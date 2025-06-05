@@ -1,8 +1,17 @@
-# Nuxt Minimal Starter
+# sigic-nuxt-sisdai
+
+## Requerimientos para correr esta aplicación
+
+Tecnologías requeridas:
+
+- [node.js](https://nodejs.org/) versión 22 o superior
+- [npm](https://www.npmjs.com/) versión 10 o superior
+
+## Nuxt Minimal Starter
 
 Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
 
-## Setup
+### Setup
 
 Make sure to install dependencies:
 
@@ -20,7 +29,7 @@ yarn install
 bun install
 ```
 
-## Development Server
+### Development Server
 
 Start the development server on `http://localhost:3000`:
 
@@ -38,7 +47,7 @@ yarn dev
 bun run dev
 ```
 
-## Production
+### Production
 
 Build the application for production:
 
@@ -73,3 +82,5 @@ bun run preview
 ```
 
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+
+## Licencia

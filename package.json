@@ -1,26 +1,30 @@
 {
-  "name": "nuxt-app",
+  "name": "sigic-nuxt-frontend",
+  "version": "0.0.0",
   "private": true,
-  "type": "module",
   "scripts": {
     "build": "nuxt build",
+    "clean": "rm -rf node_modules .nuxt dist && rm -f package-lock.json && npm cache clean -f && npm cache verify",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "reinstall": "npm run clean && npm i"
   },
   "dependencies": {
     "@centrogeomx/sisdai-componentes": "^4.14.0",
     "@centrogeomx/sisdai-css": "^1.9.0",
     "@nuxt/content": "^3.5.1",
-    "@nuxt/eslint": "^1.4.1",
     "@nuxt/image": "^1.10.0",
     "@nuxt/test-utils": "^3.19.1",
-    "@sidebase/nuxt-auth": "^0.10.1",
+    "@pinia/nuxt": "^0.11.1",
     "eslint": "^9.28.0",
-    "next-auth": "~4.21.1",
     "nuxt": "^3.17.5",
-    "vue": "^3.5.16",
-    "vue-router": "^4.5.1"
+    "pinia": "^3.0.3",
+    "vue": "latest",
+    "vue-router": "latest"
+  },
+  "devDependencies": {
+    "@nuxt/eslint": "^1.4.1"
   }
 }
