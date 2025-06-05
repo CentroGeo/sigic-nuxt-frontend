@@ -1,12 +1,11 @@
 <script setup>
-import SisdaiNavegacionPrincipal from '@centrogeomx/sisdai-componentes/src/componentes/navegacion-principal/SisdaiNavegacionPrincipal.vue'
-import SisdaiMenuAccesibilidad from '@centrogeomx/sisdai-componentes/src/componentes/menu-accesibilidad/SisdaiMenuAccesibilidad.vue'
-import { useAccesibilidadStore } from '~/stores/accesibilidad'
-const accesibilidadStore = useAccesibilidadStore()
+import SisdaiNavegacionPrincipal from "@centrogeomx/sisdai-componentes/src/componentes/navegacion-principal/SisdaiNavegacionPrincipal.vue";
+import SisdaiMenuAccesibilidad from "@centrogeomx/sisdai-componentes/src/componentes/menu-accesibilidad/SisdaiMenuAccesibilidad.vue";
+import { useAccesibilidadStore } from "~/stores/accesibilidad";
+const accesibilidadStore = useAccesibilidadStore();
 </script>
 <template>
   <div>
-    <h1>layouts/default</h1>
     <SisdaiNavegacionPrincipal>
       <!--Definiendo el logo del sitio-->
       <template #identidad>
@@ -17,7 +16,7 @@ const accesibilidadStore = useAccesibilidadStore()
           class="nav-hiperviculo-logo"
         >
           <img
-            src="https://logo"
+            src="https://www.centrogeo.org.mx/templates/ja_resume/images/logo_centrogeo_wide.svg"
             class="nav-logo color-invertir"
             alt="logo"
             width="232"
@@ -25,14 +24,20 @@ const accesibilidadStore = useAccesibilidadStore()
           />
         </a>
       </template>
+      <ul class="nav-menu">
+        <li>
+          <a href="/" class="nav-hipervinculo" exact>Inicio</a>
+        </li>
+        <li>
+          <a href="/carga" class="nav-hipervinculo" exact>Carga</a>
+        </li>
+      </ul>
     </SisdaiNavegacionPrincipal>
-    
+
     <slot />
     <!-- parece que boton flotante agrega un id al elemento html que no coincide al hacer server side rendering -->
     <client-only>
-      <SisdaiMenuAccesibilidad
-        :objeto-store="accesibilidadStore"
-      />
+      <SisdaiMenuAccesibilidad :objeto-store="accesibilidadStore" />
     </client-only>
   </div>
 </template>

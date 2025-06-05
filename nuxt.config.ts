@@ -9,7 +9,10 @@ export default defineNuxtConfig({
     "@nuxt/eslint",
     "@nuxt/image",
     "@nuxt/test-utils",
+    "@sidebase/nuxt-auth",
   ],
-
   css: ["@centrogeomx/sisdai-css/dist/sisdai.min.css"],
+  auth: {
+    isEnabled: false,
+  },
 });
