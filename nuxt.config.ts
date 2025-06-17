@@ -18,7 +18,7 @@ export default defineNuxtConfig({
     globalAppMiddleware: true,
     provider: {
       type: "authjs",
-      trustHost: false,
+      trustHost: true,
       defaultProvider: "keycloak",
     },
   },
