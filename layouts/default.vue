@@ -31,6 +31,11 @@ const accesibilidadStore = useAccesibilidadStore();
         <li>
           <a href="/carga" class="nav-hipervinculo" exact>Carga</a>
         </li>
+        <li>
+          <a href="/visualizacion" class="nav-hipervinculo" exact
+            >Visualización</a
+          >
+        </li>
       </ul>
     </SisdaiNavegacionPrincipal>
 
