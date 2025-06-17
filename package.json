@@ -14,6 +14,7 @@
   "dependencies": {
     "@centrogeomx/sisdai-componentes": "^4.14.0",
     "@centrogeomx/sisdai-css": "^1.9.0",
+    "@centrogeomx/sisdai-mapas": "^2.2.0",
     "@nuxt/content": "^3.5.1",
     "@nuxt/image": "^1.10.0",
     "@nuxt/test-utils": "^3.19.1",
