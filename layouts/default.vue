@@ -26,23 +26,43 @@ const accesibilidadStore = useAccesibilidadStore();
       </template>
       <ul class="nav-menu">
         <li>
-          <a href="/" class="nav-hipervinculo" exact>Inicio</a>
+          <NuxtLink 
+            class="nav-hipervinculo"
+            to="/" 
+            exact-path
+            >Inicio
+          </NuxtLink>
         </li>
         <li>
-          <a href="/carga" class="nav-hipervinculo" exact>Carga</a>
+          <NuxtLink 
+            class="nav-hipervinculo"
+            to="/carga" 
+            >Carga
+          </NuxtLink>
         </li>
         <li>
-          <a href="/visualizacion" class="nav-hipervinculo" exact
-            >Visualización</a
-          >
+          <NuxtLink 
+            class="nav-hipervinculo"
+            to="/visualizacion"
+            >Visualización
+          </NuxtLink>
+        </li>
+        <li>
+          <NuxtLink 
+            class="nav-hipervinculo"
+            to="/ia" 
+            >IA
+          </NuxtLink>
         </li>
       </ul>
     </SisdaiNavegacionPrincipal>
-
     <slot />
-    <!-- parece que boton flotante agrega un id al elemento html que no coincide al hacer server side rendering -->
+    <!-- parece que boton flotante agrega un id al elemento html que no 
+    coincide al hacer server side rendering -->
     <client-only>
-      <SisdaiMenuAccesibilidad :objeto-store="accesibilidadStore" />
+      <SisdaiMenuAccesibilidad 
+        :objeto-store="accesibilidadStore" 
+      />
     </client-only>
   </div>
 </template>

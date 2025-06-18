@@ -16,10 +16,12 @@
     "@centrogeomx/sisdai-css": "^1.9.0",
     "@centrogeomx/sisdai-mapas": "^2.2.0",
     "@nuxt/content": "^3.5.1",
+    "@nuxt/eslint": "^1.4.1",
     "@nuxt/image": "^1.10.0",
     "@nuxt/test-utils": "^3.19.1",
     "@pinia/nuxt": "^0.11.1",
     "@sidebase/nuxt-auth": "^0.10.1",
+    "better-sqlite3": "^11.10.0",
     "eslint": "^9.28.0",
     "next-auth": "~4.21.1",
     "nuxt": "^3.17.5",
@@ -27,7 +29,5 @@
     "vue": "latest",
     "vue-router": "latest"
   },
-  "devDependencies": {
-    "@nuxt/eslint": "^1.4.1"
-  }
+  "devDependencies": {}
 }
