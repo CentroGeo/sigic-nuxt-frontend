@@ -13,9 +13,9 @@ export default defineNuxtConfig({
   ],
   css: ["@centrogeomx/sisdai-css/dist/sisdai.min.css"],
   auth: {
-    baseURL: "http://localhost:3000/api/auth",
     isEnabled: true,
-    globalAppMiddleware: true,
+    baseURL: "/api/auth", // muy importante
+    globalAppMiddleware: true, // protege todas las páginas por defecto
     provider: {
       type: "authjs",
       trustHost: true,

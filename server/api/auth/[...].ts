@@ -9,4 +9,9 @@ export default NuxtAuthHandler({
       clientSecret: process.env.KEY_CLOAK_CLIENT_SECRET,
     }),
   ],
+  callbacks: {
+    async session({ session, user, token }) {
+      return session;
+    },
+  },
 });
