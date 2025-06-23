@@ -1,4 +1,6 @@
-<script setup></script>
+<script setup>
+definePageMeta({ auth: false });
+</script>
 <template>
   <main>
     <h2>pages/index</h2>
