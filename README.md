@@ -84,3 +84,11 @@ bun run preview
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
 
 ## Licencia
+
+## .env
+
+Las variables que debe incluir el archivo .env deben ser nombradas como sigue
+
+- `KEYCLOAK_CLIENT_ID` : `sigic-nuxt-dev` el ID del cliente
+- `KEYCLOAK_ISSUER`: `https://iam.dev.geoint.mx/realms/sigic`
+- `KEYCLOAK_CLIENT_SECRET`: Clave secreta.

@@ -4,9 +4,9 @@ export default NuxtAuthHandler({
   providers: [
     // @ts-expect-error Use .default here for it to work during SSR.
     KeycloakProvider.default({
-      clientId: process.env.KEY_CLOAK_CLIENT_ID,
-      issuer: process.env.KEY_CLOAK_ISSUER,
-      clientSecret: process.env.KEY_CLOAK_CLIENT_SECRET,
+      clientId: process.env.KEYCLOAK_CLIENT_ID,
+      issuer: process.env.KEYCLOAK_ISSUER,
+      clientSecret: process.env.KEYCLOAK_CLIENT_SECRET,
     }),
   ],
 });
