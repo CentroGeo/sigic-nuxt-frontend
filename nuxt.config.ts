@@ -15,4 +15,7 @@ export default defineNuxtConfig({
   auth: {
     isEnabled: false,
   },
+  devServer: {
+    // port: 3001
+  },
 });
