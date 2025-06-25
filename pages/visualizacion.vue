@@ -1,6 +1,9 @@
 <script setup>
 import SisdaiMapa from "@centrogeomx/sisdai-mapas/src/componentes/mapa/SisdaiMapa.vue";
 import SisdaiCapaXyz from "@centrogeomx/sisdai-mapas/src/componentes/capa/xyz/SisdaiCapaXyz.vue";
+definePageMeta({
+  middleware: "sidebase-auth",
+});
 </script>
 <template>
   <main>

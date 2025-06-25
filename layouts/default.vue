@@ -2,6 +2,18 @@
 import SisdaiNavegacionPrincipal from "@centrogeomx/sisdai-componentes/src/componentes/navegacion-principal/SisdaiNavegacionPrincipal.vue";
 import SisdaiMenuAccesibilidad from "@centrogeomx/sisdai-componentes/src/componentes/menu-accesibilidad/SisdaiMenuAccesibilidad.vue";
 import { useAccesibilidadStore } from "~/stores/accesibilidad";
+const { status, signIn, signOut } = useAuth();
+
+const loggedIn = computed(() => status.value === "authenticated");
+async function handleSignIn() {
+  await signIn("keycloak", {
+    callbackUrl: "/", // A dónde volver después del login
+    redirect: true,
+  });
+}
+async function handleSignOut() {
+  await signOut({ callbackUrl: "/" });
+}
 const accesibilidadStore = useAccesibilidadStore();
 </script>
 <template>
@@ -26,34 +38,24 @@ const accesibilidadStore = useAccesibilidadStore();
       </template>
       <ul class="nav-menu">
         <li>
-          <NuxtLink 
-            class="nav-hipervinculo"
-            to="/" 
-            exact-path
+          <NuxtLink class="nav-hipervinculo" to="/" exact-path
             >Inicio
           </NuxtLink>
         </li>
         <li>
-          <NuxtLink 
-            class="nav-hipervinculo"
-            to="/carga" 
-            >Carga
+          <NuxtLink class="nav-hipervinculo" to="/carga">Carga </NuxtLink>
+        </li>
+        <li>
+          <NuxtLink class="nav-hipervinculo" to="/visualizacion"
+            >Visualización
           </NuxtLink>
         </li>
         <li>
-          <NuxtLink 
-            class="nav-hipervinculo"
-            to="/consulta/"
-          >
-            Consulta
-          </NuxtLink>
+          <NuxtLink class="nav-hipervinculo" to="/ia">IA </NuxtLink>
         </li>
         <li>
-          <NuxtLink 
-            class="nav-hipervinculo"
-            to="/ia" 
-            >IA
-          </NuxtLink>
+          <button v-if="loggedIn" @click="handleSignOut">Cerrar sesión</button>
+          <button v-else @click="handleSignIn">Iniciar sesión</button>
         </li>
       </ul>
     </SisdaiNavegacionPrincipal>
@@ -61,9 +63,7 @@ const accesibilidadStore = useAccesibilidadStore();
     <!-- parece que boton flotante agrega un id al elemento html que no 
     coincide al hacer server side rendering -->
     <client-only>
-      <SisdaiMenuAccesibilidad 
-        :objeto-store="accesibilidadStore" 
-      />
+      <SisdaiMenuAccesibilidad :objeto-store="accesibilidadStore" />
     </client-only>
   </div>
 </template>

@@ -13,6 +13,13 @@ export default defineNuxtConfig({
   ],
   css: ["@centrogeomx/sisdai-css/dist/sisdai.min.css"],
   auth: {
-    isEnabled: false,
+    isEnabled: true,
+    baseURL: "/api/auth",
+    globalAppMiddleware: false, // protege todas las páginas por defecto
+    provider: {
+      type: "authjs",
+      trustHost: true,
+      defaultProvider: "keycloak",
+    },
   },
 });
