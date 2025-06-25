@@ -14,7 +14,7 @@ import { useGeonodeResources } from "~/composables/useGeonodeResources";
 const resourcesStore = useSelectedResourcesStore();
 const resourceType = ref("dataset");
 
-const { resourcesList, pending, error, refetch } = useGeonodeResources({
+const { resourcesList, refetch } = useGeonodeResources({
   pageNumber: 1,
   pageSize: 1000,
   resourceType: resourceType.value,
@@ -22,12 +22,10 @@ const { resourcesList, pending, error, refetch } = useGeonodeResources({
 
 function setResourceType(valor) {
   resourceType.value = valor;
-  //console.log("setResource: ", resourceType.value);
-  // Faltaría re trigerear el llamado de datos
   refetch({
-    newNum: 1,
-    newSize: 1000,
-    newType: resourceType.value,
+    pageNumber: 1,
+    pageSize: 1000,
+    resourceType: resourceType.value,
   });
 }
 </script>

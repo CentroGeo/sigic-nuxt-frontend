@@ -1,5 +1,5 @@
-// Este composable es una función que recibe los parámetros para hacer una petición a GeoNode
-// Y regresa los datos de la solicitud
+// Este composable hace peticiones de datos a Geonode
+// TODO: Resolver las peticiones de información para mostrar capas y datasets privados
 import { ref } from "vue";
 
 export function useGeonodeResources({
@@ -10,40 +10,16 @@ export function useGeonodeResources({
   const { VITE_GEONODE_API, VITE_GEONODE_URL } = import.meta.env;
   const api = `${VITE_GEONODE_URL}${VITE_GEONODE_API}/resources`;
   const resourcesList = ref([]);
-  const dataParams = new URLSearchParams({
-    page: pageNumber,
-    page_size: pageSize,
-    "filter{resource_type}": resourceType,
-    // 'filter{group.name}': 'dgpdi',
-    // 'filter{category.identifier}': identifier,
-  });
 
-  fetch(`${api}?${dataParams.toString()}`)
-    .then((response) => {
-      if (response.ok) return response.json();
-      return { resources: [] };
-    })
-    .then(({ resources }) => {
-      if (resources.length === 0) return;
-      resourcesList.value = resources;
-    })
-    .catch((err) => {
-      console.error(err);
-    })
-    .finally(() => {
-      //console.log("fin");
-    });
-
-  const fetchData = async ({ newNum, newSize, newType }) => {
-    //console.log("fetchData: ", newNum, newSize, newType);
-    const newParams = new URLSearchParams({
-      page: newNum,
-      page_size: newSize,
-      "filter{resource_type}": newType,
+  const fetchData = async ({ pageNumber, pageSize, resourceType }) => {
+    const dataParams = new URLSearchParams({
+      page: pageNumber,
+      page_size: pageSize,
+      "filter{resource_type}": resourceType,
       // 'filter{group.name}': 'dgpdi',
       // 'filter{category.identifier}': identifier,
     });
-    fetch(`${api}?${newParams.toString()}`)
+    fetch(`${api}?${dataParams.toString()}`)
       .then((response) => {
         if (response.ok) return response.json();
         return { resources: [] };
@@ -59,7 +35,7 @@ export function useGeonodeResources({
         //console.log("fin");
       });
   };
-
+  fetchData({ pageNumber, pageSize, resourceType });
   return {
     resourcesList,
     refetch: fetchData,
