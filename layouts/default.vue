@@ -46,9 +46,7 @@ const accesibilidadStore = useAccesibilidadStore();
           <NuxtLink class="nav-hipervinculo" to="/carga">Carga </NuxtLink>
         </li>
         <li>
-          <NuxtLink class="nav-hipervinculo" to="/visualizacion"
-            >Visualización
-          </NuxtLink>
+          <NuxtLink class="nav-hipervinculo" to="/consulta">Consulta </NuxtLink>
         </li>
         <li>
           <NuxtLink class="nav-hipervinculo" to="/ia">IA </NuxtLink>
