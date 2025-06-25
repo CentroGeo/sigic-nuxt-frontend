@@ -36,14 +36,17 @@ export default defineEventHandler(async (event) => {
         })
       : base_file[0]
   );
-  const res = await fetch("https://geonode.dev.geoint.mx/api/v2/uploads/", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${data.fields.token[0]}`,
-    },
-    body: formData as any, // puedes usar undici para más control
-  });
-  console.log(res);
+  const res = await fetch(
+    "https://geonode.dev.geoint.mx/api/v2/uploads/upload",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${data.fields.token[0]}`,
+      },
+      body: formData as any, // puedes usar undici para más control
+    }
+  );
+  console.log(res.json());
 
   const json = await res.json();
   return json;
