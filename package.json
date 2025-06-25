@@ -23,6 +23,7 @@
     "@sidebase/nuxt-auth": "^0.10.1",
     "better-sqlite3": "^11.10.0",
     "eslint": "^9.28.0",
+    "formidable": "^3.5.4",
     "next-auth": "~4.21.1",
     "nuxt": "^3.17.5",
     "pinia": "^3.0.3",
