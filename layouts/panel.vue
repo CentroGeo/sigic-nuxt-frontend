@@ -1,38 +1,21 @@
-<script setup></script>
+<script setup>
+import SisdaiMenuAccesibilidad from "@centrogeomx/sisdai-componentes/src/componentes/menu-accesibilidad/SisdaiMenuAccesibilidad.vue";
+import { useAccesibilidadStore } from "~/stores/accesibilidad";
+import SisdaiMenuLateral from "@centrogeomx/sisdai-componentes/src/componentes/menu-lateral/SisdaiMenuLateral.vue";
+const accesibilidadStore = useAccesibilidadStore();
+</script>
 <template>
-  <div class="grid">
+  <div class="panel-ia grid">
     <div class="columna-4">
-      <nav
-        class="menu-lateral"
-        :class="{ abierto: menu_abierto }"
-        aria-label="Menú secundario"
-      >
-        <button
-          type="button"
-          class="menu-lateral-boton"
-          aria-label="Navegación secundaria"
-          :aria-controls="id_aleatorio"
-          :aria-expanded="menu_abierto ? 'true' : 'false'"
-          @click="menu_abierto = !menu_abierto"
-        >
-          <span class="pictograma-angulo-derecho" aria-hidden="true"></span>
-        </button>
-
-        <div
-          :id="id_aleatorio"
-          class="menu-lateral-contenedor"
-          :aria-hidden="menu_abierto ? 'false' : 'true'"
-          ref="contenidoMenuLateral"
-        >
-          <slot name="contenido-menu-lateral">
-            <ul>
-              <li>
-                <NuxtLink to="/ia/panel/proyectos">Proyectos</NuxtLink>
-              </li>
-            </ul>
-          </slot>
-        </div>
-      </nav>
+      <SisdaiMenuLateral>
+        <template #contenido-menu-lateral>
+          <ul>
+            <li>
+              <NuxtLink to="/ia/panel/proyectos">Proyectos</NuxtLink>
+            </li>
+          </ul>
+        </template>
+      </SisdaiMenuLateral>
     </div>
 
     <div class="columna-8">
@@ -40,5 +23,14 @@
         <NuxtPage />
       </main>
     </div>
+    <client-only>
+      <SisdaiMenuAccesibilidad :objeto-store="accesibilidadStore" />
+    </client-only>
   </div>
 </template>
+
+<style lang="scss">
+.menu-lateral-contenedor {
+  height: 100%;
+}
+</style>
