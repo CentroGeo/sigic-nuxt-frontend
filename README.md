@@ -92,15 +92,11 @@ Las variables que debe incluir el archivo .env deben ser nombradas como sigue
 ```bash
 # Url del geonode fuente del catálogo
 GEONODE_URL = https://geonode.dev.geoint.mx
-# Api del geonode para usar endpoints
-GEONODE_API = /api/v2
 # Url del geoserver fuente de capas geográficas
 GEOSERVER_URL = https://geonode.dev.geoint.mx/geoserver
-# Api del geoserver para usar endpoints (puede servir para subir estilos sld directos al geoserver - requiere autenticación)
-GEOSERVER_API = /rest
 
 # ID del cliente de autenticación
-KEYCLOAK_CLIENT_ID = sigic-nuxt-dev
+KEYCLOAK_CLIENT_ID = <Id client>
 #
 KEYCLOAK_ISSUER = https://iam.dev.geoint.mx/realms/sigic
 # Clave secreta del servicio de autenticación
