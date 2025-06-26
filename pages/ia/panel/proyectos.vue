@@ -17,17 +17,21 @@ definePageMeta({
 </script>
 
 <template>
-  <main>
-    <div>
-      <button
-        type="button"
-        class="boton-primario"
-        @click="sisdaiModal?.abrirModal()"
-      >
-        Crear nuevo proyecto
-        <span class="pictograma-agregar" aria-hidden="true" />
-      </button>
+  <main class="grid">
+    <div class="columna-5">
+      <div>
+        <button
+          type="button"
+          class="boton-primario boton-chico"
+          @click="sisdaiModal?.abrirModal()"
+        >
+          Crear proyecto
+          <span class="pictograma-agregar" aria-hidden="true" />
+        </button>
+      </div>
     </div>
+
+    <div class="columna-11"></div>
 
     <SisdaiModal ref="sisdaiModal">
       <template #encabezado>
