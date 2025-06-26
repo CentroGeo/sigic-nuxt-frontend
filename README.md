@@ -103,6 +103,6 @@ GEOSERVER_API = /rest
 KEYCLOAK_CLIENT_ID = sigic-nuxt-dev
 #
 KEYCLOAK_ISSUER = https://iam.dev.geoint.mx/realms/sigic
-#
+# Clave secreta del servicio de autenticación
 KEYCLOAK_CLIENT_SECRET = <Clave secreta>
 ```
