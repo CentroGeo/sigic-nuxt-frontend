@@ -9,12 +9,10 @@ const descripcion = ref("");
 const { data, status } = useAuth();
 watchEffect(() => {
   if (status.value === "authenticated") {
-    console.log(data.value); // o donde venga tu token
   }
 });
 async function subirArchivo() {
   const token = data.value?.accessToken;
-  console.log(token);
   const formData = new FormData();
   formData.append("title", titulo.value);
   formData.append("abstract", descripcion.value);

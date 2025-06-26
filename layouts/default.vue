@@ -8,7 +8,6 @@ const loggedIn = computed(() => status.value === "authenticated");
 async function handleSignIn() {
   await signIn("keycloak", {
     callbackUrl: "/", // A dónde volver después del login
-    redirect: true,
   });
 }
 async function handleSignOut() {
