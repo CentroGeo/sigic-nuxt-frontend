@@ -11,7 +11,9 @@ export default defineNuxtConfig({
     "@nuxt/test-utils",
     "@sidebase/nuxt-auth",
   ],
+
   css: ["@centrogeomx/sisdai-css/dist/sisdai.min.css"],
+
   auth: {
     isEnabled: true,
     baseURL: "/api/auth",
