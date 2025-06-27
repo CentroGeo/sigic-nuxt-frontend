@@ -2,13 +2,14 @@
 // TODO: Resolver las peticiones de información para mostrar capas y datasets privados
 import { ref } from "vue";
 
+const config = useRuntimeConfig()
+const api = `${config.public.geonodeApi}/resources`;
+
 export function useGeonodeResources({
   pageNumber,
   pageSize,
   resourceType,
 } = {}) {
-  const { VITE_GEONODE_API, VITE_GEONODE_URL } = import.meta.env;
-  const api = `${VITE_GEONODE_URL}${VITE_GEONODE_API}/resources`;
   const resourcesList = ref([]);
 
   const fetchData = async ({ pageNumber, pageSize, resourceType }) => {
