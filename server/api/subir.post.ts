@@ -38,7 +38,7 @@ export default defineEventHandler(async (event) => {
   );
   console.log(formData);
   try {
-    const res = await fetch("https://geonode.dev.geoint.mx/uploads/upload/", {
+    const res = await fetch("http://10.2.102.177/uploads/upload/", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${data.fields.token[0]}`,
