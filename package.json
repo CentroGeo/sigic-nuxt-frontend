@@ -28,6 +28,5 @@
     "pinia": "^3.0.3",
     "vue": "latest",
     "vue-router": "latest"
-  },
-  "devDependencies": {}
+  }
 }

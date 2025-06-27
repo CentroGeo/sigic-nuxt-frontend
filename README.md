@@ -84,3 +84,21 @@ bun run preview
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
 
 ## Licencia
+
+## Variables de entorno (.env)
+
+Las variables que debe incluir el archivo .env deben ser nombradas como sigue
+
+```bash
+# Url del geonode fuente del catálogo
+GEONODE_URL = https://geonode.dev.geoint.mx
+# Url del geoserver fuente de capas geográficas
+GEOSERVER_URL = https://geonode.dev.geoint.mx/geoserver
+
+# ID del cliente de autenticación
+KEYCLOAK_CLIENT_ID = <Id client>
+#
+KEYCLOAK_ISSUER = https://iam.dev.geoint.mx/realms/sigic
+# Clave secreta del servicio de autenticación
+KEYCLOAK_CLIENT_SECRET = <Clave secreta>
+```
