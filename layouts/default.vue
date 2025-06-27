@@ -3,19 +3,6 @@ import MainNavegacion from "~/components/base/MainNavegacion.vue";
 import SisdaiMenuAccesibilidad from "@centrogeomx/sisdai-componentes/src/componentes/menu-accesibilidad/SisdaiMenuAccesibilidad.vue";
 import { useAccesibilidadStore } from "~/stores/accesibilidad";
 const accesibilidadStore = useAccesibilidadStore();
-
-const { status, signIn, signOut } = useAuth();
-
-const loggedIn = computed(() => status.value === "authenticated");
-async function handleSignIn() {
-  await signIn("keycloak", {
-    callbackUrl: "/", // A dónde volver después del login
-    redirect: true,
-  });
-}
-async function handleSignOut() {
-  await signOut({ callbackUrl: "/" });
-}
 </script>
 
 <template>

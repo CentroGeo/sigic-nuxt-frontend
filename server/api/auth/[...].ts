@@ -11,4 +11,17 @@ export default NuxtAuthHandler({
       clientSecret: process.env.KEYCLOAK_CLIENT_SECRET,
     }),
   ],
+  callbacks: {
+    async jwt({ token, account }) {
+      if (account?.access_token) {
+        token.accessToken = account.access_token;
+      }
+      return token;
+    },
+
+    async session({ session, token }) {
+      session.accessToken = token.accessToken as string;
+      return session;
+    },
+  },
 });
