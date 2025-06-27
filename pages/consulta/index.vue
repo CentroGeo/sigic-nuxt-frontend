@@ -13,7 +13,8 @@ import {
 
 import { useSelectedResourcesStore } from "~/stores/selectedResources.js";
 import { useGeonodeResources } from "~/composables/useGeonodeResources";
-// import { urlParams } from "./utils";
+
+const config = useRuntimeConfig();
 
 const resourceType = ref("dataset");
 const { resourcesList, refetch } = useGeonodeResources({
@@ -50,12 +51,15 @@ const resourcesStore = useSelectedResourcesStore();
       <client-only>
         <SisdaiMapa
           descripcion="Mapa básico con una capa base visible a nivel mundial."
+          class="gema"
+          :vista="{ extension: '-118.3651,14.5321,-86.7104,32.7187' }"
         >
           <SisdaiCapaXyz />
+
           <SisdaiCapaWms
             v-for="capa in resourcesStore.selectedResources['dataset']"
             :key="capa.uuid"
-            fuente="https://geonode.dev.geoint.mx/geoserver/ows"
+            :fuente="`${config.public.geoserverUrl}/ows`"
             :capa="capa.alternate"
           />
         </SisdaiMapa>
