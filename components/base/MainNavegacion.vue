@@ -1,5 +1,17 @@
 <script setup>
 import SisdaiNavegacionPrincipal from "@centrogeomx/sisdai-componentes/src/componentes/navegacion-principal/SisdaiNavegacionPrincipal.vue";
+
+const { status, signIn, signOut } = useAuth();
+
+const loggedIn = computed(() => status.value === "authenticated");
+async function handleSignIn() {
+  await signIn("keycloak", {
+    callbackUrl: "/", // A dónde volver después del login
+  });
+}
+async function handleSignOut() {
+  await signOut({ callbackUrl: "/" });
+}
 </script>
 <template>
   <SisdaiNavegacionPrincipal>
