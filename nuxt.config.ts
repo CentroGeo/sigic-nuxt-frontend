@@ -11,9 +11,29 @@ export default defineNuxtConfig({
     "@nuxt/test-utils",
     "@sidebase/nuxt-auth",
   ],
+
   css: ["@centrogeomx/sisdai-css/dist/sisdai.min.css"],
+
   auth: {
-    isEnabled: false,
+    isEnabled: true,
+    baseURL: "/api/auth",
+    globalAppMiddleware: false, // protege todas las páginas por defecto
+    provider: {
+      type: "authjs",
+      trustHost: true,
+      defaultProvider: "keycloak",
+    },
+  },
+
+  runtimeConfig: {
+    // Variables privadas (solo disponibles en el servidor, como tokens)
+
+    // Variables públicas (disponibles también en el cliente)
+    public: {
+      geonodeApi: `${process.env.GEONODE_URL}/api/v2`,
+      geoserverUrl: process.env.GEOSERVER_URL,
+      // geoserverApi: `${process.env.GEOSERVER_URL}/rest`,
+    }
   },
   devServer: {
     // port: 3001
