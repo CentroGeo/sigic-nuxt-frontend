@@ -70,6 +70,7 @@ const storeConsulta = useConsultaStore();
   .nav-lateral {
     width: 48px;
     box-shadow: 4px 0 8px -4px var(--navegacion-primaria-sombra);
+    z-index: 2;
 
     ul {
       padding: 0 8px;
