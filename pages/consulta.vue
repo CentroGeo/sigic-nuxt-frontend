@@ -1,20 +1,20 @@
 <script setup>
-// definePageMeta({ middleware: "redireccionar-consulta-capas" });
+definePageMeta({ middleware: "redireccionar-modulo-consulta" });
 
-const ruta = "/consultas";
+const ruta = "/consulta";
 const subPaginas = [
   {
     picto: "pictograma-capas",
     ruta: `${ruta}/capas`,
   },
-  // {
-  //   picto: "pictograma-tabla",
-  //   ruta: `${ruta}/tabulados`,
-  // },
-  // {
-  //   picto: "pictograma-documento",
-  //   ruta: `${ruta}/documentos`,
-  // },
+  {
+    picto: "pictograma-tabla",
+    ruta: `${ruta}/tablas`,
+  },
+  {
+    picto: "pictograma-documento",
+    ruta: `${ruta}/documentos`,
+  },
 ];
 
 const storeConsulta = useConsultaStore();

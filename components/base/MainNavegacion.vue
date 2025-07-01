@@ -40,11 +40,8 @@ async function handleSignOut() {
         <NuxtLink class="nav-hipervinculo" to="/carga">Carga</NuxtLink>
       </li>
       <li>
-        <NuxtLink class="nav-hipervinculo" to="/consulta/">Consulta</NuxtLink>
-      </li>
-      <li>
-        <NuxtLink class="nav-hipervinculo" to="/consultas/capas">
-          Consultas
+        <NuxtLink class="nav-hipervinculo" to="/consulta/capas">
+          Consulta
         </NuxtLink>
       </li>
       <li>
