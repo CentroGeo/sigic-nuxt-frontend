@@ -16,7 +16,7 @@ const { numero } = toRefs(props);
 </script>
 
 <template>
-  <p class="numero-elementos flex m-0">
+  <p class="numero-elementos flex m-y-1">
     <span class="etiqueta">{{ numero }}</span>
     <span>{{ etiqueta }}</span>
   </p>

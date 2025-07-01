@@ -23,7 +23,7 @@ const storeConsulta = useConsultaStore();
 <template>
   <div class="modulo-consultas flex">
     <div class="nav-lateral">
-      <ul>
+      <ul class="lista-sin-dibujo">
         <li>
           <div class="avatar-imagen">
             <img
@@ -74,7 +74,7 @@ const storeConsulta = useConsultaStore();
 
     ul {
       padding: 0 8px;
-      list-style: none;
+      // list-style: none;
 
       li {
         .avatar-imagen {

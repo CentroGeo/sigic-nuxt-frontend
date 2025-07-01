@@ -17,7 +17,7 @@ import { useGeonodeResources } from "~/composables/useGeonodeResources";
 const config = useRuntimeConfig();
 
 const resourceType = ref("dataset");
-const { resourcesList, refetch } = useGeonodeResources({
+const { resourcesList } = useGeonodeResources({
   pageNumber: 1,
   pageSize: 1000,
   resourceType: resourceType.value,
