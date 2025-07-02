@@ -1,7 +1,7 @@
 <script setup>
 const props = defineProps({
-  variables: { type: Array, default: [] },
-  datos: { type: Array, default: [] },
+  variables: { type: Array, default: Array },
+  datos: { type: Array, default: Array },
   caption: {
     type: String,
     default: "",
@@ -14,38 +14,49 @@ function generaIdAleatorio() {
 const idAleatorio = generaIdAleatorio();
 </script>
 <template>
-  <table>
-    <caption>
-      {{
-        caption
-      }}
-    </caption>
-    <thead>
-      <tr>
-        <th
-          v-for="(variable, v) in tabla.variables"
-          :id="`${idAleatorio}-col-${v}`"
-          :key="v"
-          scope="col"
+  <div class="contenedor-tabla">
+    <table>
+      <caption>
+        {{
+          caption
+        }}
+      </caption>
+      <thead>
+        <tr>
+          <th
+            v-for="(variable, v) in variables"
+            :id="`${idAleatorio}-col-${v}`"
+            :key="v"
+            scope="col"
+          >
+            {{ variable }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          v-for="(datum, d) in datos"
+          :id="`${idAleatorio}-ren-${d}`"
+          :key="d"
         >
-          {{ variable.nombre }}
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr
-        v-for="(datum, d) in tabla.datos"
-        :id="`${idAleatorio}-ren-${d}`"
-        :key="d"
-      >
-        <td
-          v-for="(variable, v) in tabla.variables"
-          :key="v"
-          :headers="`${idAleatorio}-ren-${d} ${idAleatorio}-col-${v}`"
-        >
-          {{ datum[variable.id]?.toLocaleString("en") }}
-        </td>
-      </tr>
-    </tbody>
-  </table>
+          <td
+            v-for="(variable, v) in variables"
+            :key="v"
+            :headers="`${idAleatorio}-ren-${d} ${idAleatorio}-col-${v}`"
+          >
+            {{ datum[variable]?.toLocaleString("en") }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </template>
+<style lang="scss">
+.contenedor-tabla {
+  overflow: auto;
+  display: inline-grid;
+}
+table {
+  min-width: 600px; // fuerza a que haya scroll si hay muchas columnas
+}
+</style>
