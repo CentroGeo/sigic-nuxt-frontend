@@ -5,7 +5,6 @@ const props = defineProps({
   etiquetaElementos: { type: String, default: undefined },
 });
 const { titulo, resourceType } = toRefs(props);
-
 const storeSelected = useSelectedResourcesStore();
 </script>
 
@@ -34,15 +33,11 @@ const storeSelected = useSelectedResourcesStore();
       />
     </div>
 
-    <ul class="lista-sin-dibujo">
-      <li
-        v-for="resource in storeSelected.selectedResources[resourceType]"
-        :key="`seleccion-${resource.uuid}`"
-      >
-        <button @click="storeSelected.removeResource(resourceType, resource)">
-          {{ resource.title }}
-        </button>
-      </li>
-    </ul>
+    <ConsultaElementoSeleccionado
+      v-for="resource in storeSelected.selectedResources[resourceType]"
+      :key="`seleccion-${resource.uuid}`"
+      :selected-element="resource"
+      :resource-type="resourceType"
+    />
   </div>
 </template>

@@ -1,10 +1,5 @@
 <script setup>
 const resourceType = "document";
-const { resourcesList } = useGeonodeResources({
-  pageNumber: 1,
-  pageSize: 1000,
-  resourceType,
-});
 </script>
 
 <template>
@@ -13,7 +8,6 @@ const { resourcesList } = useGeonodeResources({
       <ConsultaLayoutCatalogo
         titulo="Documentos"
         :resource-type="resourceType"
-        :resources-list="resourcesList"
         etiqueta-elementos="Documentos"
       />
     </template>

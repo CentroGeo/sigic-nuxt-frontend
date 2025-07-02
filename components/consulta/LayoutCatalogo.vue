@@ -1,16 +1,35 @@
 <script setup>
 const props = defineProps({
-  resourcesList: {
-    type: Array,
-    default: () => [],
-  },
   titulo: { type: String, default: "Título" },
   resourceType: { type: String, required: true },
   etiquetaElementos: { type: String, default: undefined },
 });
-const { resourcesList, titulo, resourceType } = toRefs(props);
+const { titulo, resourceType } = toRefs(props);
+console.log(resourceType.value);
+const { resourcesList } = useGeonodeResources({
+  pageNumber: 1,
+  pageSize: 20,
+  resourceType: resourceType.value,
+});
+const categories = ref({});
 
-const storeSelected = useSelectedResourcesStore();
+function groupResults() {
+  categories.value = {};
+  resourcesList.value.map((r) => {
+    let anio = r.date.slice(0, 4);
+    if (Object.keys(categories.value).includes(anio)) {
+      categories.value[anio].push(r);
+    } else {
+      categories.value[anio] = [];
+      categories.value[anio].push(r);
+    }
+  });
+}
+
+// Se utiliza un watcher porque inicialmente resourcesList está vacía
+watch(resourcesList, () => {
+  groupResults();
+});
 </script>
 
 <template>
@@ -20,7 +39,7 @@ const storeSelected = useSelectedResourcesStore();
     <div class="m-x-2 m-y-1">
       <p class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
 
-      <p>Buscador</p>
+      <ConsultaElementoBuscador />
 
       <BaseNumeroElementos
         :numero="resourcesList.length"
@@ -28,15 +47,23 @@ const storeSelected = useSelectedResourcesStore();
       />
     </div>
 
-    <ul class="lista-sin-dibujo">
-      <li
-        v-for="resource in resourcesList"
-        :key="`disponible-${resource.uuid}`"
-      >
-        <button @click="storeSelected.addResource(resourceType, resource)">
-          {{ resource.title }}
-        </button>
-      </li>
-    </ul>
+    <div
+      v-for="category in Object.keys(categories)"
+      :key="category"
+      class="panel-catalogo"
+    >
+      <h2>{{ category }}</h2>
+      <ConsultaElementoCatalogo
+        v-for="(option, index) in categories[category]"
+        :key="index"
+        :catalogue-element="option"
+        :resource-type="resourceType"
+      />
+    </div>
   </div>
 </template>
+<style lang="scss">
+.panel-catalogo {
+  padding: 0px 8px;
+}
+</style>
