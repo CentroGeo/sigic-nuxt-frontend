@@ -7,6 +7,9 @@ const accesibilidadStore = useAccesibilidadStore();
 
 <template>
   <div>
+    <a href="#principal" class="ir-contenido-principal">
+      Ir a contenido principal
+    </a>
     <MainNavegacion />
 
     <main id="principal">

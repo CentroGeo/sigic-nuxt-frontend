@@ -35,4 +35,7 @@ export default defineNuxtConfig({
       // geoserverApi: `${process.env.GEOSERVER_URL}/rest`,
     }
   },
+  devServer: {
+    // port: 3001
+  },
 });
