@@ -11,6 +11,11 @@ export default NuxtAuthHandler({
       clientSecret: process.env.KEYCLOAK_CLIENT_SECRET,
     }),
   ],
+  // Sin esta parte no podemos acceder al token
+  // (creo que porque no podemos usar las callbacks jwt)
+  //session: {
+  //  strategy: "jwt",
+  //},
   callbacks: {
     async jwt({ token, account }) {
       if (account?.access_token) {
@@ -20,6 +25,7 @@ export default NuxtAuthHandler({
     },
 
     async session({ session, token }) {
+      // @ts-ignore
       session.accessToken = token.accessToken as string;
       return session;
     },

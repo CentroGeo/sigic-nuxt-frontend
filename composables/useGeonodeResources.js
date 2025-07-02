@@ -1,6 +1,8 @@
 // Este composable hace peticiones de datos a Geonode
 // TODO: Resolver las peticiones de información para mostrar capas y datasets privados
 import { ref } from "vue";
+//console.log("aja: ", useAuth());
+// const { data: session } = useAuth();
 
 export function useGeonodeResources({
   pageNumber,
@@ -9,24 +11,31 @@ export function useGeonodeResources({
 } = {}) {
   const config = useRuntimeConfig();
   const api = `${config.public.geonodeApi}/resources`;
-
   const resourcesList = ref([]);
+
+  /*     if (!session.value?.accessToken) {
+    console.warn("No access token, cannot fetch private resources");
+    return;
+  } */
 
   const fetchData = async ({ pageNumber, pageSize, resourceType }) => {
     const dataParams = new URLSearchParams({
       page: pageNumber,
       page_size: pageSize,
       "filter{resource_type}": resourceType,
-      // 'filter{group.name}': 'dgpdi',
-      // 'filter{category.identifier}': identifier,
     });
-    fetch(`${api}?${dataParams.toString()}`)
+    fetch(`${api}?${dataParams.toString()}`, {
+      method: "GET",
+      /*       headers: {
+        Authorization: `Bearer ${session.value.accessToken}`,
+      }, */
+    })
       .then((response) => {
         if (response.ok) return response.json();
         return { resources: [] };
       })
       .then(({ resources }) => {
-        if (resources.length === 0) return;
+        //if (resources.length === 0) return;
         resourcesList.value = resources;
       })
       .catch((err) => {
