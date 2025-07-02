@@ -1,9 +1,9 @@
 <script setup>
 import LayoutConsulta from "~/components/consulta/LayoutConsulta.vue";
-import PanelCatalogo from "~/components/consulta/PanelCatalogo.vue";
-import PanelSeleccion from "~/components/consulta/PanelSeleccion.vue";
+// import PanelCatalogo from "~/components/consulta/PanelCatalogo.vue";
+// import PanelSeleccion from "~/components/consulta/PanelSeleccion.vue";
 
-import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
+// import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
 
 import {
   SisdaiMapa,
@@ -36,7 +36,7 @@ const resourcesStore = useSelectedResourcesStore();
 <template>
   <LayoutConsulta>
     <div class="visualizacion-capas">
-      <PanelCatalogo>
+      <!-- <PanelCatalogo>
         <h3>{{ resourceType }}</h3>
         <SisdaiCampoBusqueda class="p-3" />
         <ul>
@@ -46,7 +46,7 @@ const resourcesStore = useSelectedResourcesStore();
             </button>
           </li>
         </ul>
-      </PanelCatalogo>
+      </PanelCatalogo> -->
 
       <client-only>
         <SisdaiMapa
@@ -65,7 +65,7 @@ const resourcesStore = useSelectedResourcesStore();
         </SisdaiMapa>
       </client-only>
 
-      <PanelSeleccion>
+      <!-- <PanelSeleccion>
         <h3>Elementos seleccionados</h3>
         <div
           v-for="r in resourcesStore.selectedResources[resourceType]"
@@ -79,7 +79,7 @@ const resourcesStore = useSelectedResourcesStore();
             Borrar
           </button>
         </div>
-      </PanelSeleccion>
+      </PanelSeleccion> -->
     </div>
   </LayoutConsulta>
 </template>

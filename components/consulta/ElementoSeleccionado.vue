@@ -39,11 +39,17 @@ const { selectedElement, resourceType } = toRefs(props);
       <div class="contenedor-botones">
         <button
           class="boton-pictograma"
+          aria-label="Remover selección"
+          type="button"
           @click="resourcesStore.removeResource(resourceType, selectedElement)"
         >
           <span class="pictograma-eliminar" aria-hidden="true"></span>
         </button>
-        <button class="boton-pictograma">
+        <button
+          class="boton-pictograma"
+          aria-label="Descargar selección"
+          type="button"
+        >
           <span class="pictograma-archivo-descargar" aria-hidden="true"></span>
         </button>
       </div>

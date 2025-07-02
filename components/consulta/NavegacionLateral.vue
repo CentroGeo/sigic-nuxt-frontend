@@ -19,8 +19,8 @@ const storeConsulta = useConsultaStore();
 </script>
 
 <template>
-  <div class="nav-lateral">
-    <ul class="lista-sin-dibujo">
+  <div class="nav-lateral" aria-label="Navegación Lateral">
+    <ul class="lista-sin-estilo">
       <li>
         <div class="avatar-imagen">
           <img
@@ -33,6 +33,8 @@ const storeConsulta = useConsultaStore();
       <li>
         <button
           class="boton-pictograma boton-sin-contenedor-primario"
+          aria-label="Navegación Lateral"
+          type="button"
           @click="storeConsulta.alternarCatalogoColapsable"
         >
           <span
