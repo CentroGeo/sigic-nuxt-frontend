@@ -27,7 +27,7 @@ const storeSelected = useSelectedResourcesStore();
         </button>
       </div>
 
-      <BaseNumeroElementos
+      <UiNumeroElementos
         :numero="storeSelected.selectedResources[resourceType].length"
         :etiqueta="etiquetaElementos"
       />

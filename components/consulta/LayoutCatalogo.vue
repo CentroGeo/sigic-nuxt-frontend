@@ -5,7 +5,6 @@ const props = defineProps({
   etiquetaElementos: { type: String, default: undefined },
 });
 const { titulo, resourceType } = toRefs(props);
-console.log(resourceType.value);
 const { resourcesList } = useGeonodeResources({
   pageNumber: 1,
   pageSize: 20,
@@ -16,7 +15,7 @@ const categories = ref({});
 function groupResults() {
   categories.value = {};
   resourcesList.value.map((r) => {
-    let anio = r.date.slice(0, 4);
+    const anio = r.date.slice(0, 4);
     if (Object.keys(categories.value).includes(anio)) {
       categories.value[anio].push(r);
     } else {
@@ -41,7 +40,7 @@ watch(resourcesList, () => {
 
       <ConsultaElementoBuscador />
 
-      <BaseNumeroElementos
+      <UiNumeroElementos
         :numero="resourcesList.length"
         :etiqueta="etiquetaElementos"
       />

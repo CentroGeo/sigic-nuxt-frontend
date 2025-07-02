@@ -2,17 +2,28 @@
 import { toRefs } from "vue";
 
 const props = defineProps({
-  numero: {
-    type: Number,
-    default: 999,
-  },
+  /**
+   * Etiqueta en el contador que se mostrará.
+   * @type {String}
+   * @default 'Elementos'
+   */
   etiqueta: {
     type: String,
     default: "Elementos",
   },
+
+  /**
+   * Número que se mostrará.
+   * @type {Number}
+   * @default 999
+   */
+  numero: {
+    type: Number,
+    default: 999,
+  },
 });
 
-const { numero } = toRefs(props);
+const { etiqueta, numero } = toRefs(props);
 </script>
 
 <template>
