@@ -35,6 +35,6 @@ const { etiqueta, numero } = toRefs(props);
 
 <style lang="scss">
 .numero-elementos {
-  gap: 10px;
+  gap: 8px;
 }
 </style>

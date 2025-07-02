@@ -20,7 +20,7 @@ const storeConsulta = useConsultaStore();
 
 <template>
   <div class="nav-lateral">
-    <ul class="lista-sin-dibujo">
+    <ul class="lista-sin-estilo">
       <li>
         <div class="avatar-imagen">
           <img
