@@ -1,26 +1,11 @@
-<script setup>
-import PanelCatalogo from "~/components/consulta/PanelCatalogo.vue";
-import PanelSeleccion from "~/components/consulta/PanelSeleccion.vue";
-import LayoutConsulta from "~/components/consulta/LayoutConsulta.vue";
-</script>
+<script setup></script>
+
 <template>
-  <LayoutConsulta>
-    <div class="visualizacion-doc">
-      <PanelCatalogo>
-        <h3>Documentos</h3>
-      </PanelCatalogo>
+  <ConsultaLayoutPaneles>
+    <template #catalogo>Documentos disponibles</template>
 
-      <h2>Título</h2>
+    <template #visualizador>Documento</template>
 
-      <PanelSeleccion>
-        <h3>Documentos seleccionados</h3>
-      </PanelSeleccion>
-    </div>
-  </LayoutConsulta>
+    <template #seleccion>Documentos seleccionadas</template>
+  </ConsultaLayoutPaneles>
 </template>
-<style lang="scss">
-.visualizacion-doc {
-  width: 100%;
-  display: flex;
-}
-</style>
