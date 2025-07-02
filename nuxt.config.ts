@@ -5,7 +5,7 @@ export default defineNuxtConfig({
 
   modules: [
     "@pinia/nuxt",
-    "@nuxt/content",
+    // "@nuxt/content",
     "@nuxt/eslint",
     "@nuxt/image",
     "@nuxt/test-utils",

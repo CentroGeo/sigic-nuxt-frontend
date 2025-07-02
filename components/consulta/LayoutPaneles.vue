@@ -3,7 +3,7 @@ const storeConsulta = useConsultaStore();
 </script>
 
 <template>
-  <div class="contenedor-paneles flex">
+  <div class="contenedor-paneles grid">
     <div
       :class="storeConsulta.catalogoColapsado ? 'oculto' : 'columna-4'"
       :aria-hidden="storeConsulta.catalogoColapsado"
@@ -33,6 +33,6 @@ const storeConsulta = useConsultaStore();
 <style lang="scss" scoped>
 .contenedor-paneles {
   height: 100%;
-  // gap: 0;
+  gap: 0;
 }
 </style>
