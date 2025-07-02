@@ -1,11 +1,38 @@
-<script setup></script>
+<script setup>
+const config = useRuntimeConfig();
+
+async function obtenerPDFs() {
+  const res = await fetch(`${config.public.geonodeApi}/api/v2/documents/`);
+  const data = await res.json();
+  const docs = data.results;
+
+  docs.forEach((doc) => {
+    console.log(`Título: ${doc.title}`);
+    console.log(`Descargar: ${config.public.geonodeApi}${doc.download_url}`);
+  });
+}
+obtenerPDFs();
+</script>
 
 <template>
   <ConsultaLayoutPaneles>
     <template #catalogo>Documentos disponibles</template>
 
-    <template #visualizador>Documento</template>
+    <template #visualizador>
+      <embed
+        class="documento-embebido"
+        src="https://geonode.dev.geoint.mx/documents/23/link"
+        type="application/pdf"
+      />
+    </template>
 
     <template #seleccion>Documentos seleccionadas</template>
   </ConsultaLayoutPaneles>
 </template>
+
+<style>
+.documento-embebido {
+  width: 100%;
+  height: 100%;
+}
+</style>
