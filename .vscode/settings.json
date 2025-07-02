@@ -44,9 +44,9 @@
   // "editor.autoClosingQuotes": "always",
   "editor.autoIndent": "advanced",
   "editor.codeActionsOnSave": {
-    "source.fixAll": "always",
-    "source.fixAll.eslint": "always",
-    "source.fixAll.stylelint": "always"
+    // "source.fixAll": "always",
+    // "source.fixAll.eslint": "always",
+    // "source.fixAll.stylelint": "always"
     // "source.organizeImports": "always",
     // "source.removeUnusedImports": "always",
     // "source.sortImports": "always",

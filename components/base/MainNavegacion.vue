@@ -34,16 +34,18 @@ async function handleSignOut() {
     </template>
     <ul class="nav-menu">
       <li>
-        <NuxtLink class="nav-hipervinculo" to="/" exact-path>Inicio </NuxtLink>
+        <NuxtLink class="nav-hipervinculo" to="/" exact-path>Inicio</NuxtLink>
       </li>
       <li>
-        <NuxtLink class="nav-hipervinculo" to="/carga">Carga </NuxtLink>
+        <NuxtLink class="nav-hipervinculo" to="/carga">Carga</NuxtLink>
       </li>
       <li>
-        <NuxtLink class="nav-hipervinculo" to="/consulta">Consulta </NuxtLink>
+        <NuxtLink class="nav-hipervinculo" to="/consulta">Consulta</NuxtLink>
       </li>
       <li>
-        <NuxtLink class="nav-hipervinculo" to="/ia">IA </NuxtLink>
+        <NuxtLink class="nav-hipervinculo" to="/ia"
+          >Análisis Inteligencia Artificial</NuxtLink
+        >
       </li>
       <li>
         <button v-if="loggedIn" @click="handleSignOut">Cerrar sesión</button>
