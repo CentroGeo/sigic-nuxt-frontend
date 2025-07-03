@@ -1,4 +1,6 @@
 <script setup>
+// TODO: Componentizar las secciones de categorias
+// TODO: Arreglar los filtros de categorias: que sí reflejen categorias
 const props = defineProps({
   titulo: { type: String, default: "Título" },
   resourceType: { type: String, required: true },
@@ -11,7 +13,7 @@ const { resourcesList } = useGeonodeResources({
   resourceType: resourceType.value,
 });
 const categories = ref({});
-
+const selectedCategory = ref();
 function groupResults() {
   categories.value = {};
   resourcesList.value.map((r) => {
@@ -25,9 +27,17 @@ function groupResults() {
   });
 }
 
+function setSelectedCategory(categoria) {
+  selectedCategory.value = categoria;
+}
+
 // Se utiliza un watcher porque inicialmente resourcesList está vacía
 watch(resourcesList, () => {
   groupResults();
+});
+
+watch(selectedCategory, () => {
+  console.log(selectedCategory.value);
 });
 </script>
 
@@ -51,8 +61,25 @@ watch(resourcesList, () => {
       :key="category"
       class="panel-catalogo"
     >
-      <h2>{{ category }}</h2>
+      <div class="tarjeta">
+        <button
+          type="button"
+          class="boton-sin-contenedor-secundario boton-mediano boton-pictograma"
+          aria-label="Desplegar"
+          @click="setSelectedCategory(category)"
+        >
+          <div class="flex">
+            <p class="tarjeta-titulo columna-8">{{ category }}</p>
+            <span class="pictograma-angulo-abajo" aria-hidden="true"></span>
+          </div>
+          <UiNumeroElementos
+            :numero="categories[category].length"
+            :etiqueta="etiquetaElementos"
+          />
+        </button>
+      </div>
       <ConsultaElementoCatalogo
+        v-if="category == selectedCategory"
         v-for="(option, index) in categories[category]"
         :key="index"
         :catalogue-element="option"
