@@ -62,21 +62,12 @@ watch(selectedCategory, () => {
       class="panel-catalogo"
     >
       <div class="tarjeta">
-        <button
-          type="button"
-          class="boton-sin-contenedor-secundario boton-mediano boton-pictograma"
-          aria-label="Desplegar"
+        <ConsultaElementoCategoria
+          :title="category"
+          :tag="etiquetaElementos"
+          :number-elements="categories[category].length"
           @click="setSelectedCategory(category)"
-        >
-          <div class="flex">
-            <p class="tarjeta-titulo columna-8">{{ category }}</p>
-            <span class="pictograma-angulo-abajo" aria-hidden="true"></span>
-          </div>
-          <UiNumeroElementos
-            :numero="categories[category].length"
-            :etiqueta="etiquetaElementos"
-          />
-        </button>
+        />
       </div>
       <ConsultaElementoCatalogo
         v-if="category == selectedCategory"
