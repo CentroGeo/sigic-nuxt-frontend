@@ -26,11 +26,7 @@ const resourceType = "document";
     </template>
 
     <template #visualizador>
-      <embed
-        class="documento-embebido"
-        src="https://geonode.dev.geoint.mx/documents/23/link"
-        type="application/pdf"
-      />
+      <ConsultaVisualizacionDocumento></ConsultaVisualizacionDocumento>
     </template>
 
     <template #seleccion>
