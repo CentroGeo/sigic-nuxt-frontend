@@ -34,6 +34,7 @@ fetch(url)
         :datos="datos"
         :caption="'una descripción'"
       />
+      <UiPaginador></UiPaginador>
     </template>
 
     <template #seleccion>Tablas seleccionadas</template>

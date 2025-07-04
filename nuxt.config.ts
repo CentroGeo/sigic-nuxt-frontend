@@ -35,7 +35,19 @@ export default defineNuxtConfig({
       // geoserverApi: `${process.env.GEOSERVER_URL}/rest`,
     }
   },
+
   devServer: {
-    // port: 3001
+    port: 3000,
+    host: '0.0.0.0',
+    https: false,
+  },
+  vite: {
+    server: {
+      hmr: {
+        host: 'sigic.dev.geoint.mx',
+        protocol: 'wss',
+        port: 443,
+      },
+    },
   },
 });

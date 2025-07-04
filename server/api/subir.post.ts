@@ -7,6 +7,7 @@ export const config = {
     bodyParser: false,
   },
 };
+const configEnv = useRuntimeConfig();
 
 export default defineEventHandler(async (event) => {
   // Parsea FormData con formidable
@@ -39,7 +40,7 @@ export default defineEventHandler(async (event) => {
   );
   console.log(formData);
   try {
-    const res = await fetch("http://10.2.102.177/uploads/upload/", {
+    const res = await fetch(`${configEnv.public.geonodeApi}/uploads/upload/`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${data.fields.token[0]}`,
