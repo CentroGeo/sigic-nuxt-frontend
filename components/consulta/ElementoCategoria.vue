@@ -22,7 +22,7 @@ const { title, tag, numberElements } = toRefs(props);
       class="boton-sin-contenedor-secundario boton-mediano boton-pictograma"
       aria-label="Desplegar"
     >
-      <div class="flex">
+      <div class="flex columna-16">
         <p class="tarjeta-titulo columna-8">{{ title }}</p>
         <span class="pictograma-angulo-abajo" aria-hidden="true"></span>
       </div>

@@ -1,6 +1,4 @@
 <script setup>
-// TODO: Componentizar las secciones de categorias
-// TODO: Arreglar los filtros de categorias: que sí reflejen categorias
 const props = defineProps({
   titulo: { type: String, default: "Título" },
   resourceType: { type: String, required: true },
@@ -9,35 +7,57 @@ const props = defineProps({
 const { titulo, resourceType } = toRefs(props);
 const { resourcesList } = useGeonodeResources({
   pageNumber: 1,
-  pageSize: 20,
+  pageSize: 30,
   resourceType: resourceType.value,
 });
-const categories = ref({});
-const selectedCategory = ref();
+
+const config = useRuntimeConfig();
+const apiCategorias = `${config.public.geonodeApi}/facets/category`;
+const categoryList = ref([]);
+const categorizedResources = ref({});
+const selectedCategories = ref([]);
+
+// Esta parte es para obtener todas las categorias
+const { data: geonodeCategories } = await useFetch(`${apiCategorias}`);
+geonodeCategories.value.topics.items.map((d) => {
+  categoryList.value.push(d.label);
+});
+
 function groupResults() {
-  categories.value = {};
+  categorizedResources.value = {};
   resourcesList.value.map((r) => {
-    const anio = r.date.slice(0, 4);
-    if (Object.keys(categories.value).includes(anio)) {
-      categories.value[anio].push(r);
+    if (r.category) {
+      let title = r.category.gn_description;
+      if (Object.keys(categorizedResources.value).includes(title)) {
+        categorizedResources.value[title].push(r);
+      } else {
+        categorizedResources.value[title] = [];
+        categorizedResources.value[title].push(r);
+      }
     } else {
-      categories.value[anio] = [];
-      categories.value[anio].push(r);
+      if (Object.keys(categorizedResources.value).includes("Sin clasificar")) {
+        categorizedResources.value["Sin clasificar"].push(r);
+      } else {
+        categorizedResources.value["Sin clasificar"] = [];
+        categorizedResources.value["Sin clasificar"].push(r);
+      }
     }
   });
 }
 
 function setSelectedCategory(categoria) {
-  selectedCategory.value = categoria;
+  if (selectedCategories.value.includes(categoria)) {
+    selectedCategories.value = selectedCategories.value.filter(
+      (c) => c !== categoria
+    );
+  } else {
+    selectedCategories.value.push(categoria);
+  }
 }
 
 // Se utiliza un watcher porque inicialmente resourcesList está vacía
 watch(resourcesList, () => {
   groupResults();
-});
-
-watch(selectedCategory, () => {
-  console.log(selectedCategory.value);
 });
 </script>
 
@@ -57,30 +77,35 @@ watch(selectedCategory, () => {
     </div>
 
     <div
-      v-for="category in Object.keys(categories)"
+      v-for="category in Object.keys(categorizedResources)"
       :key="category"
-      class="panel-catalogo"
+      class="m-y-1"
     >
-      <div class="tarjeta">
+      <div class="">
         <ConsultaElementoCategoria
           :title="category"
           :tag="etiquetaElementos"
-          :number-elements="categories[category].length"
+          :number-elements="categorizedResources[category].length"
           @click="setSelectedCategory(category)"
         />
       </div>
-      <ConsultaElementoCatalogo
-        v-if="category == selectedCategory"
-        v-for="(option, index) in categories[category]"
-        :key="index"
-        :catalogue-element="option"
-        :resource-type="resourceType"
-      />
+      <div
+        class="contenedor-archivos"
+        v-if="selectedCategories.includes(category)"
+        v-for="(option, index) in categorizedResources[category]"
+      >
+        <ConsultaElementoCatalogo
+          class="elemento-catalogo"
+          :key="index"
+          :catalogue-element="option"
+          :resource-type="resourceType"
+        />
+      </div>
     </div>
   </div>
 </template>
-<style lang="scss">
-.panel-catalogo {
-  padding: 0px 8px;
+<style lang="scss" scoped>
+.contenedor-archivos {
+  border-bottom: solid 2px grey;
 }
 </style>

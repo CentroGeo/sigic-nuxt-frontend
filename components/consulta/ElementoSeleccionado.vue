@@ -12,73 +12,62 @@ const props = defineProps({
 const { selectedElement, resourceType } = toRefs(props);
 </script>
 <template>
-  <div class="tarjeta-seleccionada fondo-color-acento">
-    <div class="header-tarjeta">
-      <p>Categoria</p>
-      <div>
-        <span
-          class="pictograma-informacion pictograma-chico"
-          aria-hidden="true"
-        ></span>
-        <span
-          class="pictograma-subir-capa pictograma-chico"
-          aria-hidden="true"
-        ></span>
-        <span
-          class="pictograma-bajar-capa pictograma-chico"
-          aria-hidden="true"
-        ></span>
+  <div class="tarjeta">
+    <div class="tarjeta-cuerpo">
+      <div class="flex flex-contenido-separado m-0 encabezado-tarjeta">
+        <p class="tarjeta-texto-secundario m-0">Categoria</p>
+        <div class="m-0">
+          <span
+            class="pictograma-informacion pictograma-mediano"
+            aria-hidden="true"
+          ></span>
+          <span
+            class="pictograma-subir-capa pictograma-mediano"
+            aria-hidden="true"
+          ></span>
+          <span
+            class="pictograma-bajar-capa pictograma-mediano"
+            aria-hidden="true"
+          ></span>
+        </div>
       </div>
-    </div>
 
-    <div>
-      <h3>
-        {{ selectedElement.title }}
-      </h3>
+      <div>
+        <p class="tarjeta-titulo">
+          {{ selectedElement.title }}
+        </p>
 
-      <div class="contenedor-botones">
-        <button
-          class="boton-pictograma"
-          aria-label="Remover selección"
-          type="button"
-          @click="resourcesStore.removeResource(resourceType, selectedElement)"
-        >
-          <span class="pictograma-eliminar" aria-hidden="true"></span>
-        </button>
-        <button
-          class="boton-pictograma"
-          aria-label="Descargar selección"
-          type="button"
-        >
-          <span class="pictograma-archivo-descargar" aria-hidden="true"></span>
-        </button>
+        <div class="flex flex-contenido-final">
+          <button
+            class="boton-pictograma"
+            aria-label="Remover selección"
+            type="button"
+            @click="
+              resourcesStore.removeResource(resourceType, selectedElement)
+            "
+          >
+            <span class="pictograma-eliminar" aria-hidden="true"></span>
+          </button>
+          <button
+            class="boton-pictograma"
+            aria-label="Descargar selección"
+            type="button"
+          >
+            <span
+              class="pictograma-archivo-descargar"
+              aria-hidden="true"
+            ></span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </template>
 <style lang="scss" scoped>
-.tarjeta-seleccionada {
-  margin: 15px 10px;
-  h3 {
-    margin: 4px;
-  }
+.tarjeta-cuerpo {
+  padding: 16px;
 }
-.header-tarjeta {
-  display: flex;
-  flex-wrap: wrap;
+.encabezado-tarjeta {
   align-items: center;
-  justify-content: space-between;
-  p {
-    margin: 0px;
-  }
-  span {
-    margin: 0px;
-  }
-}
-
-.contenedor-botones {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
 }
 </style>
