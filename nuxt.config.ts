@@ -16,7 +16,9 @@ export default defineNuxtConfig({
 
   auth: {
     isEnabled: true,
-    baseURL: "/api/auth",
+    baseURL: 'http://localhost:3000/api/auth',
+    originEnvKey: process.env.NUXT_AUTH_ORIGIN,
+
     globalAppMiddleware: false, // protege todas las páginas por defecto
     provider: {
       type: "authjs",
@@ -36,16 +38,6 @@ export default defineNuxtConfig({
     }
   },
   devServer: {
-    port: 3000,
-    host: '0.0.0.0',  // escucha en todas las interfaces
-  },
-  vite: {
-    server: {
-      hmr: {
-        host: 'sigic.dev.geoint.mx',  // dominio visible desde navegador
-        protocol: 'wss',              // protocolo seguro para WebSocket
-        port: 443,                    // puerto que usa https (443)
-      },
-    },
+    // port: 3001
   },
 });
