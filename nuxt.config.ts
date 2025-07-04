@@ -36,12 +36,11 @@ export default defineNuxtConfig({
     }
   },
   devServer: {
-    // port: 3001
+    port: 3000,
+    host: '0.0.0.0',  // escucha en todas las interfaces
   },
   vite: {
     server: {
-      host: '0.0.0.0',  // para aceptar conexiones externas
-      port: 3000,       // el puerto que uses para dev server
       hmr: {
         host: 'sigic.dev.geoint.mx',  // dominio visible desde navegador
         protocol: 'wss',              // protocolo seguro para WebSocket
