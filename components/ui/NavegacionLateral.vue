@@ -20,11 +20,15 @@ defineProps({
     type: Boolean,
     default: false,
   },
+  idColapsable: {
+    type: String,
+    required: true,
+  },
 });
 </script>
 
 <template>
-  <div class="nav-lateral">
+  <div class="nav-lateral" aria-label="Navegación lateral">
     <ul class="lista-sin-estilo">
       <li>
         <div class="avatar-imagen">
@@ -39,6 +43,9 @@ defineProps({
         <button
           class="boton-pictograma boton-sin-contenedor-primario"
           aria-label="Colapsar"
+          :aria-controls="idColapsable"
+          :aria-expanded="!estadoColapable"
+          type="button"
           @click="funcionColapsar"
         >
           <span

@@ -25,6 +25,7 @@ const storeConsulta = useConsultaStore();
       ]"
       :funcion-colapsar="storeConsulta.alternarCatalogoColapsable"
       :estado-colapable="storeConsulta.catalogoColapsado"
+      :idColapsable="storeConsulta.idNavegacionLateral"
     />
 
     <div class="contenedor-contenido">
