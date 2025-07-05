@@ -1,7 +1,6 @@
 <script setup>
-import { useSelectedResourcesStore } from "~/stores/selectedResources.js";
-const resourcesStore = useSelectedResourcesStore();
-
+const showStore = useShownFilesStore();
+const selectedStore = useSelectedResourcesStore();
 const props = defineProps({
   selectedElement: {
     type: Object,
@@ -12,7 +11,7 @@ const props = defineProps({
 const { selectedElement, resourceType } = toRefs(props);
 </script>
 <template>
-  <div class="tarjeta">
+  <div class="tarjeta m-y-1">
     <div class="tarjeta-cuerpo">
       <div class="flex flex-contenido-separado m-0 encabezado-tarjeta">
         <p class="tarjeta-texto-secundario m-0">Categoria</p>
@@ -32,34 +31,18 @@ const { selectedElement, resourceType } = toRefs(props);
         </div>
       </div>
 
-      <div>
-        <p class="tarjeta-titulo">
-          {{ selectedElement.title }}
-        </p>
+      <ConsultaContenidoCapaSeleccionada
+        v-if="resourceType === 'dataset'"
+        :resource-type="resourceType"
+        :selected-element="selectedElement"
+      />
 
-        <div class="flex flex-contenido-final">
-          <button
-            class="boton-pictograma"
-            aria-label="Remover selección"
-            type="button"
-            @click="
-              resourcesStore.removeResource(resourceType, selectedElement)
-            "
-          >
-            <span class="pictograma-eliminar" aria-hidden="true"></span>
-          </button>
-          <button
-            class="boton-pictograma"
-            aria-label="Descargar selección"
-            type="button"
-          >
-            <span
-              class="pictograma-archivo-descargar"
-              aria-hidden="true"
-            ></span>
-          </button>
-        </div>
-      </div>
+      <ConsultaContenidoDocSeleccionado
+        v-if="resourceType !== 'dataset'"
+        :group-name="resourceType"
+        :resource-type="resourceType"
+        :selected-element="selectedElement"
+      />
     </div>
   </div>
 </template>

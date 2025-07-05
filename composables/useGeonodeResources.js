@@ -36,9 +36,17 @@ export function useGeonodeResources({
         return { resources: [] };
       })
       .then(({ resources }) => {
-        //if (resources.length === 0) return;
-        resourcesList.value = resources;
-        //console.log(resourcesList.value);
+        // Si son documentos, filtramos únicamente los pdfs
+        if (resourceType === "document") {
+          resourcesList.value = resources.filter((resource) =>
+            resource.links.some(
+              (link) =>
+                link.link_type === "uploaded" && link.name.endsWith(".pdf")
+            )
+          );
+        } else {
+          resourcesList.value = resources;
+        }
       })
       .catch((err) => {
         console.error(err);
