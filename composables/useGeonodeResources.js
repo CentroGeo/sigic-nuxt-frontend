@@ -1,5 +1,6 @@
 // Este composable hace peticiones de datos a Geonode
 // TODO: Resolver las peticiones de información para mostrar capas y datasets privados
+// TODO: Preparar para iterar en caso de que se tengan demasiados recursos
 import { ref } from "vue";
 //console.log("aja: ", useAuth());
 // const { data: session } = useAuth();
@@ -35,8 +36,17 @@ export function useGeonodeResources({
         return { resources: [] };
       })
       .then(({ resources }) => {
-        //if (resources.length === 0) return;
-        resourcesList.value = resources;
+        // Si son documentos, filtramos únicamente los pdfs
+        if (resourceType === "document") {
+          resourcesList.value = resources.filter((resource) =>
+            resource.links.some(
+              (link) =>
+                link.link_type === "uploaded" && link.name.endsWith(".pdf")
+            )
+          );
+        } else {
+          resourcesList.value = resources;
+        }
       })
       .catch((err) => {
         console.error(err);

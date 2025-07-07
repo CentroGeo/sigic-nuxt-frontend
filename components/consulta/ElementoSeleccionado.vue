@@ -1,6 +1,6 @@
 <script setup>
-import { useSelectedResourcesStore } from "~/stores/selectedResources.js";
-const resourcesStore = useSelectedResourcesStore();
+const shownStore = useShownFilesStore();
+const selectedStore = useSelectedResourcesStore();
 
 const props = defineProps({
   selectedElement: {
@@ -10,69 +10,54 @@ const props = defineProps({
   resourceType: { type: String, required: true },
 });
 const { selectedElement, resourceType } = toRefs(props);
+
+if (!shownStore.shownFiles[resourceType.value]) {
+  //console.log("si vacio", !shownStore.shownFiles[resourceType.value]);
+  let firstSelection = selectedStore.selectedResources[resourceType.value][0];
+  shownStore.setShownFile(resourceType.value, firstSelection);
+}
 </script>
 <template>
-  <div class="tarjeta-seleccionada fondo-color-acento">
-    <div class="header-tarjeta">
-      <p>Categoria</p>
-      <div>
-        <span
-          class="pictograma-informacion pictograma-chico"
-          aria-hidden="true"
-        ></span>
-        <span
-          class="pictograma-subir-capa pictograma-chico"
-          aria-hidden="true"
-        ></span>
-        <span
-          class="pictograma-bajar-capa pictograma-chico"
-          aria-hidden="true"
-        ></span>
+  <div class="tarjeta m-y-1">
+    <div class="tarjeta-cuerpo">
+      <div class="flex flex-contenido-separado m-0 encabezado-tarjeta">
+        <p class="tarjeta-texto-secundario m-0">Categoria</p>
+        <div class="m-0">
+          <span
+            class="pictograma-informacion pictograma-mediano"
+            aria-hidden="true"
+          ></span>
+          <span
+            class="pictograma-subir-capa pictograma-mediano"
+            aria-hidden="true"
+          ></span>
+          <span
+            class="pictograma-bajar-capa pictograma-mediano"
+            aria-hidden="true"
+          ></span>
+        </div>
       </div>
-    </div>
 
-    <div>
-      <h3>
-        {{ selectedElement.title }}
-      </h3>
+      <ConsultaContenidoCapaSeleccionada
+        v-if="resourceType === 'dataset'"
+        :resource-type="resourceType"
+        :selected-element="selectedElement"
+      />
 
-      <div class="contenedor-botones">
-        <button
-          class="boton-pictograma"
-          @click="resourcesStore.removeResource(resourceType, selectedElement)"
-        >
-          <span class="pictograma-eliminar" aria-hidden="true"></span>
-        </button>
-        <button class="boton-pictograma">
-          <span class="pictograma-archivo-descargar" aria-hidden="true"></span>
-        </button>
-      </div>
+      <ConsultaContenidoDocSeleccionado
+        v-if="resourceType !== 'dataset'"
+        :group-name="resourceType"
+        :resource-type="resourceType"
+        :selected-element="selectedElement"
+      />
     </div>
   </div>
 </template>
 <style lang="scss" scoped>
-.tarjeta-seleccionada {
-  margin: 15px 10px;
-  h3 {
-    margin: 4px;
-  }
+.tarjeta-cuerpo {
+  padding: 16px;
 }
-.header-tarjeta {
-  display: flex;
-  flex-wrap: wrap;
+.encabezado-tarjeta {
   align-items: center;
-  justify-content: space-between;
-  p {
-    margin: 0px;
-  }
-  span {
-    margin: 0px;
-  }
-}
-
-.contenedor-botones {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
 }
 </style>
