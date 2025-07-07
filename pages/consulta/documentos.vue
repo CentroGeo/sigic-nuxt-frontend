@@ -1,26 +1,47 @@
 <script setup>
-import PanelCatalogo from "~/components/consulta/PanelCatalogo.vue";
-import PanelSeleccion from "~/components/consulta/PanelSeleccion.vue";
-import LayoutConsulta from "~/components/consulta/LayoutConsulta.vue";
+const config = useRuntimeConfig();
+
+async function obtenerPDFs() {
+  const res = await fetch(`${config.public.geonodeApi}/api/v2/documents/`);
+  const data = await res.json();
+  const docs = data.results;
+
+  docs.forEach((doc) => {
+    console.log(`Título: ${doc.title}`);
+    console.log(`Descargar: ${config.public.geonodeApi}${doc.download_url}`);
+  });
+}
+obtenerPDFs();
+const resourceType = "document";
 </script>
+
 <template>
-  <LayoutConsulta>
-    <div class="visualizacion-doc">
-      <PanelCatalogo>
-        <h3>Documentos</h3>
-      </PanelCatalogo>
+  <ConsultaLayoutPaneles>
+    <template #catalogo>
+      <ConsultaLayoutCatalogo
+        titulo="Documentos"
+        :resource-type="resourceType"
+        etiqueta-elementos="Documentos"
+      />
+    </template>
 
-      <h2>Título</h2>
+    <template #visualizador>
+      <ConsultaVisualizacionDocumento></ConsultaVisualizacionDocumento>
+    </template>
 
-      <PanelSeleccion>
-        <h3>Documentos seleccionados</h3>
-      </PanelSeleccion>
-    </div>
-  </LayoutConsulta>
+    <template #seleccion>
+      <ConsultaLayoutSeleccion
+        titulo="Documentos seleccionados"
+        :resource-type="resourceType"
+        etiqueta-elementos="Documentos"
+      />
+    </template>
+  </ConsultaLayoutPaneles>
 </template>
-<style lang="scss">
-.visualizacion-doc {
+
+<style>
+.documento-embebido {
   width: 100%;
-  display: flex;
+  height: 100%;
 }
 </style>

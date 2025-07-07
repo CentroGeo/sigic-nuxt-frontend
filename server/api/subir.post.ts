@@ -7,6 +7,7 @@ export const config = {
     bodyParser: false,
   },
 };
+const configEnv = useRuntimeConfig();
 
 export default defineEventHandler(async (event) => {
   // Parsea FormData con formidable
@@ -19,6 +20,7 @@ export default defineEventHandler(async (event) => {
       else resolve({ fields, files });
     });
   });
+  console.log(data.fields.token[0]);
 
   const { base_file } = data.files;
   if (!base_file) {
@@ -31,14 +33,14 @@ export default defineEventHandler(async (event) => {
     "base_file",
     base_file[0].filepath
       ? new Blob([await fsp.readFile(base_file[0].filepath)], {
-          type: base_file[0].mimetype,
-        })
+        type: base_file[0].mimetype,
+      })
       : base_file[0],
     base_file[0].originalFilename
   );
   console.log(formData);
   try {
-    const res = await fetch("http://10.2.102.177/uploads/upload/", {
+    const res = await fetch(`${configEnv.public.geonodeApi}/uploads/upload/`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${data.fields.token[0]}`,

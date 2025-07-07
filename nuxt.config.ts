@@ -5,7 +5,7 @@ export default defineNuxtConfig({
 
   modules: [
     "@pinia/nuxt",
-    "@nuxt/content",
+    // "@nuxt/content",
     "@nuxt/eslint",
     "@nuxt/image",
     "@nuxt/test-utils",
@@ -16,7 +16,9 @@ export default defineNuxtConfig({
 
   auth: {
     isEnabled: true,
-    baseURL: "/api/auth",
+    baseURL: 'http://localhost:3000/api/auth',
+    originEnvKey: process.env.NUXT_AUTH_ORIGIN,
+
     globalAppMiddleware: false, // protege todas las páginas por defecto
     provider: {
       type: "authjs",
