@@ -101,4 +101,24 @@ KEYCLOAK_CLIENT_ID = <Id client>
 KEYCLOAK_ISSUER = https://iam.dev.geoint.mx/realms/sigic
 # Clave secreta del servicio de autenticación
 KEYCLOAK_CLIENT_SECRET = <Clave secreta>
+NUXT_AUTH_SECRET=clave alfanumérica definida por la persona desarrolladora
+NUXT_AUTH_ORIGIN = localhost:3000
+```
+
+Para el despliegue en producción se debe hacer un archivo `.env.production`
+
+```bash
+# Url del geonode fuente del catálogo
+GEONODE_URL = https://geonode.dev.geoint.mx
+# Url del geoserver fuente de capas geográficas
+GEOSERVER_URL = https://geonode.dev.geoint.mx/geoserver
+
+# ID del cliente de autenticación
+KEYCLOAK_CLIENT_ID = <Id client>
+#
+KEYCLOAK_ISSUER = https://iam.dev.geoint.mx/realms/sigic
+# Clave secreta del servicio de autenticación
+KEYCLOAK_CLIENT_SECRET = <Clave secreta>
+NUXT_AUTH_SECRET=clave alfanumérica definida por la persona desarrolladora
+NUXT_AUTH_ORIGIN = https://sigic.dev.geoint.mx
 ```
