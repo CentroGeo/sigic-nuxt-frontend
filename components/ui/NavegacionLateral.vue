@@ -28,11 +28,7 @@ defineProps({
 </script>
 
 <template>
-<<<<<<< HEAD:components/consulta/NavegacionLateral.vue
-  <div class="nav-lateral" aria-label="Navegación Lateral">
-=======
   <div class="nav-lateral" aria-label="Navegación lateral">
->>>>>>> dc9a7e3b7d7b45cb5eca7d0dc5353f8c2a4c6a18:components/ui/NavegacionLateral.vue
     <ul class="lista-sin-estilo">
       <li>
         <div class="avatar-imagen">
@@ -46,17 +42,11 @@ defineProps({
       <li v-if="funcionColapsar">
         <button
           class="boton-pictograma boton-sin-contenedor-primario"
-<<<<<<< HEAD:components/consulta/NavegacionLateral.vue
-          aria-label="Navegación Lateral"
-          type="button"
-          @click="storeConsulta.alternarCatalogoColapsable"
-=======
           aria-label="Colapsar"
           :aria-controls="idColapsable"
           :aria-expanded="!estadoColapable"
           type="button"
           @click="funcionColapsar"
->>>>>>> dc9a7e3b7d7b45cb5eca7d0dc5353f8c2a4c6a18:components/ui/NavegacionLateral.vue
         >
           <span
             :class="`pictograma-angulo-doble-${estadoColapable ? 'derecha' : 'izquierda'}`"
