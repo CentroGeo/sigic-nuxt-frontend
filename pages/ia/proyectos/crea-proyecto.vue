@@ -57,7 +57,7 @@ const storeIA = useIAStore();
               <div class="separador m-b-3"></div>
               <div class="flex flex-contenido-separado fuentes-encabezado">
                 <h2>Agregar fuentes de información</h2>
-                <div class="">
+                <div>
                   <button
                     class="boton-pictograma boton-primario m-r-2"
                     aria-label="Agregar del catalogo"
@@ -74,16 +74,24 @@ const storeIA = useIAStore();
                   </button>
                 </div>
               </div>
+              <div class="flex flex-contenido-final">
+                <NuxtLink
+                  class="boton boton-chico boton-primario"
+                  aria-label="Guardar proyecto"
+                  to="/ia/proyectos"
+                  @click="storeIA.crearProyecto()"
+                >
+                  Guardar proyecto
+                </NuxtLink>
+                <button
+                  class="boton-chico boton-secundario"
+                  aria-label="Cancelar"
+                >
+                  Cancelar
+                </button>
+              </div>
             </div>
           </div>
-          <NuxtLink
-            class="boton boton-primario"
-            aria-label="Crear proyecto"
-            to="/ia/proyectos"
-            @click="storeIA.crearProyecto()"
-          >
-            Crear proyecto
-          </NuxtLink>
         </div>
       </div>
     </div>

@@ -2,8 +2,10 @@
 import LayoutIA from "~/components/ia/LayoutIA.vue";
 import PanelListas from "~/components/ia/PanelListas.vue";
 import LeyendaInicio from "~/components/ia/LeyendaInicio.vue";
+import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
 
 import { useIAStore } from "~/stores/ia.js";
+import ListaProyectos from "~/components/ia/ListaProyectos.vue";
 const storeIA = useIAStore();
 
 const contextos = [
@@ -22,7 +24,7 @@ const contextos = [
     <div class="grid">
       <div class="columna-4">
         <PanelListas>
-          <h6 class="m-t-0">Proyectos</h6>
+          <ListaProyectos />
         </PanelListas>
       </div>
 
