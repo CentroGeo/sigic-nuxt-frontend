@@ -1,5 +1,7 @@
 <script setup>
+const shownStore = useShownFilesStore();
 const resourcesStore = useSelectedResourcesStore();
+
 const props = defineProps({
   groupName: { type: String, required: true },
   selectedElement: {
@@ -9,18 +11,45 @@ const props = defineProps({
   resourceType: { type: String, required: true },
 });
 const { selectedElement, resourceType } = toRefs(props);
+
+const isChecked = ref(false);
+
+function setShownElement() {
+  shownStore.setShownFile(resourceType.value, selectedElement.value);
+}
+
+/* function setCheck() {
+  console.log(
+    "se disparo la funcion que checa botones, ",
+    shownStore.shownFiles[resourceType.value].uuid
+  );
+
+  if (
+    selectedElement.value.uuid ===
+    shownStore.shownFiles[resourceType.value].uuid
+  ) {
+    isChecked.value = false;
+  } else {
+    isChecked.value = true;
+  }
+}
+setCheck();
+
+watch(
+  () => shownStore.shownFiles[resourceType.value],
+  () => {
+    setCheck();
+  },
+  { deep: true }
+); */
 </script>
 
 <template>
-  <!-- El contenido de la tarjeta de capas  -->
   <div>
-    <input
-      :id="selectedElement.uuid"
-      type="radio"
-      :name="groupName"
-      :value="selectedElement.uuid"
-    />
-    <label :for="selectedElement.uuid">{{ selectedElement.title }}</label>
+    <div @click="setShownElement">
+      <input :id="selectedElement.uuid" type="radio" :name="groupName" />
+      <label :for="selectedElement.uuid">{{ selectedElement.title }}</label>
+    </div>
 
     <div class="flex flex-contenido-final">
       <button

@@ -1,6 +1,7 @@
 <script setup>
-const showStore = useShownFilesStore();
+const shownStore = useShownFilesStore();
 const selectedStore = useSelectedResourcesStore();
+
 const props = defineProps({
   selectedElement: {
     type: Object,
@@ -9,6 +10,12 @@ const props = defineProps({
   resourceType: { type: String, required: true },
 });
 const { selectedElement, resourceType } = toRefs(props);
+
+if (!shownStore.shownFiles[resourceType.value]) {
+  //console.log("si vacio", !shownStore.shownFiles[resourceType.value]);
+  let firstSelection = selectedStore.selectedResources[resourceType.value][0];
+  shownStore.setShownFile(resourceType.value, firstSelection);
+}
 </script>
 <template>
   <div class="tarjeta m-y-1">

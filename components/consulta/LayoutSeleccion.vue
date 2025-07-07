@@ -52,7 +52,6 @@ const storeSelected = useSelectedResourcesStore();
     <div class="m-x-2 m-y-1">
       <ConsultaElementoSeleccionado
         v-for="resource in storeSelected.selectedResources[resourceType]"
-        @click="setshown"
         :key="`seleccion-${resource.uuid}`"
         :selected-element="resource"
         :resource-type="resourceType"

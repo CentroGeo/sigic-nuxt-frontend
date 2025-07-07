@@ -14,7 +14,7 @@ export const useSelectedResourcesStore = defineStore("selectedResources", {
           (r) => r.uuid === layer.uuid
         )
       ) {
-        this.selectedResources[resourceType].push(layer);
+        this.selectedResources[resourceType].unshift(layer);
       }
       //console.log(this.selectedResources);
     },
