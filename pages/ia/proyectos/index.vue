@@ -8,6 +8,16 @@ import { useIAStore } from "~/stores/ia.js";
 import ListaProyectos from "~/components/ia/ListaProyectos.vue";
 const storeIA = useIAStore();
 
+const proyecto = {
+  id: 0,
+  titulo: "Biodiversidad de ecosistemas marinos",
+  descripcion:
+    "Este proyecto de investigación científica se centra en el estudio de la biodiversidad en los ecosistemas marinos de la costa. A través de la recolección de muestras y el análisis genético, buscamos comprender cómo las variaciones en la temperatura del agua afect...",
+  numero_contextos: 0,
+  numero_fuentes: 9,
+  estado: "Privado",
+};
+
 const contextos = [
   {
     id: 0,
@@ -33,7 +43,30 @@ const contextos = [
 
         <!-- Vista Proyectos -->
         <div v-else class="contenedor">
-          <h2>Nombre del proyecto</h2>
+          <div class="grid">
+            <div class="columna-16">
+              <div class="flex flex-contenido-separado proyecto-encabezado">
+                <div class="flex proyecto-encabezado">
+                  <h2>{{ proyecto.titulo }}</h2>
+                  <div class="p-x-1 p-y-minimo proyecto-estado">
+                    <span>{{ proyecto.estado }}</span>
+                    <!-- TODO: agregar icono de para privado/publico -->
+                  </div>
+                </div>
+                <button class="boton-primario" type="button">
+                  Configurar proyecto
+                </button>
+              </div>
+            </div>
+            <div class="columna-10">
+              {{ proyecto.descripcion }}
+            </div>
+          </div>
+          <div class="grid">
+            <div class="columna-16">
+              <div class="separador m-y-3"></div>
+            </div>
+          </div>
           <h4>Contextos:</h4>
           <NuxtLink
             class="boton boton-secundario"
@@ -99,5 +132,21 @@ const contextos = [
     display: flex;
     justify-content: space-between;
   }
+}
+
+.proyecto-encabezado {
+  align-items: center;
+}
+
+.proyecto-estado {
+  border-radius: var(--Escalas-Bordes-redondeados-br-2, 8px);
+  border: 1px solid var(--Base-Borde---borde-acento, #53323c);
+  background: var(--Base-Fondo---fondo-acento, #fcf3f5);
+}
+
+.separador {
+  width: 100%;
+  height: 1px;
+  background: #aaa;
 }
 </style>

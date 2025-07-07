@@ -34,9 +34,15 @@ const listaProyectosFiltrada = ref(proyectos.value);
         <li v-for="proyecto in listaProyectosFiltrada" :key="proyecto.titulo">
           <div class="proyecto seleccionado p-l-4 p-r-2 p-y-1">
             <div class="proyecto-titulo m-b-1">{{ proyecto.titulo }}</div>
-            <div class="proyecto-pie">
-              <span>{{ proyecto.numero_contextos }} Contextos</span>
-              <span>{{ proyecto.numero_fuentes }} Fuentes</span>
+            <div class="flex">
+              <UiNumeroElementos
+                :numero="proyecto.numero_contextos"
+                etiqueta="Contextos"
+              />
+              <UiNumeroElementos
+                :numero="proyecto.numero_fuentes"
+                etiqueta="Fuentes"
+              />
             </div>
           </div>
         </li>
@@ -50,9 +56,22 @@ const listaProyectosFiltrada = ref(proyectos.value);
   width: 100%;
 }
 
-.proyecto.seleccionado {
-  border-left: var(--Escalas-Bordes-borde-8, 8px) solid
-    var(--Base-Borde---borde-acento, #53323c);
-  background: var(--Base-Fondo---fondo-acento, #fcf3f5);
+.proyecto {
+  &.seleccionado {
+    border-left: var(--Escalas-Bordes-borde-8, 8px) solid
+      var(--Base-Borde---borde-acento, #53323c);
+    background: var(--Base-Fondo---fondo-acento, #fcf3f5);
+  }
+
+  .proyecto-titulo {
+    color: var(
+      --Componentes-Navegacin-secundaria---navegacion-secundaria-color,
+      #391821
+    );
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: var(--Tipos-Interlineado-Prrafos-Prrafos, 24px);
+  }
 }
 </style>
