@@ -102,18 +102,20 @@ watch(
 );
 </script>
 <template>
-  <div
-    class="m-x-5 m-y-2"
-    :id="`elemento-${catalogueElement.uuid}`"
-    @click="selectElement(resourceType, catalogueElement)"
-  >
-    <input
-      type="checkbox"
-      :id="`checkbox-${catalogueElement.uuid}`"
-      v-model="isChecked"
-    />
-    <label :for="catalogueElement.uuid">{{ catalogueElement.title }}</label>
-    <div class="flex m-y-3 m-x-1">
+  <div class="m-x-5 m-y-2" :id="`elemento-${catalogueElement.uuid}`">
+    <div
+      class="tarjeta-elemento"
+      @click="selectElement(resourceType, catalogueElement)"
+    >
+      <input
+        type="checkbox"
+        :id="`checkbox-${catalogueElement.uuid}`"
+        v-model="isChecked"
+      />
+      <label :for="catalogueElement.uuid">{{ catalogueElement.title }}</label>
+    </div>
+
+    <div class="flex flex-contenido-inicio m-y-3">
       <span
         v-for="button in buttons"
         :class="[button.class, 'pictograma-mediano']"
@@ -122,3 +124,13 @@ watch(
     </div>
   </div>
 </template>
+<style lang="scss" scoped>
+.flex {
+  gap: 8px;
+}
+.tarjeta-elemento:hover {
+  background-color: var(--color-secundario-2);
+  border: 1px solid var(--color-secundario-8);
+  border-radius: 8px;
+}
+</style>

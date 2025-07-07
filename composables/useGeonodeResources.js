@@ -13,18 +13,23 @@ export function useGeonodeResources({
   const config = useRuntimeConfig();
   const api = `${config.public.geonodeApi}/resources`;
   const resourcesList = ref([]);
+  const typeDict = {
+    dataLayer: "dataset",
+    dataTable: "dataset",
+    document: "document",
+  };
 
   /*     if (!session.value?.accessToken) {
     console.warn("No access token, cannot fetch private resources");
     return;
   } */
-
   const fetchData = async ({ pageNumber, pageSize, resourceType }) => {
     const dataParams = new URLSearchParams({
       page: pageNumber,
       page_size: pageSize,
-      "filter{resource_type}": resourceType,
+      "filter{resource_type}": typeDict[resourceType],
     });
+    //console.log(`${api}?${dataParams.toString()}`);
     fetch(`${api}?${dataParams.toString()}`, {
       method: "GET",
       /*       headers: {
@@ -43,6 +48,15 @@ export function useGeonodeResources({
               (link) =>
                 link.link_type === "uploaded" && link.name.endsWith(".pdf")
             )
+          );
+        } else if (resourceType === "dataLayer") {
+          // Si son capas geográficas, excluimos aquellos que no tengan geometria
+          let noGeometryExtent = [-1, -1, 0, 0];
+          resourcesList.value = resources.filter(
+            (resource) =>
+              !resource.extent.coords.every(
+                (value, index) => value === noGeometryExtent[index]
+              )
           );
         } else {
           resourcesList.value = resources;

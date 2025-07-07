@@ -3,29 +3,36 @@ import { defineStore } from "pinia";
 export const useSelectedResourcesStore = defineStore("selectedResources", {
   state: () => ({
     selectedResources: {
-      dataset: [],
+      dataLayer: [],
+      dataTable: [],
+      document: [],
+    },
+    filteredResources: {
+      dataLayer: [],
+      dataTable: [],
       document: [],
     },
   }),
   actions: {
-    addResource(resourceType, layer) {
+    addResource(resourceType, file) {
       if (
-        !this.selectedResources[resourceType]?.some(
-          (r) => r.uuid === layer.uuid
-        )
+        !this.selectedResources[resourceType]?.some((r) => r.uuid === file.uuid)
       ) {
-        this.selectedResources[resourceType].unshift(layer);
+        this.selectedResources[resourceType].unshift(file);
       }
       //console.log(this.selectedResources);
     },
-    removeResource(resourceType, layer) {
+    removeResource(resourceType, file) {
       this.selectedResources[resourceType] = this.selectedResources[
         resourceType
-      ].filter((r) => r.uuid !== layer.uuid);
+      ].filter((r) => r.uuid !== file.uuid);
       //console.log(this.selectedResources);
     },
     resetResource(resourceType) {
       this.selectedResources[resourceType] = [];
+    },
+    updateFilteredResources(resourceType, newArray) {
+      this.filteredResources[resourceType] = newArray;
     },
   },
 });

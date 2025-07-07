@@ -1,5 +1,5 @@
 <script setup>
-const resourceType = "dataset";
+const resourceType = "dataLayer";
 </script>
 
 <template>
