@@ -71,7 +71,7 @@ const buttonTagDict = {
   height: 100vh;
   overflow-y: auto;
 }
-.controles-seleccion {
+.controles {
   position: sticky;
   top: 0;
   z-index: 1;

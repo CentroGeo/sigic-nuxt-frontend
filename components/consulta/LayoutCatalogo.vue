@@ -136,6 +136,7 @@ watch(
 }
 .catalogo-layout {
   height: 100vh;
+  overflow-x: hidden;
   overflow-y: auto;
 }
 .controles-catalogo {

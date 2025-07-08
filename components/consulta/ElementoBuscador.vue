@@ -1,4 +1,5 @@
 <script setup>
+// De momento el campo de búsqueda, busca únicamente en el titulo
 import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
 import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
 import SisdaiSelector from "@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue";
@@ -12,13 +13,15 @@ const props = defineProps({
 });
 const { resourcesList, resourceType, categories } = toRefs(props);
 const catalogoFiltrado = ref(resourcesList.value);
-
 const sisdaiModal = ref(null);
-//const categories = ref(["opcion 1", "opcion 2", "opcion 3"]);
-const selectedCategory = ref(null);
-const institucionInput = ref(null);
-const yearInput = ref(null);
-const keywordsInput = ref(null);
+const selectedFilter = ref({
+  selectedCategory: null,
+  institucionInput: null,
+  yearInput: null,
+  keywordsInput: null,
+});
+
+//console.log(resourcesList.value);
 
 function filterByKeywords(r) {
   catalogoFiltrado.value = r;
@@ -28,12 +31,39 @@ function filterByKeywords(r) {
   );
 }
 
+function filterByCategory(d) {
+  if (
+    d.category &&
+    selectedFilter.value["selectedCategory"] !== null &&
+    d.category.gn_description == selectedFilter.value["selectedCategory"]
+  ) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+// La idea sería generar un filtro por categoría y, sacar el numero de filtros aplicados y
+// revisar que sumen un total
 function filterByModal() {
-  console.log(
-    selectedCategory.value,
-    institucionInput.value,
-    yearInput.value,
-    keywordsInput.value
+  let total = 0;
+  let results = [];
+  // Revisamos cuántos filtros se aplicaron
+  Object.keys(selectedFilter.value).forEach((d) => {
+    if (selectedFilter.value[d]) {
+      total += 1;
+    }
+  });
+  // Revisamos la suma por filtro
+  resourcesList.value.forEach((d) => {
+    let i = filterByCategory(d);
+    if (i === total) {
+      results.push(d);
+    }
+  });
+  catalogoFiltrado.value = results;
+  resourcesStore.updateFilteredResources(
+    resourceType.value,
+    catalogoFiltrado.value
   );
   sisdaiModal.value.cerrarModal();
 }
@@ -51,7 +81,7 @@ function filterByModal() {
             class="m-y-2"
             etiqueta="Categoría"
             instruccional="Selecciona Categoría"
-            v-model="selectedCategory"
+            v-model="selectedFilter['selectedCategory']"
           >
             <option
               v-for="(category, index) in categories"
@@ -66,21 +96,21 @@ function filterByModal() {
             class="m-y-2"
             etiqueta="Institución"
             ejemplo="SECIHTI, INEGI, entre otras"
-            v-model="institucionInput"
+            v-model="selectedFilter['institucionInput']"
           />
 
           <SisdaiCampoBase
             class="m-y-2"
             etiqueta="Año de publicación"
             ejemplo="1995..."
-            v-model="yearInput"
+            v-model="selectedFilter['yearInput']"
           />
 
           <SisdaiCampoBase
             class="m-y-2"
             etiqueta="Palabras clave"
             ejemplo="agua, casas..."
-            v-model="keywordsInput"
+            v-model="selectedFilter['keywordsInput']"
           />
         </div>
       </ClientOnly>
