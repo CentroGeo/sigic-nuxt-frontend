@@ -8,4 +8,7 @@
 
 <style lang="scss">
 @use "~/assets/global.scss";
+.overflow-hidden {
+  overflow: hidden;
+}
 </style>

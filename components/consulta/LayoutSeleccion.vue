@@ -6,6 +6,11 @@ const props = defineProps({
 });
 const { titulo, resourceType } = toRefs(props);
 const storeSelected = useSelectedResourcesStore();
+const buttonTagDict = {
+  dataLayer: "mapa",
+  dataTable: "archivo",
+  document: "archivo",
+};
 </script>
 
 <template>
@@ -21,7 +26,7 @@ const storeSelected = useSelectedResourcesStore();
           class="boton-primario"
           aria-label="Descargar mapa"
         >
-          Descargar mapa
+          Descargar {{ buttonTagDict[resourceType] }}
           <span class="pictograma-mapa-generador" aria-hidden="true" />
         </button>
 

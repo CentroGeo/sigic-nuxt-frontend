@@ -16,6 +16,7 @@ const { selectedElement, resourceType } = toRefs(props);
     <p class="tarjeta-titulo m-y-2">
       {{ selectedElement.title }}
     </p>
+    <p class="tarjeta-etiqueta">Variables disponibles</p>
   </div>
 
   <div class="flex flex-contenido-final">

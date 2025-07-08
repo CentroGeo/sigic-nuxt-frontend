@@ -86,11 +86,13 @@ watch(
 
     <div class="m-x-2 m-y-1">
       <p class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
-
-      <ConsultaElementoBuscador
-        :resources-list="resourcesList"
-        :resource-type="resourceType"
-      />
+      <ClientOnly>
+        <ConsultaElementoBuscador
+          :resources-list="resourcesList"
+          :resource-type="resourceType"
+          :categories="categoryList"
+        />
+      </ClientOnly>
 
       <UiNumeroElementos
         :numero="filteredResources.length"
