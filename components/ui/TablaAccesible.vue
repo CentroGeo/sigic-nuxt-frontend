@@ -14,7 +14,7 @@ function generaIdAleatorio() {
 const idAleatorio = generaIdAleatorio();
 </script>
 <template>
-  <div class="contenedor-tabla">
+  <div class="contenedor-tabla p-2">
     <table>
       <caption>
         {{
@@ -57,6 +57,6 @@ const idAleatorio = generaIdAleatorio();
   display: inline-grid;
 }
 table {
-  min-width: 600px; // fuerza a que haya scroll si hay muchas columnas
+  min-width: 600px;
 }
 </style>
