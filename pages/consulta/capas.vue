@@ -1,5 +1,8 @@
 <script setup>
 const resourceType = "dataLayer";
+
+const config = useRuntimeConfig();
+const storeSelected = useSelectedResourcesStore();
 </script>
 
 <template>
