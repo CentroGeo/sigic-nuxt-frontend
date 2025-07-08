@@ -1,8 +1,5 @@
 <script setup>
-const resourceType = "dataset";
-
-const config = useRuntimeConfig();
-const storeSelected = useSelectedResourcesStore();
+const resourceType = "dataLayer";
 </script>
 
 <template>

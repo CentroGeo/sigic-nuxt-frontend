@@ -39,13 +39,13 @@ if (!shownStore.shownFiles[resourceType.value]) {
       </div>
 
       <ConsultaContenidoCapaSeleccionada
-        v-if="resourceType === 'dataset'"
+        v-if="resourceType === 'dataLayer'"
         :resource-type="resourceType"
         :selected-element="selectedElement"
       />
 
       <ConsultaContenidoDocSeleccionado
-        v-if="resourceType !== 'dataset'"
+        v-if="resourceType !== 'dataLayer'"
         :group-name="resourceType"
         :resource-type="resourceType"
         :selected-element="selectedElement"
@@ -56,6 +56,7 @@ if (!shownStore.shownFiles[resourceType.value]) {
 <style lang="scss" scoped>
 .tarjeta-cuerpo {
   padding: 16px;
+  background-color: var(--color-secundario-2);
 }
 .encabezado-tarjeta {
   align-items: center;

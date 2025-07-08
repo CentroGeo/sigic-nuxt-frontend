@@ -53,7 +53,7 @@ watch(
 
     <div class="flex flex-contenido-final">
       <button
-        class="boton-pictograma"
+        class="boton-pictograma boton-sin-contenedor-secundario"
         aria-label="Remover selección"
         type="button"
         @click="resourcesStore.removeResource(resourceType, selectedElement)"
@@ -61,7 +61,7 @@ watch(
         <span class="pictograma-eliminar" aria-hidden="true"></span>
       </button>
       <button
-        class="boton-pictograma"
+        class="boton-pictograma boton-sin-contenedor-secundario"
         aria-label="Descargar selección"
         type="button"
       >

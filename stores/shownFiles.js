@@ -10,7 +10,7 @@ export const useShownFilesStore = defineStore("shownFiles", {
   actions: {
     setShownFile(resourceType, resource) {
       this.shownFiles[resourceType] = resource;
-      console.log("cambio la seleccion", this.shownFiles[resourceType].uuid);
+      //console.log("cambio la seleccion", this.shownFiles[resourceType].uuid);
     },
   },
 });

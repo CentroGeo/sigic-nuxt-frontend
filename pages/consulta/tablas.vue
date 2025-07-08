@@ -2,6 +2,9 @@
 const variables = ref([]);
 const datos = ref([]);
 const config = useRuntimeConfig();
+
+const resourceType = "dataTable";
+
 const url = new URL(`${config.public.geoserverUrl}/ows`);
 
 url.search = new URLSearchParams({
@@ -26,7 +29,13 @@ fetch(url)
 
 <template>
   <ConsultaLayoutPaneles>
-    <template #catalogo>Tablas disponibles</template>
+    <template #catalogo>
+      <ConsultaLayoutCatalogo
+        titulo="Tabulados de datos"
+        :resource-type="resourceType"
+        etiqueta-elementos="Datos tabulados"
+      />
+    </template>
 
     <template #visualizador>
       <UiTablaAccesible
@@ -36,6 +45,12 @@ fetch(url)
       />
     </template>
 
-    <template #seleccion>Tablas seleccionadas</template>
+    <template #seleccion>
+      <ConsultaLayoutSeleccion
+        titulo="Tabulados de datos"
+        :resource-type="resourceType"
+        etiqueta-elementos="Datos tabulaos"
+      />
+    </template>
   </ConsultaLayoutPaneles>
 </template>

@@ -1,4 +1,6 @@
 <script setup>
+// PENDING: El buscador sisdai genera un error que dice "Hidration completed but contains mismatches"
+const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
   titulo: { type: String, default: "Título" },
   resourceType: { type: String, required: true },
@@ -11,6 +13,7 @@ const { resourcesList } = useGeonodeResources({
   resourceType: resourceType.value,
 });
 
+const filteredResources = ref([]);
 const config = useRuntimeConfig();
 const apiCategorias = `${config.public.geonodeApi}/facets/category`;
 const categoryList = ref([]);
@@ -19,13 +22,17 @@ const selectedCategories = ref([]);
 
 // Esta parte es para obtener todas las categorias
 const { data: geonodeCategories } = await useFetch(`${apiCategorias}`);
-geonodeCategories.value.topics.items.map((d) => {
-  categoryList.value.push(d.label);
-});
+if (!geonodeCategories.value) {
+  categoryList.value = ["Sin clasificar"];
+} else {
+  geonodeCategories.value.topics.items.map((d) => {
+    categoryList.value.push(d.label);
+  });
+}
 
 function groupResults() {
   categorizedResources.value = {};
-  resourcesList.value.map((r) => {
+  filteredResources.value.map((r) => {
     if (r.category) {
       let title = r.category.gn_description;
       if (Object.keys(categorizedResources.value).includes(title)) {
@@ -55,10 +62,22 @@ function setSelectedCategory(categoria) {
   }
 }
 
-// Se utiliza un watcher porque inicialmente resourcesList está vacía
+// Se utiliza un watcher porque inicialmente resourcesList y filteredResources están vacías
 watch(resourcesList, () => {
-  groupResults();
+  resourcesStore.updateFilteredResources(
+    resourceType.value,
+    resourcesList.value
+  );
 });
+watch(
+  () => resourcesStore.filteredResources[resourceType.value],
+  () => {
+    filteredResources.value =
+      resourcesStore.filteredResources[resourceType.value];
+    groupResults();
+  },
+  { deep: true }
+);
 </script>
 
 <template>
@@ -68,14 +87,16 @@ watch(resourcesList, () => {
     <div class="m-x-2 m-y-1">
       <p class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
 
-      <ConsultaElementoBuscador />
+      <ConsultaElementoBuscador
+        :resources-list="resourcesList"
+        :resource-type="resourceType"
+      />
 
       <UiNumeroElementos
-        :numero="resourcesList.length"
+        :numero="filteredResources.length"
         :etiqueta="etiquetaElementos"
       />
     </div>
-
     <div
       v-for="category in Object.keys(categorizedResources)"
       :key="category"
@@ -106,6 +127,6 @@ watch(resourcesList, () => {
 </template>
 <style lang="scss" scoped>
 .contenedor-archivos {
-  border-bottom: solid 2px grey;
+  border-bottom: solid 2px var(--color-neutro-3);
 }
 </style>

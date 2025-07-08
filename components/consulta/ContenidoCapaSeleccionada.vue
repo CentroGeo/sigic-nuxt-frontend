@@ -18,41 +18,37 @@ const { selectedElement, resourceType } = toRefs(props);
     </p>
   </div>
 
-  <div class="flex flex-contenido-final contenedor-botones">
+  <div class="flex flex-contenido-final">
     <button
-      class="boton-pictograma"
-      aria-label="Hacer zoo,"
+      class="boton-pictograma boton-sin-contenedor-secundario"
+      aria-label="Hacer zoom"
       type="button"
-      @click="resourcesStore.removeResource(resourceType, selectedElement)"
     >
       <span class="pictograma-zoom-instruccional" aria-hidden="true"></span>
     </button>
     <button
-      class="boton-pictograma"
+      class="boton-pictograma boton-sin-contenedor-secundario"
       aria-label="Ver tablas"
       type="button"
-      @click="resourcesStore.removeResource(resourceType, selectedElement)"
     >
       <span class="pictograma-tabla" aria-hidden="true"></span>
     </button>
     <button
-      class="boton-pictograma"
+      class="boton-pictograma boton-sin-contenedor-secundario"
       aria-label="Ver"
       type="button"
-      @click="resourcesStore.removeResource(resourceType, selectedElement)"
     >
       <span class="pictograma-ojo-ver" aria-hidden="true"></span>
     </button>
     <button
-      class="boton-pictograma"
+      class="boton-pictograma boton-sin-contenedor-secundario"
       aria-label="Editar"
       type="button"
-      @click="resourcesStore.removeResource(resourceType, selectedElement)"
     >
       <span class="pictograma-editar" aria-hidden="true"></span>
     </button>
     <button
-      class="boton-pictograma"
+      class="boton-pictograma boton-sin-contenedor-secundario"
       aria-label="Quitar selección"
       type="button"
       @click="resourcesStore.removeResource(resourceType, selectedElement)"
@@ -60,7 +56,7 @@ const { selectedElement, resourceType } = toRefs(props);
       <span class="pictograma-eliminar" aria-hidden="true"></span>
     </button>
     <button
-      class="boton-pictograma"
+      class="boton-pictograma boton-sin-contenedor-secundario"
       aria-label="Descargar selección"
       type="button"
     >
