@@ -2,7 +2,6 @@
 import LayoutIA from "~/components/ia/LayoutIA.vue";
 import PanelListas from "~/components/ia/PanelListas.vue";
 import LeyendaInicio from "~/components/ia/LeyendaInicio.vue";
-import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
 
 import { useIAStore } from "~/stores/ia.js";
 import ListaProyectos from "~/components/ia/ListaProyectos.vue";
@@ -124,7 +123,7 @@ const contextos = [
                   </div>
                 </div>
               </div>
-              <div class="flex flex-contenido-centrado" v-else>
+              <div v-else class="flex flex-contenido-centrado">
                 <div class="columna-8">
                   <div
                     class="nota fondo-color-neutro p-2 borde-redondeado-8 m-t-0"
