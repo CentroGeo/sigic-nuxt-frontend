@@ -16,7 +16,14 @@ const storeIA = useIAStore();
         </PanelListas>
       </div>
 
-      <div class="columna-12">
+      <div
+        :class="[
+          'columna-12',
+          !storeIA.existenProyectos
+            ? 'flex flex-contenedor-centrado flex-vertical-centrado'
+            : '',
+        ]"
+      >
         <LeyendaInicio v-if="!storeIA.existenProyectos" />
 
         <div v-else>Da click en un chat para iniciar o crea un nuevo chat</div>
