@@ -1,10 +1,11 @@
 // Este composable hace peticiones de datos a Geonode
 // TODO: Resolver las peticiones de información para mostrar capas y datasets privados
 import { ref } from "vue";
-//console.log("aja: ", useAuth());
-// const { data: session } = useAuth();
 
 export function useGeonodeResources({ resourceType } = {}) {
+  const { data: authData, status: authStatus } = useAuth();
+  console.log(authData.value, authStatus.value);
+  const token = ref(authData.value?.accessToken);
   const config = useRuntimeConfig();
   const api = `${config.public.geonodeApi}/resources`;
   const resourcesList = ref([]);
@@ -13,13 +14,6 @@ export function useGeonodeResources({ resourceType } = {}) {
     dataTable: "dataset",
     document: "document",
   };
-
-  // Para la autentizacion
-  /*     if (!session.value?.accessToken) {
-    console.warn("No access token, cannot fetch private resources");
-    return;
-  } */
-
   const fetchData = async ({ resourceType }) => {
     let page = 1;
     let allResults = [];
@@ -31,9 +25,11 @@ export function useGeonodeResources({ resourceType } = {}) {
       });
       fetch(`${api}?${dataParams.toString()}`, {
         method: "GET",
-        /*       headers: {
-        Authorization: `Bearer ${session.value.accessToken}`,
-      }, */
+        /*         headers: {
+          ...(authStatus.value === "authenticated"
+            ? { Authorization: `Basic ${token.value}` }
+            : {}),
+        }, */
       })
         .then((response) => {
           if (response.ok) return response.json();
@@ -43,7 +39,6 @@ export function useGeonodeResources({ resourceType } = {}) {
           const resources = data.resources || [];
           allResults = allResults.concat(resources);
           // Revisamos si hay una pagina siguiente
-          console.log("aqui:", allResults.length);
           if (data.links.next) {
             // Si la hay, volvemos a solicitar datos
             page += 1;
