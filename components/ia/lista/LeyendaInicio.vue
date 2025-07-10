@@ -1,17 +1,26 @@
 <script setup>
 import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
-import { useIAStore } from "~/stores/ia.js";
-const storeIA = useIAStore();
 </script>
 <template>
-  <div class="panel-izquierdo">
-    <div v-if="!storeIA.existenProyectos" class="p-3">
-      <button class="boton-primario" type="button" :disabled="true">
+  <div>
+    <div style="max-height: 85vh; overflow-y: auto" class="p-x-3 p-t-3">
+      <button
+        style="width: 100%; text-align: center; display: inline-block"
+        class="boton-primario"
+        aria-label="Crear nuevo chat"
+        disabled
+      >
         Nuevo chat
       </button>
 
       <!-- TODO: agregar estilo de campo de búsqueda deshabilitado -->
-      <SisdaiCampoBusqueda class="m-y-3" />
+      <ClientOnly>
+        <SisdaiCampoBusqueda
+          style="width: 100%"
+          class="m-y-3"
+          etiqueta="Buscar chats"
+        />
+      </ClientOnly>
 
       <h6>Chats</h6>
       <div class="nota fondo-color-neutro p-2 borde-redondeado-8">
@@ -22,16 +31,5 @@ const storeIA = useIAStore();
         </p>
       </div>
     </div>
-    <slot v-else />
   </div>
 </template>
-
-<style lang="scss">
-.panel-izquierdo {
-  // width: auto;
-  min-width: 299px;
-  height: 85vh;
-  /* offset-x | offset-y | blur-radius | spread-radius | color */
-  box-shadow: 4px 0 4px -4px var(--navegacion-primaria-sombra);
-}
-</style>
