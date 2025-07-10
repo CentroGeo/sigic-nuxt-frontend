@@ -15,6 +15,8 @@ onMounted(() => {
   mapa.setTarget(refMapa.value);
   mapa.vista = props.vista;
 });
+
+defineExpose(mapa);
 </script>
 
 <template>
