@@ -1,5 +1,6 @@
 // Este composable hace peticiones de datos a Geonode
 // TODO: Resolver las peticiones de información para mostrar capas y datasets privados
+// TODO: Preparar para iterar en caso de que se tengan demasiados recursos
 import { ref } from "vue";
 //console.log("aja: ", useAuth());
 // const { data: session } = useAuth();
@@ -12,18 +13,23 @@ export function useGeonodeResources({
   const config = useRuntimeConfig();
   const api = `${config.public.geonodeApi}/resources`;
   const resourcesList = ref([]);
+  const typeDict = {
+    dataLayer: "dataset",
+    dataTable: "dataset",
+    document: "document",
+  };
 
   /*     if (!session.value?.accessToken) {
     console.warn("No access token, cannot fetch private resources");
     return;
   } */
-
   const fetchData = async ({ pageNumber, pageSize, resourceType }) => {
     const dataParams = new URLSearchParams({
       page: pageNumber,
       page_size: pageSize,
-      "filter{resource_type}": resourceType,
+      "filter{resource_type}": typeDict[resourceType],
     });
+    //console.log(`${api}?${dataParams.toString()}`);
     fetch(`${api}?${dataParams.toString()}`, {
       method: "GET",
       /*       headers: {
@@ -35,8 +41,26 @@ export function useGeonodeResources({
         return { resources: [] };
       })
       .then(({ resources }) => {
-        //if (resources.length === 0) return;
-        resourcesList.value = resources;
+        // Si son documentos, filtramos únicamente los pdfs
+        if (resourceType === "document") {
+          resourcesList.value = resources.filter((resource) =>
+            resource.links.some(
+              (link) =>
+                link.link_type === "uploaded" && link.name.endsWith(".pdf")
+            )
+          );
+        } else if (resourceType === "dataLayer") {
+          // Si son capas geográficas, excluimos aquellos que no tengan geometria
+          let noGeometryExtent = [-1, -1, 0, 0];
+          resourcesList.value = resources.filter(
+            (resource) =>
+              !resource.extent.coords.every(
+                (value, index) => value === noGeometryExtent[index]
+              )
+          );
+        } else {
+          resourcesList.value = resources;
+        }
       })
       .catch((err) => {
         console.error(err);

@@ -1,25 +1,34 @@
 <script setup>
-const ruta = "/consulta";
-const subPaginas = [
-  {
-    picto: "pictograma-capas",
-    ruta: `${ruta}/capas`,
-  },
-  {
-    picto: "pictograma-tabla",
-    ruta: `${ruta}/tablas`,
-  },
-  {
-    picto: "pictograma-documento",
-    ruta: `${ruta}/documentos`,
-  },
-];
+/**
+ * @typedef {Object} Props
+ * @property {Array<{ pictograma: string, ruta: string }>} [subPaginas] - Lista obligatoria de subpaginas, debe contener `pictograma` y `ruta` cada objeto de la lista.
+ * @property {Function} [funcionColapsar=undefined] - Función que se ejecutará al presionar el botón colapsar.
+ * @property {Boolean} [estadoColapable=false] - Estado del icono colapsar, visible si se recibe la `funcionColapsar`.
+ */
 
-const storeConsulta = useConsultaStore();
+/** @type {Props} */
+defineProps({
+  subPaginas: {
+    type: Array,
+    required: true,
+  },
+  funcionColapsar: {
+    type: Function,
+    default: undefined,
+  },
+  estadoColapable: {
+    type: Boolean,
+    default: false,
+  },
+  idColapsable: {
+    type: String,
+    required: true,
+  },
+});
 </script>
 
 <template>
-  <div class="nav-lateral" aria-label="Navegación Lateral">
+  <div class="nav-lateral" aria-label="Navegación lateral">
     <ul class="lista-sin-estilo">
       <li>
         <div class="avatar-imagen">
@@ -30,15 +39,17 @@ const storeConsulta = useConsultaStore();
         </div>
       </li>
 
-      <li>
+      <li v-if="funcionColapsar">
         <button
           class="boton-pictograma boton-sin-contenedor-primario"
-          aria-label="Navegación Lateral"
+          aria-label="Colapsar"
+          :aria-controls="idColapsable"
+          :aria-expanded="!estadoColapable"
           type="button"
-          @click="storeConsulta.alternarCatalogoColapsable"
+          @click="funcionColapsar"
         >
           <span
-            :class="`pictograma-angulo-doble-${storeConsulta.catalogoColapsado ? 'derecha' : 'izquierda'}`"
+            :class="`pictograma-angulo-doble-${estadoColapable ? 'derecha' : 'izquierda'}`"
             aria-hidden="true"
           />
         </button>
@@ -49,7 +60,7 @@ const storeConsulta = useConsultaStore();
           class="boton-pictograma boton-sin-contenedor-primario"
           :to="subPagina.ruta"
         >
-          <span :class="subPagina.picto" aria-hidden="true" />
+          <span :class="subPagina.pictograma" aria-hidden="true" />
         </nuxt-link>
       </li>
     </ul>
@@ -64,7 +75,6 @@ const storeConsulta = useConsultaStore();
 
   ul {
     padding: 0 8px;
-    // list-style: none;
 
     li {
       .avatar-imagen {

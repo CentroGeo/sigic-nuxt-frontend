@@ -1,5 +1,14 @@
 <script setup>
-const resourceType = "dataset";
+const resourceType = "dataLayer";
+
+const config = useRuntimeConfig();
+const storeSelected = useSelectedResourcesStore();
+
+const mapa = ref();
+
+function exportarMapa() {
+  mapa.value?.exportarImagen("sigic");
+}
 </script>
 
 <template>
@@ -12,13 +21,31 @@ const resourceType = "dataset";
       />
     </template>
 
-    <template #visualizador>Mapa</template>
+    <template #visualizador>
+      <ClientOnly>
+        <SisdaiMapas
+          ref="mapa"
+          class="gema"
+          :vista="{ extension: '-118.3651,14.5321,-86.7104,32.7187' }"
+        >
+          <SisdaiCapaXyz />
+
+          <SisdaiCapaWms
+            v-for="capa in storeSelected.selectedResources[resourceType]"
+            :key="capa.uuid"
+            :fuente="`${config.public.geoserverUrl}/wms?`"
+            :capa="capa.alternate"
+          />
+        </SisdaiMapas>
+      </ClientOnly>
+    </template>
 
     <template #seleccion>
       <ConsultaLayoutSeleccion
         titulo="Capas seleccionadas"
         :resource-type="resourceType"
         etiqueta-elementos="Capas"
+        :funcion-descarga="exportarMapa"
       />
     </template>
   </ConsultaLayoutPaneles>

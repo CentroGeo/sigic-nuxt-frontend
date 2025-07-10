@@ -1,9 +1,31 @@
 <script setup>
 import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
+
+const resourcesStore = useSelectedResourcesStore();
+const props = defineProps({
+  resourcesList: { type: Array, default: () => [] },
+  resourceType: { type: String, required: true },
+});
+const { resourcesList, resourceType } = toRefs(props);
+const catalogoFiltrado = ref(resourcesList.value);
+
+function filtrar(r) {
+  catalogoFiltrado.value = r;
+  resourcesStore.updateFilteredResources(
+    resourceType.value,
+    catalogoFiltrado.value
+  );
+}
 </script>
 <template>
-  <div class="busqueda">
-    <SisdaiCampoBusqueda />
+  <div class="flex flex-contenido-equidistante m-y-3">
+    <SisdaiCampoBusqueda
+      class="columna-13"
+      :catalogo="resourcesList"
+      :propiedadBusqueda="'title'"
+      :etiqueta="'Usa palabras clave...'"
+      @alFiltrar="filtrar"
+    />
     <button
       type="button"
       class="boton-primario boton-pictograma boton-grande"
@@ -13,16 +35,3 @@ import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes
     </button>
   </div>
 </template>
-
-<style lang="scss">
-.busqueda {
-  //background-color: pink;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
-  margin: 20px 0px;
-}
-.campo-busqueda {
-  width: 80%;
-}
-</style>

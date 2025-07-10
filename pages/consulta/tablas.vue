@@ -7,6 +7,8 @@ const tamanioPagina = 10;
 
 const config = useRuntimeConfig();
 
+const resourceType = "dataTable";
+
 const obtenerDatos = async () => {
   const url = new URL(`${config.public.geoserverUrl}/ows`);
   url.search = new URLSearchParams({
@@ -36,7 +38,13 @@ watch(paginaActual, obtenerDatos, { immediate: true });
 
 <template>
   <ConsultaLayoutPaneles>
-    <template #catalogo>Tablas disponibles</template>
+    <template #catalogo>
+      <ConsultaLayoutCatalogo
+        titulo="Tabulados de datos"
+        :resource-type="resourceType"
+        etiqueta-elementos="Datos tabulados"
+      />
+    </template>
 
     <template #visualizador>
       <UiTablaAccesible
@@ -50,6 +58,12 @@ watch(paginaActual, obtenerDatos, { immediate: true });
       />
     </template>
 
-    <template #seleccion>Tablas seleccionadas</template>
+    <template #seleccion>
+      <ConsultaLayoutSeleccion
+        titulo="Tabulados de datos"
+        :resource-type="resourceType"
+        etiqueta-elementos="Datos tabulaos"
+      />
+    </template>
   </ConsultaLayoutPaneles>
 </template>
