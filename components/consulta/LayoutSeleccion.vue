@@ -71,10 +71,11 @@ const buttonTagDict = {
   height: 100vh;
   overflow-y: auto;
 }
-.controles {
+.controles-seleccion {
   position: sticky;
   top: 0;
   z-index: 1;
   background-color: var(--color-neutro-0);
+  padding-bottom: 8px;
 }
 </style>

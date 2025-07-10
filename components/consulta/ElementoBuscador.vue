@@ -1,5 +1,8 @@
 <script setup>
 // De momento el campo de búsqueda, busca únicamente en el titulo
+// Además, el filtro avanzado de institución no funciona
+// porque hay que revisar en el módulo de carga cómo se recolectará esa información
+// El filtro avanzado de keywords está buscando en el título únicamente
 import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
 import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
 import SisdaiSelector from "@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue";
@@ -23,18 +26,10 @@ const selectedFilter = ref({
 
 //console.log(resourcesList.value);
 
-function filterByKeywords(r) {
-  catalogoFiltrado.value = r;
-  resourcesStore.updateFilteredResources(
-    resourceType.value,
-    catalogoFiltrado.value
-  );
-}
-
 function filterByCategory(d) {
   if (
-    d.category &&
-    selectedFilter.value["selectedCategory"] !== null &&
+    d.category !== null &&
+    selectedFilter.value["selectedCategory"] &&
     d.category.gn_description == selectedFilter.value["selectedCategory"]
   ) {
     return 1;
@@ -42,6 +37,39 @@ function filterByCategory(d) {
     return 0;
   }
 }
+
+function filterByYear(d) {
+  if (
+    d.date !== null &&
+    selectedFilter.value["yearInput"] &&
+    d.date.slice(0, 4) === selectedFilter.value["yearInput"]
+  ) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+// Para esta función haría falta formatear el input y el título del recursp
+function filterByKeyword(d) {
+  if (selectedFilter.value["keywordsInput"]) {
+    let keywordsList = selectedFilter.value["keywordsInput"]
+      .split(",")
+      .map((word) => word.trim())
+      .filter((word) => word.length > 0);
+    let includesWord = keywordsList.some((keyword) =>
+      d.title.includes(keyword)
+    );
+    if (includesWord) {
+      return 1;
+    } else {
+      return 0;
+    }
+  } else {
+    return 0;
+  }
+}
+
 // La idea sería generar un filtro por categoría y, sacar el numero de filtros aplicados y
 // revisar que sumen un total
 function filterByModal() {
@@ -55,7 +83,7 @@ function filterByModal() {
   });
   // Revisamos la suma por filtro
   resourcesList.value.forEach((d) => {
-    let i = filterByCategory(d);
+    let i = filterByCategory(d) + filterByYear(d) + filterByKeyword(d);
     if (i === total) {
       results.push(d);
     }
@@ -66,6 +94,14 @@ function filterByModal() {
     catalogoFiltrado.value
   );
   sisdaiModal.value.cerrarModal();
+}
+
+function filterByInput(r) {
+  catalogoFiltrado.value = r;
+  resourcesStore.updateFilteredResources(
+    resourceType.value,
+    catalogoFiltrado.value
+  );
 }
 </script>
 <template>
@@ -127,7 +163,7 @@ function filterByModal() {
       :catalogo="resourcesList"
       :propiedadBusqueda="'title'"
       :etiqueta="'Usa palabras clave...'"
-      @alFiltrar="filterByKeywords"
+      @alFiltrar="filterByInput"
     />
     <button
       type="button"

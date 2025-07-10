@@ -11,42 +11,11 @@ const props = defineProps({
   resourceType: { type: String, required: true },
 });
 const { selectedElement, resourceType } = toRefs(props);
-
-const isChecked = ref(false);
-
-function setShownElement() {
-  shownStore.setShownFile(resourceType.value, selectedElement.value);
-}
-
-/* function setCheck() {
-  console.log(
-    "se disparo la funcion que checa botones, ",
-    shownStore.shownFiles[resourceType.value].uuid
-  );
-
-  if (
-    selectedElement.value.uuid ===
-    shownStore.shownFiles[resourceType.value].uuid
-  ) {
-    isChecked.value = false;
-  } else {
-    isChecked.value = true;
-  }
-}
-setCheck();
-
-watch(
-  () => shownStore.shownFiles[resourceType.value],
-  () => {
-    setCheck();
-  },
-  { deep: true }
-); */
 </script>
 
 <template>
   <div>
-    <div @click="setShownElement">
+    <div @click="shownStore.setShownFile(resourceType, selectedElement)">
       <input :id="selectedElement.uuid" type="radio" :name="groupName" />
       <label :for="selectedElement.uuid">{{ selectedElement.title }}</label>
     </div>

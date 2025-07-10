@@ -3,7 +3,8 @@ import { defineStore } from "pinia";
 export const useShownFilesStore = defineStore("shownFiles", {
   state: () => ({
     shownFiles: {
-      dataset: undefined,
+      dataLayer: undefined,
+      dataTable: undefined,
       document: undefined,
     },
   }),

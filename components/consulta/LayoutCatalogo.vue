@@ -8,8 +8,6 @@ const props = defineProps({
 });
 const { titulo, resourceType } = toRefs(props);
 const { resourcesList } = useGeonodeResources({
-  pageNumber: 1,
-  pageSize: 30,
   resourceType: resourceType.value,
 });
 
@@ -144,5 +142,6 @@ watch(
   top: 0;
   z-index: 1;
   background-color: var(--color-neutro-0);
+  padding-bottom: 8px;
 }
 </style>
