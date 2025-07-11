@@ -1,6 +1,5 @@
 <script setup>
 import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
-
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
   selectedElement: {
@@ -11,39 +10,26 @@ const props = defineProps({
 });
 const { selectedElement, resourceType } = toRefs(props);
 const modalTabla = ref(null);
-
-// Todo esto es del llamado a GeoServer
-const config = useRuntimeConfig();
-const variables = ref([]);
-const datos = ref([]);
 const paginaActual = ref(0);
-const totalFeatures = ref(0);
 const tamanioPagina = 10;
+const {
+  variables,
+  datos,
+  totalFeatures,
+  refetch: fetchTable,
+} = useGeoserverDataTable({
+  paginaActual: paginaActual.value,
+  tamanioPagina: tamanioPagina,
+  resource: selectedElement.value,
+});
 
-const obtenerDatos = async () => {
-  const url = new URL(`${config.public.geoserverUrl}/ows`);
-  url.search = new URLSearchParams({
-    service: "WFS",
-    version: "1.0.0",
-    request: "GetFeature",
-    typeName: selectedElement.value.alternate,
-    outputFormat: "application/json",
-    maxFeatures: tamanioPagina,
-    startIndex: paginaActual.value * tamanioPagina,
-  }).toString();
-
-  const res = await fetch(url);
-  const data = await res.json();
-  if (data.totalFeatures !== undefined) {
-    totalFeatures.value = data.totalFeatures;
-  }
-
-  const atributos = data.features.map((f) => f.properties);
-  variables.value = Object.keys(atributos[0] || {});
-  datos.value = atributos;
-};
-watch(paginaActual, obtenerDatos, { immediate: true });
-// Aquí termina lo del llamado a geoserver
+watch(paginaActual, () => {
+  fetchTable({
+    paginaActual: paginaActual.value,
+    tamanioPagina: tamanioPagina,
+    resource: selectedElement.value,
+  });
+});
 </script>
 <template>
   <SisdaiModal ref="modalTabla">

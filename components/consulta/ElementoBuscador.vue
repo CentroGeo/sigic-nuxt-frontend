@@ -3,6 +3,7 @@
 // Además, el filtro avanzado de institución no funciona
 // porque hay que revisar en el módulo de carga cómo se recolectará esa información
 // El filtro avanzado de keywords está buscando en el título únicamente
+// Falta poder volver a deseleccionar los filtros
 import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
 import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
 import SisdaiSelector from "@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue";
@@ -16,7 +17,7 @@ const props = defineProps({
 });
 const { resourcesList, resourceType, categories } = toRefs(props);
 const catalogoFiltrado = ref(resourcesList.value);
-const sisdaiModal = ref(null);
+const modalFiltros = ref(null);
 const selectedFilter = ref({
   selectedCategory: null,
   institucionInput: null,
@@ -93,7 +94,7 @@ function filterByModal() {
     resourceType.value,
     catalogoFiltrado.value
   );
-  sisdaiModal.value.cerrarModal();
+  modalFiltros.value.cerrarModal();
 }
 
 function filterByInput(r) {
@@ -105,7 +106,7 @@ function filterByInput(r) {
 }
 </script>
 <template>
-  <SisdaiModal ref="sisdaiModal">
+  <SisdaiModal ref="modalFiltros">
     <template #encabezado>
       <h1>Filtro avanzado</h1>
     </template>
@@ -169,7 +170,7 @@ function filterByInput(r) {
       type="button"
       class="boton-primario boton-pictograma boton-grande"
       aria-label="Filtro Avanzado"
-      @click="sisdaiModal?.abrirModal()"
+      @click="modalFiltros?.abrirModal()"
     >
       <span class="pictograma-filtro" aria-hidden="true"></span>
     </button>
