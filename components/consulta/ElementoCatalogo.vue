@@ -133,4 +133,7 @@ watch(
   border: 1px solid var(--color-secundario-8);
   border-radius: 8px;
 }
+span {
+  background-color: pink;
+}
 </style>

@@ -27,7 +27,7 @@ export function useGeonodeResources({ resourceType } = {}) {
         method: "GET",
         /*         headers: {
           ...(authStatus.value === "authenticated"
-            ? { Authorization: `Basic ${token.value}` }
+            ? { Authorization: `Bearer ${token.value}` }
             : {}),
         }, */
       })
