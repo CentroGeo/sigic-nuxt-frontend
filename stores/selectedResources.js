@@ -19,19 +19,30 @@ export const useSelectedResourcesStore = defineStore("selectedResources", {
     },
   }),
   actions: {
-    addResource(resourceType, file) {
+    addResource(resourceType, resource) {
       if (
-        !this.selectedResources[resourceType]?.some((r) => r.uuid === file.uuid)
+        !this.selectedResources[resourceType]?.some(
+          (r) => r.uuid === resource.uuid
+        )
       ) {
-        this.selectedResources[resourceType].unshift(file);
+        this.selectedResources[resourceType].unshift(resource);
       }
       //console.log(this.selectedResources);
     },
-    removeResource(resourceType, file) {
+    removeResource(resourceType, currentResource) {
+      //Borramos el recurso
       this.selectedResources[resourceType] = this.selectedResources[
         resourceType
-      ].filter((r) => r.uuid !== file.uuid);
+      ].filter((r) => r.uuid !== currentResource.uuid);
       //console.log(this.selectedResources);
+      if (this.selectedResources[resourceType].length > 0) {
+        // Si no se queda vacía, seleccionamos el documento posterior
+        this.shownFiles[resourceType] = this.selectedResources[resourceType][0];
+        console.log(this.shownFiles[resourceType]);
+      } else {
+        // Si la lista queda vacía, ajustamos el valor del recurso seleccionado
+        this.shownFiles[resourceType] = undefined;
+      }
     },
     resetResource(resourceType) {
       this.selectedResources[resourceType] = [];

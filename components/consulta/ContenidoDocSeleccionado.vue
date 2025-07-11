@@ -10,12 +10,21 @@ const props = defineProps({
   resourceType: { type: String, required: true },
 });
 const { selectedElement, resourceType } = toRefs(props);
+const shownFileUuid = computed(
+  () => resourcesStore.shownFiles[resourceType.value].uuid
+);
 </script>
 
 <template>
   <div>
     <div @click="resourcesStore.setShownFile(resourceType, selectedElement)">
-      <input :id="selectedElement.uuid" type="radio" :name="groupName" />
+      <input
+        :id="selectedElement.uuid"
+        type="radio"
+        :name="groupName"
+        :value="selectedElement.uuid"
+        v-model="shownFileUuid"
+      />
       <label :for="selectedElement.uuid">{{ selectedElement.title }}</label>
     </div>
 
