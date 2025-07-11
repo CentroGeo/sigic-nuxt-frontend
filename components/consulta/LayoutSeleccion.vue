@@ -3,6 +3,7 @@ const props = defineProps({
   titulo: { type: String, default: "Título" },
   resourceType: { type: String, required: true },
   etiquetaElementos: { type: String, default: undefined },
+  funcionDescarga: { type: Function, default: undefined },
 });
 const { titulo, resourceType } = toRefs(props);
 const storeSelected = useSelectedResourcesStore();
@@ -26,8 +27,9 @@ const buttonTagDict = {
             type="button"
             class="boton-primario"
             aria-label="Descargar mapa"
+            @click="funcionDescarga"
           >
-            Descargar {{ buttonTagDict[resourceType] }}
+            Descargar mapa
             <span class="pictograma-mapa-generador" aria-hidden="true" />
           </button>
 

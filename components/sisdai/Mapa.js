@@ -6,6 +6,8 @@ import {
   valorarArregloNumerico,
   valorarExtensionMargen,
 } from "@centrogeomx/sisdai-mapas/src/utiles";
+import { crearImagenMapa } from "@centrogeomx/sisdai-mapas/src/componentes/mapa/utiles";
+import RenderEventType from "ol/render/EventType";
 
 const duration = 250;
 
@@ -69,6 +71,25 @@ export default class Mapa extends olMap {
           ? Number(acercamiento)
           : this.getView().getZoom(),
     });
+  }
+
+  /**
+   * Permite descargar la vista actual del mapa, con las capas visibles y acercamiento mostrado en
+   * pantalla, sin controles. El formato de descargá es PNG.
+   * @param {String} nombreImagen nombre del archivo que se descargara del navegador (no debe
+   * incluir extensión).
+   */
+  exportarImagen(nombreImagen = "mapa") {
+    this.once(RenderEventType.RENDERCOMPLETE, function () {
+      const link = document.createElement("a");
+      console.log("creando imágen");
+
+      link.href = crearImagenMapa(this);
+      link.download = `${nombreImagen}.png`;
+      link.click();
+    });
+
+    this.renderSync();
   }
 
   /**
