@@ -34,5 +34,37 @@ export const useSelectedResourcesStore = defineStore("selectedResources", {
     updateFilteredResources(resourceType, newArray) {
       this.filteredResources[resourceType] = newArray;
     },
+    raiseIndex(currentSelection, resourceType) {
+      let currentIndex = this.selectedResources[resourceType].findIndex(
+        (resource) => resource.uuid === currentSelection.uuid
+      );
+      if (currentIndex !== 0) {
+        // Guardamos lo que hay en la posición previa
+        let anterior = this.selectedResources[resourceType][currentIndex - 1];
+        // Subimos el index del elemento seleccionado
+        this.selectedResources[resourceType][currentIndex - 1] =
+          currentSelection;
+        // Guardamos en el index actual el valor del previo
+        this.selectedResources[resourceType][currentIndex] = anterior;
+      } else {
+        console.log("primer elemento");
+      }
+    },
+    lowerIndex(currentSelection, resourceType) {
+      let currentIndex = this.selectedResources[resourceType].findIndex(
+        (resource) => resource.uuid === currentSelection.uuid
+      );
+      if (currentIndex !== this.selectedResources[resourceType].length - 1) {
+        // Guardamos lo que hay en la posición siguiente
+        let siguiente = this.selectedResources[resourceType][currentIndex + 1];
+        // Subimos el index del elemento seleccionado
+        this.selectedResources[resourceType][currentIndex + 1] =
+          currentSelection;
+        // Guardamos en el index actual el valor del previo
+        this.selectedResources[resourceType][currentIndex] = siguiente;
+      } else {
+        console.log("ultimo elemento");
+      }
+    },
   },
 });

@@ -46,10 +46,12 @@ if (!shownStore.shownFiles[resourceType.value]) {
           <span
             class="pictograma-subir-capa pictograma-mediano"
             aria-hidden="true"
+            @click="selectedStore.raiseIndex(selectedElement, resourceType)"
           ></span>
           <span
             class="pictograma-bajar-capa pictograma-mediano"
             aria-hidden="true"
+            @click="selectedStore.lowerIndex(selectedElement, resourceType)"
           ></span>
         </div>
       </div>
