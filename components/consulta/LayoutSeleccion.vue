@@ -29,7 +29,7 @@ const buttonTagDict = {
             aria-label="Descargar mapa"
             @click="funcionDescarga"
           >
-            Descargar mapa
+            Descargar {{ buttonTagDict[resourceType] }}
             <span class="pictograma-mapa-generador" aria-hidden="true" />
           </button>
 
