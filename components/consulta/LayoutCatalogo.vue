@@ -8,8 +8,6 @@ const props = defineProps({
 });
 const { titulo, resourceType } = toRefs(props);
 const { resourcesList } = useGeonodeResources({
-  pageNumber: 1,
-  pageSize: 30,
   resourceType: resourceType.value,
 });
 
@@ -81,22 +79,27 @@ watch(
 </script>
 
 <template>
-  <div>
-    <p class="h4 fondo-color-acento p-3 m-0">{{ titulo }}</p>
+  <div class="catalogo-layout">
+    <div class="controles-catalogo">
+      <p class="h4 fondo-color-acento p-3 m-0">{{ titulo }}</p>
 
-    <div class="m-x-2 m-y-1">
-      <p class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
+      <div class="m-x-2 m-y-1">
+        <p class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
+        <ClientOnly>
+          <ConsultaElementoBuscador
+            :resources-list="resourcesList"
+            :resource-type="resourceType"
+            :categories="categoryList"
+          />
+        </ClientOnly>
 
-      <ConsultaElementoBuscador
-        :resources-list="resourcesList"
-        :resource-type="resourceType"
-      />
-
-      <UiNumeroElementos
-        :numero="filteredResources.length"
-        :etiqueta="etiquetaElementos"
-      />
+        <UiNumeroElementos
+          :numero="filteredResources.length"
+          :etiqueta="etiquetaElementos"
+        />
+      </div>
     </div>
+
     <div
       v-for="category in Object.keys(categorizedResources)"
       :key="category"
@@ -128,5 +131,17 @@ watch(
 <style lang="scss" scoped>
 .contenedor-archivos {
   border-bottom: solid 2px var(--color-neutro-3);
+}
+.catalogo-layout {
+  height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.controles-catalogo {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: var(--color-neutro-0);
+  padding-bottom: 8px;
 }
 </style>
