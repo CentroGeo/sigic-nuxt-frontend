@@ -12,6 +12,11 @@ export const useSelectedResourcesStore = defineStore("selectedResources", {
       dataTable: [],
       document: [],
     },
+    shownFiles: {
+      dataLayer: undefined,
+      dataTable: undefined,
+      document: undefined,
+    },
   }),
   actions: {
     addResource(resourceType, file) {
@@ -33,6 +38,10 @@ export const useSelectedResourcesStore = defineStore("selectedResources", {
     },
     updateFilteredResources(resourceType, newArray) {
       this.filteredResources[resourceType] = newArray;
+    },
+    setShownFile(resourceType, resource) {
+      this.shownFiles[resourceType] = resource;
+      //console.log("cambio la seleccion", this.shownFiles[resourceType].uuid);
     },
     raiseIndex(currentSelection, resourceType) {
       let currentIndex = this.selectedResources[resourceType].findIndex(

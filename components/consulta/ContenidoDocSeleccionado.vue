@@ -1,5 +1,4 @@
 <script setup>
-const shownStore = useShownFilesStore();
 const resourcesStore = useSelectedResourcesStore();
 
 const props = defineProps({
@@ -15,7 +14,7 @@ const { selectedElement, resourceType } = toRefs(props);
 
 <template>
   <div>
-    <div @click="shownStore.setShownFile(resourceType, selectedElement)">
+    <div @click="resourcesStore.setShownFile(resourceType, selectedElement)">
       <input :id="selectedElement.uuid" type="radio" :name="groupName" />
       <label :for="selectedElement.uuid">{{ selectedElement.title }}</label>
     </div>

@@ -1,5 +1,4 @@
 <script setup>
-const shownStore = useShownFilesStore();
 const selectedStore = useSelectedResourcesStore();
 
 const props = defineProps({
@@ -11,17 +10,17 @@ const props = defineProps({
 });
 const { selectedElement, resourceType } = toRefs(props);
 
-if (!shownStore.shownFiles[resourceType.value]) {
-  //console.log("si vacio", !shownStore.shownFiles[resourceType.value]);
+if (!selectedStore.shownFiles[resourceType.value]) {
+  //console.log("si vacio", !selectedStore.shownFiles[resourceType.value]);
   let firstSelection = selectedStore.selectedResources[resourceType.value][0];
-  shownStore.setShownFile(resourceType.value, firstSelection);
+  selectedStore.setShownFile(resourceType.value, firstSelection);
 }
 
 /* const isChecked = computed(() => {
   if (resourceType.value !== "dataLayer") {
     if (
       selectedElement.value.uuid ===
-      shownStore.shownFiles[resourceType.value].uuid
+      selectedStore.shownFiles[resourceType.value].uuid
     ) {
       return true;
     } else {
