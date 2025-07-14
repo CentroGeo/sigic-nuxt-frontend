@@ -1,7 +1,9 @@
 <script setup>
+import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
+import SisdaiSelector from "@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue";
 import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
 import { ref } from "vue";
-import { useIAStore } from "~/stores/ia.js";
+
 const storeIA = useIAStore();
 
 const props = defineProps({
@@ -12,10 +14,15 @@ const props = defineProps({
 });
 const { titulo, textoBoton, recursoLista, etiquetaBusqueda } = toRefs(props);
 
+const nuevoChatModal = ref(null);
+
 // const fechaHoy = new Date();
 const fechaHoy = "01-07-2025";
 
 const catalogoFiltrado = ref(recursoLista.value);
+
+const seleccionProyecto = ref("");
+const seleccionContexto = ref("");
 </script>
 
 <template>
@@ -28,6 +35,8 @@ const catalogoFiltrado = ref(recursoLista.value);
             style="width: 100%; text-align: center; display: inline-block"
             class="boton-primario"
             aria-label="Crear nuevo chat"
+            type="button"
+            @click="nuevoChatModal?.abrirModal()"
           >
             {{ textoBoton }}
           </button>
@@ -151,6 +160,40 @@ const catalogoFiltrado = ref(recursoLista.value);
       </div>
     </div>
   </div>
+  <ClientOnly>
+    <SisdaiModal ref="nuevoChatModal">
+      <template #encabezado> <h2>Nuevo chat</h2> </template>
+      <template #cuerpo>
+        <SisdaiSelector
+          v-model="seleccionProyecto"
+          etiqueta="Selecciona un proyecto"
+          texto_ayuda="Texto de ayuda."
+        >
+          <option value="1">Opcion Uno</option>
+          <option value="2">Opcion Dos</option>
+          <option value="3">Opcion Tres</option>
+        </SisdaiSelector>
+        <SisdaiSelector
+          v-model="seleccionContexto"
+          etiqueta="Selecciona un contexto"
+          texto_ayuda="Texto de ayuda."
+        >
+          <option value="1">Opcion Uno</option>
+          <option value="2">Opcion Dos</option>
+          <option value="3">Opcion Tres</option>
+        </SisdaiSelector>
+      </template>
+      <template #pie>
+        <button
+          class="boton-primario boton-chico"
+          aria-label="Iniciar chat"
+          type="button"
+        >
+          Iniciar chat
+        </button>
+      </template>
+    </SisdaiModal>
+  </ClientOnly>
 </template>
 <style lang="scss">
 .lista-chats {
