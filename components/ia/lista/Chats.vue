@@ -2,8 +2,9 @@
 <script setup>
 import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
 import { ref } from "vue";
-import { useIAStore } from "~/stores/ia.js";
+
 const storeIA = useIAStore();
+// TODO: subir lista al store
 const chats = ref([
   {
     id: 0,

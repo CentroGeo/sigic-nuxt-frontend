@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from "vue";
+// TODO: subir lista al store
 const listadoChats = ref([
   {
     id: 0,

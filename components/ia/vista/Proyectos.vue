@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from "vue";
-import { useIAStore } from "~/stores/ia.js";
+
 const storeIA = useIAStore();
 
 const proyecto = {

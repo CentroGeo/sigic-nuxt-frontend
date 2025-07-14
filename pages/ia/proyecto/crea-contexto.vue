@@ -2,9 +2,9 @@
 import SisdaiCampoBase from "@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue";
 import SisdaiAreaTexto from "@centrogeomx/sisdai-componentes/src/componentes/area-texto/SisdaiAreaTexto.vue";
 import { ref } from "vue";
-import { useIAStore } from "~/stores/ia.js";
-const storeIA = useIAStore();
 
+const storeIA = useIAStore();
+// TODO: subir lista al store
 const proyectos = ref([
   {
     id: 0,

@@ -7,14 +7,13 @@ import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/S
 import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
 import SisdaiCasilla from "@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue";
 
-import { useIAStore } from "~/stores/ia.js";
 import { ref } from "vue";
 
 const catalogoModal = ref(null);
 const capasModal = ref(null);
 
 const storeIA = useIAStore();
-
+// TODO: subir lista al store
 const proyectos = ref([
   {
     id: 0,
