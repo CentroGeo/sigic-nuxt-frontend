@@ -14,25 +14,39 @@ const props = defineProps({
   },
 });
 const { title, tag, numberElements } = toRefs(props);
+
+const estadoAbierto = ref(false);
 </script>
+
 <template>
-  <div class="tarjeta">
-    <div class="m-x-2">
-      <div class="flex columna-16">
-        <p class="tarjeta-titulo columna-8">{{ title }}</p>
-        <span
-          class="pictograma-angulo-abajo pictograma-mediano"
-          aria-hidden="true"
-        ></span>
-      </div>
+  <button
+    class="categoria-colapsable flex-contenido-separado borde-redondeado-0 fondo-color-acento borde-l borde-grosor-4 borde-color-error"
+    @click="estadoAbierto = !estadoAbierto"
+  >
+    <div>
+      <p class="m-0">
+        {{ title }}
+      </p>
+
       <UiNumeroElementos :numero="numberElements" :etiqueta="tag" />
     </div>
-  </div>
+
+    <span
+      class="pictograma-grande p-0"
+      :class="`pictograma-angulo-${estadoAbierto ? 'arriba' : 'abajo'}`"
+      aria-hidden="true"
+    />
+  </button>
 </template>
+
 <style lang="scss" scoped>
-.tarjeta {
-  background-color: var(--color-secundario-2);
-  border-radius: 0px;
-  border-left: solid 8px var(--color-secundario-8);
+.categoria-colapsable {
+  // justify-content: space-between;
+  width: 100%;
+  align-items: flex-start;
+
+  [class^="pictograma-"] {
+    font-size: 1.75rem;
+  }
 }
 </style>
