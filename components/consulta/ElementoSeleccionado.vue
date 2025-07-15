@@ -11,7 +11,6 @@ const { selectedElement, resourceType } = toRefs(props);
 const modalInfoInteraction = ref(0);
 
 if (!selectedStore.shownFiles[resourceType.value]) {
-  //console.log("si vacio", !selectedStore.shownFiles[resourceType.value]);
   let firstSelection = selectedStore.selectedResources[resourceType.value][0];
   selectedStore.setShownFile(resourceType.value, firstSelection);
 }
@@ -29,9 +28,6 @@ if (!selectedStore.shownFiles[resourceType.value]) {
     return true;
   }
 }); */
-/* watch(modalInfoInteraction, () => {
-  console.log("cambio el valor del modal: ", modalInfoInteraction.value);
-}); */
 </script>
 <template>
   <div>
@@ -46,21 +42,41 @@ if (!selectedStore.shownFiles[resourceType.value]) {
       <div class="flex flex-contenido-separado m-0 encabezado-tarjeta">
         <p class="tarjeta-texto-secundario m-0">Categoria</p>
         <div class="m-0">
-          <span
-            class="pictograma-informacion pictograma-mediano"
-            aria-hidden="true"
+          <button
+            class="boton-pictograma boton-sin-contenedor-secundario"
+            aria-label="Mostrar información"
+            type="button"
             @click="modalInfoInteraction += 1"
-          ></span>
-          <span
-            class="pictograma-subir-capa pictograma-mediano"
-            aria-hidden="true"
+          >
+            <span
+              class="pictograma-informacion pictograma-mediano"
+              aria-hidden="true"
+            ></span>
+          </button>
+
+          <button
+            class="boton-pictograma boton-sin-contenedor-secundario"
+            aria-label="Subir elemento"
+            type="button"
             @click="selectedStore.raiseIndex(selectedElement, resourceType)"
-          ></span>
-          <span
-            class="pictograma-bajar-capa pictograma-mediano"
-            aria-hidden="true"
+          >
+            <span
+              class="pictograma-subir-capa pictograma-mediano"
+              aria-hidden="true"
+            ></span>
+          </button>
+
+          <button
+            class="boton-pictograma boton-sin-contenedor-secundario"
+            aria-label="Bajar Elemento"
+            type="button"
             @click="selectedStore.lowerIndex(selectedElement, resourceType)"
-          ></span>
+          >
+            <span
+              class="pictograma-bajar-capa pictograma-mediano"
+              aria-hidden="true"
+            ></span>
+          </button>
         </div>
       </div>
 

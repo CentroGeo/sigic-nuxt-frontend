@@ -31,10 +31,13 @@ function exportarMapa() {
           <SisdaiCapaXyz />
 
           <SisdaiCapaWms
-            v-for="capa in storeSelected.selectedResources[resourceType]"
-            :key="capa.uuid"
+            v-for="(capa, index) in storeSelected.selectedResources[
+              resourceType
+            ]"
+            :key="`${capa.uuid}_${index}`"
             :fuente="`${config.public.geoserverUrl}/wms?`"
             :capa="capa.alternate"
+            :posicion="index"
           />
         </SisdaiMapas>
       </ClientOnly>

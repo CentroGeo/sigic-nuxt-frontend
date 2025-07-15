@@ -16,7 +16,6 @@ const props = defineProps({
 const { resourceType, catalogueElement } = toRefs(props);
 const isChecked = ref(false);
 
-const type = ref(catalogueElement.value.resource_type);
 const subtype = ref(catalogueElement.value.subtype);
 const bbox_polygon = ref(catalogueElement.value.bbox_polygon.type);
 const buttons = ref([
@@ -34,7 +33,7 @@ const buttons = ref([
 ]);
 
 // Revisamos qué tipo de documento estamos mostrando para decidir qué botones mostrar
-if (type.value === "dataset") {
+if (resourceType.value === "dataLayer") {
   buttons.value.push({
     label: "Variables disponibles",
     class: "pictograma-visualizador",

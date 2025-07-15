@@ -1,5 +1,6 @@
 <script setup>
 import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
+import { downloadFile } from "~/utils/downloadFiles.js";
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
   selectedElement: {
@@ -52,29 +53,10 @@ const optionsButtons = ref([
     pictogram: "pictograma-archivo-descargar",
     action: () => {
       console.log("Descargar el archivo");
+      downloadDataLayer(selectedElement.value);
     },
   },
 ]);
-const paginaActual = ref(0);
-const tamanioPagina = 10;
-const {
-  variables,
-  datos,
-  totalFeatures,
-  refetch: fetchTable,
-} = useGeoserverDataTable({
-  paginaActual: paginaActual.value,
-  tamanioPagina: tamanioPagina,
-  resource: selectedElement.value,
-});
-
-watch(paginaActual, () => {
-  fetchTable({
-    paginaActual: paginaActual.value,
-    tamanioPagina: tamanioPagina,
-    resource: selectedElement.value,
-  });
-});
 </script>
 <template>
   <SisdaiModal ref="modalTabla">
@@ -83,11 +65,7 @@ watch(paginaActual, () => {
     </template>
 
     <template #cuerpo>
-      <UiTablaAccesible :variables="variables" :datos="datos" />
-      <UiPaginador
-        :totalPaginas="Math.ceil(totalFeatures / tamanioPagina)"
-        @cambio="paginaActual = $event"
-      />
+      <ConsultaModalTabla :selected-element="selectedElement" />
     </template>
   </SisdaiModal>
 

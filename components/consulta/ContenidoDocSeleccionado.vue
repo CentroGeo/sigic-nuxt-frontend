@@ -1,6 +1,7 @@
 <script setup>
-const resourcesStore = useSelectedResourcesStore();
+import { downloadFile } from "~/utils/downloadFiles.js";
 
+const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
   groupName: { type: String, required: true },
   selectedElement: {
@@ -41,6 +42,7 @@ const shownFileUuid = computed(
         class="boton-pictograma boton-sin-contenedor-secundario"
         aria-label="Descargar selección"
         type="button"
+        @click="downloadFile(selectedElement)"
       >
         <span class="pictograma-archivo-descargar" aria-hidden="true"></span>
       </button>
