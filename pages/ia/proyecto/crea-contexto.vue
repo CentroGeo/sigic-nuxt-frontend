@@ -59,14 +59,12 @@ const proyectos = ref([
                   :es_etiqueta_visible="true"
                   class="m-b-3"
                 />
-
                 <SisdaiAreaTexto
                   etiqueta="Descripción del contexto (opcional)"
                   :es_etiqueta_visible="true"
                   :es_obligatorio="false"
                   class="m-b-3"
                 />
-
                 <SisdaiCampoBase
                   etiqueta="Portada del proyecto"
                   tipo="file"

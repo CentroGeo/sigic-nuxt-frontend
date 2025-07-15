@@ -1,8 +1,9 @@
 <script setup>
 import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
+const storeIA = useIAStore();
 </script>
 <template>
-  <div>
+  <div v-if="!storeIA.existenProyectos">
     <div style="max-height: 85vh; overflow-y: auto" class="p-x-3 p-t-3">
       <button
         style="width: 100%; text-align: center; display: inline-block"

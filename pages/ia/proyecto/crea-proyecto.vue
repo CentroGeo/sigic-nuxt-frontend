@@ -91,13 +91,14 @@ const botonRadio = ref("");
 const botonRadioModal = ref("");
 const campoCasilla = ref(false);
 </script>
+
 <template>
   <IaLayoutPaneles>
     <template #lista>
-      <IaListaLeyendaInicio v-if="!storeIA.existenProyectos" />
+      <IaLeyendaInicioListas />
 
       <IaLayoutListas
-        v-else
+        v-if="storeIA.existenProyectos"
         texto-boton="Crear proyecto"
         titulo="Proyectos"
         etiqueta-busqueda="Buscar un proyecto"

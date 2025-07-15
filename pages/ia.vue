@@ -1,14 +1,13 @@
 <script setup>
 definePageMeta({ middleware: "redireccionar-modulo-ia" });
-
 const ruta = "/ia";
 </script>
-
 <template>
   <div class="modulo-ia flex">
-    <!-- TODO: ✅ modificar a UiNavLateral -->
-    <!-- <IaNavegacionLateral /> -->
     <UiNavegacionLateral
+      :id-colapsable="
+        `uinavegacionlateral-` + Math.random().toString(36).substring(2)
+      "
       :sub-paginas="[
         {
           pictograma: 'pictograma-ayuda',
@@ -19,17 +18,12 @@ const ruta = "/ia";
           ruta: `${ruta}/proyectos`,
         },
       ]"
-      :id-colapsable="
-        `uinavegacionlateral-` + Math.random().toString(36).substring(2)
-      "
     />
-
     <div class="contenedor-contenido">
       <NuxtPage />
     </div>
   </div>
 </template>
-
 <style lang="scss" scoped>
 .modulo-ia {
   gap: 0;

@@ -32,9 +32,9 @@ const proyectos = ref([
     </template>
 
     <template #vistas-ia>
-      <IaVistaLeyendaInicio v-if="!storeIA.existenProyectos" />
+      <IaLeyendaInicioVistas />
 
-      <IaVistaProyectos v-else />
+      <IaVistaProyectos v-if="storeIA.existenProyectos" />
     </template>
   </IaLayoutPaneles>
 </template>
