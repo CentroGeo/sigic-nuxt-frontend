@@ -1,6 +1,4 @@
 <script setup>
-import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
-import SisdaiSelector from "@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue";
 import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
 import { ref } from "vue";
 
@@ -10,19 +8,26 @@ const props = defineProps({
   titulo: { type: String, default: "Título" },
   textoBoton: { type: String, default: "Título" },
   etiquetaBusqueda: { type: String, default: undefined },
-  recursoLista: { type: Array, required: true },
+  // recursoLista: { type: Array, required: true },
 });
 const { titulo, textoBoton, recursoLista, etiquetaBusqueda } = toRefs(props);
 
-const nuevoChatModal = ref(null);
+const catalogo = ref([
+  {
+    id: 0,
+    titulo: "Biodiversidad de ecosistemas marinos",
+    numero_contextos: 0,
+    numero_fuentes: 9,
+  },
+  // {
+  //   id: 1,
+  //   titulo: "Nombre del proyecto",
+  //   numero_contextos: 5,
+  //   numero_fuentes: 5,
+  // },
+]);
 
-// const fechaHoy = new Date();
-const fechaHoy = "01-07-2025";
-
-const catalogoFiltrado = ref(recursoLista.value);
-
-const seleccionProyecto = ref("");
-const seleccionContexto = ref("");
+const catalogoFiltrado = ref(catalogo.value);
 </script>
 
 <template>

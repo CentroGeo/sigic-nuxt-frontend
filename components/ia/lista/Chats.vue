@@ -123,7 +123,6 @@ const catalogoFiltrado = ref(catalogo.value);
                             class="boton-pictograma boton-sin-contenedor-primario"
                             aria-label="Remover chat"
                             type="button"
-                            @click="removerChat(chat.id)"
                           >
                             <span
                               class="pictograma-eliminar"

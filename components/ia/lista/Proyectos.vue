@@ -4,7 +4,6 @@ import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes
 import { ref } from "vue";
 
 const storeIA = useIAStore();
-// TODO: subir lista al store
 const proyectos = ref([
   {
     id: 0,
@@ -12,6 +11,12 @@ const proyectos = ref([
     numero_contextos: 0,
     numero_fuentes: 9,
   },
+  // {
+  //   id: 1,
+  //   titulo: "Nombre del proyecto",
+  //   numero_contextos: 5,
+  //   numero_fuentes: 5,
+  // },
 ]);
 const listaProyectosFiltrada = ref(proyectos.value);
 </script>
