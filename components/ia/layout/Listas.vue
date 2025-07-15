@@ -27,88 +27,6 @@ const seleccionContexto = ref("");
 
 <template>
   <div>
-    <div>
-      <!-- TODO: Colocar ListasChats -->
-      <div v-if="titulo == 'Chats'">
-        <div style="max-height: 85vh; overflow-y: auto" class="p-x-3 p-t-3">
-          <button
-            style="width: 100%; text-align: center; display: inline-block"
-            class="boton-primario"
-            aria-label="Crear nuevo chat"
-            type="button"
-            @click="nuevoChatModal?.abrirModal()"
-          >
-            {{ textoBoton }}
-          </button>
-
-          <ClientOnly>
-            <SisdaiCampoBusqueda
-              style="width: 100%"
-              class="m-y-3"
-              :etiqueta="etiquetaBusqueda"
-              :catalogo="recursoLista"
-              :catalogo-anidado="true"
-              catalogo-anidado-propiedad-elementos="chat"
-              propiedad-busqueda="titulo"
-              @alFiltrar="(r) => (catalogoFiltrado = r)"
-            />
-          </ClientOnly>
-
-          <h6>{{ titulo }}</h6>
-          <ul class="lista-sin-estilo">
-            <li
-              v-for="grupo in catalogoFiltrado"
-              :id="grupo.id"
-              :key="grupo.id"
-            >
-              {{ grupo.fecha == fechaHoy ? "Hoy" : grupo.fecha }}
-              <ul class="lista-sin-estilo">
-                <li v-for="chat in grupo.chat" :id="chat.id" :key="chat.id">
-                  <nuxt-link
-                    class="tarjeta-chat p-2 fondo-color-acento borde borde-redondeado-20"
-                    to="/ia/chat/dinamica"
-                  >
-                    <div>
-                      <h5 class="tarjeta-titulo m-t-0">{{ chat.titulo }}</h5>
-                      <p class="tarjeta-nombre-proyecto">
-                        {{ chat.proyecto }}
-                      </p>
-                      <p class="tarjeta-nombre-contexto">
-                        {{ chat.contexto }}
-                      </p>
-                      <div class="flex flex-contenido-final">
-                        <div>
-                          <nuxt-link
-                            class="boton-pictograma boton-sin-contenedor-primario"
-                            to="#"
-                          >
-                            <span
-                              class="pictograma-editar"
-                              aria-hidden="true"
-                            />
-                          </nuxt-link>
-                          <button
-                            class="boton-pictograma boton-sin-contenedor-primario"
-                            aria-label="Remover chat"
-                            type="button"
-                          >
-                            <span
-                              class="pictograma-eliminar"
-                              aria-hidden="true"
-                            />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </nuxt-link>
-                </li>
-              </ul>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
     <!-- TODO: Colocar ListasProyectos -->
     <div v-if="titulo == 'Proyectos'">
       <div style="max-height: 85vh; overflow-y: auto" class="p-x-3 p-t-3">
@@ -160,40 +78,6 @@ const seleccionContexto = ref("");
       </div>
     </div>
   </div>
-  <ClientOnly>
-    <SisdaiModal ref="nuevoChatModal">
-      <template #encabezado> <h2>Nuevo chat</h2> </template>
-      <template #cuerpo>
-        <SisdaiSelector
-          v-model="seleccionProyecto"
-          etiqueta="Selecciona un proyecto"
-          texto_ayuda="Texto de ayuda."
-        >
-          <option value="1">Opcion Uno</option>
-          <option value="2">Opcion Dos</option>
-          <option value="3">Opcion Tres</option>
-        </SisdaiSelector>
-        <SisdaiSelector
-          v-model="seleccionContexto"
-          etiqueta="Selecciona un contexto"
-          texto_ayuda="Texto de ayuda."
-        >
-          <option value="1">Opcion Uno</option>
-          <option value="2">Opcion Dos</option>
-          <option value="3">Opcion Tres</option>
-        </SisdaiSelector>
-      </template>
-      <template #pie>
-        <button
-          class="boton-primario boton-chico"
-          aria-label="Iniciar chat"
-          type="button"
-        >
-          Iniciar chat
-        </button>
-      </template>
-    </SisdaiModal>
-  </ClientOnly>
 </template>
 <style lang="scss">
 .lista-chats {
