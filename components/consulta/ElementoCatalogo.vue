@@ -14,33 +14,24 @@ const props = defineProps({
   },
 });
 const { resourceType, catalogueElement } = toRefs(props);
+const isChecked = ref(false);
+
 const type = ref(catalogueElement.value.resource_type);
 const subtype = ref(catalogueElement.value.subtype);
 const bbox_polygon = ref(catalogueElement.value.bbox_polygon.type);
 const buttons = ref([
   {
-    label: "Información",
+    label:
+      `<p>Descripción: ${catalogueElement.value.abstract}</p>` +
+      `<p>Origen: ${catalogueElement.value.attribution}</p>` +
+      `<p>Creación: ${catalogueElement.value.created}</p>` +
+      `<p>Revisión: ${catalogueElement.value.date}</p>` +
+      `<p>Keywords: ${catalogueElement.value.keywords}</p>` +
+      `<p>CRS: ${catalogueElement.value.srid}</p>`,
     class: "pictograma-informacion",
     index: 3,
   },
 ]);
-const isChecked = ref(false);
-
-//console.log(type.value, subtype.value, bbox_polygon.value);
-
-// Si está en la lista de elementos seleccionados, mostrarla palomeada. Esto es para cuando cambiamos de vista
-function setCheck() {
-  if (
-    resourcesStore.selectedResources[resourceType.value]?.some(
-      (r) => r.uuid === catalogueElement.value.uuid
-    )
-  ) {
-    isChecked.value = true;
-  } else {
-    isChecked.value = false;
-  }
-}
-setCheck();
 
 // Revisamos qué tipo de documento estamos mostrando para decidir qué botones mostrar
 if (type.value === "dataset") {
@@ -48,6 +39,7 @@ if (type.value === "dataset") {
     label: "Variables disponibles",
     class: "pictograma-visualizador",
     index: 2,
+    tooltipInfo: "No de estilos",
   });
 
   if (subtype.value == "vector") {
@@ -72,7 +64,7 @@ if (type.value === "dataset") {
     }
   } else {
     buttons.value.push({
-      label: "Raster",
+      label: "Capa tipo raster",
       class: "pictograma-capas",
       index: 1,
     });
@@ -90,6 +82,20 @@ function selectElement(resourceType, option) {
     resourcesStore.removeResource(resourceType, option);
   }
 }
+
+// Si está en la lista de elementos seleccionados, mostrarla palomeada. Esto es para cuando cambiamos de vista
+function setCheck() {
+  if (
+    resourcesStore.selectedResources[resourceType.value]?.some(
+      (r) => r.uuid === catalogueElement.value.uuid
+    )
+  ) {
+    isChecked.value = true;
+  } else {
+    isChecked.value = false;
+  }
+}
+setCheck();
 
 // Como también se puede modificar la lista desde el panel de seleccion, montamos un watcher
 // para despalomear las opciones que se borraron
@@ -120,6 +126,7 @@ watch(
         v-for="button in buttons"
         :class="[button.class, 'pictograma-mediano']"
         aria-hidden="true"
+        v-globo-informacion:arriba="button.label"
       ></span>
     </div>
   </div>

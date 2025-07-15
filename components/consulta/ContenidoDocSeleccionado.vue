@@ -31,7 +31,7 @@ const shownFileUuid = computed(
     <div class="flex flex-contenido-final">
       <button
         class="boton-pictograma boton-sin-contenedor-secundario"
-        aria-label="Remover selección"
+        aria-label="Borrar selección"
         type="button"
         @click="resourcesStore.removeResource(resourceType, selectedElement)"
       >

@@ -10,6 +10,51 @@ const props = defineProps({
 });
 const { selectedElement, resourceType } = toRefs(props);
 const modalTabla = ref(null);
+
+const optionsButtons = ref([
+  {
+    label: "Hacer zoom",
+    pictogram: "pictograma-zoom-instruccional",
+    action: () => {
+      console.log("hacer zoom");
+    },
+  },
+  {
+    label: "Ver tablas",
+    pictogram: "pictograma-tabla",
+    action: () => {
+      modalTabla.value?.abrirModal();
+    },
+  },
+  {
+    label: "Mostrar",
+    pictogram: "pictograma-ojo-ver",
+    action: () => {
+      console.log("Mostrar u ocultar la capa");
+    },
+  },
+  {
+    label: "Cambiar opacidad",
+    pictogram: "pictograma-editar",
+    action: () => {
+      console.log("cambiar opacidad");
+    },
+  },
+  {
+    label: "Eliminar selección",
+    pictogram: "pictograma-eliminar",
+    action: () => {
+      resourcesStore.removeResource(resourceType.value, selectedElement.value);
+    },
+  },
+  {
+    label: "Descargar archivo",
+    pictogram: "pictograma-archivo-descargar",
+    action: () => {
+      console.log("Descargar el archivo");
+    },
+  },
+]);
 const paginaActual = ref(0);
 const tamanioPagina = 10;
 const {
@@ -56,48 +101,13 @@ watch(paginaActual, () => {
 
   <div class="flex flex-contenido-final">
     <button
+      v-for="button in optionsButtons"
       class="boton-pictograma boton-sin-contenedor-secundario"
-      aria-label="Hacer zoom"
+      :aria-label="button.label"
       type="button"
+      @click="button.action"
     >
-      <span class="pictograma-zoom-instruccional" aria-hidden="true"></span>
-    </button>
-    <button
-      class="boton-pictograma boton-sin-contenedor-secundario"
-      aria-label="Ver tablas"
-      type="button"
-      @click="modalTabla?.abrirModal()"
-    >
-      <span class="pictograma-tabla" aria-hidden="true"></span>
-    </button>
-    <button
-      class="boton-pictograma boton-sin-contenedor-secundario"
-      aria-label="Ver"
-      type="button"
-    >
-      <span class="pictograma-ojo-ver" aria-hidden="true"></span>
-    </button>
-    <button
-      class="boton-pictograma boton-sin-contenedor-secundario"
-      aria-label="Editar"
-      type="button"
-    >
-      <span class="pictograma-editar" aria-hidden="true"></span>
-    </button>
-    <button
-      class="boton-pictograma boton-sin-contenedor-secundario"
-      aria-label="Quitar selección"
-      type="button"
-      @click="resourcesStore.removeResource(resourceType, selectedElement)"
-    >
-      <span class="pictograma-eliminar" aria-hidden="true"></span>
-    </button>
-    <button
-      class="boton-pictograma boton-sin-contenedor-secundario"
-      aria-label="Descargar selección"
-      type="button"
-    >
-      <span class="pictograma-archivo-descargar" aria-hidden="true"></span>
+      <span :class="button.pictogram" aria-hidden="true"></span>
     </button>
   </div>
 </template>
