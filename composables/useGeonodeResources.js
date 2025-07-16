@@ -3,9 +3,9 @@
 import { ref } from "vue";
 
 export function useGeonodeResources({ resourceType } = {}) {
-  const { data: authData, status: authStatus } = useAuth();
-  console.log(authData.value, authStatus.value);
-  const token = ref(authData.value?.accessToken);
+  //const { data: authData, status: authStatus } = useAuth();
+  //console.log(authData.value, authStatus.value);
+  //const token = ref(authData.value?.accessToken);
   const config = useRuntimeConfig();
   const api = `${config.public.geonodeApi}/resources`;
   const resourcesList = ref([]);
