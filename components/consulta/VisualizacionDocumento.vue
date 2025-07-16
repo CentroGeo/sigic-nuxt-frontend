@@ -7,11 +7,16 @@ const resourceType = "document";
 const urlEmbebido = ref(null);
 const embedRef = ref(null);
 
+// Esto es por si ya había un documento seleccionado
+if (resourcesStore.shownFiles[resourceType]) {
+  urlEmbebido.value = resourcesStore.shownFiles[resourceType]["embed_url"];
+}
+
 let resizeObserver;
 
 // Observa cambios en el recurso seleccionado
 watch(
-  () => resourcesStore.selectedResources[resourceType]?.[0],
+  () => resourcesStore.shownFiles[resourceType],
   async (nv) => {
     if (nv) {
       urlEmbebido.value = null; // limpiar antes de volver a asignar

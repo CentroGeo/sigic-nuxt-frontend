@@ -1,8 +1,10 @@
 <script setup>
 import { ref } from "vue";
+import { useIAStore } from "~/stores/ia.js";
+const storeIA = useIAStore();
+
 const listadoChats = ref([
   {
-    id: 0,
     fecha: "01-07-2025",
     chat: [
       {
@@ -14,7 +16,6 @@ const listadoChats = ref([
     ],
   },
   {
-    id: 1,
     fecha: "01-06-2025",
     chat: [
       {
@@ -37,7 +38,10 @@ const listadoChats = ref([
 <template>
   <IaLayoutPaneles>
     <template #lista>
+      <IaListaLeyendaInicio v-if="!storeIA.existenProyectos" />
+
       <IaLayoutListas
+        v-else
         texto-boton="Nuevo chat"
         titulo="Chats"
         etiqueta-busqueda="Buscar chats"
@@ -46,7 +50,9 @@ const listadoChats = ref([
     </template>
 
     <template #vistas-ia>
-      <IaContenedorChat />
+      <IaVistaLeyendaInicio v-if="!storeIA.existenProyectos" />
+
+      <div v-else>Da click en un chat para iniciar o crea un nuevo chat</div>
     </template>
   </IaLayoutPaneles>
 </template>
