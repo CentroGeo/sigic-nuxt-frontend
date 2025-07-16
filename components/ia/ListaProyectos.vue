@@ -1,4 +1,3 @@
-<!-- TODO: adaptar al LayoutListas.vue -->
 <script setup>
 import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
 import { ref } from "vue";

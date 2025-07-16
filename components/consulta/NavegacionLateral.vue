@@ -1,34 +1,25 @@
 <script setup>
-/**
- * @typedef {Object} Props
- * @property {Array<{ pictograma: string, ruta: string }>} [subPaginas] - Lista obligatoria de subpaginas, debe contener `pictograma` y `ruta` cada objeto de la lista.
- * @property {Function} [funcionColapsar=undefined] - Función que se ejecutará al presionar el botón colapsar.
- * @property {Boolean} [estadoColapable=false] - Estado del icono colapsar, visible si se recibe la `funcionColapsar`.
- */
+const ruta = "/consulta";
+const subPaginas = [
+  {
+    picto: "pictograma-capas",
+    ruta: `${ruta}/capas`,
+  },
+  {
+    picto: "pictograma-tabla",
+    ruta: `${ruta}/tablas`,
+  },
+  {
+    picto: "pictograma-documento",
+    ruta: `${ruta}/documentos`,
+  },
+];
 
-/** @type {Props} */
-defineProps({
-  subPaginas: {
-    type: Array,
-    required: true,
-  },
-  funcionColapsar: {
-    type: Function,
-    default: undefined,
-  },
-  estadoColapable: {
-    type: Boolean,
-    default: false,
-  },
-  idColapsable: {
-    type: String,
-    required: true,
-  },
-});
+const storeConsulta = useConsultaStore();
 </script>
 
 <template>
-  <div class="nav-lateral" aria-label="Navegación lateral">
+  <div class="nav-lateral" aria-label="Navegación Lateral">
     <ul class="lista-sin-estilo">
       <li>
         <div class="avatar-imagen">
@@ -39,17 +30,15 @@ defineProps({
         </div>
       </li>
 
-      <li v-if="funcionColapsar">
+      <li>
         <button
           class="boton-pictograma boton-sin-contenedor-primario"
-          aria-label="Colapsar"
-          :aria-controls="idColapsable"
-          :aria-expanded="!estadoColapable"
+          aria-label="Navegación Lateral"
           type="button"
-          @click="funcionColapsar"
+          @click="storeConsulta.alternarCatalogoColapsable"
         >
           <span
-            :class="`pictograma-angulo-doble-${estadoColapable ? 'derecha' : 'izquierda'}`"
+            :class="`pictograma-angulo-doble-${storeConsulta.catalogoColapsado ? 'derecha' : 'izquierda'}`"
             aria-hidden="true"
           />
         </button>
@@ -60,7 +49,7 @@ defineProps({
           class="boton-pictograma boton-sin-contenedor-primario"
           :to="subPagina.ruta"
         >
-          <span :class="subPagina.pictograma" aria-hidden="true" />
+          <span :class="subPagina.picto" aria-hidden="true" />
         </nuxt-link>
       </li>
     </ul>
@@ -75,6 +64,7 @@ defineProps({
 
   ul {
     padding: 0 8px;
+    // list-style: none;
 
     li {
       .avatar-imagen {

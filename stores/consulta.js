@@ -1,11 +1,7 @@
 import { defineStore } from "pinia";
 
 export const useConsultaStore = defineStore("consulta", {
-  state: () => ({
-    catalogoColapsado: false,
-    idNavegacionLateral:
-      "navegacionlateral-" + Math.random().toString(36).substring(2),
-  }),
+  state: () => ({ catalogoColapsado: false }),
   actions: {
     alternarCatalogoColapsable() {
       this.catalogoColapsado = !this.catalogoColapsado;

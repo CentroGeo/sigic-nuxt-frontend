@@ -1,5 +1,7 @@
 <script setup>
-defineProps({
+import { toRefs } from "vue";
+
+const props = defineProps({
   /**
    * Etiqueta en el contador que se mostrará.
    * @type {String}
@@ -20,6 +22,8 @@ defineProps({
     default: 999,
   },
 });
+
+const { etiqueta, numero } = toRefs(props);
 </script>
 
 <template>
@@ -31,6 +35,6 @@ defineProps({
 
 <style lang="scss">
 .numero-elementos {
-  gap: 8px;
+  gap: 10px;
 }
 </style>

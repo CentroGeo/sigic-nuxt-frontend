@@ -3,7 +3,6 @@ import LayoutIA from "~/components/ia/LayoutIA.vue";
 import PanelListas from "~/components/ia/PanelListas.vue";
 import ListaChats from "~/components/ia/ListaChats.vue";
 import LeyendaInicio from "~/components/ia/LeyendaInicio.vue";
-import ContenedorChat from "~/components/ia/ContenedorChat.vue";
 
 import { useIAStore } from "~/stores/ia.js";
 const storeIA = useIAStore();
@@ -17,11 +16,25 @@ const storeIA = useIAStore();
         </PanelListas>
       </div>
 
-      <div class="columna-12">
+      <div
+        :class="[
+          'columna-12',
+          !storeIA.existenProyectos
+            ? 'flex flex-contenedor-centrado flex-vertical-centrado'
+            : '',
+        ]"
+      >
         <LeyendaInicio v-if="!storeIA.existenProyectos" />
 
-        <ContenedorChat v-else />
+        <div v-else>Da click en un chat para iniciar o crea un nuevo chat</div>
       </div>
     </div>
   </LayoutIA>
 </template>
+
+<style lang="scss">
+.grid {
+  width: 100%;
+  gap: 0;
+}
+</style>

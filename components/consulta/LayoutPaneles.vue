@@ -5,7 +5,6 @@ const storeConsulta = useConsultaStore();
 <template>
   <div class="contenedor-paneles grid">
     <div
-      :id="storeConsulta.idNavegacionLateral"
       :class="storeConsulta.catalogoColapsado ? 'oculto' : 'columna-4'"
       :aria-hidden="storeConsulta.catalogoColapsado"
     >

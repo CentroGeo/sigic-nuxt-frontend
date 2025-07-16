@@ -1,8 +1,7 @@
 <script setup>
 const config = useRuntimeConfig();
-const resourcesStore = useSelectedResourcesStore();
 
-/* async function obtenerPDFs() {
+async function obtenerPDFs() {
   const res = await fetch(`${config.public.geonodeApi}/api/v2/documents/`);
   const data = await res.json();
   const docs = data.results;
@@ -12,7 +11,7 @@ const resourcesStore = useSelectedResourcesStore();
     console.log(`Descargar: ${config.public.geonodeApi}${doc.download_url}`);
   });
 }
-obtenerPDFs(); */
+obtenerPDFs();
 const resourceType = "document";
 </script>
 
@@ -27,10 +26,7 @@ const resourceType = "document";
     </template>
 
     <template #visualizador>
-      <div class="contenedor" v-if="!resourcesStore.shownFiles[resourceType]">
-        <h1>No hay seleccion</h1>
-      </div>
-      <ConsultaVisualizacionDocumento v-else></ConsultaVisualizacionDocumento>
+      <ConsultaVisualizacionDocumento></ConsultaVisualizacionDocumento>
     </template>
 
     <template #seleccion>
@@ -43,12 +39,9 @@ const resourceType = "document";
   </ConsultaLayoutPaneles>
 </template>
 
-<style scoped>
+<style>
 .documento-embebido {
   width: 100%;
   height: 100%;
-}
-.contenedor {
-  color: var(--color-error-2);
 }
 </style>

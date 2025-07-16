@@ -15,8 +15,8 @@ const props = defineProps({
 });
 const { resourceType, catalogueElement } = toRefs(props);
 const type = ref(catalogueElement.value.resource_type);
-const subtype = ref(catalogueElement.value.subtype);
-const bbox_polygon = ref(catalogueElement.value.bbox_polygon.type);
+//const subtype = ref(catalogueElement.value.subtype);
+const subtype = ref("polygon");
 const buttons = ref([
   {
     label: "Información",
@@ -25,8 +25,6 @@ const buttons = ref([
   },
 ]);
 const isChecked = ref(false);
-
-//console.log(type.value, subtype.value, bbox_polygon.value);
 
 // Si está en la lista de elementos seleccionados, mostrarla palomeada. Esto es para cuando cambiamos de vista
 function setCheck() {
@@ -50,30 +48,22 @@ if (type.value === "dataset") {
     index: 2,
   });
 
-  if (subtype.value == "vector") {
-    if (bbox_polygon.value === "Polygon") {
-      buttons.value.push({
-        label: "Capa de poligonos",
-        class: "pictograma-capa-poligono",
-        index: 1,
-      });
-    } else if (bbox_polygon.value === "LineString") {
-      buttons.value.push({
-        label: "Capa de lineas",
-        class: "pictograma-capa-lineas",
-        index: 1,
-      });
-    } else if (bbox_polygon.value === "Points") {
-      buttons.value.push({
-        label: "Capa de puntos",
-        class: "pictograma-capa-puntos",
-        index: 1,
-      });
-    }
-  } else {
+  if (subtype.value === "polygon") {
     buttons.value.push({
-      label: "Raster",
-      class: "pictograma-capas",
+      label: "Capa de poligonos",
+      class: "pictograma-capa-poligono",
+      index: 1,
+    });
+  } else if (subtype.value === "lines") {
+    buttons.value.push({
+      label: "Capa de lineas",
+      class: "pictograma-capa-lineas",
+      index: 1,
+    });
+  } else if (subtype.value === "dots") {
+    buttons.value.push({
+      label: "Capa de puntos",
+      class: "pictograma-capa-puntos",
       index: 1,
     });
   }
@@ -102,20 +92,18 @@ watch(
 );
 </script>
 <template>
-  <div class="m-x-5 m-y-2" :id="`elemento-${catalogueElement.uuid}`">
-    <div
-      class="tarjeta-elemento"
-      @click="selectElement(resourceType, catalogueElement)"
-    >
-      <input
-        type="checkbox"
-        :id="`checkbox-${catalogueElement.uuid}`"
-        v-model="isChecked"
-      />
-      <label :for="catalogueElement.uuid">{{ catalogueElement.title }}</label>
-    </div>
-
-    <div class="flex flex-contenido-inicio m-y-3">
+  <div
+    class="contenedor-elemento"
+    :id="`elemento-${catalogueElement.uuid}`"
+    @click="selectElement(resourceType, catalogueElement)"
+  >
+    <input
+      type="checkbox"
+      :id="`checkbox-${catalogueElement.uuid}`"
+      v-model="isChecked"
+    />
+    <label :for="catalogueElement.uuid">{{ catalogueElement.title }}</label>
+    <div class="contenedor-botones">
       <span
         v-for="button in buttons"
         :class="[button.class, 'pictograma-mediano']"
@@ -124,13 +112,20 @@ watch(
     </div>
   </div>
 </template>
-<style lang="scss" scoped>
-.flex {
-  gap: 8px;
+<style lang="scss">
+.contenedor-elemento {
+  //background-color: pink;
+  margin: 0px;
+  padding: 15px 0px 15px 5%;
+  border-bottom: solid 2px #d4d4d4;
 }
-.tarjeta-elemento:hover {
-  background-color: var(--color-secundario-2);
-  border: 1px solid var(--color-secundario-8);
-  border-radius: 8px;
+.contenedor-botones {
+  //background-color: cyan;
+  display: flex;
+  gap: 3px;
+  padding: 6px;
 }
+/* .pictograma-mediano {
+  background-color: pink;
+} */
 </style>

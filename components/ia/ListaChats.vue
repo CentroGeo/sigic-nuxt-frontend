@@ -1,4 +1,3 @@
-<!-- TODO: adaptar al LayoutListas.vue -->
 <script setup>
 import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
 import { ref } from "vue";
@@ -14,22 +13,19 @@ const chats = ref([
 ]);
 const listaChatsFiltrada = ref(chats.value);
 </script>
-
 <template>
   <div class="p-3">
     <button class="boton boton-primario" aria-label="Crear nuevo chat">
       Nuevo chat
     </button>
 
-    <client-only>
-      <SisdaiCampoBusqueda
-        class="m-y-3"
-        :catalogo="chats"
-        etiqueta="Buscar chats"
-        propiedad-busqueda="titulo"
-        @alFiltrar="(r) => (listaChatsFiltrada = r)"
-      />
-    </client-only>
+    <SisdaiCampoBusqueda
+      class="m-y-3"
+      :catalogo="chats"
+      etiqueta="Buscar chats"
+      propiedad-busqueda="titulo"
+      @alFiltrar="(r) => (listaChatsFiltrada = r)"
+    />
     <h6>chats</h6>
 
     <div v-if="storeIA.existeContexto" class="lista-chats">
