@@ -97,7 +97,7 @@ const catalogoFiltrado = ref(catalogo.value);
               <ul class="lista-sin-estilo">
                 <li v-for="chat in grupo.chat" :id="chat.id" :key="chat.id">
                   <nuxt-link
-                    class="tarjeta-chat p-2 fondo-color-acento borde borde-redondeado-20"
+                    class="tarjeta-chat p-2 borde borde-redondeado-20"
                     to="/ia/chat/dinamica"
                   >
                     <div>
@@ -111,7 +111,7 @@ const catalogoFiltrado = ref(catalogo.value);
                       <div class="flex flex-contenido-final">
                         <div>
                           <nuxt-link
-                            class="boton-pictograma boton-sin-contenedor-primario"
+                            class="boton-pictograma boton-sin-contenedor-secundario"
                             to="#"
                           >
                             <span
@@ -120,7 +120,7 @@ const catalogoFiltrado = ref(catalogo.value);
                             />
                           </nuxt-link>
                           <button
-                            class="boton-pictograma boton-sin-contenedor-primario"
+                            class="boton-pictograma boton-sin-contenedor-secundario"
                             aria-label="Remover chat"
                             type="button"
                           >
@@ -177,30 +177,14 @@ const catalogoFiltrado = ref(catalogo.value);
   </ClientOnly>
 </template>
 <style lang="scss">
-.lista-chats {
-  max-height: 85vh;
-  overflow-y: auto;
-}
-.boton-nuevo-proyecto {
-  width: 100%;
-}
-
-.proyecto {
-  &.seleccionado {
-    border-left: var(--Escalas-Bordes-borde-8, 8px) solid
-      var(--Base-Borde---borde-acento, #53323c);
-    background: var(--Base-Fondo---fondo-acento, #fcf3f5);
+.tarjeta-chat {
+  background-color: var(--fondo-acento);
+  border: 1px solid var(--borde-acento);
+  h5 {
+    color: var(--texto-acento);
   }
-
-  .proyecto-titulo {
-    color: var(
-      --Componentes-Navegacin-secundaria---navegacion-secundaria-color,
-      #391821
-    );
-    font-size: 16px;
-    font-style: normal;
-    font-weight: 600;
-    line-height: var(--Tipos-Interlineado-Prrafos-Prrafos, 24px);
+  p {
+    color: var(--texto-primario);
   }
 }
 </style>

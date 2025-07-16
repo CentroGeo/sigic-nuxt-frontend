@@ -59,26 +59,24 @@ const listaProyectosFiltrada = ref(proyectos.value);
 </template>
 
 <style lang="scss">
+.lista-chats {
+  max-height: 85vh;
+  overflow-y: auto;
+}
 .boton-nuevo-proyecto {
   width: 100%;
 }
-
 .proyecto {
   &.seleccionado {
-    border-left: var(--Escalas-Bordes-borde-8, 8px) solid
-      var(--Base-Borde---borde-acento, #53323c);
-    background: var(--Base-Fondo---fondo-acento, #fcf3f5);
+    border-left: var(--Escalas-Bordes-borde-8, 8px) solid var(--borde-acento);
+    background: var(--fondo-acento);
   }
 
   .proyecto-titulo {
-    color: var(
-      --Componentes-Navegacin-secundaria---navegacion-secundaria-color,
-      #391821
-    );
+    color: var(--navegacion-secundaria-color);
     font-size: 16px;
     font-style: normal;
     font-weight: 600;
-    line-height: var(--Tipos-Interlineado-Prrafos-Prrafos, 24px);
   }
 }
 </style>
