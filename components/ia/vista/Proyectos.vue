@@ -107,7 +107,7 @@ const contextos = ref([
                       to="/ia/chat/dinamica"
                     >
                       Iniciar chat
-                      <span class="pictograma-ayuda" aria-hidden="true" />
+                      <span class="pictograma-chat" aria-hidden="true" />
                     </nuxt-link>
                     <nuxt-link
                       class="boton-secundario boton-chico"

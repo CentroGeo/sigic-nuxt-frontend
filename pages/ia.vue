@@ -10,11 +10,11 @@ const ruta = "/ia";
       "
       :sub-paginas="[
         {
-          pictograma: 'pictograma-ayuda',
+          pictograma: 'pictograma-chat',
           ruta: `${ruta}/chats`,
         },
         {
-          pictograma: 'pictograma-ayuda',
+          pictograma: 'pictograma-proyectos',
           ruta: `${ruta}/proyectos`,
         },
       ]"

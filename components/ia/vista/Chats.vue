@@ -71,7 +71,7 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
                       :class="
                         m.actor == 'Humano'
                           ? 'pictograma-persona'
-                          : 'pictograma-ayuda'
+                          : 'pictograma-bot'
                       "
                       style="
                         background-color: var(
