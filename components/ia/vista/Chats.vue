@@ -86,7 +86,7 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
                       class="m-0"
                       :class="
                         m.actor == 'Humano'
-                          ? 'fondo-color-confirmacion p-2 borde-redondeado-20'
+                          ? 'fondo-color-neutro p-2 borde-redondeado-20'
                           : ''
                       "
                       :style="m.actor == 'Humano' ? 'max-width: 592px' : ''"
@@ -110,7 +110,7 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
                         >
                           Generar reporte
                           <span
-                            class="pictograma-documento"
+                            class="pictograma-reporte"
                             aria-hidden="true"
                           ></span>
                         </button>
@@ -189,7 +189,7 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
           </p>
           <div
             v-if="controlDeslizante?.valor_seleccionado < 100"
-            class="fondo-color-informacion p-1 borde borde-redondeado-20"
+            class="fondo-color-informacion p-x-2 p-y-1 borde borde-color-informacion borde-redondeado-20"
           >
             <p class="texto-color-informacion">
               <span class="pictograma-informacion"></span>
@@ -198,7 +198,7 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
           </div>
           <div
             v-else-if="controlDeslizante?.valor_seleccionado == 100"
-            class="fondo-color-confirmacion p-1 borde borde-redondeado-20"
+            class="fondo-color-confirmacion p-x-2 p-y-1 borde borde-color-confirmacion borde-redondeado-20"
           >
             <p class="texto-color-confirmacion">
               <span class="pictograma-aprobado"></span>
@@ -225,7 +225,12 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
             </ClientOnly>
             <div class="flex flex-contenido-final">
               <label :for="idAleatorioCD"
-                >Progreso {{ controlDeslizante?.valor_seleccionado }}%</label
+                >{{
+                  controlDeslizante?.valor_seleccionado < 100
+                    ? "Progreso"
+                    : "Completado"
+                }}
+                {{ controlDeslizante?.valor_seleccionado }}%</label
               >
             </div>
           </div>
