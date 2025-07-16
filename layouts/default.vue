@@ -19,7 +19,10 @@ const accesibilidadStore = useAccesibilidadStore();
     <!-- parece que boton flotante agrega un id al elemento html que no 
     coincide al hacer server side rendering -->
     <client-only>
-      <SisdaiMenuAccesibilidad :objeto-store="accesibilidadStore" />
+      <SisdaiMenuAccesibilidad
+        :objeto-store="accesibilidadStore"
+        perfil-color="sigic"
+      />
     </client-only>
   </div>
 </template>
