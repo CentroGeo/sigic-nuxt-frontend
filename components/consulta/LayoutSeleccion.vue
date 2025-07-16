@@ -6,7 +6,7 @@ const props = defineProps({
   funcionDescarga: { type: Function, default: undefined },
 });
 const { titulo, resourceType } = toRefs(props);
-const storeSelected = useSelectedResourcesStore();
+const selectedStore = useSelectedResourcesStore();
 const buttonTagDict = {
   dataLayer: "mapa",
   dataTable: "archivo",
@@ -45,14 +45,14 @@ const buttonTagDict = {
             type="button"
             class="boton-pictograma boton-con-contenedor-secundario"
             aria-label="Eliminar"
-            @click="storeSelected.resetResource(resourceType)"
+            @click="selectedStore.resetResource(resourceType)"
           >
             <span class="pictograma-eliminar" aria-hidden="true" />
           </button>
         </div>
 
         <UiNumeroElementos
-          :numero="storeSelected.selectedResources[resourceType].length"
+          :numero="selectedStore.selectedResources[resourceType].length"
           :etiqueta="etiquetaElementos"
         />
       </div>
@@ -60,7 +60,7 @@ const buttonTagDict = {
 
     <div class="m-x-2 m-y-1">
       <ConsultaElementoSeleccionado
-        v-for="resource in storeSelected.selectedResources[resourceType]"
+        v-for="resource in selectedStore.selectedResources[resourceType]"
         :key="`seleccion-${resource.uuid}`"
         :selected-element="resource"
         :resource-type="resourceType"
