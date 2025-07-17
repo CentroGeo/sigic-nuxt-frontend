@@ -22,8 +22,8 @@ export function useGeonodeResources({ resourceType } = {}) {
         page: page,
         page_size: 15,
         "filter{resource_type}": typeDict[resourceType],
-        "filter{subtype.in}": "raster",
-        "filter{subtype.in}": "vector",
+        //"filter{subtype.in}": "raster",
+        //"filter{subtype.in}": "vector",
       });
       fetch(`${api}?${dataParams.toString()}`, {
         method: "GET",
@@ -41,7 +41,7 @@ export function useGeonodeResources({ resourceType } = {}) {
           const resources = data.resources || [];
           allResults = allResults.concat(resources);
           // Revisamos si hay una pagina siguiente
-          if (data.links.next) {
+          if (data.links.next && page <= 3) {
             // Si la hay, volvemos a solicitar datos
             page += 1;
             return loadPage();

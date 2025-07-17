@@ -16,7 +16,7 @@ const props = defineProps({
   },
 });
 const { resourceType, catalogueElement } = toRefs(props);
-const api = ref(config.public.geoserverUrl);
+const api = config.public.geoserverUrl;
 const subtype = ref(catalogueElement.value.subtype);
 const geomType = ref(null);
 const isChecked = ref(false);
@@ -48,12 +48,16 @@ const optionsDict = {
     class: "pictograma-capa-lineas",
   },
   GeometryCollection: {
-    tooltipText: "Indefinido",
-    class: "pictograma-capa-lineas",
+    tooltipText: "Colección de geometrías",
+    class: "pictograma-capas",
   },
   Raster: {
     tooltipText: "Raster",
-    class: "pictograma-capa-lineas",
+    class: "pictograma-capas",
+  },
+  Otro: {
+    tooltipText: "Ni raster ni vector",
+    class: "pictograma-flkt",
   },
 };
 // Para triggerear la función de observar
@@ -106,20 +110,23 @@ onMounted(() => {
               {
                 tooltipText: tooltipContent(catalogueElement.value),
                 class: "pictograma-informacion",
-                position: "arriba",
+                position: "derecha",
               },
             ];
           } else {
             // Si es raster
             if (subtype.value === "raster") {
               geomType.value = "Raster";
-            } else {
-              // Si es vectorial llamamos el tipo de geometría.
-              // Este llamado no se hace sino hasta que la tarjeta va a entrar a la vista
+            } else if (subtype.value === "vector") {
+              // Si es vectorial
+              // Solicitamos la geometría hasta que la tarjeta va a entrar a la vista
               geomType.value = await fetchGeometryType(
                 catalogueElement.value,
-                api.value
+                api
               );
+              //geomType.value = "Point";
+            } else {
+              geomType.value = "Otro";
             }
             buttons.value = [
               {

@@ -1,4 +1,5 @@
 export async function fetchGeometryType(resource, api) {
+  console.log(resource);
   const url = new URL(`${api}/ows`);
   url.search = new URLSearchParams({
     service: "WFS",
