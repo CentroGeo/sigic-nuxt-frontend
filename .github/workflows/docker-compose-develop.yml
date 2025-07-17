@@ -32,7 +32,7 @@ jobs:
 
       - name: Build & tag Docker image
         run: |
-          docker build --build-arg INSTALL_DEV=true \
+          docker build --build-arg NODE_ENV=development \
             -t ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.branch }} \
             -t ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.sha }} \
             -f Dockerfile .
@@ -81,3 +81,7 @@ jobs:
           KEYCLOAK_CLIENT_SECRET: ${{ secrets.KEYCLOAK_CLIENT_SECRET }}
           NUXT_AUTH_SECRET: ${{ secrets.NUXT_AUTH_SECRET }}
           VIRTUAL_PORT: "3000"
+
+      - name: Verificar variables de entorno dentro del contenedor
+        run: |
+          docker compose -f docker-compose-ghcr.yml exec -T sigic-nuxt-frontend printenv | grep -E 'NODE_ENV|NUXT|KEYCLOAK|GEOSERVER|GEONODE'
