@@ -77,7 +77,7 @@ const buttonTagDict = {
   position: sticky;
   top: 0;
   z-index: 1;
-  background-color: var(--color-neutro-0);
+  background-color: var(--fondo);
   padding-bottom: 8px;
 }
 </style>

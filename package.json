@@ -28,5 +28,8 @@
     "undici": "^7.10.0",
     "vue": "latest",
     "vue-router": "latest"
+  },
+  "devDependencies": {
+    "@nuxt/devtools": "^2.6.2"
   }
 }

@@ -2,7 +2,7 @@
 <script setup>
 import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
 import { ref } from "vue";
-import { useIAStore } from "~/stores/ia.js";
+
 const storeIA = useIAStore();
 const proyectos = ref([
   {
@@ -11,6 +11,12 @@ const proyectos = ref([
     numero_contextos: 0,
     numero_fuentes: 9,
   },
+  // {
+  //   id: 1,
+  //   titulo: "Nombre del proyecto",
+  //   numero_contextos: 5,
+  //   numero_fuentes: 5,
+  // },
 ]);
 const listaProyectosFiltrada = ref(proyectos.value);
 </script>
@@ -53,26 +59,24 @@ const listaProyectosFiltrada = ref(proyectos.value);
 </template>
 
 <style lang="scss">
+.lista-chats {
+  max-height: 85vh;
+  overflow-y: auto;
+}
 .boton-nuevo-proyecto {
   width: 100%;
 }
-
 .proyecto {
   &.seleccionado {
-    border-left: var(--Escalas-Bordes-borde-8, 8px) solid
-      var(--Base-Borde---borde-acento, #53323c);
-    background: var(--Base-Fondo---fondo-acento, #fcf3f5);
+    border-left: var(--Escalas-Bordes-borde-8, 8px) solid var(--borde-acento);
+    background: var(--fondo-acento);
   }
 
   .proyecto-titulo {
-    color: var(
-      --Componentes-Navegacin-secundaria---navegacion-secundaria-color,
-      #391821
-    );
+    color: var(--navegacion-secundaria-color);
     font-size: 16px;
     font-style: normal;
     font-weight: 600;
-    line-height: var(--Tipos-Interlineado-Prrafos-Prrafos, 24px);
   }
 }
 </style>

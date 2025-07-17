@@ -1,5 +1,8 @@
+<script setup>
+const storeIA = useIAStore();
+</script>
 <template>
-  <div>
+  <div v-if="!storeIA.existenProyectos">
     <div class="contenedor ancho-lectura">
       <div class="flex">
         <div class="columna-16 flex-vertical-centrado" style="height: 85vh">

@@ -87,10 +87,14 @@ defineProps({
         }
       }
 
-      .router-link-exact-active {
-        background: var(--boton-sin-contenedor-primario-enfoque-fondo);
-        color: var(--boton-sin-contenedor-primario-enfoque-color);
-      }
+      // .router-link-active,
+      // .router-link-exact-active {
+      //   background: var(--boton-sin-contenedor-primario-enfoque-fondo);
+      //   box-shadow:
+      //     inset 0 0 0 1px var(--boton-sin-contenedor-primario-enfoque-borde),
+      //     0 0 8px var(--boton-sin-contenedor-primario-enfoque-sombra);
+      //   color: var(--boton-sin-contenedor-primario-enfoque-color);
+      // }
     }
   }
 }
