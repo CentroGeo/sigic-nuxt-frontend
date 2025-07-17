@@ -26,14 +26,14 @@ RUN npm run build
 # 🚀 Final stage
 FROM node:22
 
+ARG INSTALL_DEV=true
+
 WORKDIR /app
 
 COPY --from=builder /app/.output .output
 COPY --from=builder /app/package.json .
 COPY --from=builder /app/package-lock.json .
 
-# Reinstala solo lo que necesite el entorno final
-ARG INSTALL_DEV=true
 RUN if [ "$INSTALL_DEV" = "true" ]; then \
       npm ci --omit=optional ; \
     else \
