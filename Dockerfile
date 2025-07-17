@@ -17,6 +17,8 @@ COPY package.json package-lock.json ./
 # Argumento para decidir si se instalan devDeps
 ARG INSTALL_DEV=true
 
+RUN npm install @oxc-parser/binding-linux-x64-gnu
+
 RUN if [ "$INSTALL_DEV" = "true" ]; then \
       npm ci --omit=optional ; \
     else \
