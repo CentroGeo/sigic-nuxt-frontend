@@ -3,6 +3,14 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
+RUN apk add --no-cache \
+  python3 \
+  make \
+  g++ \
+  libc6-compat \
+  libstdc++ \
+  sqlite-dev
+
 COPY package.json package-lock.json ./
 
 # Argumento para decidir si se instalan devDeps
