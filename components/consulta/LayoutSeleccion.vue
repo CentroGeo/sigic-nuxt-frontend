@@ -70,7 +70,7 @@ const buttonTagDict = {
 </template>
 <style lang="scss" scoped>
 .seleccion-layout {
-  height: 100vh;
+  // height: 100vh;
   overflow-y: auto;
 }
 .controles-seleccion {

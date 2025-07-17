@@ -81,7 +81,3 @@ jobs:
           KEYCLOAK_CLIENT_SECRET: ${{ secrets.KEYCLOAK_CLIENT_SECRET }}
           NUXT_AUTH_SECRET: ${{ secrets.NUXT_AUTH_SECRET }}
           VIRTUAL_PORT: "3000"
-
-      - name: Verificar variables de entorno dentro del contenedor
-        run: |
-          docker compose -f docker-compose-ghcr.yml exec -T sigic-nuxt-frontend printenv | grep -E 'NODE_ENV|NUXT|KEYCLOAK|GEOSERVER|GEONODE'
