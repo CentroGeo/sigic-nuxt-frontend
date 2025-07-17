@@ -5,6 +5,9 @@ const isDev = process.env.NODE_ENV !== 'production'
 export default defineNuxtConfig({
   compatibilityDate: "2025-05-15",
   devtools: { enabled: isDev },
+  experimental: {
+    devTools: isDev
+  },
   sourcemap: {
     server: isDev,
     client: isDev

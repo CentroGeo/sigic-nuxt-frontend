@@ -1,6 +1,10 @@
 # 🏗️ Build stage
 FROM node:22 AS builder
 
+# Usa NODE_ENV para determinar si es dev o prod
+ARG NODE_ENV=development
+ENV NODE_ENV=${NODE_ENV}
+
 WORKDIR /app
 
 # Herramientas necesarias para compilar bindings nativos
