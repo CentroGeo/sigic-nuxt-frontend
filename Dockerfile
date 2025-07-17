@@ -24,7 +24,7 @@ RUN npm run build
 
 
 # 🚀 Final stage
-FROM node:22
+FROM node:22-slim
 
 ARG INSTALL_DEV=true
 
@@ -35,9 +35,9 @@ COPY --from=builder /app/package.json .
 COPY --from=builder /app/package-lock.json .
 
 RUN if [ "$INSTALL_DEV" = "true" ]; then \
-      npm ci --omit=optional ; \
+      npm i; \
     else \
-      npm ci --omit=dev --omit=optional ; \
+      npm ci --omit=dev; \
     fi
 
 EXPOSE 3000
