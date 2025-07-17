@@ -3,12 +3,19 @@ const resourceType = "dataLayer";
 
 const config = useRuntimeConfig();
 const storeSelected = useSelectedResourcesStore();
-
+const randomNum = ref(1);
 const mapa = ref();
-
 function exportarMapa() {
   mapa.value?.exportarImagen("sigic");
 }
+// Esto de aquí permite cambiar la llave de
+watch(
+  () => storeSelected.selectedResources[resourceType],
+  () => {
+    randomNum.value += Math.random();
+  },
+  { deep: true }
+);
 </script>
 
 <template>
@@ -34,10 +41,10 @@ function exportarMapa() {
             v-for="(capa, index) in storeSelected.selectedResources[
               resourceType
             ]"
-            :key="`${capa.uuid}_${index}`"
+            :key="`${capa.uuid}_${randomNum}`"
             :fuente="`${config.public.geoserverUrl}/wms?`"
             :capa="capa.alternate"
-            :posicion="index"
+            :posicion="storeSelected.selectedResources.length - index"
           />
         </SisdaiMapas>
       </ClientOnly>

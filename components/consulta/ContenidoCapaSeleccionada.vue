@@ -1,6 +1,6 @@
 <script setup>
 import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
-import { downloadFile } from "~/utils/downloadFiles.js";
+
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
   selectedElement: {
@@ -53,7 +53,6 @@ const optionsButtons = ref([
     pictogram: "pictograma-archivo-descargar",
     action: () => {
       console.log("Descargar el archivo");
-      downloadDataLayer(selectedElement.value);
     },
   },
 ]);

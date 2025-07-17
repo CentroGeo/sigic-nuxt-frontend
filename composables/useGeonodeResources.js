@@ -22,6 +22,8 @@ export function useGeonodeResources({ resourceType } = {}) {
         page: page,
         page_size: 15,
         "filter{resource_type}": typeDict[resourceType],
+        "filter{subtype.in}": "raster",
+        "filter{subtype.in}": "vector",
       });
       fetch(`${api}?${dataParams.toString()}`, {
         method: "GET",

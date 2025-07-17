@@ -1,5 +1,4 @@
 <script setup>
-// PENDING: El buscador sisdai genera un error que dice "Hidration completed but contains mismatches"
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
   titulo: { type: String, default: "Título" },

@@ -1,7 +1,9 @@
 <script setup>
-import { ref, toRefs } from "vue";
+// PENDING: Tener en cuenta que no solo tendremos archivos vectoriales
+import { ref, toRefs, onMounted, onUnmounted } from "vue";
 import { useSelectedResourcesStore } from "~/stores/selectedResources.js";
-
+import { tooltipContent, fetchGeometryType } from "~/utils/consulta.js";
+const config = useRuntimeConfig();
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
   resourceType: {
@@ -14,63 +16,49 @@ const props = defineProps({
   },
 });
 const { resourceType, catalogueElement } = toRefs(props);
-const isChecked = ref(false);
-
+const api = ref(config.public.geoserverUrl);
 const subtype = ref(catalogueElement.value.subtype);
-const bbox_polygon = ref(catalogueElement.value.bbox_polygon.type);
-const buttons = ref([
-  {
-    label:
-      `<p>Descripción: ${catalogueElement.value.abstract}</p>` +
-      `<p>Origen: ${catalogueElement.value.attribution}</p>` +
-      `<p>Creación: ${catalogueElement.value.created}</p>` +
-      `<p>Revisión: ${catalogueElement.value.date}</p>` +
-      `<p>Keywords: ${catalogueElement.value.keywords}</p>` +
-      `<p>CRS: ${catalogueElement.value.srid}</p>`,
-    class: "pictograma-informacion",
-    index: 3,
+const geomType = ref(null);
+const isChecked = ref(false);
+const buttons = ref([]);
+const optionsDict = {
+  Point: { tooltipText: "Capa de puntos", class: "pictograma-capa-puntos" },
+  MultiPoint: {
+    tooltipText: "Capa de puntos",
+    class: "pictograma-capa-puntos",
   },
-]);
-
-// Revisamos qué tipo de documento estamos mostrando para decidir qué botones mostrar
-if (resourceType.value === "dataLayer") {
-  buttons.value.push({
-    label: "Variables disponibles",
-    class: "pictograma-visualizador",
-    index: 2,
-    tooltipInfo: "No de estilos",
-  });
-
-  if (subtype.value == "vector") {
-    if (bbox_polygon.value === "Polygon") {
-      buttons.value.push({
-        label: "Capa de poligonos",
-        class: "pictograma-capa-poligono",
-        index: 1,
-      });
-    } else if (bbox_polygon.value === "LineString") {
-      buttons.value.push({
-        label: "Capa de lineas",
-        class: "pictograma-capa-lineas",
-        index: 1,
-      });
-    } else if (bbox_polygon.value === "Points") {
-      buttons.value.push({
-        label: "Capa de puntos",
-        class: "pictograma-capa-puntos",
-        index: 1,
-      });
-    }
-  } else {
-    buttons.value.push({
-      label: "Capa tipo raster",
-      class: "pictograma-capas",
-      index: 1,
-    });
-  }
-}
-// Ordenamos la lista de botones
-buttons.value.sort((a, b) => a.index - b.index);
+  Polygon: {
+    tooltipText: "Capa de poligonos",
+    class: "pictograma-capa-poligono",
+  },
+  MultiPolygon: {
+    tooltipText: "Capa de poligonos",
+    class: "pictograma-capa-poligono",
+  },
+  LineString: {
+    tooltipText: "Capa de lineas",
+    class: "pictograma-capa-lineas",
+  },
+  LinearRing: {
+    tooltipText: "Capa de lineas",
+    class: "pictograma-capa-lineas",
+  },
+  MultiLineString: {
+    tooltipText: "Capa de lineas",
+    class: "pictograma-capa-lineas",
+  },
+  GeometryCollection: {
+    tooltipText: "Indefinido",
+    class: "pictograma-capa-lineas",
+  },
+  Raster: {
+    tooltipText: "Raster",
+    class: "pictograma-capa-lineas",
+  },
+};
+// Para triggerear la función de observar
+let observer;
+const rootEl = ref();
 
 // Manjeamos el checkbox y controlamos los elementos seleccionados
 function selectElement(resourceType, option) {
@@ -105,9 +93,80 @@ watch(
   },
   { deep: true }
 );
+
+onMounted(() => {
+  // Esto es para observar cuando la tarjeta entra en la vista
+  observer = new IntersectionObserver(
+    async (entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          // Primero checamos si no es dataset
+          if (resourceType.value !== "dataLayer") {
+            buttons.value = [
+              {
+                tooltipText: tooltipContent(catalogueElement.value),
+                class: "pictograma-informacion",
+                position: "arriba",
+              },
+            ];
+          } else {
+            // Si es raster
+            if (subtype.value === "raster") {
+              geomType.value = "Raster";
+            } else {
+              // Si es vectorial llamamos el tipo de geometría.
+              // Este llamado no se hace sino hasta que la tarjeta va a entrar a la vista
+              geomType.value = await fetchGeometryType(
+                catalogueElement.value,
+                api.value
+              );
+            }
+            buttons.value = [
+              {
+                tooltipText: optionsDict[geomType.value].tooltipText,
+                class: optionsDict[geomType.value].class,
+                position: "arriba",
+              },
+              {
+                tooltipText: "Variables disponibles",
+                class: "pictograma-visualizador",
+                position: "arriba",
+              },
+              {
+                tooltipText: tooltipContent(catalogueElement.value),
+                class: "pictograma-informacion",
+                position: "derecha",
+              },
+            ];
+          }
+          observer.unobserve(entry.target);
+        }
+      }
+    },
+    {
+      //Esto es para que se dispare la función de petición de recursos
+      // 300px antes de que el componente entre a la vista
+      root: null,
+      rootMargin: "300px",
+    }
+  );
+
+  if (rootEl.value) {
+    observer.observe(rootEl.value);
+  }
+});
+onUnmounted(() => {
+  if (observer && rootEl.value) {
+    observer.unobserve(rootEl.value);
+  }
+});
 </script>
 <template>
-  <div class="m-x-5 m-y-2" :id="`elemento-${catalogueElement.uuid}`">
+  <div
+    class="m-x-5 m-y-2"
+    :id="`elemento-${catalogueElement.uuid}`"
+    ref="rootEl"
+  >
     <div
       class="tarjeta-elemento"
       @click="selectElement(resourceType, catalogueElement)"
@@ -125,7 +184,7 @@ watch(
         v-for="button in buttons"
         :class="[button.class, 'pictograma-mediano']"
         aria-hidden="true"
-        v-globo-informacion:arriba="button.label"
+        v-globo-informacion:[button.position]="button.tooltipText"
       ></span>
     </div>
   </div>

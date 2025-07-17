@@ -1,4 +1,5 @@
 <script setup>
+import { tooltipContent } from "~/utils/consulta.js";
 const selectedStore = useSelectedResourcesStore();
 const props = defineProps({
   selectedElement: {
@@ -8,12 +9,12 @@ const props = defineProps({
   resourceType: { type: String, required: true },
 });
 const { selectedElement, resourceType } = toRefs(props);
-const modalInfoInteraction = ref(0);
 
 if (!selectedStore.shownFiles[resourceType.value]) {
   let firstSelection = selectedStore.selectedResources[resourceType.value][0];
   selectedStore.setShownFile(resourceType.value, firstSelection);
 }
+
 /* const isChecked = computed(() => {
   if (resourceType.value !== "dataLayer") {
     if (
@@ -30,12 +31,6 @@ if (!selectedStore.shownFiles[resourceType.value]) {
 }); */
 </script>
 <template>
-  <div>
-    <ConsultaModalInformacion
-      :interaction-counter="modalInfoInteraction"
-      :selected-element="selectedElement"
-    />
-  </div>
   <div class="tarjeta m-y-1">
     <!--     <div :class="isChecked ? 'tarjeta-selected' : 'selected-unselected'"> -->
     <div class="tarjeta-selected">
@@ -46,7 +41,10 @@ if (!selectedStore.shownFiles[resourceType.value]) {
             class="boton-pictograma boton-sin-contenedor-secundario"
             aria-label="Mostrar información"
             type="button"
-            @click="modalInfoInteraction += 1"
+            v-globo-informacion:izquierda="{
+              contenido: tooltipContent(selectedElement),
+              desfase: [0, 8],
+            }"
           >
             <span
               class="pictograma-informacion pictograma-mediano"

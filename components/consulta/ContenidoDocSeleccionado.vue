@@ -1,5 +1,5 @@
 <script setup>
-import { downloadFile } from "~/utils/downloadFiles.js";
+import { downloadFile } from "~/utils/consulta.js";
 
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
