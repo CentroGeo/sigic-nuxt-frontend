@@ -1,15 +1,16 @@
 # 🏗️ Build stage
-FROM node:22-alpine AS builder
+FROM node:22 AS builder
 
 WORKDIR /app
 
-RUN apk add --no-cache \
-  python3 \
-  make \
-  g++ \
-  libc6-compat \
-  libstdc++ \
-  sqlite-dev
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    make \
+    g++ \
+    libc6 \
+    libstdc++6 \
+    libsqlite3-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY package.json package-lock.json ./
 
@@ -28,7 +29,7 @@ RUN npm run build
 
 
 # 🚀 Final stage
-FROM node:22-alpine
+FROM node:22
 
 WORKDIR /app
 
