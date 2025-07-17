@@ -1,5 +1,24 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  app: {
+    head: {
+      link: [
+        {
+          rel: 'shortcut icon',
+          href: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/images/favicon.ico',
+        },
+        {
+          rel: 'stylesheet',
+          href: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/styles/main.css',
+        },
+      ],
+      script: [
+        {
+          src: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/js/gobmx.js',
+        },
+      ],
+    },
+  },
   compatibilityDate: "2025-05-15",
   devtools: { enabled: true },
 

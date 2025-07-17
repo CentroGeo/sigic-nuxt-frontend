@@ -12,7 +12,7 @@ const accesibilidadStore = useAccesibilidadStore();
     </a>
     <MainNavegacion />
 
-    <main id="principal">
+    <main id="principal" class="p-t-7">
       <slot />
     </main>
 
@@ -23,3 +23,11 @@ const accesibilidadStore = useAccesibilidadStore();
     </client-only>
   </div>
 </template>
+<style lang="scss">
+nav.navegacion.navegacion-pegada {
+  top: 60px;
+}
+.navbar-brand {
+  margin-right: 41rem;
+}
+</style>
