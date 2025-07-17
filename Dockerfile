@@ -1,6 +1,8 @@
 # 🏗️ Build stage
 FROM node:22 AS builder
 
+ARG INSTALL_DEV=true
+
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -14,16 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY package.json package-lock.json ./
 
-# Argumento para decidir si se instalan devDeps
-ARG INSTALL_DEV=true
-
-RUN npm install @oxc-parser/binding-linux-x64-gnu
-
-RUN if [ "$INSTALL_DEV" = "true" ]; then \
-      npm ci --omit=optional ; \
-    else \
-      npm ci --omit=dev --omit=optional ; \
-    fi
+RUN npm i
 
 COPY . .
 
