@@ -7,28 +7,12 @@ import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/S
 import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
 import SisdaiCasilla from "@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue";
 
-import { useIAStore } from "~/stores/ia.js";
 import { ref } from "vue";
 
 const catalogoModal = ref(null);
 const capasModal = ref(null);
 
 const storeIA = useIAStore();
-
-const proyectos = ref([
-  {
-    id: 0,
-    titulo: "Biodiversidad de ecosistemas marinos",
-    numero_contextos: 0,
-    numero_fuentes: 9,
-  },
-  // {
-  //   id: 1,
-  //   titulo: "Nombre del proyecto",
-  //   numero_contextos: 5,
-  //   numero_fuentes: 5,
-  // },
-]);
 
 const categorias = ref([
   {
@@ -92,17 +76,17 @@ const botonRadio = ref("");
 const botonRadioModal = ref("");
 const campoCasilla = ref(false);
 </script>
+
 <template>
   <IaLayoutPaneles>
     <template #lista>
-      <IaListaLeyendaInicio v-if="!storeIA.existenProyectos" />
+      <IaLeyendaInicioListas />
 
       <IaLayoutListas
-        v-else
+        v-if="storeIA.existenProyectos"
         texto-boton="Crear proyecto"
         titulo="Proyectos"
         etiqueta-busqueda="Buscar un proyecto"
-        :recurso-lista="proyectos"
       />
     </template>
 
@@ -293,7 +277,7 @@ const campoCasilla = ref(false);
                       :key="capa.id"
                       class="m-y-0"
                     >
-                      <div class="capa p-2 m-b-2">
+                      <div class="capa p-2 m-b-2 borde-redondeado-20">
                         <SisdaiCasilla
                           v-model="campoCasilla"
                           :etiqueta="capa.titulo"
@@ -323,7 +307,7 @@ const campoCasilla = ref(false);
                       :key="capa.id"
                       class="m-y-0"
                     >
-                      <div class="capa p-2 m-b-2">
+                      <div class="capa p-2 m-b-2 borde-redondeado-20">
                         <h6 class="m-t-0 m-b-1">{{ capa.titulo }}</h6>
                         <div class="m-b-1">
                           {{ capa.cateogria }}
@@ -388,39 +372,23 @@ const campoCasilla = ref(false);
 }
 
 .categoria {
-  background: var(
-    --Componentes-Navegacin-secundaria---navegacion-secundaria-fondo,
-    #f8e1e8
-  );
-  color: var(
-    --Componentes-Navegacin-secundaria---navegacion-secundaria-activo-borde,
-    #9d2148
-  );
+  background: var(--navegacion-secundaria-fondo);
+  color: var(--navegacion-secundaria-activo-borde);
   font-size: 16px;
   font-style: normal;
   font-weight: 400;
-  line-height: var(--Tipos-Interlineado-Prrafos-Prrafos, 24px);
   cursor: pointer;
 
   &.seleccionada {
-    border-left: 8px solid
-      var(
-        --Componentes-Navegacin-secundaria---navegacion-secundaria-activo-borde,
-        #9d2148
-      );
-    background: var(
-      --Componentes-Navegacin-secundaria---navegacion-secundaria-activo-fondo,
-      #fcf9fa
-    );
+    border-left: 8px solid var(--navegacion-secundaria-activo-borde);
+    background: var(--navegacion-secundaria-activo-fondo);
   }
 }
 
 .capa {
-  border-radius: var(--Escalas-Bordes-redondeados-br-20, 20px);
-  background: var(--Base-Fondo---fondo-acento, #fcf3f5);
-  color: var(--Base-Tipografa---texto-secundario, #5f3e47);
+  background: var(--fondo-acento);
+  color: var(--texto-secundario);
 
-  font-size: var(--Tipos-Tamao-Prrafos-Prrafo-base, 16px);
   font-style: normal;
   font-weight: 500;
   line-height: 20px;
