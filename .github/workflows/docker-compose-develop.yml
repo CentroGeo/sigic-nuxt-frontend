@@ -72,10 +72,12 @@ jobs:
           docker compose -f docker-compose-ghcr.yml down -v || true
           docker compose -f docker-compose-ghcr.yml up -d --force-recreate
         env:
-          NUXT_API_URL: ${{ secrets.NUXT_API_URL }}
-          NUXT_DB_USERNAME: ${{ secrets.NUXT_DB_USERNAME }}
-          NUXT_DB_PASSWORD: ${{ secrets.NUXT_DB_PASSWORD }}
-          NUXT_DB_HOST: ${{ secrets.NUXT_DB_HOST }}
-          NUXT_DB_NAME: ${{ secrets.NUXT_DB_NAME }}
-          VIRTUAL_HOST: ${{ secrets.NUXT_VIRTUAL_HOST }}
+          NODE_ENV: "development"
+          GEONODE_URL: ${{ vars.GEONODE_URL }}
+          GEOSERVER_URL: ${{ vars.GEOSERVER_URL }}
+          NUXT_AUTH_ORIGIN: ${{ vars.NUXT_AUTH_ORIGIN }}
+          KEYCLOAK_ISSUER: ${{ vars.KEYCLOAK_ISSUER }}
+          KEYCLOAK_CLIENT_ID: ${{ secrets.KEYCLOAK_CLIENT_ID }}
+          KEYCLOAK_CLIENT_SECRET: ${{ secrets.KEYCLOAK_CLIENT_SECRET }}
+          NUXT_AUTH_SECRET: ${{ secrets.NUXT_AUTH_SECRET }}
           VIRTUAL_PORT: "3000"
