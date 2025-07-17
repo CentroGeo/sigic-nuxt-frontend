@@ -32,7 +32,7 @@ jobs:
 
       - name: Build & tag Docker image
         run: |
-          docker build \
+          docker build --build-arg INSTALL_DEV=true \
             -t ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.branch }} \
             -t ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.sha }} \
             -f Dockerfile .
