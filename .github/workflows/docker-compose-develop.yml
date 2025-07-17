@@ -1,0 +1,84 @@
+name: CI/CD - Build & Deploy SIGIC Keycloak (develop)
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build:
+    name: Build SIGIC Nuxt Frontend image (develop)
+    runs-on: [self-hosted, build-develop, sigic-nuxt-frontend]
+    environment: develop
+
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GHCR_GEOINTSIGIC_PAT }}" | docker login ghcr.io -u geointsigic --password-stdin
+
+      - name: Set variables
+        id: vars
+        run: |
+          echo "owner=centrogeo" >> $GITHUB_OUTPUT
+          echo "image=sigic-nuxt-frontend" >> $GITHUB_OUTPUT
+          echo "sha=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+          echo "branch=develop" >> $GITHUB_OUTPUT
+
+      - name: Build & tag Docker image
+        run: |
+          docker build \
+            -t ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.branch }} \
+            -t ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.sha }} \
+            -f Dockerfile .
+
+      - name: Push image
+        run: |
+          docker push ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.branch }}
+          docker push ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.sha }}
+
+  deploy:
+    name: Deploy SIGIC Nuxt frontend to dev server
+    needs: build
+    runs-on: [self-hosted, deploy-develop, sigic-nuxt-frontend]
+    environment: develop
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set variables
+        id: vars
+        run: |
+          echo "owner=centrogeo" >> $GITHUB_OUTPUT
+          echo "image=sigic-nuxt-frontend" >> $GITHUB_OUTPUT
+          echo "sha=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+          echo "branch=develop" >> $GITHUB_OUTPUT
+
+      - name: Docker login to GHCR
+        run: echo ${{ secrets.GHCR_GEOINTSIGIC_PAT }} | docker login ghcr.io -u geointsigic --password-stdin
+
+      - name: Reemplazar imagen en docker-compose-ghcr.yml
+        run: |
+          sed -i "s|ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:.*|ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.sha }}|g" docker-compose-ghcr.yml
+
+      - name: Docker Compose up
+        run: |
+          docker compose -f docker-compose-ghcr.yml down -v || true
+          docker compose -f docker-compose-ghcr.yml up -d --force-recreate
+        env:
+          KC_DB_USERNAME: ${{ secrets.KC_DB_USERNAME }}
+          KC_DB_PASSWORD: ${{ secrets.KC_DB_PASSWORD }}
+          KC_DB_URL_HOST: ${{ secrets.KC_DB_URL_HOST }}
+          KC_DB_URL_DATABASE: ${{ secrets.KC_DB_URL_DATABASE }}
+          KC_DB: ${{ vars.KC_DB }}
+          KC_HOSTNAME: ${{ vars.KC_HOSTNAME }}
+          KC_HOSTNAME_STRICT: ${{ vars.KC_HOSTNAME_STRICT }}
+          JAVA_OPTS: ${{ vars.JAVA_OPTS }}
+          VIRTUAL_HOST: ${{ vars.KC_HOSTNAME }}
+          VIRTUAL_PORT: "8080"
