@@ -1,12 +1,15 @@
 <script setup>
+import { SisdaiMapa, SisdaiCapaXyz } from "@centrogeomx/sisdai-mapas";
+
 const resourceType = "dataLayer";
 
-const config = useRuntimeConfig();
-const storeSelected = useSelectedResourcesStore();
-const randomNum = ref(1);
-const mapa = ref();
+// const config = useRuntimeConfig();
+// const storeSelected = useSelectedResourcesStore();
+
+// const mapa = ref();
+
 function exportarMapa() {
-  mapa.value?.exportarImagen("sigic");
+  // mapa.value?.exportarImagen("sigic");
 }
 // Esto de aquí permite cambiar la llave de
 watch(
@@ -30,23 +33,20 @@ watch(
 
     <template #visualizador>
       <ClientOnly>
-        <SisdaiMapas
-          ref="mapa"
+        <SisdaiMapa
           class="gema"
           :vista="{ extension: '-118.3651,14.5321,-86.7104,32.7187' }"
         >
           <SisdaiCapaXyz />
 
-          <SisdaiCapaWms
-            v-for="(capa, index) in storeSelected.selectedResources[
-              resourceType
-            ]"
-            :key="`${capa.uuid}_${randomNum}`"
+          <!-- <SisdaiCapaWms
+            v-for="capa in storeSelected.selectedResources[resourceType]"
+            :key="capa.uuid"
             :fuente="`${config.public.geoserverUrl}/wms?`"
             :capa="capa.alternate"
             :posicion="storeSelected.selectedResources.length - index"
-          />
-        </SisdaiMapas>
+          /> -->
+        </SisdaiMapa>
       </ClientOnly>
     </template>
 

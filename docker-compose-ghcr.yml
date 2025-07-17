@@ -1,0 +1,16 @@
+
+services:
+  sigic-frontend:
+    image: ghcr.io/centrogeo/sigic-nuxt-frontend:main
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    environment:
+      GEONODE_URL: ${GEONODE_URL}
+      GEOSERVER_URL: ${GEOSERVER_URL}
+      NUXT_AUTH_ORIGIN: ${NUXT_AUTH_ORIGIN}
+      KEYCLOAK_ISSUER: ${KEYCLOAK_ISSUER}
+      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
+      NUXT_AUTH_SECRET: ${NUXT_AUTH_SECRET}
+      NODE_ENV: ${NODE_ENV}
