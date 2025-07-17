@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from "vue";
-import { useIAStore } from "~/stores/ia.js";
+
 const storeIA = useIAStore();
 
 const proyecto = {
@@ -41,10 +41,13 @@ const contextos = ref([
           <div class="flex flex-contenido-separado proyecto-encabezado">
             <div class="flex proyecto-encabezado">
               <h2>{{ proyecto.titulo }}</h2>
-              <div class="p-x-1 p-y-minimo proyecto-estado">
+              <p
+                class="p-x-1 p-y-minimo fondo-color-acento texto-color-secundario borde borde-color-acento borde-redondeado-8"
+              >
                 <span>{{ proyecto.estado }}</span>
                 <!-- TODO: agregar icono de para privado/publico -->
-              </div>
+                <span class="pictograma-privado" aria-hidden="true"></span>
+              </p>
             </div>
             <button class="boton-primario boton-chico" type="button">
               Configurar proyecto
@@ -107,7 +110,7 @@ const contextos = ref([
                       to="/ia/chat/dinamica"
                     >
                       Iniciar chat
-                      <span class="pictograma-ayuda" aria-hidden="true" />
+                      <span class="pictograma-chat" aria-hidden="true" />
                     </nuxt-link>
                     <nuxt-link
                       class="boton-secundario boton-chico"
@@ -168,7 +171,7 @@ const contextos = ref([
 
 <style lang="scss">
 .tarjeta {
-  background-color: var(--fondo-acento);
+  background-color: var(--fondo-neutro);
   .tarjeta-imagen {
     height: 120px;
   }
@@ -185,11 +188,11 @@ const contextos = ref([
   align-items: center;
 }
 
-.proyecto-estado {
-  border-radius: var(--Escalas-Bordes-redondeados-br-2, 8px);
-  border: 1px solid var(--Base-Borde---borde-acento, #53323c);
-  background: var(--Base-Fondo---fondo-acento, #fcf3f5);
-}
+// .proyecto-estado {
+//   // border-radius: var(--Escalas-Bordes-redondeados-br-2, 8px);
+//   // border: 1px solid var(--Base-Borde---borde-acento, #53323c);
+//   // background: var(--fondo-acento);
+// }
 
 .separador {
   width: 100%;

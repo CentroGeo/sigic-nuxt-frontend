@@ -1,105 +1,37 @@
 <script setup>
 import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
 import { ref } from "vue";
-import { useIAStore } from "~/stores/ia.js";
+
 const storeIA = useIAStore();
 
 const props = defineProps({
   titulo: { type: String, default: "Título" },
   textoBoton: { type: String, default: "Título" },
   etiquetaBusqueda: { type: String, default: undefined },
-  recursoLista: { type: Array, required: true },
+  // recursoLista: { type: Array, required: true },
 });
 const { titulo, textoBoton, recursoLista, etiquetaBusqueda } = toRefs(props);
 
-// const fechaHoy = new Date();
-const fechaHoy = "01-07-2025";
+const catalogo = ref([
+  {
+    id: 0,
+    titulo: "Biodiversidad de ecosistemas marinos",
+    numero_contextos: 0,
+    numero_fuentes: 9,
+  },
+  // {
+  //   id: 1,
+  //   titulo: "Nombre del proyecto",
+  //   numero_contextos: 5,
+  //   numero_fuentes: 5,
+  // },
+]);
 
-const catalogoFiltrado = ref(recursoLista.value);
+const catalogoFiltrado = ref(catalogo.value);
 </script>
 
 <template>
   <div>
-    <div>
-      <!-- TODO: Colocar ListasChats -->
-      <div v-if="titulo == 'Chats'">
-        <div style="max-height: 85vh; overflow-y: auto" class="p-x-3 p-t-3">
-          <button
-            style="width: 100%; text-align: center; display: inline-block"
-            class="boton-primario"
-            aria-label="Crear nuevo chat"
-          >
-            {{ textoBoton }}
-          </button>
-
-          <ClientOnly>
-            <SisdaiCampoBusqueda
-              style="width: 100%"
-              class="m-y-3"
-              :etiqueta="etiquetaBusqueda"
-              :catalogo="recursoLista"
-              :catalogo-anidado="true"
-              catalogo-anidado-propiedad-elementos="chat"
-              propiedad-busqueda="titulo"
-              @alFiltrar="(r) => (catalogoFiltrado = r)"
-            />
-          </ClientOnly>
-
-          <h6>{{ titulo }}</h6>
-          <ul class="lista-sin-estilo">
-            <li
-              v-for="grupo in catalogoFiltrado"
-              :id="grupo.id"
-              :key="grupo.id"
-            >
-              {{ grupo.fecha == fechaHoy ? "Hoy" : grupo.fecha }}
-              <ul class="lista-sin-estilo">
-                <li v-for="chat in grupo.chat" :id="chat.id" :key="chat.id">
-                  <nuxt-link
-                    class="tarjeta-chat p-2 fondo-color-acento borde borde-redondeado-20"
-                    to="/ia/chat/dinamica"
-                  >
-                    <div>
-                      <h5 class="tarjeta-titulo m-t-0">{{ chat.titulo }}</h5>
-                      <p class="tarjeta-nombre-proyecto">
-                        {{ chat.proyecto }}
-                      </p>
-                      <p class="tarjeta-nombre-contexto">
-                        {{ chat.contexto }}
-                      </p>
-                      <div class="flex flex-contenido-final">
-                        <div>
-                          <nuxt-link
-                            class="boton-pictograma boton-sin-contenedor-primario"
-                            to="#"
-                          >
-                            <span
-                              class="pictograma-editar"
-                              aria-hidden="true"
-                            />
-                          </nuxt-link>
-                          <button
-                            class="boton-pictograma boton-sin-contenedor-primario"
-                            aria-label="Remover chat"
-                            type="button"
-                          >
-                            <span
-                              class="pictograma-eliminar"
-                              aria-hidden="true"
-                            />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </nuxt-link>
-                </li>
-              </ul>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
     <!-- TODO: Colocar ListasProyectos -->
     <div v-if="titulo == 'Proyectos'">
       <div style="max-height: 85vh; overflow-y: auto" class="p-x-3 p-t-3">
@@ -157,26 +89,18 @@ const catalogoFiltrado = ref(recursoLista.value);
   max-height: 85vh;
   overflow-y: auto;
 }
-.boton-nuevo-proyecto {
-  width: 100%;
-}
 
 .proyecto {
   &.seleccionado {
-    border-left: var(--Escalas-Bordes-borde-8, 8px) solid
-      var(--Base-Borde---borde-acento, #53323c);
-    background: var(--Base-Fondo---fondo-acento, #fcf3f5);
+    border-left: var(--Escalas-Bordes-borde-8, 8px) solid var(--borde-acento);
+    background: var(--fondo-acento);
   }
 
   .proyecto-titulo {
-    color: var(
-      --Componentes-Navegacin-secundaria---navegacion-secundaria-color,
-      #391821
-    );
+    color: var(--navegacion-secundaria-color);
     font-size: 16px;
     font-style: normal;
     font-weight: 600;
-    line-height: var(--Tipos-Interlineado-Prrafos-Prrafos, 24px);
   }
 }
 </style>

@@ -31,8 +31,8 @@ const { title, tag, numberElements } = toRefs(props);
 </template>
 <style lang="scss" scoped>
 .tarjeta {
-  background-color: var(--color-secundario-2);
+  background-color: var(--fondo-acento);
   border-radius: 0px;
-  border-left: solid 8px var(--color-secundario-8);
+  border-left: solid 8px var(--borde-acento);
 }
 </style>

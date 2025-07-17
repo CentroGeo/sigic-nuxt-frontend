@@ -113,13 +113,14 @@ watch(
         />
       </div>
       <div
-        class="contenedor-archivos"
-        v-if="selectedCategories.includes(category)"
         v-for="(option, index) in categorizedResources[category]"
+        v-if="selectedCategories.includes(category)"
+        :key="index"
+        class="contenedor-archivos"
       >
         <ConsultaElementoCatalogo
-          class="elemento-catalogo"
           :key="index"
+          class="elemento-catalogo"
           :catalogue-element="option"
           :resource-type="resourceType"
         />
@@ -140,7 +141,7 @@ watch(
   position: sticky;
   top: 0;
   z-index: 1;
-  background-color: var(--color-neutro-0);
+  background-color: var(--fondo);
   padding-bottom: 8px;
 }
 </style>
