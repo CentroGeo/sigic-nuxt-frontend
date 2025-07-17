@@ -72,13 +72,10 @@ jobs:
           docker compose -f docker-compose-ghcr.yml down -v || true
           docker compose -f docker-compose-ghcr.yml up -d --force-recreate
         env:
-          KC_DB_USERNAME: ${{ secrets.KC_DB_USERNAME }}
-          KC_DB_PASSWORD: ${{ secrets.KC_DB_PASSWORD }}
-          KC_DB_URL_HOST: ${{ secrets.KC_DB_URL_HOST }}
-          KC_DB_URL_DATABASE: ${{ secrets.KC_DB_URL_DATABASE }}
-          KC_DB: ${{ vars.KC_DB }}
-          KC_HOSTNAME: ${{ vars.KC_HOSTNAME }}
-          KC_HOSTNAME_STRICT: ${{ vars.KC_HOSTNAME_STRICT }}
-          JAVA_OPTS: ${{ vars.JAVA_OPTS }}
-          VIRTUAL_HOST: ${{ vars.KC_HOSTNAME }}
-          VIRTUAL_PORT: "8080"
+          NUXT_API_URL: ${{ secrets.NUXT_API_URL }}
+          NUXT_DB_USERNAME: ${{ secrets.NUXT_DB_USERNAME }}
+          NUXT_DB_PASSWORD: ${{ secrets.NUXT_DB_PASSWORD }}
+          NUXT_DB_HOST: ${{ secrets.NUXT_DB_HOST }}
+          NUXT_DB_NAME: ${{ secrets.NUXT_DB_NAME }}
+          VIRTUAL_HOST: ${{ secrets.NUXT_VIRTUAL_HOST }}
+          VIRTUAL_PORT: "3000"
