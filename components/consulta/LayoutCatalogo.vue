@@ -133,7 +133,7 @@ watch(
   border-bottom: solid 2px var(--color-neutro-3);
 }
 .catalogo-layout {
-  height: 100vh;
+  height: 85vh;
   overflow-x: hidden;
   overflow-y: auto;
 }

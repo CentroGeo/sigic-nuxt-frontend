@@ -1,5 +1,5 @@
 <script setup>
-import { downloadFile } from "~/utils/consulta.js";
+import { downloadDataTable } from "@/utils/consulta.js";
 
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
@@ -42,9 +42,17 @@ const shownFileUuid = computed(
         class="boton-pictograma boton-sin-contenedor-secundario"
         aria-label="Descargar selección"
         type="button"
-        @click="downloadFile(selectedElement)"
       >
-        <span class="pictograma-archivo-descargar" aria-hidden="true"></span>
+        <a
+          target="_blank"
+          :href="
+            resourceType === 'document'
+              ? selectedElement.download_url
+              : downloadDataTable(selectedElement)
+          "
+        >
+          <span class="pictograma-archivo-descargar" aria-hidden="true"></span>
+        </a>
       </button>
     </div>
   </div>
@@ -52,5 +60,11 @@ const shownFileUuid = computed(
 <style lang="scss" scoped>
 .flex {
   gap: 8px;
+}
+button {
+  a {
+    text-decoration: none;
+    color: var(--color-secundario-8);
+  }
 }
 </style>

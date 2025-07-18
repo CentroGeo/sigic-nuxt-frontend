@@ -1,5 +1,8 @@
 <script setup>
 import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
+import { downloadVectorData } from "@/utils/consulta.js";
+const config = useRuntimeConfig();
+const api = config.public.geoserverUrl;
 
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
@@ -11,6 +14,7 @@ const props = defineProps({
 });
 const { selectedElement, resourceType } = toRefs(props);
 const modalTabla = ref(null);
+const modalDescargaVector = ref(null);
 
 const optionsButtons = ref([
   {
@@ -53,6 +57,7 @@ const optionsButtons = ref([
     pictogram: "pictograma-archivo-descargar",
     action: () => {
       console.log("Descargar el archivo");
+      modalDescargaVector.value?.abrirModal();
     },
   },
 ]);
@@ -65,6 +70,44 @@ const optionsButtons = ref([
 
     <template #cuerpo>
       <ConsultaModalTabla :selected-element="selectedElement" />
+    </template>
+  </SisdaiModal>
+
+  <SisdaiModal ref="modalDescargaVector">
+    <template #encabezado>
+      <h1>Descargar capa</h1>
+    </template>
+    <template #cuerpo>
+      <p>Formato:</p>
+      <button
+        type="button"
+        class="boton-secundario"
+        @click="downloadVectorData(selectedElement, 'geojson')"
+      >
+        <a>JSON</a>
+      </button>
+      <button
+        type="button"
+        class="boton-secundario"
+        @click="downloadVectorData(selectedElement, 'csv')"
+      >
+        CSV
+      </button>
+      <button
+        type="button"
+        class="boton-secundario"
+        @click="downloadVectorData(selectedElement, 'gpkg')"
+      >
+        GeoPackage
+      </button>
+      <button
+        type="button"
+        class="boton-secundario"
+        @click="downloadVectorData(selectedElement, 'gpkg')"
+      >
+        KML
+      </button>
+      <button type="button" class="boton-secundario">Metadatos</button>
     </template>
   </SisdaiModal>
 

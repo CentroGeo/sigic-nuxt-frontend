@@ -1,16 +1,20 @@
 <script setup>
-import { SisdaiMapa, SisdaiCapaXyz } from "@centrogeomx/sisdai-mapas";
+import {
+  SisdaiMapa,
+  SisdaiCapaXyz,
+  SisdaiCapaWms,
+} from "@centrogeomx/sisdai-mapas";
 
 const resourceType = "dataLayer";
 
-// const config = useRuntimeConfig();
-// const storeSelected = useSelectedResourcesStore();
+const config = useRuntimeConfig();
+const storeSelected = useSelectedResourcesStore();
+const randomNum = ref(0);
+//mapa = ref();
 
-// const mapa = ref();
-
-function exportarMapa() {
-  // mapa.value?.exportarImagen("sigic");
-}
+/* function exportarMapa() {
+  mapa.value?.exportarImagen("sigic");
+} */
 // Esto de aquí permite cambiar la llave de
 watch(
   () => storeSelected.selectedResources[resourceType],
@@ -39,13 +43,15 @@ watch(
         >
           <SisdaiCapaXyz />
 
-          <!-- <SisdaiCapaWms
-            v-for="capa in storeSelected.selectedResources[resourceType]"
-            :key="capa.uuid"
+          <SisdaiCapaWms
+            v-for="(capa, index) in storeSelected.selectedResources[
+              resourceType
+            ]"
+            :key="`${capa.uuid}_${randomNum}`"
             :fuente="`${config.public.geoserverUrl}/wms?`"
             :capa="capa.alternate"
             :posicion="storeSelected.selectedResources.length - index"
-          /> -->
+          />
         </SisdaiMapa>
       </ClientOnly>
     </template>
@@ -55,7 +61,6 @@ watch(
         titulo="Capas seleccionadas"
         :resource-type="resourceType"
         etiqueta-elementos="Capas"
-        :funcion-descarga="exportarMapa"
       />
     </template>
   </ConsultaLayoutPaneles>
