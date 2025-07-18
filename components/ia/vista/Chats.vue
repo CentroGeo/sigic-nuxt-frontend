@@ -13,7 +13,7 @@ function enfocarAreaTexto() {
 
 const mensaje = ref("");
 const mensajes = ref([
-  {
+  /* {
     id: 0,
     actor: "AI",
     message: "Hola, ¿En qué te puedo ayudar hoy?",
@@ -34,15 +34,79 @@ const mensajes = ref([
     message:
       "Hasta ahora hemos identificado que los principales retos en el uso de tecnologías para monitoreo marino están relacionados con la baja cobertura de sensores en áreas clave de biodiversidad, como el Arrecife Alacranes y la costa norte de Quintana Roo. También se ha detectado una limitada integración de datos entre plataformas locales e internacionales, lo cual dificulta el análisis comparativo y la toma de decisiones.",
     reporte: true,
-  },
+  }, */
 ]);
 
-const submitMensaje = () => {
+const submitMensaje = async () => {
   if (mensaje.value === "") return;
-  mensajes.value.push({ actor: "Humano", message: mensaje.value });
-  mensaje.value = "";
+
+  const body = {
+    model: "deepseek-r1",
+    messages: [
+      {
+        role: "system",
+        content:
+          "Eres un asistente que puede responder preguntas basadas en noticias."
+      },
+      { role: "user", content: mensaje.value }
+    ],
+    think: false
+  };
+
+  try {
+    const response = await fetch("http://localhost:8000/start", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    });
+
+    const data = await response.json();
+
+    mensajes.value.push({
+      id: mensajes.value.length + 1,
+      actor: "Humano",
+      message: mensaje.value
+    });
+    mensaje.value = "";
+
+    const jobId = data.job_id;
+    if (!jobId) {
+      throw new Error("No se recibió job_id del servidor.");
+    }
+
+    const source = new EventSource(`http://localhost:8000/process/${jobId}`);
+
+    source.onmessage = event => {
+      try {
+        const eventData = JSON.parse(event.data);
+
+        if (eventData.status === "finished" && eventData.result) {
+          const contenido = JSON.parse(eventData.result.content);
+          mensajes.value.push({
+            id: mensajes.value.length + 1,
+            actor: "AI",
+            message: contenido.response
+          });
+          source.close();
+        }
+      } catch (err) {
+        console.error("Error al procesar evento:", err);
+        source.close();
+      }
+    };
+
+    source.onerror = err => {
+      console.error("Error en el stream SSE:", err);
+      source.close();
+    };
+  } catch (error) {
+    console.error("Error al enviar el mensaje:", error);
+  }
 };
-const generaIdAleatorio = (el) => {
+
+const generaIdAleatorio = el => {
   return el + Math.random().toString(36).substring(2);
 };
 const idAleatorio = generaIdAleatorio("areatexto-");
@@ -219,7 +283,7 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
                 step="10"
                 @blur="false"
                 @update:val_entrada="
-                  ($event) => (controlDeslizante.valor_seleccionado = $event)
+                  $event => (controlDeslizante.valor_seleccionado = $event)
                 "
               />
             </ClientOnly>
