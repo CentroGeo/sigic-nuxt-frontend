@@ -37,8 +37,9 @@ nav.navbar {
 }
 a.navbar-brand {
   margin-right: calc(var(--escala-rem-gob-sisdai) * 63rem);
-  margin-top: calc(var(--escala-rem-gob-sisdai) * 0.3125rem);
-  margin-bottom: calc(var(--escala-rem-gob-sisdai) * 0.3125rem);
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: calc(var(--escala-rem-gob-sisdai) * 0.3125rem) 0 !important;
 }
 .navbar-expand-md .navbar-nav .nav-link {
   padding-right: calc(var(--escala-rem-gob-sisdai) * 0.5rem);
@@ -49,6 +50,11 @@ a.navbar-brand {
   .navbar-dark .navbar-toggler {
     margin-right: calc(var(--escala-rem-gob-sisdai) * 9rem);
   }
+  a.navbar-brand {
+    margin-right: calc(var(--escala-rem-gob-sisdai) * 41rem);
+  }
+}
+@media (max-width: 576px) {
   a.navbar-brand {
     margin-right: calc(var(--escala-rem-gob-sisdai) * 41rem);
   }
