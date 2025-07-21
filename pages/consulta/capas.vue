@@ -1,10 +1,14 @@
 <script setup>
-import { SisdaiMapa, SisdaiCapaXyz } from "@centrogeomx/sisdai-mapas";
+import {
+  SisdaiCapaWms,
+  SisdaiCapaXyz,
+  SisdaiMapa,
+} from "@centrogeomx/sisdai-mapas";
 
 const resourceType = "dataLayer";
 
-// const config = useRuntimeConfig();
-// const storeSelected = useSelectedResourcesStore();
+const config = useRuntimeConfig();
+const storeSelected = useSelectedResourcesStore();
 
 // const mapa = ref();
 
@@ -31,12 +35,12 @@ function exportarMapa() {
         >
           <SisdaiCapaXyz />
 
-          <!-- <SisdaiCapaWms
+          <SisdaiCapaWms
             v-for="capa in storeSelected.selectedResources[resourceType]"
             :key="capa.uuid"
             :fuente="`${config.public.geoserverUrl}/wms?`"
             :capa="capa.alternate"
-          /> -->
+          />
         </SisdaiMapa>
       </ClientOnly>
     </template>
