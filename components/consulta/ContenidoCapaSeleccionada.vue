@@ -2,7 +2,6 @@
 import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
 import { downloadVectorData, downloadMetadata } from "@/utils/consulta.js";
 const config = useRuntimeConfig();
-const api = config.public.geonodeUrl;
 
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({

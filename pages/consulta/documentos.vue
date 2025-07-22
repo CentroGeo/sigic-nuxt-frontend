@@ -48,7 +48,4 @@ const resourceType = "document";
   width: 100%;
   height: 100%;
 }
-.contenedor {
-  color: var(--color-error-2);
-}
 </style>

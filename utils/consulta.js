@@ -30,10 +30,18 @@ export async function fetchGeometryType(resource) {
   }
 }
 
+export function downloadPDF(resource) {
+  let anchor = document.createElement("a");
+  anchor.href = resource.download_url;
+  anchor.download = `${resource.title}.pdf`;
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+}
+
 export async function downloadMetadata(resource) {
   const config = useRuntimeConfig();
   const api = new URL(`${config.public.geonodeURL}/catalogue/csw`);
-  console.log("se van a descargar los metadatos de: ", resource.uuid);
   api.search = new URLSearchParams({
     request: "GetRecordById",
     service: "CSW",

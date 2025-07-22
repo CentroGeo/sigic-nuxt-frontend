@@ -1,5 +1,10 @@
 <script setup>
-import { downloadVectorData } from "@/utils/consulta.js";
+import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
+import {
+  downloadVectorData,
+  downloadMetadata,
+  downloadPDF,
+} from "@/utils/consulta.js";
 
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
@@ -14,6 +19,7 @@ const { selectedElement, resourceType } = toRefs(props);
 const shownFileUuid = computed(
   () => resourcesStore.shownFiles[resourceType.value].uuid
 );
+const modalDescargaDoc = ref(null);
 </script>
 
 <template>
@@ -42,30 +48,53 @@ const shownFileUuid = computed(
         class="boton-pictograma boton-sin-contenedor-secundario"
         aria-label="Descargar selección"
         type="button"
+        @click="modalDescargaDoc?.abrirModal()"
       >
         <span class="pictograma-archivo-descargar" aria-hidden="true"></span>
-
-        <!--         <a
-          target="_blank"
-          :href="
-            resourceType === 'document'
-              ? selectedElement.download_url
-              : downloadVectorData(selectedElement, 'csv')
-          "
-        >
-        </a> -->
       </button>
     </div>
   </div>
+
+  <SisdaiModal ref="modalDescargaDoc">
+    <template #encabezado>
+      <h1>Descargar documento</h1>
+    </template>
+    <template #cuerpo>
+      <p>{{ selectedElement.title }}</p>
+      <div>
+        <button
+          v-if="resourceType !== 'document'"
+          type="button"
+          class="boton-secundario"
+          @click="downloadVectorData(selectedElement, 'csv')"
+        >
+          CSV
+        </button>
+        <button
+          v-if="resourceType === 'document'"
+          type="button"
+          class="boton-secundario"
+          @click="downloadPDF(selectedElement)"
+        >
+          PDF
+        </button>
+        <button
+          type="button"
+          class="boton-secundario"
+          @click="downloadMetadata(selectedElement)"
+        >
+          Metadatos
+        </button>
+      </div>
+    </template>
+  </SisdaiModal>
 </template>
 <style lang="scss" scoped>
 .flex {
   gap: 8px;
 }
-button {
-  a {
-    text-decoration: none;
-    color: var(--color-secundario-8);
-  }
+.boton-secundario {
+  width: 90%;
+  margin: 8px;
 }
 </style>
