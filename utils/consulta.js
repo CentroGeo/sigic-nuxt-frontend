@@ -64,7 +64,6 @@ export async function downloadMetadata(resource) {
 }
 
 export async function downloadVectorData(resource, format) {
-  console.log("entramos a la funcion de descarga");
   let downloadLink = null;
   const maxRetries = 3;
   const delay = 1000;
@@ -144,34 +143,28 @@ export async function downloadVectorData(resource, format) {
     return;
   }
   const statusResult = await statusRequest.text();
-  //console.log("segunda respuesta: ", statusResult);
+
   // Como nos regresa un xml, hay que parsearlo
   const parser = new DOMParser();
   const parsedStatusResult = parser.parseFromString(statusResult, "text/xml");
-  //console.log(parsedStatusResult);
   const executeResponseHTML = parsedStatusResult.getElementsByTagName(
     "wps:ExecuteResponse"
   )[0];
-  //.log("seccion del html de nuestro interes", executeResponseHTML);
   const linkStatusLocation =
     executeResponseHTML?.getAttribute("statusLocation");
-  //console.log("statuts response link: ", linkStatusLocation);
 
   // Ahora hacemos una petición get al vínculo statusLocation.
   // Como a veces hace timeout, lo intentamos tres veces
   for (let attempt = 0; attempt < maxRetries; attempt++) {
-    //console.log(attempt);
     const downloadRequest = await fetch(linkStatusLocation);
     const downloadResult = await downloadRequest.text();
     if (downloadResult.includes("Process succeeded")) {
       console.log("se logró en el intento numero ", attempt);
-      //console.log("tercer respuesta: ", downloadResult);
       const parser2 = new DOMParser();
       const parsedDownloadResult = parser2.parseFromString(
         downloadResult,
         "text/xml"
       );
-      //console.log("get request parsed xml: ", parsedDownloadResult);
       let downloadHTML =
         parsedDownloadResult.getElementsByTagName("wps:Reference")[0];
       downloadLink = downloadHTML?.getAttribute("href");
@@ -184,7 +177,6 @@ export async function downloadVectorData(resource, format) {
     console.log("Falló la descarga");
     return;
   }
-  //console.log("downloadLink", downloadLink);
 
   // Si es un Json vamos a tener que forzar la descarga
   if (format === "geojson") {
@@ -197,7 +189,6 @@ export async function downloadVectorData(resource, format) {
     const blob = new Blob([JSON.stringify(jsonResponse)], {
       type: "application/json",
     });
-    //console.log(blob);
     const blobLink = URL.createObjectURL(blob);
     downloadLink = blobLink;
   }

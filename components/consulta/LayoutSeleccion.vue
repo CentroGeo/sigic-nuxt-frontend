@@ -1,4 +1,11 @@
 <script setup>
+import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
+import {
+  downloadVectorData,
+  downloadPDF,
+  downloadMetadata,
+} from "@/utils/consulta.js";
+const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
   titulo: { type: String, default: "Título" },
   resourceType: { type: String, required: true },
@@ -7,11 +14,43 @@ const props = defineProps({
 });
 const { titulo, resourceType } = toRefs(props);
 const selectedStore = useSelectedResourcesStore();
+const modalDescargaDoc = ref(null);
 const buttonTagDict = {
   dataLayer: "mapa",
-  dataTable: "archivo",
-  document: "archivo",
+  dataTable: "archivos",
+  document: "archivos",
 };
+function wait() {
+  return new Promise((resolve) => setTimeout(resolve, 500));
+}
+function downloadAllDocs() {
+  modalDescargaDoc.value?.abrirModal();
+}
+async function downloadAllCSV() {
+  let resourceList = resourcesStore.selectedResources[resourceType.value];
+  for (let i = 0; i < resourceList.length; i++) {
+    downloadVectorData(resourceList[i], "csv");
+    await wait();
+  }
+  modalDescargaDoc.value?.cerrarModal();
+}
+async function downloadAllPDF() {
+  let resourceList = resourcesStore.selectedResources[resourceType.value];
+  for (let i = 0; i < resourceList.length; i++) {
+    downloadPDF(resourceList[i]);
+    await wait();
+  }
+  modalDescargaDoc.value?.cerrarModal();
+}
+
+async function downloadAllMetadata() {
+  let resourceList = resourcesStore.selectedResources[resourceType.value];
+  for (let i = 0; i < resourceList.length; i++) {
+    downloadMetadata(resourceList[i]);
+    await wait();
+  }
+  modalDescargaDoc.value?.cerrarModal();
+}
 </script>
 
 <template>
@@ -27,7 +66,9 @@ const buttonTagDict = {
             type="button"
             class="boton-primario"
             aria-label="Descargar mapa"
-            @click="funcionDescarga"
+            @click="
+              resourceType === 'dataLayer' ? funcionDescarga : downloadAllDocs()
+            "
           >
             Descargar {{ buttonTagDict[resourceType] }}
             <span class="pictograma-mapa-generador" aria-hidden="true" />
@@ -66,6 +107,39 @@ const buttonTagDict = {
         :resource-type="resourceType"
       />
     </div>
+
+    <SisdaiModal ref="modalDescargaDoc">
+      <template #encabezado>
+        <h1>Descargar documentos</h1>
+      </template>
+      <template #cuerpo>
+        <div>
+          <button
+            v-if="resourceType !== 'document'"
+            type="button"
+            class="boton-secundario"
+            @click="downloadAllCSV"
+          >
+            CSV
+          </button>
+          <button
+            v-if="resourceType === 'document'"
+            type="button"
+            class="boton-secundario"
+            @click="downloadAllPDF"
+          >
+            PDF
+          </button>
+          <button
+            type="button"
+            class="boton-secundario"
+            @click="downloadAllMetadata"
+          >
+            Metadatos
+          </button>
+        </div>
+      </template>
+    </SisdaiModal>
   </div>
 </template>
 <style lang="scss" scoped>
@@ -79,5 +153,9 @@ const buttonTagDict = {
   z-index: 1;
   background-color: var(--fondo);
   padding-bottom: 8px;
+}
+.boton-secundario {
+  width: 90%;
+  margin: 8px;
 }
 </style>

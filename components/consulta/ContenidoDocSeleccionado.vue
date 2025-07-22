@@ -16,10 +16,10 @@ const props = defineProps({
   resourceType: { type: String, required: true },
 });
 const { selectedElement, resourceType } = toRefs(props);
+const modalDescargaDoc = ref(null);
 const shownFileUuid = computed(
   () => resourcesStore.shownFiles[resourceType.value].uuid
 );
-const modalDescargaDoc = ref(null);
 </script>
 
 <template>
