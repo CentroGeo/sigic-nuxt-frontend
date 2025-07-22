@@ -15,8 +15,8 @@ const buttonTagDict = {
 </script>
 
 <template>
-  <div class="m0 seleccion-layout">
-    <div class="controles-seleccion">
+  <div class="seleccion-layout">
+    <div class="encabeado-seleccion">
       <p class="h4 fondo-color-acento p-3 m-0">{{ titulo }}</p>
 
       <div class="m-x-2 m-y-1">
@@ -68,16 +68,19 @@ const buttonTagDict = {
     </div>
   </div>
 </template>
+
 <style lang="scss" scoped>
 .seleccion-layout {
-  // height: 100vh;
+  height: var(--altura-consulta-esc);
   overflow-y: auto;
-}
-.controles-seleccion {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  background-color: var(--fondo);
-  padding-bottom: 8px;
+  overflow-x: hidden;
+
+  .encabeado-seleccion {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: var(--fondo);
+    padding-bottom: 8px;
+  }
 }
 </style>
