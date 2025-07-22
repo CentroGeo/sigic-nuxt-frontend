@@ -1,13 +1,26 @@
 <script setup>
+import {
+  SisdaiCapaWms,
+  SisdaiCapaXyz,
+  SisdaiMapa,
+} from "@centrogeomx/sisdai-mapas";
+import html2canvas from "html2canvas";
+
 const resourceType = "dataLayer";
 
 const config = useRuntimeConfig();
 const storeSelected = useSelectedResourcesStore();
 
-const mapa = ref();
+const linkExportaMapa = ref();
 
 function exportarMapa() {
-  mapa.value?.exportarImagen("sigic");
+  const html = document.querySelectorAll(".mapa .ol-viewport").item(0);
+  html2canvas(html, {
+    useCORS: true,
+  }).then((canvas) => {
+    linkExportaMapa.value.href = canvas.toDataURL();
+    linkExportaMapa.value.click();
+  });
 }
 </script>
 
@@ -23,8 +36,7 @@ function exportarMapa() {
 
     <template #visualizador>
       <ClientOnly>
-        <SisdaiMapas
-          ref="mapa"
+        <SisdaiMapa
           class="gema"
           :vista="{ extension: '-118.3651,14.5321,-86.7104,32.7187' }"
         >
@@ -36,7 +48,7 @@ function exportarMapa() {
             :fuente="`${config.public.geoserverUrl}/wms?`"
             :capa="capa.alternate"
           />
-        </SisdaiMapas>
+        </SisdaiMapa>
       </ClientOnly>
     </template>
 
@@ -47,6 +59,7 @@ function exportarMapa() {
         etiqueta-elementos="Capas"
         :funcion-descarga="exportarMapa"
       />
+      <a ref="linkExportaMapa" class="oculto" download="sigic.png" />
     </template>
   </ConsultaLayoutPaneles>
 </template>

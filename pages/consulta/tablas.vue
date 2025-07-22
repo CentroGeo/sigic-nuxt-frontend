@@ -15,7 +15,7 @@ const obtenerDatos = async () => {
     service: "WFS",
     version: "1.0.0",
     request: "GetFeature",
-    typeName: "geonode:pocuf10gw",
+    typeName: "geonode:centroides_mapa2_maquinaria_mgn2020",
     outputFormat: "application/json",
     maxFeatures: tamanioPagina,
     startIndex: paginaActual.value * tamanioPagina,

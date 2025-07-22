@@ -1,6 +1,6 @@
 <script setup lang="ts">
 definePageMeta({
-  middleware: "auth",
+  middleware: "sidebase-auth",
 });
 
 const archivo = ref<File | null>(null);

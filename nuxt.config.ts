@@ -1,4 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+
+const isDev = process.env.NODE_ENV !== 'production'
+
 export default defineNuxtConfig({
   app: {
     head: {
@@ -20,7 +23,14 @@ export default defineNuxtConfig({
     },
   },
   compatibilityDate: "2025-05-15",
-  devtools: { enabled: true },
+  devtools: { enabled: isDev },
+  experimental: {
+    devTools: isDev
+  },
+  sourcemap: {
+    server: isDev,
+    client: isDev
+  },
 
   modules: [
     "@pinia/nuxt",
@@ -58,5 +68,11 @@ export default defineNuxtConfig({
   },
   devServer: {
     // port: 3001
+  },
+
+  vite: {
+    ssr: {
+      noExternal: ['@centrogeomx/sisdai-mapas'],
+    },
   },
 });
