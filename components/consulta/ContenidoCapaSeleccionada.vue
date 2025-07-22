@@ -1,7 +1,8 @@
 <script setup>
 import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
-import { downloadVectorData } from "@/utils/consulta.js";
+import { downloadVectorData, downloadMetadata } from "@/utils/consulta.js";
 const config = useRuntimeConfig();
+const api = config.public.geonodeUrl;
 
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
@@ -107,7 +108,13 @@ const optionsButtons = ref([
         >
           KML
         </button>
-        <button type="button" class="boton-secundario">Metadatos</button>
+        <button
+          type="button"
+          class="boton-secundario"
+          @click="downloadMetadata(selectedElement)"
+        >
+          Metadatos
+        </button>
       </div>
     </template>
   </SisdaiModal>

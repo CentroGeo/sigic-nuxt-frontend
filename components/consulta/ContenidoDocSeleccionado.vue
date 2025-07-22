@@ -1,5 +1,5 @@
 <script setup>
-import { downloadDataTable } from "@/utils/consulta.js";
+import { downloadVectorData } from "@/utils/consulta.js";
 
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
@@ -43,16 +43,17 @@ const shownFileUuid = computed(
         aria-label="Descargar selección"
         type="button"
       >
-        <a
+        <span class="pictograma-archivo-descargar" aria-hidden="true"></span>
+
+        <!--         <a
           target="_blank"
           :href="
             resourceType === 'document'
               ? selectedElement.download_url
-              : downloadDataTable(selectedElement)
+              : downloadVectorData(selectedElement, 'csv')
           "
         >
-          <span class="pictograma-archivo-descargar" aria-hidden="true"></span>
-        </a>
+        </a> -->
       </button>
     </div>
   </div>

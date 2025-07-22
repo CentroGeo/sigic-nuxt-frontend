@@ -1,4 +1,15 @@
-export async function fetchGeometryType(resource, api) {
+export function tooltipContent(resource) {
+  const content =
+    `<p style="max-width:250px">${
+      resource.abstract ? resource.abstract : "Sin descripción"
+    }</p>` +
+    `<p>${resource.attribution ? resource.attribution : "Sin fuente"}</p>`;
+  return content;
+}
+
+export async function fetchGeometryType(resource) {
+  const config = useRuntimeConfig();
+  const api = config.public.geoserverUrl;
   const url = new URL(`${api}/ows`);
   url.search = new URLSearchParams({
     service: "WFS",
@@ -10,26 +21,42 @@ export async function fetchGeometryType(resource, api) {
   }).toString();
 
   const res = await fetch(url);
-  const data = await res.json();
-  const geomType = data.features[0]["geometry"]["type"];
-  return geomType;
+  if (res.ok) {
+    const data = await res.json();
+    const geomType = data.features[0]["geometry"]["type"];
+    return geomType;
+  } else {
+    return "Error";
+  }
 }
 
-export function tooltipContent(resource) {
-  const content =
-    `<p style="max-width:250px">${
-      resource.abstract ? resource.abstract : "Sin descripción"
-    }</p>` +
-    `<p>${resource.attribution ? resource.attribution : "Sin fuente"}</p>`;
-  return content;
-}
+export async function downloadMetadata(resource) {
+  const config = useRuntimeConfig();
+  const api = new URL(`${config.public.geonodeURL}/catalogue/csw`);
+  console.log("se van a descargar los metadatos de: ", resource.uuid);
+  api.search = new URLSearchParams({
+    request: "GetRecordById",
+    service: "CSW",
+    version: "2.0.2",
+    id: resource.uuid,
+    outputschema: "http://www.isotc211.org/2005/gmd",
+    elementsetname: "full",
+  }).toString();
 
-export function downloadDataTable(resource) {
-  console.log("se descargará: ", resource.title);
-  return "https://geonode.dev.geoint.mx/#/";
+  const res = await fetch(api);
+  const dataBlob = await res.blob();
+  const blobLink = URL.createObjectURL(dataBlob);
+  let anchor = document.createElement("a");
+  anchor.href = blobLink;
+  anchor.download = `${resource.title}_metadata.xml`;
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+  URL.revokeObjectURL(blobLink);
 }
 
 export async function downloadVectorData(resource, format) {
+  console.log("entramos a la funcion de descarga");
   let downloadLink = null;
   const maxRetries = 3;
   const delay = 1000;
@@ -168,6 +195,7 @@ export async function downloadVectorData(resource, format) {
   }
   let anchor = document.createElement("a");
   anchor.href = downloadLink;
+  anchor.taget = "_blank";
   anchor.download = `${resource.title}.${format}`;
   document.body.appendChild(anchor);
   anchor.click();

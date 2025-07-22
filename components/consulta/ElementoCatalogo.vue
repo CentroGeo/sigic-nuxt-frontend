@@ -59,6 +59,10 @@ const optionsDict = {
     tooltipText: "Ni raster ni vector",
     class: "pictograma-flkt",
   },
+  Error: {
+    tooltipText: "No se pudo recuperar la información",
+    class: "pictograma-alerta",
+  },
 };
 // Para triggerear la función de observar
 let observer;
@@ -120,10 +124,7 @@ onMounted(() => {
             } else if (subtype.value === "vector") {
               // Si es vectorial
               // Solicitamos la geometría hasta que la tarjeta va a entrar a la vista
-              geomType.value = await fetchGeometryType(
-                catalogueElement.value,
-                api
-              );
+              geomType.value = await fetchGeometryType(catalogueElement.value);
               //geomType.value = "Point";
             } else {
               geomType.value = "Otro";

@@ -1,39 +1,41 @@
 <script setup>
-const variables = ref([]);
-const datos = ref([]);
-const paginaActual = ref(0);
-const totalFeatures = ref(0);
-const tamanioPagina = 10;
-
-const config = useRuntimeConfig();
-
+const resourcesStore = useSelectedResourcesStore();
 const resourceType = "dataTable";
 
-const obtenerDatos = async () => {
-  const url = new URL(`${config.public.geoserverUrl}/ows`);
-  url.search = new URLSearchParams({
-    service: "WFS",
-    version: "1.0.0",
-    request: "GetFeature",
-    typeName: "geonode:centroides_mapa2_maquinaria_mgn2020",
-    outputFormat: "application/json",
-    maxFeatures: tamanioPagina,
-    startIndex: paginaActual.value * tamanioPagina,
-  }).toString();
+const paginaActual = ref(0);
+const tamanioPagina = 10;
 
-  const res = await fetch(url);
-  const data = await res.json();
+const {
+  variables,
+  datos,
+  totalFeatures,
+  refetch: fetchTable,
+} = useGeoserverDataTable({
+  paginaActual: paginaActual.value,
+  tamanioPagina: tamanioPagina,
+  resource: resourcesStore.shownFiles[resourceType],
+});
 
-  if (data.totalFeatures !== undefined) {
-    totalFeatures.value = data.totalFeatures;
+watch(paginaActual, () => {
+  fetchTable({
+    paginaActual: paginaActual.value,
+    tamanioPagina: tamanioPagina,
+    resource: resourcesStore.shownFiles[resourceType],
+  });
+});
+
+// Observa cambios en el recurso seleccionado
+watch(
+  () => resourcesStore.shownFiles[resourceType],
+  () => {
+    paginaActual.value = 0;
+    fetchTable({
+      paginaActual: paginaActual.value,
+      tamanioPagina: tamanioPagina,
+      resource: resourcesStore.shownFiles[resourceType],
+    });
   }
-
-  const atributos = data.features.map((f) => f.properties);
-  variables.value = Object.keys(atributos[0] || {});
-  datos.value = atributos;
-};
-
-watch(paginaActual, obtenerDatos, { immediate: true });
+);
 </script>
 
 <template>
@@ -47,22 +49,27 @@ watch(paginaActual, obtenerDatos, { immediate: true });
     </template>
 
     <template #visualizador>
-      <UiTablaAccesible
-        :variables="variables"
-        :datos="datos"
-        :caption="'una descripción'"
-      />
-      <UiPaginador
-        :totalPaginas="Math.ceil(totalFeatures / tamanioPagina)"
-        @cambio="paginaActual = $event"
-      />
+      <div class="contenedor" v-if="!resourcesStore.shownFiles[resourceType]">
+        <h1>No hay seleccion</h1>
+      </div>
+      <div v-else>
+        <UiTablaAccesible
+          :variables="variables"
+          :datos="datos"
+          :caption="'una descripción'"
+        />
+        <UiPaginador
+          :totalPaginas="Math.ceil(totalFeatures / tamanioPagina)"
+          @cambio="paginaActual = $event"
+        />
+      </div>
     </template>
 
     <template #seleccion>
       <ConsultaLayoutSeleccion
         titulo="Tabulados de datos"
         :resource-type="resourceType"
-        etiqueta-elementos="Datos tabulaos"
+        etiqueta-elementos="Datos tabulados"
       />
     </template>
   </ConsultaLayoutPaneles>
