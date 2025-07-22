@@ -23,6 +23,10 @@ export function useGeonodeResources({ resourceType } = {}) {
         page_size: 15,
         "filter{resource_type}": typeDict[resourceType],
       });
+      // TODO: remover console logs
+      // console.log("dataParams", dataParams);
+      // https://geonode.dev.geoint.mx/api/v2/resources?page=1&page_size=15&filter%7Bresource_type%7D=dataset
+      // console.log(`${api}?${dataParams.toString()}`);
       fetch(`${api}?${dataParams.toString()}`, {
         method: "GET",
         /*         headers: {
