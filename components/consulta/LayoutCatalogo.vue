@@ -32,7 +32,7 @@ function groupResults() {
   categorizedResources.value = {};
   filteredResources.value.map((r) => {
     if (r.category) {
-      let title = r.category.gn_description;
+      const title = r.category.gn_description;
       if (Object.keys(categorizedResources.value).includes(title)) {
         categorizedResources.value[title].push(r);
       } else {
@@ -80,7 +80,7 @@ watch(
 
 <template>
   <div class="catalogo-layout">
-    <div class="controles-catalogo">
+    <div class="encabeado-catalogo">
       <p class="h4 fondo-color-acento p-3 m-0">{{ titulo }}</p>
 
       <div class="m-x-2 m-y-1">
@@ -100,6 +100,11 @@ watch(
       </div>
     </div>
 
+    <!-- <ul class="lista-catalogo" @click="n++">
+      <li v-for="x in n" :key="x">
+        {{ x }}
+      </li>
+    </ul> -->
     <div
       v-for="category in Object.keys(categorizedResources)"
       :key="category"
@@ -129,20 +134,27 @@ watch(
     </div>
   </div>
 </template>
+
 <style lang="scss" scoped>
-.contenedor-archivos {
-  border-bottom: solid 2px var(--color-neutro-3);
-}
 .catalogo-layout {
-  height: 100vh;
-  overflow-x: hidden;
+  height: var(--altura-consulta-esc);
   overflow-y: auto;
-}
-.controles-catalogo {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  background-color: var(--fondo);
-  padding-bottom: 8px;
+  overflow-x: hidden;
+
+  .encabeado-catalogo {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: var(--fondo);
+    padding-bottom: 8px;
+  }
+
+  .lista-catalogo {
+    background-color: var(--color-neutro-3);
+
+    .contenedor-archivos {
+      border-bottom: solid 2px var(--color-neutro-3);
+    }
+  }
 }
 </style>
