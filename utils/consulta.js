@@ -1,5 +1,3 @@
-import { parse } from "vue/compiler-sfc";
-
 export async function fetchGeometryType(resource, api) {
   const url = new URL(`${api}/ows`);
   url.search = new URLSearchParams({
@@ -32,7 +30,9 @@ export function downloadDataTable(resource) {
 }
 
 export async function downloadVectorData(resource, format) {
-  console.log("entramos a la funcion de descarga de archivo: ", format);
+  let downloadLink = null;
+  const maxRetries = 3;
+  const delay = 1000;
   const formatDict = {
     gpkg: "application/geopackage+sqlite3",
     geojson: "application/json",
@@ -87,10 +87,15 @@ export async function downloadVectorData(resource, format) {
     }
   );
 
+  // Revisamos el status de la primera peticion
+  if (!fetchpermissionRequest.ok) {
+    console.error("No se concedieron permisos");
+    return;
+  }
   const permissionRestult = await fetchpermissionRequest.text();
-  //console.log("primer respuesta:", permissionRestult);
+  //console.log("La primer respuesta: ", permissionRestult);
 
-  // Hacemos la segunda peticion, que también regresará un xml
+  // Hacemos la segunda peticion, que también regresará un xml del que nos interesa el status location
   const statusRequest = await fetch(
     `https://geonode.dev.geoint.mx/geoserver/ows?service=WPS&version=1.0.0&REQUEST=Execute`,
     {
@@ -98,12 +103,14 @@ export async function downloadVectorData(resource, format) {
       body: request2,
     }
   );
-
-  // La segunda petición nos regresa el status location
+  // Revisamos el status de la segunda peticion
+  if (!statusRequest.ok) {
+    console.error("Falló la petición del link para la descarga");
+    return;
+  }
   const statusResult = await statusRequest.text();
   //console.log("segunda respuesta: ", statusResult);
-
-  // Como nos regresa un xml, hay que parsearlo para acceder al link que nos interesa
+  // Como nos regresa un xml, hay que parsearlo
   const parser = new DOMParser();
   const parsedStatusResult = parser.parseFromString(statusResult, "text/xml");
   //console.log(parsedStatusResult);
@@ -114,23 +121,54 @@ export async function downloadVectorData(resource, format) {
   const linkStatusLocation =
     executeResponseHTML?.getAttribute("statusLocation");
   //console.log("statuts response link: ", linkStatusLocation);
-  // Ahora hacemos una petición get al vínculo statusLocation
-  const downloadRequest = await fetch(linkStatusLocation);
-  const downloadResult = await downloadRequest.text();
-  //console.log("tercer respuesta: ", downloadResult);
-  const parser2 = new DOMParser();
-  const parsedDownloadResult = parser2.parseFromString(
-    downloadResult,
-    "text/xml"
-  );
-  //console.log("get request parsed xml: ", parsedDownloadResult);
-  let downloadHTML =
-    parsedDownloadResult.getElementsByTagName("wps:Reference")[0];
-  let downloadLink = downloadHTML?.getAttribute("href");
-  console.log("downloadLink", downloadLink);
 
+  // Ahora hacemos una petición get al vínculo statusLocation.
+  // Como a veces hace timeout, lo intentamos tres veces
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    //console.log(attempt);
+    const downloadRequest = await fetch(linkStatusLocation);
+    const downloadResult = await downloadRequest.text();
+    if (downloadResult.includes("Process succeeded")) {
+      console.log("se logró en el intento numero ", attempt);
+      //console.log("tercer respuesta: ", downloadResult);
+      const parser2 = new DOMParser();
+      const parsedDownloadResult = parser2.parseFromString(
+        downloadResult,
+        "text/xml"
+      );
+      //console.log("get request parsed xml: ", parsedDownloadResult);
+      let downloadHTML =
+        parsedDownloadResult.getElementsByTagName("wps:Reference")[0];
+      downloadLink = downloadHTML?.getAttribute("href");
+      attempt = maxRetries;
+    } else {
+      await new Promise((res) => setTimeout(res, delay));
+    }
+  }
+  if (!downloadLink) {
+    console.log("Falló la descarga");
+    return;
+  }
+  //console.log("downloadLink", downloadLink);
+
+  // Si es un Json vamos a tener que forzar la descarga
+  if (format === "geojson") {
+    const jsonRequest = await fetch(downloadLink);
+    if (!jsonRequest.ok) {
+      console.log("Falló el forzar la descarga del json");
+      return;
+    }
+    const jsonResponse = await jsonRequest.json();
+    const blob = new Blob([JSON.stringify(jsonResponse)], {
+      type: "application/json",
+    });
+    //console.log(blob);
+    const blobLink = URL.createObjectURL(blob);
+    downloadLink = blobLink;
+  }
   let anchor = document.createElement("a");
   anchor.href = downloadLink;
+  anchor.download = `${resource.title}.${format}`;
   document.body.appendChild(anchor);
   anchor.click();
   document.body.removeChild(anchor);

@@ -2,7 +2,6 @@
 import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
 import { downloadVectorData } from "@/utils/consulta.js";
 const config = useRuntimeConfig();
-const api = config.public.geoserverUrl;
 
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
@@ -56,7 +55,6 @@ const optionsButtons = ref([
     label: "Descargar archivo",
     pictogram: "pictograma-archivo-descargar",
     action: () => {
-      console.log("Descargar el archivo");
       modalDescargaVector.value?.abrirModal();
     },
   },
@@ -78,36 +76,39 @@ const optionsButtons = ref([
       <h1>Descargar capa</h1>
     </template>
     <template #cuerpo>
+      <p>{{ selectedElement.title }}</p>
       <p>Formato:</p>
-      <button
-        type="button"
-        class="boton-secundario"
-        @click="downloadVectorData(selectedElement, 'geojson')"
-      >
-        <a>JSON</a>
-      </button>
-      <button
-        type="button"
-        class="boton-secundario"
-        @click="downloadVectorData(selectedElement, 'csv')"
-      >
-        CSV
-      </button>
-      <button
-        type="button"
-        class="boton-secundario"
-        @click="downloadVectorData(selectedElement, 'gpkg')"
-      >
-        GeoPackage
-      </button>
-      <button
-        type="button"
-        class="boton-secundario"
-        @click="downloadVectorData(selectedElement, 'gpkg')"
-      >
-        KML
-      </button>
-      <button type="button" class="boton-secundario">Metadatos</button>
+      <div>
+        <button
+          type="button"
+          class="boton-secundario"
+          @click="downloadVectorData(selectedElement, 'geojson')"
+        >
+          JSON
+        </button>
+        <button
+          type="button"
+          class="boton-secundario"
+          @click="downloadVectorData(selectedElement, 'csv')"
+        >
+          CSV
+        </button>
+        <button
+          type="button"
+          class="boton-secundario"
+          @click="downloadVectorData(selectedElement, 'gpkg')"
+        >
+          GeoPackage
+        </button>
+        <button
+          type="button"
+          class="boton-secundario"
+          @click="downloadVectorData(selectedElement, 'kml')"
+        >
+          KML
+        </button>
+        <button type="button" class="boton-secundario">Metadatos</button>
+      </div>
     </template>
   </SisdaiModal>
 
@@ -134,5 +135,9 @@ const optionsButtons = ref([
 <style lang="scss" scoped>
 .flex {
   gap: 8px;
+}
+.boton-secundario {
+  width: 90%;
+  margin: 8px;
 }
 </style>
