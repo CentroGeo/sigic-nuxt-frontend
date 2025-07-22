@@ -25,7 +25,7 @@ const storeConsulta = useConsultaStore();
       ]"
       :funcion-colapsar="storeConsulta.alternarCatalogoColapsable"
       :estado-colapable="storeConsulta.catalogoColapsado"
-      :idColapsable="storeConsulta.idNavegacionLateral"
+      :id-colapsable="storeConsulta.idNavegacionLateral"
     />
 
     <div class="contenedor-contenido">
@@ -36,8 +36,9 @@ const storeConsulta = useConsultaStore();
 
 <style lang="scss" scoped>
 .modulo-consultas {
+  --altura-consulta-esc: 85vh;
+  height: var(--altura-consulta-esc);
   gap: 0;
-  height: 85vh;
 
   .contenedor-contenido {
     flex: 1;

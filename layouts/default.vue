@@ -10,9 +10,10 @@ const accesibilidadStore = useAccesibilidadStore();
     <a href="#principal" class="ir-contenido-principal">
       Ir a contenido principal
     </a>
+
     <MainNavegacion />
 
-    <main id="principal">
+    <main id="principal" class="p-t-7">
       <slot />
     </main>
 
@@ -26,3 +27,49 @@ const accesibilidadStore = useAccesibilidadStore();
     </client-only>
   </div>
 </template>
+<style lang="scss">
+nav.navegacion.navegacion-pegada {
+  top: 54px;
+}
+:root {
+  --escala-rem-gob-sisdai: 0.65;
+}
+nav.navbar {
+  padding-top: calc(var(--escala-rem-gob-sisdai) * 0.5rem);
+  padding-bottom: calc(var(--escala-rem-gob-sisdai) * 0.5rem);
+}
+a.navbar-brand {
+  margin-right: calc(var(--escala-rem-gob-sisdai) * 63rem);
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 0 0 calc(var(--escala-rem-gob-sisdai) * 0.3125rem) 0 !important;
+}
+.navbar-expand-md .navbar-nav .nav-link {
+  padding-right: calc(var(--escala-rem-gob-sisdai) * 0.5rem);
+  padding-left: calc(var(--escala-rem-gob-sisdai) * 1.5rem);
+  padding-top: calc(var(--escala-rem-gob-sisdai) * 1.8rem);
+}
+@media (min-width: 768px) and (max-width: 992px) {
+  a.navbar-brand {
+    margin-right: calc(var(--escala-rem-gob-sisdai) * 61rem);
+  }
+}
+@media (min-width: 576px) and (max-width: 768px) {
+  .navbar-dark .navbar-toggler {
+    margin-right: calc(var(--escala-rem-gob-sisdai) * 9rem);
+  }
+  a.navbar-brand {
+    margin-right: calc(var(--escala-rem-gob-sisdai) * 41rem);
+  }
+}
+@media (max-width: 576px) {
+  a.navbar-brand {
+    margin-right: calc(var(--escala-rem-gob-sisdai) * 41rem);
+  }
+}
+.navbar-toggler-icon {
+  display: inline-block;
+  width: calc(var(--escala-rem-gob-sisdai) * 1.5em);
+  height: calc(var(--escala-rem-gob-sisdai) * 1.5em);
+}
+</style>

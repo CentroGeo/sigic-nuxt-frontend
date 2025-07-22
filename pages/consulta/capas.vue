@@ -1,28 +1,27 @@
 <script setup>
 import {
-  SisdaiMapa,
-  SisdaiCapaXyz,
   SisdaiCapaWms,
+  SisdaiCapaXyz,
+  SisdaiMapa,
 } from "@centrogeomx/sisdai-mapas";
+import html2canvas from "html2canvas";
 
 const resourceType = "dataLayer";
 
 const config = useRuntimeConfig();
 const storeSelected = useSelectedResourcesStore();
-const randomNum = ref(0);
-//mapa = ref();
 
-/* function exportarMapa() {
-  mapa.value?.exportarImagen("sigic");
-} */
-// Esto de aquí permite cambiar la llave de
-watch(
-  () => storeSelected.selectedResources[resourceType],
-  () => {
-    randomNum.value += Math.random();
-  },
-  { deep: true }
-);
+const linkExportaMapa = ref();
+
+function exportarMapa() {
+  const html = document.querySelectorAll(".mapa .ol-viewport").item(0);
+  html2canvas(html, {
+    useCORS: true,
+  }).then((canvas) => {
+    linkExportaMapa.value.href = canvas.toDataURL();
+    linkExportaMapa.value.click();
+  });
+}
 </script>
 
 <template>
@@ -44,13 +43,10 @@ watch(
           <SisdaiCapaXyz />
 
           <SisdaiCapaWms
-            v-for="(capa, index) in storeSelected.selectedResources[
-              resourceType
-            ]"
-            :key="`${capa.uuid}_${randomNum}`"
+            v-for="capa in storeSelected.selectedResources[resourceType]"
+            :key="capa.uuid"
             :fuente="`${config.public.geoserverUrl}/wms?`"
             :capa="capa.alternate"
-            :posicion="storeSelected.selectedResources.length - index"
           />
         </SisdaiMapa>
       </ClientOnly>
@@ -62,6 +58,7 @@ watch(
         :resource-type="resourceType"
         etiqueta-elementos="Capas"
       />
+      <a ref="linkExportaMapa" class="oculto" download="sigic.png" />
     </template>
   </ConsultaLayoutPaneles>
 </template>

@@ -3,6 +3,25 @@
 const isDev = process.env.NODE_ENV !== 'production'
 
 export default defineNuxtConfig({
+  app: {
+    head: {
+      link: [
+        {
+          rel: 'shortcut icon',
+          href: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/images/favicon.ico',
+        },
+        {
+          rel: 'stylesheet',
+          href: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/styles/main.css',
+        },
+      ],
+      script: [
+        {
+          src: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/js/gobmx.js',
+        },
+      ],
+    },
+  },
   compatibilityDate: "2025-05-15",
   devtools: { enabled: isDev },
   experimental: {
@@ -51,5 +70,11 @@ export default defineNuxtConfig({
   },
   devServer: {
     // port: 3001
+  },
+
+  vite: {
+    ssr: {
+      noExternal: ['@centrogeomx/sisdai-mapas'],
+    },
   },
 });
