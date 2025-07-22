@@ -50,4 +50,10 @@ export default defineNuxtConfig({
   devServer: {
     // port: 3001
   },
+
+  vite: {
+    ssr: {
+      noExternal: ['@centrogeomx/sisdai-mapas'],
+    },
+  },
 });
