@@ -29,7 +29,7 @@ const accesibilidadStore = useAccesibilidadStore();
 </template>
 <style lang="scss">
 nav.navegacion.navegacion-pegada {
-  top: 60px;
+  top: 54px;
 }
 :root {
   --escala-rem-gob-sisdai: 0.65;
