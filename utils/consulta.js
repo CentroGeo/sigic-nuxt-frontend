@@ -62,6 +62,30 @@ export async function downloadMetadata(resource) {
   document.body.removeChild(anchor);
   URL.revokeObjectURL(blobLink);
 }
+export async function downloadExcel(resource, format) {
+  const config = useRuntimeConfig();
+  const formatDict = {
+    xls: "excel",
+    xlsx: "excel2007",
+  };
+  const url = new URL(`${config.public.geoserverUrl}/ows`);
+  url.search = new URLSearchParams({
+    service: "WFS",
+    version: "1.0.0",
+    request: "GetFeature",
+    typeName: resource.alternate,
+    outputFormat: formatDict[format],
+  }).toString();
+
+  console.log(url);
+  let anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.taget = "_blank";
+  anchor.download = `${resource.title}.${format}`;
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+}
 
 export async function downloadVectorData(resource, format) {
   const config = useRuntimeConfig();
@@ -128,7 +152,7 @@ export async function downloadVectorData(resource, format) {
     return;
   }
   const permissionRestult = await fetchpermissionRequest.text();
-  //console.log("La primer respuesta: ", permissionRestult);
+  //console.log("La primer respuesta, el permiso: ", permissionRestult);
 
   // Hacemos la segunda peticion, que también regresará un xml del que nos interesa el status location
   const statusRequest = await fetch(
@@ -144,7 +168,7 @@ export async function downloadVectorData(resource, format) {
     return;
   }
   const statusResult = await statusRequest.text();
-
+  //console.log("La segunda petición, la del status: ", statusResult);
   // Como nos regresa un xml, hay que parsearlo
   const parser = new DOMParser();
   const parsedStatusResult = parser.parseFromString(statusResult, "text/xml");

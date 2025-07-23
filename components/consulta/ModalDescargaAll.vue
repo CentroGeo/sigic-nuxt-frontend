@@ -52,7 +52,7 @@ async function downloadAllMetadata() {
 
 const optionsDict = {
   dataTable: {
-    title: "archivo",
+    title: "archivos",
     elements: [
       {
         label: "CSV",
@@ -69,7 +69,7 @@ const optionsDict = {
     ],
   },
   document: {
-    title: "documento",
+    title: "documentos",
     elements: [
       {
         label: "PDF",

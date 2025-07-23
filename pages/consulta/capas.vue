@@ -27,7 +27,6 @@ watch(
   () => storeSelected.selectedResources[resourceType],
   () => {
     randomNum.value += Math.random();
-    console.log(randomNum.value);
   },
   { deep: true }
 );

@@ -2,6 +2,7 @@
 import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
 import {
   downloadVectorData,
+  downloadExcel,
   downloadMetadata,
   downloadPDF,
 } from "@/utils/consulta.js";
@@ -40,6 +41,18 @@ const optionsDict = {
         },
       },
       {
+        label: "XLS",
+        action: () => {
+          downloadExcel(selectedElement.value, "xls");
+        },
+      },
+      {
+        label: "XLSX",
+        action: () => {
+          downloadExcel(selectedElement.value, "xlsx");
+        },
+      },
+      {
         label: "GeoPackage",
         action: () => {
           downloadVectorData(selectedElement.value, "gpkg");
@@ -66,6 +79,18 @@ const optionsDict = {
         label: "CSV",
         action: () => {
           downloadVectorData(selectedElement.value, "csv");
+        },
+      },
+      {
+        label: "XLS",
+        action: () => {
+          downloadExcel(selectedElement.value, "xls");
+        },
+      },
+      {
+        label: "XLSX",
+        action: () => {
+          downloadExcel(selectedElement.value, "xlsx");
         },
       },
       {
