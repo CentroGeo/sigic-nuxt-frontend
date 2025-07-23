@@ -39,6 +39,7 @@ export default defineNuxtConfig({
     "@nuxt/image",
     "@nuxt/test-utils",
     "@sidebase/nuxt-auth",
+    '@vueuse/nuxt'
   ],
 
   css: ["@centrogeomx/sisdai-css/dist/sisdai.min.css"],
@@ -66,7 +67,19 @@ export default defineNuxtConfig({
       // geoserverApi: `${process.env.GEOSERVER_URL}/rest`,
     }
   },
+
+  nitro: {
+    // TODO: remover cuando catálogo se conecte con el backend
+    storage: {
+      fs: {
+        driver: 'fs',
+        base: './public'
+      }
+    }
+  },
+
   devServer: {
+    // TODO: remover, solo se utiliza cuando se levanta el chat-front del módulo de IA
     // port: 3001
   },
 
