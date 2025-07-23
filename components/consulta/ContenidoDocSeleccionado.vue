@@ -1,6 +1,5 @@
 <script setup>
 const resourcesStore = useSelectedResourcesStore();
-
 const props = defineProps({
   groupName: { type: String, required: true },
   selectedElement: {
@@ -13,6 +12,11 @@ const { selectedElement, resourceType } = toRefs(props);
 const shownFileUuid = computed(
   () => resourcesStore.shownFiles[resourceType.value].uuid
 );
+
+const downloadChild = ref(null);
+function notifyDownloadChild() {
+  downloadChild.value?.abrirModalDescarga();
+}
 </script>
 
 <template>
@@ -31,7 +35,7 @@ const shownFileUuid = computed(
     <div class="flex flex-contenido-final">
       <button
         class="boton-pictograma boton-sin-contenedor-secundario"
-        aria-label="Remover selección"
+        aria-label="Borrar selección"
         type="button"
         @click="resourcesStore.removeResource(resourceType, selectedElement)"
       >
@@ -41,11 +45,19 @@ const shownFileUuid = computed(
         class="boton-pictograma boton-sin-contenedor-secundario"
         aria-label="Descargar selección"
         type="button"
+        @click="notifyDownloadChild"
       >
         <span class="pictograma-archivo-descargar" aria-hidden="true"></span>
       </button>
     </div>
   </div>
+
+  <ConsultaModalDescarga
+    ref="downloadChild"
+    :resource-type="resourceType"
+    :selected-element="selectedElement"
+    :download-type="'individual'"
+  />
 </template>
 <style lang="scss" scoped>
 .flex {

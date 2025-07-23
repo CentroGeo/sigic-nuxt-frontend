@@ -1,5 +1,4 @@
 <script setup>
-import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
   selectedElement: {
@@ -9,43 +8,63 @@ const props = defineProps({
   resourceType: { type: String, required: true },
 });
 const { selectedElement, resourceType } = toRefs(props);
-const modalTabla = ref(null);
-const paginaActual = ref(0);
-const tamanioPagina = 10;
-const {
-  variables,
-  datos,
-  totalFeatures,
-  refetch: fetchTable,
-} = useGeoserverDataTable({
-  paginaActual: paginaActual.value,
-  tamanioPagina: tamanioPagina,
-  resource: selectedElement.value,
-});
 
-watch(paginaActual, () => {
-  fetchTable({
-    paginaActual: paginaActual.value,
-    tamanioPagina: tamanioPagina,
-    resource: selectedElement.value,
-  });
-});
+const tablaChild = ref(null);
+const downloadChild = ref(null);
+
+function notifyTabla() {
+  tablaChild.value?.abrirModalTabla();
+}
+function notifyDownloadChild() {
+  downloadChild.value?.abrirModalDescarga();
+}
+// Aqui se acaba la parte nueva para la prueba
+const optionsButtons = ref([
+  {
+    label: "Hacer zoom",
+    pictogram: "pictograma-zoom-instruccional",
+    action: () => {
+      console.log("hacer zoom");
+    },
+  },
+  {
+    label: "Ver tablas",
+    pictogram: "pictograma-tabla",
+    action: () => {
+      notifyTabla();
+    },
+  },
+  {
+    label: "Mostrar",
+    pictogram: "pictograma-ojo-ver",
+    action: () => {
+      console.log("Mostrar u ocultar la capa");
+    },
+  },
+  {
+    label: "Cambiar opacidad",
+    pictogram: "pictograma-editar",
+    action: () => {
+      console.log("cambiar opacidad");
+    },
+  },
+  {
+    label: "Eliminar selección",
+    pictogram: "pictograma-eliminar",
+    action: () => {
+      resourcesStore.removeResource(resourceType.value, selectedElement.value);
+    },
+  },
+  {
+    label: "Descargar archivo",
+    pictogram: "pictograma-archivo-descargar",
+    action: () => {
+      notifyDownloadChild();
+    },
+  },
+]);
 </script>
 <template>
-  <SisdaiModal ref="modalTabla">
-    <template #encabezado>
-      <h1>{{ selectedElement.title }}</h1>
-    </template>
-
-    <template #cuerpo>
-      <UiTablaAccesible :variables="variables" :datos="datos" />
-      <UiPaginador
-        :totalPaginas="Math.ceil(totalFeatures / tamanioPagina)"
-        @cambio="paginaActual = $event"
-      />
-    </template>
-  </SisdaiModal>
-
   <!-- El contenido de la tarjeta de capas  -->
   <div class="m-b-5">
     <p class="tarjeta-titulo m-y-2">
@@ -56,50 +75,23 @@ watch(paginaActual, () => {
 
   <div class="flex flex-contenido-final">
     <button
+      v-for="button in optionsButtons"
       class="boton-pictograma boton-sin-contenedor-secundario"
-      aria-label="Hacer zoom"
+      :aria-label="button.label"
       type="button"
+      @click="button.action"
     >
-      <span class="pictograma-zoom-instruccional" aria-hidden="true"></span>
-    </button>
-    <button
-      class="boton-pictograma boton-sin-contenedor-secundario"
-      aria-label="Ver tablas"
-      type="button"
-      @click="modalTabla?.abrirModal()"
-    >
-      <span class="pictograma-tabla" aria-hidden="true"></span>
-    </button>
-    <button
-      class="boton-pictograma boton-sin-contenedor-secundario"
-      aria-label="Ver"
-      type="button"
-    >
-      <span class="pictograma-ojo-ver" aria-hidden="true"></span>
-    </button>
-    <button
-      class="boton-pictograma boton-sin-contenedor-secundario"
-      aria-label="Editar"
-      type="button"
-    >
-      <span class="pictograma-editar" aria-hidden="true"></span>
-    </button>
-    <button
-      class="boton-pictograma boton-sin-contenedor-secundario"
-      aria-label="Quitar selección"
-      type="button"
-      @click="resourcesStore.removeResource(resourceType, selectedElement)"
-    >
-      <span class="pictograma-eliminar" aria-hidden="true"></span>
-    </button>
-    <button
-      class="boton-pictograma boton-sin-contenedor-secundario"
-      aria-label="Descargar selección"
-      type="button"
-    >
-      <span class="pictograma-archivo-descargar" aria-hidden="true"></span>
+      <span :class="button.pictogram" aria-hidden="true"></span>
     </button>
   </div>
+  <!-- Los modales-->
+  <ConsultaModalTabla ref="tablaChild" :selected-element="selectedElement" />
+  <ConsultaModalDescarga
+    ref="downloadChild"
+    :resource-type="resourceType"
+    :selected-element="selectedElement"
+    :download-type="'individual'"
+  />
 </template>
 <style lang="scss" scoped>
 .flex {

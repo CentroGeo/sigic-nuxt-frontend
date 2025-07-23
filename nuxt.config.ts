@@ -63,6 +63,8 @@ export default defineNuxtConfig({
     public: {
       geonodeApi: `${process.env.GEONODE_URL}/api/v2`,
       geoserverUrl: process.env.GEOSERVER_URL,
+      geonodeUrl: process.env.GEONODE_URL,
+
       // geoserverApi: `${process.env.GEOSERVER_URL}/rest`,
     }
   },
