@@ -25,7 +25,6 @@ export function useGeoserverDataTable({
         maxFeatures: tamanioPagina,
         startIndex: paginaActual * tamanioPagina,
       }).toString();
-
       const res = await fetch(url);
       const data = await res.json();
       if (data.totalFeatures !== undefined) {

@@ -55,6 +55,7 @@ const optionsButtons = ref([
     label: "Descargar archivo",
     pictogram: "pictograma-archivo-descargar",
     action: () => {
+      console.log("se tendría que abrir el modal");
       modalDescargaVector.value?.abrirModal();
     },
   },
@@ -70,7 +71,6 @@ const optionsButtons = ref([
       <ConsultaModalTabla :selected-element="selectedElement" />
     </template>
   </SisdaiModal>
-
   <SisdaiModal ref="modalDescargaVector">
     <template #encabezado>
       <h1>Descargar capa</h1>

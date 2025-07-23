@@ -41,7 +41,7 @@ export function downloadPDF(resource) {
 
 export async function downloadMetadata(resource) {
   const config = useRuntimeConfig();
-  const api = new URL(`${config.public.geonodeURL}/catalogue/csw`);
+  const api = new URL(`${config.public.geonodeUrl}/catalogue/csw`);
   api.search = new URLSearchParams({
     request: "GetRecordById",
     service: "CSW",
@@ -64,6 +64,7 @@ export async function downloadMetadata(resource) {
 }
 
 export async function downloadVectorData(resource, format) {
+  const config = useRuntimeConfig();
   let downloadLink = null;
   const maxRetries = 3;
   const delay = 1000;
@@ -114,7 +115,7 @@ export async function downloadVectorData(resource, format) {
 
   // Pedimos permiso para hacer la descarga
   const fetchpermissionRequest = await fetch(
-    `https://geonode.dev.geoint.mx/geoserver/ows?service=WPS&version=1.0.0&REQUEST=Execute`,
+    `${config.public.geoserverUrl}/ows?service=WPS&version=1.0.0&REQUEST=Execute`,
     {
       method: "POST",
       body: permissionRequest,
@@ -131,7 +132,7 @@ export async function downloadVectorData(resource, format) {
 
   // Hacemos la segunda peticion, que también regresará un xml del que nos interesa el status location
   const statusRequest = await fetch(
-    `https://geonode.dev.geoint.mx/geoserver/ows?service=WPS&version=1.0.0&REQUEST=Execute`,
+    `${config.public.geoserverUrl}/ows?service=WPS&version=1.0.0&REQUEST=Execute`,
     {
       method: "POST",
       body: request2,

@@ -21,7 +21,7 @@ const buttonTagDict = {
   document: "archivos",
 };
 function wait() {
-  return new Promise((resolve) => setTimeout(resolve, 500));
+  return new Promise((resolve) => setTimeout(resolve, 1000));
 }
 function downloadAllDocs() {
   modalDescargaDoc.value?.abrirModal();
@@ -29,7 +29,7 @@ function downloadAllDocs() {
 async function downloadAllCSV() {
   let resourceList = resourcesStore.selectedResources[resourceType.value];
   for (let i = 0; i < resourceList.length; i++) {
-    downloadVectorData(resourceList[i], "csv");
+    await downloadVectorData(resourceList[i], "csv");
     await wait();
   }
   modalDescargaDoc.value?.cerrarModal();
@@ -46,7 +46,7 @@ async function downloadAllPDF() {
 async function downloadAllMetadata() {
   let resourceList = resourcesStore.selectedResources[resourceType.value];
   for (let i = 0; i < resourceList.length; i++) {
-    downloadMetadata(resourceList[i]);
+    await downloadMetadata(resourceList[i]);
     await wait();
   }
   modalDescargaDoc.value?.cerrarModal();
@@ -145,11 +145,7 @@ async function downloadAllMetadata() {
 
 <style lang="scss" scoped>
 .seleccion-layout {
-<<<<<<< HEAD
-  height: 85vh;
-=======
   height: var(--altura-consulta-esc);
->>>>>>> d6d84166c9e4e9ce0d7bd514b22bd984d9e93b77
   overflow-y: auto;
   overflow-x: hidden;
 
