@@ -1,8 +1,4 @@
 <script setup>
-import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
-import { downloadVectorData, downloadMetadata } from "@/utils/consulta.js";
-const config = useRuntimeConfig();
-
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
   selectedElement: {
@@ -12,9 +8,17 @@ const props = defineProps({
   resourceType: { type: String, required: true },
 });
 const { selectedElement, resourceType } = toRefs(props);
-const modalTabla = ref(null);
-const modalDescargaVector = ref(null);
 
+const tablaChild = ref(null);
+const downloadChild = ref(null);
+
+function notifyTabla() {
+  tablaChild.value?.abrirModalTabla();
+}
+function notifyDownloadChild() {
+  downloadChild.value?.abrirModalDescarga();
+}
+// Aqui se acaba la parte nueva para la prueba
 const optionsButtons = ref([
   {
     label: "Hacer zoom",
@@ -27,7 +31,7 @@ const optionsButtons = ref([
     label: "Ver tablas",
     pictogram: "pictograma-tabla",
     action: () => {
-      modalTabla.value?.abrirModal();
+      notifyTabla();
     },
   },
   {
@@ -55,69 +59,12 @@ const optionsButtons = ref([
     label: "Descargar archivo",
     pictogram: "pictograma-archivo-descargar",
     action: () => {
-      console.log("se tendría que abrir el modal");
-      modalDescargaVector.value?.abrirModal();
+      notifyDownloadChild();
     },
   },
 ]);
 </script>
 <template>
-  <SisdaiModal ref="modalTabla">
-    <template #encabezado>
-      <h1>{{ selectedElement.title }}</h1>
-    </template>
-
-    <template #cuerpo>
-      <ConsultaModalTabla :selected-element="selectedElement" />
-    </template>
-  </SisdaiModal>
-  <SisdaiModal ref="modalDescargaVector">
-    <template #encabezado>
-      <h1>Descargar capa</h1>
-    </template>
-    <template #cuerpo>
-      <p>{{ selectedElement.title }}</p>
-      <p>Formato:</p>
-      <div>
-        <button
-          type="button"
-          class="boton-secundario"
-          @click="downloadVectorData(selectedElement, 'geojson')"
-        >
-          JSON
-        </button>
-        <button
-          type="button"
-          class="boton-secundario"
-          @click="downloadVectorData(selectedElement, 'csv')"
-        >
-          CSV
-        </button>
-        <button
-          type="button"
-          class="boton-secundario"
-          @click="downloadVectorData(selectedElement, 'gpkg')"
-        >
-          GeoPackage
-        </button>
-        <button
-          type="button"
-          class="boton-secundario"
-          @click="downloadVectorData(selectedElement, 'kml')"
-        >
-          KML
-        </button>
-        <button
-          type="button"
-          class="boton-secundario"
-          @click="downloadMetadata(selectedElement)"
-        >
-          Metadatos
-        </button>
-      </div>
-    </template>
-  </SisdaiModal>
-
   <!-- El contenido de la tarjeta de capas  -->
   <div class="m-b-5">
     <p class="tarjeta-titulo m-y-2">
@@ -137,13 +84,17 @@ const optionsButtons = ref([
       <span :class="button.pictogram" aria-hidden="true"></span>
     </button>
   </div>
+  <!-- Los modales-->
+  <ConsultaModalTabla ref="tablaChild" :selected-element="selectedElement" />
+  <ConsultaModalDescarga
+    ref="downloadChild"
+    :resource-type="resourceType"
+    :selected-element="selectedElement"
+    :download-type="'individual'"
+  />
 </template>
 <style lang="scss" scoped>
 .flex {
   gap: 8px;
-}
-.boton-secundario {
-  width: 90%;
-  margin: 8px;
 }
 </style>

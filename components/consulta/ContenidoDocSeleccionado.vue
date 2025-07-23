@@ -1,11 +1,4 @@
 <script setup>
-import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
-import {
-  downloadVectorData,
-  downloadMetadata,
-  downloadPDF,
-} from "@/utils/consulta.js";
-
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
   groupName: { type: String, required: true },
@@ -16,10 +9,14 @@ const props = defineProps({
   resourceType: { type: String, required: true },
 });
 const { selectedElement, resourceType } = toRefs(props);
-const modalDescargaDoc = ref(null);
 const shownFileUuid = computed(
   () => resourcesStore.shownFiles[resourceType.value].uuid
 );
+
+const downloadChild = ref(null);
+function notifyDownloadChild() {
+  downloadChild.value?.abrirModalDescarga();
+}
 </script>
 
 <template>
@@ -48,53 +45,22 @@ const shownFileUuid = computed(
         class="boton-pictograma boton-sin-contenedor-secundario"
         aria-label="Descargar selección"
         type="button"
-        @click="modalDescargaDoc?.abrirModal()"
+        @click="notifyDownloadChild"
       >
         <span class="pictograma-archivo-descargar" aria-hidden="true"></span>
       </button>
     </div>
   </div>
 
-  <SisdaiModal ref="modalDescargaDoc">
-    <template #encabezado>
-      <h1>Descargar documento</h1>
-    </template>
-    <template #cuerpo>
-      <p>{{ selectedElement.title }}</p>
-      <div>
-        <button
-          v-if="resourceType !== 'document'"
-          type="button"
-          class="boton-secundario"
-          @click="downloadVectorData(selectedElement, 'csv')"
-        >
-          CSV
-        </button>
-        <button
-          v-if="resourceType === 'document'"
-          type="button"
-          class="boton-secundario"
-          @click="downloadPDF(selectedElement)"
-        >
-          PDF
-        </button>
-        <button
-          type="button"
-          class="boton-secundario"
-          @click="downloadMetadata(selectedElement)"
-        >
-          Metadatos
-        </button>
-      </div>
-    </template>
-  </SisdaiModal>
+  <ConsultaModalDescarga
+    ref="downloadChild"
+    :resource-type="resourceType"
+    :selected-element="selectedElement"
+    :download-type="'individual'"
+  />
 </template>
 <style lang="scss" scoped>
 .flex {
   gap: 8px;
-}
-.boton-secundario {
-  width: 90%;
-  margin: 8px;
 }
 </style>

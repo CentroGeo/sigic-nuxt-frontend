@@ -1,4 +1,5 @@
 <script setup>
+import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
 const props = defineProps({
   selectedElement: {
     type: Object,
@@ -6,7 +7,7 @@ const props = defineProps({
   },
 });
 const { selectedElement } = toRefs(props);
-
+const modalTabla = ref(null);
 const paginaActual = ref(0);
 const tamanioPagina = 10;
 const {
@@ -20,6 +21,14 @@ const {
   resource: selectedElement.value,
 });
 
+function abrirModalTabla() {
+  modalTabla.value?.abrirModal();
+}
+
+defineExpose({
+  abrirModalTabla,
+});
+
 watch(paginaActual, () => {
   fetchTable({
     paginaActual: paginaActual.value,
@@ -29,9 +38,19 @@ watch(paginaActual, () => {
 });
 </script>
 <template>
-  <UiTablaAccesible :variables="variables" :datos="datos" />
-  <UiPaginador
-    :totalPaginas="Math.ceil(totalFeatures / tamanioPagina)"
-    @cambio="paginaActual = $event"
-  />
+  <ClientOnly>
+    <SisdaiModal ref="modalTabla">
+      <template #encabezado>
+        <h1>{{ selectedElement.title }}</h1>
+      </template>
+
+      <template #cuerpo>
+        <UiTablaAccesible :variables="variables" :datos="datos" />
+        <UiPaginador
+          :totalPaginas="Math.ceil(totalFeatures / tamanioPagina)"
+          @cambio="paginaActual = $event"
+        />
+      </template>
+    </SisdaiModal>
+  </ClientOnly>
 </template>
