@@ -38,7 +38,7 @@ export const useSelectedResourcesStore = defineStore("selectedResources", {
       if (this.selectedResources[resourceType].length > 0) {
         // Si no se queda vacía, seleccionamos el documento posterior
         this.shownFiles[resourceType] = this.selectedResources[resourceType][0];
-        console.log(this.shownFiles[resourceType]);
+        //console.log(this.shownFiles[resourceType]);
       } else {
         // Si la lista queda vacía, ajustamos el valor del recurso seleccionado
         this.shownFiles[resourceType] = undefined;
@@ -46,6 +46,7 @@ export const useSelectedResourcesStore = defineStore("selectedResources", {
     },
     resetResource(resourceType) {
       this.selectedResources[resourceType] = [];
+      this.shownFiles[resourceType] = null;
     },
     updateFilteredResources(resourceType, newArray) {
       this.filteredResources[resourceType] = newArray;

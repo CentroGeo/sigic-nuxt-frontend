@@ -1,5 +1,5 @@
 <script setup>
-const config = useRuntimeConfig();
+//const config = useRuntimeConfig();
 const resourcesStore = useSelectedResourcesStore();
 
 /* async function obtenerPDFs() {
@@ -47,8 +47,5 @@ const resourceType = "document";
 .documento-embebido {
   width: 100%;
   height: 100%;
-}
-.contenedor {
-  color: var(--color-error-2);
 }
 </style>

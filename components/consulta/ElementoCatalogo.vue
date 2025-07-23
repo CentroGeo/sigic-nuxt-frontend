@@ -1,7 +1,9 @@
 <script setup>
-import { ref, toRefs } from "vue";
+// PENDING: Tener en cuenta que no solo tendremos archivos vectoriales
+import { ref, toRefs, onMounted, onUnmounted } from "vue";
 import { useSelectedResourcesStore } from "~/stores/selectedResources.js";
-
+import { tooltipContent, fetchGeometryType } from "~/utils/consulta.js";
+const config = useRuntimeConfig();
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
   resourceType: {
@@ -14,19 +16,67 @@ const props = defineProps({
   },
 });
 const { resourceType, catalogueElement } = toRefs(props);
-const type = ref(catalogueElement.value.resource_type);
+const api = config.public.geoserverUrl;
 const subtype = ref(catalogueElement.value.subtype);
-const bbox_polygon = ref(catalogueElement.value.bbox_polygon.type);
-const buttons = ref([
-  {
-    label: "Información",
-    class: "pictograma-informacion",
-    index: 3,
-  },
-]);
+const geomType = ref(null);
 const isChecked = ref(false);
+const buttons = ref([]);
+const optionsDict = {
+  Point: { tooltipText: "Capa de puntos", class: "pictograma-capa-puntos" },
+  MultiPoint: {
+    tooltipText: "Capa de puntos",
+    class: "pictograma-capa-puntos",
+  },
+  Polygon: {
+    tooltipText: "Capa de poligonos",
+    class: "pictograma-capa-poligono",
+  },
+  MultiPolygon: {
+    tooltipText: "Capa de poligonos",
+    class: "pictograma-capa-poligono",
+  },
+  LineString: {
+    tooltipText: "Capa de lineas",
+    class: "pictograma-capa-lineas",
+  },
+  LinearRing: {
+    tooltipText: "Capa de lineas",
+    class: "pictograma-capa-lineas",
+  },
+  MultiLineString: {
+    tooltipText: "Capa de lineas",
+    class: "pictograma-capa-lineas",
+  },
+  GeometryCollection: {
+    tooltipText: "Colección de geometrías",
+    class: "pictograma-capas",
+  },
+  Raster: {
+    tooltipText: "Raster",
+    class: "pictograma-capas",
+  },
+  Otro: {
+    tooltipText: "Ni raster ni vector",
+    class: "pictograma-flkt",
+  },
+  Error: {
+    tooltipText: "No se pudo recuperar la información",
+    class: "pictograma-alerta",
+  },
+};
+// Para triggerear la función de observar
+let observer;
+const rootEl = ref();
 
-//console.log(type.value, subtype.value, bbox_polygon.value);
+// Manjeamos el checkbox y controlamos los elementos seleccionados
+function selectElement(resourceType, option) {
+  isChecked.value = !isChecked.value;
+  if (isChecked.value) {
+    resourcesStore.addResource(resourceType, option);
+  } else {
+    resourcesStore.removeResource(resourceType, option);
+  }
+}
 
 // Si está en la lista de elementos seleccionados, mostrarla palomeada. Esto es para cuando cambiamos de vista
 function setCheck() {
@@ -42,55 +92,6 @@ function setCheck() {
 }
 setCheck();
 
-// Revisamos qué tipo de documento estamos mostrando para decidir qué botones mostrar
-if (type.value === "dataset") {
-  buttons.value.push({
-    label: "Variables disponibles",
-    class: "pictograma-visualizador",
-    index: 2,
-  });
-
-  if (subtype.value == "vector") {
-    if (bbox_polygon.value === "Polygon") {
-      buttons.value.push({
-        label: "Capa de poligonos",
-        class: "pictograma-capa-poligono",
-        index: 1,
-      });
-    } else if (bbox_polygon.value === "LineString") {
-      buttons.value.push({
-        label: "Capa de lineas",
-        class: "pictograma-capa-lineas",
-        index: 1,
-      });
-    } else if (bbox_polygon.value === "Points") {
-      buttons.value.push({
-        label: "Capa de puntos",
-        class: "pictograma-capa-puntos",
-        index: 1,
-      });
-    }
-  } else {
-    buttons.value.push({
-      label: "Raster",
-      class: "pictograma-capas",
-      index: 1,
-    });
-  }
-}
-// Ordenamos la lista de botones
-buttons.value.sort((a, b) => a.index - b.index);
-
-// Manjeamos el checkbox y controlamos los elementos seleccionados
-function selectElement(resourceType, option) {
-  isChecked.value = !isChecked.value;
-  if (isChecked.value) {
-    resourcesStore.addResource(resourceType, option);
-  } else {
-    resourcesStore.removeResource(resourceType, option);
-  }
-}
-
 // Como también se puede modificar la lista desde el panel de seleccion, montamos un watcher
 // para despalomear las opciones que se borraron
 watch(
@@ -100,9 +101,80 @@ watch(
   },
   { deep: true }
 );
+
+onMounted(() => {
+  // Esto es para observar cuando la tarjeta entra en la vista
+  observer = new IntersectionObserver(
+    async (entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          // Primero checamos si no es dataset
+          if (resourceType.value !== "dataLayer") {
+            buttons.value = [
+              {
+                tooltipText: tooltipContent(catalogueElement.value),
+                class: "pictograma-informacion",
+                position: "derecha",
+              },
+            ];
+          } else {
+            // Si es raster
+            if (subtype.value === "raster") {
+              geomType.value = "Raster";
+            } else if (subtype.value === "vector") {
+              // Si es vectorial
+              // Solicitamos la geometría hasta que la tarjeta va a entrar a la vista
+              geomType.value = await fetchGeometryType(catalogueElement.value);
+              //geomType.value = "Point";
+            } else {
+              geomType.value = "Otro";
+            }
+            buttons.value = [
+              {
+                tooltipText: optionsDict[geomType.value].tooltipText,
+                class: optionsDict[geomType.value].class,
+                position: "arriba",
+              },
+              {
+                tooltipText: "Variables disponibles",
+                class: "pictograma-visualizador",
+                position: "arriba",
+              },
+              {
+                tooltipText: tooltipContent(catalogueElement.value),
+                class: "pictograma-informacion",
+                position: "derecha",
+              },
+            ];
+          }
+          observer.unobserve(entry.target);
+        }
+      }
+    },
+    {
+      //Esto es para que se dispare la función de petición de recursos
+      // 300px antes de que el componente entre a la vista
+      root: null,
+      rootMargin: "300px",
+    }
+  );
+
+  if (rootEl.value) {
+    observer.observe(rootEl.value);
+  }
+});
+onUnmounted(() => {
+  if (observer && rootEl.value) {
+    observer.unobserve(rootEl.value);
+  }
+});
 </script>
 <template>
-  <div class="m-x-5 m-y-2" :id="`elemento-${catalogueElement.uuid}`">
+  <div
+    class="m-x-5 m-y-2"
+    :id="`elemento-${catalogueElement.uuid}`"
+    ref="rootEl"
+  >
     <div
       class="tarjeta-elemento"
       @click="selectElement(resourceType, catalogueElement)"
@@ -120,6 +192,7 @@ watch(
         v-for="button in buttons"
         :class="[button.class, 'pictograma-mediano']"
         aria-hidden="true"
+        v-globo-informacion:[button.position]="button.tooltipText"
       ></span>
     </div>
   </div>

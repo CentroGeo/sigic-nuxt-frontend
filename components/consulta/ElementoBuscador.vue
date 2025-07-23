@@ -25,8 +25,6 @@ const selectedFilter = ref({
   keywordsInput: null,
 });
 
-//console.log(resourcesList.value);
-
 function filterByCategory(d) {
   if (
     d.category !== null &&

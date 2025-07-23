@@ -10,6 +10,7 @@ const resourceType = "dataLayer";
 
 const config = useRuntimeConfig();
 const storeSelected = useSelectedResourcesStore();
+const randomNum = ref(0);
 
 const linkExportaMapa = ref();
 
@@ -22,6 +23,13 @@ function exportarMapa() {
     linkExportaMapa.value.click();
   });
 }
+watch(
+  () => storeSelected.selectedResources[resourceType],
+  () => {
+    randomNum.value += Math.random();
+  },
+  { deep: true }
+);
 </script>
 
 <template>
@@ -43,10 +51,13 @@ function exportarMapa() {
           <SisdaiCapaXyz />
 
           <SisdaiCapaWms
-            v-for="capa in storeSelected.selectedResources[resourceType]"
-            :key="capa.uuid"
+            v-for="(capa, index) in storeSelected.selectedResources[
+              resourceType
+            ]"
+            :key="`${capa.uuid}_${randomNum}`"
             :fuente="`${config.public.geoserverUrl}/wms?`"
             :capa="capa.alternate"
+            :posicion="storeSelected.selectedResources.length - index"
           />
         </SisdaiMapa>
       </ClientOnly>
@@ -57,7 +68,6 @@ function exportarMapa() {
         titulo="Capas seleccionadas"
         :resource-type="resourceType"
         etiqueta-elementos="Capas"
-        :funcion-descarga="exportarMapa"
       />
       <a ref="linkExportaMapa" class="oculto" download="sigic.png" />
     </template>
