@@ -4,6 +4,7 @@ import {
   downloadVectorData,
   downloadPDF,
   downloadMetadata,
+  wait,
 } from "@/utils/consulta.js";
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
@@ -20,15 +21,11 @@ function abrirModalDescargaAll() {
   tagTitle.value = optionsDict[resourceType.value]["title"];
 }
 
-function wait() {
-  return new Promise((resolve) => setTimeout(resolve, 1000));
-}
-
 async function downloadAllCSV() {
   let resourceList = resourcesStore.selectedResources[resourceType.value];
   for (let i = 0; i < resourceList.length; i++) {
     await downloadVectorData(resourceList[i], "csv");
-    await wait();
+    await wait(1000);
   }
   modalDescargaAll.value?.cerrarModal();
 }
@@ -36,7 +33,7 @@ async function downloadAllPDF() {
   let resourceList = resourcesStore.selectedResources[resourceType.value];
   for (let i = 0; i < resourceList.length; i++) {
     downloadPDF(resourceList[i]);
-    await wait();
+    await wait(1000);
   }
   modalDescargaAll.value?.cerrarModal();
 }
@@ -45,7 +42,7 @@ async function downloadAllMetadata() {
   let resourceList = resourcesStore.selectedResources[resourceType.value];
   for (let i = 0; i < resourceList.length; i++) {
     await downloadMetadata(resourceList[i]);
-    await wait();
+    await wait(1000);
   }
   modalDescargaAll.value?.cerrarModal();
 }

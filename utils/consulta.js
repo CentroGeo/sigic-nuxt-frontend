@@ -30,6 +30,10 @@ export async function fetchGeometryType(resource) {
   }
 }
 
+export async function wait(miliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, miliseconds));
+}
+
 export function downloadPDF(resource) {
   let anchor = document.createElement("a");
   anchor.href = resource.download_url;
@@ -62,6 +66,7 @@ export async function downloadMetadata(resource) {
   document.body.removeChild(anchor);
   URL.revokeObjectURL(blobLink);
 }
+
 export async function downloadExcel(resource, format) {
   const config = useRuntimeConfig();
   const formatDict = {
@@ -224,4 +229,21 @@ export async function downloadVectorData(resource, format) {
   document.body.appendChild(anchor);
   anchor.click();
   document.body.removeChild(anchor);
+}
+
+export async function setUrlDocs(resources) {
+  console.log("Se cambió la url");
+  const router = useRouter();
+  const route = useRoute();
+  //console.log(resources, router, route);
+  const params = resources.map((resource) => {
+    return `${resource.alternate}`;
+  });
+  const paramsString = params.join(";");
+  await router.push({
+    path: route.path,
+    query: {
+      recursos: paramsString,
+    },
+  });
 }

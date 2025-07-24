@@ -6,15 +6,20 @@ const props = defineProps({
   funcionDescarga: { type: Function, default: undefined },
 });
 const { titulo, resourceType } = toRefs(props);
-const selectedStore = useSelectedResourcesStore();
+const resourcesStore = useSelectedResourcesStore();
 const buttonTagDict = {
   dataLayer: "mapa",
   dataTable: "archivos",
   document: "archivos",
 };
+const route = useRoute();
 const downloadAllChild = ref(null);
 function notifyDownloadAllChild() {
   downloadAllChild.value?.abrirModalDescargaAll();
+}
+
+function shareState() {
+  console.log("Se copia el url en el portapapeles: ", route.fullPath);
 }
 </script>
 
@@ -45,6 +50,7 @@ function notifyDownloadAllChild() {
             type="button"
             class="boton-pictograma boton-con-contenedor-secundario"
             aria-label="Compartir"
+            @click="shareState"
           >
             <span class="pictograma-compartir" aria-hidden="true" />
           </button>
@@ -53,14 +59,14 @@ function notifyDownloadAllChild() {
             type="button"
             class="boton-pictograma boton-con-contenedor-secundario"
             aria-label="Eliminar"
-            @click="selectedStore.resetResource(resourceType)"
+            @click="resourcesStore.resetResource(resourceType)"
           >
             <span class="pictograma-eliminar" aria-hidden="true" />
           </button>
         </div>
 
         <UiNumeroElementos
-          :numero="selectedStore.selectedResources[resourceType].length"
+          :numero="resourcesStore.selectedResources[resourceType].length"
           :etiqueta="etiquetaElementos"
         />
       </div>
@@ -68,7 +74,7 @@ function notifyDownloadAllChild() {
 
     <div class="m-x-2 m-y-1">
       <ConsultaElementoSeleccionado
-        v-for="resource in selectedStore.selectedResources[resourceType]"
+        v-for="resource in resourcesStore.selectedResources[resourceType]"
         :key="`seleccion-${resource.uuid}`"
         :selected-element="resource"
         :resource-type="resourceType"

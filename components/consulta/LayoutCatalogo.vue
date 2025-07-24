@@ -1,4 +1,5 @@
 <script setup>
+import { setUrlDocs } from "@/utils/consulta.js";
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
   titulo: { type: String, default: "Título" },
@@ -11,8 +12,10 @@ const { resourcesList } = useGeonodeResources({
 });
 
 const filteredResources = ref([]);
+const selectedResources = ref([]);
 const config = useRuntimeConfig();
 const apiCategorias = `${config.public.geonodeApi}/facets/category`;
+const route = useRoute();
 const categoryList = ref([]);
 const categorizedResources = ref({});
 const selectedCategories = ref([]);
@@ -75,6 +78,30 @@ watch(
   },
   { deep: true }
 );
+
+// Esto es para el manejo de la url
+watch(
+  () => resourcesStore.selectedResources[resourceType.value],
+  async () => {
+    const recursos = resourcesStore.selectedResources[resourceType.value];
+    await setUrlDocs(recursos);
+    console.log("catalogo: ", route.fullPath);
+  },
+  { deep: true }
+);
+onMounted(() => {
+  selectedResources.value =
+    resourcesStore.selectedResources[resourceType.value];
+  console.log("recursos mounted layout: ", selectedResources.value);
+  if (selectedResources.value.length > 0) {
+    console.log("hay selección de recursos");
+    setUrlDocs(selectedResources.value);
+  } else if (route.query.recursos) {
+    console.log("se está cargando de ser compartido");
+  } else {
+    console.log("se está cargando desde cero");
+  }
+});
 </script>
 
 <template>

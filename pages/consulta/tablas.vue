@@ -1,7 +1,6 @@
 <script setup>
 const resourcesStore = useSelectedResourcesStore();
 const resourceType = "dataTable";
-
 const paginaActual = ref(0);
 const tamanioPagina = 10;
 

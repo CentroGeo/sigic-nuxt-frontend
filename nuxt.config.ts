@@ -12,7 +12,7 @@ export default defineNuxtConfig({
         },
         {
           rel: 'stylesheet',
-          href: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/styles/main.css',
+          //href: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/styles/main.css',
         },
       ],
       script: [
