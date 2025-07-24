@@ -1,6 +1,6 @@
 <script setup>
+import { tooltipContent } from "~/utils/consulta.js";
 const selectedStore = useSelectedResourcesStore();
-
 const props = defineProps({
   selectedElement: {
     type: Object,
@@ -11,7 +11,6 @@ const props = defineProps({
 const { selectedElement, resourceType } = toRefs(props);
 
 if (!selectedStore.shownFiles[resourceType.value]) {
-  //console.log("si vacio", !selectedStore.shownFiles[resourceType.value]);
   let firstSelection = selectedStore.selectedResources[resourceType.value][0];
   selectedStore.setShownFile(resourceType.value, firstSelection);
 }
@@ -38,20 +37,44 @@ if (!selectedStore.shownFiles[resourceType.value]) {
       <div class="flex flex-contenido-separado m-0 encabezado-tarjeta">
         <p class="tarjeta-texto-secundario m-0">Categoria</p>
         <div class="m-0">
-          <span
-            class="pictograma-informacion pictograma-mediano"
-            aria-hidden="true"
-          ></span>
-          <span
-            class="pictograma-subir-capa pictograma-mediano"
-            aria-hidden="true"
+          <button
+            class="boton-pictograma boton-sin-contenedor-secundario"
+            aria-label="Mostrar información"
+            type="button"
+            v-globo-informacion:izquierda="{
+              contenido: tooltipContent(selectedElement),
+              desfase: [0, 8],
+            }"
+          >
+            <span
+              class="pictograma-informacion pictograma-mediano"
+              aria-hidden="true"
+            ></span>
+          </button>
+
+          <button
+            class="boton-pictograma boton-sin-contenedor-secundario"
+            aria-label="Subir elemento"
+            type="button"
             @click="selectedStore.raiseIndex(selectedElement, resourceType)"
-          ></span>
-          <span
-            class="pictograma-bajar-capa pictograma-mediano"
-            aria-hidden="true"
+          >
+            <span
+              class="pictograma-subir-capa pictograma-mediano"
+              aria-hidden="true"
+            ></span>
+          </button>
+
+          <button
+            class="boton-pictograma boton-sin-contenedor-secundario"
+            aria-label="Bajar Elemento"
+            type="button"
             @click="selectedStore.lowerIndex(selectedElement, resourceType)"
-          ></span>
+          >
+            <span
+              class="pictograma-bajar-capa pictograma-mediano"
+              aria-hidden="true"
+            ></span>
+          </button>
         </div>
       </div>
 

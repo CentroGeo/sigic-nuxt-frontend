@@ -9,9 +9,13 @@ const { titulo, resourceType } = toRefs(props);
 const selectedStore = useSelectedResourcesStore();
 const buttonTagDict = {
   dataLayer: "mapa",
-  dataTable: "archivo",
-  document: "archivo",
+  dataTable: "archivos",
+  document: "archivos",
 };
+const downloadAllChild = ref(null);
+function notifyDownloadAllChild() {
+  downloadAllChild.value?.abrirModalDescargaAll();
+}
 </script>
 
 <template>
@@ -27,7 +31,11 @@ const buttonTagDict = {
             type="button"
             class="boton-primario"
             aria-label="Descargar mapa"
-            @click="funcionDescarga"
+            @click="
+              resourceType === 'dataLayer'
+                ? funcionDescarga
+                : notifyDownloadAllChild()
+            "
           >
             Descargar {{ buttonTagDict[resourceType] }}
             <span class="pictograma-mapa-generador" aria-hidden="true" />
@@ -66,6 +74,11 @@ const buttonTagDict = {
         :resource-type="resourceType"
       />
     </div>
+
+    <ConsultaModalDescargaAll
+      ref="downloadAllChild"
+      :resource-type="resourceType"
+    />
   </div>
 </template>
 
