@@ -13,7 +13,7 @@ const accesibilidadStore = useAccesibilidadStore();
 
     <MainNavegacion />
 
-    <main id="principal" class="p-t-7">
+    <main id="principal">
       <slot />
     </main>
 
@@ -28,8 +28,11 @@ const accesibilidadStore = useAccesibilidadStore();
   </div>
 </template>
 <style lang="scss">
+#principal {
+  // padding-top: 56px;
+}
 nav.navegacion.navegacion-pegada {
-  top: 54px;
+  // top: 54px;
 }
 :root {
   --escala-rem-gob-sisdai: 0.65;
