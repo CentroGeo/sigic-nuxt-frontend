@@ -37,6 +37,48 @@ const mensajes = ref([
   }, */
 ]);
 
+
+// Agregar nueva referencia para el contenedor del chat
+const contenedorChatRef = ref(null);
+const usuarioHizoScroll = ref(false); 
+
+// Función para manejar el scroll del usuario
+function manejarScroll() {
+  const contenedor = contenedorChatRef.value;
+  if (contenedor) {
+    // Verificamos si el usuario está cerca del fondo (con un margen de 100px)
+    const cercaDelFondo = contenedor.scrollTop + contenedor.clientHeight >= contenedor.scrollHeight - 100;
+    usuarioHizoScroll.value = !cercaDelFondo;
+  }
+}
+
+// Función para hacer scroll al final
+/* function scrollToBottom() {
+  nextTick(() => {
+    setTimeout(() => {
+      if (contenedorChatRef.value) {
+        contenedorChatRef.value.scrollTo({
+          top: contenedorChatRef.value.scrollHeight,
+          //behavior: 'smooth'
+          behavior: 'auto'
+        });
+      }
+    }, 50);
+  });
+} */
+
+// Función para hacer scroll al final solo si el usuario no ha hecho scroll manual
+function scrollToBottomIfNeeded() {
+  nextTick(() => {
+    if (contenedorChatRef.value && !usuarioHizoScroll.value) {
+      contenedorChatRef.value.scrollTo({
+        top: contenedorChatRef.value.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  });
+}
+
 const submitMensaje = async () => {
 
   const resultado = ref('')
@@ -78,6 +120,9 @@ const submitMensaje = async () => {
     message: ""
   }) - 1; // Obtenemos el índice del nuevo mensaje    
 
+  // Hacer scroll inicial al nuevo mensaje
+  //scrollToBottom();
+
 
 // Envía la pregunta 
   const res = await fetch('http://localhost:8000/start', {
@@ -106,6 +151,12 @@ const submitMensaje = async () => {
   else{
     console.log("jobId: ",jobId)
   }
+
+  // Resetear el flag al enviar nuevo mensaje
+  usuarioHizoScroll.value = false;
+  
+  // Hacer scroll inicial al nuevo mensaje
+  scrollToBottomIfNeeded();  
 
  // Hacer streaming de la respuesta
   try {
@@ -171,6 +222,9 @@ const submitMensaje = async () => {
                 mensajeRespuesta+=dataObj['message'];
                 //console.log(mensajeRespuesta)
                 mensajes.value[aiMessageIndex].message = mensajeRespuesta;
+                // Hacer scroll después de cada actualización
+                //scrollToBottom();
+                scrollToBottomIfNeeded();
             }
           }
 
@@ -183,6 +237,8 @@ const submitMensaje = async () => {
   } catch (err) {
     //resultado.value = 'Error en el streaming: ' + err
     mensajes.value[aiMessageIndex].message = 'Error en el streaming: ' + err
+    //scrollToBottom();
+    scrollToBottomIfNeeded();
   }
 
 };
@@ -201,7 +257,7 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
     <div class="columna-12">
       <div class="contenedor-chat p-y-3">
         <div class="contenedor-chat-contenido">
-          <div class="contenedor-log">
+          <div class="contenedor-log" ref="contenedorChatRef" @scroll="manejarScroll">
             <div v-for="m in mensajes" :key="m.id">
               <div :class="m.actor == 'Humano' ? 'p-y-2 ' : ''">
                 <div
