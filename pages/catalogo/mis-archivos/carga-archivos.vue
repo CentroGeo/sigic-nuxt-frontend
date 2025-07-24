@@ -11,6 +11,10 @@ async function onDrop() {
   // function onDrop() {
   // console.log(files.value);
   if (files.value) {
+    // TODO: remover cuando esté back, asignar una copia al store
+    data.value = files.value;
+    datosArriba = true;
+
     const formData = new FormData();
     let isValid = false;
     files.value.forEach((file) => {
@@ -122,39 +126,42 @@ onChange(async (files) => {
             <div
               ref="onDropZone"
               class="flex flex-contenido-centrado borde borde-redondeado-16 p-1 m-b-3"
-              style="min-height: 165px; border-style: dashed; cursor: pointer"
+              style="min-height: 281px; border-style: dashed; cursor: pointer"
               @click="open()"
             >
-              <div class="" style="text-align: center">
-                <div v-if="!datosArriba">
-                  <div>
-                    <span class="pictograma-archivo-subir pictograma-mediano" />
+              <div class="flex flex-vertical-centrado">
+                <div class="texto-centrado">
+                  <div v-if="!datosArriba">
+                    <div>
+                      <span
+                        class="pictograma-archivo-subir pictograma-mediano"
+                      />
+                    </div>
+                    <p>Arratra o suelta tu archivo</p>
                   </div>
-                  <p>Arratra o suelta tu archivo</p>
-                </div>
-                <div class="texto-izquierda">
-                  <p v-for="d in data" :key="d.name">
-                    {{ d.name }}
-                  </p>
-                </div>
+                  <div class="texto-izquierda">
+                    <p v-for="d in data" :key="d.name">
+                      {{ d.name }}
+                    </p>
+                  </div>
 
-                <label
-                  class="boton boton-secundario boton-chico"
-                  for="identificadorUNICO"
-                  @click="open()"
-                >
-                  Elige Archivo
-                </label>
-                <input
-                  id="identificadorUNICO"
-                  name="identificadorUNICO"
-                  placeholder="ejemplo"
-                  type="file"
-                  :v-model="ejemplo"
-                  @click="open()"
-                />
-                <!-- TODO: preguntar la mejor opción -->
-                <!-- <ClientOnly>
+                  <label
+                    class="boton boton-secundario boton-chico"
+                    for="identificadorUNICO"
+                    @click="open()"
+                  >
+                    Elige Archivo
+                  </label>
+                  <input
+                    id="identificadorUNICO"
+                    name="identificadorUNICO"
+                    placeholder="ejemplo"
+                    type="file"
+                    :v-model="ejemplo"
+                    @click="open()"
+                  />
+                  <!-- TODO: preguntar la mejor opción -->
+                  <!-- <ClientOnly>
                   <CatalogoCampoBase
                     v-model="ejemplo.archivo"
                     etiqueta="Arrastra o suelta tu archivo"
@@ -166,22 +173,23 @@ onChange(async (files) => {
                   type="file"
                   @change="(e) => (archivo = e.target.files[0])"
                 /> -->
+                </div>
               </div>
             </div>
+            <button
+              class="boton-primario boton-chico"
+              type="button"
+              :disabled="!datosArriba"
+            >
+              Subir archivos
+            </button>
           </div>
-          <button
-            class="boton-primario boton-chico"
-            type="button"
-            :disabled="!datosArriba"
-          >
-            Subir archivos
-          </button>
 
           <h2>Cargas pendientes</h2>
-          <div>
+          <div style="position: relative; z-index: 999">
             <div class="fondo-color-confirmacion p-2 borde-redondeado-16">
               <div class="flex texto-color-confirmacion">
-                <span class="pictograma-aprobado"></span>
+                <span class="pictograma-aprobado" />
                 <b> Archivo cargado correctamente </b>
               </div>
 
