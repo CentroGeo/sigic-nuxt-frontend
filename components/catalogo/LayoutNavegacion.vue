@@ -1,9 +1,9 @@
 <template>
-  <div class="contenedor layout-navegacion">
-    <h4 class="m-0 p-y-3">Catálogo de información</h4>
-  </div>
   <nav class="menu-lateral abierto">
     <div class="menu-lateral-contenedor">
+      <div class="contenedor layout-navegacion">
+        <h4 class="m-0 p-y-3">Catálogo de información</h4>
+      </div>
       <ul>
         <li>
           <nuxt-link to="/catalogo/explorar">Explorar</nuxt-link>
