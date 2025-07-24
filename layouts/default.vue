@@ -38,6 +38,9 @@ nav.navbar {
   padding-top: calc(var(--escala-rem-gob-sisdai) * 0.5rem);
   padding-bottom: calc(var(--escala-rem-gob-sisdai) * 0.5rem);
 }
+nav.navbar.navbar-fixed-top {
+  z-index: 9999;
+}
 a.navbar-brand {
   margin-right: calc(var(--escala-rem-gob-sisdai) * 63rem);
   margin-top: 0;
@@ -72,4 +75,11 @@ a.navbar-brand {
   width: calc(var(--escala-rem-gob-sisdai) * 1.5em);
   height: calc(var(--escala-rem-gob-sisdai) * 1.5em);
 }
+// footer.main-footer {
+//   width: 100%;
+//   display: inline-flex;
+// }
+// footer.main-footer .list-info {
+//   width: 100%;
+// }
 </style>
