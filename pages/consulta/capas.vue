@@ -30,6 +30,9 @@ watch(
   },
   { deep: true }
 );
+
+// bbox_polygon
+// api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
 </script>
 
 <template>
@@ -68,6 +71,7 @@ watch(
         titulo="Capas seleccionadas"
         :resource-type="resourceType"
         etiqueta-elementos="Capas"
+        :funcion-descarga="exportarMapa"
       />
       <a ref="linkExportaMapa" class="oculto" download="sigic.png" />
     </template>
