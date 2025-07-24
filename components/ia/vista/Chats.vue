@@ -38,72 +38,153 @@ const mensajes = ref([
 ]);
 
 const submitMensaje = async () => {
+
+  const resultado = ref('')
+  const loading = ref(false)
+
   if (mensaje.value === "") return;
 
   const body = {
+    user_id: "c5461377-f021-402a-9700-a6d43c82e30c",
+    type: "Preguntar",
     model: "deepseek-r1",
+    //model: "llama3.1",
     messages: [
       {
         role: "system",
         content:
-          "Eres un asistente que puede responder preguntas basadas en noticias."
+          "Eres un asistente amable que puede ayudar al usuario. Responde de manera cordial. Responde siempre en español."
       },
       { role: "user", content: mensaje.value }
     ],
-    think: false
+    think: false,
+    chat_id:0,
   };
 
+  console.log(body)
+
+  // Agregar mensaje del usuario
+  mensajes.value.push({ 
+    id: mensajes.value.length + 1,
+    actor: "Humano",
+    message: mensaje.value
+  });
+  mensaje.value = "";
+
+// Agregar mensaje vacío de la IA que se actualizará en el streaming
+  const aiMessageIndex = mensajes.value.push({
+    id: mensajes.value.length + 1,
+    actor: "AI",
+    message: ""
+  }) - 1; // Obtenemos el índice del nuevo mensaje    
+
+
+// Envía la pregunta 
+  const res = await fetch('http://localhost:8000/start', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  })
+
+  //console.log(res)
+  if (!res.ok) {
+    //resultado.value = 'Error al iniciar solicitud.'
+    mensajes.value[aiMessageIndex].message = 'Error al iniciar solicitud.'
+    loading.value = false
+    return
+  }
+
+  const json = await res.json()
+  const jobId = json.job_id
+
+  if (!jobId) {
+    //resultado.value = 'No se recibió job_id.'
+    mensajes.value[aiMessageIndex].message = 'No se recibió job_id.'
+    loading.value = false
+    return
+  }
+  else{
+    console.log("jobId: ",jobId)
+  }
+
+ // Hacer streaming de la respuesta
   try {
-    const response = await fetch("http://localhost:8000/start", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(body)
-    });
+    const streamRes = await fetch(`http://localhost:8000/stream/${jobId}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    })
 
-    const data = await response.json();
+    const reader = streamRes.body?.getReader()
+    const decoder = new TextDecoder('utf-8')
 
-    mensajes.value.push({
-      id: mensajes.value.length + 1,
-      actor: "Humano",
-      message: mensaje.value
-    });
-    mensaje.value = "";
-
-    const jobId = data.job_id;
-    if (!jobId) {
-      throw new Error("No se recibió job_id del servidor.");
+    if (!reader) {
+      //resultado.value = 'No se pudo leer el stream.'
+      mensajes.value[aiMessageIndex].message = 'No se pudo leer el stream.'
+      loading.value = false
+      return
+    }
+    else{
+      //console.log(reader)
     }
 
-    const source = new EventSource(`http://localhost:8000/process/${jobId}`);
+    let mensajeRespuesta="";
 
-    source.onmessage = event => {
-      try {
-        const eventData = JSON.parse(event.data);
+    //muestra la respuesta del modelo en streaming
+    while (true) { 
+      const { done, value } = await reader.read()
+      //console.log(done)
+      if (done) break
+      const chunk = decoder.decode(value)
+      //resultado.value += chunk
+      //console.log("chunk:",chunk)
+      resultado.value = chunk
+      //console.log(resultado.value)
 
-        if (eventData.status === "finished" && eventData.result) {
-          const contenido = JSON.parse(eventData.result.content);
-          mensajes.value.push({
-            id: mensajes.value.length + 1,
-            actor: "AI",
-            message: contenido.response
-          });
-          source.close();
+      let arrayResults = resultado.value.split("\n\n");
+      //console.log(arrayResults)
+
+      arrayResults.forEach((resultElement) => {
+        //console.log(resultElement)
+      
+
+        if(resultElement.includes("status:")){
+          let statusStr=resultElement.replace("status:","")
+          let statusObj=JSON.parse(statusStr)
+          console.log(statusObj["status"])
         }
-      } catch (err) {
-        console.error("Error al procesar evento:", err);
-        source.close();
-      }
-    };
+        if(resultElement.includes("event: done")){
+          //let statusStr=resultElement.replace("status:","")
+          //let statusObj=JSON.parse(statusStr)
+          //console.log(statusObj)
+        }        
+        if(resultElement.includes("data:")){
+          if(resultElement.includes("STREAM_COMPLETED")){
+            console.log("stream completado")
+          }
+          else{
+            let dataStr=resultElement.replace("data:","")
+            //console.log(dataStr)
+            let dataObj=JSON.parse(dataStr)
+            //console.log(dataObj)
+            if(dataObj['status']=='started'){
+              //console.log(dataObj['message'])
+                mensajeRespuesta+=dataObj['message'];
+                //console.log(mensajeRespuesta)
+                mensajes.value[aiMessageIndex].message = mensajeRespuesta;
+            }
+          }
 
-    source.onerror = err => {
-      console.error("Error en el stream SSE:", err);
-      source.close();
-    };
-  } catch (error) {
-    console.error("Error al enviar el mensaje:", error);
+
+        }
+
+      });
+    }
+
+  } catch (err) {
+    //resultado.value = 'Error en el streaming: ' + err
+    mensajes.value[aiMessageIndex].message = 'Error en el streaming: ' + err
   }
+
 };
 
 const generaIdAleatorio = el => {
