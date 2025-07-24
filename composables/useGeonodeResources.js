@@ -14,6 +14,7 @@ export function useGeonodeResources({ resourceType } = {}) {
     dataTable: "dataset",
     document: "document",
   };
+
   const fetchData = async ({ resourceType }) => {
     let page = 1;
     let allResults = [];
@@ -26,8 +27,8 @@ export function useGeonodeResources({ resourceType } = {}) {
         //"filter{subtype.in}": "vector",
       });
       // TODO: remover console logs
-      // console.log("dataParams", dataParams);
       // https://geonode.dev.geoint.mx/api/v2/resources?page=1&page_size=15&filter%7Bresource_type%7D=dataset
+      // console.log("dataParams", dataParams);
       // console.log(`${api}?${dataParams.toString()}`);
       fetch(`${api}?${dataParams.toString()}`, {
         method: "GET",
@@ -38,12 +39,15 @@ export function useGeonodeResources({ resourceType } = {}) {
         }, */
       })
         .then((response) => {
+          // console.log("response", response);
           if (response.ok) return response.json();
           return { resources: [] };
         })
         .then((data) => {
           const resources = data.resources || [];
           allResults = allResults.concat(resources);
+          // console.log("data", data);
+          // console.log("page", page);
           // Revisamos si hay una pagina siguiente
           if (data.links.next && page < 3) {
             // Si la hay, volvemos a solicitar datos

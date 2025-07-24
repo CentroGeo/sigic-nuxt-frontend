@@ -1,4 +1,7 @@
 <script setup>
+const { listaRecursos } = useDemoGeonodeResources();
+console.log("listaRecursos", listaRecursos);
+
 // Estas son las propiedades requeridas para filtrar avanzado
 const recursosLista = ref([
   {
