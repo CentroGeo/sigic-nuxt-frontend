@@ -123,7 +123,7 @@ function cuadroInformativo(pk) {
       <ClientOnly>
         <SisdaiMapa
           class="gema"
-          :vista="{ extension: extencionMapa }"
+          :vista="{ extension: extensionMapa }"
           @click-centrar="storeConsulta.ajustarExtencionMapa = undefined"
         >
           <SisdaiCapaXyz />
