@@ -3,7 +3,7 @@ import { defineStore } from "pinia";
 export const useConsultaStore = defineStore("consulta", {
   state: () => ({
     catalogoColapsado: false,
-    ajustarExtencionMapa: undefined,
+    ajustarExtensionMapa: undefined,
     idNavegacionLateral:
       "navegacionlateral-" + Math.random().toString(36).substring(2),
   }),
