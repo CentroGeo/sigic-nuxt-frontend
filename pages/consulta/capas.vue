@@ -26,22 +26,87 @@ function exportarMapa() {
   );
 }
 
+const attributos = reactive({});
+function addAttribute(pk) {
+  // attributes[pk] = `${config.public.geonodeApi}/datasets/${pk}/attribute_set`;
+  attributos[pk] = [];
+
+  fetch(`${config.public.geonodeApi}/datasets/${pk}/attribute_set`)
+    .then((response) => response.json())
+    .then(({ attributes }) => {
+      // console.log(attributes);
+
+      const etiquetas = {};
+      const columnas = attributes
+        .filter((a) => a.visible)
+        .sort((a, b) => a.display_order - b.display_order)
+        .map(({ attribute, attribute_label }) => {
+          etiquetas[attribute] = attribute_label || attribute;
+          return attribute;
+        });
+      console.log(columnas);
+
+      attributos[pk] = {
+        params: {
+          propertyName: columnas.join(","),
+        },
+        // attribute_label
+        contenido: (data) =>
+          columnas
+            .map(
+              (columna) =>
+                `<p><b>${etiquetas[columna] || columna}</b>: ${
+                  data[columna]
+                }</p>`
+            )
+            .join(""),
+      };
+      console.log(attributos[pk]);
+    })
+    .catch((err) => {
+      console.error(err);
+    })
+    .finally(() => {
+      //console.log("fin");
+    });
+}
+
 watch(
   () => storeSelected.selectedResources[resourceType],
-  () => {
+  (nv_) => {
     randomNum.value += Math.random();
+
+    const arr1 = nv_.map((r) => r.pk);
+    const arr2 = Object.keys(attributos);
+    // console.log(arr1, arr2);
+
+    const nv = arr1.filter((item) => !arr2.includes(item));
+    // console.log("Se agregó:", nv);
+    nv.forEach((r) => addAttribute(r));
+
+    const ov = arr2.filter((item) => !arr1.includes(item));
+    // console.log("Se quitó:", ov);
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+    ov.forEach((resource) => delete attributos[resource]);
+
+    // console.log(attributos);
   },
   { deep: true }
 );
 
 // bbox_polygon
 // api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
-const cuadroInformativo = {
-  params: {
-    propertyName: "nombre",
-  },
-  contenido: (d) => `<p><b>nombre</b>: ${d["nombre"]}</p>`,
-};
+
+function cuadroInformativo(pk) {
+  console.log(pk);
+
+  return {
+    params: {
+      propertyName: "nombre",
+    },
+    contenido: (d) => `<p><b>nombre</b>: ${d["nombre"]}</p>`,
+  };
+}
 </script>
 
 <template>
@@ -71,7 +136,7 @@ const cuadroInformativo = {
             :fuente="`${config.public.geoserverUrl}/wms?`"
             :capa="capa.alternate"
             :posicion="storeSelected.selectedResources.length - index"
-            :cuadro-informativo="cuadroInformativo"
+            :cuadro-informativo="attributos[capa.pk]"
           />
         </SisdaiMapa>
       </ClientOnly>
