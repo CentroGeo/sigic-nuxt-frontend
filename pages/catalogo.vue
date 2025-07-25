@@ -1,10 +1,9 @@
 <script setup>
 definePageMeta({ middleware: "redireccionar-modulo-catalogo" });
-
 const ruta = "/catalogo";
-
 const storeCatalogo = useCatalogoStore();
 </script>
+
 <template>
   <div class="modulo-catalogo flex">
     <UiNavegacionLateral
@@ -26,20 +25,19 @@ const storeCatalogo = useCatalogoStore();
           ruta: `${ruta}/documentos`,
         },
       ]"
-      :funcion-colapsar="storeCatalogo.alternarCatalogoColapsable"
-      :estado-colapable="storeCatalogo.catalogoColapsado"
       :id-colapsable="storeCatalogo.idNavegacionLateral"
+      :estado-colapable="storeCatalogo.catalogoColapsado"
+      :funcion-colapsar="storeCatalogo.alternarCatalogoColapsable"
     />
     <div class="contenedor-contenido">
       <NuxtPage />
     </div>
   </div>
 </template>
+
 <style lang="scss">
 .modulo-catalogo {
   gap: 0;
-  height: 85vh;
-
   .contenedor-contenido {
     flex: 1;
   }

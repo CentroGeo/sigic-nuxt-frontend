@@ -1,13 +1,13 @@
 <template>
   <UiLayoutPaneles>
     <template #catalogo>
-      <CatalogoLayoutNavegacion />
+      <CatalogoListaMenuLateral />
     </template>
 
     <template #visualizador>
-      <div class="contenedor">
+      <main class="contenedor">
         <h2>Todos mis archivos</h2>
-      </div>
+      </main>
     </template>
   </UiLayoutPaneles>
 </template>

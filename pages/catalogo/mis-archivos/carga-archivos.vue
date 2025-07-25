@@ -110,18 +110,18 @@ onChange(async (files) => {
 <template>
   <UiLayoutPaneles>
     <template #catalogo>
-      <CatalogoLayoutNavegacion />
+      <CatalogoListaMenuLateral />
     </template>
 
     <template #visualizador>
-      <div class="contenedor">
+      <main id="principal" class="contenedor m-b-10">
         <div class="alineacion-izquierda ancho-lectura">
           <h2>Carga archivo</h2>
           <p>
             <b>Solo archivos GeoJSON, Geopaquetes, CSV, XML, PDF, JPG y PNG.</b>
           </p>
 
-          <!-- Drag & Drop -->
+          <!-- TODO> hacer components DragNdDrop -->
           <div>
             <div
               ref="onDropZone"
@@ -186,7 +186,7 @@ onChange(async (files) => {
           </div>
 
           <h2>Cargas pendientes</h2>
-          <div style="position: relative; z-index: 999">
+          <div>
             <div class="fondo-color-confirmacion p-2 borde-redondeado-16">
               <div class="flex texto-color-confirmacion">
                 <span class="pictograma-aprobado" />
@@ -216,7 +216,7 @@ onChange(async (files) => {
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </template>
   </UiLayoutPaneles>
 </template>
