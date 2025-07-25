@@ -124,7 +124,7 @@ function cuadroInformativo(pk) {
         <SisdaiMapa
           class="gema"
           :vista="{ extension: extensionMapa }"
-          @click-centrar="storeConsulta.ajustarExtencionMapa = undefined"
+          @click-centrar="storeConsulta.ajustarExtensionMapa = undefined"
         >
           <SisdaiCapaXyz />
 
