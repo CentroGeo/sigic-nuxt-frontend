@@ -121,17 +121,23 @@ onChange(async (files) => {
 <template>
   <UiLayoutPaneles>
     <template #catalogo>
-      <CatalogoLayoutNavegacion />
+      <CatalogoListaMenuLateral />
     </template>
 
     <template #visualizador>
-      <div class="contenedor m-y-4">
+      <main id="principal" class="contenedor m-b-10 m-y-3">
         <div class="alineacion-izquierda ancho-lectura">
           <div class="flex">
-            <span
-              class="pictograma-flecha-izquierda pictograma-mediano texto-color-acento"
-            ></span>
-            <h2 class="m-0">Editar</h2>
+            <nuxt-link
+              to="/catalogo/mis-archivos"
+              aria-label="regresar a mis archivos"
+            >
+              <span
+                class="pictograma-flecha-izquierda pictograma-mediano texto-color-acento"
+                aria-hidden="true"
+              />
+              <span class="h2 texto-color-primario p-l-2">Editar</span>
+            </nuxt-link>
           </div>
           <h2>nombre de la capa.json</h2>
 
@@ -302,7 +308,7 @@ onChange(async (files) => {
             </button>
           </div>
         </div>
-      </div>
+      </main>
     </template>
   </UiLayoutPaneles>
 </template>

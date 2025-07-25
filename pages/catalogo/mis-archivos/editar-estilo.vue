@@ -106,64 +106,76 @@ onChange(async (files) => {
 <template>
   <UiLayoutPaneles>
     <template #catalogo>
-      <CatalogoLayoutNavegacion />
+      <CatalogoListaMenuLateral />
     </template>
 
     <template #visualizador>
-      <div class="contenedor m-y-4">
+      <main id="principal" class="contenedor m-b-10 m-y-3">
         <div class="alineacion-izquierda ancho-lectura">
           <div class="flex">
-            <span
-              class="pictograma-flecha-izquierda pictograma-mediano texto-color-acento"
-            />
-            <h2 class="m-0">Editar</h2>
-          </div>
-          <h2>nombre de la capa.json</h2>
-
-          <h2>Estilo</h2>
-          <p><b>Estilo, solo archivos .sld</b></p>
-
-          <!-- Drag & Drop -->
-          <div>
-            <div
-              ref="onDropZone"
-              class="flex flex-contenido-centrado borde borde-redondeado-16 p-1 m-b-3"
-              style="min-height: 281px; border-style: dashed; cursor: pointer"
-              @click="open()"
+            <nuxt-link
+              to="/catalogo/mis-archivos"
+              aria-label="regresar a mis archivos"
             >
-              <div class="flex flex-vertical-centrado">
-                <div class="texto-centrado">
-                  <div v-if="!datosArriba">
-                    <div>
-                      <span
-                        class="pictograma-archivo-subir pictograma-mediano"
-                      />
-                    </div>
-                    <p>Arratra o suelta tu archivo</p>
-                  </div>
-                  <div class="texto-izquierda">
-                    <p v-for="d in data" :key="d.name">
-                      {{ d.name }}
-                    </p>
-                  </div>
+              <span
+                class="pictograma-flecha-izquierda pictograma-mediano texto-color-acento"
+                aria-hidden="true"
+              />
+              <span class="h2 texto-color-primario p-l-2">Editar</span>
+            </nuxt-link>
+          </div>
 
-                  <label
-                    class="boton boton-secundario boton-chico"
-                    for="identificadorUNICO"
-                    @click="open()"
-                  >
-                    Elige Archivo
-                  </label>
-                  <input
-                    id="identificadorUNICO"
-                    name="identificadorUNICO"
-                    placeholder="ejemplo"
-                    type="file"
-                    :v-model="ejemplo"
-                    @click="open()"
-                  />
-                  <!-- TODO: preguntar la mejor opción -->
-                  <!-- <ClientOnly>
+          <div class="flex">
+            <div class="columna-16">
+              <h2>nombre de la capa.json</h2>
+
+              <h2>Estilo</h2>
+              <p><b>Estilo, solo archivos .sld</b></p>
+              <!-- Drag & Drop -->
+              <div>
+                <div
+                  ref="onDropZone"
+                  class="flex flex-contenido-centrado borde borde-redondeado-16 p-1 m-b-3"
+                  style="
+                    min-height: 281px;
+                    border-style: dashed;
+                    cursor: pointer;
+                  "
+                  @click="open()"
+                >
+                  <div class="flex flex-vertical-centrado">
+                    <div class="texto-centrado">
+                      <div v-if="!datosArriba">
+                        <div>
+                          <span
+                            class="pictograma-archivo-subir pictograma-mediano"
+                          />
+                        </div>
+                        <p>Arratra o suelta tu archivo</p>
+                      </div>
+                      <div class="texto-izquierda">
+                        <p v-for="d in data" :key="d.name">
+                          {{ d.name }}
+                        </p>
+                      </div>
+
+                      <label
+                        class="boton boton-secundario boton-chico"
+                        for="identificadorUNICO"
+                        @click="open()"
+                      >
+                        Elige Archivo
+                      </label>
+                      <input
+                        id="identificadorUNICO"
+                        name="identificadorUNICO"
+                        placeholder="ejemplo"
+                        type="file"
+                        :v-model="ejemplo"
+                        @click="open()"
+                      />
+                      <!-- TODO: preguntar la mejor opción -->
+                      <!-- <ClientOnly>
                   <CatalogoCampoBase
                     v-model="ejemplo.archivo"
                     etiqueta="Arrastra o suelta tu archivo"
@@ -175,32 +187,42 @@ onChange(async (files) => {
                   type="file"
                   @change="(e) => (archivo = e.target.files[0])"
                 /> -->
+                    </div>
+                  </div>
+                </div>
+                <button
+                  class="boton-primario boton-chico"
+                  type="button"
+                  :disabled="!datosArriba"
+                >
+                  Subir archivos
+                </button>
+              </div>
+            </div>
+
+            <div class="flex">
+              <div class="columna-16">
+                <div class="fondo-color-neutro p-3 borde-redondeado-16">
+                  <p>Nombre del estilo de la capa.sld</p>
+                  <span class="pictograma-ayuda" />
+                </div>
+              </div>
+              <div class="columna-16">
+                <div class="fondo-color-confirmacion p-3 borde-redondeado-16">
+                  <div class="flex texto-color-confirmacion">
+                    <span class="pictograma-aprobado" />
+                    <b> Archivo cargado correctamente </b>
+                  </div>
+                  <p>Nombre del estilo de la capa.sld</p>
+                  <nuxt-link to="/catalogo/mis-archivos">
+                    Ver en Mis archivos
+                  </nuxt-link>
                 </div>
               </div>
             </div>
-            <button
-              class="boton-primario boton-chico"
-              type="button"
-              :disabled="!datosArriba"
-            >
-              Subir archivos
-            </button>
-          </div>
-
-          <div class="fondo-color-neutro p-3 borde-redondeado-16">
-            <p>Nombre del estilo de la capa.sld</p>
-            <span class="pictograma-ayuda" />
-          </div>
-          <div class="fondo-color-confirmacion p-3 borde-redondeado-16">
-            <div class="flex texto-color-confirmacion">
-              <span class="pictograma-aprobado" />
-              <b> Archivo cargado correctamente </b>
-            </div>
-            <p>Nombre del estilo de la capa.sld</p>
-            <a href="#"> Ver en Mis archivos </a>
           </div>
         </div>
-      </div>
+      </main>
     </template>
   </UiLayoutPaneles>
 </template>
