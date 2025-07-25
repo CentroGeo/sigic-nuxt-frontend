@@ -73,10 +73,10 @@ defineProps({
   // display: block;
   width: 48px;
   box-shadow: 4px 0 8px -4px var(--navegacion-primaria-sombra);
-  top: 40px;
-  height: calc(100vh - 46px);
-  // overflow-y: auto;
-  position: sticky;
+  // top: 40px;
+  // height: calc(100vh - 46px);
+  // // overflow-y: auto;
+  // position: sticky;
   z-index: 9997;
 
   ul {
