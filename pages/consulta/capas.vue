@@ -30,6 +30,28 @@ watch(
   },
   { deep: true }
 );
+onMounted(() => {
+  randomNum.value = 0;
+  if (storeSelected.selectedResources[resourceType].length > 0) {
+    storeSelected.lowerIndex(
+      storeSelected.selectedResources[resourceType][0],
+      resourceType
+    );
+    storeSelected.raiseIndex(
+      storeSelected.selectedResources[resourceType][1],
+      resourceType
+    );
+  }
+  /* if (storeSelected.selectedResources[resourceType].length > 0) {
+    let respaldo = storeSelected.selectedResources[resourceType];
+    storeSelected.resetResource(resourceType);
+    for (let i = 0; i < respaldo.length; i++) {
+      storeSelected.addResource(resourceType, respaldo[i]);
+    }
+  }
+  storeSelected.selectedResources[resourceType];
+  console.log("este 2", storeSelected.selectedResources[resourceType]); */
+});
 </script>
 
 <template>
@@ -47,6 +69,7 @@ watch(
         <SisdaiMapa
           class="gema"
           :vista="{ extension: '-118.3651,14.5321,-86.7104,32.7187' }"
+          id="mapa_catalogo"
         >
           <SisdaiCapaXyz />
 

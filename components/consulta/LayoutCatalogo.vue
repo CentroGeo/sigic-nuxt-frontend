@@ -68,6 +68,19 @@ watch(resourcesList, () => {
     resourceType.value,
     resourcesList.value
   );
+  // Queremos revisar si hay query params y buscar los recursos
+  /*if (route.query.recursos) {
+    console.log("ahora estamos wachando en los datos");
+    let paramList = route.query.recursos.split(";");
+    resourcesList.value.forEach((resource) => {
+      for (let i = 0; i < paramList.length; i++) {
+        if (paramList[i] === resource.alternate) {
+          console.log(resource);
+          resourcesStore.addResource(resourceType.value, resource);
+        }
+      }
+    });
+  }*/
 });
 watch(
   () => resourcesStore.filteredResources[resourceType.value],
@@ -89,15 +102,23 @@ watch(
   },
   { deep: true }
 );
+
 onMounted(() => {
   selectedResources.value =
     resourcesStore.selectedResources[resourceType.value];
   console.log("recursos mounted layout: ", selectedResources.value);
   if (selectedResources.value.length > 0) {
-    console.log("hay selección de recursos");
+    console.log("hay selección de recursos y solo se cambio de vista");
     setUrlDocs(selectedResources.value);
   } else if (route.query.recursos) {
-    console.log("se está cargando de ser compartido");
+    console.log("se está cargando de ser compartido o se actualizó");
+    //let paramList = route.query.recursos.split(";");
+    //console.log(paramList);
+    /*     resourcesList.value.forEach((resource) => {
+      if (paramList.includes(resource.alternate)) {
+        console.log(resource);
+      }
+    }); */
   } else {
     console.log("se está cargando desde cero");
   }

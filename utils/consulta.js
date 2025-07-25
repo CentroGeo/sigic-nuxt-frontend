@@ -1,9 +1,12 @@
+import { useSelectedResourcesStore } from "@/stores/selectedResources.js";
 export function tooltipContent(resource) {
   const content =
-    `<p style="max-width:250px">${
+    `<p style="max-width:200px">${
       resource.abstract ? resource.abstract : "Sin descripción"
     }</p>` +
-    `<p>${resource.attribution ? resource.attribution : "Sin fuente"}</p>`;
+    `<p style="max-width:200px">${
+      resource.attribution ? resource.attribution : "Sin fuente"
+    }</p>`;
   return content;
 }
 
@@ -232,13 +235,16 @@ export async function downloadVectorData(resource, format) {
 }
 
 export async function setUrlDocs(resources) {
+  const resourcesStore = useSelectedResourcesStore();
   console.log("Se cambió la url");
   const router = useRouter();
   const route = useRoute();
+  let params = [];
   //console.log(resources, router, route);
-  const params = resources.map((resource) => {
+  params = resources.map((resource) => {
     return `${resource.alternate}`;
   });
+
   const paramsString = params.join(";");
   await router.push({
     path: route.path,
