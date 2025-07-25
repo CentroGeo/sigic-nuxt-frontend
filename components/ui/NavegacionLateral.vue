@@ -2,7 +2,7 @@
 /**
  * @typedef {Object} Props
  * @property {Array<{ pictograma: string, ruta: string }>} [subPaginas] - Lista obligatoria de subpaginas, debe contener `pictograma` y `ruta` cada objeto de la lista.
- * @property {Function} [funcionColapsar=undefined] - Función que se ejecutará al presionar el botón colapsar.
+ * @property {Function} [funcionColapsar=undefined] - Función que se ejecutará al presionar el botón colapsar y alternar el estadoColpasable.
  * @property {Boolean} [estadoColapable=false] - Estado del icono colapsar, visible si se recibe la `funcionColapsar`.
  */
 
@@ -26,7 +26,6 @@ defineProps({
   },
 });
 </script>
-
 <template>
   <div class="nav-lateral" aria-label="Navegación lateral">
     <ul class="lista-sin-estilo">
@@ -71,8 +70,13 @@ defineProps({
 
 <style lang="scss" scoped>
 .nav-lateral {
+  // display: block;
   width: 48px;
   box-shadow: 4px 0 8px -4px var(--navegacion-primaria-sombra);
+  top: 40px;
+  height: calc(100vh - 46px);
+  // overflow-y: auto;
+  position: sticky;
   z-index: 9997;
 
   ul {

@@ -61,13 +61,13 @@ const idAleatorio = generaIdAleatorio();
               v-if="variable === 'Acciones'"
               style="display: flex; gap: 16px; max-width: 168px"
             >
-              <button
+              <!-- <button
                 class="boton-pictograma boton-secundario"
                 aria-label=""
                 type="button"
               >
                 <span class="pictograma-ayuda"></span>
-              </button>
+              </button> -->
               <button
                 class="boton-pictograma boton-secundario"
                 aria-label=""
