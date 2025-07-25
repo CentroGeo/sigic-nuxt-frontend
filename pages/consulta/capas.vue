@@ -8,10 +8,10 @@ import { exportarMapa as exportarMapaPNG } from "@centrogeomx/sisdai-mapas/src/u
 
 const resourceType = "dataLayer";
 
-const extencionNacional = "-118.3651,14.5321,-86.7104,32.7187";
+const extensionNacional = "-118.3651,14.5321,-86.7104,32.7187";
 const storeConsulta = useConsultaStore();
-const extencionMapa = computed(
-  () => storeConsulta.ajustarExtencionMapa || extencionNacional
+const extensionMapa = computed(
+  () => storeConsulta.ajustarExtensionMapa || extensionNacional
 );
 
 const config = useRuntimeConfig();
