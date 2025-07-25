@@ -41,7 +41,7 @@ const optionsButtons = ref([
       //   extension: getExtent(selectedElement.value.bbox_polygon.coordinates[0]),
       // });
 
-      storeConsulta.ajustarExtencionMapa = getExtent(
+      storeConsulta.ajustarExtensionMapa = getExtent(
         selectedElement.value.bbox_polygon.coordinates[0]
       ).join(",");
     },
