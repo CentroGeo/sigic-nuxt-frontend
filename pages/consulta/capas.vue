@@ -33,6 +33,12 @@ watch(
 
 // bbox_polygon
 // api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
+const cuadroInformativo2 = {
+  params: {
+    propertyName: "nombre",
+  },
+  contenido: (d) => `<p><b>nombre</b>: ${d["nombre"]}</p>`,
+};
 </script>
 
 <template>
@@ -61,6 +67,7 @@ watch(
             :fuente="`${config.public.geoserverUrl}/wms?`"
             :capa="capa.alternate"
             :posicion="storeSelected.selectedResources.length - index"
+            :cuadro-informativo="cuadroInformativo2"
           />
         </SisdaiMapa>
       </ClientOnly>
