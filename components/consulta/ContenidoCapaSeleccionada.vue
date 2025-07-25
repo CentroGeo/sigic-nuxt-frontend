@@ -1,4 +1,5 @@
 <script setup>
+const storeConsulta = useConsultaStore();
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
   selectedElement: {
@@ -18,13 +19,31 @@ function notifyTabla() {
 function notifyDownloadChild() {
   downloadChild.value?.abrirModalDescarga();
 }
+
+/**
+ * Devuelve el extend de acuerdo a una capa en formato: left,bootom,rigth,top
+ * @param {Array} bboxPolygon arreglo de corrdenadas envolventes de la capa
+ * @returns {Array}
+ */
+function getExtent(bboxPolygon) {
+  const x = bboxPolygon.map(([x]) => x);
+  const y = bboxPolygon.map(([, y]) => y);
+  return [Math.min(...x), Math.min(...y), Math.max(...x), Math.max(...y)];
+}
+
 // Aqui se acaba la parte nueva para la prueba
 const optionsButtons = ref([
   {
     label: "Hacer zoom",
     pictogram: "pictograma-zoom-instruccional",
     action: () => {
-      console.log("hacer zoom");
+      // console.log("hacer zoom", {
+      //   extension: getExtent(selectedElement.value.bbox_polygon.coordinates[0]),
+      // });
+
+      storeConsulta.ajustarExtencionMapa = getExtent(
+        selectedElement.value.bbox_polygon.coordinates[0]
+      ).join(",");
     },
   },
   {

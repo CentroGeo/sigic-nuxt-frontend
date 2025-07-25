@@ -4,25 +4,28 @@ import {
   SisdaiCapaXyz,
   SisdaiMapa,
 } from "@centrogeomx/sisdai-mapas";
-import html2canvas from "html2canvas";
+import { exportarMapa as exportarMapaPNG } from "@centrogeomx/sisdai-mapas/src/utiles";
 
 const resourceType = "dataLayer";
+
+const extencionNacional = "-118.3651,14.5321,-86.7104,32.7187";
+const storeConsulta = useConsultaStore();
+const extencionMapa = computed(
+  () => storeConsulta.ajustarExtencionMapa || extencionNacional
+);
 
 const config = useRuntimeConfig();
 const storeSelected = useSelectedResourcesStore();
 const randomNum = ref(0);
 
 const linkExportaMapa = ref();
-
 function exportarMapa() {
-  const html = document.querySelectorAll(".mapa .ol-viewport").item(0);
-  html2canvas(html, {
-    useCORS: true,
-  }).then((canvas) => {
-    linkExportaMapa.value.href = canvas.toDataURL();
-    linkExportaMapa.value.click();
-  });
+  exportarMapaPNG(
+    document.querySelectorAll(".mapa .ol-viewport").item(0),
+    linkExportaMapa.value
+  );
 }
+
 watch(
   () => storeSelected.selectedResources[resourceType],
   () => {
@@ -33,7 +36,7 @@ watch(
 
 // bbox_polygon
 // api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
-const cuadroInformativo2 = {
+const cuadroInformativo = {
   params: {
     propertyName: "nombre",
   },
@@ -55,7 +58,8 @@ const cuadroInformativo2 = {
       <ClientOnly>
         <SisdaiMapa
           class="gema"
-          :vista="{ extension: '-118.3651,14.5321,-86.7104,32.7187' }"
+          :vista="{ extension: extencionMapa }"
+          @click-centrar="storeConsulta.ajustarExtencionMapa = undefined"
         >
           <SisdaiCapaXyz />
 
@@ -67,7 +71,7 @@ const cuadroInformativo2 = {
             :fuente="`${config.public.geoserverUrl}/wms?`"
             :capa="capa.alternate"
             :posicion="storeSelected.selectedResources.length - index"
-            :cuadro-informativo="cuadroInformativo2"
+            :cuadro-informativo="cuadroInformativo"
           />
         </SisdaiMapa>
       </ClientOnly>
