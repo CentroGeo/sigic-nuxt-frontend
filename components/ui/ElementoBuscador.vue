@@ -229,22 +229,29 @@ function filtrarPorEntrada(r) {
   </ClientOnly>
 
   <div class="flex">
-    <ClientOnly>
-      <SisdaiCampoBusqueda
-        class="columna-13"
-        :catalogo="recursosLista"
-        :propiedad-busqueda="'title'"
-        :etiqueta="'Usa palabras clave...'"
-        @al-filtrar="filtrarPorEntrada"
-      />
-    </ClientOnly>
-    <button
-      class="boton-primario boton-pictograma boton-grande"
-      aria-label="Filtro Avanzado"
-      type="button"
-      @click="modalFiltros?.abrirModal()"
-    >
-      <span class="pictograma-filtro" aria-hidden="true" />
-    </button>
+    <div>
+      <ClientOnly>
+        <label for="buscadoravanzado">Buscador</label>
+        <SisdaiCampoBusqueda
+          id="buscadoravanzado"
+          class="columna-13"
+          style="height: 40px"
+          :catalogo="recursosLista"
+          :propiedad-busqueda="'title'"
+          :etiqueta="'Usa palabras clave...'"
+          @al-filtrar="filtrarPorEntrada"
+        />
+      </ClientOnly>
+    </div>
+    <div class="flex-vertical-final">
+      <button
+        class="boton-primario boton-pictograma boton-grande"
+        aria-label="Filtro Avanzado"
+        type="button"
+        @click="modalFiltros?.abrirModal()"
+      >
+        <span class="pictograma-filtro" aria-hidden="true" />
+      </button>
+    </div>
   </div>
 </template>
