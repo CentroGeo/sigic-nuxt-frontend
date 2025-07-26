@@ -191,19 +191,6 @@ onChange(async (files) => {
                     :v-model="ejemplo"
                     @click="open()"
                   />
-                  <!-- TODO: preguntar la mejor opción -->
-                  <!-- <ClientOnly>
-                  <CatalogoCampoBase
-                    v-model="ejemplo.archivo"
-                    etiqueta="Arrastra o suelta tu archivo"
-                    ejemplo="tipo file"
-                    tipo="file"
-                  />
-                </ClientOnly>
-                <input
-                  type="file"
-                  @change="(e) => (archivo = e.target.files[0])"
-                /> -->
                 </div>
               </div>
             </div>
