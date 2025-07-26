@@ -1,7 +1,5 @@
 <script setup>
-import SisdaiNavegacionGobMx from "@centrogeomx/sisdai-componentes/src/componentes/navegacion-gob-mx/SisdaiNavegacionGobMx.vue";
 import MainNavegacion from "~/components/base/MainNavegacion.vue";
-import SisdaiPiePaginaGobMx from "@centrogeomx/sisdai-componentes/src/componentes/pie-pagina-gob-mx/SisdaiPiePaginaGobMx.vue";
 import SisdaiMenuAccesibilidad from "@centrogeomx/sisdai-componentes/src/componentes/menu-accesibilidad/SisdaiMenuAccesibilidad.vue";
 import { useAccesibilidadStore } from "~/stores/accesibilidad";
 const accesibilidadStore = useAccesibilidadStore();
@@ -12,14 +10,11 @@ const accesibilidadStore = useAccesibilidadStore();
     <a href="#principal" class="ir-contenido-principal">
       Ir a contenido principal
     </a>
-    <SisdaiNavegacionGobMx />
     <MainNavegacion />
 
-    <main id="principal">
+    <div class="contenido">
       <slot />
-    </main>
-
-    <SisdaiPiePaginaGobMx />
+    </div>
 
     <!-- parece que boton flotante agrega un id al elemento html que no 
     coincide al hacer server side rendering -->
@@ -32,7 +27,7 @@ const accesibilidadStore = useAccesibilidadStore();
   </div>
 </template>
 <style lang="scss">
-#principal {
+.contenido {
   // padding-top: 56px;
 }
 nav.navegacion.navegacion-pegada {
