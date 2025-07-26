@@ -1,6 +1,4 @@
 <script setup>
-import SisdaiSelector from "@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue";
-const seleccionEjemplo = ref("");
 // // BuscadorAvanzado
 // const recursosLista = ref([
 //   {
@@ -101,28 +99,15 @@ const recursosFiltrados = ref([]);
 
     <template #visualizador>
       <main id="principal" class="contenedor m-b-10 m-t-3">
-        <div class="flex">
-          <div class="columna-8">
-            <ClientOnly>
-              <SisdaiSelector v-model="seleccionEjemplo" etiqueta="Ordenar por">
-                <option value="1">Opcion Uno</option>
-                <option value="2">Opcion Dos</option>
-                <option value="3">Opcion Tres</option>
-              </SisdaiSelector>
-            </ClientOnly>
-          </div>
-          <div class="columna-8 flex-vertical-final">
-            <UiElementoBuscador
-              :recursos-lista="recursosFiltrados"
-              :recursos-tipo="recursosTipo"
-              :categorias="[
-                'categoría_0: capas',
-                'categoría_1: tablas',
-                'categoría_2: documentos',
-              ]"
-            />
-          </div>
-        </div>
+        <CatalogoElementoFiltros
+          :recursos-lista="recursosFiltrados"
+          :recursos-tipo="recursosTipo"
+          :categorias="[
+            'categoría_0: capas',
+            'categoría_1: tablas',
+            'categoría_2: documentos',
+          ]"
+        />
 
         <div class="flex">
           <!-- TODO: bug en el alto del número -->
