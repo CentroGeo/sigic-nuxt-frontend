@@ -16,36 +16,23 @@ defineProps({
 <template>
   <div class="contenedor-paneles grid">
     <div
-      v-if="paneles === 3"
-      :id="storeCatalogo.idNavegacionLateral"
-      :class="storeCatalogo.catalogoColapsado ? 'oculto' : 'columna-4'"
-      :aria-hidden="storeCatalogo.catalogoColapsado"
-    >
-      <slot name="catalogo">
-        <p>Panel catálogo</p>
-      </slot>
-    </div>
-    <div
-      v-if="paneles == 2"
-      :id="storeCatalogo.idNavegacionLateral"
-      :class="storeCatalogo.catalogoColapsado ? 'oculto' : 'columna-4'"
-      :aria-hidden="storeCatalogo.catalogoColapsado"
-      class="menu-lateral-fondo"
+      :class="`
+      ${storeCatalogo.catalogoColapsado ? 'oculto' : 'columna-4'} 
+      ${paneles === 2 ? 'menu-lateral-fondo' : ''}`"
     >
       <slot name="catalogo">
         <p>Panel catálogo</p>
       </slot>
     </div>
 
-    <div :class="`columna-${storeCatalogo.catalogoColapsado ? '16' : '12'}`">
-      <slot name="visualizador">
-        <p>Panel visualización</p>
-      </slot>
-    </div>
-    <!-- TODO: unir condición ? : -->
     <div
-      v-if="paneles === 3"
-      :class="`columna-${storeCatalogo.catalogoColapsado ? '12' : '8'}`"
+      :class="`${
+        paneles === 2
+          ? `columna-${storeCatalogo.catalogoColapsado ? '16' : '12'}`
+          : paneles === 3
+          ? `columna-${storeCatalogo.catalogoColapsado ? '12' : '8'}`
+          : ''
+      }`"
     >
       <slot name="visualizador">
         <p>Panel visualización</p>
