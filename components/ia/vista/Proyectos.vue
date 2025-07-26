@@ -5,7 +5,7 @@ const storeIA = useIAStore();
 
 const proyecto = {
   id: 0,
-  titulo: "Biodiversidad de ecosistemas marinos",
+  titulo: "Biodiversidad de ecosistemas marinos hola",
   descripcion:
     "Este proyecto de investigación científica se centra en el estudio de la biodiversidad en los ecosistemas marinos de la costa. A través de la recolección de muestras y el análisis genético, buscamos comprender cómo las variaciones en la temperatura del agua afect...",
   numero_contextos: 0,

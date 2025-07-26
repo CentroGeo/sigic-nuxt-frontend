@@ -14,6 +14,11 @@ const capasModal = ref(null);
 
 const storeIA = useIAStore();
 
+// Datos del formulario
+const nombreProyecto = ref("");
+const descripcionProyecto = ref("");
+const visibilidadProyecto = ref("publico"); // Valor por defecto
+
 const categorias = ref([
   {
     id: 0,
@@ -72,9 +77,23 @@ const seleccionarCategoria = (categoria) => {
   categoriaSeleccionada.value = categoria;
 };
 
-const botonRadio = ref("");
+//const botonRadio = ref("");
 const botonRadioModal = ref("");
 const campoCasilla = ref(false);
+
+
+// Función para guardar el proyecto
+const guardarProyecto = async () => {
+
+   //manda a guardar proyecto.
+   //TODO: enviar la visivilidad, el archivo y el usuario
+   storeIA.crearProyecto(nombreProyecto.value, descripcionProyecto.value)
+
+   //Redirigir después de guardar
+   navigateTo('/ia/proyectos');
+};
+
+
 </script>
 
 <template>
@@ -98,6 +117,7 @@ const campoCasilla = ref(false);
             <form action="">
               <ClientOnly>
                 <SisdaiCampoBase
+                  v-model="nombreProyecto"
                   etiqueta="Nombre del proyecto"
                   ejemplo=""
                   :es_etiqueta_visible="true"
@@ -105,6 +125,7 @@ const campoCasilla = ref(false);
                 />
 
                 <SisdaiAreaTexto
+                  v-model="descripcionProyecto"
                   etiqueta="Descripción del proyecto"
                   :es_etiqueta_visible="true"
                   :es_obligatorio="false"
@@ -113,13 +134,13 @@ const campoCasilla = ref(false);
 
                 <SisdaiGrupoBotonesRadio leyenda="Visibilidad">
                   <SisdaiBotonRadio
-                    v-model="botonRadio"
+                    v-model="visibilidadProyecto"
                     etiqueta="Público"
                     value="publico"
                     name="visibilidad"
                   />
                   <SisdaiBotonRadio
-                    v-model="botonRadio"
+                    v-model="visibilidadProyecto"
                     etiqueta="Privado"
                     value="privado"
                     name="visibilidad"
@@ -156,8 +177,7 @@ const campoCasilla = ref(false);
               <NuxtLink
                 class="boton boton-chico boton-primario"
                 aria-label="Guardar proyecto"
-                to="/ia/proyectos"
-                @click="storeIA.crearProyecto()"
+                @click="guardarProyecto"
               >
                 Guardar proyecto
               </NuxtLink>

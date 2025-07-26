@@ -1,6 +1,6 @@
 <script setup>
 import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 
 const storeIA = useIAStore();
 
@@ -19,15 +19,38 @@ const catalogo = ref([
     numero_contextos: 0,
     numero_fuentes: 9,
   },
-  // {
-  //   id: 1,
-  //   titulo: "Nombre del proyecto",
-  //   numero_contextos: 5,
-  //   numero_fuentes: 5,
-  // },
+   {
+     id: 1,
+     titulo: "Nombre del proyecto",
+     numero_contextos: 5,
+     numero_fuentes: 5,
+   },
+   {
+     id: 2,
+     titulo: "Nombre del proyecto",
+     numero_contextos: 5,
+     numero_fuentes: 5,
+   },   
 ]);
 
 const catalogoFiltrado = ref(catalogo.value);
+
+
+// Función para guardar el proyecto
+const loadProjectList = async () => {
+
+  let arrayProjects = []
+   //consulta proyectos
+   arrayProjects = await storeIA.getProjectsList()
+
+   console.log(arrayProjects)
+};
+
+
+onMounted(() => {
+  loadProjectList();
+});
+
 </script>
 
 <template>
