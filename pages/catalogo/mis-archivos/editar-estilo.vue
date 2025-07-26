@@ -128,7 +128,16 @@ onChange(async (files) => {
           <div class="flex">
             <div class="columna-16">
               <h2>nombre de la capa.json</h2>
-
+              <div class="flex">
+                <nuxt-link
+                  to="/catalogo/mis-archivos/editar-metadatos"
+                  exact-path
+                  >Metadatos</nuxt-link
+                >
+                <nuxt-link to="/catalogo/mis-archivos/editar-estilo"
+                  >Estilo</nuxt-link
+                >
+              </div>
               <h2>Estilo</h2>
               <p><b>Estilo, solo archivos .sld</b></p>
               <!-- Drag & Drop -->
