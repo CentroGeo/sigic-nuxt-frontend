@@ -18,6 +18,7 @@ defineProps({
     <div
       :class="`
       ${storeCatalogo.catalogoColapsado ? 'oculto' : 'columna-4'} 
+      /**TODO: revisar el fondo en ia*/
       ${paneles === 2 ? 'menu-lateral-fondo' : ''}`"
     >
       <slot name="catalogo">

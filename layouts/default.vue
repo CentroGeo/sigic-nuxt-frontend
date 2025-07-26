@@ -77,11 +77,4 @@ a.navbar-brand {
   width: calc(var(--escala-rem-gob-sisdai) * 1.5em);
   height: calc(var(--escala-rem-gob-sisdai) * 1.5em);
 }
-// footer.main-footer {
-//   width: 100%;
-//   display: inline-flex;
-// }
-// footer.main-footer .list-info {
-//   width: 100%;
-// }
 </style>

@@ -27,7 +27,6 @@ export function useGeonodeResources({ resourceType } = {}) {
         //"filter{subtype.in}": "vector",
       });
       // TODO: remover console logs
-      // https://geonode.dev.geoint.mx/api/v2/resources?page=1&page_size=15&filter%7Bresource_type%7D=dataset
       // console.log("dataParams", dataParams);
       // console.log(`${api}?${dataParams.toString()}`);
       fetch(`${api}?${dataParams.toString()}`, {
