@@ -1,6 +1,8 @@
 <script setup>
 import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
 import SisdaiControlDeslizante from "@centrogeomx/sisdai-componentes/src/componentes/control-deslizante/SisdaiControlDeslizante.vue";
+import { marked } from 'marked'; // Importar marked para mostrar formato markdown
+import DOMPurify from 'dompurify'; // Para seguridad XSS
 import { ref } from "vue";
 
 const reporteModal = ref(null);
@@ -42,6 +44,18 @@ const mensajes = ref([
 const contenedorChatRef = ref(null);
 const usuarioHizoScroll = ref(false); 
 
+// Configurar marked (opcional)
+marked.setOptions({
+  breaks: true, // Convertir saltos de línea en <br>
+  gfm: true,    // Habilitar GitHub Flavored Markdown
+});
+
+// Función para convertir markdown a HTML seguro
+function renderMarkdown(content) {
+  return DOMPurify.sanitize(marked.parse(content));
+}
+
+
 // Función para manejar el scroll del usuario
 function manejarScroll() {
   const contenedor = contenedorChatRef.value;
@@ -79,6 +93,7 @@ function scrollToBottomIfNeeded() {
   });
 }
 
+
 const submitMensaje = async () => {
 
   const resultado = ref('')
@@ -89,8 +104,8 @@ const submitMensaje = async () => {
   const body = {
     user_id: "c5461377-f021-402a-9700-a6d43c82e30c",
     type: "Preguntar",
-    model: "deepseek-r1",
-    //model: "llama3.1",
+    //model: "deepseek-r1",
+    model: "llama3.1",
     messages: [
       {
         role: "system",
@@ -158,6 +173,7 @@ const submitMensaje = async () => {
   // Hacer scroll inicial al nuevo mensaje
   scrollToBottomIfNeeded();  
 
+  let mensajeRespuesta="";
  // Hacer streaming de la respuesta
   try {
     const streamRes = await fetch(`http://localhost:8000/stream/${jobId}`, {
@@ -178,7 +194,7 @@ const submitMensaje = async () => {
       //console.log(reader)
     }
 
-    let mensajeRespuesta="";
+    
 
     //muestra la respuesta del modelo en streaming
     while (true) { 
@@ -199,9 +215,16 @@ const submitMensaje = async () => {
       
 
         if(resultElement.includes("status:")){
-          let statusStr=resultElement.replace("status:","")
-          let statusObj=JSON.parse(statusStr)
-          console.log(statusObj["status"])
+          try{
+            let statusStr=resultElement.replace("status:","")
+            let statusObj=JSON.parse(statusStr)
+            //console.log(statusObj["status"])
+          }
+          catch (err) {
+              console.log('Error Leyendo status: ' + err)
+              console.log(resultElement)
+          }          
+
         }
         if(resultElement.includes("event: done")){
           //let statusStr=resultElement.replace("status:","")
@@ -213,19 +236,26 @@ const submitMensaje = async () => {
             console.log("stream completado")
           }
           else{
-            let dataStr=resultElement.replace("data:","")
-            //console.log(dataStr)
-            let dataObj=JSON.parse(dataStr)
-            //console.log(dataObj)
-            if(dataObj['status']=='started'){
-              //console.log(dataObj['message'])
-                mensajeRespuesta+=dataObj['message'];
-                //console.log(mensajeRespuesta)
-                mensajes.value[aiMessageIndex].message = mensajeRespuesta;
-                // Hacer scroll después de cada actualización
-                //scrollToBottom();
-                scrollToBottomIfNeeded();
-            }
+            try{
+              let dataStr=resultElement.replace("data:","")
+              //console.log(dataStr)
+              let dataObj=JSON.parse(dataStr)
+              //console.log(dataObj)
+              if(dataObj['status']=='started'){
+                //console.log(dataObj['message'])
+                  mensajeRespuesta+=dataObj['message'];
+                  //console.log(mensajeRespuesta)
+                  mensajes.value[aiMessageIndex].message = mensajeRespuesta;
+                  // Hacer scroll después de cada actualización
+                  //scrollToBottom();
+                  scrollToBottomIfNeeded();
+              }     
+            } 
+            catch (err) {
+              console.log('Error Leyendo data: ' + err)
+              console.log(resultElement)
+            }  
+
           }
 
 
@@ -236,7 +266,9 @@ const submitMensaje = async () => {
 
   } catch (err) {
     //resultado.value = 'Error en el streaming: ' + err
-    mensajes.value[aiMessageIndex].message = 'Error en el streaming: ' + err
+    //mensajes.value[aiMessageIndex].message = 'Error en el streaming: ' + err
+    console.log('Error en el streaming: ' + err)
+    console.log(mensajeRespuesta)
     //scrollToBottom();
     scrollToBottomIfNeeded();
   }
@@ -283,8 +315,8 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
                   </div>
                   <div>
                     <!-- Mensaje chat -->
-                    <p
-                      class="m-0"
+<!--                     <p
+                      class="m-0 markdown-content"
                       :class="
                         m.actor == 'Humano'
                           ? 'fondo-color-neutro p-2 borde-redondeado-20'
@@ -293,7 +325,18 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
                       :style="m.actor == 'Humano' ? 'max-width: 592px' : ''"
                     >
                       {{ m.message }}
-                    </p>
+                      
+                    </p> -->
+
+                    <!-- Mensaje chat con markdown -->
+                    <!-- TO DO: corregir altura de contenedor de mensaje  -->
+                    <div
+                      class="m-0 markdown-content"
+                      :class="m.actor == 'Humano' ? 'fondo-color-neutro p-2 borde-redondeado-20' : ''"
+                      :style="m.actor == 'Humano' ? 'max-width: 592px' : ''"
+                      v-html="renderMarkdown(m.message)"
+                    ></div>
+
 
                     <!-- Reporte -->
                     <div v-if="m.actor == 'AI' && m.reporte" class="">
@@ -488,4 +531,71 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
     }
   }
 }
+
+/* Estilos para el markdown */
+.markdown-content {
+  h1, h2, h3, h4, h5, h6 {
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+    font-weight: bold;
+  }
+  
+  h1 { font-size: 1.5em; }
+  h2 { font-size: 1.4em; }
+  h3 { font-size: 1.3em; }
+  
+  p {
+    margin-bottom: 1em;
+    line-height: 1.5;
+  }
+  
+  ul, ol {
+    margin-bottom: 1em;
+    padding-left: 2em;
+  }
+  
+  li {
+    margin-bottom: 0.5em;
+  }
+  
+  strong {
+    font-weight: bold;
+  }
+  
+  em {
+    font-style: italic;
+  }
+  
+  code {
+    background-color: #f0f0f0;
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-family: monospace;
+  }
+  
+  pre {
+    background-color: #f5f5f5;
+    padding: 1em;
+    border-radius: 4px;
+    overflow-x: auto;
+    
+    code {
+      background-color: transparent;
+      padding: 0;
+    }
+  }
+  
+  blockquote {
+    border-left: 3px solid #ccc;
+    padding-left: 1em;
+    margin-left: 0;
+    color: #666;
+  }
+  
+  a {
+    color: var(--boton-primario-fondo);
+    text-decoration: underline;
+  }
+}
+
 </style>
