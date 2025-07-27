@@ -23,9 +23,18 @@ function notifyDownloadChild() {
 /**
  * Devuelve el extend de acuerdo a una capa en formato: left,bootom,rigth,top
  * @param {Array} bboxPolygon arreglo de corrdenadas envolventes de la capa
- * @returns {Array}
+ * @returns {Array} left,bootom,rigth,top
  */
 function getExtent(bboxPolygon) {
+  if (!Array.isArray(bboxPolygon)) {
+    console.error(
+      "El valor de la extensión no está definida o no es una lista de coordenadas:",
+      bboxPolygon
+    );
+
+    return [];
+  }
+
   const x = bboxPolygon.map(([x]) => x);
   const y = bboxPolygon.map(([, y]) => y);
   return [Math.min(...x), Math.min(...y), Math.max(...x), Math.max(...y)];

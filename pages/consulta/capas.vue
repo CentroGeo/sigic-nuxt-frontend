@@ -27,48 +27,55 @@ function exportarMapa() {
 }
 
 const attributos = reactive({});
-function addAttribute(pk) {
+async function addAttribute(pk) {
   // attributes[pk] = `${config.public.geonodeApi}/datasets/${pk}/attribute_set`;
   attributos[pk] = [];
 
-  fetch(`${config.public.geonodeApi}/datasets/${pk}/attribute_set`)
-    .then((response) => response.json())
-    .then(({ attributes }) => {
-      // console.log(attributes);
+  try {
+    const { attributes } = await fetch(
+      `${config.public.geonodeApi}/datasets/${pk}/attribute_set`
+    ).then((response) => response.json());
+    // console.log(attributes);
 
-      const etiquetas = {};
-      const columnas = attributes
-        .filter((a) => a.visible)
-        .sort((a, b) => a.display_order - b.display_order)
-        .map(({ attribute, attribute_label }) => {
-          etiquetas[attribute] = attribute_label || attribute;
-          return attribute;
-        });
-      console.log(columnas);
+    const etiquetas = {};
+    const columnas = attributes
+      .filter((a) => a.visible)
+      .sort((a, b) => a.display_order - b.display_order)
+      .map(({ attribute, attribute_label }) => {
+        etiquetas[attribute] = attribute_label || attribute;
+        return attribute;
+      });
+    // console.log(columnas);
 
-      attributos[pk] = {
-        params: {
-          propertyName: columnas.join(","),
-        },
-        // attribute_label
-        contenido: (data) =>
-          columnas
-            .map(
-              (columna) =>
-                `<p><b>${etiquetas[columna] || columna}</b>: ${
-                  data[columna]
-                }</p>`
-            )
-            .join(""),
-      };
-      console.log(attributos[pk]);
-    })
-    .catch((err) => {
-      console.error(err);
-    })
-    .finally(() => {
-      //console.log("fin");
-    });
+    attributos[pk] = {
+      params: {
+        propertyName: columnas.join(","),
+      },
+      // attribute_label
+      contenido: (data) =>
+        columnas
+          .map(
+            (columna) =>
+              `<p><b>${etiquetas[columna] || columna}</b>: ${data[columna]}</p>`
+          )
+          .join(""),
+    };
+    // console.log(attributos[pk]);
+  } catch (error) {
+    console.error("Error en la búsqueda:", error);
+
+    console.error(
+      "Ocurrió un problema al realizar la búsqueda. Por favor, verifica tu conexión o intenta de nuevo más tarde."
+    );
+
+    if (error.response && error.response.status === 400) {
+      console.error(
+        "Los parámetros de búsqueda no son válidos. Revisa los filtros ingresados."
+      );
+    } else if (error.response && error.response.status === 500) {
+      console.error("El servidor encontró un problema. Intenta más tarde.");
+    }
+  }
 }
 
 watch(
@@ -96,17 +103,6 @@ watch(
 
 // bbox_polygon
 // api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
-
-function cuadroInformativo(pk) {
-  console.log(pk);
-
-  return {
-    params: {
-      propertyName: "nombre",
-    },
-    contenido: (d) => `<p><b>nombre</b>: ${d["nombre"]}</p>`,
-  };
-}
 </script>
 
 <template>
