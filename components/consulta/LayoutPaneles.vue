@@ -1,7 +1,7 @@
 <script setup>
 const storeConsulta = useConsultaStore();
 </script>
-
+<!-- TODO: revisar si les laten cómo quedo el de ui/ -->
 <template>
   <div class="contenedor-paneles grid">
     <div

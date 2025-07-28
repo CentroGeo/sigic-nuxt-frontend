@@ -10,12 +10,11 @@ const accesibilidadStore = useAccesibilidadStore();
     <a href="#principal" class="ir-contenido-principal">
       Ir a contenido principal
     </a>
-
     <MainNavegacion />
 
-    <main id="principal" class="p-t-7">
+    <div class="contenido">
       <slot />
-    </main>
+    </div>
 
     <!-- parece que boton flotante agrega un id al elemento html que no 
     coincide al hacer server side rendering -->
@@ -28,8 +27,11 @@ const accesibilidadStore = useAccesibilidadStore();
   </div>
 </template>
 <style lang="scss">
+.contenido {
+  // padding-top: 56px;
+}
 nav.navegacion.navegacion-pegada {
-  top: 54px;
+  // top: 54px;
 }
 :root {
   --escala-rem-gob-sisdai: 0.65;
@@ -37,6 +39,9 @@ nav.navegacion.navegacion-pegada {
 nav.navbar {
   padding-top: calc(var(--escala-rem-gob-sisdai) * 0.5rem);
   padding-bottom: calc(var(--escala-rem-gob-sisdai) * 0.5rem);
+}
+nav.navbar.navbar-fixed-top {
+  z-index: 9999;
 }
 a.navbar-brand {
   margin-right: calc(var(--escala-rem-gob-sisdai) * 63rem);
