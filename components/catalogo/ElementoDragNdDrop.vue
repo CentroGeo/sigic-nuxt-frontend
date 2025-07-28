@@ -17,14 +17,16 @@ async function onDrop() {
     files.value.forEach((file) => {
       // TODO: revisar bien los MIME de los archivos válidos
       if (
-        file.type === "application/geo+json" ||
+        file.type === "application/vnd.geo+json" ||
         file.type === "application/json" ||
+        file.type === "application/geo+json" ||
+        file.type === "application/geopackage+sqlite3" ||
         file.type === "text/csv" ||
         file.type === "application/xml" ||
         file.type === "application/pdf" ||
-        file.type === "image/jpge" ||
+        file.type === "image/jpeg" ||
         file.type === "image/png" ||
-        file.type === "image/webp"
+        file.name.slice(-4) === ".sld"
       ) {
         // console.log(file);
         formData.append(
@@ -69,14 +71,16 @@ onChange(async (files) => {
 
       // TODO: revisar bien los archivos válidos
       if (
-        files[x]?.type === "application/geo+json" ||
+        files[x]?.type === "application/vnd.geo+json" ||
         files[x]?.type === "application/json" ||
+        files[x]?.type === "application/geo+json" ||
+        files[x]?.type === "application/geopackage+sqlite3" ||
         files[x]?.type === "text/csv" ||
         files[x]?.type === "application/xml" ||
         files[x]?.type === "application/pdf" ||
-        files[x]?.type === "image/jpge" ||
+        files[x]?.type === "image/jpeg" ||
         files[x]?.type === "image/png" ||
-        files[x]?.type === "image/webp"
+        files[x]?.name.slice(-4) === ".sld"
       ) {
         // agrega el archivo a un FormData
         formData.append(
@@ -88,6 +92,7 @@ onChange(async (files) => {
       } else {
         isValid = false;
         console.log("Archivo inválido");
+        console.log("files[x]?.type", files[x]?.type);
       }
     }
   }
@@ -146,22 +151,24 @@ onChange(async (files) => {
         </div>
       </div>
       <div class="flex">
-        <button
-          class="boton-primario boton-chico"
-          aria-label="Guardar"
-          type="button"
-          :disabled="!datosArriba"
-        >
-          Guardar
-        </button>
-        <button
-          class="boton-secundario boton-chico"
-          aria-label="Eliminar"
-          type="button"
-          :disabled="true"
-        >
-          Eliminar
-        </button>
+        <client-only>
+          <button
+            class="boton-primario boton-chico"
+            aria-label="Guardar"
+            type="button"
+            :disabled="!datosArriba"
+          >
+            Guardar
+          </button>
+          <button
+            class="boton-secundario boton-chico"
+            aria-label="Eliminar"
+            type="button"
+            :disabled="true"
+          >
+            Eliminar
+          </button>
+        </client-only>
       </div>
     </div>
     <!-- TODO: preguntar la mejor opción -->
@@ -176,3 +183,20 @@ onChange(async (files) => {
     <input type="file" @change="(e) => (archivo = e.target.files[0])" /> -->
   </div>
 </template>
+<style lang="scss">
+#identificadorUNICO {
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
+}
+#identificadorUNICO + label {
+  display: inline-block;
+  cursor: pointer;
+}
+#identificadorUNICO:focus + label,
+#identificadorUNICO + label:hover {
+}
+</style>

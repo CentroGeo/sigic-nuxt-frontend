@@ -5,28 +5,366 @@
 const { data } = await useFetch(
   "https://stable.demo.geonode.org/api/v2/resources?page=1&page_size=15&filter%7Bresource_type%7D=dataset"
 );
-console.log("data.value", data.value);
+// console.log("data.value", data.value);
 // console.log("data.value", data.value.links);
 // console.log("data.value", data.value.page);
 // console.log("data.value", data.value.page_size);
-// console.log("data.value", data.value.resources);
+// console.log("data.value.resources", data.value.resources);
 // console.log("data.value", data.value.total);
 // console.log("data.value.links.next", data.value.links.next);
 
 // const { data: resources } = await useFetch(
 //   "https://stable.demo.geonode.org/api/v2/resources?page=1&page_size=15&filter%7Bresource_type%7D=dataset"
 // );
-const { pending, data: resources } = useFetch(
+
+const {
+  pending,
+  data: datosUseFetch,
+  refresh,
+} = useFetch(
   "https://stable.demo.geonode.org/api/v2/resources?page=1&page_size=15&filter%7Bresource_type%7D=dataset",
+  // "http://10.2.102.99/api/v2/resources?page=1&page_size=15&filter%7Bresource_type%7D=document",
   {
     // TODO: investigar propiedades
     lazy: false,
     // server: false,
+    // transform: (datosUseFetch) => {
+    //   return datosUseFetch.map((dato) => ({
+    //     links: dato.links,
+    //   }));
+    // },
+    // pick: ["links", "page", "page_size", "resources", "total"],
+    // pick: ["resources"],
   }
 );
-// console.log("resources", resources.value.resources);
+// console.log("datosUseFetch.resources", datosUseFetch.value);
 
 const listaRecursos = ref([]);
+const recurso = {
+  pk: "15148",
+  uuid: "bfd94a65-0817-40cf-bb52-f8bdaf471555",
+  resource_type: "dataset",
+  // polymorphic_ctype_id: "58",
+  // perms: ["download_resourcebase", "view_resourcebase"],
+  owner: {
+    pk: 6977,
+    username: "fadyhammad",
+    first_name: "",
+    last_name: "",
+    avatar: "https://stable.demo.geonode.org/static/geonode/img/avatar.png",
+    is_superuser: false,
+    is_staff: false,
+    email: "fadyhammad685@gmail.com",
+    link: "https://stable.demo.geonode.org/api/v2/users/6977",
+  },
+  poc: [
+    {
+      pk: 6977,
+      username: "fadyhammad",
+      first_name: "",
+      last_name: "",
+      avatar: "https://stable.demo.geonode.org/static/geonode/img/avatar.png",
+      is_superuser: false,
+      is_staff: false,
+      email: "fadyhammad685@gmail.com",
+      link: "https://stable.demo.geonode.org/api/v2/users/6977",
+    },
+  ],
+  metadata_author: [
+    {
+      pk: 6977,
+      username: "fadyhammad",
+      first_name: "",
+      last_name: "",
+      avatar: "https://stable.demo.geonode.org/static/geonode/img/avatar.png",
+      is_superuser: false,
+      is_staff: false,
+      email: "fadyhammad685@gmail.com",
+      link: "https://stable.demo.geonode.org/api/v2/users/6977",
+    },
+  ],
+  // processor: [],
+  // publisher: [],
+  // custodian: [],
+  // distributor: [],
+  // resource_user: [],
+  // resource_provider: [],
+  // originator: [],
+  // principal_investigator: [],
+  keywords: [],
+  tkeywords: [],
+  // regions: [],
+  category: null,
+  title: "gaza_strip_geobackeg",
+  abstract: "",
+  attribution: null,
+  // alternate: "geonode:gaza_strip_geobackeg",
+  doi: null,
+  bbox_polygon: {
+    type: "Polygon",
+    coordinates: [
+      [
+        [34.21942995590014, 31.225941694567965],
+        [34.21942995590014, 31.594897091884107],
+        [34.56677582288928, 31.594897091884107],
+        [34.56677582288928, 31.225941694567965],
+        [34.21942995590014, 31.225941694567965],
+      ],
+    ],
+  },
+  ll_bbox_polygon: {
+    type: "Polygon",
+    coordinates: [
+      [
+        [34.21942995590014, 31.225941694567965],
+        [34.21942995590014, 31.594897091884107],
+        [34.56677582288928, 31.594897091884107],
+        [34.56677582288928, 31.225941694567965],
+        [34.21942995590014, 31.225941694567965],
+      ],
+    ],
+  },
+  // srid: "EPSG:4326",
+  date: "2025-07-28T09:52:43.067920Z",
+  date_type: "publication",
+  // edition: null,
+  // purpose: null,
+  // maintenance_frequency: null,
+  // restriction_code_type: null,
+  // constraints_other: null,
+  license: {
+    identifier: "not_specified",
+  },
+  // language: "eng",
+  spatial_representation_type: null,
+  // temporal_extent_start: null,
+  // temporal_extent_end: null,
+  // supplemental_information: "No information provided",
+  // data_quality_statement: null,
+  // group: null,
+  // popular_count: "2",
+  // share_count: "0",
+  // rating: "0",
+  // featured: false,
+  // advertised: true,
+  is_published: true,
+  is_approved: true,
+  detail_url: "https://stable.demo.geonode.org/catalogue/#/dataset/15148",
+  embed_url:
+    "https://stable.demo.geonode.org/datasets/geonode:gaza_strip_geobackeg/embed",
+  created: "2025-07-28T09:52:43.112042Z",
+  last_updated: "2025-07-28T09:52:48.809879Z",
+  // raw_abstract: "",
+  // raw_purpose: "None",
+  // raw_constraints_other: "None",
+  // raw_supplemental_information: "No information provided",
+  // raw_data_quality_statement: "None",
+  metadata_only: false,
+  processed: true,
+  state: "PROCESSED",
+  subtype: "vector",
+  sourcetype: "LOCAL",
+  is_copyable: true,
+  download_url:
+    "https://stable.demo.geonode.org/datasets/geonode:gaza_strip_geobackeg/dataset_download",
+  download_urls: [
+    {
+      url: "/datasets/geonode:gaza_strip_geobackeg/dataset_download",
+      ajax_safe: true,
+      default: true,
+    },
+    {
+      url: "https://stable.demo.geonode.org/api/v2/assets/9172/download",
+      ajax_safe: true,
+      default: false,
+    },
+  ],
+  extent: {
+    coords: [
+      34.21942995590014, 31.225941694567965, 34.56677582288928,
+      31.594897091884107,
+    ],
+    srid: "EPSG:4326",
+  },
+  favorite: false,
+  thumbnail_url:
+    "https://stable.demo.geonode.org/uploaded/thumbs/dataset-bfd94a65-0817-40cf-bb52-f8bdaf471555-thumb-5fb5330a-f420-4000-bee4-6aa5491f912d.jpg",
+  links: [
+    {
+      extension: "xml",
+      link_type: "metadata",
+      name: "Atom",
+      mime: "text/xml",
+      url: "https://stable.demo.geonode.org/catalogue/csw?request=GetRecordById&service=CSW&version=2.0.2&id=bfd94a65-0817-40cf-bb52-f8bdaf471555&outputschema=http%3A%2F%2Fwww.w3.org%2F2005%2FAtom&elementsetname=full",
+    },
+    {
+      extension: "xml",
+      link_type: "metadata",
+      name: "DIF",
+      mime: "text/xml",
+      url: "https://stable.demo.geonode.org/catalogue/csw?request=GetRecordById&service=CSW&version=2.0.2&id=bfd94a65-0817-40cf-bb52-f8bdaf471555&outputschema=http%3A%2F%2Fgcmd.gsfc.nasa.gov%2FAboutus%2Fxml%2Fdif%2F&elementsetname=full",
+    },
+    {
+      extension: "xml",
+      link_type: "metadata",
+      name: "Dublin Core",
+      mime: "text/xml",
+      url: "https://stable.demo.geonode.org/catalogue/csw?request=GetRecordById&service=CSW&version=2.0.2&id=bfd94a65-0817-40cf-bb52-f8bdaf471555&outputschema=http%3A%2F%2Fwww.opengis.net%2Fcat%2Fcsw%2F2.0.2&elementsetname=full",
+    },
+    {
+      extension: "xml",
+      link_type: "metadata",
+      name: "ebRIM",
+      mime: "text/xml",
+      url: "https://stable.demo.geonode.org/catalogue/csw?request=GetRecordById&service=CSW&version=2.0.2&id=bfd94a65-0817-40cf-bb52-f8bdaf471555&outputschema=urn%3Aoasis%3Anames%3Atc%3Aebxml-regrep%3Axsd%3Arim%3A3.0&elementsetname=full",
+    },
+    {
+      extension: "xml",
+      link_type: "metadata",
+      name: "FGDC",
+      mime: "text/xml",
+      url: "https://stable.demo.geonode.org/catalogue/csw?request=GetRecordById&service=CSW&version=2.0.2&id=bfd94a65-0817-40cf-bb52-f8bdaf471555&outputschema=http%3A%2F%2Fwww.opengis.net%2Fcat%2Fcsw%2Fcsdgm&elementsetname=full",
+    },
+    {
+      extension: "xml",
+      link_type: "metadata",
+      name: "ISO",
+      mime: "text/xml",
+      url: "https://stable.demo.geonode.org/catalogue/csw?request=GetRecordById&service=CSW&version=2.0.2&id=bfd94a65-0817-40cf-bb52-f8bdaf471555&outputschema=http%3A%2F%2Fwww.isotc211.org%2F2005%2Fgmd&elementsetname=full",
+    },
+    {
+      extension: "xml",
+      link_type: "metadata",
+      name: "ISO with XSL",
+      mime: "text/xml",
+      url: "https://stable.demo.geonode.org/showmetadata/xsl/15148",
+    },
+    {
+      extension: "gpkg",
+      link_type: "data",
+      name: "gaza_strip_geobackeg",
+      mime: "",
+      url: "https://stable.demo.geonode.org/api/v2/assets/9172/link",
+      extras: {
+        type: "asset",
+        content: {
+          title: "Original",
+          description: null,
+          type: "gpkg",
+          download_url:
+            "https://stable.demo.geonode.org/api/v2/assets/9172/download",
+        },
+      },
+    },
+    {
+      extension: "jpg",
+      link_type: "image",
+      name: "JPEG",
+      mime: "image/jpeg",
+      url: "https://stable.demo.geonode.org/geoserver/ows?service=WMS&request=GetMap&layers=geonode%3Agaza_strip_geobackeg&format=image%2Fjpeg&height=550&width=550&srs=EPSG%3A4326&bbox=34.2194300%2C31.2259417%2C34.5667758%2C31.5948971",
+    },
+    {
+      extension: "pdf",
+      link_type: "image",
+      name: "PDF",
+      mime: "application/pdf",
+      url: "https://stable.demo.geonode.org/geoserver/ows?service=WMS&request=GetMap&layers=geonode%3Agaza_strip_geobackeg&format=application%2Fpdf&height=550&width=550&srs=EPSG%3A4326&bbox=34.2194300%2C31.2259417%2C34.5667758%2C31.5948971",
+    },
+    {
+      extension: "png",
+      link_type: "image",
+      name: "PNG",
+      mime: "image/png",
+      url: "https://stable.demo.geonode.org/geoserver/ows?service=WMS&request=GetMap&layers=geonode%3Agaza_strip_geobackeg&format=image%2Fpng&height=550&width=550&srs=EPSG%3A4326&bbox=34.2194300%2C31.2259417%2C34.5667758%2C31.5948971",
+    },
+    {
+      extension: "zip",
+      link_type: "data",
+      name: "Zipped Shapefile",
+      mime: "SHAPE-ZIP",
+      url: "https://stable.demo.geonode.org/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typename=geonode%3Agaza_strip_geobackeg&outputFormat=SHAPE-ZIP&srs=EPSG%3A4326&format_options=charset%3AUTF-8",
+    },
+    {
+      extension: "gml",
+      link_type: "data",
+      name: "GML 2.0",
+      mime: "gml2",
+      url: "https://stable.demo.geonode.org/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typename=geonode%3Agaza_strip_geobackeg&outputFormat=gml2&srs=EPSG%3A4326",
+    },
+    {
+      extension: "gml",
+      link_type: "data",
+      name: "GML 3.1.1",
+      mime: "text/xml; subtype=gml/3.1.1",
+      url: "https://stable.demo.geonode.org/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typename=geonode%3Agaza_strip_geobackeg&outputFormat=text%2Fxml%3B+subtype%3Dgml%2F3.1.1&srs=EPSG%3A4326",
+    },
+    {
+      extension: "csv",
+      link_type: "data",
+      name: "CSV",
+      mime: "csv",
+      url: "https://stable.demo.geonode.org/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typename=geonode%3Agaza_strip_geobackeg&outputFormat=csv&srs=EPSG%3A4326",
+    },
+    {
+      extension: "excel",
+      link_type: "data",
+      name: "Excel",
+      mime: "excel",
+      url: "https://stable.demo.geonode.org/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typename=geonode%3Agaza_strip_geobackeg&outputFormat=excel&srs=EPSG%3A4326",
+    },
+    {
+      extension: "json",
+      link_type: "data",
+      name: "GeoJSON",
+      mime: "json",
+      url: "https://stable.demo.geonode.org/geoserver/ows?service=WFS&version=1.0.0&request=GetFeature&typename=geonode%3Agaza_strip_geobackeg&outputFormat=json&srs=EPSG%3A4326&srsName=EPSG%3A4326",
+    },
+    {
+      extension: "html",
+      link_type: "html",
+      name: "geonode:gaza_strip_geobackeg",
+      mime: "text/html",
+      url: "https://stable.demo.geonode.org/catalogue/#/dataset/15148",
+    },
+    {
+      extension: "png",
+      link_type: "image",
+      name: "Legend",
+      mime: "image/png",
+      url: "https://stable.demo.geonode.org/geoserver/ows?service=WMS&request=GetLegendGraphic&format=image/png&WIDTH=20&HEIGHT=20&LAYER=geonode:gaza_strip_geobackeg&STYLE=polygon&version=1.3.0&sld_version=1.1.0&legend_options=fontAntiAliasing:true;fontSize:12;forceLabels:on",
+    },
+    {
+      extension: "html",
+      link_type: "OGC:WMS",
+      name: "OGC WMS: geonode Service",
+      mime: "text/html",
+      url: "https://stable.demo.geonode.org/geoserver/ows",
+    },
+    {
+      extension: "html",
+      link_type: "OGC:WFS",
+      name: "OGC WFS: geonode Service",
+      mime: "text/html",
+      url: "https://stable.demo.geonode.org/geoserver/ows",
+    },
+    {
+      extension: "png",
+      link_type: "image",
+      name: "Legend",
+      mime: "image/png",
+      url: "https://stable.demo.geonode.org/geoserver/ows?service=WMS&request=GetLegendGraphic&format=image/png&WIDTH=20&HEIGHT=20&LAYER=geonode:gaza_strip_geobackeg&STYLE=gaza_strip_geobackeg&version=1.3.0&sld_version=1.1.0&legend_options=fontAntiAliasing:true;fontSize:12;forceLabels:on",
+    },
+    {
+      extension: "png",
+      link_type: "image",
+      name: "Thumbnail",
+      mime: "image/png",
+      url: "https://stable.demo.geonode.org/uploaded/thumbs/dataset-bfd94a65-0817-40cf-bb52-f8bdaf471555-thumb-5fb5330a-f420-4000-bee4-6aa5491f912d.jpg",
+    },
+  ],
+  link: "https://stable.demo.geonode.org/api/v2/resources/15148",
+  metadata_uploaded_preserve: false,
+};
 // listaRecursos.value = await fetch(
 const datos = ref(
   await fetch(
@@ -66,7 +404,6 @@ const datos = ref(
 
 const recursosTipo = ref("dataLayer");
 const recursosFiltrados = ref([]);
-
 const resourcesStore = useSelectedResourcesStore();
 const { resourcesList } = useGeonodeResources({
   resourceType: recursosTipo.value,
@@ -114,13 +451,24 @@ watch(
         <main id="principal" class="contenedor m-b-10 p-t-3">
           <div v-if="pending">...cargando</div>
           <div v-else>
-            <!-- {{ data.resources }} -->
+            <button @click="refresh">Refresh data</button>
             <div class="flex">
+              listaRecursos recurso.resource_type:
               <b v-for="recurso in listaRecursos" :key="recurso.title">
                 {{ recurso.resource_type }}
               </b>
             </div>
-            <!-- {{ resources }} -->
+            <!-- {{ data }} -->
+            <div>datosUseFetch.resources: {{ datosUseFetch.resources }}</div>
+            <!-- <div class="flex">
+              listaRecursos recurso.resource_type:
+              <b
+                v-for="recurso in datosUseFetch.resources"
+                :key="recurso.title"
+              >
+                {{ recurso.title }}
+              </b>
+            </div> -->
           </div>
 
           <CatalogoElementoFiltros
