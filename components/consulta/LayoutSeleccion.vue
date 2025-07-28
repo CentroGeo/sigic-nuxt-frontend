@@ -38,7 +38,7 @@ function shareState() {
             aria-label="Descargar mapa"
             @click="
               resourceType === 'dataLayer'
-                ? funcionDescarga
+                ? funcionDescarga()
                 : notifyDownloadAllChild()
             "
           >

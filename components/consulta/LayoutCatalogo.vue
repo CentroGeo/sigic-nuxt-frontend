@@ -1,5 +1,5 @@
 <script setup>
-import { setUrlDocs } from "@/utils/consulta.js";
+//import { setUrlDocs } from "@/utils/consulta.js";
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
   titulo: { type: String, default: "Título" },
@@ -97,13 +97,13 @@ watch(
   () => resourcesStore.selectedResources[resourceType.value],
   async () => {
     const recursos = resourcesStore.selectedResources[resourceType.value];
-    await setUrlDocs(recursos);
-    console.log("catalogo: ", route.fullPath);
+    //await setUrlDocs(recursos);
+    //console.log("catalogo: ", route.fullPath);
   },
   { deep: true }
 );
 
-onMounted(() => {
+/* onMounted(() => {
   selectedResources.value =
     resourcesStore.selectedResources[resourceType.value];
   console.log("recursos mounted layout: ", selectedResources.value);
@@ -114,15 +114,15 @@ onMounted(() => {
     console.log("se está cargando de ser compartido o se actualizó");
     //let paramList = route.query.recursos.split(";");
     //console.log(paramList);
-    /*     resourcesList.value.forEach((resource) => {
+        resourcesList.value.forEach((resource) => {
       if (paramList.includes(resource.alternate)) {
         console.log(resource);
       }
-    }); */
+    }); 
   } else {
     console.log("se está cargando desde cero");
   }
-});
+}); */
 </script>
 
 <template>

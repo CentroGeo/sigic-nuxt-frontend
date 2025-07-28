@@ -4,53 +4,120 @@ import {
   SisdaiCapaXyz,
   SisdaiMapa,
 } from "@centrogeomx/sisdai-mapas";
-import html2canvas from "html2canvas";
+import { exportarMapa as exportarMapaPNG } from "@centrogeomx/sisdai-mapas/src/utiles";
 
 const resourceType = "dataLayer";
+
+const extensionNacional = "-118.3651,14.5321,-86.7104,32.7187";
+const storeConsulta = useConsultaStore();
+const extensionMapa = computed(
+  () => storeConsulta.ajustarExtensionMapa || extensionNacional
+);
 
 const config = useRuntimeConfig();
 const storeSelected = useSelectedResourcesStore();
 const randomNum = ref(0);
 
 const linkExportaMapa = ref();
-
 function exportarMapa() {
-  const html = document.querySelectorAll(".mapa .ol-viewport").item(0);
-  html2canvas(html, {
-    useCORS: true,
-  }).then((canvas) => {
-    linkExportaMapa.value.href = canvas.toDataURL();
-    linkExportaMapa.value.click();
-  });
+  exportarMapaPNG(
+    document.querySelectorAll(".mapa .ol-viewport").item(0),
+    linkExportaMapa.value
+  );
 }
+
+const attributos = reactive({});
+function addAttribute(pk) {
+  // attributes[pk] = `${config.public.geonodeApi}/datasets/${pk}/attribute_set`;
+  attributos[pk] = [];
+
+  fetch(`${config.public.geonodeApi}/datasets/${pk}/attribute_set`)
+    .then((response) => response.json())
+    .then(({ attributes }) => {
+      // console.log(attributes);
+
+      const etiquetas = {};
+      const columnas = attributes
+        .filter((a) => a.visible)
+        .sort((a, b) => a.display_order - b.display_order)
+        .map(({ attribute, attribute_label }) => {
+          etiquetas[attribute] = attribute_label || attribute;
+          return attribute;
+        });
+      //console.log(columnas);
+
+      attributos[pk] = {
+        params: {
+          propertyName: columnas.join(","),
+        },
+        // attribute_label
+        contenido: (data) =>
+          columnas
+            .map(
+              (columna) =>
+                `<p><b>${etiquetas[columna] || columna}</b>: ${
+                  data[columna]
+                }</p>`
+            )
+            .join(""),
+      };
+      //console.log(attributos[pk]);
+    })
+    .catch((err) => {
+      console.error(err);
+    })
+    .finally(() => {
+      //console.log("fin");
+    });
+}
+
 watch(
   () => storeSelected.selectedResources[resourceType],
-  () => {
+  (nv_) => {
     randomNum.value += Math.random();
+
+    const arr1 = nv_.map((r) => r.pk);
+    const arr2 = Object.keys(attributos);
+    // console.log(arr1, arr2);
+
+    const nv = arr1.filter((item) => !arr2.includes(item));
+    // console.log("Se agregó:", nv);
+    nv.forEach((r) => addAttribute(r));
+
+    const ov = arr2.filter((item) => !arr1.includes(item));
+    // console.log("Se quitó:", ov);
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+    ov.forEach((resource) => delete attributos[resource]);
+
+    // console.log(attributos);
+
+    //console.log();
   },
   { deep: true }
 );
+
+// bbox_polygon
+// api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
+
+function cuadroInformativo(pk) {
+  console.log(pk);
+
+  return {
+    params: {
+      propertyName: "nombre",
+    },
+    contenido: (d) => `<p><b>nombre</b>: ${d["nombre"]}</p>`,
+  };
+}
 onMounted(() => {
-  randomNum.value = 0;
-  if (storeSelected.selectedResources[resourceType].length > 0) {
-    storeSelected.lowerIndex(
-      storeSelected.selectedResources[resourceType][0],
-      resourceType
-    );
-    storeSelected.raiseIndex(
-      storeSelected.selectedResources[resourceType][1],
-      resourceType
-    );
-  }
-  /* if (storeSelected.selectedResources[resourceType].length > 0) {
-    let respaldo = storeSelected.selectedResources[resourceType];
+  /*   if (storeSelected.selectedResources[resourceType].length > 0) {
+    let datosPrueba = storeSelected.selectedResources[resourceType];
     storeSelected.resetResource(resourceType);
-    for (let i = 0; i < respaldo.length; i++) {
-      storeSelected.addResource(resourceType, respaldo[i]);
+    for (let i = datosPrueba.length - 1; i >= 0; i--) {
+      storeSelected.addResource(resourceType, datosPrueba[i]);
+      console.log(datosPrueba[i]);
     }
-  }
-  storeSelected.selectedResources[resourceType];
-  console.log("este 2", storeSelected.selectedResources[resourceType]); */
+  } */
 });
 </script>
 
@@ -68,8 +135,8 @@ onMounted(() => {
       <ClientOnly>
         <SisdaiMapa
           class="gema"
-          :vista="{ extension: '-118.3651,14.5321,-86.7104,32.7187' }"
-          id="mapa_catalogo"
+          :vista="{ extension: extensionMapa }"
+          @click-centrar="storeConsulta.ajustarExtensionMapa = undefined"
         >
           <SisdaiCapaXyz />
 
@@ -81,6 +148,8 @@ onMounted(() => {
             :fuente="`${config.public.geoserverUrl}/wms?`"
             :capa="capa.alternate"
             :posicion="storeSelected.selectedResources.length - index"
+            :cuadro-informativo="attributos[capa.pk]"
+            @alFinalizarCarga="(v) => console.log('C: alFinalizarCarga', v)"
           />
         </SisdaiMapa>
       </ClientOnly>
@@ -91,6 +160,7 @@ onMounted(() => {
         titulo="Capas seleccionadas"
         :resource-type="resourceType"
         etiqueta-elementos="Capas"
+        :funcion-descarga="exportarMapa"
       />
       <a ref="linkExportaMapa" class="oculto" download="sigic.png" />
     </template>
