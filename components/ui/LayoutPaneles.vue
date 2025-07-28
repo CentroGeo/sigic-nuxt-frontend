@@ -1,5 +1,4 @@
 <script setup>
-const storeCatalogo = useCatalogoStore();
 /**
  * @typedef {Object} Props
  * @property {Number} [paneles=2] - Indica el número de paneles a utilizar.
@@ -12,6 +11,8 @@ defineProps({
     default: 2,
   },
 });
+// store
+const storeCatalogo = useCatalogoStore();
 </script>
 <template>
   <div class="contenedor-paneles grid">

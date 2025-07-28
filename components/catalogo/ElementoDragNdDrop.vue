@@ -41,7 +41,7 @@ async function onDrop() {
 
     if (isValid) {
       console.log(formData);
-      await $fetch("/api/subirV2", {
+      await $fetch("/api/subirSLD", {
         method: "POST",
         body: formData,
       });
@@ -96,7 +96,7 @@ onChange(async (files) => {
     console.log(formData);
 
     // manda el FormData con los archivos al event handler de api/upload
-    await $fetch("/api/subirV2", {
+    await $fetch("/api/subirSLD", {
       method: "POST",
       body: formData,
     });
@@ -176,3 +176,20 @@ onChange(async (files) => {
     <input type="file" @change="(e) => (archivo = e.target.files[0])" /> -->
   </div>
 </template>
+<style lang="scss">
+#identificadorUNICO {
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
+}
+#identificadorUNICO + label {
+  display: inline-block;
+  cursor: pointer;
+}
+#identificadorUNICO:focus + label,
+#identificadorUNICO + label:hover {
+}
+</style>

@@ -1,54 +1,40 @@
 <script setup>
-// De momento el campo de búsqueda, busca únicamente en el titulo
-// Además, el filtro avanzado de institución no funciona
-// porque hay que revisar en el módulo de carga cómo se recolectará esa información
-// El filtro avanzado de keywords está buscando en el título únicamente
-// Falta poder volver a deseleccionar los filtros
+// Se está pensando en añadir una propiedad para colocar
+// el selector a los filtros avanzados. comparte las mismas
+// características que el ElementoBuscador del módulo de consulta
 import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
 import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
 import SisdaiSelector from "@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue";
 import SisdaiCampoBase from "@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue";
-// import SisdaiSelector from "@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue";
 const seleccionEjemplo = ref("");
-
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
-  // resourcesList: { type: Array, default: () => [] },
   recursosLista: { type: Array, default: () => [] },
-  // resourceType: { type: String, required: true },
   recursosTipo: { type: String, required: true },
-  // categories: { type: Array, default: () => [] },
   categorias: { type: Array, default: () => [] },
   conSelector: { type: Boolean, default: false },
 });
-// const { resourcesList, resourceType, categories } = toRefs(props);
 const { recursosLista, recursosTipo, categorias, conSelector } = toRefs(props);
-// const catalogoFiltrado = ref(resourcesList.value);
 const catalogoFiltrado = ref(recursosLista.value);
 const modalFiltros = ref(null);
-// const selectedFilter = ref({
 const seleccionFiltro = ref({
   categoriaSeleccionada: null,
   institucionEntrada: null,
   anioEntrada: null,
   palabrasClaveEntrada: null,
 });
-// function filterByCategory(d) {
 function filtrarPorCategoria(d) {
-  // console.log("d.category", d.category);
   if (
     d.category !== null &&
-    /*selectedFilter.value["selectedCategory"] &&*/
     seleccionFiltro.value["categoriaSeleccionada"] &&
     d.category === seleccionFiltro.value["categoriaSeleccionada"]
-    /**d.category.gn_description == selectedFilter.value["selectedCategory"]*/
   ) {
     return 1;
   } else {
     return 0;
   }
 }
-// TODO: filtrarPorInstitucion
+// se agrega el filtrarPorInstitucion
 function filtrarPorInstitucion(d) {
   // console.log("d.attribution", d.attribution);
   if (seleccionFiltro.value["institucionEntrada"]) {
@@ -73,8 +59,6 @@ function filtrarPorInstitucion(d) {
     return 0;
   }
 }
-
-// function filterByYear(d) {
 const filtrarPorAnio = (d) => {
   // 2025-07-17T19 // TODO:
   return d.date !== null &&
@@ -84,23 +68,19 @@ const filtrarPorAnio = (d) => {
     ? 1
     : 0;
 };
-
 // Para esta función haría falta formatear el input y el título del recursp
 // function filterByKeyword(d) {
 function filtrarPorPalabraClave(d) {
-  // console.log("d.keywords", d.keywords);
   if (seleccionFiltro.value["palabrasClaveEntrada"]) {
     let palabrasClaveLista = seleccionFiltro.value["palabrasClaveEntrada"]
       .split(",")
       .map((palabra) => palabra.trim())
       .filter((palabra) => palabra.length > 0);
-    // console.log("palabrasClaveLista", palabrasClaveLista);
     // probar si hay si el arreglo incluye algo de la palabra
-    let includesWord = palabrasClaveLista.some((palabraClave) =>
+    let incluyePalabras = palabrasClaveLista.some((palabraClave) =>
       d.keywords.includes(palabraClave)
     );
-    // console.log("includesWord", includesWord);
-    if (includesWord) {
+    if (incluyePalabras) {
       return 1;
     } else {
       return 0;
@@ -109,7 +89,6 @@ function filtrarPorPalabraClave(d) {
     return 0;
   }
 }
-
 // La idea sería generar un filtro por categoría y, sacar el numero de filtros aplicados y
 // revisar que sumen un total
 // function filterByModal() {
@@ -118,7 +97,6 @@ function filtrarPorModal() {
   let totalFiltros = 0;
   // resultados ya filtrados
   let resultados = [];
-
   // Revisamos cuántos filtros se aplicaron
   Object.keys(seleccionFiltro.value).forEach((d) => {
     if (seleccionFiltro.value[d]) {
@@ -126,7 +104,6 @@ function filtrarPorModal() {
     }
   });
   console.log("total de filtros usados", totalFiltros);
-
   // Revisamos la suma por filtro
   recursosLista.value.forEach((d, idx) => {
     let tf =
@@ -135,24 +112,19 @@ function filtrarPorModal() {
       filtrarPorAnio(d) +
       filtrarPorPalabraClave(d);
     // console.log("coincidencias de filtro con el objeto", idx, ":", tf);
-    // console.log("d", d);
     if (tf === totalFiltros) {
       resultados.push(d);
     }
   });
   // console.log("Resultado filtrado", resultados);
   catalogoFiltrado.value = resultados;
-  // console.log("catalogoFiltrado.value", catalogoFiltrado.value);
-
   // actualizar Recursos con lista filtrada en el store
   resourcesStore.updateFilteredResources(
     recursosTipo.value,
     catalogoFiltrado.value
   );
-
   modalFiltros.value.cerrarModal();
 }
-
 function filtrarPorEntrada(r) {
   catalogoFiltrado.value = r;
   resourcesStore.updateFilteredResources(
@@ -170,7 +142,7 @@ function filtrarPorEntrada(r) {
         </template>
 
         <template #cuerpo>
-          <!-- TODO: Form -->
+          <!-- se añida formulario Form -->
           <form @keypress.enter.exact.prevent="filtrarPorModal()">
             <ClientOnly>
               <SisdaiSelector
@@ -186,19 +158,16 @@ function filtrarPorEntrada(r) {
                   {{ categoria }}
                 </option>
               </SisdaiSelector>
-
               <SisdaiCampoBase
                 v-model="seleccionFiltro['institucionEntrada']"
                 etiqueta="Institución"
                 ejemplo="SECIHTI, INEGI, entre otras"
               />
-
               <SisdaiCampoBase
                 v-model="seleccionFiltro['anioEntrada']"
                 etiqueta="Año de publicación"
                 ejemplo="1995..."
               />
-
               <SisdaiCampoBase
                 v-model="seleccionFiltro['palabrasClaveEntrada']"
                 etiqueta="Palabras clave"
@@ -209,7 +178,7 @@ function filtrarPorEntrada(r) {
         </template>
 
         <template #pie>
-          <!-- TODO: aria-label -->
+          <!-- se agrega aria-label -->
           <button
             class="boton-primario"
             aria-label="Aplicar filtros"
@@ -236,7 +205,7 @@ function filtrarPorEntrada(r) {
         <div class="flex">
           <div>
             <ClientOnly>
-              <!-- TODO: label for -->
+              <!-- se agrega label for -->
               <label for="buscadoravanzado">Buscador</label>
               <SisdaiCampoBusqueda
                 id="buscadoravanzado"

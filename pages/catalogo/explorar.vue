@@ -1,60 +1,7 @@
 <script setup>
 // TODO: demo recursos
-const { listaRecursos } = useDemoGeonodeResources();
-console.log("listaRecursos", listaRecursos);
-
-// Estas son las propiedades requeridas para filtrar avanzado
-// const recursosLista = ref([
-//   {
-//     categoria: "categoría 0: capas",
-//     fecha: "2025",
-//     palabras_clave: "clave 0, clave 1",
-//   },
-//   {
-//     categoria: "categoría 1: tablas",
-//     fecha: "2024",
-//     palabras_clave: "clave 2, clave 3",
-//   },
-// ]);
-const recursosTipo = ref("dataLayer");
-const recursosFiltrados = ref([]);
-
-const resourcesStore = useSelectedResourcesStore();
-const { resourcesList } = useGeonodeResources({
-  resourceType: recursosTipo.value,
-});
-// console.log(
-//   "Recursos filtrados desde Geonode en específico los",
-//   recursosTipo.value,
-//   resourcesList
-// );
-
-watch(resourcesList, () => {
-  resourcesStore.updateFilteredResources(
-    recursosTipo.value,
-    resourcesList.value
-  );
-  // console.log(
-  //   "Copia de los Recursos filtrados en el store",
-  //   resourcesStore.filteredResources[recursosTipo.value]
-  // );
-});
-
-watch(
-  () => resourcesStore.filteredResources[recursosTipo.value],
-  () => {
-    recursosFiltrados.value =
-      resourcesStore.filteredResources[recursosTipo.value];
-
-    // groupResults();
-
-    console.log(
-      "Copia de los Recursos filtrados en la vista",
-      recursosFiltrados.value
-    );
-  },
-  { deep: true }
-);
+// const { listaRecursos } = useDemoGeonodeResources();
+// console.log("listaRecursos", listaRecursos);
 </script>
 
 <template>
