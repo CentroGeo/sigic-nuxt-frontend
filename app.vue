@@ -1,5 +1,8 @@
 <template>
   <div>
+    <!-- https://nuxt.com/docs/4.x/api/components/nuxt-loading-indicator -->
+    <NuxtLoadingIndicator />
+
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>

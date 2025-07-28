@@ -6,11 +6,6 @@ const { data } = await useFetch(
   "https://stable.demo.geonode.org/api/v2/resources?page=1&page_size=15&filter%7Bresource_type%7D=dataset"
 );
 console.log("data.value", data.value);
-// console.log("data.value", data.value.links);
-// console.log("data.value", data.value.page);
-// console.log("data.value", data.value.page_size);
-// console.log("data.value", data.value.resources);
-// console.log("data.value", data.value.total);
 // console.log("data.value.links.next", data.value.links.next);
 
 // const { data: resources } = await useFetch(
@@ -26,9 +21,9 @@ const { pending, data: resources } = useFetch(
 );
 // console.log("resources", resources.value.resources);
 
-const listaRecursos = ref([]);
+// const listaRecursos = ref([]);
 // listaRecursos.value = await fetch(
-const datos = ref(
+const listaRecursos = ref(
   await fetch(
     "https://stable.demo.geonode.org/api/v2/resources?page=1&page_size=15&filter%7Bresource_type%7D=dataset",
     {
@@ -41,20 +36,12 @@ const datos = ref(
       return res.json();
     })
     .then((json) => {
-      // TODO: aquí se pueden obtener las distintas propiedades
-      // links, page, page_size, resorces, total
-      const data = json;
-      // enlaces.value = json.links;
-      // pagina.page = value.page;
-      // paginaTamanio.value = json.page_size;
-      listaRecursos.value = json.resources;
-      // total.value = json.total;
-
+      const data = json.resources;
       // console.log("data", data);
       return data;
     })
 );
-// console.log("listaRecursos.value", listaRecursos.value);
+console.log("listaRecursos.value", listaRecursos.value);
 // console.log(
 //   "listaRecursos.value[0].last_updated",
 //   listaRecursos.value[0].last_updated
@@ -114,13 +101,13 @@ watch(
         <main id="principal" class="contenedor m-b-10 p-t-3">
           <div v-if="pending">...cargando</div>
           <div v-else>
-            <!-- {{ data.resources }} -->
             <div class="flex">
               <b v-for="recurso in listaRecursos" :key="recurso.title">
                 {{ recurso.resource_type }}
               </b>
             </div>
-            <!-- {{ resources }} -->
+            <!-- {{ data }} -->
+            {{ resources }}
           </div>
 
           <CatalogoElementoFiltros
