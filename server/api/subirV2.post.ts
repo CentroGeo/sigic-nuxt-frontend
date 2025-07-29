@@ -1,49 +1,86 @@
+import formidable from "formidable";
+import { promises as fsp } from "fs";
+
 export default defineEventHandler(async (event) => {
+  // TODO: subir files sld al backend
+  const form = formidable({ multiples: false });
+  console.log("form", form);
+
+  const data = await new Promise<any>((resolve, reject) => {
+    form.parse(event.node.req, (err, fields, files) => {
+      if (err) reject(err);
+      else resolve({ fields, files });
+    });
+  });
+  console.log('data', data);
+
+  const { base_file } = data.files;
+  if (!base_file) {
+    throw createError({ statusCode: 400, message: "Archivo faltante" });
+  }
+
+  const formData = new FormData();
+  formData.append(
+    "base_file",
+    base_file[0].filepath
+      ? new Blob([await fsp.readFile(base_file[0].filepath)], {
+        type: base_file[0].mimetype,
+      })
+      : base_file[0],
+    base_file[0].originalFilename
+  );
+  formData.append(
+    "sld_file",
+    base_file[0].filepath
+      ? new Blob([await fsp.readFile(base_file[0].filepath)], {
+        type: base_file[0].mimetype,
+      })
+      : base_file[0],
+    base_file[0].originalFilename
+  );
+  formData.append("dataset_title", "geonode:coordinaciones");
+  // formData.append('dataset_title', layerSlug);
+  formData.append("style_upload_form", "true");
+  formData.append("permissions", JSON.stringify({}));
+  formData.append("charset", "undefined");
+  console.log('formData', formData);
+
   try {
-    const files = await readMultipartFormData(event)
-    // imprime los archivos del lado del servidor
-    console.log(files)
-    if (!files) {
-      return createError({ statusCode: 400, statusMessage: 'Los archivos están vacíos' })
-    }
-
-    for (const file of files) {
-      // TODO: remover useStorage cuando se conecte al backend
-      await useStorage().setItemRaw(`fs:${file.filename}`, file.data)
-    }
-
-    // TODO: subir files sld al backend
-    //// const res = await fetch(`${configEnv.public.geonodeApi}/uploads/upload/`, {
-    // const response = await fetch("http://10.2.102.99/upload/uploads/upload", {
-    //   headers: {
-    //     "Authorization": `Bearer ${data.fields.token[0]}`,
-    //     "accept": "*/*",
-    //     "accept-language": "en-US,en;q=0.9",
-    //     "content-type": "multipart/form-data; boundary=----WebkitFormBoundaryb6Ed1YzAuqRpzbdL",
-    //     "x-csrftoken": "7FPk21mZjOhvU63jeaRt0TSDvscOL0kv",
-    //     "x-requested-with": "XMLHttpRequest"
-    //   },
-    //   referrer: "http://10.2.102.99/datasets/geonode:coordinaciones/style_upload",
-    //   body: "filename=\"simple_green-point.sld\"",
-    //   method: "POST",
-    //   mode: "cors",
-    //   credentials: "include"
-    // })
-    // console.log("response.status:", response.status);
-    // if (!response.ok) {
-    //   throw new Error(`Error ${response.status}:`)
+    // const files = await readMultipartFormData(event)
+    // console.log('files', files) // imprime los archivos del lado del servidor
+    // if (!files) {
+    //   return createError({ statusCode: 400, statusMessage: 'Los archivos están vacíos' })
     // }
-    // const { dataset } = await response.json();
-    // const json = await response.json();
-    // console.log("json:", json);
-    // // return json;
-    // return {
-    //   html: dataset.raw_abstract,
-    //   text: dataset.abstract
+    // for (const file of files) {
+    //   // await useStorage().setItemRaw(`fs:${file.filename}`, file.data)
+    //   console.log('file.data', file.data)
     // }
 
-    return 200
+    // const upRes = await fetch(`${configEnv.public.geonodeApi}/uploads/upload/`, {
+    const upRes = await fetch("http://10.2.102.239/upload/uploads/upload", {
+      method: "POST",
+      headers: {
+        // "X-CSRFToken": getCookie("csrftoken"),
+        Token: "RmL4MRAwZbBXtuLREQ4GGEFR8LlwHQzq",
+        "X-Requested-With": "XMLHttpRequest",
+      },
+      credentials: "include",
+      body: formData,
+    });
+    // if (!upRes.ok) {
+    //   throw new Error(`Upload falló: ${upRes.status}`);
+    // }
+    // const { execution_id } = await upRes.json();
+    // console.log("execution_id", execution_id);
+    // return execution_id
+    console.log("response status:", upRes.status);
+    const json = await upRes.json();
+    console.log("json:", json);
+    return json;
+
+    // return 200
   } catch (error) {
-    return createError({ statusCode: 500, statusMessage: 'Algo salió mal con tu api' })
+    console.error("Error al subir al GeoNode:", error);
+    throw createError({ statusCode: 500, statusMessage: 'Error al subir al GeoNode', data: error });
   }
 })

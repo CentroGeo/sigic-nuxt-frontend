@@ -2,6 +2,8 @@
 const ejemplo = ref({});
 const data = ref({});
 
+const configEnv = useRuntimeConfig();
+
 const onDropZone = ref(null);
 const { files } = useDropZone(onDropZone, { onDrop });
 async function onDrop() {
@@ -58,54 +60,112 @@ onChange(async (files) => {
   // imprime el archivo que se suba mediante el diálogo
   console.log(files);
 
-  // TODO: remover cuando esté back, asignar una copia al store
-  data.value = files;
-  datosArriba = true;
-
   const formData = new FormData();
-  let isValid = false;
-  if (files) {
-    for (let x = 0; x < files.length; x++) {
-      // imprime el archivo en forma de objeto
-      console.log(files[x]);
-
-      // TODO: revisar bien los archivos válidos
-      if (
-        files[x]?.type === "application/vnd.geo+json" ||
-        files[x]?.type === "application/json" ||
-        files[x]?.type === "application/geo+json" ||
-        files[x]?.type === "application/geopackage+sqlite3" ||
-        files[x]?.type === "text/csv" ||
-        files[x]?.type === "application/xml" ||
-        files[x]?.type === "application/pdf" ||
-        files[x]?.type === "image/jpeg" ||
-        files[x]?.type === "image/png" ||
-        files[x]?.name.slice(-4) === ".sld"
-      ) {
-        // agrega el archivo a un FormData
-        formData.append(
-          "file",
-          files[x],
-          files[x]?.name.replaceAll(" ", "-").toLocaleLowerCase()
-        );
-        isValid = true;
-      } else {
-        isValid = false;
-        console.log("Archivo inválido");
-        console.log("files[x]?.type", files[x]?.type);
-      }
-    }
+  for (let x = 0; x < files.length; x++) {
+    formData.append("base_file", files[x]);
+    formData.append("sld_file", files[x]);
+    formData.append("dataset_title", "geonode:coordinaciones");
+    // formData.append('dataset_title', layerSlug);
+    formData.append("style_upload_form", "true");
+    formData.append("permissions", JSON.stringify({}));
+    formData.append("charset", "undefined");
   }
-  if (isValid) {
-    // imprime el FormData si es el archivo fue válido
-    console.log(formData);
+  console.log("formData", formData);
 
-    // manda el FormData con los archivos al event handler de api/upload
-    await $fetch("/api/subirV2", {
-      method: "POST",
-      body: formData,
-    });
+  //  Utilidad para leer la cookie csrftoken
+  function getCookie(name) {
+    return document.cookie
+      .split("; ")
+      .find((r) => r.startsWith(name + "="))
+      ?.split("=")[1];
   }
+  // const upRes = await fetch(
+  //   `${configEnv.public.geonodeApi}/upload/uploads/upload`,
+  //   {
+  const upRes = await fetch("http://10.2.102.239/upload/uploads/upload", {
+    method: "POST",
+    headers: {
+      // "X-CSRFToken": getCookie("csrftoken"),
+      Token: "RmL4MRAwZbBXtuLREQ4GGEFR8LlwHQzq",
+      "X-Requested-With": "XMLHttpRequest",
+    },
+    credentials: "include",
+    body: formData,
+  });
+  // console.log("upRes", upRes);
+  // if (!upRes.ok) {
+  //   throw new Error(`Upload falló: ${upRes.status}`);
+  // }
+  // const { execution_id } = await upRes.json();
+  // console.log("execution_id", execution_id);
+  console.log("response status:", upRes.status);
+  const json = await upRes.json();
+  console.log("json:", json);
+
+  // const res = await fetch("/api/subirV2", {
+  //   method: "POST",
+  //   body: formData,
+  // });
+  // const json = await res.json();
+  // console.log("json", json);
+
+  // TODO: remover cuando esté back, asignar una copia al store
+  // data.value = files;
+  // datosArriba = true;
+  // let isValid = false;
+  // if (files) {
+  //   for (let x = 0; x < files.length; x++) {
+  //     // imprime el archivo en forma de objeto
+  //     console.log("files[x]", files[x]);
+
+  //     // TODO: revisar bien los archivos válidos
+  //     if (
+  //       files[x]?.type === "application/vnd.geo+json" ||
+  //       files[x]?.type === "application/json" ||
+  //       files[x]?.type === "application/geo+json" ||
+  //       files[x]?.type === "application/geopackage+sqlite3" ||
+  //       files[x]?.type === "text/csv" ||
+  //       files[x]?.type === "application/xml" ||
+  //       files[x]?.type === "application/pdf" ||
+  //       files[x]?.type === "image/jpeg" ||
+  //       files[x]?.type === "image/png" ||
+  //       files[x]?.name.slice(-4) === ".sld"
+  //     ) {
+  //       // agrega el archivo a un FormData
+  //       // formData.append(
+  //       //   "file",
+  //       //   files[x],
+  //       //   files[x]?.name.replaceAll(" ", "-").toLocaleLowerCase()
+  //       // );
+
+  //       console.log("files[x]", files[x]);
+
+  //       formData.append("base_file", files[x]);
+  //       formData.append("sld_file", files[x]);
+  //       formData.append("dataset_title", "geonode:coordinaciones");
+  //       // formData.append('dataset_title', layerSlug);
+  //       formData.append("style_upload_form", "true");
+  //       formData.append("permissions", JSON.stringify({}));
+  //       formData.append("charset", "undefined");
+
+  //       isValid = true;
+  //     } else {
+  //       isValid = false;
+  //       console.log("Archivo inválido");
+  //       console.log("files[x]?.type", files[x]?.type);
+  //     }
+  //   }
+  // }
+  // if (isValid) {
+  //   // imprime el FormData si es el archivo fue válido
+  //   console.log(formData);
+
+  //   // manda el FormData con los archivos al event handler de api/upload
+  //   await $fetch("/api/subirV2", {
+  //     method: "POST",
+  //     body: formData,
+  //   });
+  // }
 });
 </script>
 <template>
