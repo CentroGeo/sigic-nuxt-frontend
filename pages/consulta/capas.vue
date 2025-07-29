@@ -17,6 +17,7 @@ const extensionMapa = computed(
 const config = useRuntimeConfig();
 const storeSelected = useSelectedResourcesStore();
 const randomNum = ref(0);
+const isFinishedLoading = ref(0);
 
 const linkExportaMapa = ref();
 function exportarMapa() {
@@ -109,15 +110,22 @@ function cuadroInformativo(pk) {
     contenido: (d) => `<p><b>nombre</b>: ${d["nombre"]}</p>`,
   };
 }
-onMounted(() => {
-  /*   if (storeSelected.selectedResources[resourceType].length > 0) {
-    let datosPrueba = storeSelected.selectedResources[resourceType];
-    storeSelected.resetResource(resourceType);
-    for (let i = datosPrueba.length - 1; i >= 0; i--) {
-      storeSelected.addResource(resourceType, datosPrueba[i]);
-      console.log(datosPrueba[i]);
-    }
-  } */
+// Este watcher sirve para ajustar los índices de las capas montadas
+// cuando estas terminan de cargarse
+watch(isFinishedLoading, () => {
+  if (
+    isFinishedLoading.value ===
+    storeSelected.selectedResources[resourceType].length
+  ) {
+    storeSelected.lowerIndex(
+      storeSelected.selectedResources[resourceType][0],
+      resourceType
+    );
+    storeSelected.raiseIndex(
+      storeSelected.selectedResources[resourceType][1],
+      resourceType
+    );
+  }
 });
 </script>
 
@@ -149,7 +157,7 @@ onMounted(() => {
             :capa="capa.alternate"
             :posicion="storeSelected.selectedResources.length - index"
             :cuadro-informativo="attributos[capa.pk]"
-            @alFinalizarCarga="(v) => console.log('C: alFinalizarCarga', v)"
+            @alFinalizarCarga="isFinishedLoading += 1"
           />
         </SisdaiMapa>
       </ClientOnly>

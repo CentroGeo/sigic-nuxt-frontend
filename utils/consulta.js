@@ -234,15 +234,27 @@ export async function downloadVectorData(resource, format) {
   document.body.removeChild(anchor);
 }
 
-export async function setUrlDocs(resources) {
+export async function setUrlDocs(resources, resourceType) {
   const resourcesStore = useSelectedResourcesStore();
-  console.log("Se cambió la url");
+  console.log("Se cambió la url: ", resources);
   const router = useRouter();
   const route = useRoute();
   let params = [];
+  let indicator = null;
   //console.log(resources, router, route);
+  if (resourceType === "dataTable") {
+    indicator = "alternate";
+  } else {
+    indicator = "title";
+  }
   params = resources.map((resource) => {
-    return `${resource.alternate}`;
+    let isSelected = 0;
+    if (resource.uuid === resourcesStore.shownFiles[resourceType].uuid) {
+      isSelected = 1;
+    } else {
+      isSelected = 0;
+    }
+    return `${resource[indicator]},${isSelected}`;
   });
 
   const paramsString = params.join(";");
