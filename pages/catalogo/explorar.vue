@@ -124,7 +124,10 @@ watch(
           <h2>Explora</h2>
           <div class="flex">
             <div class="columna-5">
-              <a class="tarjeta tarjeta-hipervinculo-interno" href="#">
+              <nuxt-link
+                class="tarjeta tarjeta-hipervinculo-interno"
+                to="/catalogo/capas"
+              >
                 <img
                   class="tarjeta-imagen"
                   src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/asha.jpg"
@@ -136,10 +139,13 @@ watch(
                     {{ listaRecursosCapas.length }} capas
                   </p>
                 </div>
-              </a>
+              </nuxt-link>
             </div>
             <div class="columna-5">
-              <a class="tarjeta tarjeta-hipervinculo-interno" href="#">
+              <nuxt-link
+                class="tarjeta tarjeta-hipervinculo-interno"
+                to="/catalogo/tablas"
+              >
                 <img
                   class="tarjeta-imagen"
                   src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/becka.jpg"
@@ -149,10 +155,13 @@ watch(
                   <p class="tarjeta-titulo">Datos tabulados</p>
                   <p>{{ listaRecursosTablas.length }} datos tabulados</p>
                 </div>
-              </a>
+              </nuxt-link>
             </div>
             <div class="columna-5">
-              <a class="tarjeta tarjeta-hipervinculo-interno" href="#">
+              <nuxt-link
+                class="tarjeta tarjeta-hipervinculo-interno"
+                to="/catalogo/documentos"
+              >
                 <img
                   class="tarjeta-imagen"
                   src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/baghira.jpg"
@@ -162,7 +171,7 @@ watch(
                   <p class="tarjeta-titulo">Documentos</p>
                   <p>{{ listaRecursosDocumentos.length }} documentos</p>
                 </div>
-              </a>
+              </nuxt-link>
             </div>
           </div>
 
