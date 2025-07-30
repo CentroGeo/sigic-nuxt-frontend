@@ -1,10 +1,6 @@
 <script setup>
-import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
-import {
-  downloadVectorData,
-  downloadPDF,
-  downloadMetadata,
-} from "@/utils/consulta.js";
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+import { downloadVectorData, downloadPDF, downloadMetadata } from '@/utils/consulta.js';
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
   resourceType: { type: String, required: true },
@@ -16,8 +12,8 @@ const tagTitle = ref();
 
 function abrirModalDescargaAll() {
   modalDescargaAll.value?.abrirModal();
-  optionsList.value = optionsDict[resourceType.value]["elements"];
-  tagTitle.value = optionsDict[resourceType.value]["title"];
+  optionsList.value = optionsDict[resourceType.value]['elements'];
+  tagTitle.value = optionsDict[resourceType.value]['title'];
 }
 
 function wait() {
@@ -25,15 +21,15 @@ function wait() {
 }
 
 async function downloadAllCSV() {
-  let resourceList = resourcesStore.selectedResources[resourceType.value];
+  const resourceList = resourcesStore.selectedResources[resourceType.value];
   for (let i = 0; i < resourceList.length; i++) {
-    await downloadVectorData(resourceList[i], "csv");
+    await downloadVectorData(resourceList[i], 'csv');
     await wait();
   }
   modalDescargaAll.value?.cerrarModal();
 }
 async function downloadAllPDF() {
-  let resourceList = resourcesStore.selectedResources[resourceType.value];
+  const resourceList = resourcesStore.selectedResources[resourceType.value];
   for (let i = 0; i < resourceList.length; i++) {
     downloadPDF(resourceList[i]);
     await wait();
@@ -42,7 +38,7 @@ async function downloadAllPDF() {
 }
 
 async function downloadAllMetadata() {
-  let resourceList = resourcesStore.selectedResources[resourceType.value];
+  const resourceList = resourcesStore.selectedResources[resourceType.value];
   for (let i = 0; i < resourceList.length; i++) {
     await downloadMetadata(resourceList[i]);
     await wait();
@@ -52,16 +48,16 @@ async function downloadAllMetadata() {
 
 const optionsDict = {
   dataTable: {
-    title: "archivos",
+    title: 'archivos',
     elements: [
       {
-        label: "CSV",
+        label: 'CSV',
         action: () => {
           downloadAllCSV();
         },
       },
       {
-        label: "Metadatos",
+        label: 'Metadatos',
         action: () => {
           downloadAllMetadata();
         },
@@ -69,16 +65,16 @@ const optionsDict = {
     ],
   },
   document: {
-    title: "documentos",
+    title: 'documentos',
     elements: [
       {
-        label: "PDF",
+        label: 'PDF',
         action: () => {
           downloadAllPDF();
         },
       },
       {
-        label: "Metadatos",
+        label: 'Metadatos',
         action: () => {
           downloadAllMetadata();
         },
@@ -101,6 +97,7 @@ defineExpose({
         <div>
           <button
             v-for="option in optionsList"
+            :key="option.label"
             type="button"
             class="boton-secundario"
             @click="option.action"

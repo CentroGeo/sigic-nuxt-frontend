@@ -51,7 +51,7 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
 
 <template>
   <div class="grid">
-    <div class="columna-2"></div>
+    <div class="columna-2"/>
 
     <div class="columna-12">
       <div class="contenedor-chat p-y-3">
@@ -112,7 +112,7 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
                           <span
                             class="pictograma-reporte"
                             aria-hidden="true"
-                          ></span>
+                          />
                         </button>
                         <!-- Enfocar Area Texto -->
                         <button
@@ -125,7 +125,7 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
                           <span
                             class="pictograma-actualizar"
                             aria-hidden="true"
-                          ></span>
+                          />
                         </button>
                       </div>
                     </div>
@@ -166,7 +166,7 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
       </div>
     </div>
 
-    <div class="columna-2"></div>
+    <div class="columna-2"/>
   </div>
   <!-- Modal nuevo chat -->
   <ClientOnly>
@@ -192,7 +192,7 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
             class="fondo-color-informacion p-x-2 p-y-1 borde borde-color-informacion borde-redondeado-20"
           >
             <p class="texto-color-informacion">
-              <span class="pictograma-informacion"></span>
+              <span class="pictograma-informacion"/>
               Verifica siempre los datos antes de usarlos.
             </p>
           </div>
@@ -201,7 +201,7 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
             class="fondo-color-confirmacion p-x-2 p-y-1 borde borde-color-confirmacion borde-redondeado-20"
           >
             <p class="texto-color-confirmacion">
-              <span class="pictograma-aprobado"></span>
+              <span class="pictograma-aprobado"/>
               Tu reporte está listo para descagar
             </p>
           </div>

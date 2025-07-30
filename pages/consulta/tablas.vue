@@ -49,7 +49,7 @@ watch(
     </template>
 
     <template #visualizador>
-      <div class="contenedor" v-if="!resourcesStore.shownFiles[resourceType]">
+      <div v-if="!resourcesStore.shownFiles[resourceType]" class="contenedor">
         <h1>No hay seleccion</h1>
       </div>
       <div v-else>
@@ -59,7 +59,7 @@ watch(
           :caption="'una descripción'"
         />
         <UiPaginador
-          :totalPaginas="Math.ceil(totalFeatures / tamanioPagina)"
+          :total-paginas="Math.ceil(totalFeatures / tamanioPagina)"
           @cambio="paginaActual = $event"
         />
       </div>

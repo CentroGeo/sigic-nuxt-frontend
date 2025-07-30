@@ -47,7 +47,7 @@ watch(paginaActual, () => {
       <template #cuerpo>
         <UiTablaAccesible :variables="variables" :datos="datos" />
         <UiPaginador
-          :totalPaginas="Math.ceil(totalFeatures / tamanioPagina)"
+          :total-paginas="Math.ceil(totalFeatures / tamanioPagina)"
           @cambio="paginaActual = $event"
         />
       </template>

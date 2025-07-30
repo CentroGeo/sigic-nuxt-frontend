@@ -13,6 +13,7 @@ export default defineEventHandler(async (event) => {
     }
     return 200
   } catch (error) {
+    console.log(error)
     return createError({ statusCode: 500, statusMessage: 'Algo salió mal con tu api' })
   }
 })

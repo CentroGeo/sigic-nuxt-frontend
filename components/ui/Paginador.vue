@@ -34,41 +34,41 @@ const cambiarPorInput = (e) => {
 <template>
   <div class="paginador p-x-2 p-y-1 fondo-color-neutro">
     <button
-      @click="irAlInicio"
       :disabled="pagina <= 0"
       class="boton-secundario boton-chico boton-pictograma"
+      @click="irAlInicio"
     >
-      <span class="pictograma-angulo-doble-arriba"></span>
+      <span class="pictograma-angulo-doble-arriba"/>
     </button>
     <button
-      @click="irAnterior"
       :disabled="pagina <= 0"
       class="boton-secundario boton-chico boton-pictograma m-x-1"
+      @click="irAnterior"
     >
-      <span class="pictograma-angulo-arriba"></span>
+      <span class="pictograma-angulo-arriba"/>
     </button>
     <input
       type="number"
       :value="pagina + 1"
-      @change="cambiarPorInput"
       min="1"
       :max="totalPaginas"
-    />
+      @change="cambiarPorInput"
+    >
     <span> / {{ totalPaginas }}</span>
 
     <button
       class="boton-secundario boton-chico boton-pictograma m-x-1"
-      @click="irSiguiente"
       :disabled="pagina >= totalPaginas - 1"
+      @click="irSiguiente"
     >
-      <span class="pictograma-angulo-abajo"></span>
+      <span class="pictograma-angulo-abajo"/>
     </button>
     <button
       class="boton-secundario boton-chico boton-pictograma"
-      @click="irAlFinal"
       :disabled="pagina >= totalPaginas - 1"
+      @click="irAlFinal"
     >
-      <span class="pictograma-angulo-doble-abajo"></span>
+      <span class="pictograma-angulo-doble-abajo"/>
     </button>
   </div>
 </template>

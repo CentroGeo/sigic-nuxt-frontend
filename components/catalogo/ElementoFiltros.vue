@@ -2,10 +2,10 @@
 // Se está pensando en añadir una propiedad para colocar
 // el selector a los filtros avanzados. comparte las mismas
 // características que el ElementoBuscador del módulo de consulta
+import SisdaiCampoBase from "@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue";
 import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
 import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
 import SisdaiSelector from "@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue";
-import SisdaiCampoBase from "@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue";
 const seleccionEjemplo = ref("");
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
@@ -14,7 +14,7 @@ const props = defineProps({
   categorias: { type: Array, default: () => [] },
   conSelector: { type: Boolean, default: false },
 });
-const { recursosLista, recursosTipo, categorias, conSelector } = toRefs(props);
+const { recursosLista, recursosTipo, categorias } = toRefs(props);
 const catalogoFiltrado = ref(recursosLista.value);
 const modalFiltros = ref(null);
 const seleccionFiltro = ref({
@@ -38,14 +38,14 @@ function filtrarPorCategoria(d) {
 function filtrarPorInstitucion(d) {
   // console.log("d.attribution", d.attribution);
   if (seleccionFiltro.value["institucionEntrada"]) {
-    let institucionesLista = seleccionFiltro.value["institucionEntrada"]
+    const institucionesLista = seleccionFiltro.value["institucionEntrada"]
       .split(",")
       .map((institucion) => institucion.trim())
       .filter((instituciones) => instituciones.length > 0);
     // console.log("institucionesLista", institucionesLista);
 
     // probar si hay si el arreglo incluye algo de la palabra
-    let institucionesIncluidas = institucionesLista.some((institucion) =>
+    const institucionesIncluidas = institucionesLista.some((institucion) =>
       d.keywords.includes(institucion)
     );
     // console.log("institucionesIncluidas", institucionesIncluidas);
@@ -72,12 +72,12 @@ const filtrarPorAnio = (d) => {
 // function filterByKeyword(d) {
 function filtrarPorPalabraClave(d) {
   if (seleccionFiltro.value["palabrasClaveEntrada"]) {
-    let palabrasClaveLista = seleccionFiltro.value["palabrasClaveEntrada"]
+    const palabrasClaveLista = seleccionFiltro.value["palabrasClaveEntrada"]
       .split(",")
       .map((palabra) => palabra.trim())
       .filter((palabra) => palabra.length > 0);
     // probar si hay si el arreglo incluye algo de la palabra
-    let incluyePalabras = palabrasClaveLista.some((palabraClave) =>
+    const incluyePalabras = palabrasClaveLista.some((palabraClave) =>
       d.keywords.includes(palabraClave)
     );
     if (incluyePalabras) {
@@ -96,17 +96,17 @@ function filtrarPorModal() {
   // total de filtros usados
   let totalFiltros = 0;
   // resultados ya filtrados
-  let resultados = [];
+  const resultados = [];
   // Revisamos cuántos filtros se aplicaron
   Object.keys(seleccionFiltro.value).forEach((d) => {
     if (seleccionFiltro.value[d]) {
       totalFiltros += 1;
     }
   });
-  console.log("total de filtros usados", totalFiltros);
+  // console.log("total de filtros usados", totalFiltros);
   // Revisamos la suma por filtro
-  recursosLista.value.forEach((d, idx) => {
-    let tf =
+  recursosLista.value.forEach((d) => {
+    const tf =
       filtrarPorCategoria(d) +
       filtrarPorInstitucion(d) +
       filtrarPorAnio(d) +

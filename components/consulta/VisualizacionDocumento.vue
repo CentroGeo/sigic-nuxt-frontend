@@ -55,7 +55,7 @@ onBeforeUnmount(() => {
       :src="urlEmbebido"
       type="application/pdf"
       class="documento-embebido"
-    />
+    >
   </div>
 </template>
 

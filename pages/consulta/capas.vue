@@ -44,7 +44,6 @@ function addAttribute(pk) {
           etiquetas[attribute] = attribute_label || attribute;
           return attribute;
         });
-      console.log(columnas);
 
       attributos[pk] = {
         params: {
@@ -61,7 +60,6 @@ function addAttribute(pk) {
             )
             .join(""),
       };
-      console.log(attributos[pk]);
     })
     .catch((err) => {
       console.error(err);
@@ -97,6 +95,12 @@ watch(
 // bbox_polygon
 // api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
 
+/**
+ * Revisión!
+ */
+
+/*
+
 function cuadroInformativo(pk) {
   console.log(pk);
 
@@ -106,7 +110,8 @@ function cuadroInformativo(pk) {
     },
     contenido: (d) => `<p><b>nombre</b>: ${d["nombre"]}</p>`,
   };
-}
+}*/
+
 </script>
 
 <template>

@@ -9,7 +9,10 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "reinstall": "npm run clean && npm i"
+    "reinstall": "npm run clean && npm i",
+    "lint": "eslint . --ext .js,.ts,.vue",
+    "lint:fix": "eslint . --ext .js,.ts,.vue --fix",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@centrogeomx/sisdai-componentes": "^4.14.0",
@@ -31,6 +34,11 @@
     "@nuxt/eslint": "^1.7.0",
     "@nuxt/test-utils": "^3.19.2",
     "@vueuse/nuxt": "^13.5.0",
-    "eslint": "^9.31.0"
+    "@types/formidable": "^3.4.5",
+    "eslint": "^9.32.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.3",
+    "prettier": "^3.6.2"
   }
 }
