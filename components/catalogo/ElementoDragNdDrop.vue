@@ -2,7 +2,8 @@
 const ejemplo = ref({});
 const datos = ref({});
 
-const { data, status } = useAuth();
+// para obtener el token para bearer
+const { data } = useAuth();
 
 const onDropZone = ref(null);
 const { files } = useDropZone(onDropZone, { onDrop });
@@ -60,32 +61,27 @@ onChange(async (files) => {
   // imprime el archivo que se suba mediante el diálogo
   console.log(files);
 
+  // obtén el token para el bearer
   const token = data.value?.accessToken;
   console.log("token", token);
 
   const formData = new FormData();
+  // por cada conjunto de Files asigna las propiedades
+  // según el tipo de archivo. acá es para SLD
   for (let x = 0; x < files.length; x++) {
     formData.append("base_file", files[x]);
     formData.append("sld_file", files[x]);
-    formData.append("dataset_title", "geonode:coordinaciones");
+    // TODO: cambiar el layerSlug según la capa
     // formData.append('dataset_title', layerSlug);
+    formData.append("dataset_title", "geonode:coordinaciones");
     formData.append("style_upload_form", "true");
     formData.append("permissions", JSON.stringify({}));
     formData.append("charset", "undefined");
+    // token importante
     formData.append("token", token);
   }
   console.log("formData", formData);
 
-  //  Utilidad para leer la cookie csrftoken
-  // function getCookie(name) {
-  //   return document.cookie
-  //     .split("; ")
-  //     .find((r) => r.startsWith(name + "="))
-  //     ?.split("=")[1];
-  // }
-  // const upRes = await fetch(
-  //   `${configEnv.public.geonodeApi}/upload/uploads/upload`,
-  //   {
   // const upRes = await fetch("http://10.2.102.239/upload/uploads/upload", {
   //   method: "POST",
   //   headers: {
