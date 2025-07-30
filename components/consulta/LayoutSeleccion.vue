@@ -33,7 +33,7 @@ function notifyDownloadAllChild() {
             aria-label="Descargar mapa"
             @click="
               resourceType === 'dataLayer'
-                ? funcionDescarga
+                ? funcionDescarga()
                 : notifyDownloadAllChild()
             "
           >

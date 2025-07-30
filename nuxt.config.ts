@@ -12,12 +12,12 @@ export default defineNuxtConfig({
         },
         {
           rel: 'stylesheet',
-          href: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/styles/main.css',
+          // href: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/styles/main.css',
         },
       ],
       script: [
         {
-          src: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/js/gobmx.js',
+          // src: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/js/gobmx.js',
         },
       ],
     },
@@ -39,6 +39,7 @@ export default defineNuxtConfig({
     "@nuxt/image",
     "@nuxt/test-utils",
     "@sidebase/nuxt-auth",
+    '@vueuse/nuxt'
   ],
 
   css: ["@centrogeomx/sisdai-css/dist/sisdai.min.css"],
@@ -68,7 +69,19 @@ export default defineNuxtConfig({
       // geoserverApi: `${process.env.GEOSERVER_URL}/rest`,
     }
   },
+
+  nitro: {
+    // TODO: remover cuando catálogo se conecte con el backend
+    storage: {
+      fs: {
+        driver: 'fs',
+        base: './public'
+      }
+    }
+  },
+
   devServer: {
+    // TODO: remover, solo se utiliza cuando se levanta el chat-front del módulo de IA
     // port: 3001
   },
 

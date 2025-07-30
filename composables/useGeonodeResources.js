@@ -14,6 +14,7 @@ export function useGeonodeResources({ resourceType } = {}) {
     dataTable: "dataset",
     document: "document",
   };
+
   const fetchData = async ({ resourceType }) => {
     let page = 1;
     let allResults = [];

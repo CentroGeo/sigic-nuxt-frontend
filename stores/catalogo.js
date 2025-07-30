@@ -1,9 +1,9 @@
 import { defineStore } from "pinia";
 
-export const useConsultaStore = defineStore("consulta", {
+export const useCatalogoStore = defineStore("catalogo", {
   state: () => ({
+    files: [],
     catalogoColapsado: false,
-    ajustarExtensionMapa: undefined,
     idNavegacionLateral:
       "navegacionlateral-" + Math.random().toString(36).substring(2),
   }),

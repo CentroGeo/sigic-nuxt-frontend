@@ -1,4 +1,5 @@
 <script setup>
+const storeConsulta = useConsultaStore();
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
   selectedElement: {
@@ -18,46 +19,64 @@ function notifyTabla() {
 function notifyDownloadChild() {
   downloadChild.value?.abrirModalDescarga();
 }
+
+/**
+ * Devuelve el extend de acuerdo a una capa en formato: left,bootom,rigth,top
+ * @param {Array} bboxPolygon arreglo de corrdenadas envolventes de la capa
+ * @returns {Array}
+ */
+function getExtent(bboxPolygon) {
+  const x = bboxPolygon.map(([x]) => x);
+  const y = bboxPolygon.map(([, y]) => y);
+  return [Math.min(...x), Math.min(...y), Math.max(...x), Math.max(...y)];
+}
+
 // Aqui se acaba la parte nueva para la prueba
 const optionsButtons = ref([
   {
-    label: 'Hacer zoom',
-    pictogram: 'pictograma-zoom-instruccional',
+    label: "Hacer zoom",
+    pictogram: "pictograma-zoom-instruccional",
     action: () => {
-      console.warn('hacer zoom');
+      // console.log("hacer zoom", {
+      //   extension: getExtent(selectedElement.value.bbox_polygon.coordinates[0]),
+      // });
+
+      storeConsulta.ajustarExtensionMapa = getExtent(
+        selectedElement.value.bbox_polygon.coordinates[0]
+      ).join(",");
     },
   },
   {
-    label: 'Ver tablas',
-    pictogram: 'pictograma-tabla',
+    label: "Ver tablas",
+    pictogram: "pictograma-tabla",
     action: () => {
       notifyTabla();
     },
   },
   {
-    label: 'Mostrar',
-    pictogram: 'pictograma-ojo-ver',
+    label: "Mostrar",
+    pictogram: "pictograma-ojo-ver",
     action: () => {
-      console.warn('Mostrar u ocultar la capa');
+      console.log("Mostrar u ocultar la capa");
     },
   },
   {
-    label: 'Cambiar opacidad',
-    pictogram: 'pictograma-editar',
+    label: "Cambiar opacidad",
+    pictogram: "pictograma-editar",
     action: () => {
-      console.warn('cambiar opacidad');
+      console.log("cambiar opacidad");
     },
   },
   {
-    label: 'Eliminar selección',
-    pictogram: 'pictograma-eliminar',
+    label: "Eliminar selección",
+    pictogram: "pictograma-eliminar",
     action: () => {
       resourcesStore.removeResource(resourceType.value, selectedElement.value);
     },
   },
   {
-    label: 'Descargar archivo',
-    pictogram: 'pictograma-archivo-descargar',
+    label: "Descargar archivo",
+    pictogram: "pictograma-archivo-descargar",
     action: () => {
       notifyDownloadChild();
     },
@@ -76,13 +95,12 @@ const optionsButtons = ref([
   <div class="flex flex-contenido-final">
     <button
       v-for="button in optionsButtons"
-      :key="button.label"
       class="boton-pictograma boton-sin-contenedor-secundario"
       :aria-label="button.label"
       type="button"
       @click="button.action"
     >
-      <span :class="button.pictogram" aria-hidden="true" />
+      <span :class="button.pictogram" aria-hidden="true"></span>
     </button>
   </div>
   <!-- Los modales-->
