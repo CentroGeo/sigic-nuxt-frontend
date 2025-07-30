@@ -1,8 +1,8 @@
 <script setup>
 const ejemplo = ref({});
-const data = ref({});
+const datos = ref({});
 
-const configEnv = useRuntimeConfig();
+const { data, status } = useAuth();
 
 const onDropZone = ref(null);
 const { files } = useDropZone(onDropZone, { onDrop });
@@ -11,7 +11,7 @@ async function onDrop() {
   // console.log(files.value);
   if (files.value) {
     // TODO: remover cuando esté back, asignar una copia al store
-    data.value = files.value;
+    datos.value = files.value;
     datosArriba = true;
 
     const formData = new FormData();
@@ -60,6 +60,9 @@ onChange(async (files) => {
   // imprime el archivo que se suba mediante el diálogo
   console.log(files);
 
+  const token = data.value?.accessToken;
+  console.log("token", token);
+
   const formData = new FormData();
   for (let x = 0; x < files.length; x++) {
     formData.append("base_file", files[x]);
@@ -69,51 +72,52 @@ onChange(async (files) => {
     formData.append("style_upload_form", "true");
     formData.append("permissions", JSON.stringify({}));
     formData.append("charset", "undefined");
+    formData.append("token", token);
   }
   console.log("formData", formData);
 
   //  Utilidad para leer la cookie csrftoken
-  function getCookie(name) {
-    return document.cookie
-      .split("; ")
-      .find((r) => r.startsWith(name + "="))
-      ?.split("=")[1];
-  }
+  // function getCookie(name) {
+  //   return document.cookie
+  //     .split("; ")
+  //     .find((r) => r.startsWith(name + "="))
+  //     ?.split("=")[1];
+  // }
   // const upRes = await fetch(
   //   `${configEnv.public.geonodeApi}/upload/uploads/upload`,
   //   {
-  const upRes = await fetch("http://10.2.102.239/upload/uploads/upload", {
-    method: "POST",
-    headers: {
-      // "X-CSRFToken": getCookie("csrftoken"),
-      // Token: "RmL4MRAwZbBXtuLREQ4GGEFR8LlwHQzq",
-      // "X-CSRFToken": "RmL4MRAwZbBXtuLREQ4GGEFR8LlwHQzq",
-      // Authorization: `Bearer ${token}`,
-      "X-Requested-With": "XMLHttpRequest",
-    },
-    // credentials: "include",
-    body: formData,
-    mode: "cors",
-  });
+  // const upRes = await fetch("http://10.2.102.239/upload/uploads/upload", {
+  //   method: "POST",
+  //   headers: {
+  //     // "X-CSRFToken": getCookie("csrftoken"),
+  //     // Token: "RmL4MRAwZbBXtuLREQ4GGEFR8LlwHQzq",
+  //     // "X-CSRFToken": "RmL4MRAwZbBXtuLREQ4GGEFR8LlwHQzq",
+  //     // Authorization: `Bearer ${token}`,
+  //     "X-Requested-With": "XMLHttpRequest",
+  //   },
+  //   // credentials: "include",
+  //   body: formData,
+  //   mode: "cors",
+  // });
   // console.log("upRes", upRes);
   // if (!upRes.ok) {
   //   throw new Error(`Upload falló: ${upRes.status}`);
   // }
   // const { execution_id } = await upRes.json();
   // console.log("execution_id", execution_id);
-  console.log("response status:", upRes.status);
-  const json = await upRes.json();
-  console.log("json:", json);
+  // console.log("response status:", upRes.status);
+  // const json = await upRes.json();
+  // console.log("json:", json);
 
-  // const res = await fetch("/api/subirV2", {
-  //   method: "POST",
-  //   body: formData,
-  // });
-  // const json = await res.json();
+  const res = await fetch("/api/subirSLD", {
+    method: "POST",
+    body: formData,
+  });
+  const json = await res.json();
   // console.log("json", json);
 
   // TODO: remover cuando esté back, asignar una copia al store
-  // data.value = files;
+  // datos.value = files;
   // datosArriba = true;
   // let isValid = false;
   // if (files) {
@@ -190,7 +194,7 @@ onChange(async (files) => {
               <p>Arratra o suelta tu archivo</p>
             </div>
             <div class="texto-izquierda">
-              <p v-for="d in data" :key="d.name">
+              <p v-for="d in datos" :key="d.name">
                 {{ d.name }}
               </p>
             </div>
