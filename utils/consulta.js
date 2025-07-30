@@ -241,7 +241,6 @@ export async function setUrlDocs(resources, resourceType) {
   const route = useRoute();
   let params = [];
   let indicator = null;
-  //console.log(resources, router, route);
   if (resourceType === "dataTable") {
     indicator = "alternate";
   } else {
@@ -301,4 +300,15 @@ export async function setUrlLayers(resources) {
       recursos: paramsString,
     },
   });
+}
+export function setMapView(resourceType, resources, paramsArray) {
+  const resourcesStore = useSelectedResourcesStore();
+
+  for (let i = paramsArray.length - 1; i >= 0; i--) {
+    resources.forEach((d) => {
+      if (d.alternate === paramsArray[i]) {
+        resourcesStore.addResource(resourceType, d);
+      }
+    });
+  }
 }

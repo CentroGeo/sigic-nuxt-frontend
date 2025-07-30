@@ -111,17 +111,14 @@ function cuadroInformativo(pk) {
 }
 
 // Este watcher sirve para ajustar los índices de las capas montadas
-// cuando estas terminan de cargarse
+// cuando estas terminan de cargarse pero solo funciona cuando recién se montan las capas.
+// Tiene efectos secundarios?
 watch(isFinishedLoading, () => {
-  console.log("contador: ", isFinishedLoading.value);
-
-  if (
-    storeSelected.selectedResources[resourceType].length %
-      isFinishedLoading.value ===
-    0
-  ) {
+  let resourcesNum = storeSelected.selectedResources[resourceType].length;
+  console.log("contador: ", isFinishedLoading.value, resourcesNum);
+  if (resourcesNum === isFinishedLoading.value) {
     console.log("Aqui hay una función comentada para probar");
-
+    randomNum.value += 1;
     /*     storeSelected.lowerIndex(
       storeSelected.selectedResources[resourceType][0],
       resourceType
