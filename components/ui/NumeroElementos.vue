@@ -7,7 +7,7 @@ defineProps({
    */
   etiqueta: {
     type: String,
-    default: "Elementos",
+    default: "",
   },
 
   /**

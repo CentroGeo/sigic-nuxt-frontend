@@ -49,6 +49,7 @@ export const useSelectedResourcesStore = defineStore("selectedResources", {
       this.shownFiles[resourceType] = null;
     },
     updateFilteredResources(resourceType, newArray) {
+      // actualiza los recursos filtrados
       this.filteredResources[resourceType] = newArray;
     },
     setShownFile(resourceType, resource) {
