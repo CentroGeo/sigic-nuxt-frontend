@@ -27,10 +27,10 @@ const resourceType = "document";
     </template>
 
     <template #visualizador>
-      <div class="contenedor" v-if="!resourcesStore.shownFiles[resourceType]">
+      <div v-if="!resourcesStore.shownFiles[resourceType]" class="contenedor">
         <h1>No hay seleccion</h1>
       </div>
-      <ConsultaVisualizacionDocumento v-else></ConsultaVisualizacionDocumento>
+      <ConsultaVisualizacionDocumento v-else/>
     </template>
 
     <template #seleccion>

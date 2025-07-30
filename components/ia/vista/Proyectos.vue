@@ -46,7 +46,7 @@ const contextos = ref([
               >
                 <span>{{ proyecto.estado }}</span>
                 <!-- TODO: agregar icono de para privado/publico -->
-                <span class="pictograma-privado" aria-hidden="true"></span>
+                <span class="pictograma-privado" aria-hidden="true"/>
               </p>
             </div>
             <button class="boton-primario boton-chico" type="button">
@@ -93,7 +93,7 @@ const contextos = ref([
                     class="tarjeta-imagen"
                     :src="contexto.tarjeta_img"
                     alt=""
-                  />
+                  >
                   <div class="tarjeta-cuerpo">
                     <p class="tarjeta-titulo">
                       {{ contexto.tarjeta_titulo }}

@@ -9,7 +9,10 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "reinstall": "npm run clean && npm i"
+    "reinstall": "npm run clean && npm i",
+    "lint": "eslint . --ext .js,.ts,.vue",
+    "lint:fix": "eslint . --ext .js,.ts,.vue --fix",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@centrogeomx/sisdai-componentes": "^4.14.0",
@@ -20,7 +23,6 @@
     "@nuxt/test-utils": "^3.19.1",
     "@pinia/nuxt": "^0.11.1",
     "@sidebase/nuxt-auth": "^0.10.1",
-    "eslint": "^9.31.0",
     "formidable": "^3.5.4",
     "html2canvas": "^1.4.1",
     "next-auth": "~4.21.1",
@@ -31,6 +33,12 @@
     "vue-router": "latest"
   },
   "devDependencies": {
-    "@nuxt/devtools": "^2.6.2"
+    "@nuxt/devtools": "^2.6.2",
+    "@types/formidable": "^3.4.5",
+    "eslint": "^9.32.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.3",
+    "prettier": "^3.6.2"
   }
 }

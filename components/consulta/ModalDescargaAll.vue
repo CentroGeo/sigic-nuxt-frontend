@@ -25,7 +25,7 @@ function wait() {
 }
 
 async function downloadAllCSV() {
-  let resourceList = resourcesStore.selectedResources[resourceType.value];
+  const resourceList = resourcesStore.selectedResources[resourceType.value];
   for (let i = 0; i < resourceList.length; i++) {
     await downloadVectorData(resourceList[i], "csv");
     await wait();
@@ -33,7 +33,7 @@ async function downloadAllCSV() {
   modalDescargaAll.value?.cerrarModal();
 }
 async function downloadAllPDF() {
-  let resourceList = resourcesStore.selectedResources[resourceType.value];
+  const resourceList = resourcesStore.selectedResources[resourceType.value];
   for (let i = 0; i < resourceList.length; i++) {
     downloadPDF(resourceList[i]);
     await wait();
@@ -42,7 +42,7 @@ async function downloadAllPDF() {
 }
 
 async function downloadAllMetadata() {
-  let resourceList = resourcesStore.selectedResources[resourceType.value];
+  const resourceList = resourcesStore.selectedResources[resourceType.value];
   for (let i = 0; i < resourceList.length; i++) {
     await downloadMetadata(resourceList[i]);
     await wait();

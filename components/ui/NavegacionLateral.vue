@@ -35,7 +35,7 @@ defineProps({
           <img
             src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg"
             alt=""
-          />
+          >
         </div>
       </li>
 

@@ -33,9 +33,9 @@ async function subirArchivo() {
     <section id="">
       <div class="contenedor">
         <h3>Sección</h3>
-        <input type="file" @change="(e) => (archivo = e.target.files[0])" />
-        <input v-model="titulo" placeholder="Título" />
-        <input v-model="descripcion" placeholder="Descripción" />
+        <input type="file" @change="(e) => (archivo = e.target.files[0])" >
+        <input v-model="titulo" placeholder="Título" >
+        <input v-model="descripcion" placeholder="Descripción" >
         <button @click="subirArchivo">Subir</button>
       </div>
     </section>

@@ -56,7 +56,7 @@ export function useGeonodeResources({ resourceType } = {}) {
             );
           } else if (resourceType === "dataLayer") {
             // Si son capas geográficas, excluimos aquellos que no tengan geometria
-            let noGeometryExtent = [-1, -1, 0, 0];
+            const noGeometryExtent = [-1, -1, 0, 0];
             resourcesList.value = allResults.filter(
               (resource) =>
                 !resource.extent.coords.every(
