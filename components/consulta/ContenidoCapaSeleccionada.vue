@@ -76,6 +76,7 @@ const optionsButtons = ref([
   <div class="flex flex-contenido-final">
     <button
       v-for="button in optionsButtons"
+      :key="button.label"
       class="boton-pictograma boton-sin-contenedor-secundario"
       :aria-label="button.label"
       type="button"

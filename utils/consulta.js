@@ -75,7 +75,7 @@ export async function downloadExcel(resource, format) {
     outputFormat: formatDict[format],
   }).toString();
 
-  console.log(url);
+  console.warn(url);
   const anchor = document.createElement('a');
   anchor.href = url;
   anchor.taget = '_blank';
@@ -149,7 +149,7 @@ export async function downloadVectorData(resource, format) {
     console.error('No se concedieron permisos');
     return;
   }
-  const permissionRestult = await fetchpermissionRequest.text();
+  // // const permissionRestult = await fetchpermissionRequest.text();
   //console.log("La primer respuesta, el permiso: ", permissionRestult);
 
   // Hacemos la segunda peticion, que también regresará un xml del que nos interesa el status location
@@ -179,7 +179,7 @@ export async function downloadVectorData(resource, format) {
     const downloadRequest = await fetch(linkStatusLocation);
     const downloadResult = await downloadRequest.text();
     if (downloadResult.includes('Process succeeded')) {
-      console.log('se logró en el intento numero ', attempt);
+      console.warn('se logró en el intento numero ', attempt);
       const parser2 = new DOMParser();
       const parsedDownloadResult = parser2.parseFromString(downloadResult, 'text/xml');
       const downloadHTML = parsedDownloadResult.getElementsByTagName('wps:Reference')[0];
