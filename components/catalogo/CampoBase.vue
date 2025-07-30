@@ -71,7 +71,7 @@ const modeloCampo = computed({
       :aria-required="es_obligatorio"
       :type="tipo"
       v-bind="$attrs"
-    />
+    >
     <p
       v-if="textoAyuda || esObligatorio || textoError"
       aria-live="polite"

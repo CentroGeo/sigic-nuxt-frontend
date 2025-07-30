@@ -141,7 +141,7 @@ onChange(async (files) => {
               type="file"
               :v-model="ejemplo"
               @click="open()"
-            />
+            >
           </div>
         </div>
       </div>

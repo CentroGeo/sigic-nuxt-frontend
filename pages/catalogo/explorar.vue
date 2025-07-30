@@ -62,7 +62,7 @@ const recursosTipo = ref("dataLayer");
                 class="tarjeta-imagen"
                 src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/asha.jpg"
                 alt=""
-              />
+              >
               <div class="tarjeta-cuerpo">
                 <p class="tarjeta-titulo">Capas geográficas</p>
                 <p class="tarjeta-etiqueta">351 capas</p>
@@ -75,7 +75,7 @@ const recursosTipo = ref("dataLayer");
                 class="tarjeta-imagen"
                 src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/becka.jpg"
                 alt=""
-              />
+              >
               <div class="tarjeta-cuerpo">
                 <p class="tarjeta-titulo">Datos tabulados</p>
                 <p>420 datos tabulados</p>
@@ -88,7 +88,7 @@ const recursosTipo = ref("dataLayer");
                 class="tarjeta-imagen"
                 src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/baghira.jpg"
                 alt=""
-              />
+              >
               <div class="tarjeta-cuerpo">
                 <p class="tarjeta-titulo">Documentos</p>
                 <p>204 documentos</p>
@@ -106,7 +106,7 @@ const recursosTipo = ref("dataLayer");
                 class="tarjeta-imagen"
                 src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/kale-1.jpg"
                 alt=""
-              />
+              >
               <div class="tarjeta-cuerpo">
                 <p class="tarjeta-etiqueta">Capa geográfica</p>
                 <p class="tarjeta-titulo">Cuerpos de agua</p>
@@ -127,7 +127,7 @@ const recursosTipo = ref("dataLayer");
                 class="tarjeta-imagen"
                 src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/kale-1.jpg"
                 alt=""
-              />
+              >
               <div class="tarjeta-cuerpo">
                 <p class="tarjeta-etiqueta">Datos tabulados</p>
                 <p class="tarjeta-titulo">Afluencia Diaria Trolebus</p>
@@ -146,7 +146,7 @@ const recursosTipo = ref("dataLayer");
                 class="tarjeta-imagen"
                 src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/kale-1.jpg"
                 alt=""
-              />
+              >
               <div class="tarjeta-cuerpo">
                 <p class="tarjeta-etiqueta">Documento</p>
                 <p class="tarjeta-titulo">Carpetas de investigación FGJ</p>

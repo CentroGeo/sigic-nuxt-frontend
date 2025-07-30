@@ -55,7 +55,7 @@ const idAleatorio = generaIdAleatorio();
               style="min-width: 168px"
             >
               {{ datum[variable]?.toLocaleString("en") }}
-              <span class="pictograma-capas"></span>
+              <span class="pictograma-capas"/>
             </p>
             <div
               v-if="variable === 'Acciones'"
@@ -73,14 +73,14 @@ const idAleatorio = generaIdAleatorio();
                 aria-label=""
                 type="button"
               >
-                <span class="pictograma-ayuda"></span>
+                <span class="pictograma-ayuda"/>
               </button>
               <button
                 class="boton-pictograma boton-secundario"
                 aria-label=""
                 type="button"
               >
-                <span class="pictograma-archivo-descargar"></span>
+                <span class="pictograma-archivo-descargar"/>
               </button>
             </div>
             <!-- {{ datum[variable]?.toLocaleString("en") }} -->

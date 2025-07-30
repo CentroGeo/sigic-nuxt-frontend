@@ -100,7 +100,7 @@ const optionsButtons = ref([
       type="button"
       @click="button.action"
     >
-      <span :class="button.pictogram" aria-hidden="true"></span>
+      <span :class="button.pictogram" aria-hidden="true"/>
     </button>
   </div>
   <!-- Los modales-->
