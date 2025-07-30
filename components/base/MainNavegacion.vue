@@ -3,13 +3,13 @@ import SisdaiNavegacionPrincipal from "@centrogeomx/sisdai-componentes/src/compo
 
 const { status, signIn, signOut } = useAuth();
 
-const loggedIn = computed(() => status.value === "authenticated");
-async function handleSignIn() {
+const estaLogueado = computed(() => status.value === "authenticated");
+async function iniciarSesion() {
   await signIn("keycloak", {
     callbackUrl: "/", // A dónde volver después del login
   });
 }
-async function handleSignOut() {
+async function cerrarSesion() {
   await signOut({ callbackUrl: "/" });
 }
 </script>
@@ -37,7 +37,7 @@ async function handleSignOut() {
         <NuxtLink class="nav-hipervinculo" to="/" exact-path>Inicio</NuxtLink>
       </li>
       <!-- <li><NuxtLink class="nav-hipervinculo" to="/carga">Carga</NuxtLink></li> -->
-      <li>
+      <li v-if="estaLogueado">
         <NuxtLink class="nav-hipervinculo" to="/catalogo">Catálogo</NuxtLink>
       </li>
       <li>
@@ -49,8 +49,8 @@ async function handleSignOut() {
         </NuxtLink>
       </li>
       <li>
-        <button v-if="loggedIn" @click="handleSignOut">Cerrar sesión</button>
-        <button v-else @click="handleSignIn">Iniciar sesión</button>
+        <button v-if="estaLogueado" @click="cerrarSesion">Cerrar sesión</button>
+        <button v-else @click="iniciarSesion">Iniciar sesión</button>
       </li>
     </ul>
   </SisdaiNavegacionPrincipal>

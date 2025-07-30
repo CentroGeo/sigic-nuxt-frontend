@@ -55,6 +55,10 @@ export default defineNuxtConfig({
       trustHost: true,
       defaultProvider: "keycloak",
     },
+    sessionRefresh: {
+      enablePeriodically: true,
+      enableOnWindowFocus: true,
+    }
   },
 
   runtimeConfig: {
