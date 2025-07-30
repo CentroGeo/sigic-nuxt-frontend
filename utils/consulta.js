@@ -265,3 +265,40 @@ export async function setUrlDocs(resources, resourceType) {
     },
   });
 }
+export function setDocView(resourceType, resources, paramsArray) {
+  const resourcesStore = useSelectedResourcesStore();
+  const attrDict = {
+    document: "title",
+    dataTable: "alternate",
+  };
+
+  for (let i = paramsArray.length - 1; i >= 0; i--) {
+    let vals = paramsArray[i].split(",");
+    resources.forEach((d) => {
+      if (d[attrDict[resourceType]] === vals[0]) {
+        resourcesStore.addResource(resourceType, d);
+        if (vals[1] === "1") {
+          resourcesStore.setShownFile(resourceType, d);
+        }
+      }
+    });
+  }
+}
+export async function setUrlLayers(resources) {
+  console.log("Se cambió la url: ", resources);
+  const router = useRouter();
+  const route = useRoute();
+  let params = [];
+  let indicator = "alternate";
+  params = resources.map((resource) => {
+    return `${resource[indicator]}`;
+  });
+
+  const paramsString = params.join(";");
+  await router.push({
+    path: route.path,
+    query: {
+      recursos: paramsString,
+    },
+  });
+}

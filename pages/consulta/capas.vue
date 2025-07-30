@@ -7,7 +7,6 @@ import {
 import { exportarMapa as exportarMapaPNG } from "@centrogeomx/sisdai-mapas/src/utiles";
 
 const resourceType = "dataLayer";
-
 const extensionNacional = "-118.3651,14.5321,-86.7104,32.7187";
 const storeConsulta = useConsultaStore();
 const extensionMapa = computed(
@@ -110,21 +109,27 @@ function cuadroInformativo(pk) {
     contenido: (d) => `<p><b>nombre</b>: ${d["nombre"]}</p>`,
   };
 }
+
 // Este watcher sirve para ajustar los índices de las capas montadas
 // cuando estas terminan de cargarse
 watch(isFinishedLoading, () => {
+  console.log("contador: ", isFinishedLoading.value);
+
   if (
-    isFinishedLoading.value ===
-    storeSelected.selectedResources[resourceType].length
+    storeSelected.selectedResources[resourceType].length %
+      isFinishedLoading.value ===
+    0
   ) {
-    storeSelected.lowerIndex(
+    console.log("Aqui hay una función comentada para probar");
+
+    /*     storeSelected.lowerIndex(
       storeSelected.selectedResources[resourceType][0],
       resourceType
     );
     storeSelected.raiseIndex(
       storeSelected.selectedResources[resourceType][1],
       resourceType
-    );
+    ); */
   }
 });
 </script>
@@ -145,6 +150,7 @@ watch(isFinishedLoading, () => {
           class="gema"
           :vista="{ extension: extensionMapa }"
           @click-centrar="storeConsulta.ajustarExtensionMapa = undefined"
+          @al-mover-vista="console.log('al mover vista')"
         >
           <SisdaiCapaXyz />
 

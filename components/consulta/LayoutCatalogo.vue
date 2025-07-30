@@ -1,5 +1,5 @@
 <script setup>
-//import { setUrlDocs } from "@/utils/consulta.js";
+import { setUrlDocs, setUrlLayers, setDocView } from "@/utils/consulta.js";
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
   titulo: { type: String, default: "Título" },
@@ -70,35 +70,9 @@ watch(resourcesList, () => {
   );
   // Queremos revisar si hay query params y buscar los recursos
   if (route.query.recursos) {
-    console.log("ahora estamos wachando en los datos");
     let paramList = route.query.recursos.split(";");
-    //console.log(paramList.length);
-    if (resourceType.value === "document") {
-      for (let i = paramList.length - 1; i >= 0; i--) {
-        let vals = paramList[i].split(",");
-        console.log(vals);
-        resourcesList.value.forEach((d) => {
-          if (d.title === vals[0]) {
-            resourcesStore.addResource(resourceType.value, d);
-            if (vals[1] === "1") {
-              resourcesStore.setShownFile(resourceType.value, d);
-            }
-          }
-        });
-      }
-    } else if (resourceType.value === "dataTable") {
-      for (let i = paramList.length - 1; i >= 0; i--) {
-        let vals = paramList[i].split(",");
-        console.log(vals);
-        resourcesList.value.forEach((d) => {
-          if (d.alternate === vals[0]) {
-            resourcesStore.addResource(resourceType.value, d);
-            if (vals[1] === "1") {
-              resourcesStore.setShownFile(resourceType.value, d);
-            }
-          }
-        });
-      }
+    if (resourceType.value !== "dataLayer") {
+      setDocView(resourceType.value, resourcesList.value, paramList);
     }
   }
 });
@@ -122,7 +96,7 @@ watch(
     const recursos = resourcesStore.selectedResources[resourceType.value];
     if (resourceType.value !== "dataLayer") {
       setUrlDocs(recursos, resourceType.value);
-    }
+    } else setUrlLayers(recursos);
   },
   { deep: true }
 );
@@ -130,10 +104,12 @@ watch(
 onMounted(() => {
   selectedResources.value =
     resourcesStore.selectedResources[resourceType.value];
-  console.log("recursos mounted layout: ", selectedResources.value);
   if (selectedResources.value.length > 0) {
-    console.log("hay selección de recursos y solo se cambio de vista");
-    setUrlDocs(selectedResources.value, resourceType.value);
+    if (resourceType.value === "dataLayer") {
+      setUrlLayers(selectedResources.value);
+    } else {
+      setUrlDocs(selectedResources.value, resourceType.value);
+    }
   } else if (route.query.recursos) {
     console.log("se está cargando de ser compartido o se actualizó");
   } else {
