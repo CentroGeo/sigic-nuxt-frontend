@@ -37,14 +37,14 @@ export default defineEventHandler(async (event) => {
       : base_file[0],
     base_file[0].originalFilename
   );
-  console.log(formData);
+  console.warn(formData);
   try {
     const res = await fetch(`${configEnv.public.geonodeApi}/uploads/upload/`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${data.fields.token[0]}`,
       },
-      body: formData as any,
+      body: formData,
     });
 
     console.log('response status:', res.status);

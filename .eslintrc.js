@@ -8,16 +8,17 @@ module.exports = {
     'eslint:recommended',
     'plugin:vue/vue3-recommended',
     'google',
-    'plugin:prettier/recommended'
+    'plugin:prettier/recommended',
   ],
   parserOptions: {
     ecmaVersion: 2022,
     sourceType: 'module',
   },
+
   rules: {
     'require-jsdoc': 'off',
     'valid-jsdoc': 'off',
     'max-len': ['error', { code: 100 }],
-    'prettier/prettier': 'error'
+    'prettier/prettier': 'error',
   },
 };
