@@ -84,6 +84,7 @@ const optionsButtons = ref([
 ]);
 </script>
 <template>
+  <div>
   <!-- El contenido de la tarjeta de capas  -->
   <div class="m-b-5">
     <p class="tarjeta-titulo m-y-2">
@@ -112,6 +113,7 @@ const optionsButtons = ref([
     :selected-element="selectedElement"
     :download-type="'individual'"
   />
+  </div>
 </template>
 <style lang="scss" scoped>
 .flex {

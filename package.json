@@ -22,6 +22,7 @@
     "@pinia/nuxt": "^0.11.1",
     "@sidebase/nuxt-auth": "^0.10.1",
     "formidable": "^3.5.4",
+    "html2canvas": "^1.4.1",
     "next-auth": "~4.21.1",
     "nuxt": "^3.17.7",
     "pinia": "^3.0.3",
