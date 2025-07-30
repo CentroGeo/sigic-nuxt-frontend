@@ -86,11 +86,14 @@ onChange(async (files) => {
     method: "POST",
     headers: {
       // "X-CSRFToken": getCookie("csrftoken"),
-      Token: "RmL4MRAwZbBXtuLREQ4GGEFR8LlwHQzq",
+      // Token: "RmL4MRAwZbBXtuLREQ4GGEFR8LlwHQzq",
+      // "X-CSRFToken": "RmL4MRAwZbBXtuLREQ4GGEFR8LlwHQzq",
+      // Authorization: `Bearer ${token}`,
       "X-Requested-With": "XMLHttpRequest",
     },
-    credentials: "include",
+    // credentials: "include",
     body: formData,
+    mode: "cors",
   });
   // console.log("upRes", upRes);
   // if (!upRes.ok) {
