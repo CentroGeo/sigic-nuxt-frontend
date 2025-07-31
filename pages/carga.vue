@@ -20,7 +20,7 @@ async function subirArchivo() {
   formData.append('base_file', archivo.value!);
   formData.append('token', token);
 
-  const res = await fetch('/api/subir', {
+  await fetch('/api/subir', {
     method: 'POST',
     body: formData,
   });

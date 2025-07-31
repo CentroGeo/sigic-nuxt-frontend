@@ -1,5 +1,5 @@
 <script setup>
-const props = defineProps({
+defineProps({
   variables: { type: Array, default: Array },
   datos: { type: Array, default: Array },
   caption: {

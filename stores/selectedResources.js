@@ -23,18 +23,16 @@ export const useSelectedResourcesStore = defineStore('selectedResources', {
       if (!this.selectedResources[resourceType]?.some((r) => r.uuid === resource.uuid)) {
         this.selectedResources[resourceType].unshift(resource);
       }
-      
     },
     removeResource(resourceType, currentResource) {
       //Borramos el recurso
       this.selectedResources[resourceType] = this.selectedResources[resourceType].filter(
         (r) => r.uuid !== currentResource.uuid
       );
-      
+
       if (this.selectedResources[resourceType].length > 0) {
         // Si no se queda vacía, seleccionamos el documento posterior
         this.shownFiles[resourceType] = this.selectedResources[resourceType][0];
-        
       } else {
         // Si la lista queda vacía, ajustamos el valor del recurso seleccionado
         this.shownFiles[resourceType] = undefined;

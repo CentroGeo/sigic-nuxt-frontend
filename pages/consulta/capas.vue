@@ -18,11 +18,11 @@ function exportarMapa() {
 }
 
 const attributos = reactive({});
-function addAttribute(pk) {
+async function addAttribute(pk) {
   // attributes[pk] = `${config.public.geonodeApi}/datasets/${pk}/attribute_set`;
   attributos[pk] = [];
 
-  fetch(`${config.public.geonodeApi}/datasets/${pk}/attribute_set`)
+  await fetch(`${config.public.geonodeApi}/datasets/${pk}/attribute_set`)
     .then((response) => response.json())
     .then(({ attributes }) => {
       // console.log(attributes);
@@ -35,7 +35,6 @@ function addAttribute(pk) {
           etiquetas[attribute] = attribute_label || attribute;
           return attribute;
         });
-      console.log(columnas);
 
       attributos[pk] = {
         params: {
@@ -47,7 +46,6 @@ function addAttribute(pk) {
             .map((columna) => `<p><b>${etiquetas[columna] || columna}</b>: ${data[columna]}</p>`)
             .join(''),
       };
-      console.log(attributos[pk]);
     })
     .catch((err) => {
       console.error(err);
@@ -70,9 +68,10 @@ watch(
     // console.log("Se agregó:", nv);
     nv.forEach((r) => addAttribute(r));
 
-    const ov = arr2.filter((item) => !arr1.includes(item));
+    //const ov = arr2.filter((item) => !arr1.includes(item));
     // console.log("Se quitó:", ov);
-    ov.forEach((resource) => delete attributos[resource]);
+
+    //ov.forEach((resource) => delete attributos[resource]);
 
     // console.log(attributos);
   },
@@ -81,6 +80,12 @@ watch(
 
 // bbox_polygon
 // api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
+
+/**
+ * Revisión!
+ */
+
+/*
 
 function cuadroInformativo(pk) {
   console.log(pk);
@@ -91,7 +96,7 @@ function cuadroInformativo(pk) {
     },
     contenido: (d) => `<p><b>nombre</b>: ${d['nombre']}</p>`,
   };
-}
+}*/
 </script>
 
 <template>
