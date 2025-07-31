@@ -9,15 +9,20 @@ const props = defineProps({
   resourceType: { type: String, required: true },
 });
 const { selectedElement, resourceType } = toRefs(props);
-
+const isVisible = ref(true);
 const tablaChild = ref(null);
 const downloadChild = ref(null);
+const opacityChild = ref(null);
 
 function notifyTabla() {
   tablaChild.value?.abrirModalTabla();
 }
 function notifyDownloadChild() {
   downloadChild.value?.abrirModalDescarga();
+}
+
+function notifyOpacityChild() {
+  opacityChild.value.abrirModalOpacidad();
 }
 
 /**
@@ -55,9 +60,15 @@ const optionsButtons = ref([
   },
   {
     label: "Mostrar",
-    pictogram: "pictograma-ojo-ver",
+    get pictogram() {
+      return isVisible.value ? "pictograma-ojo-ver" : "pictograma-ojo-ocultar";
+    },
     action: () => {
-      console.log("Mostrar u ocultar la capa");
+      isVisible.value = !isVisible.value;
+      resourcesStore.updateLayerVisibility(
+        selectedElement.value.alternate,
+        isVisible.value
+      );
     },
   },
   {
@@ -65,6 +76,7 @@ const optionsButtons = ref([
     pictogram: "pictograma-editar",
     action: () => {
       console.log("cambiar opacidad");
+      notifyOpacityChild();
     },
   },
   {
@@ -109,7 +121,10 @@ const optionsButtons = ref([
     ref="downloadChild"
     :resource-type="resourceType"
     :selected-element="selectedElement"
-    :download-type="'individual'"
+  />
+  <ConsultaModalOpacidad
+    ref="opacityChild"
+    :selected-element="selectedElement"
   />
 </template>
 <style lang="scss" scoped>

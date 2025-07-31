@@ -42,7 +42,7 @@ export function useGeonodeResources({ resourceType } = {}) {
           const resources = data.resources || [];
           allResults = allResults.concat(resources);
           // Revisamos si hay una pagina siguiente
-          if (data.links.next && page < 5) {
+          if (data.links.next) {
             // Si la hay, volvemos a solicitar datos
             page += 1;
             return loadPage();

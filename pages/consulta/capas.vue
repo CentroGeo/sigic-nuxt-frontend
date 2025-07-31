@@ -17,9 +17,6 @@ const config = useRuntimeConfig();
 const storeSelected = useSelectedResourcesStore();
 const randomNum = ref(0);
 const isFinishedLoading = ref(0);
-const route = useRoute();
-const initialZoom = ref();
-const initialCenter = ref();
 const linkExportaMapa = ref();
 function exportarMapa() {
   exportarMapaPNG(
@@ -27,7 +24,6 @@ function exportarMapa() {
     linkExportaMapa.value
   );
 }
-
 const attributos = reactive({});
 function addAttribute(pk) {
   // attributes[pk] = `${config.public.geonodeApi}/datasets/${pk}/attribute_set`;
@@ -115,25 +111,12 @@ function cuadroInformativo(pk) {
 // Este watcher sirve para ajustar los índices de las capas montadas
 // cuando estas terminan de cargarse pero solo funciona cuando recién se montan las capas.
 watch(isFinishedLoading, () => {
+  console.log("cuenta: ", isFinishedLoading.value);
   let resourcesNum = storeSelected.selectedResources[resourceType].length;
   if (resourcesNum === isFinishedLoading.value) {
     randomNum.value += 1;
   }
 });
-/* 
-onMounted(() => {
-  if (route.query.acercamiento && route.query.centro) {
-    let paramsCentro = route.query.centro.split(",").map(Number);
-    let paramsAcercamiento = Number(route.query.acercamiento);
-    //storeSelected.setMapViewParams(paramsCentro, paramsAcercamiento);
-    initialZoom.value = paramsCentro;
-    initialCenter.value = paramsAcercamiento;
-  } else {
-    initialCenter.value = [-102.53775, 23.6254];
-    initialZoom.value = 4.818118060279814;
-  }
-  console.log(initialZoom.value);
-}); */
 </script>
 
 <template>
@@ -151,17 +134,9 @@ onMounted(() => {
         <SisdaiMapa
           class="gema"
           :vista="{
-            acercamiento: initialZoom,
-            centro: initialCenter,
             extension: extensionMapa,
           }"
           @click-centrar="storeConsulta.ajustarExtensionMapa = undefined"
-          @al-mover-vista="
-            ({ acercamiento, centro }) => {
-              //console.log(acercamiento, centro);
-              //storeSelected.setMapViewParams(centro, acercamiento);
-            }
-          "
         >
           <SisdaiCapaXyz />
 

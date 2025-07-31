@@ -36,6 +36,7 @@ defineExpose({
       </template>
 
       <template #cuerpo>
+        <p>Este es un placeholder para el selector de capas</p>
         <SisdaiMapa class="gema" :vista="{ extension: extent }">
           <SisdaiCapaXyz />
 

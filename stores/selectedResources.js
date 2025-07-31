@@ -16,8 +16,8 @@ export const useSelectedResourcesStore = defineStore("selectedResources", {
       dataLayer: {
         centro: [-102.53775, 23.6254],
         acercamiento: 4.818118060279814,
-        opacidad: {},
-        visibilidad: {},
+        opacity: {},
+        visibility: {},
       },
       dataTable: undefined,
       document: undefined,
@@ -92,6 +92,14 @@ export const useSelectedResourcesStore = defineStore("selectedResources", {
       } else {
         console.log("ultimo elemento");
       }
+    },
+    updateLayerOpasity(alternate, value) {
+      this.shownFiles.dataLayer.opacity[alternate] = value;
+      console.log(this.shownFiles.dataLayer.opacity);
+    },
+    updateLayerVisibility(alternate, value) {
+      this.shownFiles.dataLayer.visibility[alternate] = value;
+      console.log(this.shownFiles.dataLayer.visibility);
     },
     setMapViewParams(centroArg, acercamientoArg) {
       this.shownFiles.dataLayer.centro = centroArg;

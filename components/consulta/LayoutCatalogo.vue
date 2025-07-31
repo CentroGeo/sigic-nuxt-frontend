@@ -1,10 +1,5 @@
 <script setup>
-import {
-  setUrlDocs,
-  setUrlLayers,
-  setDocView,
-  setMapView,
-} from "@/utils/consulta.js";
+import { setUrlDocs, setUrlLayers, setDocView } from "@/utils/consulta.js";
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
   titulo: { type: String, default: "Título" },
@@ -78,9 +73,10 @@ watch(resourcesList, () => {
     let paramResources = route.query.recursos.split(";");
     if (resourceType.value !== "dataLayer") {
       setDocView(resourceType.value, resourcesList.value, paramResources);
-    } else {
+    } /*else {
       setMapView(resourceType.value, resourcesList.value, paramResources);
     }
+ */
   }
 });
 watch(

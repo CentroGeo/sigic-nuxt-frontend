@@ -299,8 +299,8 @@ export async function setUrlLayers(resources) {
   await router.push({
     path: route.path,
     query: {
-      centro: resourcesStore.shownFiles.dataLayer.centro.join(","),
-      acercamiento: resourcesStore.shownFiles.dataLayer.acercamiento,
+      //centro: resourcesStore.shownFiles.dataLayer.centro.join(","),
+      //acercamiento: resourcesStore.shownFiles.dataLayer.acercamiento,
       recursos: paramsString,
     },
   });
