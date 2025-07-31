@@ -72,7 +72,7 @@ watch(
 
     const ov = arr2.filter((item) => !arr1.includes(item));
     // console.log("Se quitó:", ov);
-    ov.forEach((resource) => attributos.delete(resource));
+    ov.forEach((resource) => delete attributos[resource]);
 
     // console.log(attributos);
   },
