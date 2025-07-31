@@ -37,7 +37,7 @@ async function onDrop() {
 
     if (isValid) {
       console.log(formData);
-      await $fetch('/api/subirSLD', {
+      await fetch('/api/subirSLD', {
         method: 'POST',
         body: formData,
       });
@@ -85,10 +85,9 @@ onChange(async (files) => {
   }
   if (isValid) {
     // imprime el FormData si es el archivo fue válido
-    console.log(formData);
 
     // manda el FormData con los archivos al event handler de api/upload
-    await $fetch('/api/subirSLD', {
+    await fetch('/api/subirSLD', {
       method: 'POST',
       body: formData,
     });
