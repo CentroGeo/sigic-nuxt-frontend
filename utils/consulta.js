@@ -75,7 +75,6 @@ export async function downloadExcel(resource, format) {
     outputFormat: formatDict[format],
   }).toString();
 
-  console.warn(url);
   const anchor = document.createElement('a');
   anchor.href = url;
   anchor.target = '_blank';
