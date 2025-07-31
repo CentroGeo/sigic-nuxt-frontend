@@ -1,13 +1,9 @@
 // Este composable hace peticiones de datos a Geonode
 // TODO: Resolver las peticiones de información para mostrar capas y datasets privados
 // TODO: Manejo de errores en la petición
-import { ref } from "vue";
+import { ref } from 'vue';
 
-export function useGeoserverDataTable({
-  paginaActual,
-  tamanioPagina,
-  resource,
-} = {}) {
+export function useGeoserverDataTable({ paginaActual, tamanioPagina, resource } = {}) {
   const config = useRuntimeConfig();
   const variables = ref([]);
   const datos = ref([]);
@@ -17,11 +13,11 @@ export function useGeoserverDataTable({
   const fetchTable = async ({ paginaActual, tamanioPagina, resource }) => {
     if (resource) {
       url.search = new URLSearchParams({
-        service: "WFS",
-        version: "1.0.0",
-        request: "GetFeature",
+        service: 'WFS',
+        version: '1.0.0',
+        request: 'GetFeature',
         typeName: resource.alternate,
-        outputFormat: "application/json",
+        outputFormat: 'application/json',
         maxFeatures: tamanioPagina,
         startIndex: paginaActual * tamanioPagina,
       }).toString();

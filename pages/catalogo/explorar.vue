@@ -3,36 +3,36 @@
 // const { listaRecursos } = useDemoGeonodeResources();
 // console.log("listaRecursos", listaRecursos);
 const recursosFiltrados = ref([
-  { id: "bash", nombre: "Bash" },
-  { id: "c", nombre: "C" },
-  { id: "cpp", nombre: "C++" },
-  { id: "csharp", nombre: "C#" },
-  { id: "css", nombre: "CSS" },
-  { id: "dart", nombre: "Dart" },
-  { id: "docker", nombre: "Docker" },
-  { id: "elixir", nombre: "Elixir" },
-  { id: "go", nombre: "Go" },
-  { id: "graphql", nombre: "GraphQL" },
-  { id: "html", nombre: "HTML" },
-  { id: "java", nombre: "Java" },
-  { id: "javascript", nombre: "JavaScript" },
-  { id: "json", nombre: "JSON" },
-  { id: "kotlin", nombre: "Kotlin" },
-  { id: "markdown", nombre: "Markdown" },
-  { id: "php", nombre: "PHP" },
-  { id: "python", nombre: "Python" },
-  { id: "r", nombre: "R" },
-  { id: "ruby", nombre: "Ruby" },
-  { id: "rust", nombre: "Rust" },
-  { id: "scss", nombre: "SCSS" },
-  { id: "shell", nombre: "Shell" },
-  { id: "sql", nombre: "SQL" },
-  { id: "swift", nombre: "Swift" },
-  { id: "typescript", nombre: "TypeScript" },
-  { id: "xml", nombre: "XML" },
-  { id: "yaml", nombre: "YAML" },
+  { id: 'bash', nombre: 'Bash' },
+  { id: 'c', nombre: 'C' },
+  { id: 'cpp', nombre: 'C++' },
+  { id: 'csharp', nombre: 'C#' },
+  { id: 'css', nombre: 'CSS' },
+  { id: 'dart', nombre: 'Dart' },
+  { id: 'docker', nombre: 'Docker' },
+  { id: 'elixir', nombre: 'Elixir' },
+  { id: 'go', nombre: 'Go' },
+  { id: 'graphql', nombre: 'GraphQL' },
+  { id: 'html', nombre: 'HTML' },
+  { id: 'java', nombre: 'Java' },
+  { id: 'javascript', nombre: 'JavaScript' },
+  { id: 'json', nombre: 'JSON' },
+  { id: 'kotlin', nombre: 'Kotlin' },
+  { id: 'markdown', nombre: 'Markdown' },
+  { id: 'php', nombre: 'PHP' },
+  { id: 'python', nombre: 'Python' },
+  { id: 'r', nombre: 'R' },
+  { id: 'ruby', nombre: 'Ruby' },
+  { id: 'rust', nombre: 'Rust' },
+  { id: 'scss', nombre: 'SCSS' },
+  { id: 'shell', nombre: 'Shell' },
+  { id: 'sql', nombre: 'SQL' },
+  { id: 'swift', nombre: 'Swift' },
+  { id: 'typescript', nombre: 'TypeScript' },
+  { id: 'xml', nombre: 'XML' },
+  { id: 'yaml', nombre: 'YAML' },
 ]);
-const recursosTipo = ref("dataLayer");
+const recursosTipo = ref('dataLayer');
 </script>
 
 <template>
@@ -46,11 +46,7 @@ const recursosTipo = ref("dataLayer");
         <CatalogoElementoFiltros
           :recursos-lista="recursosFiltrados"
           :recursos-tipo="recursosTipo"
-          :categorias="[
-            'categoría_0: capas',
-            'categoría_1: tablas',
-            'categoría_2: documentos',
-          ]"
+          :categorias="['categoría_0: capas', 'categoría_1: tablas', 'categoría_2: documentos']"
         />
 
         <h2>Explora</h2>
@@ -110,9 +106,7 @@ const recursosTipo = ref("dataLayer");
               <div class="tarjeta-cuerpo">
                 <p class="tarjeta-etiqueta">Capa geográfica</p>
                 <p class="tarjeta-titulo">Cuerpos de agua</p>
-                <p>
-                  Mapa interactivo: Rescate del Lago de Texcoco, diagnóstico
-                </p>
+                <p>Mapa interactivo: Rescate del Lago de Texcoco, diagnóstico</p>
               </div>
               <div class="tarjeta-pie">
                 <button type="button" class="boton-primario boton-chico">
@@ -151,8 +145,8 @@ const recursosTipo = ref("dataLayer");
                 <p class="tarjeta-etiqueta">Documento</p>
                 <p class="tarjeta-titulo">Carpetas de investigación FGJ</p>
                 <p>
-                  Información actualizada de las carpetas de investigación de la
-                  Fiscalía General de Justicia (FGJ)
+                  Información actualizada de las carpetas de investigación de la Fiscalía General de
+                  Justicia (FGJ)
                 </p>
               </div>
               <div class="tarjeta-pie">

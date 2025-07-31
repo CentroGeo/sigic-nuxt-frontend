@@ -1,6 +1,6 @@
 // Este composable hace peticiones de datos a Geonode
 // TODO: Resolver las peticiones de información para mostrar capas y datasets privados
-import { ref } from "vue";
+import { ref } from 'vue';
 
 export function useGeonodeResources({ resourceType } = {}) {
   //const { data: authData, status: authStatus } = useAuth();
@@ -10,9 +10,9 @@ export function useGeonodeResources({ resourceType } = {}) {
   const api = `${config.public.geonodeApi}/resources`;
   const resourcesList = ref([]);
   const typeDict = {
-    dataLayer: "dataset",
-    dataTable: "dataset",
-    document: "document",
+    dataLayer: 'dataset',
+    dataTable: 'dataset',
+    document: 'document',
   };
 
   const fetchData = async ({ resourceType }) => {
@@ -22,12 +22,12 @@ export function useGeonodeResources({ resourceType } = {}) {
       const dataParams = new URLSearchParams({
         page: page,
         page_size: 15,
-        "filter{resource_type}": typeDict[resourceType],
+        'filter{resource_type}': typeDict[resourceType],
         //"filter{subtype.in}": "raster",
         //"filter{subtype.in}": "vector",
       });
       fetch(`${api}?${dataParams.toString()}`, {
-        method: "GET",
+        method: 'GET',
         /*         headers: {
           ...(authStatus.value === "authenticated"
             ? { Authorization: `Bearer ${token.value}` }
@@ -46,23 +46,20 @@ export function useGeonodeResources({ resourceType } = {}) {
             // Si la hay, volvemos a solicitar datos
             page += 1;
             return loadPage();
-          } else if (resourceType === "document") {
+          } else if (resourceType === 'document') {
             //Si ya no hay paginas siguientes, filtramos los datos
             // Si son documentos, filtramos únicamente los pdfs
             resourcesList.value = allResults.filter((resource) =>
               resource.links.some(
-                (link) =>
-                  link.link_type === "uploaded" && link.name.endsWith(".pdf")
+                (link) => link.link_type === 'uploaded' && link.name.endsWith('.pdf')
               )
             );
-          } else if (resourceType === "dataLayer") {
+          } else if (resourceType === 'dataLayer') {
             // Si son capas geográficas, excluimos aquellos que no tengan geometria
-            let noGeometryExtent = [-1, -1, 0, 0];
+            const noGeometryExtent = [-1, -1, 0, 0];
             resourcesList.value = allResults.filter(
               (resource) =>
-                !resource.extent.coords.every(
-                  (value, index) => value === noGeometryExtent[index]
-                )
+                !resource.extent.coords.every((value, index) => value === noGeometryExtent[index])
             );
           } else {
             resourcesList.value = allResults;

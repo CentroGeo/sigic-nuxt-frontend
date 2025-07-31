@@ -1,11 +1,10 @@
-import { defineStore } from "pinia";
+import { defineStore } from 'pinia';
 
-export const useConsultaStore = defineStore("consulta", {
+export const useConsultaStore = defineStore('consulta', {
   state: () => ({
     catalogoColapsado: false,
     ajustarExtensionMapa: undefined,
-    idNavegacionLateral:
-      "navegacionlateral-" + Math.random().toString(36).substring(2),
+    idNavegacionLateral: 'navegacionlateral-' + Math.random().toString(36).substring(2),
   }),
   actions: {
     alternarCatalogoColapsable() {

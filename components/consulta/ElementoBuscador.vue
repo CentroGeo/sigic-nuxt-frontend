@@ -4,10 +4,10 @@
 // porque hay que revisar en el módulo de carga cómo se recolectará esa información
 // El filtro avanzado de keywords está buscando en el título únicamente
 // Falta poder volver a deseleccionar los filtros
-import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
-import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
-import SisdaiSelector from "@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue";
-import SisdaiCampoBase from "@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue";
+import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
+import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
@@ -28,8 +28,8 @@ const selectedFilter = ref({
 function filterByCategory(d) {
   if (
     d.category !== null &&
-    selectedFilter.value["selectedCategory"] &&
-    d.category.gn_description == selectedFilter.value["selectedCategory"]
+    selectedFilter.value['selectedCategory'] &&
+    d.category.gn_description === selectedFilter.value['selectedCategory']
   ) {
     return 1;
   } else {
@@ -40,8 +40,8 @@ function filterByCategory(d) {
 function filterByYear(d) {
   if (
     d.date !== null &&
-    selectedFilter.value["yearInput"] &&
-    d.date.slice(0, 4) === selectedFilter.value["yearInput"]
+    selectedFilter.value['yearInput'] &&
+    d.date.slice(0, 4) === selectedFilter.value['yearInput']
   ) {
     return 1;
   } else {
@@ -51,14 +51,12 @@ function filterByYear(d) {
 
 // Para esta función haría falta formatear el input y el título del recursp
 function filterByKeyword(d) {
-  if (selectedFilter.value["keywordsInput"]) {
-    let keywordsList = selectedFilter.value["keywordsInput"]
-      .split(",")
+  if (selectedFilter.value['keywordsInput']) {
+    const keywordsList = selectedFilter.value['keywordsInput']
+      .split(',')
       .map((word) => word.trim())
       .filter((word) => word.length > 0);
-    let includesWord = keywordsList.some((keyword) =>
-      d.title.includes(keyword)
-    );
+    const includesWord = keywordsList.some((keyword) => d.title.includes(keyword));
     if (includesWord) {
       return 1;
     } else {
@@ -73,7 +71,7 @@ function filterByKeyword(d) {
 // revisar que sumen un total
 function filterByModal() {
   let total = 0;
-  let results = [];
+  const results = [];
   // Revisamos cuántos filtros se aplicaron
   Object.keys(selectedFilter.value).forEach((d) => {
     if (selectedFilter.value[d]) {
@@ -82,25 +80,19 @@ function filterByModal() {
   });
   // Revisamos la suma por filtro
   resourcesList.value.forEach((d) => {
-    let i = filterByCategory(d) + filterByYear(d) + filterByKeyword(d);
+    const i = filterByCategory(d) + filterByYear(d) + filterByKeyword(d);
     if (i === total) {
       results.push(d);
     }
   });
   catalogoFiltrado.value = results;
-  resourcesStore.updateFilteredResources(
-    resourceType.value,
-    catalogoFiltrado.value
-  );
+  resourcesStore.updateFilteredResources(resourceType.value, catalogoFiltrado.value);
   modalFiltros.value.cerrarModal();
 }
 
 function filterByInput(r) {
   catalogoFiltrado.value = r;
-  resourcesStore.updateFilteredResources(
-    resourceType.value,
-    catalogoFiltrado.value
-  );
+  resourcesStore.updateFilteredResources(resourceType.value, catalogoFiltrado.value);
 }
 </script>
 <template>
@@ -113,39 +105,39 @@ function filterByInput(r) {
       <ClientOnly>
         <div>
           <SisdaiSelector
+            v-model="selectedFilter['selectedCategory']"
             class="m-y-2"
             etiqueta="Categoría"
             instruccional="Selecciona Categoría"
-            v-model="selectedFilter['selectedCategory']"
           >
             <option
               v-for="(category, index) in categories"
-              :value="category"
               :key="`${index}-category`"
+              :value="category"
             >
               {{ category }}
             </option>
           </SisdaiSelector>
 
           <SisdaiCampoBase
+            v-model="selectedFilter['institucionInput']"
             class="m-y-2"
             etiqueta="Institución"
             ejemplo="SECIHTI, INEGI, entre otras"
-            v-model="selectedFilter['institucionInput']"
           />
 
           <SisdaiCampoBase
+            v-model="selectedFilter['yearInput']"
             class="m-y-2"
             etiqueta="Año de publicación"
             ejemplo="1995..."
-            v-model="selectedFilter['yearInput']"
           />
 
           <SisdaiCampoBase
+            v-model="selectedFilter['keywordsInput']"
             class="m-y-2"
             etiqueta="Palabras clave"
             ejemplo="agua, casas..."
-            v-model="selectedFilter['keywordsInput']"
           />
         </div>
       </ClientOnly>
@@ -160,9 +152,9 @@ function filterByInput(r) {
     <SisdaiCampoBusqueda
       class="columna-13"
       :catalogo="resourcesList"
-      :propiedadBusqueda="'title'"
+      :propiedad-busqueda="'title'"
       :etiqueta="'Usa palabras clave...'"
-      @alFiltrar="filterByInput"
+      @al-filtrar="filterByInput"
     />
     <button
       type="button"
@@ -170,7 +162,7 @@ function filterByInput(r) {
       aria-label="Filtro Avanzado"
       @click="modalFiltros?.abrirModal()"
     >
-      <span class="pictograma-filtro" aria-hidden="true"></span>
+      <span class="pictograma-filtro" aria-hidden="true" />
     </button>
   </div>
 </template>

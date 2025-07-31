@@ -34,8 +34,8 @@ function getExtent(bboxPolygon) {
 // Aqui se acaba la parte nueva para la prueba
 const optionsButtons = ref([
   {
-    label: "Hacer zoom",
-    pictogram: "pictograma-zoom-instruccional",
+    label: 'Hacer zoom',
+    pictogram: 'pictograma-zoom-instruccional',
     action: () => {
       // console.log("hacer zoom", {
       //   extension: getExtent(selectedElement.value.bbox_polygon.coordinates[0]),
@@ -43,40 +43,40 @@ const optionsButtons = ref([
 
       storeConsulta.ajustarExtensionMapa = getExtent(
         selectedElement.value.bbox_polygon.coordinates[0]
-      ).join(",");
+      ).join(',');
     },
   },
   {
-    label: "Ver tablas",
-    pictogram: "pictograma-tabla",
+    label: 'Ver tablas',
+    pictogram: 'pictograma-tabla',
     action: () => {
       notifyTabla();
     },
   },
   {
-    label: "Mostrar",
-    pictogram: "pictograma-ojo-ver",
+    label: 'Mostrar',
+    pictogram: 'pictograma-ojo-ver',
     action: () => {
-      console.log("Mostrar u ocultar la capa");
+      console.log('Mostrar u ocultar la capa');
     },
   },
   {
-    label: "Cambiar opacidad",
-    pictogram: "pictograma-editar",
+    label: 'Cambiar opacidad',
+    pictogram: 'pictograma-editar',
     action: () => {
-      console.log("cambiar opacidad");
+      console.log('cambiar opacidad');
     },
   },
   {
-    label: "Eliminar selección",
-    pictogram: "pictograma-eliminar",
+    label: 'Eliminar selección',
+    pictogram: 'pictograma-eliminar',
     action: () => {
       resourcesStore.removeResource(resourceType.value, selectedElement.value);
     },
   },
   {
-    label: "Descargar archivo",
-    pictogram: "pictograma-archivo-descargar",
+    label: 'Descargar archivo',
+    pictogram: 'pictograma-archivo-descargar',
     action: () => {
       notifyDownloadChild();
     },
@@ -100,7 +100,7 @@ const optionsButtons = ref([
       type="button"
       @click="button.action"
     >
-      <span :class="button.pictogram" aria-hidden="true"></span>
+      <span :class="button.pictogram" aria-hidden="true" />
     </button>
   </div>
   <!-- Los modales-->

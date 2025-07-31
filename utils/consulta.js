@@ -1,9 +1,7 @@
 export function tooltipContent(resource) {
   const content =
-    `<p style="max-width:250px">${
-      resource.abstract ? resource.abstract : "Sin descripción"
-    }</p>` +
-    `<p>${resource.attribution ? resource.attribution : "Sin fuente"}</p>`;
+    `<p style="max-width:250px">${resource.abstract ? resource.abstract : 'Sin descripción'}</p>` +
+    `<p>${resource.attribution ? resource.attribution : 'Sin fuente'}</p>`;
   return content;
 }
 
@@ -12,26 +10,30 @@ export async function fetchGeometryType(resource) {
   const api = config.public.geoserverUrl;
   const url = new URL(`${api}/ows`);
   url.search = new URLSearchParams({
-    service: "WFS",
-    version: "1.0.0",
-    request: "GetFeature",
+    service: 'WFS',
+    version: '1.0.0',
+    request: 'GetFeature',
     typeName: resource.alternate,
     maxFeatures: 1,
-    outputFormat: "application/json",
+    outputFormat: 'application/json',
   }).toString();
 
   const res = await fetch(url);
   if (res.ok) {
     const data = await res.json();
-    const geomType = data.features[0]["geometry"]["type"];
-    return geomType;
+    if (Array.isArray(data.features) && data.features.length > 0 && data.features[0]?.geometry?.type) {
+      const geomType = data.features[0].geometry.type;
+      return geomType;
+    } else {
+      return 'Unable to determine geometry type';
+    }
   } else {
-    return "Error";
+    return 'Error';
   }
 }
 
 export function downloadPDF(resource) {
-  let anchor = document.createElement("a");
+  const anchor = document.createElement('a');
   anchor.href = resource.download_url;
   anchor.download = `${resource.title}.pdf`;
   document.body.appendChild(anchor);
@@ -43,18 +45,18 @@ export async function downloadMetadata(resource) {
   const config = useRuntimeConfig();
   const api = new URL(`${config.public.geonodeUrl}/catalogue/csw`);
   api.search = new URLSearchParams({
-    request: "GetRecordById",
-    service: "CSW",
-    version: "2.0.2",
+    request: 'GetRecordById',
+    service: 'CSW',
+    version: '2.0.2',
     id: resource.uuid,
-    outputschema: "http://www.isotc211.org/2005/gmd",
-    elementsetname: "full",
+    outputschema: 'http://www.isotc211.org/2005/gmd',
+    elementsetname: 'full',
   }).toString();
 
   const res = await fetch(api);
   const dataBlob = await res.blob();
   const blobLink = URL.createObjectURL(dataBlob);
-  let anchor = document.createElement("a");
+  const anchor = document.createElement('a');
   anchor.href = blobLink;
   anchor.download = `${resource.title}_metadata.xml`;
   document.body.appendChild(anchor);
@@ -65,22 +67,21 @@ export async function downloadMetadata(resource) {
 export async function downloadExcel(resource, format) {
   const config = useRuntimeConfig();
   const formatDict = {
-    xls: "excel",
-    xlsx: "excel2007",
+    xls: 'excel',
+    xlsx: 'excel2007',
   };
   const url = new URL(`${config.public.geoserverUrl}/ows`);
   url.search = new URLSearchParams({
-    service: "WFS",
-    version: "1.0.0",
-    request: "GetFeature",
+    service: 'WFS',
+    version: '1.0.0',
+    request: 'GetFeature',
     typeName: resource.alternate,
     outputFormat: formatDict[format],
   }).toString();
 
-  console.log(url);
-  let anchor = document.createElement("a");
+  const anchor = document.createElement('a');
   anchor.href = url;
-  anchor.taget = "_blank";
+  anchor.target = '_blank';
   anchor.download = `${resource.title}.${format}`;
   document.body.appendChild(anchor);
   anchor.click();
@@ -93,12 +94,12 @@ export async function downloadVectorData(resource, format) {
   const maxRetries = 3;
   const delay = 1000;
   const formatDict = {
-    gpkg: "application/geopackage+sqlite3",
-    geojson: "application/json",
-    csv: "text/csv",
-    kml: "application/vnd.google-earth.kml+xml",
+    gpkg: 'application/geopackage+sqlite3',
+    geojson: 'application/json',
+    csv: 'text/csv',
+    kml: 'application/vnd.google-earth.kml+xml',
   };
-  let permissionRequest = `<?xml version="1.0" encoding="UTF-8"?><wps:Execute version="1.0.0" service="WPS" 
+  const permissionRequestTemplate = `<?xml version="1.0" encoding="UTF-8"?><wps:Execute version="1.0.0" service="WPS" 
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
   xmlns="http://www.opengis.net/wps/1.0.0" 
   xmlns:wfs="http://www.opengis.net/wfs" 
@@ -114,7 +115,7 @@ export async function downloadVectorData(resource, format) {
   <wps:DataInputs><wps:Input><ows:Identifier>layerName</ows:Identifier><wps:Data>
   <wps:LiteralData>${resource.alternate}</wps:LiteralData></wps:Data></wps:Input></wps:DataInputs></wps:Execute>`;
 
-  let request2 = `<?xml version="1.0" encoding="UTF-8"?><wps:Execute version="1.0.0" service="WPS" 
+  const request2 = `<?xml version="1.0" encoding="UTF-8"?><wps:Execute version="1.0.0" service="WPS" 
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
   xmlns="http://www.opengis.net/wps/1.0.0" 
   xmlns:wfs="http://www.opengis.net/wfs" 
@@ -141,85 +142,78 @@ export async function downloadVectorData(resource, format) {
   const fetchpermissionRequest = await fetch(
     `${config.public.geoserverUrl}/ows?service=WPS&version=1.0.0&REQUEST=Execute`,
     {
-      method: "POST",
+      method: 'POST',
       body: permissionRequest,
     }
   );
 
   // Revisamos el status de la primera peticion
   if (!fetchpermissionRequest.ok) {
-    console.error("No se concedieron permisos");
+    console.error('No se concedieron permisos');
     return;
   }
-  const permissionRestult = await fetchpermissionRequest.text();
+  // // const permissionRestult = await fetchpermissionRequest.text();
   //console.log("La primer respuesta, el permiso: ", permissionRestult);
 
   // Hacemos la segunda peticion, que también regresará un xml del que nos interesa el status location
   const statusRequest = await fetch(
     `${config.public.geoserverUrl}/ows?service=WPS&version=1.0.0&REQUEST=Execute`,
     {
-      method: "POST",
+      method: 'POST',
       body: request2,
     }
   );
   // Revisamos el status de la segunda peticion
   if (!statusRequest.ok) {
-    console.error("Falló la petición del link para la descarga");
+    console.error('Falló la petición del link para la descarga');
     return;
   }
   const statusResult = await statusRequest.text();
   //console.log("La segunda petición, la del status: ", statusResult);
   // Como nos regresa un xml, hay que parsearlo
   const parser = new DOMParser();
-  const parsedStatusResult = parser.parseFromString(statusResult, "text/xml");
-  const executeResponseHTML = parsedStatusResult.getElementsByTagName(
-    "wps:ExecuteResponse"
-  )[0];
-  const linkStatusLocation =
-    executeResponseHTML?.getAttribute("statusLocation");
+  const parsedStatusResult = parser.parseFromString(statusResult, 'text/xml');
+  const executeResponseHTML = parsedStatusResult.getElementsByTagName('wps:ExecuteResponse')[0];
+  const linkStatusLocation = executeResponseHTML?.getAttribute('statusLocation');
 
   // Ahora hacemos una petición get al vínculo statusLocation.
   // Como a veces hace timeout, lo intentamos tres veces
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     const downloadRequest = await fetch(linkStatusLocation);
     const downloadResult = await downloadRequest.text();
-    if (downloadResult.includes("Process succeeded")) {
-      console.log("se logró en el intento numero ", attempt);
+    if (downloadResult.includes('Process succeeded')) {
+      console.warn('succeeded on attempt number ', attempt);
       const parser2 = new DOMParser();
-      const parsedDownloadResult = parser2.parseFromString(
-        downloadResult,
-        "text/xml"
-      );
-      let downloadHTML =
-        parsedDownloadResult.getElementsByTagName("wps:Reference")[0];
-      downloadLink = downloadHTML?.getAttribute("href");
+      const parsedDownloadResult = parser2.parseFromString(downloadResult, 'text/xml');
+      const downloadHTML = parsedDownloadResult.getElementsByTagName('wps:Reference')[0];
+      downloadLink = downloadHTML?.getAttribute('href');
       attempt = maxRetries;
     } else {
       await new Promise((res) => setTimeout(res, delay));
     }
   }
   if (!downloadLink) {
-    console.log("Falló la descarga");
+    console.error('Falló la descarga');
     return;
   }
 
   // Si es un Json vamos a tener que forzar la descarga
-  if (format === "geojson") {
+  if (format === 'geojson') {
     const jsonRequest = await fetch(downloadLink);
     if (!jsonRequest.ok) {
-      console.log("Falló el forzar la descarga del json");
+      console.error('Falló el forzar la descarga del json');
       return;
     }
     const jsonResponse = await jsonRequest.json();
     const blob = new Blob([JSON.stringify(jsonResponse)], {
-      type: "application/json",
+      type: 'application/json',
     });
     const blobLink = URL.createObjectURL(blob);
     downloadLink = blobLink;
   }
-  let anchor = document.createElement("a");
+  const anchor = document.createElement('a');
   anchor.href = downloadLink;
-  anchor.taget = "_blank";
+  anchor.target = '_blank';
   anchor.download = `${resource.title}.${format}`;
   document.body.appendChild(anchor);
   anchor.click();

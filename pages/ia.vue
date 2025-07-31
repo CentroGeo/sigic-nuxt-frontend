@@ -1,13 +1,11 @@
 <script setup>
-definePageMeta({ middleware: "redireccionar-modulo-ia" });
-const ruta = "/ia";
+definePageMeta({ middleware: 'redireccionar-modulo-ia' });
+const ruta = '/ia';
 </script>
 <template>
   <div class="modulo-ia flex">
     <UiNavegacionLateral
-      :id-colapsable="
-        `uinavegacionlateral-` + Math.random().toString(36).substring(2)
-      "
+      :id-colapsable="`uinavegacionlateral-` + Math.random().toString(36).substring(2)"
       :sub-paginas="[
         {
           pictograma: 'pictograma-chat',
