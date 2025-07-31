@@ -75,10 +75,12 @@ watch(resourcesList, () => {
   );
   // Queremos revisar si hay query params y buscar los recursos
   if (route.query.recursos) {
-    let paramList = route.query.recursos.split(";");
+    let paramResources = route.query.recursos.split(";");
     if (resourceType.value !== "dataLayer") {
-      setDocView(resourceType.value, resourcesList.value, paramList);
-    } else setMapView(resourceType.value, resourcesList.value, paramList);
+      setDocView(resourceType.value, resourcesList.value, paramResources);
+    } else {
+      setMapView(resourceType.value, resourcesList.value, paramResources);
+    }
   }
 });
 watch(

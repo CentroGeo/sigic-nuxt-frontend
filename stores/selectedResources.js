@@ -13,7 +13,12 @@ export const useSelectedResourcesStore = defineStore("selectedResources", {
       document: [],
     },
     shownFiles: {
-      dataLayer: undefined,
+      dataLayer: {
+        centro: [-102.53775, 23.6254],
+        acercamiento: 4.818118060279814,
+        opacidad: {},
+        visibilidad: {},
+      },
       dataTable: undefined,
       document: undefined,
     },
@@ -87,6 +92,11 @@ export const useSelectedResourcesStore = defineStore("selectedResources", {
       } else {
         console.log("ultimo elemento");
       }
+    },
+    setMapViewParams(centroArg, acercamientoArg) {
+      this.shownFiles.dataLayer.centro = centroArg;
+      this.shownFiles.dataLayer.acercamiento = acercamientoArg;
+      console.log("cambiaron centro y zoom: ", this.shownFiles.dataLayer);
     },
   },
 });

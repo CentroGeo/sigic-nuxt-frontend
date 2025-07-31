@@ -17,7 +17,9 @@ const config = useRuntimeConfig();
 const storeSelected = useSelectedResourcesStore();
 const randomNum = ref(0);
 const isFinishedLoading = ref(0);
-
+const route = useRoute();
+const initialZoom = ref();
+const initialCenter = ref();
 const linkExportaMapa = ref();
 function exportarMapa() {
   exportarMapaPNG(
@@ -112,23 +114,26 @@ function cuadroInformativo(pk) {
 
 // Este watcher sirve para ajustar los índices de las capas montadas
 // cuando estas terminan de cargarse pero solo funciona cuando recién se montan las capas.
-// Tiene efectos secundarios?
 watch(isFinishedLoading, () => {
   let resourcesNum = storeSelected.selectedResources[resourceType].length;
-  console.log("contador: ", isFinishedLoading.value, resourcesNum);
   if (resourcesNum === isFinishedLoading.value) {
-    console.log("Aqui hay una función comentada para probar");
     randomNum.value += 1;
-    /*     storeSelected.lowerIndex(
-      storeSelected.selectedResources[resourceType][0],
-      resourceType
-    );
-    storeSelected.raiseIndex(
-      storeSelected.selectedResources[resourceType][1],
-      resourceType
-    ); */
   }
 });
+/* 
+onMounted(() => {
+  if (route.query.acercamiento && route.query.centro) {
+    let paramsCentro = route.query.centro.split(",").map(Number);
+    let paramsAcercamiento = Number(route.query.acercamiento);
+    //storeSelected.setMapViewParams(paramsCentro, paramsAcercamiento);
+    initialZoom.value = paramsCentro;
+    initialCenter.value = paramsAcercamiento;
+  } else {
+    initialCenter.value = [-102.53775, 23.6254];
+    initialZoom.value = 4.818118060279814;
+  }
+  console.log(initialZoom.value);
+}); */
 </script>
 
 <template>
@@ -145,9 +150,18 @@ watch(isFinishedLoading, () => {
       <ClientOnly>
         <SisdaiMapa
           class="gema"
-          :vista="{ extension: extensionMapa }"
+          :vista="{
+            acercamiento: initialZoom,
+            centro: initialCenter,
+            extension: extensionMapa,
+          }"
           @click-centrar="storeConsulta.ajustarExtensionMapa = undefined"
-          @al-mover-vista="console.log('al mover vista')"
+          @al-mover-vista="
+            ({ acercamiento, centro }) => {
+              console.log(acercamiento, centro);
+              //storeSelected.setMapViewParams(centro, acercamiento);
+            }
+          "
         >
           <SisdaiCapaXyz />
 

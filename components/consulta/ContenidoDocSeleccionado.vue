@@ -12,6 +12,17 @@ const { selectedElement, resourceType } = toRefs(props);
 const shownFileUuid = computed(
   () => resourcesStore.shownFiles[resourceType.value].uuid
 );
+const hasGeometry = ref();
+const noGeometry = [-1, -1, 0, 0];
+
+if (resourceType.value === "dataTable") {
+  !selectedElement.value.extent.coords.every(
+    (value, index) => value === noGeometry[index]
+  );
+  console.log(selectedElement.value.extent);
+} else {
+  hasGeometry.value = false;
+}
 
 const downloadChild = ref(null);
 function notifyDownloadChild() {

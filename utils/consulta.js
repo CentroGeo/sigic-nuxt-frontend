@@ -264,15 +264,15 @@ export async function setUrlDocs(resources, resourceType) {
     },
   });
 }
-export function setDocView(resourceType, resources, paramsArray) {
+export function setDocView(resourceType, resources, paramsResources) {
   const resourcesStore = useSelectedResourcesStore();
   const attrDict = {
     document: "title",
     dataTable: "alternate",
   };
 
-  for (let i = paramsArray.length - 1; i >= 0; i--) {
-    let vals = paramsArray[i].split(",");
+  for (let i = paramsResources.length - 1; i >= 0; i--) {
+    let vals = paramsResources[i].split(",");
     resources.forEach((d) => {
       if (d[attrDict[resourceType]] === vals[0]) {
         resourcesStore.addResource(resourceType, d);
@@ -284,6 +284,8 @@ export function setDocView(resourceType, resources, paramsArray) {
   }
 }
 export async function setUrlLayers(resources) {
+  const resourcesStore = useSelectedResourcesStore();
+
   console.log("Se cambió la url: ", resources);
   const router = useRouter();
   const route = useRoute();
@@ -297,16 +299,17 @@ export async function setUrlLayers(resources) {
   await router.push({
     path: route.path,
     query: {
+      centro: resourcesStore.shownFiles.dataLayer.centro.join(","),
+      acercamiento: resourcesStore.shownFiles.dataLayer.acercamiento,
       recursos: paramsString,
     },
   });
 }
-export function setMapView(resourceType, resources, paramsArray) {
+export function setMapView(resourceType, resources, paramsResources) {
   const resourcesStore = useSelectedResourcesStore();
-
-  for (let i = paramsArray.length - 1; i >= 0; i--) {
+  for (let i = paramsResources.length - 1; i >= 0; i--) {
     resources.forEach((d) => {
-      if (d.alternate === paramsArray[i]) {
+      if (d.alternate === paramsResources[i]) {
         resourcesStore.addResource(resourceType, d);
       }
     });
