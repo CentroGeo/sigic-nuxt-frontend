@@ -55,13 +55,13 @@ const capasSeleccionadas = ref([
   {
     id: 0,
     titulo: 'Nombre de la fuente de información',
-    cateogria: 'Categoría 1',
+    categoria: 'Categoría 1',
     tipo: 'Poligonos',
   },
   {
     id: 1,
     titulo: 'Nombre de la fuente de información',
-    cateogria: 'Categoría 3',
+    categoria: 'Categoría 3',
     tipo: 'Puntos',
   },
 ]);
