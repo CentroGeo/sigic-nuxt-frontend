@@ -28,7 +28,8 @@
     "pinia": "^3.0.3",
     "undici": "^7.10.0",
     "vue": "latest",
-    "vue-router": "latest"
+    "vue-router": "latest",
+    "@vueuse/nuxt": "^13.5.0"
   },
   "devDependencies": {
     "@nuxt/devtools": "^2.6.2",
