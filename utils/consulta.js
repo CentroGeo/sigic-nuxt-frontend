@@ -25,7 +25,7 @@ export async function fetchGeometryType(resource) {
       const geomType = data.features[0].geometry.type;
       return geomType;
     } else {
-      return 'Unknown';
+      return 'Unable to determine geometry type';
     }
   } else {
     return 'Error';
