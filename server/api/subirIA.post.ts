@@ -1,13 +1,12 @@
 import { createError } from "h3";
 import formidable from "formidable";
-import { Readable } from "stream";
 import { promises as fsp } from "fs";
 export const config = {
   api: {
     bodyParser: false,
   },
 };
-const configEnv = useRuntimeConfig();
+// const configEnv = useRuntimeConfig();
 
 export default defineEventHandler(async (event) => {
   // Parsea FormData con formidable
@@ -41,7 +40,8 @@ export default defineEventHandler(async (event) => {
   console.log(formData);
   try {
     const res = await fetch(
-      "http://localhost:8001/api/fileuploads/upload-to-geonode/",
+      "http://localhost:8080/api/fileuploads/upload-to-geonode/",
+      // "http://localhost:8001/api/fileuploads/upload-to-geonode/",
       {
         method: "POST",
         headers: {
