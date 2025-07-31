@@ -1,6 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
-const isDev = process.dev
+const isDev = process.env.NODE_ENV !== 'production'
 
 export default defineNuxtConfig({
   app: {
