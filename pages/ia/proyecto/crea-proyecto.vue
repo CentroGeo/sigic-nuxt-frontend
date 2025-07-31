@@ -55,13 +55,13 @@ const capasSeleccionadas = ref([
   {
     id: 0,
     titulo: 'Nombre de la fuente de información',
-    cateogria: 'Categoría 1',
+    categoria: 'Categoría 1',
     tipo: 'Poligonos',
   },
   {
     id: 1,
     titulo: 'Nombre de la fuente de información',
-    cateogria: 'Categoría 3',
+    categoria: 'Categoría 3',
     tipo: 'Puntos',
   },
 ]);
@@ -262,7 +262,7 @@ const campoCasilla = ref(false);
                       <div class="capa p-2 m-b-2 borde-redondeado-20">
                         <h6 class="m-t-0 m-b-1">{{ capa.titulo }}</h6>
                         <div class="m-b-1">
-                          {{ capa.cateogria }}
+                          {{ capa.categoria }}
                         </div>
                         <div class="icono m-b-1">
                           <span class="pictograma-capa-poligono m-r-1" aria-hidden="true" />
