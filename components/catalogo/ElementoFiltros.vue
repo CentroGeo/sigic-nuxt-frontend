@@ -2,11 +2,11 @@
 // Se está pensando en añadir una propiedad para colocar
 // el selector a los filtros avanzados. comparte las mismas
 // características que el ElementoBuscador del módulo de consulta
-import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
-import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
-import SisdaiSelector from "@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue";
-import SisdaiCampoBase from "@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue";
-const seleccionEjemplo = ref("");
+import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
+import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
+const seleccionEjemplo = ref('');
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
   recursosLista: { type: Array, default: () => [] },
@@ -26,8 +26,8 @@ const seleccionFiltro = ref({
 function filtrarPorCategoria(d) {
   if (
     d.category !== null &&
-    seleccionFiltro.value["categoriaSeleccionada"] &&
-    d.category === seleccionFiltro.value["categoriaSeleccionada"]
+    seleccionFiltro.value['categoriaSeleccionada'] &&
+    d.category === seleccionFiltro.value['categoriaSeleccionada']
   ) {
     return 1;
   } else {
@@ -37,9 +37,9 @@ function filtrarPorCategoria(d) {
 // se agrega el filtrarPorInstitucion
 function filtrarPorInstitucion(d) {
   // console.log("d.attribution", d.attribution);
-  if (seleccionFiltro.value["institucionEntrada"]) {
-    const institucionesLista = seleccionFiltro.value["institucionEntrada"]
-      .split(",")
+  if (seleccionFiltro.value['institucionEntrada']) {
+    const institucionesLista = seleccionFiltro.value['institucionEntrada']
+      .split(',')
       .map((institucion) => institucion.trim())
       .filter((instituciones) => instituciones.length > 0);
     // console.log("institucionesLista", institucionesLista);
@@ -62,18 +62,18 @@ function filtrarPorInstitucion(d) {
 const filtrarPorAnio = (d) => {
   // 2025-07-17T19 // TODO:
   return d.date !== null &&
-    seleccionFiltro.value["anioEntrada"] &&
+    seleccionFiltro.value['anioEntrada'] &&
     /* d.date.slice(0, 4) === seleccionFiltro.value["anioEntrada"] // lo siguiente solo válida la fecha con cuatro dígitos*/
-    d.date.slice(0, 13) === seleccionFiltro.value["anioEntrada"]
+    d.date.slice(0, 13) === seleccionFiltro.value['anioEntrada']
     ? 1
     : 0;
 };
 // Para esta función haría falta formatear el input y el título del recursp
 // function filterByKeyword(d) {
 function filtrarPorPalabraClave(d) {
-  if (seleccionFiltro.value["palabrasClaveEntrada"]) {
-    const palabrasClaveLista = seleccionFiltro.value["palabrasClaveEntrada"]
-      .split(",")
+  if (seleccionFiltro.value['palabrasClaveEntrada']) {
+    const palabrasClaveLista = seleccionFiltro.value['palabrasClaveEntrada']
+      .split(',')
       .map((palabra) => palabra.trim())
       .filter((palabra) => palabra.length > 0);
     // probar si hay si el arreglo incluye algo de la palabra
@@ -103,7 +103,7 @@ function filtrarPorModal() {
       totalFiltros += 1;
     }
   });
-  console.log("total de filtros usados", totalFiltros);
+  console.log('total de filtros usados', totalFiltros);
   // Revisamos la suma por filtro
   recursosLista.value.forEach((d, idx) => {
     const tf =
@@ -119,18 +119,12 @@ function filtrarPorModal() {
   // console.log("Resultado filtrado", resultados);
   catalogoFiltrado.value = resultados;
   // actualizar Recursos con lista filtrada en el store
-  resourcesStore.updateFilteredResources(
-    recursosTipo.value,
-    catalogoFiltrado.value
-  );
+  resourcesStore.updateFilteredResources(recursosTipo.value, catalogoFiltrado.value);
   modalFiltros.value.cerrarModal();
 }
 function filtrarPorEntrada(r) {
   catalogoFiltrado.value = r;
-  resourcesStore.updateFilteredResources(
-    recursosTipo.value,
-    catalogoFiltrado.value
-  );
+  resourcesStore.updateFilteredResources(recursosTipo.value, catalogoFiltrado.value);
 }
 </script>
 <template>

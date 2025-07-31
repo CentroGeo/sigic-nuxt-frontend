@@ -32,10 +32,7 @@ defineProps({
       <ul class="lista-sin-estilo">
         <li>
           <div class="avatar-imagen">
-            <img
-              src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg"
-              alt=""
-            >
+            <img src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg" alt="" />
           </div>
         </li>
 
@@ -49,19 +46,14 @@ defineProps({
             @click="funcionColapsar"
           >
             <span
-              :class="`pictograma-angulo-doble-${
-                estadoColapable ? 'derecha' : 'izquierda'
-              }`"
+              :class="`pictograma-angulo-doble-${estadoColapable ? 'derecha' : 'izquierda'}`"
               aria-hidden="true"
             />
           </button>
         </li>
 
         <li v-for="subPagina in subPaginas" :key="`elemento-${subPagina.ruta}`">
-          <nuxt-link
-            class="boton-pictograma boton-sin-contenedor-primario"
-            :to="subPagina.ruta"
-          >
+          <nuxt-link class="boton-pictograma boton-sin-contenedor-primario" :to="subPagina.ruta">
             <span :class="subPagina.pictograma" aria-hidden="true" />
           </nuxt-link>
         </li>

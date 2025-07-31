@@ -1,7 +1,7 @@
 <script setup>
-import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
-import SisdaiControlDeslizante from "@centrogeomx/sisdai-componentes/src/componentes/control-deslizante/SisdaiControlDeslizante.vue";
-import { ref } from "vue";
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+import SisdaiControlDeslizante from '@centrogeomx/sisdai-componentes/src/componentes/control-deslizante/SisdaiControlDeslizante.vue';
+import { ref } from 'vue';
 
 const reporteModal = ref(null);
 const controlDeslizante = ref(null);
@@ -11,47 +11,47 @@ function enfocarAreaTexto() {
   areaTextoRef.value.focus();
 }
 
-const mensaje = ref("");
+const mensaje = ref('');
 const mensajes = ref([
   {
     id: 0,
-    actor: "AI",
-    message: "Hola, ¿En qué te puedo ayudar hoy?",
+    actor: 'AI',
+    message: 'Hola, ¿En qué te puedo ayudar hoy?',
     reporte: false,
   },
   {
     id: 1,
-    actor: "Humano",
+    actor: 'Humano',
     // message: "Por favor, cuéntame una historia",
     message:
-      "¿Cuáles serían los principales retos en el uso de estas tecnologías de monitoreo, considerando tanto la cobertura espacial como la integración de datos?",
+      '¿Cuáles serían los principales retos en el uso de estas tecnologías de monitoreo, considerando tanto la cobertura espacial como la integración de datos?',
     reporte: false,
   },
   {
     id: 2,
-    actor: "AI",
+    actor: 'AI',
     // message: "Era hace una vez...",
     message:
-      "Hasta ahora hemos identificado que los principales retos en el uso de tecnologías para monitoreo marino están relacionados con la baja cobertura de sensores en áreas clave de biodiversidad, como el Arrecife Alacranes y la costa norte de Quintana Roo. También se ha detectado una limitada integración de datos entre plataformas locales e internacionales, lo cual dificulta el análisis comparativo y la toma de decisiones.",
+      'Hasta ahora hemos identificado que los principales retos en el uso de tecnologías para monitoreo marino están relacionados con la baja cobertura de sensores en áreas clave de biodiversidad, como el Arrecife Alacranes y la costa norte de Quintana Roo. También se ha detectado una limitada integración de datos entre plataformas locales e internacionales, lo cual dificulta el análisis comparativo y la toma de decisiones.',
     reporte: true,
   },
 ]);
 
 const submitMensaje = () => {
-  if (mensaje.value === "") return;
-  mensajes.value.push({ actor: "Humano", message: mensaje.value });
-  mensaje.value = "";
+  if (mensaje.value === '') return;
+  mensajes.value.push({ actor: 'Humano', message: mensaje.value });
+  mensaje.value = '';
 };
 const generaIdAleatorio = (el) => {
   return el + Math.random().toString(36).substring(2);
 };
-const idAleatorio = generaIdAleatorio("areatexto-");
-const idAleatorioCD = generaIdAleatorio("controldeslizante-");
+const idAleatorio = generaIdAleatorio('areatexto-');
+const idAleatorioCD = generaIdAleatorio('controldeslizante-');
 </script>
 
 <template>
   <div class="grid">
-    <div class="columna-2"/>
+    <div class="columna-2" />
 
     <div class="columna-12">
       <div class="contenedor-chat p-y-3">
@@ -61,23 +61,13 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
               <div :class="m.actor == 'Humano' ? 'p-y-2 ' : ''">
                 <div
                   class="contenedor-log-contenido"
-                  :style="
-                    m.actor == 'Humano' ? 'flex-direction:row-reverse' : ''
-                  "
+                  :style="m.actor == 'Humano' ? 'flex-direction:row-reverse' : ''"
                 >
                   <div>
                     <span
                       class="pictograma-grande p-1 borde-redondeado-8"
-                      :class="
-                        m.actor == 'Humano'
-                          ? 'pictograma-persona'
-                          : 'pictograma-bot'
-                      "
-                      style="
-                        background-color: var(
-                          --boton-primario-deshabilitado-fondo
-                        );
-                      "
+                      :class="m.actor == 'Humano' ? 'pictograma-persona' : 'pictograma-bot'"
+                      style="background-color: var(--boton-primario-deshabilitado-fondo)"
                     />
                   </div>
                   <div>
@@ -85,9 +75,7 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
                     <p
                       class="m-0"
                       :class="
-                        m.actor == 'Humano'
-                          ? 'fondo-color-neutro p-2 borde-redondeado-20'
-                          : ''
+                        m.actor == 'Humano' ? 'fondo-color-neutro p-2 borde-redondeado-20' : ''
                       "
                       :style="m.actor == 'Humano' ? 'max-width: 592px' : ''"
                     >
@@ -97,8 +85,8 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
                     <!-- Reporte -->
                     <div v-if="m.actor == 'AI' && m.reporte" class="">
                       <p>
-                        ¿Te gustaría que genere un reporte con esta información
-                        o prefieres seguir consultando?
+                        ¿Te gustaría que genere un reporte con esta información o prefieres seguir
+                        consultando?
                       </p>
                       <div class="flex">
                         <!-- Abril modal -->
@@ -109,10 +97,7 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
                           @click="reporteModal?.abrirModal()"
                         >
                           Generar reporte
-                          <span
-                            class="pictograma-reporte"
-                            aria-hidden="true"
-                          />
+                          <span class="pictograma-reporte" aria-hidden="true" />
                         </button>
                         <!-- Enfocar Area Texto -->
                         <button
@@ -122,10 +107,7 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
                           @click="enfocarAreaTexto()"
                         >
                           Seguir consultando
-                          <span
-                            class="pictograma-actualizar"
-                            aria-hidden="true"
-                          />
+                          <span class="pictograma-actualizar" aria-hidden="true" />
                         </button>
                       </div>
                     </div>
@@ -137,9 +119,7 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
 
           <div class="contenedor-area-texto">
             <form class="formulario-area-texto">
-              <label :for="idAleatorio" class="a11y-solo-lectura">
-                Nombre de la etiqueta
-              </label>
+              <label :for="idAleatorio" class="a11y-solo-lectura"> Nombre de la etiqueta </label>
               <textarea
                 :id="idAleatorio"
                 ref="areaTextoRef"
@@ -166,33 +146,28 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
       </div>
     </div>
 
-    <div class="columna-2"/>
+    <div class="columna-2" />
   </div>
   <!-- Modal nuevo chat -->
   <ClientOnly>
     <SisdaiModal ref="reporteModal">
       <template #encabezado>
         <h2>
-          {{
-            controlDeslizante?.valor_seleccionado < 100
-              ? "Creando reporte"
-              : "Reporte listo"
-          }}
+          {{ controlDeslizante?.valor_seleccionado < 100 ? 'Creando reporte' : 'Reporte listo' }}
         </h2>
       </template>
 
       <template #cuerpo>
         <div>
           <p v-if="controlDeslizante?.valor_seleccionado < 100">
-            Tu archivo se está creando espera a que la barra de progreso se
-            complete
+            Tu archivo se está creando espera a que la barra de progreso se complete
           </p>
           <div
             v-if="controlDeslizante?.valor_seleccionado < 100"
             class="fondo-color-informacion p-x-2 p-y-1 borde borde-color-informacion borde-redondeado-20"
           >
             <p class="texto-color-informacion">
-              <span class="pictograma-informacion"/>
+              <span class="pictograma-informacion" />
               Verifica siempre los datos antes de usarlos.
             </p>
           </div>
@@ -201,7 +176,7 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
             class="fondo-color-confirmacion p-x-2 p-y-1 borde borde-color-confirmacion borde-redondeado-20"
           >
             <p class="texto-color-confirmacion">
-              <span class="pictograma-aprobado"/>
+              <span class="pictograma-aprobado" />
               Tu reporte está listo para descagar
             </p>
           </div>
@@ -218,18 +193,12 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
                 :val_entrada="90"
                 step="10"
                 @blur="false"
-                @update:val_entrada="
-                  ($event) => (controlDeslizante.valor_seleccionado = $event)
-                "
+                @update:val_entrada="($event) => (controlDeslizante.valor_seleccionado = $event)"
               />
             </ClientOnly>
             <div class="flex flex-contenido-final">
               <label :for="idAleatorioCD"
-                >{{
-                  controlDeslizante?.valor_seleccionado < 100
-                    ? "Progreso"
-                    : "Completado"
-                }}
+                >{{ controlDeslizante?.valor_seleccionado < 100 ? 'Progreso' : 'Completado' }}
                 {{ controlDeslizante?.valor_seleccionado }}%</label
               >
             </div>

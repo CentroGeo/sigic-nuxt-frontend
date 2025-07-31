@@ -1,5 +1,5 @@
 <script setup>
-import { tooltipContent } from "~/utils/consulta.js";
+import { tooltipContent } from '~/utils/consulta.js';
 const selectedStore = useSelectedResourcesStore();
 const props = defineProps({
   selectedElement: {
@@ -46,10 +46,7 @@ if (!selectedStore.shownFiles[resourceType.value]) {
             aria-label="Mostrar información"
             type="button"
           >
-            <span
-              class="pictograma-informacion pictograma-mediano"
-              aria-hidden="true"
-            />
+            <span class="pictograma-informacion pictograma-mediano" aria-hidden="true" />
           </button>
 
           <button
@@ -58,10 +55,7 @@ if (!selectedStore.shownFiles[resourceType.value]) {
             type="button"
             @click="selectedStore.raiseIndex(selectedElement, resourceType)"
           >
-            <span
-              class="pictograma-subir-capa pictograma-mediano"
-              aria-hidden="true"
-            />
+            <span class="pictograma-subir-capa pictograma-mediano" aria-hidden="true" />
           </button>
 
           <button
@@ -70,10 +64,7 @@ if (!selectedStore.shownFiles[resourceType.value]) {
             type="button"
             @click="selectedStore.lowerIndex(selectedElement, resourceType)"
           >
-            <span
-              class="pictograma-bajar-capa pictograma-mediano"
-              aria-hidden="true"
-            />
+            <span class="pictograma-bajar-capa pictograma-mediano" aria-hidden="true" />
           </button>
         </div>
       </div>

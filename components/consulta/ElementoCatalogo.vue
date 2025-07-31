@@ -172,7 +172,7 @@ onUnmounted(() => {
 <template>
   <div :id="`elemento-${catalogueElement.uuid}`" ref="rootEl" class="m-x-5 m-y-2">
     <div class="tarjeta-elemento" @click="selectElement(resourceType, catalogueElement)">
-      <input :id="`checkbox-${catalogueElement.uuid}`" v-model="isChecked" type="checkbox" >
+      <input :id="`checkbox-${catalogueElement.uuid}`" v-model="isChecked" type="checkbox" />
       <label :for="catalogueElement.uuid">{{ catalogueElement.title }}</label>
     </div>
 

@@ -7,7 +7,7 @@ defineProps({
    */
   etiqueta: {
     type: String,
-    default: "",
+    default: '',
   },
 
   /**
@@ -30,11 +30,11 @@ defineProps({
 </template>
 
 <style lang="scss">
-body[data-tema="claro"],
+body[data-tema='claro'],
 :root {
   --fondo-primario: var(--color-primario-1);
 }
-body[data-tema="oscuro"] {
+body[data-tema='oscuro'] {
   --fondo-primario: var(--color-primario-4);
 }
 

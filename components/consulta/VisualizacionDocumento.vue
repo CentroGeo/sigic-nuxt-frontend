@@ -1,15 +1,15 @@
 <script setup>
-import { ref, watch, nextTick, onBeforeUnmount } from "vue";
+import { ref, watch, nextTick, onBeforeUnmount } from 'vue';
 
 const resourcesStore = useSelectedResourcesStore();
-const resourceType = "document";
+const resourceType = 'document';
 
 const urlEmbebido = ref(null);
 const embedRef = ref(null);
 
 // Esto es por si ya había un documento seleccionado
 if (resourcesStore.shownFiles[resourceType]) {
-  urlEmbebido.value = resourcesStore.shownFiles[resourceType]["embed_url"];
+  urlEmbebido.value = resourcesStore.shownFiles[resourceType]['embed_url'];
 }
 
 let resizeObserver;
@@ -55,7 +55,7 @@ onBeforeUnmount(() => {
       :src="urlEmbebido"
       type="application/pdf"
       class="documento-embebido"
-    >
+    />
   </div>
 </template>
 

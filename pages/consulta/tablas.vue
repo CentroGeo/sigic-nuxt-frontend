@@ -1,6 +1,6 @@
 <script setup>
 const resourcesStore = useSelectedResourcesStore();
-const resourceType = "dataTable";
+const resourceType = 'dataTable';
 
 const paginaActual = ref(0);
 const tamanioPagina = 10;
@@ -53,11 +53,7 @@ watch(
         <h1>No hay seleccion</h1>
       </div>
       <div v-else>
-        <UiTablaAccesible
-          :variables="variables"
-          :datos="datos"
-          :caption="'una descripción'"
-        />
+        <UiTablaAccesible :variables="variables" :datos="datos" :caption="'una descripción'" />
         <UiPaginador
           :total-paginas="Math.ceil(totalFeatures / tamanioPagina)"
           @cambio="paginaActual = $event"

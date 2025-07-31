@@ -9,10 +9,7 @@
       <main id="principal" class="contenedor m-b-10 m-y-3">
         <div class="alineacion-izquierda ancho-lectura">
           <div class="flex">
-            <nuxt-link
-              to="/catalogo/mis-archivos"
-              aria-label="regresar a mis archivos"
-            >
+            <nuxt-link to="/catalogo/mis-archivos" aria-label="regresar a mis archivos">
               <span
                 class="pictograma-flecha-izquierda pictograma-mediano texto-color-acento"
                 aria-hidden="true"
@@ -25,14 +22,10 @@
             <div class="columna-16">
               <h2>nombre de la capa.json</h2>
               <div class="flex">
-                <nuxt-link
-                  to="/catalogo/mis-archivos/editar-metadatos"
-                  exact-path
+                <nuxt-link to="/catalogo/mis-archivos/editar-metadatos" exact-path
                   >Metadatos</nuxt-link
                 >
-                <nuxt-link to="/catalogo/mis-archivos/editar-estilo"
-                  >Estilo</nuxt-link
-                >
+                <nuxt-link to="/catalogo/mis-archivos/editar-estilo">Estilo</nuxt-link>
               </div>
               <h2>Estilo</h2>
               <p><b>Estilo, solo archivos .sld</b></p>
@@ -55,9 +48,7 @@
                     <b> Archivo cargado correctamente </b>
                   </div>
                   <p>Nombre del estilo de la capa.sld</p>
-                  <nuxt-link to="/catalogo/mis-archivos">
-                    Ver en Mis archivos
-                  </nuxt-link>
+                  <nuxt-link to="/catalogo/mis-archivos"> Ver en Mis archivos </nuxt-link>
                 </div>
               </div>
             </div>

@@ -4,12 +4,12 @@ const props = defineProps({
   datos: { type: Array, default: Array },
   caption: {
     type: String,
-    default: "",
+    default: '',
   },
 });
 
 function generaIdAleatorio() {
-  return "id-" + Math.random().toString(36).substring(2);
+  return 'id-' + Math.random().toString(36).substring(2);
 }
 const idAleatorio = generaIdAleatorio();
 </script>
@@ -34,17 +34,13 @@ const idAleatorio = generaIdAleatorio();
         </tr>
       </thead>
       <tbody>
-        <tr
-          v-for="(datum, d) in datos"
-          :id="`${idAleatorio}-ren-${d}`"
-          :key="d"
-        >
+        <tr v-for="(datum, d) in datos" :id="`${idAleatorio}-ren-${d}`" :key="d">
           <td
             v-for="(variable, v) in variables"
             :key="v"
             :headers="`${idAleatorio}-ren-${d} ${idAleatorio}-col-${v}`"
           >
-            {{ datum[variable]?.toLocaleString("en") }}
+            {{ datum[variable]?.toLocaleString('en') }}
           </td>
         </tr>
       </tbody>

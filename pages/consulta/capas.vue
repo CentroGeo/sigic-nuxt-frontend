@@ -1,18 +1,12 @@
 <script setup>
-import {
-  SisdaiCapaWms,
-  SisdaiCapaXyz,
-  SisdaiMapa,
-} from "@centrogeomx/sisdai-mapas";
-import { exportarMapa as exportarMapaPNG } from "@centrogeomx/sisdai-mapas/src/utiles";
+import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
+import { exportarMapa as exportarMapaPNG } from '@centrogeomx/sisdai-mapas/src/utiles';
 
-const resourceType = "dataLayer";
+const resourceType = 'dataLayer';
 
-const extensionNacional = "-118.3651,14.5321,-86.7104,32.7187";
+const extensionNacional = '-118.3651,14.5321,-86.7104,32.7187';
 const storeConsulta = useConsultaStore();
-const extensionMapa = computed(
-  () => storeConsulta.ajustarExtensionMapa || extensionNacional
-);
+const extensionMapa = computed(() => storeConsulta.ajustarExtensionMapa || extensionNacional);
 
 const config = useRuntimeConfig();
 const storeSelected = useSelectedResourcesStore();
@@ -20,10 +14,7 @@ const randomNum = ref(0);
 
 const linkExportaMapa = ref();
 function exportarMapa() {
-  exportarMapaPNG(
-    document.querySelectorAll(".mapa .ol-viewport").item(0),
-    linkExportaMapa.value
-  );
+  exportarMapaPNG(document.querySelectorAll('.mapa .ol-viewport').item(0), linkExportaMapa.value);
 }
 
 const attributos = reactive({});
@@ -48,18 +39,13 @@ function addAttribute(pk) {
 
       attributos[pk] = {
         params: {
-          propertyName: columnas.join(","),
+          propertyName: columnas.join(','),
         },
         // attribute_label
         contenido: (data) =>
           columnas
-            .map(
-              (columna) =>
-                `<p><b>${etiquetas[columna] || columna}</b>: ${
-                  data[columna]
-                }</p>`
-            )
-            .join(""),
+            .map((columna) => `<p><b>${etiquetas[columna] || columna}</b>: ${data[columna]}</p>`)
+            .join(''),
       };
       console.log(attributos[pk]);
     })
@@ -102,9 +88,9 @@ function cuadroInformativo(pk) {
 
   return {
     params: {
-      propertyName: "nombre",
+      propertyName: 'nombre',
     },
-    contenido: (d) => `<p><b>nombre</b>: ${d["nombre"]}</p>`,
+    contenido: (d) => `<p><b>nombre</b>: ${d['nombre']}</p>`,
   };
 }
 </script>
@@ -129,9 +115,7 @@ function cuadroInformativo(pk) {
           <SisdaiCapaXyz />
 
           <SisdaiCapaWms
-            v-for="(capa, index) in storeSelected.selectedResources[
-              resourceType
-            ]"
+            v-for="(capa, index) in storeSelected.selectedResources[resourceType]"
             :key="`${capa.uuid}_${randomNum}`"
             :fuente="`${config.public.geoserverUrl}/wms?`"
             :capa="capa.alternate"

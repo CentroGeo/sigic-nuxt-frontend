@@ -1,33 +1,31 @@
 <script setup>
-import { ref } from "vue";
+import { ref } from 'vue';
 
 const storeIA = useIAStore();
 
 const proyecto = {
   id: 0,
-  titulo: "Biodiversidad de ecosistemas marinos",
+  titulo: 'Biodiversidad de ecosistemas marinos',
   descripcion:
-    "Este proyecto de investigación científica se centra en el estudio de la biodiversidad en los ecosistemas marinos de la costa. A través de la recolección de muestras y el análisis genético, buscamos comprender cómo las variaciones en la temperatura del agua afect...",
+    'Este proyecto de investigación científica se centra en el estudio de la biodiversidad en los ecosistemas marinos de la costa. A través de la recolección de muestras y el análisis genético, buscamos comprender cómo las variaciones en la temperatura del agua afect...',
   numero_contextos: 0,
   numero_fuentes: 9,
-  estado: "Privado",
+  estado: 'Privado',
 };
 
 const contextos = ref([
   {
     id: 0,
-    tarjeta_img:
-      "https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/kale-1.jpg",
-    tarjeta_titulo: "Tecnologías para monitoreo marino",
-    tarjeta_etiqueta: "5 Fuentes",
+    tarjeta_img: 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/kale-1.jpg',
+    tarjeta_titulo: 'Tecnologías para monitoreo marino',
+    tarjeta_etiqueta: '5 Fuentes',
     numero_fuentes: 5,
   },
   {
     id: 1,
-    tarjeta_img:
-      "https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/becka.jpg",
-    tarjeta_titulo: "Zonas de riesgo ecológico marino",
-    tarjeta_etiqueta: "6 Fuentes",
+    tarjeta_img: 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/becka.jpg',
+    tarjeta_titulo: 'Zonas de riesgo ecológico marino',
+    tarjeta_etiqueta: '6 Fuentes',
     numero_fuentes: 6,
   },
 ]);
@@ -46,12 +44,10 @@ const contextos = ref([
               >
                 <span>{{ proyecto.estado }}</span>
                 <!-- TODO: agregar icono de para privado/publico -->
-                <span class="pictograma-privado" aria-hidden="true"/>
+                <span class="pictograma-privado" aria-hidden="true" />
               </p>
             </div>
-            <button class="boton-primario boton-chico" type="button">
-              Configurar proyecto
-            </button>
+            <button class="boton-primario boton-chico" type="button">Configurar proyecto</button>
           </div>
         </div>
       </div>
@@ -66,9 +62,7 @@ const contextos = ref([
         </div>
       </div>
       <div class="grid">
-        <div
-          class="flex flex-contenido-separado contexto-encabezado columna-16"
-        >
+        <div class="flex flex-contenido-separado contexto-encabezado columna-16">
           <h4>Contextos:</h4>
           <NuxtLink
             class="boton boton-secundario boton-chico"
@@ -83,25 +77,14 @@ const contextos = ref([
         <div class="columna-16">
           <div v-if="storeIA.existeContexto">
             <div class="flex m-y-3">
-              <div
-                v-for="contexto in contextos"
-                :key="contexto.id"
-                class="columna-4"
-              >
+              <div v-for="contexto in contextos" :key="contexto.id" class="columna-4">
                 <div class="tarjeta">
-                  <img
-                    class="tarjeta-imagen"
-                    :src="contexto.tarjeta_img"
-                    alt=""
-                  >
+                  <img class="tarjeta-imagen" :src="contexto.tarjeta_img" alt="" />
                   <div class="tarjeta-cuerpo">
                     <p class="tarjeta-titulo">
                       {{ contexto.tarjeta_titulo }}
                     </p>
-                    <UiNumeroElementos
-                      :numero="contexto.numero_fuentes"
-                      etiqueta="Fuentes"
-                    />
+                    <UiNumeroElementos :numero="contexto.numero_fuentes" etiqueta="Fuentes" />
                   </div>
                   <div class="tarjeta-pie">
                     <nuxt-link
@@ -112,11 +95,7 @@ const contextos = ref([
                       Iniciar chat
                       <span class="pictograma-chat" aria-hidden="true" />
                     </nuxt-link>
-                    <nuxt-link
-                      class="boton-secundario boton-chico"
-                      type="button"
-                      to="#"
-                    >
+                    <nuxt-link class="boton-secundario boton-chico" type="button" to="#">
                       Editar contexto
                       <span class="pictograma-editar" aria-hidden="true" />
                     </nuxt-link>
@@ -128,13 +107,10 @@ const contextos = ref([
           <div v-else class="flex flex-contenido-centrado">
             <div class="columna-8">
               <div class="nota fondo-color-neutro p-2 borde-redondeado-8 m-t-0">
-                <h6 class="m-t-0 m-b-2">
-                  Aún no hay contextos en este proyecto.
-                </h6>
+                <h6 class="m-t-0 m-b-2">Aún no hay contextos en este proyecto.</h6>
                 <p class="m-y-0">
-                  Para comenzar, haz clic en "Crear contexto" y selecciona las
-                  fuentes que quieres usar. Esto te permitirá activar el
-                  análisis dentro del chat.
+                  Para comenzar, haz clic en "Crear contexto" y selecciona las fuentes que quieres
+                  usar. Esto te permitirá activar el análisis dentro del chat.
                 </p>
               </div>
             </div>
@@ -154,10 +130,7 @@ const contextos = ref([
                 Agregar del catálogo
                 <span class="pictograma-agregar" aria-hidden="true" />
               </button>
-              <button
-                class="boton-pictograma boton-secundario"
-                aria-label="Subir archivos"
-              >
+              <button class="boton-pictograma boton-secundario" aria-label="Subir archivos">
                 Subir archivos
                 <span class="pictograma-archivo-subir" aria-hidden="true" />
               </button>

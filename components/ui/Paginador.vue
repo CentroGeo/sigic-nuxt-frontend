@@ -6,13 +6,13 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["cambio"]);
+const emit = defineEmits(['cambio']);
 
 const pagina = ref(0);
 
 // Emitimos cada que cambia internamente
 watch(pagina, (nuevaPagina) => {
-  emit("cambio", nuevaPagina);
+  emit('cambio', nuevaPagina);
 });
 
 const irAPagina = (nueva) => {
@@ -38,14 +38,14 @@ const cambiarPorInput = (e) => {
       class="boton-secundario boton-chico boton-pictograma"
       @click="irAlInicio"
     >
-      <span class="pictograma-angulo-doble-arriba"/>
+      <span class="pictograma-angulo-doble-arriba" />
     </button>
     <button
       :disabled="pagina <= 0"
       class="boton-secundario boton-chico boton-pictograma m-x-1"
       @click="irAnterior"
     >
-      <span class="pictograma-angulo-arriba"/>
+      <span class="pictograma-angulo-arriba" />
     </button>
     <input
       type="number"
@@ -53,7 +53,7 @@ const cambiarPorInput = (e) => {
       min="1"
       :max="totalPaginas"
       @change="cambiarPorInput"
-    >
+    />
     <span> / {{ totalPaginas }}</span>
 
     <button
@@ -61,14 +61,14 @@ const cambiarPorInput = (e) => {
       :disabled="pagina >= totalPaginas - 1"
       @click="irSiguiente"
     >
-      <span class="pictograma-angulo-abajo"/>
+      <span class="pictograma-angulo-abajo" />
     </button>
     <button
       class="boton-secundario boton-chico boton-pictograma"
       :disabled="pagina >= totalPaginas - 1"
       @click="irAlFinal"
     >
-      <span class="pictograma-angulo-doble-abajo"/>
+      <span class="pictograma-angulo-doble-abajo" />
     </button>
   </div>
 </template>
