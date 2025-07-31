@@ -1,116 +1,103 @@
 <script setup>
 const ejemplo = ref({});
-const datos = ref({});
+
+const formData = ref(new FormData());
 
 // para obtener el token para bearer
 const { data } = useAuth();
+const datosArriba = ref(false);
+const datos = ref({});
 
 const onDropZone = ref(null);
 const { files } = useDropZone(onDropZone, { onDrop });
 async function onDrop() {
-  // function onDrop() {
-  // console.log(files.value);
-  if (files.value) {
-    // TODO: remover cuando esté back, asignar una copia al store
-    datos.value = files.value;
-    datosArriba = true;
-
-    const formData = new FormData();
-    let isValid = false;
-    files.value.forEach((file) => {
-      // TODO: revisar bien los MIME de los archivos válidos
-      if (
-        file.type === "application/vnd.geo+json" ||
-        file.type === "application/json" ||
-        file.type === "application/geo+json" ||
-        file.type === "application/geopackage+sqlite3" ||
-        file.type === "text/csv" ||
-        file.type === "application/xml" ||
-        file.type === "application/pdf" ||
-        file.type === "image/jpeg" ||
-        file.type === "image/png" ||
-        file.name.slice(-4) === ".sld"
-      ) {
-        // console.log(file);
-        formData.append(
-          "file",
-          file,
-          file.name.replaceAll(" ", "-").toLocaleLowerCase()
-        );
-        isValid = true;
-      } else {
-        isValid = false;
-        console.log("Archivo inválido");
-      }
-    });
-
-    if (isValid) {
-      console.log(formData);
-      await $fetch("/api/subirSLD", {
-        method: "POST",
-        body: formData,
-      });
-    }
-  }
-}
-
-let datosArriba = false;
-
-const { open, onChange } = useFileDialog();
-onChange(async (files) => {
-  // imprime el archivo que se suba mediante el diálogo
+  // imprime el archivo que se suba mediante el drop
   console.log(files);
 
   // obtén el token para el bearer
   const token = data.value?.accessToken;
   console.log("token", token);
 
-  const formData = new FormData();
+  if (files.value) {
+    // TODO: remover cuando esté back, asignar una copia al store
+    datos.value = files.value;
+    datosArriba.value = true;
+
+    // let isValid = false;
+    files.value.forEach((file) => {
+      formData.value.append("base_file", file);
+      formData.value.append("sld_file", file);
+      // TODO: cambiar el layerSlug según la capa
+      // formData.append('dataset_title', layerSlug);
+      formData.value.append("dataset_title", "geonode:coordinaciones");
+      formData.value.append("style_upload_form", "true");
+      formData.value.append("permissions", JSON.stringify({}));
+      formData.value.append("charset", "undefined");
+      // token importante
+      formData.value.append("token", token);
+      // TODO: revisar bien los MIME de los archivos válidos
+      // if (
+      //   file.type === "application/vnd.geo+json" ||
+      //   file.type === "application/json" ||
+      //   file.type === "application/geo+json" ||
+      //   file.type === "application/geopackage+sqlite3" ||
+      //   file.type === "text/csv" ||
+      //   file.type === "application/xml" ||
+      //   file.type === "application/pdf" ||
+      //   file.type === "image/jpeg" ||
+      //   file.type === "image/png" ||
+      //   file.name.slice(-4) === ".sld"
+      // ) {
+      //   // console.log(file);
+      //   formData.append(
+      //     "file",
+      //     file,
+      //     file.name.replaceAll(" ", "-").toLocaleLowerCase()
+      //   );
+      //   isValid = true;
+      // } else {
+      //   isValid = false;
+      //   console.log("Archivo inválido");
+      // }
+    });
+
+    // if (isValid) {
+    //   console.log(formData);
+    //   await $fetch("/api/subirSLD", {
+    //     method: "POST",
+    //     body: formData,
+    //   });
+    // }
+  }
+}
+
+const { open, onChange } = useFileDialog();
+onChange(async (files) => {
+  // imprime el archivo que se suba mediante el diálogo
+  // console.log("files", files);
+
+  // obtén el token para el bearer
+  const token = data.value?.accessToken;
+  // console.log("token", token);
+
+  datos.value = files;
+  datosArriba.value = true;
+
   // por cada conjunto de Files asigna las propiedades
   // según el tipo de archivo. acá es para SLD
   for (let x = 0; x < files.length; x++) {
-    formData.append("base_file", files[x]);
-    formData.append("sld_file", files[x]);
+    formData.value.append("base_file", files[x]);
+    formData.value.append("sld_file", files[x]);
     // TODO: cambiar el layerSlug según la capa
     // formData.append('dataset_title', layerSlug);
-    formData.append("dataset_title", "geonode:coordinaciones");
-    formData.append("style_upload_form", "true");
-    formData.append("permissions", JSON.stringify({}));
-    formData.append("charset", "undefined");
+    formData.value.append("dataset_title", "geonode:coordinaciones");
+    formData.value.append("style_upload_form", "true");
+    formData.value.append("permissions", JSON.stringify({}));
+    formData.value.append("charset", "undefined");
     // token importante
-    formData.append("token", token);
+    formData.value.append("token", token);
   }
-  console.log("formData", formData);
-
-  // const upRes = await fetch("http://10.2.102.239/upload/uploads/upload", {
-  //   method: "POST",
-  //   headers: {
-  //     // "X-CSRFToken": getCookie("csrftoken"),
-  //     // Token: "RmL4MRAwZbBXtuLREQ4GGEFR8LlwHQzq",
-  //     // "X-CSRFToken": "RmL4MRAwZbBXtuLREQ4GGEFR8LlwHQzq",
-  //     // Authorization: `Bearer ${token}`,
-  //     "X-Requested-With": "XMLHttpRequest",
-  //   },
-  //   // credentials: "include",
-  //   body: formData,
-  //   mode: "cors",
-  // });
-  // console.log("upRes", upRes);
-  // if (!upRes.ok) {
-  //   throw new Error(`Upload falló: ${upRes.status}`);
-  // }
-  // const { execution_id } = await upRes.json();
-  // console.log("execution_id", execution_id);
-  // console.log("response status:", upRes.status);
-  // const json = await upRes.json();
-  // console.log("json:", json);
-
-  const res = await fetch("/api/subirSLD", {
-    method: "POST",
-    body: formData,
-  });
-  const json = await res.json();
-  // console.log("json", json);
+  // console.log("formData.value", formData.value);
 
   // TODO: remover cuando esté back, asignar una copia al store
   // datos.value = files;
@@ -220,6 +207,7 @@ onChange(async (files) => {
             aria-label="Guardar"
             type="button"
             :disabled="!datosArriba"
+            @click="$emit('guardarArchivo', formData)"
           >
             Guardar
           </button>
