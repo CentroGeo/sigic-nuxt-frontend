@@ -182,7 +182,7 @@ export async function downloadVectorData(resource, format) {
     const downloadRequest = await fetch(linkStatusLocation);
     const downloadResult = await downloadRequest.text();
     if (downloadResult.includes('Process succeeded')) {
-      console.warn('se logró en el intento numero ', attempt);
+      console.warn('succeeded on attempt number ', attempt);
       const parser2 = new DOMParser();
       const parsedDownloadResult = parser2.parseFromString(downloadResult, 'text/xml');
       const downloadHTML = parsedDownloadResult.getElementsByTagName('wps:Reference')[0];
