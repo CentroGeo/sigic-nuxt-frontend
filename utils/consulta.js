@@ -285,22 +285,38 @@ export function setDocView(resourceType, resources, paramsResources) {
 }
 export async function setUrlLayers(resources) {
   const resourcesStore = useSelectedResourcesStore();
-
   console.log("Se cambió la url: ", resources);
   const router = useRouter();
   const route = useRoute();
   let params = [];
   let indicator = "alternate";
+  let opacidades = Object.keys(resourcesStore.shownFiles.dataLayer.opacity);
+  let visibilidades = Object.keys(
+    resourcesStore.shownFiles.dataLayer.visibility
+  );
   params = resources.map((resource) => {
-    return `${resource[indicator]}`;
+    let indOpacity = 1;
+    let indVisibility = 1;
+    if (opacidades.includes(resource.alternate)) {
+      indOpacity =
+        resourcesStore.shownFiles.dataLayer.opacity[resource.alternate] / 100;
+    }
+    if (visibilidades.includes(resource.alternate)) {
+      indVisibility = resourcesStore.shownFiles.dataLayer.visibility[
+        resource.alternate
+      ]
+        ? 1
+        : 0;
+    }
+    return `${resource[indicator]},${indOpacity},${indVisibility}`;
   });
 
   const paramsString = params.join(";");
   await router.push({
     path: route.path,
     query: {
-      //centro: resourcesStore.shownFiles.dataLayer.centro.join(","),
-      //acercamiento: resourcesStore.shownFiles.dataLayer.acercamiento,
+      centro: resourcesStore.shownFiles.dataLayer.centro.join(","),
+      acercamiento: resourcesStore.shownFiles.dataLayer.acercamiento,
       recursos: paramsString,
     },
   });

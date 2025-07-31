@@ -107,6 +107,9 @@ function cuadroInformativo(pk) {
     contenido: (d) => `<p><b>nombre</b>: ${d["nombre"]}</p>`,
   };
 }
+function updateMapParams(centro, acercamiento) {
+  storeSelected.setMapViewParams(centro, acercamiento);
+}
 
 // Este watcher sirve para ajustar los índices de las capas montadas
 // cuando estas terminan de cargarse pero solo funciona cuando recién se montan las capas.
@@ -137,6 +140,12 @@ watch(isFinishedLoading, () => {
             extension: extensionMapa,
           }"
           @click-centrar="storeConsulta.ajustarExtensionMapa = undefined"
+          @al-mover-vista="
+            ({ acercamiento, centro }) => {
+              console.log(acercamiento, centro);
+              updateMapParams(centro, acercamiento);
+            }
+          "
         >
           <SisdaiCapaXyz />
 

@@ -8,15 +8,22 @@ const props = defineProps({
   },
 });
 const { selectedElement } = toRefs(props);
-//const resourcesStore = useSelectedResourcesStore();
+const resourcesStore = useSelectedResourcesStore();
 const controlOpacidad = ref();
 const modalOpacidad = ref(null);
 function abrirModalOpacidad() {
   modalOpacidad.value?.abrirModal();
 }
+const valorOpacidad = ref();
 
 defineExpose({
   abrirModalOpacidad,
+});
+watch(valorOpacidad, () => {
+  resourcesStore.updateLayerOpacity(
+    selectedElement.value.alternate,
+    valorOpacidad.value
+  );
 });
 </script>
 <template>
@@ -37,7 +44,10 @@ defineExpose({
             step="10"
             ref="controlOpacidad"
             @update:val_entrada="
-              ($event) => (controlOpacidad.valor_seleccionado = $event)
+              ($event) => {
+                controlOpacidad.valor_seleccionado = $event;
+                valorOpacidad = controlOpacidad.valor_seleccionado;
+              }
             "
           >
           </SisdaiControlDeslizante>

@@ -93,7 +93,7 @@ export const useSelectedResourcesStore = defineStore("selectedResources", {
         console.log("ultimo elemento");
       }
     },
-    updateLayerOpasity(alternate, value) {
+    updateLayerOpacity(alternate, value) {
       this.shownFiles.dataLayer.opacity[alternate] = value;
       console.log(this.shownFiles.dataLayer.opacity);
     },
