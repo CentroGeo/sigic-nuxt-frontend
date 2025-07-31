@@ -21,8 +21,12 @@ export async function fetchGeometryType(resource) {
   const res = await fetch(url);
   if (res.ok) {
     const data = await res.json();
-    const geomType = data.features[0]['geometry']['type'];
-    return geomType;
+    if (Array.isArray(data.features) && data.features.length > 0 && data.features[0]?.geometry?.type) {
+      const geomType = data.features[0].geometry.type;
+      return geomType;
+    } else {
+      return 'Unknown';
+    }
   } else {
     return 'Error';
   }
