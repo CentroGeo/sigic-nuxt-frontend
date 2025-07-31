@@ -63,7 +63,7 @@ const ejemplo = ref({});
           </ClientOnly>
 
           <!-- Formulario -->
-          <form>
+          <form class="m-t-3">
             <div class="flex">
               <div class="columna-16">
                 <ClientOnly>

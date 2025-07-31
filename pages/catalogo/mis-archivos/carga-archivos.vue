@@ -53,21 +53,3 @@
     </template>
   </UiLayoutPaneles>
 </template>
-
-<style lang="scss">
-#identificadorUNICO {
-  width: 0.1px;
-  height: 0.1px;
-  opacity: 0;
-  overflow: hidden;
-  position: absolute;
-  z-index: -1;
-}
-#identificadorUNICO + label {
-  display: inline-block;
-  cursor: pointer;
-}
-#identificadorUNICO:focus + label,
-#identificadorUNICO + label:hover {
-}
-</style>

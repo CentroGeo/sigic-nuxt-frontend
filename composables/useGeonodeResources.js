@@ -26,9 +26,6 @@ export function useGeonodeResources({ resourceType } = {}) {
         //"filter{subtype.in}": "raster",
         //"filter{subtype.in}": "vector",
       });
-      // TODO: remover console logs
-      // console.log("dataParams", dataParams);
-      // console.log(`${api}?${dataParams.toString()}`);
       fetch(`${api}?${dataParams.toString()}`, {
         method: "GET",
         /*         headers: {
@@ -38,15 +35,12 @@ export function useGeonodeResources({ resourceType } = {}) {
         }, */
       })
         .then((response) => {
-          // console.log("response", response);
           if (response.ok) return response.json();
           return { resources: [] };
         })
         .then((data) => {
           const resources = data.resources || [];
           allResults = allResults.concat(resources);
-          // console.log("data", data);
-          // console.log("page", page);
           // Revisamos si hay una pagina siguiente
           if (data.links.next && page < 3) {
             // Si la hay, volvemos a solicitar datos

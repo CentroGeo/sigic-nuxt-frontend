@@ -46,7 +46,7 @@ async function onDrop() {
 
     if (isValid) {
       console.log(formData);
-      await $fetch("/api/subirV2", {
+      await $fetch("/api/subirSLD", {
         method: "POST",
         body: formData,
       });

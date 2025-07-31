@@ -1,16 +1,12 @@
 <script setup>
 import { computed } from "vue";
-
 const identificador = idAleatorio();
-
 function idAleatorio() {
   return "campo-" + Math.random().toString(36).substring(2);
 }
-
 defineExpose({
   identificador,
 });
-
 const props = defineProps({
   etiqueta: {
     type: String,
@@ -45,9 +41,7 @@ const props = defineProps({
     default: false,
   },
 });
-
 const emit = defineEmits(["update:modelValue"]);
-
 const modeloCampo = computed({
   get() {
     return props.modelValue;
