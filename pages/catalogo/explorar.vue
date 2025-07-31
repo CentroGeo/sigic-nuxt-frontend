@@ -1,4 +1,5 @@
 <script setup>
+// TODO: integrar los filtros de información
 const resourcesStore = useSelectedResourcesStore();
 
 const recursosTipo = ref("dataLayer");
@@ -85,7 +86,6 @@ watch(
     const documentoOrdenado = sortDateArray(
       recursosFiltradosDocumentos.value
     )[0];
-    console.log(documentoOrdenado);
     documentoMasReciente.value = {
       titulo: documentoOrdenado.title,
       resumen: documentoOrdenado.abstract,
