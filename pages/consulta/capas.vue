@@ -72,8 +72,7 @@ watch(
 
     const ov = arr2.filter((item) => !arr1.includes(item));
     // console.log("Se quitó:", ov);
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-    ov.forEach((resource) => delete attributos[resource]);
+    ov.forEach((resource) => attributos.delete(resource));
 
     // console.log(attributos);
   },
