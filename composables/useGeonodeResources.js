@@ -26,7 +26,7 @@ export function useGeonodeResources({ resourceType } = {}) {
         //"filter{subtype.in}": "raster",
         //"filter{subtype.in}": "vector",
       });
-      await $fetch(`${api}?${dataParams.toString()}`, {
+      await fetch(`${api}?${dataParams.toString()}`, {
         method: 'GET',
         /*         headers: {
           ...(authStatus.value === "authenticated"
