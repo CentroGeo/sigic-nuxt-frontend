@@ -1,6 +1,6 @@
 <script setup>
 definePageMeta({
-  middleware: "sidebase-auth",
+  middleware: ["sidebase-auth", "redireccionar-modulo-catalogo"],
 });
 const ruta = "/catalogo";
 const storeCatalogo = useCatalogoStore();

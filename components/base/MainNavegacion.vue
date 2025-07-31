@@ -4,6 +4,7 @@ import SisdaiNavegacionPrincipal from "@centrogeomx/sisdai-componentes/src/compo
 const { status, signIn, signOut } = useAuth();
 
 const estaLogueado = computed(() => status.value === "authenticated");
+
 async function iniciarSesion() {
   await signIn("keycloak", {
     callbackUrl: "/", // A dónde volver después del login
@@ -49,8 +50,22 @@ async function cerrarSesion() {
         </NuxtLink>
       </li>
       <li>
-        <button v-if="estaLogueado" @click="cerrarSesion">Cerrar sesión</button>
-        <button v-else @click="iniciarSesion">Iniciar sesión</button>
+        <button
+          v-if="estaLogueado"
+          aria-label="Cerrar sesión"
+          type="button"
+          @click="cerrarSesion"
+        >
+          Cerrar sesión
+        </button>
+        <button
+          v-else
+          aria-label="Iniciar sesión"
+          type="button"
+          @click="iniciarSesion"
+        >
+          Iniciar sesión
+        </button>
       </li>
     </ul>
   </SisdaiNavegacionPrincipal>
