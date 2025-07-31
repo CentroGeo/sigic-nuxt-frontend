@@ -1,6 +1,6 @@
 <script setup>
 import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
-import { exportarMapa as exportarMapaPNG } from '@centrogeomx/sisdai-mapas/src/utiles';
+import { exportarHTMLComoPNG as exportarMapaPNG } from '@centrogeomx/sisdai-mapas/funciones';
 
 const resourceType = 'dataLayer';
 
