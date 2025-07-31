@@ -158,7 +158,7 @@ onMounted(() => {
           @click-centrar="storeConsulta.ajustarExtensionMapa = undefined"
           @al-mover-vista="
             ({ acercamiento, centro }) => {
-              console.log(acercamiento, centro);
+              //console.log(acercamiento, centro);
               //storeSelected.setMapViewParams(centro, acercamiento);
             }
           "

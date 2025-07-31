@@ -118,9 +118,9 @@ onMounted(() => {
       setUrlDocs(selectedResources.value, resourceType.value);
     }
   } else if (route.query.recursos) {
-    console.log("se está cargando de ser compartido o se actualizó");
+    //console.log("se está cargando de ser compartido o se actualizó");
   } else {
-    console.log("se está cargando desde cero");
+    //console.log("se está cargando desde cero");
   }
 });
 </script>

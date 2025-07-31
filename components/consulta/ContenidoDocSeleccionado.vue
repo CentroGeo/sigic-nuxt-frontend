@@ -14,19 +14,26 @@ const shownFileUuid = computed(
 );
 const hasGeometry = ref();
 const noGeometry = [-1, -1, 0, 0];
-
-if (resourceType.value === "dataTable") {
-  !selectedElement.value.extent.coords.every(
-    (value, index) => value === noGeometry[index]
-  );
-  console.log(selectedElement.value.extent);
-} else {
-  hasGeometry.value = false;
-}
-
+const mapPreview = ref(null);
 const downloadChild = ref(null);
+
+function notifyMapPreview() {
+  mapPreview.value?.abrirModalMapa();
+}
 function notifyDownloadChild() {
   downloadChild.value?.abrirModalDescarga();
+}
+
+if (resourceType.value === "dataTable") {
+  let a = selectedElement.value.extent.coords.join(",");
+  let b = noGeometry.join(",");
+  if (a === b) {
+    hasGeometry.value = false;
+  } else {
+    hasGeometry.value = true;
+  }
+} else {
+  hasGeometry.value = true;
 }
 </script>
 
@@ -44,6 +51,15 @@ function notifyDownloadChild() {
     </div>
 
     <div class="flex flex-contenido-final">
+      <button
+        v-if="hasGeometry"
+        class="boton-pictograma boton-sin-contenedor-secundario"
+        aria-label="Abrir vista previa"
+        type="button"
+        @click="notifyMapPreview"
+      >
+        <span class="pictograma-mexico" aria-hidden="true"></span>
+      </button>
       <button
         class="boton-pictograma boton-sin-contenedor-secundario"
         aria-label="Borrar selección"
@@ -69,6 +85,7 @@ function notifyDownloadChild() {
     :selected-element="selectedElement"
     :download-type="'individual'"
   />
+  <ConsultaModalMapa ref="mapPreview" :selected-element="selectedElement" />
 </template>
 <style lang="scss" scoped>
 .flex {

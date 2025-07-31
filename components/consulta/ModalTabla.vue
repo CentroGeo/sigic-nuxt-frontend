@@ -7,6 +7,8 @@ const props = defineProps({
   },
 });
 const { selectedElement } = toRefs(props);
+const resourcesStore = useSelectedResourcesStore();
+
 const modalTabla = ref(null);
 const paginaActual = ref(0);
 const tamanioPagina = 10;
@@ -24,6 +26,12 @@ const {
 function abrirModalTabla() {
   modalTabla.value?.abrirModal();
 }
+function openTableView() {
+  console.log(selectedElement.value);
+  resourcesStore.addResource("dataTable", selectedElement.value);
+  resourcesStore.setShownFile("dataTable", selectedElement.value);
+  console.log("Redirije al visor de tablas");
+}
 
 defineExpose({
   abrirModalTabla,
@@ -39,7 +47,7 @@ watch(paginaActual, () => {
 </script>
 <template>
   <ClientOnly>
-    <SisdaiModal ref="modalTabla">
+    <SisdaiModal ref="modalTabla" id="modalTabla">
       <template #encabezado>
         <h1>{{ selectedElement.title }}</h1>
       </template>
@@ -51,6 +59,19 @@ watch(paginaActual, () => {
           @cambio="paginaActual = $event"
         />
       </template>
+
+      <template #pie>
+        <button type="button" class="boton-primario" @click="openTableView">
+          Abrir en Tablas
+        </button>
+        <button type="button" class="boton-primario">Descargar</button>
+      </template>
     </SisdaiModal>
   </ClientOnly>
 </template>
+<style lang="scss" scoped>
+#modalTabla {
+  height: 80%;
+  gap: 0;
+}
+</style>

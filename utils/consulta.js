@@ -236,7 +236,7 @@ export async function downloadVectorData(resource, format) {
 
 export async function setUrlDocs(resources, resourceType) {
   const resourcesStore = useSelectedResourcesStore();
-  console.log("Se cambió la url: ", resources);
+  //console.log("Se cambió la url: ", resources);
   const router = useRouter();
   const route = useRoute();
   let params = [];
@@ -248,7 +248,7 @@ export async function setUrlDocs(resources, resourceType) {
   }
   params = resources.map((resource) => {
     let isSelected = 0;
-    if (resource.uuid === resourcesStore.shownFiles[resourceType].uuid) {
+    if (resource.uuid === resourcesStore.shownFiles[resourceType]?.uuid) {
       isSelected = 1;
     } else {
       isSelected = 0;
