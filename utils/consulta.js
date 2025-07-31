@@ -78,7 +78,7 @@ export async function downloadExcel(resource, format) {
   console.warn(url);
   const anchor = document.createElement('a');
   anchor.href = url;
-  anchor.taget = '_blank';
+  anchor.target = '_blank';
   anchor.download = `${resource.title}.${format}`;
   document.body.appendChild(anchor);
   anchor.click();
