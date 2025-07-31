@@ -210,7 +210,7 @@ export async function downloadVectorData(resource, format) {
   }
   const anchor = document.createElement('a');
   anchor.href = downloadLink;
-  anchor.taget = '_blank';
+  anchor.target = '_blank';
   anchor.download = `${resource.title}.${format}`;
   document.body.appendChild(anchor);
   anchor.click();
