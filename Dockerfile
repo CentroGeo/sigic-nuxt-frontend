@@ -42,9 +42,9 @@ COPY --from=builder /app/package-lock.json .
 
 # Si estamos en desarrollo, instala todo (útil para devtools), sino solo prod deps
 RUN if [ "$NODE_ENV" = "development" ]; then \
-      npm install; \
+      npm i; \
     else \
-      npm ci --omit=dev --omit=optional; \
+      npm i --omit=dev --omit=optional; \
     fi
 
 EXPOSE 3000
