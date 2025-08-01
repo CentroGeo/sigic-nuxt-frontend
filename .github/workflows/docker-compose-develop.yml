@@ -13,6 +13,8 @@ jobs:
     name: Lint Nuxt frontend code
     runs-on: ubuntu-latest
     environment: develop
+    if: github.event_name == 'pull_request'
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -56,12 +58,16 @@ jobs:
           echo "sha=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
           echo "branch=develop" >> $GITHUB_OUTPUT
 
+      - name: Set environment
+        id: env
+        run: echo "NODE_ENV=$([ '${{ github.ref_name }}' = 'main' ] && echo 'production' || echo 'development')" >> $GITHUB_OUTPUT
+
       - name: Build & tag Docker image
         run: |
-          docker build --build-arg NODE_ENV=development \
+          docker build --build-arg NODE_ENV=${{ steps.env.outputs.NODE_ENV }} \
             -t ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.branch }} \
             -t ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.sha }} \
-            -f Dockerfile .
+            -f Dockerfile . 
 
       - name: Push image
         run: |
