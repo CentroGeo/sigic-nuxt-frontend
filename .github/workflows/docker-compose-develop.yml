@@ -1,15 +1,41 @@
-name: CI/CD - Build & Deploy SIGIC Keycloak (develop)
+name: CI & CD - Lint, Build & Deploy SIGIC Nuxt Frontend (develop)
 
 on:
   push:
     branches:
       - develop
+  pull_request:
+    branches:
+      - develop
 
 jobs:
+  lint:
+    name: Lint Nuxt frontend code
+    runs-on: ubuntu-latest
+    environment: develop
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+
   build:
     name: Build SIGIC Nuxt Frontend image (develop)
+    needs: lint
     runs-on: [self-hosted, build-develop, sigic-nuxt-frontend]
     environment: develop
+    if: github.event_name == 'push'
 
     permissions:
       packages: write
@@ -42,11 +68,14 @@ jobs:
           docker push ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.branch }}
           docker push ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.sha }}
 
+
+
   deploy:
     name: Deploy SIGIC Nuxt frontend to dev server
     needs: build
     runs-on: [self-hosted, deploy-develop, sigic-nuxt-frontend]
     environment: develop
+    if: github.event_name == 'push'
 
     steps:
       - name: Checkout repo
@@ -81,3 +110,7 @@ jobs:
           KEYCLOAK_CLIENT_SECRET: ${{ secrets.KEYCLOAK_CLIENT_SECRET }}
           NUXT_AUTH_SECRET: ${{ secrets.NUXT_AUTH_SECRET }}
           VIRTUAL_PORT: "3000"
+
+      - name: Clean old Docker images
+        run: |
+          docker image prune -f
