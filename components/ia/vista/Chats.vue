@@ -1,13 +1,14 @@
 <script setup>
 import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
 import SisdaiControlDeslizante from "@centrogeomx/sisdai-componentes/src/componentes/control-deslizante/SisdaiControlDeslizante.vue";
-import { marked } from 'marked'; // Importar marked para mostrar formato markdown
-import DOMPurify from 'dompurify'; // Para seguridad XSS
+import { marked } from "marked"; // Importar marked para mostrar formato markdown
+import DOMPurify from "dompurify"; // Para seguridad XSS
 import { ref } from "vue";
 
 const reporteModal = ref(null);
 const controlDeslizante = ref(null);
 const areaTextoRef = ref(null);
+const isSubmitting = ref(false);
 
 function enfocarAreaTexto() {
   areaTextoRef.value.focus();
@@ -39,15 +40,14 @@ const mensajes = ref([
   }, */
 ]);
 
-
 // Agregar nueva referencia para el contenedor del chat
 const contenedorChatRef = ref(null);
-const usuarioHizoScroll = ref(false); 
+const usuarioHizoScroll = ref(false);
 
 // Configurar marked (opcional)
 marked.setOptions({
   breaks: true, // Convertir saltos de línea en <br>
-  gfm: true,    // Habilitar GitHub Flavored Markdown
+  gfm: true // Habilitar GitHub Flavored Markdown
 });
 
 // Función para convertir markdown a HTML seguro
@@ -55,13 +55,14 @@ function renderMarkdown(content) {
   return DOMPurify.sanitize(marked.parse(content));
 }
 
-
 // Función para manejar el scroll del usuario
 function manejarScroll() {
   const contenedor = contenedorChatRef.value;
   if (contenedor) {
     // Verificamos si el usuario está cerca del fondo (con un margen de 100px)
-    const cercaDelFondo = contenedor.scrollTop + contenedor.clientHeight >= contenedor.scrollHeight - 100;
+    const cercaDelFondo =
+      contenedor.scrollTop + contenedor.clientHeight >=
+      contenedor.scrollHeight - 100;
     usuarioHizoScroll.value = !cercaDelFondo;
   }
 }
@@ -87,25 +88,27 @@ function scrollToBottomIfNeeded() {
     if (contenedorChatRef.value && !usuarioHizoScroll.value) {
       contenedorChatRef.value.scrollTo({
         top: contenedorChatRef.value.scrollHeight,
-        behavior: 'smooth'
+        behavior: "smooth"
       });
     }
   });
 }
 
-
 const submitMensaje = async () => {
+  if (isSubmitting.value || mensaje.value.trim() === "") return;
 
-  const resultado = ref('')
-  const loading = ref(false)
+  const resultado = ref("");
+  const loading = ref(false);
 
-  if (mensaje.value === "") return;
+  /* if (mensaje.value === "") return; */
+
+  isSubmitting.value = true;
 
   const body = {
     user_id: "c5461377-f021-402a-9700-a6d43c82e30c",
     type: "Preguntar",
-    //model: "deepseek-r1",
-    model: "llama3.1",
+    model: "deepseek-r1",
+    //model: "llama3.1",
     messages: [
       {
         role: "system",
@@ -115,164 +118,153 @@ const submitMensaje = async () => {
       { role: "user", content: mensaje.value }
     ],
     think: false,
-    chat_id:0,
+    chat_id: 0
   };
 
-  console.log(body)
+  console.log(body);
 
   // Agregar mensaje del usuario
-  mensajes.value.push({ 
+  mensajes.value.push({
     id: mensajes.value.length + 1,
     actor: "Humano",
     message: mensaje.value
   });
   mensaje.value = "";
 
-// Agregar mensaje vacío de la IA que se actualizará en el streaming
-  const aiMessageIndex = mensajes.value.push({
-    id: mensajes.value.length + 1,
-    actor: "AI",
-    message: ""
-  }) - 1; // Obtenemos el índice del nuevo mensaje    
+  // Agregar mensaje vacío de la IA que se actualizará en el streaming
+  const aiMessageIndex =
+    mensajes.value.push({
+      id: mensajes.value.length + 1,
+      actor: "AI",
+      message: ""
+    }) - 1; // Obtenemos el índice del nuevo mensaje
 
   // Hacer scroll inicial al nuevo mensaje
   //scrollToBottom();
 
-
-// Envía la pregunta 
-  const res = await fetch('http://localhost:8000/start', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+  // Envía la pregunta
+  const res = await fetch("http://localhost:8000/start", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body)
-  })
+  });
 
   //console.log(res)
   if (!res.ok) {
     //resultado.value = 'Error al iniciar solicitud.'
-    mensajes.value[aiMessageIndex].message = 'Error al iniciar solicitud.'
-    loading.value = false
-    return
+    mensajes.value[aiMessageIndex].message = "Error al iniciar solicitud.";
+    loading.value = false;
+    isSubmitting.value = false;
+    return;
   }
 
-  const json = await res.json()
-  const jobId = json.job_id
+  const json = await res.json();
+  const jobId = json.job_id;
 
   if (!jobId) {
     //resultado.value = 'No se recibió job_id.'
-    mensajes.value[aiMessageIndex].message = 'No se recibió job_id.'
-    loading.value = false
-    return
-  }
-  else{
-    console.log("jobId: ",jobId)
+    mensajes.value[aiMessageIndex].message = "No se recibió job_id.";
+    loading.value = false;
+    isSubmitting.value = false;
+    return;
+  } else {
+    console.log("jobId: ", jobId);
   }
 
   // Resetear el flag al enviar nuevo mensaje
   usuarioHizoScroll.value = false;
-  
-  // Hacer scroll inicial al nuevo mensaje
-  scrollToBottomIfNeeded();  
 
-  let mensajeRespuesta="";
- // Hacer streaming de la respuesta
+  // Hacer scroll inicial al nuevo mensaje
+  scrollToBottomIfNeeded();
+
+  let mensajeRespuesta = "";
+  // Hacer streaming de la respuesta
   try {
     const streamRes = await fetch(`http://localhost:8000/stream/${jobId}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' }
-    })
+      method: "GET",
+      headers: { "Content-Type": "application/json" }
+    });
 
-    const reader = streamRes.body?.getReader()
-    const decoder = new TextDecoder('utf-8')
+    const reader = streamRes.body?.getReader();
+    const decoder = new TextDecoder("utf-8");
 
     if (!reader) {
       //resultado.value = 'No se pudo leer el stream.'
-      mensajes.value[aiMessageIndex].message = 'No se pudo leer el stream.'
-      loading.value = false
-      return
-    }
-    else{
+      mensajes.value[aiMessageIndex].message = "No se pudo leer el stream.";
+      loading.value = false;
+      return;
+    } else {
       //console.log(reader)
     }
 
-    
-
     //muestra la respuesta del modelo en streaming
-    while (true) { 
-      const { done, value } = await reader.read()
+    while (true) {
+      const { done, value } = await reader.read();
       //console.log(done)
-      if (done) break
-      const chunk = decoder.decode(value)
+      if (done) break;
+      const chunk = decoder.decode(value);
       //resultado.value += chunk
       //console.log("chunk:",chunk)
-      resultado.value = chunk
+      resultado.value = chunk;
       //console.log(resultado.value)
 
       let arrayResults = resultado.value.split("\n\n");
       //console.log(arrayResults)
 
-      arrayResults.forEach((resultElement) => {
+      arrayResults.forEach(resultElement => {
         //console.log(resultElement)
-      
 
-        if(resultElement.includes("status:")){
-          try{
-            let statusStr=resultElement.replace("status:","")
-            let statusObj=JSON.parse(statusStr)
+        if (resultElement.includes("status:")) {
+          try {
+            let statusStr = resultElement.replace("status:", "");
+            let statusObj = JSON.parse(statusStr);
             //console.log(statusObj["status"])
+          } catch (err) {
+            console.log("Error Leyendo status: " + err);
+            console.log(resultElement);
           }
-          catch (err) {
-              console.log('Error Leyendo status: ' + err)
-              console.log(resultElement)
-          }          
-
         }
-        if(resultElement.includes("event: done")){
+        if (resultElement.includes("event: done")) {
           //let statusStr=resultElement.replace("status:","")
           //let statusObj=JSON.parse(statusStr)
           //console.log(statusObj)
-        }        
-        if(resultElement.includes("data:")){
-          if(resultElement.includes("STREAM_COMPLETED")){
-            console.log("stream completado")
-          }
-          else{
-            try{
-              let dataStr=resultElement.replace("data:","")
-              //console.log(dataStr)
-              let dataObj=JSON.parse(dataStr)
-              //console.log(dataObj)
-              if(dataObj['status']=='started'){
-                //console.log(dataObj['message'])
-                  mensajeRespuesta+=dataObj['message'];
-                  //console.log(mensajeRespuesta)
-                  mensajes.value[aiMessageIndex].message = mensajeRespuesta;
-                  // Hacer scroll después de cada actualización
-                  //scrollToBottom();
-                  scrollToBottomIfNeeded();
-              }     
-            } 
-            catch (err) {
-              console.log('Error Leyendo data: ' + err)
-              console.log(resultElement)
-            }  
-
-          }
-
-
         }
-
+        if (resultElement.includes("data:")) {
+          if (resultElement.includes("STREAM_COMPLETED")) {
+            console.log("stream completado");
+          } else {
+            try {
+              let dataStr = resultElement.replace("data:", "");
+              //console.log(dataStr)
+              let dataObj = JSON.parse(dataStr);
+              //console.log(dataObj)
+              if (dataObj["status"] == "started") {
+                //console.log(dataObj['message'])
+                mensajeRespuesta += dataObj["message"];
+                //console.log(mensajeRespuesta)
+                mensajes.value[aiMessageIndex].message = mensajeRespuesta;
+                // Hacer scroll después de cada actualización
+                //scrollToBottom();
+                scrollToBottomIfNeeded();
+              }
+            } catch (err) {
+              console.log("Error Leyendo data: " + err);
+              console.log(resultElement);
+            }
+          }
+        }
       });
     }
-
   } catch (err) {
     //resultado.value = 'Error en el streaming: ' + err
     //mensajes.value[aiMessageIndex].message = 'Error en el streaming: ' + err
-    console.log('Error en el streaming: ' + err)
-    console.log(mensajeRespuesta)
+    console.log("Error en el streaming: " + err);
+    console.log(mensajeRespuesta);
     //scrollToBottom();
     scrollToBottomIfNeeded();
+  } finally {
+    isSubmitting.value = false;
   }
-
 };
 
 const generaIdAleatorio = el => {
@@ -289,7 +281,11 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
     <div class="columna-12">
       <div class="contenedor-chat p-y-3">
         <div class="contenedor-chat-contenido">
-          <div class="contenedor-log" ref="contenedorChatRef" @scroll="manejarScroll">
+          <div
+            class="contenedor-log"
+            ref="contenedorChatRef"
+            @scroll="manejarScroll"
+          >
             <div v-for="m in mensajes" :key="m.id">
               <div :class="m.actor == 'Humano' ? 'p-y-2 ' : ''">
                 <div
@@ -315,7 +311,7 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
                   </div>
                   <div>
                     <!-- Mensaje chat -->
-<!--                     <p
+                    <!--                     <p
                       class="m-0 markdown-content"
                       :class="
                         m.actor == 'Humano'
@@ -332,11 +328,14 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
                     <!-- TO DO: corregir altura de contenedor de mensaje  -->
                     <div
                       class="m-0 markdown-content"
-                      :class="m.actor == 'Humano' ? 'fondo-color-neutro p-2 borde-redondeado-20' : ''"
+                      :class="
+                        m.actor == 'Humano'
+                          ? 'fondo-color-neutro p-2 borde-redondeado-20'
+                          : ''
+                      "
                       :style="m.actor == 'Humano' ? 'max-width: 592px' : ''"
                       v-html="renderMarkdown(m.message)"
                     ></div>
-
 
                     <!-- Reporte -->
                     <div v-if="m.actor == 'AI' && m.reporte" class="">
@@ -391,13 +390,14 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
                 tabindex="0"
                 rows="1"
                 placeholder="Envía un mensaje"
+                :disabled="isSubmitting"
                 @keypress.enter.exact.prevent="submitMensaje()"
               />
               <div class="formulario-boton">
                 <button
                   class="boton-pictograma boton-con-contenedor-primario"
                   aria-label="Enviar mensaje"
-                  :disabled="mensaje == ''"
+                  :disabled="mensaje == '' || isSubmitting"
                   type="button"
                   @click.prevent="submitMensaje()"
                 >
@@ -534,68 +534,79 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
 
 /* Estilos para el markdown */
 .markdown-content {
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     margin-top: 1em;
     margin-bottom: 0.5em;
     font-weight: bold;
   }
-  
-  h1 { font-size: 1.5em; }
-  h2 { font-size: 1.4em; }
-  h3 { font-size: 1.3em; }
-  
-  p {
-    margin-bottom: 1em;
-    line-height: 1.5;
+
+  h1 {
+    font-size: 1.5em;
   }
-  
-  ul, ol {
+  h2 {
+    font-size: 1.4em;
+  }
+  h3 {
+    font-size: 1.3em;
+  }
+
+  p {
+    margin: 0;
+    /* line-height: 1.5; */
+  }
+
+  ul,
+  ol {
     margin-bottom: 1em;
     padding-left: 2em;
   }
-  
+
   li {
     margin-bottom: 0.5em;
   }
-  
+
   strong {
     font-weight: bold;
   }
-  
+
   em {
     font-style: italic;
   }
-  
+
   code {
     background-color: #f0f0f0;
     padding: 0.2em 0.4em;
     border-radius: 3px;
     font-family: monospace;
   }
-  
+
   pre {
     background-color: #f5f5f5;
     padding: 1em;
     border-radius: 4px;
     overflow-x: auto;
-    
+
     code {
       background-color: transparent;
       padding: 0;
     }
   }
-  
+
   blockquote {
     border-left: 3px solid #ccc;
     padding-left: 1em;
     margin-left: 0;
     color: #666;
   }
-  
+
   a {
     color: var(--boton-primario-fondo);
     text-decoration: underline;
   }
 }
-
 </style>

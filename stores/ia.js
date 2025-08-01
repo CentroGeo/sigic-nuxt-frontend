@@ -5,44 +5,49 @@ export const useIAStore = defineStore("ia", {
   state: () => ({
     existenProyectos: false,
     existeContexto: false,
+    proyectos: [],
+    proyectoSeleccionado: null
   }),
   actions: {
-    async crearProyecto(title, description) {
-      console.log("crear proyecto")
+    async crearProyecto(title, description, isPublic) {
+      console.log("crear proyecto");
       try {
         const formData = new FormData();
-        formData.append('title', title);
-        formData.append('description', description);
+        formData.append("title", title);
+        formData.append("description", description);
         //formData.append('visibility', visibilidadProyecto.value);
-        formData.append('public', "False");
+        formData.append("public", isPublic === "publico" ? "True" : "False");
+
         //formData.append('file', "");
-        
+
         // Agregar las capas seleccionadas si es necesario
-    /*     capasSeleccionadas.value.forEach((capa, index) => {
+        /*     capasSeleccionadas.value.forEach((capa, index) => {
           formData.append(`layers[${index}][id]`, capa.id);
           formData.append(`layers[${index}][title]`, capa.titulo);
           formData.append(`layers[${index}][category]`, capa.cateogria);
           formData.append(`layers[${index}][type]`, capa.tipo);
         }); */
 
-        const response = await fetch('http://localhost:8080/api/fileuploads/workspaces/admin/create', {
-          method: 'POST',
-          body: formData
-        });
+        const response = await fetch(
+          "http://localhost:8080/api/fileuploads/workspaces/admin/create",
+          {
+            method: "POST",
+            body: formData
+          }
+        );
 
         if (!response.ok) {
-          throw new Error('Error al guardar el proyecto');
+          throw new Error("Error al guardar el proyecto");
         }
 
         const data = await response.json();
-        console.log('Proyecto guardado:', data);
-        
+        console.log("Proyecto guardado:", data);
+
         // Redirigir después de guardar
-        this.existenProyectos=true;
+        this.existenProyectos = true;
         //navigateTo('/ia/proyectos');
-        
       } catch (error) {
-        console.error('Error:', error);
+        console.error("Error:", error);
         // Aquí podrías mostrar un mensaje de error al usuario
       }
     },
@@ -53,20 +58,33 @@ export const useIAStore = defineStore("ia", {
     async getProjectsList() {
       this.existeContexto = true;
 
-      const response = await fetch('http://localhost:8080/api/fileuploads/workspaces/admin', {
-        method: 'POST',
-        body: {}
-      });
+      const response = await fetch(
+        "http://localhost:8080/api/fileuploads/workspaces/admin",
+        {
+          method: "POST",
+          body: {}
+        }
+      );
 
       if (!response.ok) {
-          throw new Error('Error al consultar proyectos');
-        }
+        throw new Error("Error al consultar proyectos");
+      }
 
-        const data = await response.json();
-        //console.log('Proyectos:', data);   
-        return(data)   
+      const data = await response.json();
+      this.proyectos = data;
 
+      if (data.length > 0) {
+        this.proyectoSeleccionado = data[0];
+      } else {
+        this.proyectoSeleccionado = null;
+      }
+
+      this.existenProyectos = true;
+      //console.log('Proyectos:', data);
+      return data;
     },
-
-  },
+    seleccionarProyecto(proyecto) {
+      this.proyectoSeleccionado = proyecto;
+    }
+  }
 });

@@ -3,15 +3,7 @@ import { ref } from "vue";
 
 const storeIA = useIAStore();
 
-const proyecto = {
-  id: 0,
-  titulo: "Biodiversidad de ecosistemas marinos hola",
-  descripcion:
-    "Este proyecto de investigación científica se centra en el estudio de la biodiversidad en los ecosistemas marinos de la costa. A través de la recolección de muestras y el análisis genético, buscamos comprender cómo las variaciones en la temperatura del agua afect...",
-  numero_contextos: 0,
-  numero_fuentes: 9,
-  estado: "Privado",
-};
+const proyecto = computed(() => storeIA.proyectoSeleccionado);
 
 const contextos = ref([
   {
@@ -20,7 +12,7 @@ const contextos = ref([
       "https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/kale-1.jpg",
     tarjeta_titulo: "Tecnologías para monitoreo marino",
     tarjeta_etiqueta: "5 Fuentes",
-    numero_fuentes: 5,
+    numero_fuentes: 5
   },
   {
     id: 1,
@@ -28,36 +20,44 @@ const contextos = ref([
       "https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/becka.jpg",
     tarjeta_titulo: "Zonas de riesgo ecológico marino",
     tarjeta_etiqueta: "6 Fuentes",
-    numero_fuentes: 6,
-  },
+    numero_fuentes: 6
+  }
 ]);
 </script>
 
 <template>
   <div>
-    <div class="contenedor" style="max-height: 85vh; overflow-y: auto">
+    <div
+      v-if="proyecto"
+      class="contenedor"
+      style="max-height: 85vh; overflow-y: auto"
+    >
       <div class="grid">
         <div class="columna-16">
           <div class="flex flex-contenido-separado proyecto-encabezado">
             <div class="flex proyecto-encabezado">
-              <h2>{{ proyecto.titulo }}</h2>
+              <h2>{{ proyecto.title }}</h2>
               <p
                 class="p-x-1 p-y-minimo fondo-color-acento texto-color-secundario borde borde-color-acento borde-redondeado-8"
               >
-                <span>{{ proyecto.estado }}</span>
+                <span>{{ proyecto.public ? "Público" : "Privado" }}</span>
                 <!-- TODO: agregar icono de para privado/publico -->
                 <span class="pictograma-privado" aria-hidden="true"></span>
               </p>
             </div>
-            <button class="boton-primario boton-chico" type="button">
+            <nuxt-link
+              class="boton boton-primario boton-chico"
+              aria-label="Configurar proyecto"
+              :to="`/ia/proyecto/${proyecto.id}`"
+            >
               Configurar proyecto
-            </button>
+            </nuxt-link>
           </div>
         </div>
       </div>
       <div class="grid">
         <div class="columna-10">
-          {{ proyecto.descripcion }}
+          {{ proyecto.description }}
         </div>
       </div>
       <div class="grid">

@@ -22,38 +22,38 @@ const visibilidadProyecto = ref("publico"); // Valor por defecto
 const categorias = ref([
   {
     id: 0,
-    titulo: "Nombre de categoría 1",
+    titulo: "Nombre de categoría 1"
   },
   {
     id: 1,
-    titulo: "Nombre de categoría 2",
+    titulo: "Nombre de categoría 2"
   },
   {
     id: 2,
-    titulo: "Nombre de categoría 3",
+    titulo: "Nombre de categoría 3"
   },
   {
     id: 3,
-    titulo: "Nombre de categoría 4",
-  },
+    titulo: "Nombre de categoría 4"
+  }
 ]);
 
 const capasGeograficas = ref([
   {
     id: 0,
     titulo: "Nombre de la fuente de información",
-    tipo: "Poligonos",
+    tipo: "Poligonos"
   },
   {
     id: 1,
     titulo: "Nombre de la fuente de información",
-    tipo: "Puntos",
+    tipo: "Puntos"
   },
   {
     id: 2,
     titulo: "Nombre de la fuente de información",
-    tipo: "Líneas",
-  },
+    tipo: "Líneas"
+  }
 ]);
 
 const capasSeleccionadas = ref([
@@ -61,19 +61,34 @@ const capasSeleccionadas = ref([
     id: 0,
     titulo: "Nombre de la fuente de información",
     cateogria: "Categoría 1",
-    tipo: "Poligonos",
+    tipo: "Poligonos"
   },
   {
     id: 1,
     titulo: "Nombre de la fuente de información",
     cateogria: "Categoría 3",
-    tipo: "Puntos",
-  },
+    tipo: "Puntos"
+  }
 ]);
 
 const categoriaSeleccionada = ref(null);
 
-const seleccionarCategoria = (categoria) => {
+const route = useRoute();
+const esEdicion = ref(false);
+
+const proyecto = computed(() => storeIA.proyectoSeleccionado);
+
+onMounted(async () => {
+  if (route.params.id !== "nuevo") {
+    esEdicion.value = true;
+
+    nombreProyecto.value = proyecto.value.title;
+    descripcionProyecto.value = proyecto.value.description;
+    visibilidadProyecto.value = proyecto.value.public ? "publico" : "privado";
+  }
+});
+
+const seleccionarCategoria = categoria => {
   categoriaSeleccionada.value = categoria;
 };
 
@@ -81,19 +96,19 @@ const seleccionarCategoria = (categoria) => {
 const botonRadioModal = ref("");
 const campoCasilla = ref(false);
 
-
 // Función para guardar el proyecto
 const guardarProyecto = async () => {
+  //manda a guardar proyecto.
+  //TODO: enviar la visivilidad, el archivo y el usuario
+  storeIA.crearProyecto(
+    nombreProyecto.value,
+    descripcionProyecto.value,
+    visibilidadProyecto.value
+  );
 
-   //manda a guardar proyecto.
-   //TODO: enviar la visivilidad, el archivo y el usuario
-   storeIA.crearProyecto(nombreProyecto.value, descripcionProyecto.value)
-
-   //Redirigir después de guardar
-   navigateTo('/ia/proyectos');
+  //Redirigir después de guardar
+  navigateTo("/ia/proyectos");
 };
-
-
 </script>
 
 <template>
@@ -181,12 +196,13 @@ const guardarProyecto = async () => {
               >
                 Guardar proyecto
               </NuxtLink>
-              <button
-                class="boton-chico boton-secundario"
+              <nuxt-link
+                class="boton boton-chico boton-secundario"
                 aria-label="Cancelar"
+                to="/ia/proyectos/"
               >
                 Cancelar
-              </button>
+              </nuxt-link>
             </div>
           </div>
         </div>
@@ -274,7 +290,7 @@ const guardarProyecto = async () => {
                       <div
                         class="categoria p-l-6 p-r-2 p-y-1"
                         :class="{
-                          seleccionada: categoria === categoriaSeleccionada,
+                          seleccionada: categoria === categoriaSeleccionada
                         }"
                         @click="seleccionarCategoria(categoria)"
                       >

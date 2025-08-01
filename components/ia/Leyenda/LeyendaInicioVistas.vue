@@ -22,7 +22,7 @@ const storeIA = useIAStore();
             <NuxtLink
               class="boton-pictograma boton-primario"
               aria-label="Crear nuevo proyecto"
-              to="/ia/proyecto/crea-proyecto"
+              to="/ia/proyecto/nuevo"
             >
               Crear proyecto
               <span class="pictograma-agregar" aria-hidden="true" />
