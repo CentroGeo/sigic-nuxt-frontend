@@ -62,7 +62,7 @@ jobs:
 
       - name: Build & tag Docker image
         run: |
-          docker build --build-arg NODE_ENV=${{ steps.env.outputs.NODE_ENV }} \
+          docker build --no-cache --build-arg NODE_ENV=${{ steps.env.outputs.NODE_ENV }} \
             -t ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.branch }} \
             -t ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.sha }} \
             -f Dockerfile . 
