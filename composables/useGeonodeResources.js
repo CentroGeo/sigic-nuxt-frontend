@@ -18,7 +18,7 @@ export function useGeonodeResources({ resourceType } = {}) {
   const fetchData = async ({ resourceType }) => {
     let page = 1;
     let allResults = [];
-    const loadPage = () => {
+    const loadPage = async () => {
       // cuando se requiere todos los recursos sin filtrar?
       const dataParams =
         resourceType === 'todos'
@@ -33,7 +33,7 @@ export function useGeonodeResources({ resourceType } = {}) {
               //"filter{subtype.in}": "raster",
               //"filter{subtype.in}": "vector",
             });
-      fetch(`${api}?${dataParams.toString()}`, {
+      await fetch(`${api}?${dataParams.toString()}`, {
         method: 'GET',
         /*         headers: {
           ...(authStatus.value === "authenticated"

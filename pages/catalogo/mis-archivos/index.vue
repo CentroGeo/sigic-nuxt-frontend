@@ -19,7 +19,6 @@ watch(
   () => resourcesStore.filteredResources[recursosTipo.value],
   () => {
     recursosFiltrados.value = resourcesStore.filteredResources[recursosTipo.value];
-
     // obteniendo datos por las props que necesito
     datos.value = recursosFiltrados.value.map((d) => ({
       titulo: d.title,

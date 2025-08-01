@@ -43,7 +43,6 @@ export default defineEventHandler(async (event) => {
 
   // TODO: cambiar el layerSlug según la capa
   // formData.append('dataset_title', layerSlug);
-
   formData.append("dataset_title", "geonode:coordinaciones");
   formData.append("style_upload_form", "true");
   formData.append("permissions", JSON.stringify({}));
@@ -53,6 +52,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     const res = await fetch(`${configEnv.public.geonodeApi}/upload/uploads/upload`, {
+      // esta es la máquina con la que se probó
       // const res = await fetch("http://10.2.102.239/upload/uploads/upload", {
       method: "POST",
       headers: {

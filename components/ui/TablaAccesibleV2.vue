@@ -1,4 +1,12 @@
 <script setup>
+/**
+ * @typedef {Object} Props
+ * @property {Array} [variables=[]] - Indica las variables del encabezado thead tr th.
+ * @property {Array} [datos=[]] - Indica los datos que coincida con las variables.
+ * @property {caption} [caption=''] - Indica el título de la tabla.
+ */
+
+/** @type {Props} */
 const props = defineProps({
   variables: { type: Array, default: Array },
   datos: { type: Array, default: Array },
@@ -45,14 +53,6 @@ const idAleatorio = generaIdAleatorio();
                 ? datum[variable]?.toLocaleString('en')
                 : ''
             }}
-            <!-- <p
-              v-if="variable === 'tipo_recurso'"
-              class="texto-centrado fondo-color-acento p-1 texto-color-acento borde borde-redondeado-16"
-              style="min-width: 168px"
-            >
-              {{ datum[variable]?.toLocaleString("en") }}
-              <span class="pictograma-capas"></span>
-            </p> -->
             <p
               v-if="variable === 'tipo_recurso'"
               class="texto-centrado fondo-color-acento p-1 texto-color-acento borde borde-redondeado-16"
@@ -99,7 +99,6 @@ const idAleatorio = generaIdAleatorio();
                 </button>
               </div>
             </div>
-            <!-- {{ datum[variable]?.toLocaleString("en") }} -->
           </td>
         </tr>
       </tbody>

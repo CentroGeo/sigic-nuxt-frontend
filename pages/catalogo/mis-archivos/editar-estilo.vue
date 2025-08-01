@@ -53,6 +53,7 @@ async function guardarArchivo(formData) {
               </div>
               <h2>Estilo</h2>
               <p><b>Estilo, solo archivos .sld</b></p>
+
               <!-- Drag & Drop -->
               <ClientOnly>
                 <CatalogoElementoDragNdDrop

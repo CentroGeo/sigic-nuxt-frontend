@@ -30,7 +30,6 @@ const todosLosDemas = ref(false);
 const archivoValido = ref(false);
 
 function appendSLD(files, layerSlug, token) {
-  // console.log("files", files);
   files.forEach((file) => {
     formData.value.append('base_file', file);
     formData.value.append('sld_file', file);
@@ -47,7 +46,6 @@ function appendSLD(files, layerSlug, token) {
 
 function appendOtros(files, token) {
   // TODO: hacer append de otros
-  // console.log("files", files);
   files.forEach((file) => {
     formData.value.append('base_file', file);
     formData.value.append('sld_file', file);
@@ -65,8 +63,6 @@ function appendOtros(files, token) {
 const validarTipoArchivo = (files) => {
   // TODO: revisar bien los MIME de los archivos válidos
   files.forEach((file) => {
-    // console.log("file.name", file.name);
-    // console.log("file.type", file.type);
     if (
       tipoArchivoValidos.value === 'sld' &&
       (file.name.slice(-4) === '.sld' ||
@@ -75,7 +71,6 @@ const validarTipoArchivo = (files) => {
         file.type === 'application/vnd.sld+xml' ||
         file.type === 'application/vnd.sld+xml,.sld')
     ) {
-      // console.log('Archivo SLD válido');
       esSLD.value = true;
     } else if (
       tipoArchivoValidos.value !== 'sld' &&
@@ -100,10 +95,9 @@ const validarTipoArchivo = (files) => {
 function appendFormData(files, token) {
   if (esSLD.value && tipoArchivoValidos.value === 'sld') {
     appendSLD(files, 'geonode:coordinaciones', token);
-  } else if (todosLosDemas.value) {
+  }
+  if (todosLosDemas.value) {
     appendOtros(files, token);
-  } else {
-    // console.log('Archivo inválido');
   }
 }
 
@@ -118,7 +112,6 @@ async function onDrop() {
     // obtén el token para el bearer
     const token = data.value?.accessToken;
     // console.log("token", token);
-
     datos.value = files.value;
     datosArriba.value = true;
 
@@ -138,7 +131,6 @@ onChange(async (files) => {
     // obtén el token para el bearer
     const token = data.value?.accessToken;
     // console.log("token", token);
-
     datos.value = files;
     datosArriba.value = true;
 

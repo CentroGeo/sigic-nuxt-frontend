@@ -5,10 +5,6 @@ const resourcesStore = useSelectedResourcesStore();
 const recursosTipo = ref('dataLayer');
 const recursosFiltrados = ref([]);
 
-const recursosFiltradosCapas = ref([]);
-const recursosFiltradosTablas = ref([]);
-const recursosFiltradosDocumentos = ref([]);
-
 const sortDateArray = (array) => {
   return array.sort((a, b) => {
     return b.last_updated - a.last_updated;
@@ -19,6 +15,7 @@ const sortDateArray = (array) => {
 const { resourcesList: listaRecursosCapas } = useGeonodeResources({
   resourceType: 'dataLayer',
 });
+const recursosFiltradosCapas = ref([]);
 const capaMasReciente = ref([]);
 watch(listaRecursosCapas, () => {
   resourcesStore.updateFilteredResources('dataLayer', listaRecursosCapas.value);
@@ -36,10 +33,12 @@ watch(
   },
   { deep: true }
 );
+
 // dataTable
 const { resourcesList: listaRecursosTablas } = useGeonodeResources({
   resourceType: 'dataTable',
 });
+const recursosFiltradosTablas = ref([]);
 const tablaMasReciente = ref([]);
 watch(listaRecursosTablas, () => {
   resourcesStore.updateFilteredResources('dataTable', listaRecursosTablas.value);
@@ -57,10 +56,12 @@ watch(
   },
   { deep: true }
 );
+
 // document
 const { resourcesList: listaRecursosDocumentos } = useGeonodeResources({
   resourceType: 'document',
 });
+const recursosFiltradosDocumentos = ref([]);
 const documentoMasReciente = ref([]);
 watch(listaRecursosDocumentos, () => {
   resourcesStore.updateFilteredResources('document', listaRecursosDocumentos.value);
@@ -73,7 +74,6 @@ watch(
   () => resourcesStore.filteredResources['document'],
   () => {
     recursosFiltradosDocumentos.value = resourcesStore.filteredResources['document'];
-
     const documentoOrdenado = sortDateArray(recursosFiltradosDocumentos.value)[0];
     documentoMasReciente.value = {
       titulo: documentoOrdenado.title,
