@@ -30,6 +30,7 @@ function openTableView() {
   console.log(selectedElement.value);
   resourcesStore.addResource("dataTable", selectedElement.value);
   resourcesStore.setShownFile("dataTable", selectedElement.value);
+  modalTabla.value?.cerrarModal();
   console.log("Redirije al visor de tablas");
 }
 
@@ -61,9 +62,12 @@ watch(paginaActual, () => {
       </template>
 
       <template #pie>
-        <button type="button" class="boton-primario" @click="openTableView">
-          Abrir en Tablas
-        </button>
+        <nuxtLink to="/consulta/tablas">
+          <button type="button" class="boton-primario" @click="openTableView">
+            Abrir en Tablas
+          </button>
+        </nuxtLink>
+
         <button type="button" class="boton-primario">Descargar</button>
       </template>
     </SisdaiModal>
