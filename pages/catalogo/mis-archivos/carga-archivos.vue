@@ -1,17 +1,17 @@
 <script setup>
-import SisdaiControlDeslizante from "@centrogeomx/sisdai-componentes/src/componentes/control-deslizante/SisdaiControlDeslizante.vue";
+import SisdaiControlDeslizante from '@centrogeomx/sisdai-componentes/src/componentes/control-deslizante/SisdaiControlDeslizante.vue';
 const controlDeslizante = ref(null);
 const generaIdAleatorio = (el) => {
   return el + Math.random().toString(36).substring(2);
 };
-const idAleatorioControlDes = generaIdAleatorio("controldeslizante-");
+const idAleatorioControlDes = generaIdAleatorio('controldeslizante-');
 
 const statusOk = ref(false);
 const pending = ref(false);
 async function guardarArchivo(formData) {
   // TODO: editar subirSLD por subirArchivos
-  const res = await fetch("/api/subirSLD", {
-    method: "POST",
+  const res = await fetch('/api/subirSLD', {
+    method: 'POST',
     body: formData,
   });
   pending.value = true;
@@ -21,7 +21,7 @@ async function guardarArchivo(formData) {
       pending.value = false;
       statusOk.value = true;
     }
-  }, "2500");
+  }, '2500');
 }
 </script>
 
@@ -40,9 +40,7 @@ async function guardarArchivo(formData) {
           </p>
 
           <ClientOnly>
-            <CatalogoElementoDragNdDrop
-              @guardar-archivo="(i) => guardarArchivo(i)"
-            />
+            <CatalogoElementoDragNdDrop @guardar-archivo="(i) => guardarArchivo(i)" />
           </ClientOnly>
 
           <!-- <div v-if="statusOk"> -->
@@ -56,9 +54,7 @@ async function guardarArchivo(formData) {
 
               <p>Capas_lago_texcoco.json</p>
               <div class="texto-color-confirmacion">
-                <p class="m-b-0">
-                  Se detectaron 236 polígonos/líneas/puntos válidos
-                </p>
+                <p class="m-b-0">Se detectaron 236 polígonos/líneas/puntos válidos</p>
                 <p class="m-t-0">Sistema de referencia EPSG:4326</p>
               </div>
 
@@ -69,14 +65,10 @@ async function guardarArchivo(formData) {
                   >
                 </div>
                 <div>
-                  <nuxt-link to="/catalogo/mis-archivos/editar-estilo"
-                    >Editar estilo</nuxt-link
-                  >
+                  <nuxt-link to="/catalogo/mis-archivos/editar-estilo">Editar estilo</nuxt-link>
                 </div>
                 <div>
-                  <nuxt-link to="/catalogo/mis-archivos"
-                    >Ver en mis archivos</nuxt-link
-                  >
+                  <nuxt-link to="/catalogo/mis-archivos">Ver en mis archivos</nuxt-link>
                 </div>
               </div>
             </div>
@@ -87,9 +79,7 @@ async function guardarArchivo(formData) {
               <div class="flex flex-contenido-separado">
                 <p class="flex-vertical-centrado">nombre de la capa.json</p>
                 <div class="flex">
-                  <p class="borde borde-redondeado-8" style="padding: 4px">
-                    .json
-                  </p>
+                  <p class="borde borde-redondeado-8" style="padding: 4px">.json</p>
                   <p class="flex-vertical-centrado">1MB</p>
                 </div>
               </div>
@@ -102,18 +92,12 @@ async function guardarArchivo(formData) {
                   :val_entrada="90"
                   step="10"
                   @blur="false"
-                  @update:val_entrada="
-                    ($event) => (controlDeslizante.valor_seleccionado = $event)
-                  "
+                  @update:val_entrada="($event) => (controlDeslizante.valor_seleccionado = $event)"
                 />
               </ClientOnly>
               <div class="flex flex-contenido-inicio">
                 <label :for="idAleatorioControlDes"
-                  >{{
-                    controlDeslizante?.valor_seleccionado < 100
-                      ? "Progreso"
-                      : "Completado"
-                  }}
+                  >{{ controlDeslizante?.valor_seleccionado < 100 ? 'Progreso' : 'Completado' }}
                   {{ controlDeslizante?.valor_seleccionado }}%</label
                 >
               </div>

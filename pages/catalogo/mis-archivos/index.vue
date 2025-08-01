@@ -3,7 +3,7 @@
 const resourcesStore = useSelectedResourcesStore();
 
 const recursosFiltrados = ref([]);
-const recursosTipo = ref("todos");
+const recursosTipo = ref('todos');
 
 const variables = ref([]);
 const datos = ref([]);
@@ -13,16 +13,12 @@ const { resourcesList } = useGeonodeResources({
   resourceType: recursosTipo.value,
 });
 watch(resourcesList, () => {
-  resourcesStore.updateFilteredResources(
-    recursosTipo.value,
-    resourcesList.value
-  );
+  resourcesStore.updateFilteredResources(recursosTipo.value, resourcesList.value);
 });
 watch(
   () => resourcesStore.filteredResources[recursosTipo.value],
   () => {
-    recursosFiltrados.value =
-      resourcesStore.filteredResources[recursosTipo.value];
+    recursosFiltrados.value = resourcesStore.filteredResources[recursosTipo.value];
 
     // obteniendo datos por las props que necesito
     datos.value = recursosFiltrados.value.map((d) => ({
@@ -31,7 +27,7 @@ watch(
       // tipo_recurso: "Capa geográfica",
       categoria: d.category.gn_description,
       actualizacion: d.last_updated,
-      acciones: "Editar, Descargar, Remover",
+      acciones: 'Editar, Descargar, Remover',
       enlace_descarga: d.download_url,
     }));
     // obteniendo las variables de las keys

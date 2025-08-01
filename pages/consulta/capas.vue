@@ -1,18 +1,12 @@
 <script setup>
-import {
-  SisdaiCapaWms,
-  SisdaiCapaXyz,
-  SisdaiMapa,
-} from "@centrogeomx/sisdai-mapas";
-import { exportarMapa as exportarMapaPNG } from "@centrogeomx/sisdai-mapas/src/utiles";
+import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
+import { exportarHTMLComoPNG as exportarMapaPNG } from '@centrogeomx/sisdai-mapas/funciones';
 
-const resourceType = "dataLayer";
+const resourceType = 'dataLayer';
 
-const extensionNacional = "-118.3651,14.5321,-86.7104,32.7187";
+const extensionNacional = '-118.3651,14.5321,-86.7104,32.7187';
 const storeConsulta = useConsultaStore();
-const extensionMapa = computed(
-  () => storeConsulta.ajustarExtensionMapa || extensionNacional
-);
+const extensionMapa = computed(() => storeConsulta.ajustarExtensionMapa || extensionNacional);
 
 const config = useRuntimeConfig();
 const storeSelected = useSelectedResourcesStore();
@@ -20,18 +14,15 @@ const randomNum = ref(0);
 
 const linkExportaMapa = ref();
 function exportarMapa() {
-  exportarMapaPNG(
-    document.querySelectorAll(".mapa .ol-viewport").item(0),
-    linkExportaMapa.value
-  );
+  exportarMapaPNG(document.querySelectorAll('.mapa .ol-viewport').item(0), linkExportaMapa.value);
 }
 
 const attributos = reactive({});
-function addAttribute(pk) {
+async function addAttribute(pk) {
   // attributes[pk] = `${config.public.geonodeApi}/datasets/${pk}/attribute_set`;
   attributos[pk] = [];
 
-  fetch(`${config.public.geonodeApi}/datasets/${pk}/attribute_set`)
+  await fetch(`${config.public.geonodeApi}/datasets/${pk}/attribute_set`)
     .then((response) => response.json())
     .then(({ attributes }) => {
       // console.log(attributes);
@@ -44,24 +35,17 @@ function addAttribute(pk) {
           etiquetas[attribute] = attribute_label || attribute;
           return attribute;
         });
-      console.log(columnas);
 
       attributos[pk] = {
         params: {
-          propertyName: columnas.join(","),
+          propertyName: columnas.join(','),
         },
         // attribute_label
         contenido: (data) =>
           columnas
-            .map(
-              (columna) =>
-                `<p><b>${etiquetas[columna] || columna}</b>: ${
-                  data[columna]
-                }</p>`
-            )
-            .join(""),
+            .map((columna) => `<p><b>${etiquetas[columna] || columna}</b>: ${data[columna]}</p>`)
+            .join(''),
       };
-      console.log(attributos[pk]);
     })
     .catch((err) => {
       console.error(err);
@@ -84,10 +68,10 @@ watch(
     // console.log("Se agregó:", nv);
     nv.forEach((r) => addAttribute(r));
 
-    const ov = arr2.filter((item) => !arr1.includes(item));
+    //const ov = arr2.filter((item) => !arr1.includes(item));
     // console.log("Se quitó:", ov);
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-    ov.forEach((resource) => delete attributos[resource]);
+
+    //ov.forEach((resource) => delete attributos[resource]);
 
     // console.log(attributos);
   },
@@ -97,16 +81,22 @@ watch(
 // bbox_polygon
 // api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
 
+/**
+ * Revisión!
+ */
+
+/*
+
 function cuadroInformativo(pk) {
   console.log(pk);
 
   return {
     params: {
-      propertyName: "nombre",
+      propertyName: 'nombre',
     },
-    contenido: (d) => `<p><b>nombre</b>: ${d["nombre"]}</p>`,
+    contenido: (d) => `<p><b>nombre</b>: ${d['nombre']}</p>`,
   };
-}
+}*/
 </script>
 
 <template>
@@ -129,9 +119,7 @@ function cuadroInformativo(pk) {
           <SisdaiCapaXyz />
 
           <SisdaiCapaWms
-            v-for="(capa, index) in storeSelected.selectedResources[
-              resourceType
-            ]"
+            v-for="(capa, index) in storeSelected.selectedResources[resourceType]"
             :key="`${capa.uuid}_${randomNum}`"
             :fuente="`${config.public.geoserverUrl}/wms?`"
             :capa="capa.alternate"

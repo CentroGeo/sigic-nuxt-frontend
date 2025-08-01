@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
   const form = formidable({ multiples: false });
   console.log("form", form);
 
-  const data = await new Promise<any>((resolve, reject) => {
+  const data = await new Promise<{ fields: Fields; files: Files }>((resolve, reject) => {
     form.parse(event.node.req, (err, fields, files) => {
       if (err) reject(err);
       else resolve({ fields, files });
@@ -22,7 +22,6 @@ export default defineEventHandler(async (event) => {
   }
 
   const formData = new FormData();
-
   formData.append(
     "base_file",
     base_file[0].filepath
@@ -50,7 +49,7 @@ export default defineEventHandler(async (event) => {
   formData.append("permissions", JSON.stringify({}));
   formData.append("charset", "undefined");
 
-  console.log('formData', formData);
+  console.warn('formData', formData);
 
   try {
     const res = await fetch(`${configEnv.public.geonodeApi}/upload/uploads/upload`, {
@@ -79,4 +78,4 @@ export default defineEventHandler(async (event) => {
 
     throw createError({ statusCode: 500, statusMessage: 'Error al subir al GeoNode', data: error });
   }
-})
+});

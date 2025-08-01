@@ -1,11 +1,19 @@
 <script setup>
+/**
+ * @typedef {Object} Props
+ * @property {String} [tipoArchivoValidos=''] - Indica los tipos de archivo válidos.
+ */
+
+/** @type {Props} */
 const props = defineProps({
   tipoArchivoValidos: {
     type: String,
-    default: "",
+    default: '',
   },
 });
 const { tipoArchivoValidos } = toRefs(props);
+
+defineEmits('guardarArchivo');
 
 const ejemplo = ref({});
 
@@ -24,15 +32,15 @@ const archivoValido = ref(false);
 function appendSLD(files, layerSlug, token) {
   // console.log("files", files);
   files.forEach((file) => {
-    formData.value.append("base_file", file);
-    formData.value.append("sld_file", file);
-    formData.value.append("dataset_title", layerSlug);
+    formData.value.append('base_file', file);
+    formData.value.append('sld_file', file);
+    formData.value.append('dataset_title', layerSlug);
     // formData.value.append("dataset_title", "geonode:coordinaciones");
-    formData.value.append("style_upload_form", "true");
-    formData.value.append("permissions", JSON.stringify({}));
-    formData.value.append("charset", "undefined");
+    formData.value.append('style_upload_form', 'true');
+    formData.value.append('permissions', JSON.stringify({}));
+    formData.value.append('charset', 'undefined');
     // token importante
-    formData.value.append("token", token);
+    formData.value.append('token', token);
   });
   // console.log("formData.value", formData.value);
 }
@@ -41,15 +49,15 @@ function appendOtros(files, token) {
   // TODO: hacer append de otros
   // console.log("files", files);
   files.forEach((file) => {
-    formData.value.append("base_file", file);
-    formData.value.append("sld_file", file);
+    formData.value.append('base_file', file);
+    formData.value.append('sld_file', file);
     // formData.value.append("dataset_title", layerSlug);
-    formData.value.append("dataset_title", "geonode:coordinaciones");
-    formData.value.append("style_upload_form", "true");
-    formData.value.append("permissions", JSON.stringify({}));
-    formData.value.append("charset", "undefined");
+    formData.value.append('dataset_title', 'geonode:coordinaciones');
+    formData.value.append('style_upload_form', 'true');
+    formData.value.append('permissions', JSON.stringify({}));
+    formData.value.append('charset', 'undefined');
     // token importante
-    formData.value.append("token", token);
+    formData.value.append('token', token);
   });
   // console.log("formData.value", formData.value);
 }
@@ -60,25 +68,26 @@ const validarTipoArchivo = (files) => {
     // console.log("file.name", file.name);
     // console.log("file.type", file.type);
     if (
-      tipoArchivoValidos.value === "sld" &&
-      (file.name.slice(-4) === ".sld" ||
-        file.type === ".sld" ||
-        file.type === "application/vnd.sld+xml" ||
-        file.type === "application/vnd.sld+xml,.sld")
+      tipoArchivoValidos.value === 'sld' &&
+      (file.name.slice(-4) === '.sld' ||
+        file.name.endsWith('.sld') ||
+        file.type === '.sld' ||
+        file.type === 'application/vnd.sld+xml' ||
+        file.type === 'application/vnd.sld+xml,.sld')
     ) {
-      console.log("Archivo SLD válido");
+      // console.log('Archivo SLD válido');
       esSLD.value = true;
     } else if (
-      tipoArchivoValidos.value !== "sld" &&
-      (file.type === "application/vnd.geo+json" ||
-        file.type === "application/json" ||
-        file.type === "application/geo+json" ||
-        file.type === "application/geopackage+sqlite3" ||
-        file.type === "text/csv" ||
-        file.type === "application/xml" ||
-        file.type === "application/pdf" ||
-        file.type === "image/jpeg" ||
-        file.type === "image/png")
+      tipoArchivoValidos.value !== 'sld' &&
+      (file.type === 'application/vnd.geo+json' ||
+        file.type === 'application/json' ||
+        file.type === 'application/geo+json' ||
+        file.type === 'application/geopackage+sqlite3' ||
+        file.type === 'text/csv' ||
+        file.type === 'application/xml' ||
+        file.type === 'application/pdf' ||
+        file.type === 'image/jpeg' ||
+        file.type === 'image/png')
     ) {
       todosLosDemas.value = true;
     } else {
@@ -89,12 +98,12 @@ const validarTipoArchivo = (files) => {
 };
 
 function appendFormData(files, token) {
-  if (esSLD.value && tipoArchivoValidos.value === "sld") {
-    appendSLD(files, "geonode:coordinaciones", token);
+  if (esSLD.value && tipoArchivoValidos.value === 'sld') {
+    appendSLD(files, 'geonode:coordinaciones', token);
   } else if (todosLosDemas.value) {
     appendOtros(files, token);
   } else {
-    console.log("Archivo inválido");
+    // console.log('Archivo inválido');
   }
 }
 

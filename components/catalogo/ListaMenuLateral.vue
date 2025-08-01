@@ -21,9 +21,7 @@
           <nuxt-link to="/catalogo/mis-archivos">Mis archivos</nuxt-link>
           <ul>
             <li>
-              <nuxt-link to="/catalogo/mis-archivos/carga-archivos"
-                >Carga de archivos</nuxt-link
-              >
+              <nuxt-link to="/catalogo/mis-archivos/carga-archivos">Carga de archivos</nuxt-link>
             </li>
           </ul>
         </li>

@@ -1,5 +1,5 @@
 <script setup>
-import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 const props = defineProps({
   selectedElement: {
     type: Object,
@@ -47,7 +47,7 @@ watch(paginaActual, () => {
       <template #cuerpo>
         <UiTablaAccesible :variables="variables" :datos="datos" />
         <UiPaginador
-          :totalPaginas="Math.ceil(totalFeatures / tamanioPagina)"
+          :total-paginas="Math.ceil(totalFeatures / tamanioPagina)"
           @cambio="paginaActual = $event"
         />
       </template>

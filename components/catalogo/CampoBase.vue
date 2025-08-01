@@ -1,8 +1,8 @@
 <script setup>
-import { computed } from "vue";
+import { computed } from 'vue';
 const identificador = idAleatorio();
 function idAleatorio() {
-  return "campo-" + Math.random().toString(36).substring(2);
+  return 'campo-' + Math.random().toString(36).substring(2);
 }
 defineExpose({
   identificador,
@@ -14,23 +14,23 @@ const props = defineProps({
   },
   tipo: {
     type: String,
-    default: "text",
+    default: 'text',
   },
   ejemplo: {
     type: String,
-    default: "",
+    default: '',
   },
   textoAyuda: {
     type: String,
-    default: "",
+    default: '',
   },
   textoError: {
     type: String,
-    default: "",
+    default: '',
   },
   modelValue: {
     type: [String, Number],
-    default: "",
+    default: '',
   },
   esEtiquetaVisible: {
     type: Boolean,
@@ -41,26 +41,21 @@ const props = defineProps({
     default: false,
   },
 });
-const emit = defineEmits(["update:modelValue"]);
+const emit = defineEmits(['update:modelValue']);
 const modeloCampo = computed({
   get() {
     return props.modelValue;
   },
   set(value) {
-    emit("update:modelValue", value);
+    emit('update:modelValue', value);
   },
 });
 </script>
 <template>
   <div>
-    <label
-      :for="identificador"
-      :class="es_etiqueta_visible ? '' : 'a11y-solo-lectura'"
-    >
+    <label :for="identificador" :class="es_etiqueta_visible ? '' : 'a11y-solo-lectura'">
       {{ etiqueta }}
-      <span v-if="es_obligatorio" class="formulario-obligatoriedad">
-        (Obligatorio)
-      </span>
+      <span v-if="es_obligatorio" class="formulario-obligatoriedad"> (Obligatorio) </span>
     </label>
     <input
       :id="identificador"

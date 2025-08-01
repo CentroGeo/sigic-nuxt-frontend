@@ -10,7 +10,7 @@
 </template>
 
 <style lang="scss">
-@use "~/assets/global.scss";
+@use '~/assets/global.scss';
 .overflow-hidden {
   overflow: hidden;
 }

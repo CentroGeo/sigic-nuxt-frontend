@@ -2,7 +2,7 @@
 // TODO: fix tabla, filtros y paginador
 const resourcesStore = useSelectedResourcesStore();
 
-const recursosTipo = ref("dataLayer");
+const recursosTipo = ref('dataLayer');
 const recursosFiltrados = ref([]);
 
 // dataLayer
@@ -15,26 +15,22 @@ const { resourcesList: listaRecursosCapas } = useGeonodeResources({
 });
 
 watch(listaRecursosCapas, () => {
-  resourcesStore.updateFilteredResources(
-    recursosTipo.value,
-    listaRecursosCapas.value
-  );
+  resourcesStore.updateFilteredResources(recursosTipo.value, listaRecursosCapas.value);
 });
 
 watch(
   () => resourcesStore.filteredResources[recursosTipo.value],
   () => {
-    recursosFiltradosCapas.value =
-      resourcesStore.filteredResources[recursosTipo.value];
+    recursosFiltradosCapas.value = resourcesStore.filteredResources[recursosTipo.value];
 
     // obteniendo datos por las props que necesito
     datos.value = recursosFiltradosCapas.value.map((d) => ({
       nombre: d.title,
       // tipo_recurso: d.resource_type,
-      tipo_recurso: "Capa geográfica",
+      tipo_recurso: 'Capa geográfica',
       categoria: d.category.gn_description,
       actualizacion: d.last_updated,
-      acciones: "Ver, Descargar",
+      acciones: 'Ver, Descargar',
       enlace_descarga: d.download_url,
     }));
     // obteniendo las variables de las keys

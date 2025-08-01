@@ -1,17 +1,17 @@
 <script setup>
-import SisdaiCampoBase from "@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue";
-import SisdaiSelector from "@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue";
+import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
+import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
-const campoTitulo = ref("");
-const campoResumen = ref("");
-const campoPalabrasClave = ref("");
-const campoAutor = ref("");
-const campoAnioPublicacion = ref("");
+const campoTitulo = ref('');
+const campoResumen = ref('');
+const campoPalabrasClave = ref('');
+const campoAutor = ref('');
+const campoAnioPublicacion = ref('');
 
-const seleccionEjemplo = ref("");
+const seleccionEjemplo = ref('');
 
-const seleccionCategoria = ref("");
-const seleccionGrupo = ref("");
+const seleccionCategoria = ref('');
+const seleccionGrupo = ref('');
 
 const ejemplo = ref({});
 </script>
@@ -26,10 +26,7 @@ const ejemplo = ref({});
       <main id="principal" class="contenedor m-b-10 m-y-3">
         <div class="alineacion-izquierda ancho-lectura">
           <div class="flex">
-            <nuxt-link
-              to="/catalogo/mis-archivos"
-              aria-label="regresar a mis archivos"
-            >
+            <nuxt-link to="/catalogo/mis-archivos" aria-label="regresar a mis archivos">
               <span
                 class="pictograma-flecha-izquierda pictograma-mediano texto-color-acento"
                 aria-hidden="true"
@@ -39,22 +36,15 @@ const ejemplo = ref({});
           </div>
           <h2>nombre de la capa.json</h2>
           <div class="flex">
-            <nuxt-link to="/catalogo/mis-archivos/editar-metadatos" exact-path
-              >Metadatos</nuxt-link
-            >
-            <nuxt-link to="/catalogo/mis-archivos/editar-estilo"
-              >Estilo</nuxt-link
-            >
+            <nuxt-link to="/catalogo/mis-archivos/editar-metadatos" exact-path>Metadatos</nuxt-link>
+            <nuxt-link to="/catalogo/mis-archivos/editar-estilo">Estilo</nuxt-link>
           </div>
           <h2>Metadatos</h2>
           <ol>
             <li>Metadatos básicos</li>
           </ol>
           <p>
-            <b
-              >Miniatura imagen no mayor a 9kb tamaño 120x120px. Archivos Png o
-              JPG</b
-            >
+            <b>Miniatura imagen no mayor a 9kb tamaño 120x120px. Archivos Png o JPG</b>
           </p>
 
           <!-- Drag & Drop -->
@@ -109,10 +99,7 @@ const ejemplo = ref({});
               </div>
               <div class="columna-16">
                 <ClientOnly>
-                  <SisdaiSelector
-                    v-model="seleccionCategoria"
-                    etiqueta="Categoría"
-                  >
+                  <SisdaiSelector v-model="seleccionCategoria" etiqueta="Categoría">
                     <option value="1">Opcion Uno</option>
                     <option value="2">Opcion Dos</option>
                     <option value="3">Opcion Tres</option>
@@ -160,15 +147,9 @@ const ejemplo = ref({});
               </div>
             </div>
             <div class="flex p-t-3">
-              <button class="boton-secundario boton-chico" type="button">
-                Ir a mis archivos
-              </button>
-              <button class="boton-primario boton-chico" disabled="disabled">
-                Actualizar
-              </button>
-              <button class="boton-primario boton-chico" :disabled="false">
-                Siguiente
-              </button>
+              <button class="boton-secundario boton-chico" type="button">Ir a mis archivos</button>
+              <button class="boton-primario boton-chico" disabled="disabled">Actualizar</button>
+              <button class="boton-primario boton-chico" :disabled="false">Siguiente</button>
             </div>
           </form>
         </div>

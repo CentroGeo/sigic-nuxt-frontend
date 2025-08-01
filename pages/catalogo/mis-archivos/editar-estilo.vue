@@ -1,16 +1,16 @@
 <script setup>
-import SisdaiControlDeslizante from "@centrogeomx/sisdai-componentes/src/componentes/control-deslizante/SisdaiControlDeslizante.vue";
+import SisdaiControlDeslizante from '@centrogeomx/sisdai-componentes/src/componentes/control-deslizante/SisdaiControlDeslizante.vue';
 const controlDeslizante = ref(null);
 const generaIdAleatorio = (el) => {
   return el + Math.random().toString(36).substring(2);
 };
-const idAleatorioControlDes = generaIdAleatorio("controldeslizante-");
+const idAleatorioControlDes = generaIdAleatorio('controldeslizante-');
 
 const statusOk = ref(false);
 const pending = ref(false);
 async function guardarArchivo(formData) {
-  const res = await fetch("/api/subirSLD", {
-    method: "POST",
+  const res = await fetch('/api/subirSLD', {
+    method: 'POST',
     body: formData,
   });
   pending.value = true;
@@ -20,7 +20,7 @@ async function guardarArchivo(formData) {
       pending.value = false;
       statusOk.value = true;
     }
-  }, "2500");
+  }, '2500');
 }
 </script>
 <template>
@@ -33,10 +33,7 @@ async function guardarArchivo(formData) {
       <main id="principal" class="contenedor m-b-10 m-y-3">
         <div class="alineacion-izquierda ancho-lectura">
           <div class="flex">
-            <nuxt-link
-              to="/catalogo/mis-archivos"
-              aria-label="regresar a mis archivos"
-            >
+            <nuxt-link to="/catalogo/mis-archivos" aria-label="regresar a mis archivos">
               <span
                 class="pictograma-flecha-izquierda pictograma-mediano texto-color-acento"
                 aria-hidden="true"
@@ -49,14 +46,10 @@ async function guardarArchivo(formData) {
             <div class="columna-16">
               <h2>nombre de la capa.json</h2>
               <div class="flex">
-                <nuxt-link
-                  to="/catalogo/mis-archivos/editar-metadatos"
-                  exact-path
+                <nuxt-link to="/catalogo/mis-archivos/editar-metadatos" exact-path
                   >Metadatos</nuxt-link
                 >
-                <nuxt-link to="/catalogo/mis-archivos/editar-estilo"
-                  >Estilo</nuxt-link
-                >
+                <nuxt-link to="/catalogo/mis-archivos/editar-estilo">Estilo</nuxt-link>
               </div>
               <h2>Estilo</h2>
               <p><b>Estilo, solo archivos .sld</b></p>
@@ -82,9 +75,7 @@ async function guardarArchivo(formData) {
                   <p>Capas_lago_texcoco.json</p>
 
                   <div>
-                    <nuxt-link to="/catalogo/mis-archivos"
-                      >Ver en mis archivos</nuxt-link
-                    >
+                    <nuxt-link to="/catalogo/mis-archivos">Ver en mis archivos</nuxt-link>
                   </div>
                 </div>
               </div>
@@ -94,9 +85,7 @@ async function guardarArchivo(formData) {
                   <div class="flex flex-contenido-separado">
                     <p class="flex-vertical-centrado">nombre de la capa.json</p>
                     <div class="flex">
-                      <p class="borde borde-redondeado-8" style="padding: 4px">
-                        .sld
-                      </p>
+                      <p class="borde borde-redondeado-8" style="padding: 4px">.sld</p>
                       <p class="flex-vertical-centrado">1MB</p>
                     </div>
                   </div>
@@ -110,17 +99,14 @@ async function guardarArchivo(formData) {
                       step="10"
                       @blur="false"
                       @update:val_entrada="
-                        ($event) =>
-                          (controlDeslizante.valor_seleccionado = $event)
+                        ($event) => (controlDeslizante.valor_seleccionado = $event)
                       "
                     />
                   </ClientOnly>
                   <div class="flex flex-contenido-inicio">
                     <label :for="idAleatorioControlDes"
                       >{{
-                        controlDeslizante?.valor_seleccionado < 100
-                          ? "Progreso"
-                          : "Completado"
+                        controlDeslizante?.valor_seleccionado < 100 ? 'Progreso' : 'Completado'
                       }}
                       {{ controlDeslizante?.valor_seleccionado }}%</label
                     >

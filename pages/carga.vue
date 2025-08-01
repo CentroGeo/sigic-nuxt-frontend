@@ -1,30 +1,31 @@
 <script setup lang="ts">
 definePageMeta({
-  middleware: "sidebase-auth",
+  middleware: 'sidebase-auth',
 });
 
 const archivo = ref<File | null>(null);
-const titulo = ref("");
-const descripcion = ref("");
+const titulo = ref('');
+const descripcion = ref('');
 const { data, status } = useAuth();
 watchEffect(() => {
-  if (status.value === "authenticated") {
+  if (status.value === 'authenticated') {
+    // pass
   }
 });
 async function subirArchivo() {
   const token = data.value?.accessToken;
   const formData = new FormData();
-  formData.append("title", titulo.value);
-  formData.append("abstract", descripcion.value);
-  formData.append("base_file", archivo.value!);
-  formData.append("token", token);
+  formData.append('title', titulo.value);
+  formData.append('abstract', descripcion.value);
+  formData.append('base_file', archivo.value!);
+  formData.append('token', token);
 
-  const res = await fetch("/api/subir", {
-    method: "POST",
+  await fetch('/api/subir', {
+    method: 'POST',
     body: formData,
   });
 
-  const json = await res.json();
+  // // const json = await res.json();
 }
 </script>
 <template>

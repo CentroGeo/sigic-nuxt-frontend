@@ -2,7 +2,7 @@
 // TODO: integrar los filtros de información
 const resourcesStore = useSelectedResourcesStore();
 
-const recursosTipo = ref("dataLayer");
+const recursosTipo = ref('dataLayer');
 const recursosFiltrados = ref([]);
 
 const recursosFiltradosCapas = ref([]);
@@ -17,17 +17,16 @@ const sortDateArray = (array) => {
 
 // dataLayer
 const { resourcesList: listaRecursosCapas } = useGeonodeResources({
-  resourceType: "dataLayer",
+  resourceType: 'dataLayer',
 });
 const capaMasReciente = ref([]);
 watch(listaRecursosCapas, () => {
-  resourcesStore.updateFilteredResources("dataLayer", listaRecursosCapas.value);
+  resourcesStore.updateFilteredResources('dataLayer', listaRecursosCapas.value);
 });
 watch(
-  () => resourcesStore.filteredResources["dataLayer"],
+  () => resourcesStore.filteredResources['dataLayer'],
   () => {
-    recursosFiltradosCapas.value =
-      resourcesStore.filteredResources["dataLayer"];
+    recursosFiltradosCapas.value = resourcesStore.filteredResources['dataLayer'];
     const capaOrdenada = sortDateArray(recursosFiltradosCapas.value)[0];
     capaMasReciente.value = {
       titulo: capaOrdenada.title,
@@ -39,20 +38,16 @@ watch(
 );
 // dataTable
 const { resourcesList: listaRecursosTablas } = useGeonodeResources({
-  resourceType: "dataTable",
+  resourceType: 'dataTable',
 });
 const tablaMasReciente = ref([]);
 watch(listaRecursosTablas, () => {
-  resourcesStore.updateFilteredResources(
-    "dataTable",
-    listaRecursosTablas.value
-  );
+  resourcesStore.updateFilteredResources('dataTable', listaRecursosTablas.value);
 });
 watch(
-  () => resourcesStore.filteredResources["dataTable"],
+  () => resourcesStore.filteredResources['dataTable'],
   () => {
-    recursosFiltradosTablas.value =
-      resourcesStore.filteredResources["dataTable"];
+    recursosFiltradosTablas.value = resourcesStore.filteredResources['dataTable'];
     const tablaOrdenada = sortDateArray(recursosFiltradosTablas.value)[0];
     tablaMasReciente.value = {
       titulo: tablaOrdenada.title,
@@ -64,28 +59,22 @@ watch(
 );
 // document
 const { resourcesList: listaRecursosDocumentos } = useGeonodeResources({
-  resourceType: "document",
+  resourceType: 'document',
 });
 const documentoMasReciente = ref([]);
 watch(listaRecursosDocumentos, () => {
-  resourcesStore.updateFilteredResources(
-    "document",
-    listaRecursosDocumentos.value
-  );
+  resourcesStore.updateFilteredResources('document', listaRecursosDocumentos.value);
   // console.log(
   //   "Copia de los Recursos filtrados en el store",
   //   resourcesStore.filteredResources["document"].length
   // );
 });
 watch(
-  () => resourcesStore.filteredResources["document"],
+  () => resourcesStore.filteredResources['document'],
   () => {
-    recursosFiltradosDocumentos.value =
-      resourcesStore.filteredResources["document"];
+    recursosFiltradosDocumentos.value = resourcesStore.filteredResources['document'];
 
-    const documentoOrdenado = sortDateArray(
-      recursosFiltradosDocumentos.value
-    )[0];
+    const documentoOrdenado = sortDateArray(recursosFiltradosDocumentos.value)[0];
     documentoMasReciente.value = {
       titulo: documentoOrdenado.title,
       resumen: documentoOrdenado.abstract,
@@ -124,10 +113,7 @@ watch(
           <h2>Explora</h2>
           <div class="flex">
             <div class="columna-5">
-              <nuxt-link
-                class="tarjeta tarjeta-hipervinculo-interno"
-                to="/catalogo/capas"
-              >
+              <nuxt-link class="tarjeta tarjeta-hipervinculo-interno" to="/catalogo/capas">
                 <img
                   class="tarjeta-imagen"
                   src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/asha.jpg"
@@ -135,17 +121,12 @@ watch(
                 />
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-titulo">Capas geográficas</p>
-                  <p class="tarjeta-etiqueta">
-                    {{ listaRecursosCapas.length }} capas
-                  </p>
+                  <p class="tarjeta-etiqueta">{{ listaRecursosCapas.length }} capas</p>
                 </div>
               </nuxt-link>
             </div>
             <div class="columna-5">
-              <nuxt-link
-                class="tarjeta tarjeta-hipervinculo-interno"
-                to="/catalogo/tablas"
-              >
+              <nuxt-link class="tarjeta tarjeta-hipervinculo-interno" to="/catalogo/tablas">
                 <img
                   class="tarjeta-imagen"
                   src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/becka.jpg"
@@ -158,10 +139,7 @@ watch(
               </nuxt-link>
             </div>
             <div class="columna-5">
-              <nuxt-link
-                class="tarjeta tarjeta-hipervinculo-interno"
-                to="/catalogo/documentos"
-              >
+              <nuxt-link class="tarjeta tarjeta-hipervinculo-interno" to="/catalogo/documentos">
                 <img
                   class="tarjeta-imagen"
                   src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/baghira.jpg"
@@ -179,15 +157,11 @@ watch(
           <div class="flex">
             <div class="columna-5">
               <div class="tarjeta">
-                <img
-                  class="tarjeta-imagen"
-                  :src="capaMasReciente.imagen"
-                  alt=""
-                />
+                <img class="tarjeta-imagen" :src="capaMasReciente.imagen" alt="" />
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-etiqueta">Capa geográfica</p>
                   <p class="tarjeta-titulo">{{ capaMasReciente.titulo }}</p>
-                  <p v-html="capaMasReciente.resumen"></p>
+                  <p>{{ capaMasReciente.resumen }}</p>
                 </div>
                 <div class="tarjeta-pie">
                   <nuxt-link
@@ -202,15 +176,11 @@ watch(
             </div>
             <div class="columna-5">
               <div class="tarjeta">
-                <img
-                  class="tarjeta-imagen"
-                  :src="tablaMasReciente.imagen"
-                  alt=""
-                />
+                <img class="tarjeta-imagen" :src="tablaMasReciente.imagen" alt="" />
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-etiqueta">Datos tabulados</p>
                   <p class="tarjeta-titulo">{{ tablaMasReciente.titulo }}</p>
-                  <p v-html="tablaMasReciente.resumen"></p>
+                  <p>{{ tablaMasReciente.resumen }}</p>
                 </div>
                 <div class="tarjeta-pie">
                   <nuxt-link
@@ -225,11 +195,7 @@ watch(
             </div>
             <div class="columna-5">
               <div class="tarjeta">
-                <img
-                  class="tarjeta-imagen"
-                  :src="documentoMasReciente.imagen"
-                  alt=""
-                />
+                <img class="tarjeta-imagen" :src="documentoMasReciente.imagen" alt="" />
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-etiqueta">Documento</p>
                   <p class="tarjeta-titulo">

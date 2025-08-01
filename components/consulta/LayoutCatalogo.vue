@@ -1,7 +1,7 @@
 <script setup>
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
-  titulo: { type: String, default: "Título" },
+  titulo: { type: String, default: 'Título' },
   resourceType: { type: String, required: true },
   etiquetaElementos: { type: String, default: undefined },
 });
@@ -20,7 +20,7 @@ const selectedCategories = ref([]);
 // Esta parte es para obtener todas las categorias
 const { data: geonodeCategories } = await useFetch(`${apiCategorias}`);
 if (!geonodeCategories.value) {
-  categoryList.value = ["Sin clasificar"];
+  categoryList.value = ['Sin clasificar'];
 } else {
   geonodeCategories.value.topics.items.map((d) => {
     categoryList.value.push(d.label);
@@ -39,11 +39,11 @@ function groupResults() {
         categorizedResources.value[title].push(r);
       }
     } else {
-      if (Object.keys(categorizedResources.value).includes("Sin clasificar")) {
-        categorizedResources.value["Sin clasificar"].push(r);
+      if (Object.keys(categorizedResources.value).includes('Sin clasificar')) {
+        categorizedResources.value['Sin clasificar'].push(r);
       } else {
-        categorizedResources.value["Sin clasificar"] = [];
-        categorizedResources.value["Sin clasificar"].push(r);
+        categorizedResources.value['Sin clasificar'] = [];
+        categorizedResources.value['Sin clasificar'].push(r);
       }
     }
   });
@@ -51,9 +51,7 @@ function groupResults() {
 
 function setSelectedCategory(categoria) {
   if (selectedCategories.value.includes(categoria)) {
-    selectedCategories.value = selectedCategories.value.filter(
-      (c) => c !== categoria
-    );
+    selectedCategories.value = selectedCategories.value.filter((c) => c !== categoria);
   } else {
     selectedCategories.value.push(categoria);
   }
@@ -61,16 +59,12 @@ function setSelectedCategory(categoria) {
 
 // Se utiliza un watcher porque inicialmente resourcesList y filteredResources están vacías
 watch(resourcesList, () => {
-  resourcesStore.updateFilteredResources(
-    resourceType.value,
-    resourcesList.value
-  );
+  resourcesStore.updateFilteredResources(resourceType.value, resourcesList.value);
 });
 watch(
   () => resourcesStore.filteredResources[resourceType.value],
   () => {
-    filteredResources.value =
-      resourcesStore.filteredResources[resourceType.value];
+    filteredResources.value = resourcesStore.filteredResources[resourceType.value];
     groupResults();
   },
   { deep: true }
@@ -92,10 +86,7 @@ watch(
           />
         </ClientOnly>
 
-        <UiNumeroElementos
-          :numero="filteredResources.length"
-          :etiqueta="etiquetaElementos"
-        />
+        <UiNumeroElementos :numero="filteredResources.length" :etiqueta="etiquetaElementos" />
       </div>
     </div>
 
@@ -104,11 +95,7 @@ watch(
         {{ x }}
       </li>
     </ul> -->
-    <div
-      v-for="category in Object.keys(categorizedResources)"
-      :key="category"
-      class="m-y-1"
-    >
+    <div v-for="category in Object.keys(categorizedResources)" :key="category" class="m-y-1">
       <div class="">
         <ConsultaElementoCategoria
           :title="category"
@@ -119,11 +106,11 @@ watch(
       </div>
       <div
         v-for="(option, index) in categorizedResources[category]"
-        v-if="selectedCategories.includes(category)"
         :key="index"
         class="contenedor-archivos"
       >
         <ConsultaElementoCatalogo
+          v-if="selectedCategories.includes(category)"
           :key="index"
           class="elemento-catalogo"
           :catalogue-element="option"

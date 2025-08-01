@@ -4,12 +4,12 @@ const props = defineProps({
   datos: { type: Array, default: Array },
   caption: {
     type: String,
-    default: "",
+    default: '',
   },
 });
 
 function generaIdAleatorio() {
-  return "id-" + Math.random().toString(36).substring(2);
+  return 'id-' + Math.random().toString(36).substring(2);
 }
 const idAleatorio = generaIdAleatorio();
 </script>
@@ -29,25 +29,21 @@ const idAleatorio = generaIdAleatorio();
             :key="v"
             scope="col"
           >
-            {{ variable.replaceAll("_", " ") }}
+            {{ variable.replaceAll('_', ' ') }}
           </th>
         </tr>
       </thead>
       <tbody>
-        <tr
-          v-for="(datum, d) in props.datos"
-          :id="`${idAleatorio}-ren-${d}`"
-          :key="d"
-        >
+        <tr v-for="(datum, d) in props.datos" :id="`${idAleatorio}-ren-${d}`" :key="d">
           <td
             v-for="(variable, v) in props.variables"
             :key="v"
             :headers="`${idAleatorio}-ren-${d} ${idAleatorio}-col-${v}`"
           >
             {{
-              variable !== "tipo_recurso" && variable !== "acciones"
-                ? datum[variable]?.toLocaleString("en")
-                : ""
+              variable !== 'tipo_recurso' && variable !== 'acciones'
+                ? datum[variable]?.toLocaleString('en')
+                : ''
             }}
             <!-- <p
               v-if="variable === 'tipo_recurso'"
@@ -63,7 +59,7 @@ const idAleatorio = generaIdAleatorio();
               style="min-width: 168px"
             >
               <span v-if="datum[variable]?.toLocaleString('en') === 'document'"
-                >{{ datum[variable]?.toLocaleString("en") }}
+                >{{ datum[variable]?.toLocaleString('en') }}
                 <span class="pictograma-documento"></span>
               </span>
               <span
@@ -71,7 +67,7 @@ const idAleatorio = generaIdAleatorio();
                   datum[variable]?.toLocaleString('en') === 'dataset' ||
                   datum[variable]?.toLocaleString('en') === 'Capa geográfica'
                 "
-                >{{ datum[variable]?.toLocaleString("en") }}
+                >{{ datum[variable]?.toLocaleString('en') }}
                 <span class="pictograma-capas"></span>
               </span>
             </p>
@@ -81,25 +77,13 @@ const idAleatorio = generaIdAleatorio();
                 v-if="datum[variable]?.includes('Editar, Descargar, Remover')"
                 style="display: flex; gap: 16px; max-width: 168px"
               >
-                <button
-                  class="boton-pictograma boton-secundario"
-                  aria-label=""
-                  type="button"
-                >
+                <button class="boton-pictograma boton-secundario" aria-label="" type="button">
                   <span class="pictograma-editar"></span>
                 </button>
-                <button
-                  class="boton-pictograma boton-secundario"
-                  aria-label=""
-                  type="button"
-                >
+                <button class="boton-pictograma boton-secundario" aria-label="" type="button">
                   <span class="pictograma-archivo-descargar"></span>
                 </button>
-                <button
-                  class="boton-pictograma boton-secundario"
-                  aria-label=""
-                  type="button"
-                >
+                <button class="boton-pictograma boton-secundario" aria-label="" type="button">
                   <span class="pictograma-eliminar"></span>
                 </button>
               </div>
@@ -107,18 +91,10 @@ const idAleatorio = generaIdAleatorio();
                 v-if="datum[variable]?.includes('Ver, Descargar')"
                 style="display: flex; gap: 16px; max-width: 168px"
               >
-                <button
-                  class="boton-pictograma boton-secundario"
-                  aria-label=""
-                  type="button"
-                >
+                <button class="boton-pictograma boton-secundario" aria-label="" type="button">
                   <span class="pictograma-ayuda"></span>
                 </button>
-                <button
-                  class="boton-pictograma boton-secundario"
-                  aria-label=""
-                  type="button"
-                >
+                <button class="boton-pictograma boton-secundario" aria-label="" type="button">
                   <span class="pictograma-archivo-descargar"></span>
                 </button>
               </div>
