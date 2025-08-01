@@ -38,7 +38,8 @@ WORKDIR /app
 
 RUN if [ "$NODE_ENV" = "development" ]; then \
       apt-get update && apt-get install -y --no-install-recommends git \
-      && rm -rf /var/lib/apt/lists/*
+      && rm -rf /var/lib/apt/lists/* \
+    fi
 
 COPY --from=builder /app/.output/ .output/
 COPY --from=builder /app/package.json .
