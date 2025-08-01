@@ -1,18 +1,12 @@
 <script setup>
-import {
-  SisdaiCapaWms,
-  SisdaiCapaXyz,
-  SisdaiMapa,
-} from "@centrogeomx/sisdai-mapas";
-import { exportarHTMLComoPNG } from "@centrogeomx/sisdai-mapas/funciones";
+import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
+import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
 
-const resourceType = "dataLayer";
+const resourceType = 'dataLayer';
 
-const extensionNacional = "-118.3651,14.5321,-86.7104,32.7187";
+const extensionNacional = '-118.3651,14.5321,-86.7104,32.7187';
 const storeConsulta = useConsultaStore();
-const extensionMapa = computed(
-  () => storeConsulta.ajustarExtensionMapa || extensionNacional
-);
+const extensionMapa = computed(() => storeConsulta.ajustarExtensionMapa || extensionNacional);
 
 const config = useRuntimeConfig();
 const storeSelected = useSelectedResourcesStore();
@@ -20,15 +14,11 @@ const randomNum = ref(0);
 
 const linkExportaMapa = ref();
 function exportarMapa() {
-  exportarHTMLComoPNG(
-    document.querySelectorAll(".mapa .ol-viewport").item(0),
-    linkExportaMapa.value
-  );
+  exportarHTMLComoPNG(document.querySelectorAll('.mapa .ol-viewport').item(0), linkExportaMapa.value);
 }
 
 const attributos = reactive({});
 async function addAttribute(pk) {
-  // attributes[pk] = `${config.public.geonodeApi}/datasets/${pk}/attribute_set`;
   attributos[pk] = [];
 
   try {
@@ -91,17 +81,16 @@ watch(
     // console.log("Se agregó:", nv);
     nv.forEach((r) => addAttribute(r));
 
-    const ov = arr2.filter((item) => !arr1.includes(item));
+    //const ov = arr2.filter((item) => !arr1.includes(item));
     // console.log("Se quitó:", ov);
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-    ov.forEach((resource) => delete attributos[resource]);
+
+    //ov.forEach((resource) => delete attributos[resource]);
 
     // console.log(attributos);
   },
   { deep: true }
 );
 
-// bbox_polygon
 // api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
 </script>
 
@@ -125,9 +114,7 @@ watch(
           <SisdaiCapaXyz />
 
           <SisdaiCapaWms
-            v-for="(capa, index) in storeSelected.selectedResources[
-              resourceType
-            ]"
+            v-for="(capa, index) in storeSelected.selectedResources[resourceType]"
             :key="`${capa.uuid}_${randomNum}`"
             :fuente="`${config.public.geoserverUrl}/wms?`"
             :capa="capa.alternate"

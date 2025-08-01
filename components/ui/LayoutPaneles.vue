@@ -32,8 +32,8 @@ const storeCatalogo = useCatalogoStore();
         paneles === 2
           ? `columna-${storeCatalogo.catalogoColapsado ? '16' : '12'}`
           : paneles === 3
-          ? `columna-${storeCatalogo.catalogoColapsado ? '12' : '8'}`
-          : ''
+            ? `columna-${storeCatalogo.catalogoColapsado ? '12' : '8'}`
+            : ''
       }`"
     >
       <slot name="visualizador">

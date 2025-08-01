@@ -1,7 +1,7 @@
 <script setup>
-definePageMeta({ middleware: "redireccionar-modulo-consulta" });
+definePageMeta({ middleware: 'redireccionar-modulo-consulta' });
 
-const ruta = "/consulta";
+const ruta = '/consulta';
 
 const storeConsulta = useConsultaStore();
 </script>

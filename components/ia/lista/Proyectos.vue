@@ -1,13 +1,13 @@
 <!-- TODO: adaptar al LayoutListas.vue -->
 <script setup>
-import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
-import { ref } from "vue";
+import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
+import { ref } from 'vue';
 
 const storeIA = useIAStore();
 const proyectos = ref([
   {
     id: 0,
-    titulo: "Biodiversidad de ecosistemas marinos",
+    titulo: 'Biodiversidad de ecosistemas marinos',
     numero_contextos: 0,
     numero_fuentes: 9,
   },
@@ -42,14 +42,8 @@ const listaProyectosFiltrada = ref(proyectos.value);
           <div class="proyecto seleccionado p-l-4 p-r-2 p-y-1">
             <div class="proyecto-titulo m-b-1">{{ proyecto.titulo }}</div>
             <div class="flex">
-              <UiNumeroElementos
-                :numero="proyecto.numero_contextos"
-                etiqueta="Contextos"
-              />
-              <UiNumeroElementos
-                :numero="proyecto.numero_fuentes"
-                etiqueta="Fuentes"
-              />
+              <UiNumeroElementos :numero="proyecto.numero_contextos" etiqueta="Contextos" />
+              <UiNumeroElementos :numero="proyecto.numero_fuentes" etiqueta="Fuentes" />
             </div>
           </div>
         </li>

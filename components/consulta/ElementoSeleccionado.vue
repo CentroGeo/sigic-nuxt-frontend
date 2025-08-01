@@ -1,5 +1,5 @@
 <script setup>
-import { tooltipContent } from "~/utils/consulta.js";
+import { tooltipContent } from '~/utils/consulta.js';
 const selectedStore = useSelectedResourcesStore();
 const props = defineProps({
   selectedElement: {
@@ -11,7 +11,7 @@ const props = defineProps({
 const { selectedElement, resourceType } = toRefs(props);
 
 if (!selectedStore.shownFiles[resourceType.value]) {
-  let firstSelection = selectedStore.selectedResources[resourceType.value][0];
+  const firstSelection = selectedStore.selectedResources[resourceType.value][0];
   selectedStore.setShownFile(resourceType.value, firstSelection);
 }
 
@@ -38,18 +38,15 @@ if (!selectedStore.shownFiles[resourceType.value]) {
         <p class="tarjeta-texto-secundario m-0">Categoria</p>
         <div class="m-0">
           <button
-            class="boton-pictograma boton-sin-contenedor-secundario"
-            aria-label="Mostrar información"
-            type="button"
             v-globo-informacion:izquierda="{
               contenido: tooltipContent(selectedElement),
               desfase: [0, 8],
             }"
+            class="boton-pictograma boton-sin-contenedor-secundario"
+            aria-label="Mostrar información"
+            type="button"
           >
-            <span
-              class="pictograma-informacion pictograma-mediano"
-              aria-hidden="true"
-            ></span>
+            <span class="pictograma-informacion pictograma-mediano" aria-hidden="true" />
           </button>
 
           <button
@@ -58,10 +55,7 @@ if (!selectedStore.shownFiles[resourceType.value]) {
             type="button"
             @click="selectedStore.raiseIndex(selectedElement, resourceType)"
           >
-            <span
-              class="pictograma-subir-capa pictograma-mediano"
-              aria-hidden="true"
-            ></span>
+            <span class="pictograma-subir-capa pictograma-mediano" aria-hidden="true" />
           </button>
 
           <button
@@ -70,10 +64,7 @@ if (!selectedStore.shownFiles[resourceType.value]) {
             type="button"
             @click="selectedStore.lowerIndex(selectedElement, resourceType)"
           >
-            <span
-              class="pictograma-bajar-capa pictograma-mediano"
-              aria-hidden="true"
-            ></span>
+            <span class="pictograma-bajar-capa pictograma-mediano" aria-hidden="true" />
           </button>
         </div>
       </div>

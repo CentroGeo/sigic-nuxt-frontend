@@ -1,6 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
-const isDev = process.env.NODE_ENV !== 'production'
+const isDev = process.env.NODE_ENV === 'production' ? false : true
 
 export default defineNuxtConfig({
   app: {
@@ -55,6 +55,10 @@ export default defineNuxtConfig({
       trustHost: true,
       defaultProvider: "keycloak",
     },
+    sessionRefresh: {
+      enablePeriodically: true,
+      enableOnWindowFocus: true,
+    }
   },
 
   runtimeConfig: {
