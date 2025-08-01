@@ -31,10 +31,8 @@ jobs:
       - name: Run ESLint
         run: npm run lint
 
-
   build:
     name: Build SIGIC Nuxt Frontend image (develop)
-    needs: lint
     runs-on: [self-hosted, build-develop, sigic-nuxt-frontend]
     environment: develop
     if: github.event_name == 'push'
