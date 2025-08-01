@@ -13,7 +13,7 @@ const props = defineProps({
 });
 const { tipoArchivoValidos } = toRefs(props);
 
-defineEmits('guardarArchivo');
+const emit = defineEmits(['guardarArchivo']);
 
 const ejemplo = ref({});
 
@@ -191,7 +191,7 @@ onChange(async (files) => {
             aria-label="Guardar"
             type="button"
             :disabled="!datosArriba"
-            @click="$emit('guardarArchivo', formData)"
+            @click="emit('guardarArchivo', formData)"
           >
             Guardar
           </button>
