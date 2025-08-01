@@ -9,6 +9,7 @@ const idAleatorioControlDes = generaIdAleatorio("controldeslizante-");
 const statusOk = ref(false);
 const pending = ref(false);
 async function guardarArchivo(formData) {
+  // TODO: editar subirSLD por subirArchivos
   const res = await fetch("/api/subirSLD", {
     method: "POST",
     body: formData,
@@ -68,12 +69,12 @@ async function guardarArchivo(formData) {
                   >
                 </div>
                 <div>
-                  <nuxt-link to="/catalogo/mis-archivos/editar-metadatos"
-                    >Editar metadatos</nuxt-link
+                  <nuxt-link to="/catalogo/mis-archivos/editar-estilo"
+                    >Editar estilo</nuxt-link
                   >
                 </div>
                 <div>
-                  <nuxt-link to="/catalogo/mis-archivos/editar-estilo"
+                  <nuxt-link to="/catalogo/mis-archivos"
                     >Ver en mis archivos</nuxt-link
                   >
                 </div>

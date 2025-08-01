@@ -1,4 +1,12 @@
 <script setup>
+const props = defineProps({
+  tipoArchivoValidos: {
+    type: String,
+    default: "",
+  },
+});
+const { tipoArchivoValidos } = toRefs(props);
+
 const ejemplo = ref({});
 
 const formData = ref(new FormData());
@@ -7,34 +15,98 @@ const formData = ref(new FormData());
 const { data } = useAuth();
 const datosArriba = ref(false);
 const datos = ref({});
+const esSLD = ref(false);
+const todosLosDemas = ref(false);
+const archivoValido = ref(false);
+
+function appendSLD(files, layerSlug, token) {
+  // console.log("files", files);
+  files.forEach((file) => {
+    formData.value.append("base_file", file);
+    formData.value.append("sld_file", file);
+    formData.value.append("dataset_title", layerSlug);
+    // formData.value.append("dataset_title", "geonode:coordinaciones");
+    formData.value.append("style_upload_form", "true");
+    formData.value.append("permissions", JSON.stringify({}));
+    formData.value.append("charset", "undefined");
+    // token importante
+    formData.value.append("token", token);
+  });
+  // console.log("formData.value", formData.value);
+}
+
+const validarTipoArchivo = (files) => {
+  files.forEach((file) => {
+    // console.log("file.name", file.name);
+    // console.log("file.type", file.type);
+    if (
+      tipoArchivoValidos.value === "sld" &&
+      (file.name.slice(-4) === ".sld" ||
+        file.type === ".sld" ||
+        file.type === "application/vnd.sld+xml" ||
+        file.type === "application/vnd.sld+xml,.sld")
+    ) {
+      console.log("Archivo SLD válido");
+      esSLD.value = true;
+    } else if (
+      tipoArchivoValidos.value !== "sld" &&
+      (file.type === "application/vnd.geo+json" ||
+        file.type === "application/json" ||
+        file.type === "application/geo+json" ||
+        file.type === "application/geopackage+sqlite3" ||
+        file.type === "text/csv" ||
+        file.type === "application/xml" ||
+        file.type === "application/pdf" ||
+        file.type === "image/jpeg" ||
+        file.type === "image/png")
+    ) {
+      todosLosDemas.value = true;
+    } else {
+      archivoValido.value = true;
+      datosArriba.value = false;
+    }
+  });
+};
 
 const onDropZone = ref(null);
 const { files } = useDropZone(onDropZone, { onDrop });
 async function onDrop() {
   // imprime el archivo que se suba mediante el drop
-  console.log(files);
-
-  // obtén el token para el bearer
-  const token = data.value?.accessToken;
-  console.log("token", token);
+  // console.log("files", files.value);
 
   if (files.value) {
-    // TODO: remover cuando esté back, asignar una copia al store
+    // obtén el token para el bearer
+    const token = data.value?.accessToken;
+    // console.log("token", token);
+    files.value = Array.from(files.value);
+
     datos.value = files.value;
     datosArriba.value = true;
-
     // let isValid = false;
+
+    // files.value.forEach((file) => {});
+    validarTipoArchivo(files.value);
+    // appendSLD(files.value, "geonode:coordinaciones", token);
+    if (esSLD.value && tipoArchivoValidos.value === "sld") {
+      appendSLD(files.value, "geonode:coordinaciones", token);
+    } else if (todosLosDemas.value) {
+      // appendOtros(files, token);
+      console.log("subiendo");
+    } else {
+      console.log("Archivo inválido");
+    }
+
     files.value.forEach((file) => {
-      formData.value.append("base_file", file);
-      formData.value.append("sld_file", file);
-      // TODO: cambiar el layerSlug según la capa
-      // formData.append('dataset_title', layerSlug);
-      formData.value.append("dataset_title", "geonode:coordinaciones");
-      formData.value.append("style_upload_form", "true");
-      formData.value.append("permissions", JSON.stringify({}));
-      formData.value.append("charset", "undefined");
-      // token importante
-      formData.value.append("token", token);
+      // formData.value.append("base_file", file);
+      // formData.value.append("sld_file", file);
+      // // TODO: cambiar el layerSlug según la capa
+      // // formData.append('dataset_title', layerSlug);
+      // formData.value.append("dataset_title", "geonode:coordinaciones");
+      // formData.value.append("style_upload_form", "true");
+      // formData.value.append("permissions", JSON.stringify({}));
+      // formData.value.append("charset", "undefined");
+      // // token importante
+      // formData.value.append("token", token);
       // TODO: revisar bien los MIME de los archivos válidos
       // if (
       //   file.type === "application/vnd.geo+json" ||
@@ -75,27 +147,40 @@ const { open, onChange } = useFileDialog();
 onChange(async (files) => {
   // imprime el archivo que se suba mediante el diálogo
   // console.log("files", files);
+  files = Array.from(files);
 
-  // obtén el token para el bearer
-  const token = data.value?.accessToken;
-  // console.log("token", token);
+  if (files) {
+    // obtén el token para el bearer
+    const token = data.value?.accessToken;
+    // console.log("token", token);
 
-  datos.value = files;
-  datosArriba.value = true;
+    datos.value = files;
+    datosArriba.value = true;
 
-  // por cada conjunto de Files asigna las propiedades
-  // según el tipo de archivo. acá es para SLD
-  for (let x = 0; x < files.length; x++) {
-    formData.value.append("base_file", files[x]);
-    formData.value.append("sld_file", files[x]);
-    // TODO: cambiar el layerSlug según la capa
-    // formData.append('dataset_title', layerSlug);
-    formData.value.append("dataset_title", "geonode:coordinaciones");
-    formData.value.append("style_upload_form", "true");
-    formData.value.append("permissions", JSON.stringify({}));
-    formData.value.append("charset", "undefined");
-    // token importante
-    formData.value.append("token", token);
+    validarTipoArchivo(files);
+
+    if (esSLD.value && tipoArchivoValidos.value === "sld") {
+      appendSLD(files, "geonode:coordinaciones", token);
+    } else if (todosLosDemas.value) {
+      // appendOtros(files, token);
+      console.log("subiendo");
+    } else {
+      console.log("Archivo inválido");
+    }
+    // por cada conjunto de Files asigna las propiedades
+    // según el tipo de archivo. acá es para SLD
+    // for (let x = 0; x < files.length; x++) {
+    //   // formData.value.append("base_file", files[x]);
+    //   // formData.value.append("sld_file", files[x]);
+    //   // // TODO: cambiar el layerSlug según la capa
+    //   // // formData.append('dataset_title', layerSlug);
+    //   // formData.value.append("dataset_title", "geonode:coordinaciones");
+    //   // formData.value.append("style_upload_form", "true");
+    //   // formData.value.append("permissions", JSON.stringify({}));
+    //   // formData.value.append("charset", "undefined");
+    //   // // token importante
+    //   // formData.value.append("token", token);
+    // }
   }
   // console.log("formData.value", formData.value);
 
@@ -200,6 +285,7 @@ onChange(async (files) => {
           </div>
         </div>
       </div>
+      <p v-if="archivoValido" class="texto-color-error">Archivo inválido</p>
       <div class="flex">
         <client-only>
           <button
