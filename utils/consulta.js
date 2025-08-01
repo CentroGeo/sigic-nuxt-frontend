@@ -1,8 +1,8 @@
 import { useSelectedResourcesStore } from "@/stores/selectedResources.js";
 export function tooltipContent(resource) {
   let formatedAbstract = "Sin descripción";
+  let formatedAttribution = "Sin fuente"
   if (resource.abstract) {
-    console.log(resource.abstract);
     formatedAbstract = resource.abstract
       .replace(/^<p>/, "")
       .replace(/<\/p>$/, "")
@@ -10,8 +10,8 @@ export function tooltipContent(resource) {
       .replace(/<\/pre>$/, "");
   }
   const content =
-    `<p style="max-width:250px">${resource.abstract ? resource.abstract : 'Sin descripción'}</p>` +
-    `<p>${resource.attribution ? resource.attribution : 'Sin fuente'}</p>`;
+    `<p style="max-width:250px">${formatedAbstract}</p>` +
+    `<p style="max-width:250px">${resource.attribution ? resource.attribution : 'Sin fuente'}</p>`;
   return content;
 }
 

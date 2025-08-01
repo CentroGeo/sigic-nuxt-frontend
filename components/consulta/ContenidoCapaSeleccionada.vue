@@ -78,7 +78,6 @@ const optionsButtons = ref([
     label: 'Cambiar opacidad',
     pictogram: 'pictograma-editar',
     action: () => {
-      console.warn('cambiar opacidad');
       notifyOpacityChild();
     },
   },

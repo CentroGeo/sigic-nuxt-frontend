@@ -86,8 +86,8 @@ export const useSelectedResourcesStore = defineStore('selectedResources', {
       }
     },
     updateLayerOpacity(alternate, value) {
-      this.shownFiles.dataLayer.opacity[alternate] = value;
-      console.log(this.shownFiles.dataLayer.opacity);
+      this.shownFiles.dataLayer.opacity[alternate] = value / 100;
+      console.log("cambio store opacidad", this.shownFiles.dataLayer.opacity);
     },
     updateLayerVisibility(alternate, value) {
       this.shownFiles.dataLayer.visibility[alternate] = value;

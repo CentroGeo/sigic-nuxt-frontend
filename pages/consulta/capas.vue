@@ -11,6 +11,7 @@ const extensionMapa = computed(() => storeConsulta.ajustarExtensionMapa || exten
 const config = useRuntimeConfig();
 const storeSelected = useSelectedResourcesStore();
 const randomNum = ref(0);
+const opacityDict = ref({})
 const isFinishedLoading = ref(0);
 const linkExportaMapa = ref();
 function exportarMapa() {
@@ -95,9 +96,9 @@ function cuadroInformativo(pk) {
     contenido: (d) => `<p><b>nombre</b>: ${d['nombre']}</p>`,
   };
 } 
-function updateMapParams(centro, acercamiento) {
+/* function updateMapParams(centro, acercamiento) {
   storeSelected.setMapViewParams(centro, acercamiento);
-}
+} */
 
 // Este watcher sirve para ajustar los índices de las capas montadas
 // cuando estas terminan de cargarse pero solo funciona cuando recién se montan las capas.
@@ -105,9 +106,16 @@ watch(isFinishedLoading, () => {
   console.log("cuenta: ", isFinishedLoading.value);
   let resourcesNum = storeSelected.selectedResources[resourceType].length;
   if (resourcesNum === isFinishedLoading.value) {
+    opacityDict.value = storeSelected.shownFiles.dataLayer.opacity
     randomNum.value += 1;
+    console.log("Dict opacidad", opacityDict.value)
   }
 });
+watch(() => storeSelected.shownFiles.dataLayer, () =>{
+  isFinishedLoading.value = 0
+  randomNum.value  += 1
+  console.log("watcher en capas", storeSelected.shownFiles.dataLayer)
+},{deep:true})
 </script>
 
 <template>
@@ -131,7 +139,6 @@ watch(isFinishedLoading, () => {
           @al-mover-vista="
             ({ acercamiento, centro }) => {
               console.log(acercamiento, centro);
-              updateMapParams(centro, acercamiento);
             }
           "
         >
@@ -141,8 +148,7 @@ watch(isFinishedLoading, () => {
             :key="`${capa.uuid}_${randomNum}`"
             :fuente="`${config.public.geoserverUrl}/wms?`"
             :capa="capa.alternate"
-            :visible="storeSelected.shownFiles.dataLayer.visibility ?? true"
-            :opacidad="storeSelected.shownFiles.dataLayer.opacity ?? 1"
+            :opacidad="0.3"
             :posicion="storeSelected.selectedResources.length - index"
             :cuadro-informativo="attributos[capa.pk]"
             @alFinalizarCarga="isFinishedLoading += 1"

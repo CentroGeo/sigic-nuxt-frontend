@@ -1,5 +1,5 @@
 <script setup>
-import { setDocView, setUrlDocs, setUrlLayers } from "@/utils/consulta.js";
+import { setDocView, setUrlDocs } from "@/utils/consulta.js";
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
   titulo: { type: String, default: 'Título' },
@@ -93,7 +93,7 @@ watch(
     const recursos = resourcesStore.selectedResources[resourceType.value];
     if (resourceType.value !== "dataLayer") {
       setUrlDocs(recursos, resourceType.value);
-    } else setUrlLayers(recursos);
+    } /*else setUrlLayers(recursos);*/
   },
   { deep: true }
 );
@@ -103,7 +103,7 @@ onMounted(() => {
     resourcesStore.selectedResources[resourceType.value];
   if (selectedResources.value.length > 0) {
     if (resourceType.value === "dataLayer") {
-      setUrlLayers(selectedResources.value);
+      /*setUrlLayers(selectedResources.value);*/
     } else {
       setUrlDocs(selectedResources.value, resourceType.value);
     }

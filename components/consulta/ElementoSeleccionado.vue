@@ -1,6 +1,6 @@
 <script setup>
 import { tooltipContent } from '~/utils/consulta.js';
-const selectedStore = useSelectedResourcesStore();
+const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
   selectedElement: {
     type: Object,
