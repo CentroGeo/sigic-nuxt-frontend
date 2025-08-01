@@ -20,6 +20,7 @@ const extent = ref([-118.3651, 14.5321, -86.7104, 32.7187]);
 const estiloSeleccionado = ref("Opcion 1");
 const estilosLista = ref(["Opcion 1", "Opción 2", "Opcion 3"]);
 const modalMapa = ref(null);
+const emit = defineEmits(["clickDownload"]);
 function abrirModalMapa() {
   modalMapa.value?.abrirModal();
 }
@@ -27,6 +28,13 @@ function openLayerView() {
   resourcesStore.addResource("dataLayer", selectedElement.value);
   modalMapa.value?.cerrarModal();
   console.log("Redirije al visor de capas");
+}
+function notifyDownload() {
+  console.log(
+    "se hizo click en download, se triggerea el custom emit para notificar al padre"
+  );
+  emit("clickDownload");
+  modalMapa.value?.cerrarModal();
 }
 defineExpose({
   abrirModalMapa,
@@ -72,7 +80,9 @@ defineExpose({
           </button>
         </nuxtLink>
 
-        <button type="button" class="boton-primario">Descargar</button>
+        <button type="button" class="boton-primario" @click="notifyDownload">
+          Descargar
+        </button>
       </template>
     </SisdaiModal>
   </ClientOnly>

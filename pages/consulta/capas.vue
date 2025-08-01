@@ -148,7 +148,6 @@ watch(isFinishedLoading, () => {
           "
         >
           <SisdaiCapaXyz />
-
           <SisdaiCapaWms
             v-for="(capa, index) in storeSelected.selectedResources[
               resourceType
@@ -156,6 +155,8 @@ watch(isFinishedLoading, () => {
             :key="`${capa.uuid}_${randomNum}`"
             :fuente="`${config.public.geoserverUrl}/wms?`"
             :capa="capa.alternate"
+            :visible="false"
+            :opacidad="0.1"
             :posicion="storeSelected.selectedResources.length - index"
             :cuadro-informativo="attributos[capa.pk]"
             @alFinalizarCarga="isFinishedLoading += 1"

@@ -14,15 +14,8 @@ const shownFileUuid = computed(
 );
 const hasGeometry = ref();
 const noGeometry = [-1, -1, 0, 0];
-const mapPreview = ref(null);
+const mapChild = ref(null);
 const downloadChild = ref(null);
-
-function notifyMapPreview() {
-  mapPreview.value?.abrirModalMapa();
-}
-function notifyDownloadChild() {
-  downloadChild.value?.abrirModalDescarga();
-}
 
 if (resourceType.value === "dataTable") {
   let a = selectedElement.value.extent.coords.join(",");
@@ -34,6 +27,17 @@ if (resourceType.value === "dataTable") {
   }
 } else {
   hasGeometry.value = true;
+}
+
+function notifyMapChild() {
+  mapChild.value?.abrirModalMapa();
+}
+function notifyDownloadChild() {
+  downloadChild.value?.abrirModalDescarga();
+}
+function downloadFromMap() {
+  console.log("el padre se enteró");
+  downloadChild.value?.abrirModalDescarga();
 }
 </script>
 
@@ -56,7 +60,7 @@ if (resourceType.value === "dataTable") {
         class="boton-pictograma boton-sin-contenedor-secundario"
         aria-label="Abrir vista previa"
         type="button"
-        @click="notifyMapPreview"
+        @click="notifyMapChild"
       >
         <span class="pictograma-mexico" aria-hidden="true"></span>
       </button>
@@ -85,7 +89,11 @@ if (resourceType.value === "dataTable") {
     :selected-element="selectedElement"
     :download-type="'individual'"
   />
-  <ConsultaModalMapa ref="mapPreview" :selected-element="selectedElement" />
+  <ConsultaModalMapa
+    ref="mapChild"
+    :selected-element="selectedElement"
+    @clickDownload="downloadFromMap"
+  />
 </template>
 <style lang="scss" scoped>
 .flex {

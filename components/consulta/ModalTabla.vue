@@ -8,7 +8,7 @@ const props = defineProps({
 });
 const { selectedElement } = toRefs(props);
 const resourcesStore = useSelectedResourcesStore();
-
+const emit = defineEmits(["clickDownload"]);
 const modalTabla = ref(null);
 const paginaActual = ref(0);
 const tamanioPagina = 10;
@@ -33,7 +33,13 @@ function openTableView() {
   modalTabla.value?.cerrarModal();
   console.log("Redirije al visor de tablas");
 }
-
+function notifyDownload() {
+  console.log(
+    "se hizo click en download, se triggerea el custom emit para notificar al padre"
+  );
+  emit("clickDownload");
+  modalTabla.value?.cerrarModal();
+}
 defineExpose({
   abrirModalTabla,
 });
@@ -68,7 +74,9 @@ watch(paginaActual, () => {
           </button>
         </nuxtLink>
 
-        <button type="button" class="boton-primario">Descargar</button>
+        <button type="button" class="boton-primario" @click="notifyDownload">
+          Descargar
+        </button>
       </template>
     </SisdaiModal>
   </ClientOnly>

@@ -40,7 +40,7 @@ const optionsDict = {
           downloadVectorData(selectedElement.value, "csv");
         },
       },
-      {
+      /*       {
         label: "XLS",
         action: () => {
           downloadExcel(selectedElement.value, "xls");
@@ -51,7 +51,7 @@ const optionsDict = {
         action: () => {
           downloadExcel(selectedElement.value, "xlsx");
         },
-      },
+      }, */
       {
         label: "GeoPackage",
         action: () => {
@@ -81,7 +81,7 @@ const optionsDict = {
           downloadVectorData(selectedElement.value, "csv");
         },
       },
-      {
+      /*       {
         label: "XLS",
         action: () => {
           downloadExcel(selectedElement.value, "xls");
@@ -92,7 +92,7 @@ const optionsDict = {
         action: () => {
           downloadExcel(selectedElement.value, "xlsx");
         },
-      },
+      }, */
       {
         label: "Metadatos",
         action: () => {

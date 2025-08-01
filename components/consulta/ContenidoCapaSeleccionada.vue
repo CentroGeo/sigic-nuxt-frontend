@@ -24,7 +24,10 @@ function notifyDownloadChild() {
 function notifyOpacityChild() {
   opacityChild.value.abrirModalOpacidad();
 }
-
+function downloadFromTabla() {
+  console.log("el padre se enteró");
+  downloadChild.value?.abrirModalDescarga();
+}
 /**
  * Devuelve el extend de acuerdo a una capa en formato: left,bootom,rigth,top
  * @param {Array} bboxPolygon arreglo de corrdenadas envolventes de la capa
@@ -116,7 +119,11 @@ const optionsButtons = ref([
     </button>
   </div>
   <!-- Los modales-->
-  <ConsultaModalTabla ref="tablaChild" :selected-element="selectedElement" />
+  <ConsultaModalTabla
+    ref="tablaChild"
+    :selected-element="selectedElement"
+    @clickDownload="downloadFromTabla"
+  />
   <ConsultaModalDescarga
     ref="downloadChild"
     :resource-type="resourceType"
