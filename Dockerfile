@@ -36,9 +36,9 @@ ENV NODE_ENV=${NODE_ENV:-development}
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    git \
-    && rm -rf /var/lib/apt/lists/*
+RUN if [ "$NODE_ENV" = "development" ]; then \
+      apt-get update && apt-get install -y --no-install-recommends git \
+      && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/.output/ .output/
 COPY --from=builder /app/package.json .
