@@ -1,4 +1,7 @@
 <script setup>
+import { SisdaiLeyendaWms } from "@centrogeomx/sisdai-mapas";
+
+const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
@@ -46,10 +49,6 @@ const optionsButtons = ref([
     label: "Hacer zoom",
     pictogram: "pictograma-zoom-instruccional",
     action: () => {
-      // console.log("hacer zoom", {
-      //   extension: getExtent(selectedElement.value.bbox_polygon.coordinates[0]),
-      // });
-
       storeConsulta.ajustarExtensionMapa = getExtent(
         selectedElement.value.bbox_polygon.coordinates[0]
       ).join(",");
@@ -94,22 +93,32 @@ const optionsButtons = ref([
 </script>
 <template>
   <!-- El contenido de la tarjeta de capas  -->
-  <div class="m-b-5">
-    <p class="tarjeta-titulo m-y-2">
+  <div class="m-y-2">
+    <!-- <p class="tarjeta-titulo m-y-2">
       {{ selectedElement.title }}
     </p>
-    <p class="tarjeta-etiqueta">Variables disponibles</p>
+
+    <p class="tarjeta-etiqueta">Variables disponibles</p> -->
+
+    <SisdaiLeyendaWms
+      :nombre="selectedElement.alternate"
+      :fuente="`${config.public.geoserverUrl}/wms?`"
+      :titulo="selectedElement.title || 'cargando...'"
+      :sin-control="true"
+      :sin-control-clases="true"
+    />
   </div>
 
   <div class="flex flex-contenido-final">
     <button
-      v-for="button in optionsButtons"
+      v-for="(button, idx) in optionsButtons"
+      :key="`accion-seleccion-${idx}`"
       class="boton-pictograma boton-sin-contenedor-secundario"
       :aria-label="button.label"
       type="button"
       @click="button.action"
     >
-      <span :class="button.pictogram" aria-hidden="true"></span>
+      <span :class="button.pictogram" aria-hidden="true" />
     </button>
   </div>
   <!-- Los modales-->

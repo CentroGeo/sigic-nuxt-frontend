@@ -4,7 +4,7 @@ import {
   SisdaiCapaXyz,
   SisdaiMapa,
 } from "@centrogeomx/sisdai-mapas";
-import { exportarMapa as exportarMapaPNG } from "@centrogeomx/sisdai-mapas/src/utiles";
+import { exportarHTMLComoPNG } from "@centrogeomx/sisdai-mapas/funciones";
 
 const resourceType = "dataLayer";
 
@@ -20,7 +20,7 @@ const randomNum = ref(0);
 
 const linkExportaMapa = ref();
 function exportarMapa() {
-  exportarMapaPNG(
+  exportarHTMLComoPNG(
     document.querySelectorAll(".mapa .ol-viewport").item(0),
     linkExportaMapa.value
   );
