@@ -2,8 +2,8 @@
 FROM node:22 AS builder
 
 # Usa NODE_ENV para determinar si es dev o prod
-ARG NODE_ENV=development
-ENV NODE_ENV=${NODE_ENV}
+ARG NODE_ENV
+ENV NODE_ENV=${NODE_ENV:-development}
 
 WORKDIR /app
 
@@ -20,7 +20,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY package.json package-lock.json ./
 
 # ⚠️ npm install en lugar de ci para no romper optional deps nativas
-RUN npm install
+RUN npm ci
 
 COPY . .
 
@@ -31,18 +31,18 @@ RUN npm run build
 FROM node:22-slim
 
 # Usa NODE_ENV para determinar si es dev o prod
-ARG NODE_ENV=development
-ENV NODE_ENV=${NODE_ENV}
+ARG NODE_ENV
+ENV NODE_ENV=${NODE_ENV:-development}
 
 WORKDIR /app
 
-COPY --from=builder /app/.output .output
+COPY --from=builder /app/.output/ .output/
 COPY --from=builder /app/package.json .
 COPY --from=builder /app/package-lock.json .
 
-# Si estamos en desarrollo, instala todo (útil para devtools), sino solo prod deps
+# Si estamos en desarrollo, instala dev deps (útil para devtools), sino solo prod deps
 RUN if [ "$NODE_ENV" = "development" ]; then \
-      npm i; \
+      npm ci; \
     else \
       npm i --omit=dev --omit=optional; \
     fi
