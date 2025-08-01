@@ -26,7 +26,7 @@ if (resourceType.value === "dataTable") {
     hasGeometry.value = true;
   }
 } else {
-  hasGeometry.value = true;
+  hasGeometry.value = false;
 }
 
 function notifyMapChild() {
@@ -62,7 +62,7 @@ function downloadFromMap() {
         type="button"
         @click="notifyMapChild"
       >
-        <span class="pictograma-mexico" aria-hidden="true"></span>
+        <span class="pictograma-capas" aria-hidden="true"></span>
       </button>
       <button
         class="boton-pictograma boton-sin-contenedor-secundario"

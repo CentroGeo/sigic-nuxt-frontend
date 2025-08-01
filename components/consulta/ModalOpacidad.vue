@@ -35,25 +35,45 @@ watch(valorOpacidad, () => {
 
       <template #cuerpo>
         <p>{{ selectedElement.title }}</p>
-        <div class="contenedor">
-          <SisdaiControlDeslizante
-            :val_min="0"
-            :val_max="100"
-            :val_entrada="100"
-            id="contro-opacidad"
-            step="10"
-            ref="controlOpacidad"
-            @update:val_entrada="
-              ($event) => {
-                controlOpacidad.valor_seleccionado = $event;
-                valorOpacidad = controlOpacidad.valor_seleccionado;
-              }
-            "
-          >
-          </SisdaiControlDeslizante>
-          <div>{{ controlOpacidad?.valor_seleccionado }}%</div>
+        <div class="contenedor flex">
+          <div class="columna-11">
+            <SisdaiControlDeslizante
+              class="deslizante"
+              :val_min="0"
+              :val_max="100"
+              :val_entrada="100"
+              id="contro-opacidad"
+              step="10"
+              ref="controlOpacidad"
+              @update:val_entrada="
+                ($event) => {
+                  controlOpacidad.valor_seleccionado = $event;
+                  valorOpacidad = controlOpacidad.valor_seleccionado;
+                }
+              "
+            >
+            </SisdaiControlDeslizante>
+          </div>
+
+          <div class="tarjeta columna-5">
+            <p class="m-x-2 m-y-1">
+              {{ controlOpacidad?.valor_seleccionado }}%
+            </p>
+          </div>
         </div>
       </template>
     </SisdaiModal>
   </ClientOnly>
 </template>
+<style lang="scss" scoped>
+.contenedor {
+  margin: 0px;
+  padding: 8px;
+  align-items: center;
+}
+
+.tarjeta {
+  background-color: var(--color-neutro-0);
+  border: 1px solid var(--color-secundario-8);
+}
+</style>
