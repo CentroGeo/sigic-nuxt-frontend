@@ -106,11 +106,11 @@ watch(
       </div>
       <div
         v-for="(option, index) in categorizedResources[category]"
-        v-if="selectedCategories.includes(category)"
         :key="index"
         class="contenedor-archivos"
       >
         <ConsultaElementoCatalogo
+          v-if="selectedCategories.includes(category)"
           :key="index"
           class="elemento-catalogo"
           :catalogue-element="option"

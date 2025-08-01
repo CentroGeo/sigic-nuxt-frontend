@@ -1,6 +1,8 @@
-import { createError } from 'h3';
+import type { Fields, Files } from "formidable";
 import formidable from 'formidable';
+
 import { promises as fsp } from 'fs';
+import { createError } from 'h3';
 export const config = {
   api: {
     bodyParser: false,
@@ -13,13 +15,12 @@ export default defineEventHandler(async (event) => {
   const form = formidable({ multiples: false });
   console.log('form', form);
 
-  const data = await new Promise<any>((resolve, reject) => {
+  const data = await new Promise<{ fields: Fields; files: Files }>((resolve, reject) => {
     form.parse(event.node.req, (err, fields, files) => {
       if (err) reject(err);
       else resolve({ fields, files });
     });
   });
-  console.log(data.fields.token[0]);
 
   const { base_file } = data.files;
   if (!base_file) {
@@ -32,8 +33,8 @@ export default defineEventHandler(async (event) => {
     'base_file',
     base_file[0].filepath
       ? new Blob([await fsp.readFile(base_file[0].filepath)], {
-          type: base_file[0].mimetype,
-        })
+        type: base_file[0].mimetype,
+      })
       : base_file[0],
     base_file[0].originalFilename
   );
@@ -44,7 +45,7 @@ export default defineEventHandler(async (event) => {
       headers: {
         Authorization: `Bearer ${data.fields.token[0]}`,
       },
-      body: formData,
+      body: formData as unknown as BodyInit,
     });
 
     console.log('response status:', res.status);

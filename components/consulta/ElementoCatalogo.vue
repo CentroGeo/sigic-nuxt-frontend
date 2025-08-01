@@ -1,9 +1,8 @@
 <script setup>
 // PENDING: Tener en cuenta que no solo tendremos archivos vectoriales
-import { ref, toRefs, onMounted, onUnmounted } from 'vue';
+import { onMounted, onUnmounted, ref, toRefs } from 'vue';
 import { useSelectedResourcesStore } from '~/stores/selectedResources.js';
-import { tooltipContent, fetchGeometryType } from '~/utils/consulta.js';
-const config = useRuntimeConfig();
+import { fetchGeometryType, tooltipContent } from '~/utils/consulta.js';
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
   resourceType: {
@@ -178,7 +177,8 @@ onUnmounted(() => {
 
     <div class="flex flex-contenido-inicio m-y-3">
       <span
-        v-for="button in buttons"
+        v-for="(button, i) in buttons"
+        :key="i"
         v-globo-informacion:[button.position]="button.tooltipText"
         :class="[button.class, 'pictograma-mediano']"
         aria-hidden="true"

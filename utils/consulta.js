@@ -21,7 +21,11 @@ export async function fetchGeometryType(resource) {
   const res = await fetch(url);
   if (res.ok) {
     const data = await res.json();
-    if (Array.isArray(data.features) && data.features.length > 0 && data.features[0]?.geometry?.type) {
+    if (
+      Array.isArray(data.features) &&
+      data.features.length > 0 &&
+      data.features[0]?.geometry?.type
+    ) {
       const geomType = data.features[0].geometry.type;
       return geomType;
     } else {
@@ -143,7 +147,7 @@ export async function downloadVectorData(resource, format) {
     `${config.public.geoserverUrl}/ows?service=WPS&version=1.0.0&REQUEST=Execute`,
     {
       method: 'POST',
-      body: permissionRequest,
+      body: permissionRequestTemplate,
     }
   );
 

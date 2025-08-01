@@ -2,10 +2,10 @@
 // Se está pensando en añadir una propiedad para colocar
 // el selector a los filtros avanzados. comparte las mismas
 // características que el ElementoBuscador del módulo de consulta
+import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 const seleccionEjemplo = ref('');
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
@@ -14,7 +14,7 @@ const props = defineProps({
   categorias: { type: Array, default: () => [] },
   conSelector: { type: Boolean, default: false },
 });
-const { recursosLista, recursosTipo, categorias, conSelector } = toRefs(props);
+const { recursosLista, recursosTipo, categorias } = toRefs(props);
 const catalogoFiltrado = ref(recursosLista.value);
 const modalFiltros = ref(null);
 const seleccionFiltro = ref({
@@ -103,9 +103,9 @@ function filtrarPorModal() {
       totalFiltros += 1;
     }
   });
-  console.log('total de filtros usados', totalFiltros);
+  // console.log("total de filtros usados", totalFiltros);
   // Revisamos la suma por filtro
-  recursosLista.value.forEach((d, idx) => {
+  recursosLista.value.forEach((d) => {
     const tf =
       filtrarPorCategoria(d) +
       filtrarPorInstitucion(d) +
