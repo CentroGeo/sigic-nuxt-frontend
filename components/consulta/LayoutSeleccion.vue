@@ -14,12 +14,17 @@ const buttonTagDict = {
 };
 const route = useRoute();
 const downloadAllChild = ref(null);
+const shareChild = ref(null);
 function notifyDownloadAllChild() {
   downloadAllChild.value?.abrirModalDescargaAll();
+}
+function notifyShareChild() {
+  shareChild.value?.abrirModalCompartir();
 }
 
 function shareState() {
   console.log("Se copia el url en el portapapeles: ", route.fullPath);
+  notifyShareChild();
 }
 </script>
 
@@ -85,6 +90,7 @@ function shareState() {
       ref="downloadAllChild"
       :resource-type="resourceType"
     />
+    <ConsultaModalCompartir ref="shareChild" />
   </div>
 </template>
 
