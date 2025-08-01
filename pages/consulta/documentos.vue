@@ -1,6 +1,18 @@
 <script setup>
 const resourcesStore = useSelectedResourcesStore();
-const resourceType = "document";
+
+/* async function obtenerPDFs() {
+  const res = await fetch(`${config.public.geonodeApi}/api/v2/documents/`);
+  const data = await res.json();
+  const docs = data.results;
+
+  docs.forEach((doc) => {
+    console.log(`Título: ${doc.title}`);
+    console.log(`Descargar: ${config.public.geonodeApi}${doc.download_url}`);
+  });
+}
+obtenerPDFs(); */
+const resourceType = 'document';
 </script>
 
 <template>
@@ -14,10 +26,10 @@ const resourceType = "document";
     </template>
 
     <template #visualizador>
-      <div class="contenedor" v-if="!resourcesStore.shownFiles[resourceType]">
+      <div v-if="!resourcesStore.shownFiles[resourceType]" class="contenedor">
         <h1>No hay seleccion</h1>
       </div>
-      <ConsultaVisualizacionDocumento v-else></ConsultaVisualizacionDocumento>
+      <ConsultaVisualizacionDocumento v-else />
     </template>
 
     <template #seleccion>

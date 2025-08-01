@@ -1,6 +1,6 @@
 <script setup>
 const props = defineProps({
-  titulo: { type: String, default: "Título" },
+  titulo: { type: String, default: 'Título' },
   resourceType: { type: String, required: true },
   etiquetaElementos: { type: String, default: undefined },
   funcionDescarga: { type: Function, default: undefined },
@@ -8,9 +8,9 @@ const props = defineProps({
 const { titulo, resourceType } = toRefs(props);
 const resourcesStore = useSelectedResourcesStore();
 const buttonTagDict = {
-  dataLayer: "mapa",
-  dataTable: "archivos",
-  document: "archivos",
+  dataLayer: 'mapa',
+  dataTable: 'archivos',
+  document: 'archivos',
 };
 const route = useRoute();
 const downloadAllChild = ref(null);
@@ -41,11 +41,7 @@ function shareState() {
             type="button"
             class="boton-primario"
             aria-label="Descargar mapa"
-            @click="
-              resourceType === 'dataLayer'
-                ? funcionDescarga()
-                : notifyDownloadAllChild()
-            "
+            @click="resourceType === 'dataLayer' ? funcionDescarga() : notifyDownloadAllChild()"
           >
             Descargar {{ buttonTagDict[resourceType] }}
             <span class="pictograma-mapa-generador" aria-hidden="true" />

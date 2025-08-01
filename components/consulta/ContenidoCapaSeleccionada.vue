@@ -42,8 +42,8 @@ function getExtent(bboxPolygon) {
 // Aqui se acaba la parte nueva para la prueba
 const optionsButtons = ref([
   {
-    label: "Hacer zoom",
-    pictogram: "pictograma-zoom-instruccional",
+    label: 'Hacer zoom',
+    pictogram: 'pictograma-zoom-instruccional',
     action: () => {
       // console.log("hacer zoom", {
       //   extension: getExtent(selectedElement.value.bbox_polygon.coordinates[0]),
@@ -51,20 +51,20 @@ const optionsButtons = ref([
 
       storeConsulta.ajustarExtensionMapa = getExtent(
         selectedElement.value.bbox_polygon.coordinates[0]
-      ).join(",");
+      ).join(',');
     },
   },
   {
-    label: "Ver tablas",
-    pictogram: "pictograma-tabla",
+    label: 'Ver tablas',
+    pictogram: 'pictograma-tabla',
     action: () => {
       notifyTabla();
     },
   },
   {
-    label: "Mostrar",
+    label: 'Mostrar',
     get pictogram() {
-      return isVisible.value ? "pictograma-ojo-ver" : "pictograma-ojo-ocultar";
+      return isVisible.value ? 'pictograma-ojo-ver' : "pictograma-ojo-ocultar";
     },
     action: () => {
       isVisible.value = !isVisible.value;
@@ -75,23 +75,23 @@ const optionsButtons = ref([
     },
   },
   {
-    label: "Cambiar opacidad",
-    pictogram: "pictograma-editar",
+    label: 'Cambiar opacidad',
+    pictogram: 'pictograma-editar',
     action: () => {
-      console.log("cambiar opacidad");
+      console.warn('cambiar opacidad');
       notifyOpacityChild();
     },
   },
   {
-    label: "Eliminar selección",
-    pictogram: "pictograma-eliminar",
+    label: 'Eliminar selección',
+    pictogram: 'pictograma-eliminar',
     action: () => {
       resourcesStore.removeResource(resourceType.value, selectedElement.value);
     },
   },
   {
-    label: "Descargar archivo",
-    pictogram: "pictograma-archivo-descargar",
+    label: 'Descargar archivo',
+    pictogram: 'pictograma-archivo-descargar',
     action: () => {
       notifyDownloadChild();
     },
@@ -99,40 +99,43 @@ const optionsButtons = ref([
 ]);
 </script>
 <template>
-  <!-- El contenido de la tarjeta de capas  -->
-  <div class="m-b-5">
-    <p class="tarjeta-titulo m-y-2">
-      {{ selectedElement.title }}
-    </p>
-    <p class="tarjeta-etiqueta">Variables disponibles</p>
-  </div>
+  <div>
+    <!-- El contenido de la tarjeta de capas  -->
+    <div class="m-b-5">
+      <p class="tarjeta-titulo m-y-2">
+        {{ selectedElement.title }}
+      </p>
+      <p class="tarjeta-etiqueta">Variables disponibles</p>
+    </div>
 
-  <div class="flex flex-contenido-final">
-    <button
-      v-for="button in optionsButtons"
-      class="boton-pictograma boton-sin-contenedor-secundario"
-      :aria-label="button.label"
-      type="button"
-      @click="button.action"
-    >
-      <span :class="button.pictogram" aria-hidden="true"></span>
-    </button>
-  </div>
-  <!-- Los modales-->
-  <ConsultaModalTabla
+    <div class="flex flex-contenido-final">
+      <button
+        v-for="button in optionsButtons"
+        :key="button.label"
+        class="boton-pictograma boton-sin-contenedor-secundario"
+        :aria-label="button.label"
+        type="button"
+        @click="button.action"
+      >
+        <span :class="button.pictogram" aria-hidden="true" />
+      </button>
+    </div>
+    <!-- Los modales-->
+    <ConsultaModalTabla
     ref="tablaChild"
     :selected-element="selectedElement"
     @clickDownload="downloadFromTabla"
   />
-  <ConsultaModalDescarga
-    ref="downloadChild"
-    :resource-type="resourceType"
-    :selected-element="selectedElement"
+    <ConsultaModalDescarga
+      ref="downloadChild"
+      :resource-type="resourceType"
+      :selected-element="selectedElement"
   />
   <ConsultaModalOpacidad
     ref="opacityChild"
-    :selected-element="selectedElement"
-  />
+      :selected-element="selectedElement"
+    />
+  </div>
 </template>
 <style lang="scss" scoped>
 .flex {

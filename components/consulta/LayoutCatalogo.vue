@@ -1,8 +1,8 @@
 <script setup>
-import { setUrlDocs, setUrlLayers, setDocView } from "@/utils/consulta.js";
+import { setDocView, setUrlDocs, setUrlLayers } from "@/utils/consulta.js";
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
-  titulo: { type: String, default: "Título" },
+  titulo: { type: String, default: 'Título' },
   resourceType: { type: String, required: true },
   etiquetaElementos: { type: String, default: undefined },
 });
@@ -23,7 +23,7 @@ const selectedCategories = ref([]);
 // Esta parte es para obtener todas las categorias
 const { data: geonodeCategories } = await useFetch(`${apiCategorias}`);
 if (!geonodeCategories.value) {
-  categoryList.value = ["Sin clasificar"];
+  categoryList.value = ['Sin clasificar'];
 } else {
   geonodeCategories.value.topics.items.map((d) => {
     categoryList.value.push(d.label);
@@ -42,11 +42,11 @@ function groupResults() {
         categorizedResources.value[title].push(r);
       }
     } else {
-      if (Object.keys(categorizedResources.value).includes("Sin clasificar")) {
-        categorizedResources.value["Sin clasificar"].push(r);
+      if (Object.keys(categorizedResources.value).includes('Sin clasificar')) {
+        categorizedResources.value['Sin clasificar'].push(r);
       } else {
-        categorizedResources.value["Sin clasificar"] = [];
-        categorizedResources.value["Sin clasificar"].push(r);
+        categorizedResources.value['Sin clasificar'] = [];
+        categorizedResources.value['Sin clasificar'].push(r);
       }
     }
   });
@@ -54,9 +54,7 @@ function groupResults() {
 
 function setSelectedCategory(categoria) {
   if (selectedCategories.value.includes(categoria)) {
-    selectedCategories.value = selectedCategories.value.filter(
-      (c) => c !== categoria
-    );
+    selectedCategories.value = selectedCategories.value.filter((c) => c !== categoria);
   } else {
     selectedCategories.value.push(categoria);
   }
@@ -64,10 +62,7 @@ function setSelectedCategory(categoria) {
 
 // Se utiliza un watcher porque inicialmente resourcesList y filteredResources están vacías
 watch(resourcesList, () => {
-  resourcesStore.updateFilteredResources(
-    resourceType.value,
-    resourcesList.value
-  );
+  resourcesStore.updateFilteredResources(resourceType.value, resourcesList.value);
   // Queremos revisar si hay query params y buscar los recursos
   if (route.query.recursos) {
     let paramResources = route.query.recursos.split(";");
@@ -82,8 +77,7 @@ watch(resourcesList, () => {
 watch(
   () => resourcesStore.filteredResources[resourceType.value],
   () => {
-    filteredResources.value =
-      resourcesStore.filteredResources[resourceType.value];
+    filteredResources.value = resourcesStore.filteredResources[resourceType.value];
     groupResults();
   },
   { deep: true }
@@ -136,10 +130,7 @@ onMounted(() => {
           />
         </ClientOnly>
 
-        <UiNumeroElementos
-          :numero="filteredResources.length"
-          :etiqueta="etiquetaElementos"
-        />
+        <UiNumeroElementos :numero="filteredResources.length" :etiqueta="etiquetaElementos" />
       </div>
     </div>
 
@@ -148,11 +139,7 @@ onMounted(() => {
         {{ x }}
       </li>
     </ul> -->
-    <div
-      v-for="category in Object.keys(categorizedResources)"
-      :key="category"
-      class="m-y-1"
-    >
+    <div v-for="category in Object.keys(categorizedResources)" :key="category" class="m-y-1">
       <div class="">
         <ConsultaElementoCategoria
           :title="category"
@@ -163,11 +150,11 @@ onMounted(() => {
       </div>
       <div
         v-for="(option, index) in categorizedResources[category]"
-        v-if="selectedCategories.includes(category)"
         :key="index"
         class="contenedor-archivos"
       >
         <ConsultaElementoCatalogo
+          v-if="selectedCategories.includes(category)"
           :key="index"
           class="elemento-catalogo"
           :catalogue-element="option"

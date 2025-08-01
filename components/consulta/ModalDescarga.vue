@@ -1,11 +1,10 @@
 <script setup>
-import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
 import {
-  downloadVectorData,
-  downloadExcel,
   downloadMetadata,
   downloadPDF,
-} from "@/utils/consulta.js";
+  downloadVectorData
+} from '@/utils/consulta.js';
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 const props = defineProps({
   resourceType: { type: String, required: true },
   selectedElement: {
@@ -20,52 +19,52 @@ const tagTitle = ref();
 
 function abrirModalDescarga() {
   modalDescarga.value?.abrirModal();
-  optionsList.value = optionsDict[resourceType.value]["elements"];
-  tagTitle.value = optionsDict[resourceType.value]["title"];
+  optionsList.value = optionsDict[resourceType.value]['elements'];
+  tagTitle.value = optionsDict[resourceType.value]['title'];
 }
 
 const optionsDict = {
   dataLayer: {
-    title: "capa",
+    title: 'capa',
     elements: [
       {
-        label: "GeoJson",
+        label: 'GeoJson',
         action: () => {
-          downloadVectorData(selectedElement.value, "geojson");
+          downloadVectorData(selectedElement.value, 'geojson');
         },
       },
       {
-        label: "CSV",
+        label: 'CSV',
         action: () => {
-          downloadVectorData(selectedElement.value, "csv");
+          downloadVectorData(selectedElement.value, 'csv');
         },
       },
       /*       {
         label: "XLS",
         action: () => {
-          downloadExcel(selectedElement.value, "xls");
+          downloadExcel(selectedElement.value, 'xls');
         },
       },
       {
-        label: "XLSX",
+        label: 'XLSX',
         action: () => {
-          downloadExcel(selectedElement.value, "xlsx");
+          downloadExcel(selectedElement.value, 'xlsx');
         },
       }, */
       {
-        label: "GeoPackage",
+        label: 'GeoPackage',
         action: () => {
-          downloadVectorData(selectedElement.value, "gpkg");
+          downloadVectorData(selectedElement.value, 'gpkg');
         },
       },
       {
-        label: "KML",
+        label: 'KML',
         action: () => {
-          downloadVectorData(selectedElement.value, "kml");
+          downloadVectorData(selectedElement.value, 'kml');
         },
       },
       {
-        label: "Metadatos",
+        label: 'Metadatos',
         action: () => {
           downloadMetadata(selectedElement.value);
         },
@@ -73,28 +72,28 @@ const optionsDict = {
     ],
   },
   dataTable: {
-    title: "archivo",
+    title: 'archivo',
     elements: [
       {
-        label: "CSV",
+        label: 'CSV',
         action: () => {
-          downloadVectorData(selectedElement.value, "csv");
+          downloadVectorData(selectedElement.value, 'csv');
         },
       },
       /*       {
         label: "XLS",
         action: () => {
-          downloadExcel(selectedElement.value, "xls");
+          downloadExcel(selectedElement.value, 'xls');
         },
       },
       {
-        label: "XLSX",
+        label: 'XLSX',
         action: () => {
-          downloadExcel(selectedElement.value, "xlsx");
+          downloadExcel(selectedElement.value, 'xlsx');
         },
       }, */
       {
-        label: "Metadatos",
+        label: 'Metadatos',
         action: () => {
           downloadMetadata(selectedElement.value);
         },
@@ -102,16 +101,16 @@ const optionsDict = {
     ],
   },
   document: {
-    title: "documento",
+    title: 'documento',
     elements: [
       {
-        label: "PDF",
+        label: 'PDF',
         action: () => {
           downloadPDF(selectedElement.value);
         },
       },
       {
-        label: "Metadatos",
+        label: 'Metadatos',
         action: () => {
           downloadMetadata(selectedElement.value);
         },
@@ -135,6 +134,7 @@ defineExpose({
         <div>
           <button
             v-for="option in optionsList"
+            :key="option.label"
             type="button"
             class="boton-secundario"
             @click="option.action"

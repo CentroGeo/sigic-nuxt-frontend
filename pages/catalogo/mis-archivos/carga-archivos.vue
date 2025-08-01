@@ -26,9 +26,7 @@
               </div>
 
               <div class="texto-color-confirmacion">
-                <p class="m-b-0">
-                  Se detectaron 236 polígonos/líneas/puntos válidos
-                </p>
+                <p class="m-b-0">Se detectaron 236 polígonos/líneas/puntos válidos</p>
                 <p class="m-0">Sistema de referencia EPSG:4326</p>
               </div>
 
