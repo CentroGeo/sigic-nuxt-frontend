@@ -172,8 +172,8 @@ onUnmounted(() => {
 
 const selectedStore = useSelectedResources2Store();
 const capasSeleccionadas = computed({
-  get: () => selectedStore.capas,
-  set: (newValue) => (selectedStore.capas = newValue),
+  get: () => selectedStore.listaCapas,
+  set: (capas) => selectedStore.actualizarCapas(capas),
 });
 </script>
 
@@ -207,10 +207,5 @@ const capasSeleccionadas = computed({
 <style lang="scss" scoped>
 .flex {
   gap: 8px;
-}
-.tarjeta-elemento:hover {
-  background-color: var(--color-secundario-2);
-  border: 1px solid var(--color-secundario-8);
-  border-radius: 8px;
 }
 </style>

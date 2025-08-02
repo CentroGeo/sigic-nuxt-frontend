@@ -5,8 +5,8 @@ import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
 const resourceType = 'dataLayer';
 
 const extensionNacional = '-118.3651,14.5321,-86.7104,32.7187';
-const storeConsulta = useConsultaStore();
-const extensionMapa = computed(() => storeConsulta.ajustarExtensionMapa || extensionNacional);
+// const storeConsulta = useConsultaStore();
+// const extensionMapa = computed(() => storeConsulta.ajustarExtensionMapa || extensionNacional);
 
 const config = useRuntimeConfig();
 const storeSelected = useSelectedResourcesStore();
@@ -130,11 +130,11 @@ const vistaDelMapa = ref({ extension: extensionNacional });
  * Agrega en un parametro hash los valores de la vista del mapa
  * @param param vista del mapa
  */
-function cambiarVistaEnUrl({ acercamiento, centro }) {
+function actualizarHashDesdeVista({ acercamiento, centro }) {
   const hash = `#vista=${acercamiento.toFixed(0)}/${centro[1].toFixed(4)}/${centro[0].toFixed(4)}`;
 
   if (hash !== route.hash) {
-    router.replace({ hash, query: route.query });
+    router.replace({ query: route.query, hash });
   }
 }
 
@@ -145,21 +145,32 @@ function cambiarVistaEnUrl({ acercamiento, centro }) {
 function actualizarVistaDesdeHash(hashVista) {
   if (hashVista === '') return;
 
-  // console.log(hashVista);
   const [acercamiento, latitud, longitud] = hashVista.split('=')[1].split('/');
-
-  // console.log(acercamiento, [longitud, latitud]);
   vistaDelMapa.value = { acercamiento, centro: [longitud, latitud] };
 }
-
-// http://localhost:3000/consulta/capas#vista=9/19.3107/-99.6239
-onMounted(() => {
-  actualizarVistaDesdeHash(route.hash?.slice(1));
-});
 
 function clickCentrar() {
   vistaDelMapa.value = { extension: extensionNacional };
 }
+
+function actualizarQueyDesdeStore(capasComoQueryParam) {
+  const query = { capas: capasComoQueryParam };
+  // console.log(query, route.query.capas);
+
+  if (query.capas !== route.query.capas) {
+    router.replace({ query, hash: route.hash });
+  }
+}
+watch(() => selectedStore.capasComoQueryParam, actualizarQueyDesdeStore);
+
+function actualizarCapasDesdeQuery(queryCapas) {
+  console.log('actualizarCapasDesdeQuery', queryCapas);
+}
+
+onMounted(() => {
+  actualizarVistaDesdeHash(route.hash?.slice(1));
+  actualizarCapasDesdeQuery(route.query.capas);
+});
 </script>
 
 <template>
@@ -178,15 +189,16 @@ function clickCentrar() {
           class="gema"
           :vista="vistaDelMapa"
           @click-centrar="clickCentrar"
-          @al-mover-vista="cambiarVistaEnUrl"
+          @al-mover-vista="actualizarHashDesdeVista"
         >
           <SisdaiCapaXyz />
 
           <SisdaiCapaWms
-            v-for="alternate in selectedStore.capas"
+            v-for="alternate in selectedStore.listaCapas"
             :key="`wms-${alternate}`"
             :fuente="`${config.public.geoserverUrl}/wms?`"
             :capa="alternate"
+            :opacidad="selectedStore.capas[alternate].opacidad"
           />
         </SisdaiMapa>
       </ClientOnly>
