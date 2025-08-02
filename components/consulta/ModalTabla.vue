@@ -7,6 +7,8 @@ const props = defineProps({
   },
 });
 const { selectedElement } = toRefs(props);
+const resourcesStore = useSelectedResourcesStore();
+const emit = defineEmits(["clickDownload"]);
 const modalTabla = ref(null);
 const paginaActual = ref(0);
 const tamanioPagina = 10;
@@ -24,7 +26,20 @@ const {
 function abrirModalTabla() {
   modalTabla.value?.abrirModal();
 }
-
+function openTableView() {
+  console.log(selectedElement.value);
+  resourcesStore.addResource("dataTable", selectedElement.value);
+  resourcesStore.setShownFile("dataTable", selectedElement.value);
+  modalTabla.value?.cerrarModal();
+  console.log("Redirije al visor de tablas");
+}
+function notifyDownload() {
+  console.log(
+    "se hizo click en download, se triggerea el custom emit para notificar al padre"
+  );
+  emit("clickDownload");
+  modalTabla.value?.cerrarModal();
+}
 defineExpose({
   abrirModalTabla,
 });
@@ -39,7 +54,7 @@ watch(paginaActual, () => {
 </script>
 <template>
   <ClientOnly>
-    <SisdaiModal ref="modalTabla">
+    <SisdaiModal ref="modalTabla" id="modalTabla">
       <template #encabezado>
         <h1>{{ selectedElement.title }}</h1>
       </template>
@@ -51,6 +66,24 @@ watch(paginaActual, () => {
           @cambio="paginaActual = $event"
         />
       </template>
+
+      <template #pie>
+        <nuxtLink to="/consulta/tablas">
+          <button type="button" class="boton-primario" @click="openTableView">
+            Abrir en Tablas
+          </button>
+        </nuxtLink>
+
+        <button type="button" class="boton-primario" @click="notifyDownload">
+          Descargar
+        </button>
+      </template>
     </SisdaiModal>
   </ClientOnly>
 </template>
+<style lang="scss" scoped>
+#modalTabla {
+  height: 80%;
+  gap: 0;
+}
+</style>

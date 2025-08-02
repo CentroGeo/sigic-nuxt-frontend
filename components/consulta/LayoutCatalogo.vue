@@ -1,4 +1,5 @@
 <script setup>
+import { setDocView, setUrlDocs } from "@/utils/consulta.js";
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
   titulo: { type: String, default: 'Título' },
@@ -11,8 +12,10 @@ const { resourcesList } = useGeonodeResources({
 });
 
 const filteredResources = ref([]);
+const selectedResources = ref([]);
 const config = useRuntimeConfig();
 const apiCategorias = `${config.public.geonodeApi}/facets/category`;
+const route = useRoute();
 const categoryList = ref([]);
 const categorizedResources = ref({});
 const selectedCategories = ref([]);
@@ -60,6 +63,16 @@ function setSelectedCategory(categoria) {
 // Se utiliza un watcher porque inicialmente resourcesList y filteredResources están vacías
 watch(resourcesList, () => {
   resourcesStore.updateFilteredResources(resourceType.value, resourcesList.value);
+  // Queremos revisar si hay query params y buscar los recursos
+  if (route.query.recursos) {
+    let paramResources = route.query.recursos.split(";");
+    if (resourceType.value !== "dataLayer") {
+      setDocView(resourceType.value, resourcesList.value, paramResources);
+    } /*else {
+      setMapView(resourceType.value, resourcesList.value, paramResources);
+    }
+ */
+  }
 });
 watch(
   () => resourcesStore.filteredResources[resourceType.value],
@@ -69,6 +82,37 @@ watch(
   },
   { deep: true }
 );
+
+// Esto es para el manejo de la url
+watch(
+  [
+    () => resourcesStore.selectedResources[resourceType.value],
+    () => resourcesStore.shownFiles[resourceType.value],
+  ],
+  () => {
+    const recursos = resourcesStore.selectedResources[resourceType.value];
+    if (resourceType.value !== "dataLayer") {
+      setUrlDocs(recursos, resourceType.value);
+    } /*else setUrlLayers(recursos);*/
+  },
+  { deep: true }
+);
+
+onMounted(() => {
+  selectedResources.value =
+    resourcesStore.selectedResources[resourceType.value];
+  if (selectedResources.value.length > 0) {
+    if (resourceType.value === "dataLayer") {
+      /*setUrlLayers(selectedResources.value);*/
+    } else {
+      setUrlDocs(selectedResources.value, resourceType.value);
+    }
+  } else if (route.query.recursos) {
+    //console.log("se está cargando de ser compartido o se actualizó");
+  } else {
+    //console.log("se está cargando desde cero");
+  }
+});
 </script>
 
 <template>

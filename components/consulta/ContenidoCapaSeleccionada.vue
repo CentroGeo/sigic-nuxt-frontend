@@ -12,9 +12,10 @@ const props = defineProps({
   resourceType: { type: String, required: true },
 });
 const { selectedElement, resourceType } = toRefs(props);
-
+const isVisible = ref(true);
 const tablaChild = ref(null);
 const downloadChild = ref(null);
+const opacityChild = ref(null);
 
 function notifyTabla() {
   tablaChild.value?.abrirModalTabla();
@@ -23,6 +24,13 @@ function notifyDownloadChild() {
   downloadChild.value?.abrirModalDescarga();
 }
 
+function notifyOpacityChild() {
+  opacityChild.value.abrirModalOpacidad();
+}
+function downloadFromTabla() {
+  console.log("el padre se enteró");
+  downloadChild.value?.abrirModalDescarga();
+}
 /**
  * Devuelve el extend de acuerdo a una capa en formato: left,bootom,rigth,top
  * @param {Array} bboxPolygon arreglo de corrdenadas envolventes de la capa
@@ -63,16 +71,22 @@ const optionsButtons = ref([
   },
   {
     label: 'Mostrar',
-    pictogram: 'pictograma-ojo-ver',
+    get pictogram() {
+      return isVisible.value ? 'pictograma-ojo-ver' : "pictograma-ojo-ocultar";
+    },
     action: () => {
-      console.warn('Mostrar u ocultar la capa');
+      isVisible.value = !isVisible.value;
+      resourcesStore.updateLayerVisibility(
+        selectedElement.value.alternate,
+        isVisible.value
+      );
     },
   },
   {
     label: 'Cambiar opacidad',
     pictogram: 'pictograma-editar',
     action: () => {
-      console.warn('cambiar opacidad');
+      notifyOpacityChild();
     },
   },
   {
@@ -117,14 +131,20 @@ const optionsButtons = ref([
         <span :class="button.pictogram" aria-hidden="true" />
       </button>
     </div>
-    
-    <!-- Los modales -->
-    <ConsultaModalTabla ref="tablaChild" :selected-element="selectedElement" />
+    <!-- Los modales-->
+    <ConsultaModalTabla
+      ref="tablaChild"
+      :selected-element="selectedElement"
+      @clickDownload="downloadFromTabla"
+    />
     <ConsultaModalDescarga
       ref="downloadChild"
       :resource-type="resourceType"
       :selected-element="selectedElement"
-      :download-type="'individual'"
+    />
+    <ConsultaModalOpacidad
+      ref="opacityChild"
+      :selected-element="selectedElement"
     />
   </div>
 </template>

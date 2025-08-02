@@ -1,6 +1,6 @@
 <script setup>
 import { tooltipContent } from '~/utils/consulta.js';
-const selectedStore = useSelectedResourcesStore();
+const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
   selectedElement: {
     type: Object,
@@ -10,16 +10,16 @@ const props = defineProps({
 });
 const { selectedElement, resourceType } = toRefs(props);
 
-if (!selectedStore.shownFiles[resourceType.value]) {
-  const firstSelection = selectedStore.selectedResources[resourceType.value][0];
-  selectedStore.setShownFile(resourceType.value, firstSelection);
+if (!resourcesStore.shownFiles[resourceType.value]) {
+  let firstSelection = resourcesStore.selectedResources[resourceType.value][0];
+  resourcesStore.setShownFile(resourceType.value, firstSelection);
 }
 
 /* const isChecked = computed(() => {
   if (resourceType.value !== "dataLayer") {
     if (
       selectedElement.value.uuid ===
-      selectedStore.shownFiles[resourceType.value].uuid
+      resourcesStore.shownFiles[resourceType.value].uuid
     ) {
       return true;
     } else {
@@ -53,7 +53,7 @@ if (!selectedStore.shownFiles[resourceType.value]) {
             class="boton-pictograma boton-sin-contenedor-secundario"
             aria-label="Subir elemento"
             type="button"
-            @click="selectedStore.raiseIndex(selectedElement, resourceType)"
+            @click="resourcesStore.raiseIndex(selectedElement, resourceType)"
           >
             <span class="pictograma-subir-capa pictograma-mediano" aria-hidden="true" />
           </button>
@@ -62,7 +62,7 @@ if (!selectedStore.shownFiles[resourceType.value]) {
             class="boton-pictograma boton-sin-contenedor-secundario"
             aria-label="Bajar Elemento"
             type="button"
-            @click="selectedStore.lowerIndex(selectedElement, resourceType)"
+            @click="resourcesStore.lowerIndex(selectedElement, resourceType)"
           >
             <span class="pictograma-bajar-capa pictograma-mediano" aria-hidden="true" />
           </button>

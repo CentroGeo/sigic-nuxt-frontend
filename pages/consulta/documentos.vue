@@ -1,5 +1,4 @@
 <script setup>
-//const config = useRuntimeConfig();
 const resourcesStore = useSelectedResourcesStore();
 
 /* async function obtenerPDFs() {
