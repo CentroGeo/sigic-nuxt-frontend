@@ -11,11 +11,14 @@ const extensionMapa = computed(() => storeConsulta.ajustarExtensionMapa || exten
 const config = useRuntimeConfig();
 const storeSelected = useSelectedResourcesStore();
 const randomNum = ref(0);
-const opacityDict = ref({})
+const opacityDict = ref({});
 const isFinishedLoading = ref(0);
 const linkExportaMapa = ref();
 function exportarMapa() {
-  exportarHTMLComoPNG(document.querySelectorAll('.mapa .ol-viewport').item(0), linkExportaMapa.value);
+  exportarHTMLComoPNG(
+    document.querySelectorAll('.mapa .ol-viewport').item(0),
+    linkExportaMapa.value
+  );
 }
 const attributos = reactive({});
 async function addAttribute(pk) {
@@ -39,31 +42,26 @@ async function addAttribute(pk) {
 
     attributos[pk] = {
       params: {
-        propertyName: columnas.join(","),
+        propertyName: columnas.join(','),
       },
       // attribute_label
       contenido: (data) =>
         columnas
-          .map(
-            (columna) =>
-              `<p><b>${etiquetas[columna] || columna}</b>: ${data[columna]}</p>`
-          )
-          .join(""),
+          .map((columna) => `<p><b>${etiquetas[columna] || columna}</b>: ${data[columna]}</p>`)
+          .join(''),
     };
     // console.log(attributos[pk]);
   } catch (error) {
-    console.error("Error en la búsqueda:", error);
+    console.error('Error en la búsqueda:', error);
 
     console.error(
-      "Ocurrió un problema al realizar la búsqueda. Por favor, verifica tu conexión o intenta de nuevo más tarde."
+      'Ocurrió un problema al realizar la búsqueda. Por favor, verifica tu conexión o intenta de nuevo más tarde.'
     );
 
     if (error.response && error.response.status === 400) {
-      console.error(
-        "Los parámetros de búsqueda no son válidos. Revisa los filtros ingresados."
-      );
+      console.error('Los parámetros de búsqueda no son válidos. Revisa los filtros ingresados.');
     } else if (error.response && error.response.status === 500) {
-      console.error("El servidor encontró un problema. Intenta más tarde.");
+      console.error('El servidor encontró un problema. Intenta más tarde.');
     }
   }
 }
@@ -105,19 +103,63 @@ watch(
 // Este watcher sirve para ajustar los índices de las capas montadas
 // cuando estas terminan de cargarse pero solo funciona cuando recién se montan las capas.
 watch(isFinishedLoading, () => {
-  console.log("cuenta: ", isFinishedLoading.value);
-  let resourcesNum = storeSelected.selectedResources[resourceType].length;
+  console.log('cuenta: ', isFinishedLoading.value);
+  const resourcesNum = storeSelected.selectedResources[resourceType].length;
   if (resourcesNum === isFinishedLoading.value) {
-    opacityDict.value = storeSelected.shownFiles.dataLayer.opacity
+    opacityDict.value = storeSelected.shownFiles.dataLayer.opacity;
     randomNum.value += 1;
-    console.log("Dict opacidad", opacityDict.value)
+    console.log('Dict opacidad', opacityDict.value);
   }
 });
-watch(() => storeSelected.shownFiles.dataLayer, () =>{
-  isFinishedLoading.value = 0
-  randomNum.value  += 1
-  console.log("watcher en capas", storeSelected.shownFiles.dataLayer)
-},{deep:true})
+watch(
+  () => storeSelected.shownFiles.dataLayer,
+  () => {
+    isFinishedLoading.value = 0;
+    randomNum.value += 1;
+    console.log('watcher en capas', storeSelected.shownFiles.dataLayer);
+  },
+  { deep: true }
+);
+
+const route = useRoute();
+const router = useRouter();
+const selectedStore = useSelectedResources2Store();
+const vistaDelMapa = ref({ extension: extensionNacional });
+
+/**
+ * Agrega en un parametro hash los valores de la vista del mapa
+ * @param param vista del mapa
+ */
+function cambiarVistaEnUrl({ acercamiento, centro }) {
+  const hash = `#vista=${acercamiento.toFixed(0)}/${centro[1].toFixed(4)}/${centro[0].toFixed(4)}`;
+
+  if (hash !== route.hash) {
+    router.replace({ hash, query: route.query });
+  }
+}
+
+/**
+ *
+ * @param hashVista texto hash sin el carácter #
+ */
+function actualizarVistaDesdeHash(hashVista) {
+  if (hashVista === '') return;
+
+  // console.log(hashVista);
+  const [acercamiento, latitud, longitud] = hashVista.split('=')[1].split('/');
+
+  // console.log(acercamiento, [longitud, latitud]);
+  vistaDelMapa.value = { acercamiento, centro: [longitud, latitud] };
+}
+
+// http://localhost:3000/consulta/capas#vista=9/19.3107/-99.6239
+onMounted(() => {
+  actualizarVistaDesdeHash(route.hash?.slice(1));
+});
+
+function clickCentrar() {
+  vistaDelMapa.value = { extension: extensionNacional };
+}
 </script>
 
 <template>
@@ -134,27 +176,17 @@ watch(() => storeSelected.shownFiles.dataLayer, () =>{
       <ClientOnly>
         <SisdaiMapa
           class="gema"
-          :vista="{
-            extension: extensionMapa,
-          }"
-          @click-centrar="storeConsulta.ajustarExtensionMapa = undefined"
-          @al-mover-vista="
-            ({ acercamiento, centro }) => {
-              console.log(acercamiento, centro);
-            }
-          "
+          :vista="vistaDelMapa"
+          @click-centrar="clickCentrar"
+          @al-mover-vista="cambiarVistaEnUrl"
         >
           <SisdaiCapaXyz />
 
           <SisdaiCapaWms
-            v-for="(capa, index) in storeSelected.selectedResources[resourceType]"
-            :key="`${capa.uuid}_${randomNum}`"
+            v-for="alternate in selectedStore.capas"
+            :key="`wms-${alternate}`"
             :fuente="`${config.public.geoserverUrl}/wms?`"
-            :capa="capa.alternate"
-            :opacidad="0.3"
-            :posicion="storeSelected.selectedResources.length - index"
-            :cuadro-informativo="attributos[capa.pk]"
-            @alFinalizarCarga="isFinishedLoading += 1"
+            :capa="alternate"
           />
         </SisdaiMapa>
       </ClientOnly>

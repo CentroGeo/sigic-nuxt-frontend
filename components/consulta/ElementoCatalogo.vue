@@ -3,6 +3,7 @@
 import { onMounted, onUnmounted, ref, toRefs } from 'vue';
 import { useSelectedResourcesStore } from '~/stores/selectedResources.js';
 import { fetchGeometryType, tooltipContent } from '~/utils/consulta.js';
+
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
   resourceType: {
@@ -15,6 +16,7 @@ const props = defineProps({
   },
 });
 const { resourceType, catalogueElement } = toRefs(props);
+
 // const api = config.public.geoserverUrl;
 const subtype = ref(catalogueElement.value.subtype);
 const geomType = ref(null);
@@ -67,7 +69,7 @@ const optionsDict = {
 let observer;
 const rootEl = ref();
 
-// Manjeamos el checkbox y controlamos los elementos seleccionados
+// Manejeamos el checkbox y controlamos los elementos seleccionados
 function selectElement(resourceType, option) {
   isChecked.value = !isChecked.value;
   if (isChecked.value) {
@@ -167,12 +169,27 @@ onUnmounted(() => {
     observer.unobserve(rootEl.value);
   }
 });
+
+const selectedStore = useSelectedResources2Store();
+const capasSeleccionadas = computed({
+  get: () => selectedStore.capas,
+  set: (newValue) => (selectedStore.capas = newValue),
+});
 </script>
+
 <template>
   <div :id="`elemento-${catalogueElement.uuid}`" ref="rootEl" class="m-x-5 m-y-2">
-    <div class="tarjeta-elemento" @click="selectElement(resourceType, catalogueElement)">
-      <input :id="`checkbox-${catalogueElement.uuid}`" v-model="isChecked" type="checkbox" />
-      <label :for="catalogueElement.uuid">{{ catalogueElement.title }}</label>
+    <div class="tarjeta-elemento">
+      <input
+        :id="`checkbox-consulta-catalogo-${catalogueElement.uuid}`"
+        v-model="capasSeleccionadas"
+        type="checkbox"
+        :value="catalogueElement.alternate"
+      />
+
+      <label :for="`checkbox-consulta-catalogo-${catalogueElement.uuid}`">
+        {{ catalogueElement.title }}
+      </label>
     </div>
 
     <div class="flex flex-contenido-inicio m-y-3">
@@ -186,6 +203,7 @@ onUnmounted(() => {
     </div>
   </div>
 </template>
+
 <style lang="scss" scoped>
 .flex {
   gap: 8px;
