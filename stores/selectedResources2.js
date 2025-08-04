@@ -8,7 +8,7 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
       document: [],
     },
     selectedResources: {
-      dataLayer: {},
+      dataLayer: [],
       dataTable: {},
       document: {},
     },
@@ -20,9 +20,8 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
      * @returns
      */
     resourcesAsQueryParam: (state) => (resourceType) => {
-      return state
-        .resourcesList(resourceType)
-        .map((uuid) => `${uuid},${state.selectedResources[resourceType][uuid].asQueryParam}`)
+      return state.selectedResources[resourceType]
+        .map((resource) => `${resource.asQueryParam}`)
         .join(';');
     },
 
@@ -32,27 +31,32 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
      * @returns {Array<String>}
      */
     resourcesList: (state) => (resourceType) => {
-      return Object.keys(state.selectedResources[resourceType]);
+      return state.selectedResources[resourceType].map(({ uuid }) => uuid);
     },
   },
   actions: {
+    /**
+     * Agrega a la selección los recurson que encuentre en el queryParam.
+     * @param {String} queryParam de los recursos separados por punto y coma (;).
+     * @param {String} resourceType tipo de resursos a agregar.
+     */
     addFromQueryParam(queryParam, resourceType) {
-      console.log('addFromQueryParam', queryParam, resourceType);
+      if (queryParam === undefined) {
+        // Validar si el queryParam se puede parsear
+        return;
+      }
 
-      const x = queryParam?.split(';').map((capa) => {
-        return new ConfiguracioCapa(capa);
-      });
-
-      console.log(x);
+      this.selectedResources[resourceType] = queryParam
+        .split(';')
+        .map((capa) => new ConfiguracioCapa(capa));
     },
     updateFilteredResources(resourceType, newArray) {
       this.filteredResources[resourceType] = newArray;
     },
     updateSelectedResources(resources, resourceType) {
       if (resourceType === 'dataLayer') {
-        this.selectedResources[resourceType] = resources.reduce(
-          (obj, capa) => ({ ...obj, [capa]: new ConfiguracioCapa() }),
-          {}
+        this.selectedResources[resourceType] = resources.map(
+          (uuid) => new ConfiguracioCapa({ uuid })
         );
       } else {
         this.selectedResources[resourceType] = resources.reduce(
@@ -68,9 +72,9 @@ class ConfiguracioCapa {
   separador_ = ',';
 
   /**
-   * Devuelve los atributos del query param en un objeto
-   * @param {String} queryParam
-   * @returns
+   * Devuelve los atributos del query param en un objeto.
+   * @param {String} queryParam de un recurso con sus atributos separados por comas (,).
+   * @returns {Object}
    */
   fromQueryParam(queryParam) {
     const [uuid, estilo, opacidad, visible] = queryParam.split(this.separador_);
@@ -89,7 +93,7 @@ class ConfiguracioCapa {
 
   get asQueryParam() {
     // return `${this.estilo || ''},${this.opacidad},${this.visible}`;
-    return [this.estilo || '', this.opacidad, this.visible].join(this.separador_);
+    return [this.uuid, this.estilo || '', this.opacidad, this.visible].join(this.separador_);
   }
 }
 class ConfiguracionOtro {

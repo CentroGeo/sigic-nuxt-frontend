@@ -139,8 +139,8 @@ function actualizarHashDesdeVista({ acercamiento, centro }) {
 }
 
 /**
- *
- * @param hashVista texto hash sin el carácter #
+ * Actualiza la vista del mapa dependiendo del hash.
+ * @param hashVista texto hash sin el carácter #.
  */
 function actualizarVistaDesdeHash(hashVista) {
   if (hashVista === '') return;
@@ -149,22 +149,32 @@ function actualizarVistaDesdeHash(hashVista) {
   vistaDelMapa.value = { acercamiento, centro: [longitud, latitud] };
 }
 
+/**
+ * Función ejecutada cuando se dá click en el botón centrar del mapa.
+ */
 function clickCentrar() {
   vistaDelMapa.value = { extension: extensionNacional };
 }
 
-function actualizarQueyDesdeStore(resourcesAsQueryParam) {
-  const query = { capas: resourcesAsQueryParam };
-  // console.log(query, route.query.capas);
+/**
+ * Actualiza el queryParam desde los valores del store.
+ * @param queryParam generado por el store.
+ */
+function updateQueryFromStore(queryParam) {
+  const query = { capas: queryParam };
 
   if (query.capas !== route.query.capas) {
     router.replace({ query, hash: route.hash });
   }
 }
-watch(() => selectedStore.resourcesAsQueryParam(resourceType), actualizarQueyDesdeStore);
+watch(() => selectedStore.resourcesAsQueryParam(resourceType), updateQueryFromStore);
 
-function actualizarCapasDesdeQuery(queryCapas) {
-  selectedStore.addFromQueryParam(queryCapas, resourceType);
+/**
+ * Actualiza el store desde los valores del queryParam.
+ * @param queryParam que llega desde la url.
+ */
+function actualizarCapasDesdeQuery(queryParam) {
+  selectedStore.addFromQueryParam(queryParam, resourceType);
 }
 
 onMounted(() => {
