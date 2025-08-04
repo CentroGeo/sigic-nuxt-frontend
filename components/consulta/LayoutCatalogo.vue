@@ -1,6 +1,5 @@
 <script setup>
-import { setDocView, setUrlDocs } from "@/utils/consulta.js";
-const resourcesStore = useSelectedResourcesStore();
+const resourcesStore = useSelectedResources2Store();
 const props = defineProps({
   titulo: { type: String, default: 'Título' },
   resourceType: { type: String, required: true },
@@ -10,13 +9,12 @@ const { titulo, resourceType } = toRefs(props);
 const { resourcesList } = useGeonodeResources({
   resourceType: resourceType.value,
 });
-
-const filteredResources = ref([]);
-const selectedResources = ref([]);
 const config = useRuntimeConfig();
 const apiCategorias = `${config.public.geonodeApi}/facets/category`;
-const route = useRoute();
+//const route = useRoute();
 const categoryList = ref([]);
+const filteredResources = ref([]);
+//const selectedResources = ref([]);
 const categorizedResources = ref({});
 const selectedCategories = ref([]);
 
@@ -64,15 +62,14 @@ function setSelectedCategory(categoria) {
 watch(resourcesList, () => {
   resourcesStore.updateFilteredResources(resourceType.value, resourcesList.value);
   // Queremos revisar si hay query params y buscar los recursos
-  if (route.query.recursos) {
+  /*if (route.query.recursos) {
     let paramResources = route.query.recursos.split(";");
     if (resourceType.value !== "dataLayer") {
       setDocView(resourceType.value, resourcesList.value, paramResources);
-    } /*else {
+    } else {
       setMapView(resourceType.value, resourcesList.value, paramResources);
     }
- */
-  }
+  } */
 });
 watch(
   () => resourcesStore.filteredResources[resourceType.value],
@@ -84,7 +81,7 @@ watch(
 );
 
 // Esto es para el manejo de la url
-watch(
+/* watch(
   [
     () => resourcesStore.selectedResources[resourceType.value],
     () => resourcesStore.shownFiles[resourceType.value],
@@ -93,17 +90,17 @@ watch(
     const recursos = resourcesStore.selectedResources[resourceType.value];
     if (resourceType.value !== "dataLayer") {
       setUrlDocs(recursos, resourceType.value);
-    } /*else setUrlLayers(recursos);*/
+    } /*else setUrlLayers(recursos);
   },
   { deep: true }
-);
+); */
 
-onMounted(() => {
+/* onMounted(() => {
   selectedResources.value =
     resourcesStore.selectedResources[resourceType.value];
   if (selectedResources.value.length > 0) {
     if (resourceType.value === "dataLayer") {
-      /*setUrlLayers(selectedResources.value);*/
+      /*setUrlLayers(selectedResources.value);
     } else {
       setUrlDocs(selectedResources.value, resourceType.value);
     }
@@ -112,7 +109,7 @@ onMounted(() => {
   } else {
     //console.log("se está cargando desde cero");
   }
-});
+}); */
 </script>
 
 <template>

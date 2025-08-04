@@ -49,7 +49,7 @@ watch(
     </template>
 
     <template #visualizador>
-      <div v-if="!resourcesStore.shownFiles[resourceType]" class="contenedor">
+<!--       <div v-if="!resourcesStore.shownFiles[resourceType]" class="contenedor">
         <h1>No hay seleccion</h1>
       </div>
       <div v-else>
@@ -58,15 +58,15 @@ watch(
           :total-paginas="Math.ceil(totalFeatures / tamanioPagina)"
           @cambio="paginaActual = $event"
         />
-      </div>
+      </div> -->
     </template>
 
     <template #seleccion>
-      <ConsultaLayoutSeleccion
+<!--       <ConsultaLayoutSeleccion
         titulo="Tabulados de datos"
         :resource-type="resourceType"
         etiqueta-elementos="Datos tabulados"
-      />
+      /> -->
     </template>
   </ConsultaLayoutPaneles>
 </template>

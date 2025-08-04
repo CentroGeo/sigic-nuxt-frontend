@@ -5,8 +5,8 @@ import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
 const resourceType = 'dataLayer';
 
 const extensionNacional = '-118.3651,14.5321,-86.7104,32.7187';
-// const storeConsulta = useConsultaStore();
-// const extensionMapa = computed(() => storeConsulta.ajustarExtensionMapa || extensionNacional);
+const storeConsulta = useConsultaStore();
+const extensionMapa = computed(() => storeConsulta.ajustarExtensionMapa || extensionNacional);
 
 const config = useRuntimeConfig();
 const storeSelected = useSelectedResourcesStore();
@@ -185,6 +185,23 @@ onMounted(() => {
 
     <template #visualizador>
       <ClientOnly>
+<!--         <SisdaiMapa
+          class="gema"
+          :vista="{extension: extensionMapa}"
+          @click-centrar="storeConsulta.ajustarExtensionMapa = undefined"
+          @al-mover-vista="({ acercamiento, centro }) => {console.log(acercamiento, centro)}"
+                >
+          <SisdaiCapaXyz />
+
+          <SisdaiCapaWms
+            v-for="(capa, index) in storeSelected.selectedResources[resourceType]"
+            :key="`${capa.uuid}_${randomNum}`"
+            :fuente="`${config.public.geoserverUrl}/wms?`"
+            :posicion="storeSelected.selectedResources.length - index"
+            :capa="capa.alternate"
+            @alFinalizarCarga="isFinishedLoading += 1"
+          />
+        </SisdaiMapa> -->
         <SisdaiMapa
           class="gema"
           :vista="vistaDelMapa"
@@ -205,13 +222,13 @@ onMounted(() => {
     </template>
 
     <template #seleccion>
-      <ConsultaLayoutSeleccion
+<!--       <ConsultaLayoutSeleccion
         titulo="Capas seleccionadas"
         :resource-type="resourceType"
         etiqueta-elementos="Capas"
         :funcion-descarga="exportarMapa"
       />
-      <a ref="linkExportaMapa" class="oculto" download="sigic.png" />
+      <a ref="linkExportaMapa" class="oculto" download="sigic.png" /> -->
     </template>
   </ConsultaLayoutPaneles>
 </template>

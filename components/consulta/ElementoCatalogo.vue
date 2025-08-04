@@ -172,19 +172,27 @@ onUnmounted(() => {
 
 const selectedStore = useSelectedResources2Store();
 const capasSeleccionadas = computed({
-  get: () => selectedStore.listaCapas,
-  set: (capas) => selectedStore.actualizarCapas(capas),
+  get: () => selectedStore.resourcesList(resourceType.value),
+  set: (capas) => selectedStore.updateSelectedResources(capas, resourceType.value),
 });
 </script>
 
 <template>
   <div :id="`elemento-${catalogueElement.uuid}`" ref="rootEl" class="m-x-5 m-y-2">
+<!--     <div class="tarjeta-elemento" @click="selectElement(resourceType, catalogueElement)">
+
+
+      <input :id="`checkbox-${catalogueElement.uuid}`" v-model="isChecked" type="checkbox" />
+
+
+      <label :for="catalogueElement.uuid">{{ catalogueElement.title }}</label>
+    </div> -->
     <div class="tarjeta-elemento">
       <input
         :id="`checkbox-consulta-catalogo-${catalogueElement.uuid}`"
         v-model="capasSeleccionadas"
         type="checkbox"
-        :value="catalogueElement.alternate"
+        :value="catalogueElement.uuid"
       />
 
       <label :for="`checkbox-consulta-catalogo-${catalogueElement.uuid}`">

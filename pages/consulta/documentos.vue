@@ -26,18 +26,18 @@ const resourceType = 'document';
     </template>
 
     <template #visualizador>
-      <div v-if="!resourcesStore.shownFiles[resourceType]" class="contenedor">
+<!--       <div v-if="!resourcesStore.shownFiles[resourceType]" class="contenedor">
         <h1>No hay seleccion</h1>
       </div>
-      <ConsultaVisualizacionDocumento v-else />
+      <ConsultaVisualizacionDocumento v-else /> -->
     </template>
 
     <template #seleccion>
-      <ConsultaLayoutSeleccion
+<!--       <ConsultaLayoutSeleccion
         titulo="Documentos seleccionados"
         :resource-type="resourceType"
         etiqueta-elementos="Documentos"
-      />
+      /> -->
     </template>
   </ConsultaLayoutPaneles>
 </template>
