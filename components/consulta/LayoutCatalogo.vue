@@ -1,12 +1,13 @@
 <script setup>
-const resourcesStore = useSelectedResources2Store();
+const storeSelected = useSelectedResources2Store();
+const storeFetched = useFetchedResourcesStore()
 const props = defineProps({
   titulo: { type: String, default: 'Título' },
   resourceType: { type: String, required: true },
   etiquetaElementos: { type: String, default: undefined },
 });
 const { titulo, resourceType } = toRefs(props);
-const resources = computed(()=> resourcesStore.fetchedResources[props.resourceType])
+const resources = computed(()=> storeFetched[props.resourceType])
 const config = useRuntimeConfig();
 const apiCategorias = `${config.public.geonodeApi}/facets/category`;
 const categoryList = ref([]);
@@ -59,7 +60,7 @@ onMounted(async () => {
     const {resourcesList} = await useGeonodeResources({
       resourceType: resourceType.value,
     });
-    resourcesStore.updateFetchedResources(props.resourceType, resourcesList.value)
+    storeFetched.updateFetchedResources(props.resourceType, resourcesList.value)
   }else{
     console.log('hay cosas en la store')
   }

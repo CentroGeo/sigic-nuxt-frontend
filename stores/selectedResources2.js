@@ -2,17 +2,9 @@ import { defineStore } from 'pinia';
 
 export const useSelectedResources2Store = defineStore('selectedResources2', {
   state: () => ({
-    fetchedResources: {
-      dataLayer: [],
-      dataTable: [],
-      document: [],
-      all: [],
-    },
-    selectedResources: {
-      dataLayer: [],
-      dataTable: [],
-      document: [],
-    },
+    dataLayer: [],
+    dataTable: [],
+    document: [],
   }),
   getters: {
     /**
@@ -21,9 +13,7 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
      * @returns
      */
     resourcesAsQueryParam: (state) => (resourceType) => {
-      return state.selectedResources[resourceType]
-        .map((resource) => `${resource.asQueryParam}`)
-        .join(';');
+      return state[resourceType].map((resource) => `${resource.asQueryParam}`).join(';');
     },
 
     /**
@@ -32,7 +22,7 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
      * @returns {Array<String>}
      */
     resourcesList: (state) => (resourceType) => {
-      return state.selectedResources[resourceType].map(({ uuid }) => uuid);
+      return state[resourceType].map(({ uuid }) => uuid);
     },
 
     /**
@@ -57,22 +47,13 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
         return;
       }
 
-      this.selectedResources[resourceType] = queryParam
-        .split(';')
-        .map((capa) => new ConfiguracioCapa(capa));
-    },
-    updateFetchedResources(resourceType, newArray) {
-      this.fetchedResources[resourceType] = newArray;
+      this[resourceType] = queryParam.split(';').map((capa) => new ConfiguracioCapa(capa));
     },
     updateSelectedResources(resources, resourceType) {
       if (resourceType === 'dataLayer') {
-        this.selectedResources[resourceType] = resources.map(
-          (uuid) => new ConfiguracioCapa({ uuid })
-        );
+        this[resourceType] = resources.map((uuid) => new ConfiguracioCapa({ uuid }));
       } else {
-        this.selectedResources[resourceType] = resources.map(
-          (uuid) => new ConfiguracionOtro({ uuid })
-        );
+        this[resourceType] = resources.map((uuid) => new ConfiguracionOtro({ uuid }));
       }
     },
   },

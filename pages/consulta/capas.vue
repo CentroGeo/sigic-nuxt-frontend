@@ -167,7 +167,7 @@ function updateQueryFromStore(queryParam) {
     router.replace({ query, hash: route.hash });
   }
 
-  const { uuid } = selectedStore.selectedResources[resourceType][0];
+  const { uuid } = selectedStore[resourceType][0];
   const { alternate } = selectedStore.findResource(uuid, resourceType);
   console.log(alternate);
 }
