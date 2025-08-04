@@ -153,15 +153,15 @@ function clickCentrar() {
   vistaDelMapa.value = { extension: extensionNacional };
 }
 
-function actualizarQueyDesdeStore(capasComoQueryParam) {
-  const query = { capas: capasComoQueryParam };
+function actualizarQueyDesdeStore(resourcesAsQueryParam) {
+  const query = { capas: resourcesAsQueryParam };
   // console.log(query, route.query.capas);
 
   if (query.capas !== route.query.capas) {
     router.replace({ query, hash: route.hash });
   }
 }
-watch(() => selectedStore.capasComoQueryParam, actualizarQueyDesdeStore);
+watch(() => selectedStore.resourcesAsQueryParam(resourceType), actualizarQueyDesdeStore);
 
 function actualizarCapasDesdeQuery(queryCapas) {
   console.log('actualizarCapasDesdeQuery', queryCapas);
@@ -185,7 +185,7 @@ onMounted(() => {
 
     <template #visualizador>
       <ClientOnly>
-<!--         <SisdaiMapa
+        <!--         <SisdaiMapa
           class="gema"
           :vista="{extension: extensionMapa}"
           @click-centrar="storeConsulta.ajustarExtensionMapa = undefined"
@@ -222,7 +222,7 @@ onMounted(() => {
     </template>
 
     <template #seleccion>
-<!--       <ConsultaLayoutSeleccion
+      <!--       <ConsultaLayoutSeleccion
         titulo="Capas seleccionadas"
         :resource-type="resourceType"
         etiqueta-elementos="Capas"

@@ -7,36 +7,51 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
       dataTable: [],
       document: [],
     },
-    selectedResources:{
+    selectedResources: {
       dataLayer: {},
       dataTable: {},
       document: {},
-    }
+    },
   }),
   getters: {
-/*     resourcesList: ({ capas }) => Object.keys(capas),
- */    
+    /**
+     * Devuelve la lista de uuids en un arreglo.
+     * @param {String} resourceType tipo de resursos a consultar.
+     * @returns {Array<String>}
+     */
     resourcesList: (state) => (resourceType) => {
-      return Object.keys(state.selectedResources[resourceType])
-    }
-/*     capasComoQueryParam: (state) =>
-      state.listaCapas.map((capa) => `${capa},${state.capas[capa].queryParam}`).join(';'), */
+      return Object.keys(state.selectedResources[resourceType]);
+    },
+
+    /**
+     * Devuelde los recursos almacenados en la selección en formato url para el query param.
+     * @param {String} resourceType tipo de resursos a consultar.
+     * @returns
+     */
+    resourcesAsQueryParam: (state) => (resourceType) => {
+      return state
+        .resourcesList(resourceType)
+        .map((uuid) => `${uuid},${state.selectedResources[resourceType][uuid].queryParam}`)
+        .join(';');
+    },
   },
   actions: {
     updateFilteredResources(resourceType, newArray) {
       this.filteredResources[resourceType] = newArray;
     },
     updateSelectedResources(resources, resourceType) {
-      if(resourceType === 'dataLayer'){
-      this.selectedResources[resourceType] = resources.reduce((obj, capa) => ({ ...obj, [capa]: new ConfiguracioCapa() }), {});
-      }else{
-      this.selectedResources[resourceType] = resources.reduce((obj, capa) => ({ ...obj, [capa]: new ConfiguracionOtro() }), {});
+      if (resourceType === 'dataLayer') {
+        this.selectedResources[resourceType] = resources.reduce(
+          (obj, capa) => ({ ...obj, [capa]: new ConfiguracioCapa() }),
+          {}
+        );
+      } else {
+        this.selectedResources[resourceType] = resources.reduce(
+          (obj, capa) => ({ ...obj, [capa]: new ConfiguracionOtro() }),
+          {}
+        );
       }
-      console.log(resourceType, this.selectedResources[resourceType])
     },
-/*     actualizarCapas(capas) {
-      this.capas = capas.reduce((obj, capa) => ({ ...obj, [capa]: new ConfiguracioCapa() }), {});
-    }, */
   },
 });
 
@@ -57,6 +72,6 @@ class ConfiguracionOtro {
   }
 
   get queryParam() {
-    return `${this.estilo || ''},${this.opacidad},${this.visible}`;
+    return ``;
   }
 }
