@@ -15,7 +15,7 @@ const props = defineProps({
     default: Object,
   },
 });
-const { resourceType, catalogueElement } = toRefs(props);
+const { catalogueElement } = toRefs(props);
 
 // const api = config.public.geoserverUrl;
 const subtype = ref(catalogueElement.value.subtype);
@@ -82,7 +82,7 @@ const rootEl = ref();
 // Si está en la lista de elementos seleccionados, mostrarla palomeada. Esto es para cuando cambiamos de vista
 /* function setCheck() {
   if (
-    resourcesStore.selectedResources[resourceType.value]?.some(
+    resourcesStore.selectedResources[props.resourceType]?.some(
       (r) => r.uuid === catalogueElement.value.uuid
     )
   ) {
@@ -96,7 +96,7 @@ setCheck(); */
 // Como también se puede modificar la lista desde el panel de seleccion, montamos un watcher
 // para despalomear las opciones que se borraron
 /* watch(
-  () => resourcesStore.selectedResources[resourceType.value],
+  () => resourcesStore.selectedResources[props.resourceType],
   () => {
     setCheck();
   },
@@ -110,7 +110,7 @@ onMounted(() => {
       for (const entry of entries) {
         if (entry.isIntersecting) {
           // Primero checamos si no es dataset
-          if (resourceType.value !== 'dataLayer') {
+          if (props.resourceType !== 'dataLayer') {
             buttons.value = [
               {
                 tooltipText: tooltipContent(catalogueElement.value),
@@ -192,7 +192,7 @@ const capasSeleccionadas = computed({
       </label>
     </div>
 
-     <div class="flex flex-contenido-inicio m-y-3">
+    <div class="flex flex-contenido-inicio m-y-3">
       <span
         v-for="(button, i) in buttons"
         :key="i"
@@ -200,7 +200,7 @@ const capasSeleccionadas = computed({
         :class="[button.class, 'pictograma-mediano']"
         aria-hidden="true"
       />
-    </div> 
+    </div>
   </div>
 </template>
 

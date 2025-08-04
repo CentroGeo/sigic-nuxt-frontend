@@ -166,6 +166,10 @@ function updateQueryFromStore(queryParam) {
   if (query.capas !== route.query.capas) {
     router.replace({ query, hash: route.hash });
   }
+
+  const { uuid } = selectedStore.selectedResources[resourceType][0];
+  const { alternate } = selectedStore.findResource(uuid, resourceType);
+  console.log(alternate);
 }
 watch(() => selectedStore.resourcesAsQueryParam(resourceType), updateQueryFromStore);
 
@@ -232,13 +236,13 @@ onMounted(() => {
     </template>
 
     <template #seleccion>
-      <!--       <ConsultaLayoutSeleccion
+      <ConsultaLayoutSeleccion
         titulo="Capas seleccionadas"
         :resource-type="resourceType"
         etiqueta-elementos="Capas"
         :funcion-descarga="exportarMapa"
       />
-      <a ref="linkExportaMapa" class="oculto" download="sigic.png" /> -->
+      <a ref="linkExportaMapa" class="oculto" download="sigic.png" />
     </template>
   </ConsultaLayoutPaneles>
 </template>

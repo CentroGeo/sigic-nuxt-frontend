@@ -34,6 +34,16 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
     resourcesList: (state) => (resourceType) => {
       return state.selectedResources[resourceType].map(({ uuid }) => uuid);
     },
+
+    /**
+     * Busca un recurso de acuerdo a su uuid.
+     * @param {String} uuid del catalogo a buscar.
+     * @param {String} resourceType tipo de resursos a consultar.
+     * @returns
+     */
+    findResource: (state) => (uuidToFind, resourceType) => {
+      return state.fetchedResources[resourceType].find(({ uuid }) => uuid === uuidToFind);
+    },
   },
   actions: {
     /**
@@ -53,7 +63,7 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
     },
     updateFetchedResources(resourceType, newArray) {
       this.fetchedResources[resourceType] = newArray;
-    }, 
+    },
     updateSelectedResources(resources, resourceType) {
       if (resourceType === 'dataLayer') {
         this.selectedResources[resourceType] = resources.map(
