@@ -19,7 +19,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY package.json package-lock.json ./
 
-# ⚠️ npm install en lugar de ci para no romper optional deps nativas
 RUN npm ci
 
 COPY . .
@@ -46,7 +45,7 @@ RUN if [ "$NODE_ENV" = "development" ]; then \
       rm -rf /var/lib/apt/lists/*; \
       npm ci; \
     else \
-      npm i --omit=dev --omit=optional; \
+      npm ci --omit=dev --omit=optional; \
     fi
 
 EXPOSE 3000
