@@ -25,7 +25,7 @@ function notifyShareChild() {
 }
 
 function shareState() {
-  console.log("Se copia el url en el portapapeles: ", route.fullPath);
+  console.log('Se copia el url en el portapapeles: ', route.fullPath);
   notifyShareChild();
 }
 </script>
@@ -84,10 +84,7 @@ function shareState() {
       />
     </div>
 
-    <ConsultaModalDescargaAll
-      ref="downloadAllChild"
-      :resource-type="resourceType"
-    />
+    <ConsultaModalDescargaAll ref="downloadAllChild" :resource-type="resourceType" />
     <ConsultaModalCompartir ref="shareChild" />
   </div>
 </template>

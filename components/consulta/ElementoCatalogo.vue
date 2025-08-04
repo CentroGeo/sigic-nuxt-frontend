@@ -18,7 +18,7 @@ const props = defineProps({
     default: Object,
   },
 });
-const { resourceType, catalogueElement } = toRefs(props);
+const { catalogueElement } = toRefs(props);
 
 const subtype = ref(catalogueElement.value.subtype);
 const geomType = ref(null);
@@ -70,8 +70,6 @@ const optionsDict = {
 let observer;
 const rootEl = ref();
 
-
-
 onMounted(() => {
   // Esto es para observar cuando la tarjeta entra en la vista
   observer = new IntersectionObserver(
@@ -79,7 +77,7 @@ onMounted(() => {
       for (const entry of entries) {
         if (entry.isIntersecting) {
           // Primero checamos si no es dataset
-          if (resourceType.value !== 'dataLayer') {
+          if (props.resourceType !== 'dataLayer') {
             buttons.value = [
               {
                 tooltipText: tooltipContent(catalogueElement.value),
@@ -138,7 +136,6 @@ onUnmounted(() => {
     observer.unobserve(rootEl.value);
   }
 });
-
 </script>
 
 <template>
@@ -156,7 +153,7 @@ onUnmounted(() => {
       </label>
     </div>
 
-     <div class="flex flex-contenido-inicio m-y-3">
+    <div class="flex flex-contenido-inicio m-y-3">
       <span
         v-for="(button, i) in buttons"
         :key="i"
@@ -164,7 +161,7 @@ onUnmounted(() => {
         :class="[button.class, 'pictograma-mediano']"
         aria-hidden="true"
       />
-    </div> 
+    </div>
   </div>
 </template>
 

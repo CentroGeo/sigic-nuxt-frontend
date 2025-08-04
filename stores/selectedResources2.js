@@ -2,9 +2,9 @@ import { defineStore } from 'pinia';
 
 export const useSelectedResources2Store = defineStore('selectedResources2', {
   state: () => ({
-      dataLayer: [],
-      dataTable: [],
-      document: [],
+    dataLayer: [],
+    dataTable: [],
+    document: [],
   }),
   getters: {
     /**
@@ -13,9 +13,7 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
      * @returns
      */
     resourcesAsQueryParam: (state) => (resourceType) => {
-      return state[resourceType]
-        .map((resource) => `${resource.asQueryParam}`)
-        .join(';');
+      return state[resourceType].map((resource) => `${resource.asQueryParam}`).join(';');
     },
 
     /**
@@ -39,19 +37,13 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
         return;
       }
 
-      this[resourceType] = queryParam
-        .split(';')
-        .map((capa) => new ConfiguracioCapa(capa));
+      this[resourceType] = queryParam.split(';').map((capa) => new ConfiguracioCapa(capa));
     },
     updateSelectedResources(resources, resourceType) {
       if (resourceType === 'dataLayer') {
-        this[resourceType] = resources.map(
-          (uuid) => new ConfiguracioCapa({ uuid })
-        );
+        this[resourceType] = resources.map((uuid) => new ConfiguracioCapa({ uuid }));
       } else {
-        this[resourceType] = resources.map(
-          (uuid) => new ConfiguracionOtro({ uuid })
-        );
+        this[resourceType] = resources.map((uuid) => new ConfiguracionOtro({ uuid }));
       }
     },
   },

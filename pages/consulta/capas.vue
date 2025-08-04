@@ -124,6 +124,7 @@ watch(
 const route = useRoute();
 const router = useRouter();
 const selectedStore = useSelectedResources2Store();
+const fetchedStore = useFetchedResourcesStore();
 const vistaDelMapa = ref({ extension: extensionNacional });
 
 /**
@@ -166,6 +167,10 @@ function updateQueryFromStore(queryParam) {
   if (query.capas !== route.query.capas) {
     router.replace({ query, hash: route.hash });
   }
+
+  const { uuid } = selectedStore[resourceType][0];
+  const { alternate } = fetchedStore.findResource(uuid, resourceType);
+  console.log(alternate);
 }
 watch(() => selectedStore.resourcesAsQueryParam(resourceType), updateQueryFromStore);
 
@@ -238,7 +243,7 @@ onMounted(() => {
         etiqueta-elementos="Capas"
         :funcion-descarga="exportarMapa"
       />
-      <a ref="linkExportaMapa" class="oculto" download="sigic.png" /> 
+      <a ref="linkExportaMapa" class="oculto" download="sigic.png" />
     </template>
   </ConsultaLayoutPaneles>
 </template>
