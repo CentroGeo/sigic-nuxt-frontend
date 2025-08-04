@@ -17,7 +17,7 @@
   "dependencies": {
     "@centrogeomx/sisdai-componentes": "^4.14.0",
     "@centrogeomx/sisdai-css": "^1.9.0",
-    "@centrogeomx/sisdai-mapas": "github:CentroGeo/sisdai-mapas#sigic",
+    "@centrogeomx/sisdai-mapas": "https://github.com/CentroGeo/sisdai-mapas#sigic",
     "@nuxt/image": "^1.10.0",
     "@pinia/nuxt": "^0.11.1",
     "@sidebase/nuxt-auth": "^0.10.1",
