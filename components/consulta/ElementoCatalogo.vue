@@ -1,10 +1,13 @@
 <script setup>
 // PENDING: Tener en cuenta que no solo tendremos archivos vectoriales
 import { onMounted, onUnmounted, ref, toRefs } from 'vue';
-import { useSelectedResourcesStore } from '~/stores/selectedResources.js';
 import { fetchGeometryType, tooltipContent } from '~/utils/consulta.js';
 
-const resourcesStore = useSelectedResourcesStore();
+const selectedStore = useSelectedResources2Store();
+const capasSeleccionadas = computed({
+  get: () => selectedStore.resourcesList(props.resourceType),
+  set: (uuids) => selectedStore.updateSelectedResources(uuids, props.resourceType),
+});
 const props = defineProps({
   resourceType: {
     type: String,
@@ -17,10 +20,8 @@ const props = defineProps({
 });
 const { resourceType, catalogueElement } = toRefs(props);
 
-// const api = config.public.geoserverUrl;
 const subtype = ref(catalogueElement.value.subtype);
 const geomType = ref(null);
-//const isChecked = ref(false);
 const buttons = ref([]);
 const optionsDict = {
   Point: { tooltipText: 'Capa de puntos', class: 'pictograma-capa-puntos' },
@@ -69,39 +70,7 @@ const optionsDict = {
 let observer;
 const rootEl = ref();
 
-// Manejeamos el checkbox y controlamos los elementos seleccionados
-/* function selectElement(resourceType, option) {
-  isChecked.value = !isChecked.value;
-  if (isChecked.value) {
-    resourcesStore.addResource(resourceType, option);
-  } else {
-    resourcesStore.removeResource(resourceType, option);
-  }
-} */
 
-// Si está en la lista de elementos seleccionados, mostrarla palomeada. Esto es para cuando cambiamos de vista
-/* function setCheck() {
-  if (
-    resourcesStore.selectedResources[resourceType.value]?.some(
-      (r) => r.uuid === catalogueElement.value.uuid
-    )
-  ) {
-    isChecked.value = true;
-  } else {
-    isChecked.value = false;
-  }
-}
-setCheck(); */
-
-// Como también se puede modificar la lista desde el panel de seleccion, montamos un watcher
-// para despalomear las opciones que se borraron
-/* watch(
-  () => resourcesStore.selectedResources[resourceType.value],
-  () => {
-    setCheck();
-  },
-  { deep: true }
-); */
 
 onMounted(() => {
   // Esto es para observar cuando la tarjeta entra en la vista
@@ -170,11 +139,6 @@ onUnmounted(() => {
   }
 });
 
-const selectedStore = useSelectedResources2Store();
-const capasSeleccionadas = computed({
-  get: () => selectedStore.resourcesList(props.resourceType),
-  set: (uuids) => selectedStore.updateSelectedResources(uuids, props.resourceType),
-});
 </script>
 
 <template>
