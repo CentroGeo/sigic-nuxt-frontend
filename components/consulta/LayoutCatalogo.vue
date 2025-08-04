@@ -22,16 +22,6 @@ if (!geonodeCategories.value) {
     categoryList.value.push(d.label);
   });
 }
-// Para evitar estar repitiendo las peticiones, vamos a revisar si la store está vacía. Si está vacía, guardamos todos los recursos.
-if (resources.value.length === 0) {
-  console.log('la store esta vacia')
-  const {resourcesList} = await useGeonodeResources({
-    resourceType: resourceType.value,
-  });
-  resourcesStore.updateFetchedResources(props.resourceType, resourcesList.value)
-}else{
-  console.log('hay cosas en la store')
-}
 
 function groupResults() {
   categorizedResources.value = {};
@@ -54,7 +44,6 @@ function groupResults() {
     }
   });
 }
-groupResults()
 
 function setSelectedCategory(categoria) {
   if (selectedCategories.value.includes(categoria)) {
@@ -64,6 +53,20 @@ function setSelectedCategory(categoria) {
   }
 } 
 
+onMounted(async () => {
+  // Para evitar estar repitiendo las peticiones, vamos a revisar si la store está vacía. Si está vacía, guardamos todos los recursos.
+  if (resources.value.length === 0) {
+    console.log('la store esta vacia')
+    const {resourcesList} = await useGeonodeResources({
+      resourceType: resourceType.value,
+    });
+    resourcesStore.updateFetchedResources(props.resourceType, resourcesList.value)
+  }else{
+    console.log('hay cosas en la store')
+  }
+  groupResults()
+
+});
 </script>
 
 <template>
