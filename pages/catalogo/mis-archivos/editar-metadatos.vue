@@ -1,19 +1,66 @@
 <script setup>
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
-import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
-const campoTitulo = ref('');
-const campoResumen = ref('');
-const campoPalabrasClave = ref('');
-const campoAutor = ref('');
-const campoAnioPublicacion = ref('');
+const campoResumen = ref('foo');
+// const campoTitulo = ref('');
+// const campoPalabrasClave = ref('');
+// const campoAutor = ref('');
+// const campoAnioPublicacion = ref('');
+// const seleccionEjemplo = ref('');
+// const seleccionCategoria = ref('');
+// const seleccionGrupo = ref('');
+// const ejemplo = ref({});
 
-const seleccionEjemplo = ref('');
+// const { data } = useAuth();
 
-const seleccionCategoria = ref('');
-const seleccionGrupo = ref('');
+// async function patchData() {
+//   const token = data.value?.accessToken;
+//   const formData = new FormData();
+//   formData.append('abstract', 'foo');
+//   formData.append('token', token);
+//   await fetch('/api/metadatos', { method: 'POST', body: formData });
+// }
 
-const ejemplo = ref({});
+// console.log('index patch');
+// fetch('https://jsonplaceholder.typicode.com/posts/1', {
+//   method: 'PATCH',
+//   body: JSON.stringify({
+//     title: 'foo',
+//   }),
+//   headers: {
+//     'Content-type': 'application/json; charset=UTF-8',
+//   },
+// })
+//   .then((response) => response.json())
+//   .then((json) => console.log('index patch', json));
+
+// console.log('geonode');
+
+// fetch('http://10.2.102.239/api/v2/datasets/1/', {
+//   method: 'PATCH',
+//   body: JSON.stringify({
+//     abstract: 'foo',
+//   }),
+//   headers: {
+//     'Content-type': 'application/json; charset=UTF-8',
+//   },
+// })
+//   .then((response) => response.json())
+//   .then((json) => console.log(json));
+// fetch('/api/metadatos', {
+//   method: 'POST',
+// })
+//   .then((response) => response.json())
+//   .then((json) => console.log(json));
+const { data } = useAuth();
+async function submit() {
+  const token = ref(data.value?.accessToken);
+  const { body } = await $fetch('/api/metadatos', {
+    method: 'POST',
+    body: { abstract: 'foo', token: token.value },
+  });
+  console.log('body', body);
+}
 </script>
 
 <template>
@@ -48,13 +95,13 @@ const ejemplo = ref({});
           </p>
 
           <!-- Drag & Drop -->
-          <ClientOnly>
+          <!-- <ClientOnly>
             <CatalogoElementoDragNdDrop />
-          </ClientOnly>
+          </ClientOnly> -->
 
           <!-- Formulario -->
-          <form class="m-t-3">
-            <div class="flex">
+          <div class="m-t-3">
+            <!-- <div class="flex">
               <div class="columna-16">
                 <ClientOnly>
                   <SisdaiCampoBase
@@ -63,17 +110,17 @@ const ejemplo = ref({});
                     ejemplo="Añade un nombre"
                   />
                 </ClientOnly>
-              </div>
-              <div class="columna-16">
-                <ClientOnly>
-                  <SisdaiCampoBase
-                    v-model="campoResumen"
-                    etiqueta="Resumen"
-                    ejemplo="El texto descriptivo es conciso y significativo. Debe ayudar a la persona usuaria a..."
-                  />
-                </ClientOnly>
-              </div>
-              <div class="columna-8">
+              </div> -->
+            <div class="columna-16">
+              <ClientOnly>
+                <SisdaiCampoBase
+                  v-model="campoResumen"
+                  etiqueta="Resumen"
+                  ejemplo="El texto descriptivo es conciso y significativo. Debe ayudar a la persona usuaria a..."
+                />
+              </ClientOnly>
+            </div>
+            <!-- <div class="columna-8">
                 <ClientOnly>
                   <SisdaiSelector
                     v-model="seleccionEjemplo"
@@ -145,13 +192,15 @@ const ejemplo = ref({});
                   />
                 </ClientOnly>
               </div>
-            </div>
+            </div> -->
             <div class="flex p-t-3">
               <button class="boton-secundario boton-chico" type="button">Ir a mis archivos</button>
-              <button class="boton-primario boton-chico" disabled="disabled">Actualizar</button>
+              <button class="boton-primario boton-chico" :disabled="false" @click="submit()">
+                Actualizar
+              </button>
               <button class="boton-primario boton-chico" :disabled="false">Siguiente</button>
             </div>
-          </form>
+          </div>
         </div>
       </main>
     </template>
