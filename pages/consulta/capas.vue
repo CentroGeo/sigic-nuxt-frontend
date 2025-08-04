@@ -139,8 +139,8 @@ function actualizarHashDesdeVista({ acercamiento, centro }) {
 }
 
 /**
- *
- * @param hashVista texto hash sin el carácter #
+ * Actualiza la vista del mapa dependiendo del hash.
+ * @param hashVista texto hash sin el carácter #.
  */
 function actualizarVistaDesdeHash(hashVista) {
   if (hashVista === '') return;
@@ -149,22 +149,32 @@ function actualizarVistaDesdeHash(hashVista) {
   vistaDelMapa.value = { acercamiento, centro: [longitud, latitud] };
 }
 
+/**
+ * Función ejecutada cuando se dá click en el botón centrar del mapa.
+ */
 function clickCentrar() {
   vistaDelMapa.value = { extension: extensionNacional };
 }
 
-function actualizarQueyDesdeStore(capasComoQueryParam) {
-  const query = { capas: capasComoQueryParam };
-  // console.log(query, route.query.capas);
+/**
+ * Actualiza el queryParam desde los valores del store.
+ * @param queryParam generado por el store.
+ */
+function updateQueryFromStore(queryParam) {
+  const query = { capas: queryParam };
 
   if (query.capas !== route.query.capas) {
     router.replace({ query, hash: route.hash });
   }
 }
-watch(() => selectedStore.capasComoQueryParam, actualizarQueyDesdeStore);
+watch(() => selectedStore.resourcesAsQueryParam(resourceType), updateQueryFromStore);
 
-function actualizarCapasDesdeQuery(queryCapas) {
-  console.log('actualizarCapasDesdeQuery', queryCapas);
+/**
+ * Actualiza el store desde los valores del queryParam.
+ * @param queryParam que llega desde la url.
+ */
+function actualizarCapasDesdeQuery(queryParam) {
+  selectedStore.addFromQueryParam(queryParam, resourceType);
 }
 
 onMounted(() => {
@@ -185,7 +195,7 @@ onMounted(() => {
 
     <template #visualizador>
       <ClientOnly>
-<!--         <SisdaiMapa
+        <!--         <SisdaiMapa
           class="gema"
           :vista="{extension: extensionMapa}"
           @click-centrar="storeConsulta.ajustarExtensionMapa = undefined"
@@ -222,7 +232,7 @@ onMounted(() => {
     </template>
 
     <template #seleccion>
-<!--       <ConsultaLayoutSeleccion
+      <!--       <ConsultaLayoutSeleccion
         titulo="Capas seleccionadas"
         :resource-type="resourceType"
         etiqueta-elementos="Capas"
