@@ -54,7 +54,6 @@ function setSelectedCategory(categoria) {
 } 
 
 onMounted(async () => {
-  // Para evitar estar repitiendo las peticiones, vamos a revisar si la store está vacía. Si está vacía, guardamos todos los recursos.
   if (resources.value.length === 0) {
     console.log('la store esta vacia')
     const {resourcesList} = await useGeonodeResources({
@@ -103,15 +102,15 @@ onMounted(async () => {
         />
       </div>
       <div
-        v-for="(option, index) in categorizedResources[category]"
+        v-for="(resource, index) in categorizedResources[category]"
         :key="index"
         class="contenedor-archivos"
       >
-        <ConsultaElementoCatalogo
+         <ConsultaElementoCatalogo
           v-if="selectedCategories.includes(category)"
           :key="index"
           class="elemento-catalogo"
-          :catalogue-element="option"
+          :catalogue-element="resource"
           :resource-type="resourceType"
         />
       </div>

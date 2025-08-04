@@ -20,7 +20,7 @@ const { resourceType, catalogueElement } = toRefs(props);
 // const api = config.public.geoserverUrl;
 const subtype = ref(catalogueElement.value.subtype);
 const geomType = ref(null);
-const isChecked = ref(false);
+//const isChecked = ref(false);
 const buttons = ref([]);
 const optionsDict = {
   Point: { tooltipText: 'Capa de puntos', class: 'pictograma-capa-puntos' },
@@ -70,17 +70,17 @@ let observer;
 const rootEl = ref();
 
 // Manejeamos el checkbox y controlamos los elementos seleccionados
-function selectElement(resourceType, option) {
+/* function selectElement(resourceType, option) {
   isChecked.value = !isChecked.value;
   if (isChecked.value) {
     resourcesStore.addResource(resourceType, option);
   } else {
     resourcesStore.removeResource(resourceType, option);
   }
-}
+} */
 
 // Si está en la lista de elementos seleccionados, mostrarla palomeada. Esto es para cuando cambiamos de vista
-function setCheck() {
+/* function setCheck() {
   if (
     resourcesStore.selectedResources[resourceType.value]?.some(
       (r) => r.uuid === catalogueElement.value.uuid
@@ -91,17 +91,17 @@ function setCheck() {
     isChecked.value = false;
   }
 }
-setCheck();
+setCheck(); */
 
 // Como también se puede modificar la lista desde el panel de seleccion, montamos un watcher
 // para despalomear las opciones que se borraron
-watch(
+/* watch(
   () => resourcesStore.selectedResources[resourceType.value],
   () => {
     setCheck();
   },
   { deep: true }
-);
+); */
 
 onMounted(() => {
   // Esto es para observar cuando la tarjeta entra en la vista
@@ -192,7 +192,7 @@ const capasSeleccionadas = computed({
       </label>
     </div>
 
-    <div class="flex flex-contenido-inicio m-y-3">
+     <div class="flex flex-contenido-inicio m-y-3">
       <span
         v-for="(button, i) in buttons"
         :key="i"
@@ -200,7 +200,7 @@ const capasSeleccionadas = computed({
         :class="[button.class, 'pictograma-mediano']"
         aria-hidden="true"
       />
-    </div>
+    </div> 
   </div>
 </template>
 

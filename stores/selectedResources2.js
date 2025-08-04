@@ -10,8 +10,8 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
     },
     selectedResources: {
       dataLayer: [],
-      dataTable: {},
-      document: {},
+      dataTable: [],
+      document: [],
     },
   }),
   getters: {
@@ -51,18 +51,17 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
         .split(';')
         .map((capa) => new ConfiguracioCapa(capa));
     },
-    updateFilteredResources(resourceType, newArray) {
-      this.filteredResources[resourceType] = newArray;
-    },
+    updateFetchedResources(resourceType, newArray) {
+      this.fetchedResources[resourceType] = newArray;
+    }, 
     updateSelectedResources(resources, resourceType) {
       if (resourceType === 'dataLayer') {
         this.selectedResources[resourceType] = resources.map(
           (uuid) => new ConfiguracioCapa({ uuid })
         );
       } else {
-        this.selectedResources[resourceType] = resources.reduce(
-          (obj, capa) => ({ ...obj, [capa]: new ConfiguracionOtro() }),
-          {}
+        this.selectedResources[resourceType] = resources.map(
+          (uuid) => new ConfiguracionOtro({ uuid })
         );
       }
     },
