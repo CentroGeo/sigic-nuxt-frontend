@@ -1,6 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
-const isDev = process.env.NODE_ENV === 'production' ? false : true
+const isDev = process.env.NODE_ENV !== 'production';
 
 export default defineNuxtConfig({
   app: {
@@ -22,27 +22,24 @@ export default defineNuxtConfig({
       ],
     },
   },
-  compatibilityDate: "2025-05-15",
+  compatibilityDate: '2025-05-15',
   devtools: { enabled: isDev },
-  experimental: {
-    devTools: isDev
-  },
   sourcemap: {
     server: isDev,
-    client: isDev
+    client: isDev,
   },
 
   modules: [
-    "@pinia/nuxt",
+    '@pinia/nuxt',
     // "@nuxt/content",
-    "@nuxt/eslint",
-    "@nuxt/image",
-    "@nuxt/test-utils",
-    "@sidebase/nuxt-auth",
-    '@vueuse/nuxt'
+    '@nuxt/eslint',
+    '@nuxt/image',
+    '@nuxt/test-utils',
+    '@sidebase/nuxt-auth',
+    '@vueuse/nuxt',
   ],
 
-  css: ["@centrogeomx/sisdai-css/dist/sisdai.min.css"],
+  css: ['@centrogeomx/sisdai-css/dist/sisdai.min.css'],
 
   auth: {
     isEnabled: true,
@@ -51,14 +48,14 @@ export default defineNuxtConfig({
 
     globalAppMiddleware: false, // protege todas las páginas por defecto
     provider: {
-      type: "authjs",
+      type: 'authjs',
       trustHost: true,
-      defaultProvider: "keycloak",
+      defaultProvider: 'keycloak',
     },
     sessionRefresh: {
       enablePeriodically: true,
       enableOnWindowFocus: true,
-    }
+    },
   },
 
   runtimeConfig: {
@@ -71,7 +68,7 @@ export default defineNuxtConfig({
       geonodeUrl: process.env.GEONODE_URL,
 
       // geoserverApi: `${process.env.GEOSERVER_URL}/rest`,
-    }
+    },
   },
 
   nitro: {
@@ -79,9 +76,9 @@ export default defineNuxtConfig({
     storage: {
       fs: {
         driver: 'fs',
-        base: './public'
-      }
-    }
+        base: './public',
+      },
+    },
   },
 
   devServer: {
