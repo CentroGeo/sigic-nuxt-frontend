@@ -232,13 +232,13 @@ onMounted(() => {
     </template>
 
     <template #seleccion>
-      <!--       <ConsultaLayoutSeleccion
+      <ConsultaLayoutSeleccion
         titulo="Capas seleccionadas"
         :resource-type="resourceType"
         etiqueta-elementos="Capas"
         :funcion-descarga="exportarMapa"
       />
-      <a ref="linkExportaMapa" class="oculto" download="sigic.png" /> -->
+      <a ref="linkExportaMapa" class="oculto" download="sigic.png" /> 
     </template>
   </ConsultaLayoutPaneles>
 </template>

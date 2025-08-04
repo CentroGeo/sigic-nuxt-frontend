@@ -6,7 +6,9 @@ const props = defineProps({
   funcionDescarga: { type: Function, default: undefined },
 });
 const { titulo, resourceType } = toRefs(props);
-const resourcesStore = useSelectedResourcesStore();
+const storeSelected = useSelectedResources2Store();
+const selectedResources = computed(() => storeSelected[props.resourceType])
+
 const buttonTagDict = {
   dataLayer: 'mapa',
   dataTable: 'archivos',
@@ -67,7 +69,7 @@ function shareState() {
         </div>
 
         <UiNumeroElementos
-          :numero="resourcesStore.selectedResources[resourceType].length"
+          :numero="selectedResources.length"
           :etiqueta="etiquetaElementos"
         />
       </div>
@@ -75,7 +77,7 @@ function shareState() {
 
     <div class="m-x-2 m-y-1">
       <ConsultaElementoSeleccionado
-        v-for="resource in resourcesStore.selectedResources[resourceType]"
+        v-for="resource in selectedResources"
         :key="`seleccion-${resource.uuid}`"
         :selected-element="resource"
         :resource-type="resourceType"

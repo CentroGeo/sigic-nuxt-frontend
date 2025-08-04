@@ -69,7 +69,7 @@ if (!resourcesStore.shownFiles[resourceType.value]) {
         </div>
       </div>
 
-      <ConsultaContenidoCapaSeleccionada
+<!--       <ConsultaContenidoCapaSeleccionada
         v-if="resourceType === 'dataLayer'"
         :resource-type="resourceType"
         :selected-element="selectedElement"
@@ -80,7 +80,7 @@ if (!resourcesStore.shownFiles[resourceType.value]) {
         :group-name="resourceType"
         :resource-type="resourceType"
         :selected-element="selectedElement"
-      />
+      /> -->
     </div>
   </div>
 </template>
