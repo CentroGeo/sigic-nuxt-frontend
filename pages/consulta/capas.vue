@@ -164,7 +164,7 @@ function actualizarQueyDesdeStore(resourcesAsQueryParam) {
 watch(() => selectedStore.resourcesAsQueryParam(resourceType), actualizarQueyDesdeStore);
 
 function actualizarCapasDesdeQuery(queryCapas) {
-  console.log('actualizarCapasDesdeQuery', queryCapas);
+  selectedStore.addFromQueryParam(queryCapas, resourceType);
 }
 
 onMounted(() => {
