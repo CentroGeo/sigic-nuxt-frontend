@@ -19,7 +19,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY package.json package-lock.json ./
 
-# ⚠️ npm install en lugar de ci para no romper optional deps nativas
 RUN npm ci
 
 COPY . .
@@ -36,20 +35,17 @@ ENV NODE_ENV=${NODE_ENV:-development}
 
 WORKDIR /app
 
-RUN if [ "$NODE_ENV" = "development" ]; then \
-      apt-get update && apt-get install -y --no-install-recommends git \
-      && rm -rf /var/lib/apt/lists/* \
-    fi
-
 COPY --from=builder /app/.output/ .output/
 COPY --from=builder /app/package.json .
 COPY --from=builder /app/package-lock.json .
 
-# Si estamos en desarrollo, instala dev deps (útil para devtools), sino solo prod deps
 RUN if [ "$NODE_ENV" = "development" ]; then \
+      apt-get update && \
+      apt-get install -y --no-install-recommends git && \
+      rm -rf /var/lib/apt/lists/*; \
       npm ci; \
     else \
-      npm i --omit=dev --omit=optional; \
+      npm ci --omit=dev --omit=optional; \
     fi
 
 EXPOSE 3000

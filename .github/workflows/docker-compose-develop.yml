@@ -58,7 +58,12 @@ jobs:
 
       - name: Set environment
         id: env
-        run: echo "NODE_ENV=$([ '${{ github.ref_name }}' = 'main' ] && echo 'production' || echo 'development')" >> $GITHUB_OUTPUT
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            echo "NODE_ENV=production" >> "$GITHUB_OUTPUT"
+          else
+            echo "NODE_ENV=development" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Build & tag Docker image
         run: |
@@ -71,8 +76,6 @@ jobs:
         run: |
           docker push ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.branch }}
           docker push ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.sha }}
-
-
 
   deploy:
     name: Deploy SIGIC Nuxt frontend to dev server
