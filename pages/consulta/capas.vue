@@ -124,6 +124,7 @@ watch(
 const route = useRoute();
 const router = useRouter();
 const selectedStore = useSelectedResources2Store();
+const fetchedStore = useFetchedResourcesStore();
 const vistaDelMapa = ref({ extension: extensionNacional });
 
 /**
@@ -168,7 +169,7 @@ function updateQueryFromStore(queryParam) {
   }
 
   const { uuid } = selectedStore[resourceType][0];
-  const { alternate } = selectedStore.findResource(uuid, resourceType);
+  const { alternate } = fetchedStore.findResource(uuid, resourceType);
   console.log(alternate);
 }
 watch(() => selectedStore.resourcesAsQueryParam(resourceType), updateQueryFromStore);
