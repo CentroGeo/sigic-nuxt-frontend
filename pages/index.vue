@@ -1,5 +1,33 @@
 <script setup>
 definePageMeta({ auth: false });
+const { signIn } = useAuth();
+
+async function iniciarSesion() {
+  await signIn('keycloak', {
+    callbackUrl: '/', // A dónde volver después del login
+  });
+}
+useHead({
+  link: [
+    {
+      key: 'gob-favicon',
+      rel: 'shortcut icon',
+      href: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/images/favicon.ico',
+    },
+    {
+      key: 'gob-styles',
+      rel: 'stylesheet',
+      href: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/styles/main.css',
+    },
+  ],
+  script: [
+    {
+      key: 'gobmx-script',
+      src: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/js/gobmx.js',
+      defer: true,
+    },
+  ],
+});
 </script>
 <template>
   <div>
@@ -272,6 +300,198 @@ definePageMeta({ auth: false });
           </div>
         </div>
       </section>
+      <section id="explora" class="m-y-10">
+        <div class="contenedor ancho-lectura texto-centrado">
+          <h2>Explora las últimas capas geográficas en SIGIC</h2>
+          <p>
+            Consulta lo más reciente del catálogo: datos geográficos listos para visualizar,
+            compartir o descargar.
+          </p>
+        </div>
+        <div class="contenedor ancho-fijo">
+          <div class="flex">
+            <div class="columna-4">
+              <div class="tarjeta">
+                <img
+                  class="tarjeta-imagen"
+                  src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/asha.jpg"
+                />
+
+                <div class="tarjeta-cuerpo">
+                  <p class="tarjeta-etiqueta">Salud</p>
+                  <p class="tarjeta-titulo">
+                    Infraestructura de salud pública en la Península de Yucatán
+                  </p>
+                  <p>Capa de puntos</p>
+                </div>
+
+                <div class="tarjeta-pie">
+                  <NuxtLink class="boton-primario boton-chico"
+                    >Abrir capa en el visualizador
+                    <span class="pictograma-visualizador pictograma-chico"></span
+                  ></NuxtLink>
+                </div>
+              </div>
+            </div>
+
+            <div class="columna-4">
+              <div class="tarjeta">
+                <img
+                  class="tarjeta-imagen"
+                  src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/asha.jpg"
+                />
+
+                <div class="tarjeta-cuerpo">
+                  <p class="tarjeta-etiqueta">Seguridad humana</p>
+                  <p class="tarjeta-titulo">
+                    Ubicación de refugios temporales activos – Temporada de lluvias 2024
+                  </p>
+                  <p>Capa de puntos</p>
+                </div>
+
+                <div class="tarjeta-pie">
+                  <NuxtLink class="boton-primario boton-chico"
+                    >Abrir capa en el visualizador
+                    <span class="pictograma-visualizador pictograma-chico"></span
+                  ></NuxtLink>
+                </div>
+              </div>
+            </div>
+
+            <div class="columna-4">
+              <div class="tarjeta">
+                <img
+                  class="tarjeta-imagen"
+                  src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/asha.jpg"
+                />
+
+                <div class="tarjeta-cuerpo">
+                  <p class="tarjeta-etiqueta">Energía y cambio climático</p>
+                  <p class="tarjeta-titulo">
+                    Áreas de riesgo por olas de calor extremas en el norte de México
+                  </p>
+                  <p>Capa de polígonos</p>
+                </div>
+
+                <div class="tarjeta-pie">
+                  <NuxtLink class="boton-primario boton-chico"
+                    >Abrir capa en el visualizador
+                    <span class="pictograma-visualizador pictograma-chico"></span
+                  ></NuxtLink>
+                </div>
+              </div>
+            </div>
+
+            <div class="columna-4">
+              <div class="tarjeta">
+                <img
+                  class="tarjeta-imagen"
+                  src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/asha.jpg"
+                />
+
+                <div class="tarjeta-cuerpo">
+                  <p class="tarjeta-etiqueta">Agua</p>
+                  <p class="tarjeta-titulo">
+                    Red de drenaje urbano – Zona metropolitana de Guadalajara
+                  </p>
+                  <p>Capa de líneas</p>
+                </div>
+
+                <div class="tarjeta-pie">
+                  <NuxtLink class="boton-primario boton-chico"
+                    >Abrir capa en el visualizador
+                    <span class="pictograma-visualizador pictograma-chico"></span
+                  ></NuxtLink>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id="empezar" class="m-t-10 fondo-color-acento p-y-10">
+        <div class="contenedor ancho-lectura texto-centrado">
+          <h2>¿Con qué quieres empezar?</h2>
+          <div class="flex">
+            <button
+              class="boton-primario boton-chico texto-centrado init-sesion columna-16"
+              @click="iniciarSesion"
+            >
+              Crear una cuenta en SIGIC
+            </button>
+          </div>
+          <h3>o también puedes ir a:</h3>
+        </div>
+        <div class="contenedor ancho-lectura texto-centrado flex">
+          <a class="boton-secundario boton-chico texto-centrado init-sesion columna-8">
+            Visualizador de contenido
+          </a>
+          <a class="boton-secundario boton-chico texto-centrado init-sesion columna-8">
+            Análisis mediante IA
+          </a>
+          <a class="boton-secundario boton-chico texto-centrado init-sesion columna-8">
+            Catálogo de información
+          </a>
+          <a class="boton-secundario boton-chico texto-centrado init-sesion columna-8">
+            Subir mis propios archivos
+          </a>
+        </div>
+      </section>
     </main>
   </div>
 </template>
+<style scope lang="scss">
+.init-sesion {
+  display: inline;
+}
+
+.contenido {
+  // padding-top: 56px;
+}
+nav.navegacion.navegacion-pegada {
+  // top: 54px;
+}
+:root {
+  --escala-rem-gob-sisdai: 0.65;
+}
+nav.navbar {
+  padding-top: calc(var(--escala-rem-gob-sisdai) * 0.5rem);
+  padding-bottom: calc(var(--escala-rem-gob-sisdai) * 0.5rem);
+}
+nav.navbar.navbar-fixed-top {
+  z-index: 9999;
+}
+a.navbar-brand {
+  margin-right: calc(var(--escala-rem-gob-sisdai) * 63rem);
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 0 0 calc(var(--escala-rem-gob-sisdai) * 0.3125rem) 0 !important;
+}
+.navbar-expand-md .navbar-nav .nav-link {
+  padding-right: calc(var(--escala-rem-gob-sisdai) * 0.5rem);
+  padding-left: calc(var(--escala-rem-gob-sisdai) * 1.5rem);
+  padding-top: calc(var(--escala-rem-gob-sisdai) * 1.8rem);
+}
+@media (min-width: 768px) and (max-width: 992px) {
+  a.navbar-brand {
+    margin-right: calc(var(--escala-rem-gob-sisdai) * 61rem);
+  }
+}
+@media (min-width: 576px) and (max-width: 768px) {
+  .navbar-dark .navbar-toggler {
+    margin-right: calc(var(--escala-rem-gob-sisdai) * 9rem);
+  }
+  a.navbar-brand {
+    margin-right: calc(var(--escala-rem-gob-sisdai) * 41rem);
+  }
+}
+@media (max-width: 576px) {
+  a.navbar-brand {
+    margin-right: calc(var(--escala-rem-gob-sisdai) * 41rem);
+  }
+}
+.navbar-toggler-icon {
+  display: inline-block;
+  width: calc(var(--escala-rem-gob-sisdai) * 1.5em);
+  height: calc(var(--escala-rem-gob-sisdai) * 1.5em);
+}
+</style>
