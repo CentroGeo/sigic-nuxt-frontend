@@ -6,15 +6,10 @@ const props = defineProps({
   etiquetaElementos: { type: String, default: undefined },
 });
 const { titulo, resourceType } = toRefs(props);
-const { resourcesList } = useGeonodeResources({
-  resourceType: resourceType.value,
-});
+const resources = computed(()=> resourcesStore.fetchedResources[props.resourceType])
 const config = useRuntimeConfig();
 const apiCategorias = `${config.public.geonodeApi}/facets/category`;
-//const route = useRoute();
 const categoryList = ref([]);
-const filteredResources = ref([]);
-//const selectedResources = ref([]);
 const categorizedResources = ref({});
 const selectedCategories = ref([]);
 
@@ -27,10 +22,20 @@ if (!geonodeCategories.value) {
     categoryList.value.push(d.label);
   });
 }
+// Para evitar estar repitiendo las peticiones, vamos a revisar si la store está vacía. Si está vacía, guardamos todos los recursos.
+if (resources.value.length === 0) {
+  console.log('la store esta vacia')
+  const {resourcesList} = await useGeonodeResources({
+    resourceType: resourceType.value,
+  });
+  resourcesStore.updateFetchedResources(props.resourceType, resourcesList.value)
+}else{
+  console.log('hay cosas en la store')
+}
 
 function groupResults() {
   categorizedResources.value = {};
-  filteredResources.value.map((r) => {
+  resources.value.map((r) => {
     if (r.category) {
       const title = r.category.gn_description;
       if (Object.keys(categorizedResources.value).includes(title)) {
@@ -49,6 +54,7 @@ function groupResults() {
     }
   });
 }
+groupResults()
 
 function setSelectedCategory(categoria) {
   if (selectedCategories.value.includes(categoria)) {
@@ -56,60 +62,8 @@ function setSelectedCategory(categoria) {
   } else {
     selectedCategories.value.push(categoria);
   }
-}
+} 
 
-// Se utiliza un watcher porque inicialmente resourcesList y filteredResources están vacías
-watch(resourcesList, () => {
-  resourcesStore.updateFilteredResources(resourceType.value, resourcesList.value);
-  // Queremos revisar si hay query params y buscar los recursos
-  /*if (route.query.recursos) {
-    let paramResources = route.query.recursos.split(";");
-    if (resourceType.value !== "dataLayer") {
-      setDocView(resourceType.value, resourcesList.value, paramResources);
-    } else {
-      setMapView(resourceType.value, resourcesList.value, paramResources);
-    }
-  } */
-});
-watch(
-  () => resourcesStore.filteredResources[resourceType.value],
-  () => {
-    filteredResources.value = resourcesStore.filteredResources[resourceType.value];
-    groupResults();
-  },
-  { deep: true }
-);
-
-// Esto es para el manejo de la url
-/* watch(
-  [
-    () => resourcesStore.selectedResources[resourceType.value],
-    () => resourcesStore.shownFiles[resourceType.value],
-  ],
-  () => {
-    const recursos = resourcesStore.selectedResources[resourceType.value];
-    if (resourceType.value !== "dataLayer") {
-      setUrlDocs(recursos, resourceType.value);
-    } /*else setUrlLayers(recursos);
-  },
-  { deep: true }
-); */
-
-/* onMounted(() => {
-  selectedResources.value =
-    resourcesStore.selectedResources[resourceType.value];
-  if (selectedResources.value.length > 0) {
-    if (resourceType.value === "dataLayer") {
-      /*setUrlLayers(selectedResources.value);
-    } else {
-      setUrlDocs(selectedResources.value, resourceType.value);
-    }
-  } else if (route.query.recursos) {
-    //console.log("se está cargando de ser compartido o se actualizó");
-  } else {
-    //console.log("se está cargando desde cero");
-  }
-}); */
 </script>
 
 <template>
@@ -119,15 +73,15 @@ watch(
 
       <div class="m-x-2 m-y-1">
         <p class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
-        <ClientOnly>
+<!--         <ClientOnly>
           <ConsultaElementoBuscador
             :resources-list="resourcesList"
             :resource-type="resourceType"
             :categories="categoryList"
           />
-        </ClientOnly>
+        </ClientOnly> -->
 
-        <UiNumeroElementos :numero="filteredResources.length" :etiqueta="etiquetaElementos" />
+         <UiNumeroElementos :numero="resources.length" :etiqueta="etiquetaElementos" />
       </div>
     </div>
 
@@ -158,7 +112,7 @@ watch(
           :resource-type="resourceType"
         />
       </div>
-    </div>
+     </div> 
   </div>
 </template>
 

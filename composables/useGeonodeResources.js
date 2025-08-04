@@ -2,10 +2,9 @@
 // TODO: Resolver las peticiones de información para mostrar capas y datasets privados
 import { ref } from 'vue';
 
-export function useGeonodeResources({ resourceType } = {}) {
+export async function useGeonodeResources({ resourceType } = {}) {
   //const { data: authData, status: authStatus } = useAuth();
-  //console.log(authData.value, authStatus.value);
-  // const token = ref(authData.value?.accessToken);
+  //const token = ref(authData.value?.accessToken);
   const config = useRuntimeConfig();
   const api = `${config.public.geonodeApi}/resources`;
   const resourcesList = ref([]);
@@ -18,66 +17,59 @@ export function useGeonodeResources({ resourceType } = {}) {
   const fetchData = async ({ resourceType }) => {
     let page = 1;
     let allResults = [];
+   
     const loadPage = async () => {
       const dataParams = new URLSearchParams({
         page: page,
         page_size: 15,
         'filter{resource_type}': typeDict[resourceType],
-        //"filter{subtype.in}": "raster",
-        //"filter{subtype.in}": "vector",
+        //'filter{is_approved}':true,
       });
-      await fetch(`${api}?${dataParams.toString()}`, {
+      const response = await fetch(`${api}?${dataParams.toString()}`, {
         method: 'GET',
-        /*         headers: {
+        /*headers: {
           ...(authStatus.value === "authenticated"
             ? { Authorization: `Bearer ${token.value}` }
             : {}),
-        }, */
+        },*/
       })
-        .then((response) => {
-          if (response.ok) return response.json();
-          return { resources: [] };
-        })
-        .then((data) => {
-          const resources = data.resources || [];
-          allResults = allResults.concat(resources);
-          // Revisamos si hay una pagina siguiente
-          if (data.links.next) {
-            // Si la hay, volvemos a solicitar datos
-            page += 1;
-            return loadPage();
-          } else if (resourceType === 'document') {
-            //Si ya no hay paginas siguientes, filtramos los datos
-            // Si son documentos, filtramos únicamente los pdfs
-            resourcesList.value = allResults.filter((resource) =>
-              resource.links.some(
-                (link) => link.link_type === 'uploaded' && link.name.endsWith('.pdf')
-              )
-            );
-          } else if (resourceType === 'dataLayer') {
-            // Si son capas geográficas, excluimos aquellos que no tengan geometria
-            const noGeometryExtent = [-1, -1, 0, 0];
-            resourcesList.value = allResults.filter(
-              (resource) =>
-                !resource.extent.coords.every((value, index) => value === noGeometryExtent[index])
-            );
-          } else {
-            resourcesList.value = allResults;
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-        })
-        .finally(() => {
-          //console.log("fin");
-        });
+      if(!response.ok){
+        throw new Error(`HTTP ${response.status} – ${response.statusText}`);
+      }
+      const data = await response.json();
+      const resources = data.resources || [];
+      allResults = allResults.concat(resources);
+      if (data.links.next) {
+        // Si la hay, volvemos a solicitar datos
+        page += 1;
+        return loadPage();
+      }
+    }
+    await loadPage();
+    if (resourceType === 'document') {
+      //Si ya no hay paginas siguientes, filtramos los datos
+      // Si son documentos, filtramos únicamente los pdfs
+        resourcesList.value = allResults.filter((resource) =>
+          resource.links.some(
+            (link) => link.link_type === 'uploaded' && link.name.endsWith('.pdf')
+          )
+        );
+    } else if (resourceType === 'dataLayer') {
+      // Si son capas geográficas, excluimos aquellos que no tengan geometria
+      const noGeometryExtent = [-1, -1, 0, 0];
+      resourcesList.value = allResults.filter(
+        (resource) =>
+          !resource.extent.coords.every((value, index) => value === noGeometryExtent[index])
+        );
+    } else {
+      resourcesList.value = allResults;
+    }
+    return resourcesList.value
     };
-    loadPage();
-  };
-  fetchData({ resourceType });
-
+  await fetchData({ resourceType });
   return {
     resourcesList,
     refetch: fetchData,
   };
-}
+  };
+

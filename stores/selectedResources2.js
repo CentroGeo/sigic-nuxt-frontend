@@ -2,10 +2,11 @@ import { defineStore } from 'pinia';
 
 export const useSelectedResources2Store = defineStore('selectedResources2', {
   state: () => ({
-    filteredResources: {
+    fetchedResources: {
       dataLayer: [],
       dataTable: [],
       document: [],
+      all: [],
     },
     selectedResources:{
       dataLayer: {},
@@ -23,9 +24,9 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
       state.listaCapas.map((capa) => `${capa},${state.capas[capa].queryParam}`).join(';'), */
   },
   actions: {
-    updateFilteredResources(resourceType, newArray) {
-      this.filteredResources[resourceType] = newArray;
-    },
+    updateFetchedResources(resourceType, newArray) {
+      this.fetchedResources[resourceType] = newArray;
+    }, 
     updateSelectedResources(resources, resourceType) {
       if(resourceType === 'dataLayer'){
       this.selectedResources[resourceType] = resources.reduce((obj, capa) => ({ ...obj, [capa]: new ConfiguracioCapa() }), {});
