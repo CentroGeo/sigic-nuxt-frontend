@@ -1,5 +1,7 @@
 <script setup>
-definePageMeta({ auth: false });
+import { useRoute } from 'vue-router';
+
+definePageMeta({ auth: false, key: 'inicio' });
 const { signIn } = useAuth();
 
 async function iniciarSesion() {
@@ -7,19 +9,9 @@ async function iniciarSesion() {
     callbackUrl: '/', // A dónde volver después del login
   });
 }
+const route = useRoute();
+
 useHead({
-  link: [
-    {
-      key: 'gob-favicon',
-      rel: 'shortcut icon',
-      href: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/images/favicon.ico',
-    },
-    {
-      key: 'gob-styles',
-      rel: 'stylesheet',
-      href: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/styles/main.css',
-    },
-  ],
   script: [
     {
       key: 'gobmx-script',
@@ -27,6 +19,68 @@ useHead({
       defer: true,
     },
   ],
+});
+onMounted(() => {
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = 'https://framework-gb.cdn.gob.mx/gm/v3/assets/styles/main.css';
+  document.head.insertBefore(link, document.head.firstChild);
+  if (route.path === '/') {
+    document.body.classList.add('solo-en-index');
+  }
+});
+
+onUnmounted(() => {
+  document.body.classList.remove('solo-en-index');
+
+  const agregadasPorFrameworkGogHead = [...document.head.children].filter(
+    (el) =>
+      el.outerHTML.includes('framework-gb.cdn.gob.mx') ||
+      el.innerHTML.includes('framework-gb.cdn.gob.mx') ||
+      el.outerHTML.includes('ajax.googleapis.com/ajax/libs/webfont') ||
+      el.innerHTML.includes('ajax.googleapis.com/ajax/libs/webfont')
+  );
+  const agregadasPorFrameworkGogBody = [...document.body.children].filter(
+    (el) =>
+      el.outerHTML.includes('framework-gb.cdn.gob.mx') ||
+      el.innerHTML.includes('framework-gb.cdn.gob.mx') ||
+      el.outerHTML.includes('https://cdn.jsdelivr.net/npm') ||
+      el.innerHTML.includes('https://cdn.jsdelivr.net/npm')
+  );
+  agregadasPorFrameworkGogHead.forEach((el) => el.remove());
+  agregadasPorFrameworkGogBody.forEach((el) => el.remove());
+  document.querySelector('body').className = '';
+  document.querySelectorAll('div.pace').forEach((el) => el.remove());
+
+  const vars_window = [
+    'Pace',
+    'Modernizr',
+    '_addEvent',
+    '_events',
+    '_myLib',
+    '$gmx',
+    'html5',
+    'yepnope',
+    '$',
+    'jQuery',
+    'uidEvent',
+    'bootstrap',
+    'MX',
+    'urlEmail',
+    'getParseURL',
+    'WebFont',
+    'FloatingUICore',
+    'FloatingUIDOM',
+  ];
+  for (const el of vars_window) {
+    if (window[el]) {
+      try {
+        delete window[el];
+      } catch (e) {
+        window[el] = undefined;
+      }
+    }
+  }
 });
 </script>
 <template>
@@ -439,17 +493,19 @@ useHead({
     </main>
   </div>
 </template>
-<style scope lang="scss">
+<style lang="scss" scope>
 .init-sesion {
   display: inline;
 }
+.solo-en-index {
+  .contenido {
+    padding-top: 54px;
+  }
+  nav.navegacion.navegacion-pegada {
+    top: 54px;
+  }
+}
 
-.contenido {
-  // padding-top: 56px;
-}
-nav.navegacion.navegacion-pegada {
-  // top: 54px;
-}
 :root {
   --escala-rem-gob-sisdai: 0.65;
 }
