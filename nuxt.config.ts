@@ -43,7 +43,7 @@ export default defineNuxtConfig({
 
   auth: {
     isEnabled: true,
-    baseURL: `${process.env.NUXT_PUBLIC_BASE_URL}/api/auth`,
+    baseURL: `${process.env.NUXT_AUTH_ORIGIN}/api/auth`,
     originEnvKey: process.env.NUXT_AUTH_ORIGIN,
 
     globalAppMiddleware: false, // protege todas las páginas por defecto
