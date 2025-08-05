@@ -9,9 +9,6 @@ const props = defineProps({
 });
 const resourcesStore = useSelectedResources2Store()
 const {groupName, selectedElement, resourceType } = toRefs(props);
-/* const selectedResource = computed(() => resourcesStore[props.resourceType].filter((element) => element.isSelected === 1))
-const prueba = computed(() => selectedResource.value[0]['uuid'])
- */
 const selectedResource = computed({
   get(){
     return resourcesStore[props.resourceType].filter((element) => element.isSelected === 1)[0]['uuid']

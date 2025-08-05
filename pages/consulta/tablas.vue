@@ -1,9 +1,12 @@
 <script setup>
-const resourcesStore = useSelectedResourcesStore();
+const resourcesStore = useSelectedResources2Store();
+const fetchedResources = useFetchedResourcesStore();
 const resourceType = 'dataTable';
-
 const paginaActual = ref(0);
 const tamanioPagina = 10;
+const selected = computed(() => resourcesStore[resourceType].filter((element) => element.isSelected === 1)[0])
+const selectedUuid = computed(() => selected.value?.uuid ?? null)
+const selectedElement = ref()
 
 const {
   variables,
@@ -13,29 +16,26 @@ const {
 } = useGeoserverDataTable({
   paginaActual: paginaActual.value,
   tamanioPagina: tamanioPagina,
-  resource: resourcesStore.shownFiles[resourceType],
+  resource: selectedElement.value,
 });
 
 watch(paginaActual, () => {
   fetchTable({
     paginaActual: paginaActual.value,
     tamanioPagina: tamanioPagina,
-    resource: resourcesStore.shownFiles[resourceType],
+    resource: selectedElement.value,
   });
 });
 
-// Observa cambios en el recurso seleccionado
-watch(
-  () => resourcesStore.shownFiles[resourceType],
-  () => {
+watch(selectedUuid, ()=>{
+  selectedElement.value = fetchedResources.findResources([selectedUuid.value], resourceType)[0]
     paginaActual.value = 0;
     fetchTable({
       paginaActual: paginaActual.value,
       tamanioPagina: tamanioPagina,
-      resource: resourcesStore.shownFiles[resourceType],
+      resource: selectedElement.value,
     });
-  }
-);
+})
 </script>
 
 <template>
@@ -49,7 +49,7 @@ watch(
     </template>
 
     <template #visualizador>
-<!--       <div v-if="!resourcesStore.shownFiles[resourceType]" class="contenedor">
+       <div v-if="resourcesStore[resourceType].length === 0" class="contenedor">
         <h1>No hay seleccion</h1>
       </div>
       <div v-else>
@@ -58,7 +58,7 @@ watch(
           :total-paginas="Math.ceil(totalFeatures / tamanioPagina)"
           @cambio="paginaActual = $event"
         />
-      </div> -->
+      </div>
     </template>
 
     <template #seleccion>
