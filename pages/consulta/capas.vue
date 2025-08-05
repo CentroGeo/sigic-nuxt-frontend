@@ -1,4 +1,5 @@
 <script setup>
+import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from "@centrogeomx/sisdai-mapas";
 import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
 
 const resourceType = 'dataLayer';
@@ -204,7 +205,7 @@ onMounted(() => {
             @alFinalizarCarga="isFinishedLoading += 1"
           />
         </SisdaiMapa> -->
-<!--         <SisdaiMapa
+        <SisdaiMapa
           class="gema"
           :vista="vistaDelMapa"
           @click-centrar="clickCentrar"
@@ -222,7 +223,7 @@ onMounted(() => {
             :capa="resource.alternate"
             :opacidad="resource.opacidad"
           />
-        </SisdaiMapa> -->
+        </SisdaiMapa>
       </ClientOnly>
     </template>
 
