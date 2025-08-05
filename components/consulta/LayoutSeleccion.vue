@@ -6,9 +6,10 @@ const props = defineProps({
   funcionDescarga: { type: Function, default: undefined },
 });
 const { titulo, resourceType } = toRefs(props);
+const storeFetched = useFetchedResourcesStore()
 const storeSelected = useSelectedResources2Store();
-const selectedResources = computed(() => storeSelected[props.resourceType])
-
+const selectedUuid = computed(() => storeSelected[props.resourceType].map((d) => d.uuid))
+const selectedResources = computed(() => storeFetched.findResources(selectedUuid.value, props.resourceType))
 const buttonTagDict = {
   dataLayer: 'mapa',
   dataTable: 'archivos',
@@ -28,6 +29,7 @@ function shareState() {
   console.log('Se copia el url en el portapapeles: ', route.fullPath);
   notifyShareChild();
 }
+
 </script>
 
 <template>
@@ -62,7 +64,7 @@ function shareState() {
             type="button"
             class="boton-pictograma boton-con-contenedor-secundario"
             aria-label="Eliminar"
-            @click="storeSelected.resetResource(resourceType)"
+            @click="storeSelected.resetResources(resourceType)"
           >
             <span class="pictograma-eliminar" aria-hidden="true" />
           </button>
@@ -71,7 +73,7 @@ function shareState() {
         <UiNumeroElementos
           :numero="selectedResources.length"
           :etiqueta="etiquetaElementos"
-        />
+        /> 
       </div>
     </div>
 
@@ -79,10 +81,10 @@ function shareState() {
       <ConsultaElementoSeleccionado
         v-for="resource in selectedResources"
         :key="`seleccion-${resource.uuid}`"
-        :element-uuid="resource.uuid"
+        :selected-element="resource"
         :resource-type="resourceType"
       />
-    </div>
+    </div> 
 
     <ConsultaModalDescargaAll ref="downloadAllChild" :resource-type="resourceType" />
     <ConsultaModalCompartir ref="shareChild" />

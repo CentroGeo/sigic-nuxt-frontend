@@ -1,19 +1,13 @@
 <script setup>
 const props = defineProps({
-  elementUuid: {
-    type: String,
-    default: undefined,
+  selectedElement: {
+    type: Object,
+    default: ()=>{},
   },
   resourceType: { type: String, required: true },
 });
-const { elementUuid, resourceType } = toRefs(props);
-const selectedStore = useSelectedResources2Store()
-const fetchedStore = useFetchedResourcesStore()
-const selectedElement = fetchedStore.findResource(elementUuid.value, resourceType.value)
-/* if (!resourcesStore.shownFiles[resourceType.value]) {
-  let firstSelection = resourcesStore.selectedResources[resourceType.value][0];
-  resourcesStore.setShownFile(resourceType.value, firstSelection);
-} */
+const { selectedElement, resourceType } = toRefs(props);
+console.log(selectedElement.value)
 
 </script>
 <template>
@@ -37,7 +31,6 @@ const selectedElement = fetchedStore.findResource(elementUuid.value, resourceTyp
             class="boton-pictograma boton-sin-contenedor-secundario"
             aria-label="Subir elemento"
             type="button"
-            @click="selectedStore.raiseIndex(resourceType, elementUuid)"
           >
             <span class="pictograma-subir-capa pictograma-mediano" aria-hidden="true" />
           </button>
@@ -46,19 +39,17 @@ const selectedElement = fetchedStore.findResource(elementUuid.value, resourceTyp
             class="boton-pictograma boton-sin-contenedor-secundario"
             aria-label="Bajar Elemento"
             type="button"
-            @click="selectedStore.lowerIndex(resourceType, elementUuid)"
-
           >
             <span class="pictograma-bajar-capa pictograma-mediano" aria-hidden="true" />
           </button>
         </div>
       </div>
       
-      <ConsultaContenidoCapaSeleccionada
+       <ConsultaContenidoCapaSeleccionada
         v-if="resourceType === 'dataLayer'"
         :resource-type="resourceType"
         :selected-element="selectedElement"
-      />
+      /> 
 
      <ConsultaContenidoDocSeleccionado
         v-if="resourceType !== 'dataLayer'"

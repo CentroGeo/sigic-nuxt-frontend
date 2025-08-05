@@ -1,7 +1,6 @@
 import { useSelectedResourcesStore } from "@/stores/selectedResources.js";
 export function tooltipContent(resource) {
   let formatedAbstract = "Sin descripción";
-  let formatedAttribution = "Sin fuente"
   if (resource.abstract) {
     formatedAbstract = resource.abstract
       .replace(/^<p>/, "")

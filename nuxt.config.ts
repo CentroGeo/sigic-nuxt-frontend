@@ -32,15 +32,8 @@ export default defineNuxtConfig({
     client: isDev
   },
 
-  modules: [
-    "@pinia/nuxt",
-    // "@nuxt/content",
-    "@nuxt/eslint",
-    "@nuxt/image",
-    "@nuxt/test-utils",
-    "@sidebase/nuxt-auth",
-    '@vueuse/nuxt'
-  ],
+  modules: ["@pinia/nuxt", // "@nuxt/content",
+  "@nuxt/eslint", "@nuxt/image", "@nuxt/test-utils", "@sidebase/nuxt-auth", '@vueuse/nuxt', '@nuxt/scripts'],
 
   css: ["@centrogeomx/sisdai-css/dist/sisdai.min.css"],
 

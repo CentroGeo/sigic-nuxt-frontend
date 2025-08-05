@@ -9,16 +9,6 @@ export const useFetchedResourcesStore = defineStore('fetchedResources', {
   }),
   getters: {
     /**
-     * Devuelve un recurso de acuerdo a su uuid.
-     * @param {String} uuid del catalogo a buscar.
-     * @param {String} resourceType tipo de resursos a consultar.
-     * @returns {Object} ojeto del recurso de geonode.
-     */
-    findResource: (state) => (uuidToFind, resourceType) => {
-      return state[resourceType].find(({ uuid }) => uuid === uuidToFind);
-    },
-
-    /**
      * Devuelve una lista de recursos que coincidan con una lista de uuids.
      * @param {Array<String>} uuids del catalogo a buscar.
      * @param {String} resourceType tipo de resursos a consultar.
@@ -29,6 +19,11 @@ export const useFetchedResourcesStore = defineStore('fetchedResources', {
     },
   },
   actions: {
+    /**
+     * 
+     * @param {String} resourceType 
+     * @param {Array<Object>} newArray 
+     */
     updateFetchedResources(resourceType, newArray) {
       this[resourceType] = newArray;
     },

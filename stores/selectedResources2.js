@@ -48,7 +48,7 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
       const last = this[resourceType].pop()
       if(last)this[resourceType].unshift(last)
     },
-    resetResource(resourceType) {
+    resetResources(resourceType) {
       this[resourceType] = [];
     },
     removeResource(resourceType, resourceUuid) {
@@ -56,39 +56,7 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
       this[resourceType] = this[resourceType].filter(
         (r) => r.uuid !== resourceUuid
       )
-    },
-    raiseIndex(resourceType, elementUuid) {
-      const currentIndex = this[resourceType].findIndex(
-        (resource) => resource.uuid === elementUuid
-      );
-      if (currentIndex !== 0) {
-        // Guardamos lo que hay en la posición previa
-        const anterior = this[resourceType][currentIndex - 1];
-        const current = this[resourceType][currentIndex]
-        // Subimos el index del elemento seleccionado
-        this[resourceType][currentIndex - 1] = current;
-        // Guardamos en el index actual el valor del previo
-        this[resourceType][currentIndex] = anterior;
-      } else {
-        console.warn('primer elemento');
-      }
-    },
-    lowerIndex(resourceType, elementUuid) {
-      const currentIndex = this[resourceType].findIndex(
-        (resource) => resource.uuid === elementUuid
-      );
-      if (currentIndex !== this[resourceType].length - 1) {
-        // Guardamos lo que hay en la posición siguiente y en la actual
-        const current = this[resourceType][currentIndex]
-        const siguiente = this[resourceType][currentIndex + 1];
-        // Subimos el index del elemento seleccionado
-        this[resourceType][currentIndex + 1] = current;
-        // Guardamos en el index actual el valor del previo
-        this[resourceType][currentIndex] = siguiente;
-      } else {
-        console.warn('ultimo elemento');
-      }
-    },      
+    },     
   },
 });
 
@@ -140,6 +108,6 @@ class ConfiguracionOtro {
 
   get asQueryParam() {
     // return `${this.estilo || ''},${this.opacidad},${this.visible}`;
-    return [this.uuid, this.isSelected.value].join(this.separador_);
+    return [this.uuid, this.isSelected].join(this.separador_);
   }
 }
