@@ -2,18 +2,20 @@
 const props = defineProps({
   selectedElement: {
     type: Object,
-    default: ()=>{},
+    default: () => {},
   },
   resourceType: { type: String, required: true },
 });
 const { selectedElement, resourceType } = toRefs(props);
-
+// console.log(selectedElement.value);
 </script>
+
 <template>
   <div class="tarjeta m-y-1">
     <div class="tarjeta-selected">
       <div class="flex flex-contenido-separado m-0 encabezado-tarjeta">
         <p class="tarjeta-texto-secundario m-0">Categoria</p>
+
         <div class="m-0">
           <button
             v-globo-informacion:izquierda="{
@@ -23,9 +25,10 @@ const { selectedElement, resourceType } = toRefs(props);
             class="boton-pictograma boton-sin-contenedor-secundario"
             aria-label="Mostrar información"
             type="button"
-          > 
+          >
             <span class="pictograma-informacion pictograma-mediano" aria-hidden="true" />
           </button>
+
           <button
             class="boton-pictograma boton-sin-contenedor-secundario"
             aria-label="Subir elemento"
@@ -43,22 +46,23 @@ const { selectedElement, resourceType } = toRefs(props);
           </button>
         </div>
       </div>
-      
-       <ConsultaContenidoCapaSeleccionada
+
+      <ConsultaContenidoCapaSeleccionada
         v-if="resourceType === 'dataLayer'"
         :resource-type="resourceType"
         :selected-element="selectedElement"
-      /> 
+      />
 
-     <ConsultaContenidoDocSeleccionado
+      <ConsultaContenidoDocSeleccionado
         v-if="resourceType !== 'dataLayer'"
         :group-name="resourceType"
         :resource-type="resourceType"
         :selected-element="selectedElement"
-      /> 
+      />
     </div>
   </div>
 </template>
+
 <style lang="scss" scoped>
 .tarjeta-selected {
   padding: 16px;

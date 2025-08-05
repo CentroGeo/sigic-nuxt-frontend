@@ -20,9 +20,9 @@ export const useFetchedResourcesStore = defineStore('fetchedResources', {
   },
   actions: {
     /**
-     * 
-     * @param {String} resourceType 
-     * @param {Array<Object>} newArray 
+     *
+     * @param {String} resourceType
+     * @param {Array<Object>} newArray
      */
     updateFetchedResources(resourceType, newArray) {
       this[resourceType] = newArray;

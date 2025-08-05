@@ -6,7 +6,7 @@ import { fetchGeometryType, tooltipContent } from '~/utils/consulta.js';
 const selectedStore = useSelectedResources2Store();
 const capasSeleccionadas = computed({
   get: () => selectedStore.resourcesList(props.resourceType),
-  set: (uuids) => selectedStore.updateSelectedResources(uuids, props.resourceType),
+  set: (uuids) => selectedStore.updateResources(uuids, props.resourceType),
 });
 const props = defineProps({
   resourceType: {
