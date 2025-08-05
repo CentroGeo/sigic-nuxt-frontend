@@ -105,7 +105,7 @@ jobs:
 
       - name: Escribir archivo .env
         run: |
-          echo "NODE_ENV=${{ steps.env.outputs.NODE_ENV }}" >> .env
+          echo "NODE_ENV=development" >> .env
           echo "GEONODE_URL=${{ vars.GEONODE_URL }}" >> .env
           echo "GEOSERVER_URL=${{ vars.GEOSERVER_URL }}" >> .env
           echo "NUXT_AUTH_ORIGIN=${{ vars.NUXT_AUTH_ORIGIN }}" >> .env
