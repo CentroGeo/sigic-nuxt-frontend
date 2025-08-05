@@ -8,6 +8,7 @@ const props = defineProps({
 const { titulo, resourceType } = toRefs(props);
 const config = useRuntimeConfig();
 const resources = computed(()=> storeFetched[props.resourceType])
+console.log("aqui",resources.value)
 const apiCategorias = `${config.public.geonodeApi}/facets/category`;
 const categoryList = ref([]);
 const categorizedResources = ref({});
@@ -75,6 +76,7 @@ onMounted(async () => {
 
       <div class="m-x-2 m-y-1">
         <p class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
+
 <!--         <ClientOnly>
           <ConsultaElementoBuscador
             :resources-list="resourcesList"
@@ -82,16 +84,10 @@ onMounted(async () => {
             :categories="categoryList"
           />
         </ClientOnly> -->
-
-         <UiNumeroElementos :numero="resources.length" :etiqueta="etiquetaElementos" />
+        <UiNumeroElementos :numero="resources.length" :etiqueta="etiquetaElementos" />
       </div>
     </div>
 
-    <!-- <ul class="lista-catalogo" @click="n++">
-      <li v-for="x in n" :key="x">
-        {{ x }}
-      </li>
-    </ul> -->
     <div v-for="category in Object.keys(categorizedResources)" :key="category" class="m-y-1">
       <div class="">
         <ConsultaElementoCategoria

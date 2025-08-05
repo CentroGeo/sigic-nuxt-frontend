@@ -33,11 +33,11 @@ const resourceType = 'document';
     </template>
 
     <template #seleccion>
-<!--       <ConsultaLayoutSeleccion
+       <ConsultaLayoutSeleccion
         titulo="Documentos seleccionados"
         :resource-type="resourceType"
         etiqueta-elementos="Documentos"
-      /> -->
+      />
     </template>
   </ConsultaLayoutPaneles>
 </template>

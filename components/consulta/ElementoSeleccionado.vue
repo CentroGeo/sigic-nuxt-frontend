@@ -7,7 +7,6 @@ const props = defineProps({
   resourceType: { type: String, required: true },
 });
 const { selectedElement, resourceType } = toRefs(props);
-console.log(selectedElement.value)
 
 </script>
 <template>

@@ -187,7 +187,7 @@ onMounted(() => {
   <ConsultaLayoutPaneles>
     <template #catalogo>
       <ConsultaLayoutCatalogo
-        titulo="Capas geográficas"
+        :titulo="'Capas geográficas'"
         :resource-type="resourceType"
         etiqueta-elementos="Capas"
       />

@@ -9,11 +9,21 @@ const props = defineProps({
 });
 const resourcesStore = useSelectedResources2Store()
 const {groupName, selectedElement, resourceType } = toRefs(props);
+/* const selectedResource = computed(() => resourcesStore[props.resourceType].filter((element) => element.isSelected === 1))
+const prueba = computed(() => selectedResource.value[0]['uuid'])
+ */
+const selectedResource = computed({
+  get(){
+    return resourcesStore[props.resourceType].filter((element) => element.isSelected === 1)[0]['uuid']
+  },
+  set(newSelectedUuid){
+    resourcesStore.setSelectedElement(props.resourceType, newSelectedUuid)
+  },
+})
 const hasGeometry = ref();
 const noGeometry = [-1, -1, 0, 0];
 const mapChild = ref(null);
 const downloadChild = ref(null);
-console.log(selectedElement.value)
 if (resourceType.value === "dataTable") {
   let a = selectedElement.value.extent.coords.join(",");
   let b = noGeometry.join(",");
@@ -36,6 +46,7 @@ function downloadFromMap() {
   console.log("el padre se enteró");
   downloadChild.value?.abrirModalDescarga();
 }
+
 </script>
 
 <template>
@@ -46,6 +57,7 @@ function downloadFromMap() {
         type="radio"
         :name="groupName"
         :value="selectedElement.uuid"
+        v-model="selectedResource"
       />
       <label :for="selectedElement.uuid">{{ selectedElement.title }}</label>
     </div> 
@@ -85,6 +97,7 @@ function downloadFromMap() {
     :download-type="'individual'"
   />
   <ConsultaModalMapa
+    v-if="hasGeometry"
     ref="mapChild"
     :selected-element="selectedElement"
     @clickDownload="downloadFromMap"

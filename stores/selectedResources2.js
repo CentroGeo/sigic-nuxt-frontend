@@ -45,8 +45,11 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
       } else {
         this[resourceType] = resources.map((uuid) => new ConfiguracionOtro({ uuid }));
       }
-      const last = this[resourceType].pop()
-      if(last)this[resourceType].unshift(last)
+      // Seleccionamos el ultimo recurso para tablas y docs
+      if(resourceType !== 'dataLayer'){
+        const last = this[resourceType].at(-1)
+        last?.setSelected(1)
+      }
     },
     resetResources(resourceType) {
       this[resourceType] = [];
@@ -56,7 +59,16 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
       this[resourceType] = this[resourceType].filter(
         (r) => r.uuid !== resourceUuid
       )
-    },     
+    },
+    setSelectedElement(resourceType, resourceUuid){
+      this[resourceType].forEach((element) => {
+        if(element.uuid === resourceUuid){
+          element.setSelected(1)
+        }else{
+          element.setSelected(0)
+        }
+      })
+    }     
   },
 });
 
@@ -109,5 +121,9 @@ class ConfiguracionOtro {
   get asQueryParam() {
     // return `${this.estilo || ''},${this.opacidad},${this.visible}`;
     return [this.uuid, this.isSelected].join(this.separador_);
+  }
+
+  setSelected(newValue){
+    this.isSelected = newValue
   }
 }
