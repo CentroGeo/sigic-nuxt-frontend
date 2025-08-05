@@ -183,8 +183,9 @@ onMounted(() => {
   updateStoreFromQuery(route.query.capas);
 });
 
-const getResourceSelected = () =>
-  fetchedStore.findResources(selectedStore.resourcesList(resourceType), resourceType);
+function getFetchedResources() {
+  return fetchedStore.findResources(selectedStore.resourcesList(resourceType), resourceType);
+}
 </script>
 
 <template>
@@ -215,7 +216,7 @@ const getResourceSelected = () =>
           <SisdaiCapaXyz />
 
           <SisdaiCapaWms
-            v-for="resource in getResourceSelected()"
+            v-for="resource in getFetchedResources()"
             :key="`wms-${resource.uuid}`"
             :fuente="`${config.public.geoserverUrl}/wms?`"
             :capa="resource.alternate"

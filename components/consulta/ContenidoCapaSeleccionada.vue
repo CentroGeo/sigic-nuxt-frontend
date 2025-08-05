@@ -1,9 +1,9 @@
 <script setup>
-import { SisdaiLeyendaWms } from "@centrogeomx/sisdai-mapas";
+import { SisdaiLeyendaWms } from '@centrogeomx/sisdai-mapas';
 
 const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
-const resourcesStore = useSelectedResources2Store();
+const selectedStore = useSelectedResources2Store();
 const props = defineProps({
   selectedElement: {
     type: Object,
@@ -11,8 +11,10 @@ const props = defineProps({
   },
   resourceType: { type: String, required: true },
 });
-const { selectedElement, resourceType } = toRefs(props);
-const isVisible = ref(true);
+const { uuid } = props.selectedElement;
+
+const { selectedElement } = toRefs(props);
+const isVisible = ref(selectedStore.findResource(uuid, props.resourceType).visible);
 const tablaChild = ref(null);
 const downloadChild = ref(null);
 const opacityChild = ref(null);
@@ -28,7 +30,7 @@ function notifyOpacityChild() {
   opacityChild.value.abrirModalOpacidad();
 }
 function downloadFromTabla() {
-  console.log("el padre se enteró");
+  console.log('el padre se enteró');
   downloadChild.value?.abrirModalDescarga();
 }
 /**
@@ -39,7 +41,7 @@ function downloadFromTabla() {
 function getExtent(bboxPolygon) {
   if (!Array.isArray(bboxPolygon)) {
     console.error(
-      "El valor de la extensión no está definida o no es una lista de coordenadas:",
+      'El valor de la extensión no está definida o no es una lista de coordenadas:',
       bboxPolygon
     );
 
@@ -72,11 +74,12 @@ const optionsButtons = ref([
   {
     label: 'Mostrar',
     get pictogram() {
-      return isVisible.value ? 'pictograma-ojo-ver' : "pictograma-ojo-ocultar";
+      return isVisible.value ? 'pictograma-ojo-ver' : 'pictograma-ojo-ocultar';
     },
     action: () => {
       isVisible.value = !isVisible.value;
-      console.log(isVisible.value)
+
+      selectedStore.findResource(uuid, props.resourceType).visible = isVisible.value;
     },
   },
   {
@@ -90,7 +93,7 @@ const optionsButtons = ref([
     label: 'Eliminar selección',
     pictogram: 'pictograma-eliminar',
     action: () => {
-      resourcesStore.removeResource(resourceType.value, selectedElement.value.uuid);
+      selectedStore.removeResource(props.resourceType, selectedElement.value.uuid);
     },
   },
   {
@@ -132,17 +135,14 @@ const optionsButtons = ref([
     <ConsultaModalTabla
       ref="tablaChild"
       :selected-element="selectedElement"
-      @clickDownload="downloadFromTabla"
+      @click-download="downloadFromTabla"
     />
     <ConsultaModalDescarga
       ref="downloadChild"
       :resource-type="resourceType"
       :selected-element="selectedElement"
     />
-    <ConsultaModalOpacidad
-      ref="opacityChild"
-      :selected-element="selectedElement"
-    />
+    <ConsultaModalOpacidad ref="opacityChild" :selected-element="selectedElement" />
   </div>
 </template>
 

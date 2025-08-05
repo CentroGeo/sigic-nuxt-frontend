@@ -49,7 +49,7 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
 
       this[resourceType] = queryParam.split(';').map((capa) => new ConfiguracioCapa(capa));
     },
-    updateSelectedResources(resources, resourceType) {
+    updateResources(resources, resourceType) {
       if (resourceType === 'dataLayer') {
         this[resourceType] = resources.map((uuid) => new ConfiguracioCapa({ uuid }));
       } else {
@@ -92,22 +92,23 @@ class ConfiguracioCapa {
   }
 
   get asQueryParam() {
-    // return `${this.estilo || ''},${this.opacidad},${this.visible}`;
-    return [this.uuid, this.estilo || '', this.opacidad, Number(this.visible)].join(this.separador_);
+    return [this.uuid, this.estilo || '', this.opacidad, Number(this.visible)].join(
+      this.separador_
+    );
   }
 
   get opacidad() {
-    return this.opacidad_
+    return this.opacidad_;
   }
   set opacidad(valor) {
-    this.opacidad_ = Number(valor)
+    this.opacidad_ = Number(valor);
   }
 
   get visible() {
-    return this.visible_
+    return this.visible_;
   }
   set visible(valor) {
-    this.visible_ = Boolean(Number(valor))
+    this.visible_ = Boolean(Number(valor));
   }
 }
 
