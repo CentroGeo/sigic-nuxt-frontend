@@ -111,7 +111,7 @@ jobs:
           echo "GEONODE_URL=${{ vars.GEONODE_URL }}" >> .env
           echo "GEOSERVER_URL=${{ vars.GEOSERVER_URL }}" >> .env
           echo "NUXT_AUTH_ORIGIN=${{ vars.NUXT_AUTH_ORIGIN }}" >> .env
-          echo "NUXT_AUTH_BASE_URL=${{ vars.NUXT_AUTH_BASE_URL }}" >> .env
+          echo "NUXT_PUBLIC_BASE_URL=${{ vars.NUXT_PUBLIC_BASE_URL }}" >> .env
           echo "KEYCLOAK_ISSUER=${{ vars.KEYCLOAK_ISSUER }}" >> .env
           echo "KEYCLOAK_CLIENT_ID=${{ secrets.KEYCLOAK_CLIENT_ID }}" >> .env
           echo "KEYCLOAK_CLIENT_SECRET=${{ secrets.KEYCLOAK_CLIENT_SECRET }}" >> .env
@@ -127,7 +127,7 @@ jobs:
           GEONODE_URL: ${{ vars.GEONODE_URL }}
           GEOSERVER_URL: ${{ vars.GEOSERVER_URL }}
           NUXT_AUTH_ORIGIN: ${{ vars.NUXT_AUTH_ORIGIN }}
-          NUXT_AUTH_BASE_URL: ${{ vars.NUXT_AUTH_BASE_URL }}
+          NUXT_PUBLIC_BASE_URL: ${{ vars.NUXT_PUBLIC_BASE_URL }}
           KEYCLOAK_ISSUER: ${{ vars.KEYCLOAK_ISSUER }}
           KEYCLOAK_CLIENT_ID: ${{ secrets.KEYCLOAK_CLIENT_ID }}
           KEYCLOAK_CLIENT_SECRET: ${{ secrets.KEYCLOAK_CLIENT_SECRET }}
