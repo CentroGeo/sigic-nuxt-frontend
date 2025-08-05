@@ -1,5 +1,5 @@
 <script setup>
-import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from "@centrogeomx/sisdai-mapas";
+import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
 import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
 
 const resourceType = 'dataLayer';
@@ -174,14 +174,17 @@ watch(() => selectedStore.resourcesAsQueryParam(resourceType), updateQueryFromSt
  * Actualiza el store desde los valores del queryParam.
  * @param queryParam que llega desde la url.
  */
-function actualizarCapasDesdeQuery(queryParam) {
+function updateStoreFromQuery(queryParam) {
   selectedStore.addFromQueryParam(queryParam, resourceType);
 }
 
 onMounted(() => {
   actualizarVistaDesdeHash(route.hash?.slice(1));
-  actualizarCapasDesdeQuery(route.query.capas);
+  updateStoreFromQuery(route.query.capas);
 });
+
+const getResourceSelected = () =>
+  fetchedStore.findResources(selectedStore.resourcesList(resourceType), resourceType);
 </script>
 
 <template>
@@ -197,14 +200,12 @@ onMounted(() => {
     <template #visualizador>
       <ClientOnly>
         <!-- <SisdaiMapa>
-          <SisdaiCapaXyz />
-
           <SisdaiCapaWms
-            :fuente="`${config.public.geoserverUrl}/wms?`"
             :posicion="storeSelected.selectedResources.length - index"
             @alFinalizarCarga="isFinishedLoading += 1"
           />
         </SisdaiMapa> -->
+
         <SisdaiMapa
           class="gema"
           :vista="vistaDelMapa"
@@ -214,14 +215,12 @@ onMounted(() => {
           <SisdaiCapaXyz />
 
           <SisdaiCapaWms
-            v-for="resource in fetchedStore.findResources(
-              selectedStore.resourcesList(resourceType),
-              resourceType
-            )"
+            v-for="resource in getResourceSelected()"
             :key="`wms-${resource.uuid}`"
             :fuente="`${config.public.geoserverUrl}/wms?`"
             :capa="resource.alternate"
-            :opacidad="resource.opacidad"
+            :opacidad="selectedStore.findResource(resource.uuid, resourceType).opacidad"
+            :visible="selectedStore.findResource(resource.uuid, resourceType).visible"
           />
         </SisdaiMapa>
       </ClientOnly>

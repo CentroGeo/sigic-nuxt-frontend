@@ -8,6 +8,16 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
   }),
   getters: {
     /**
+     * Devuelve un recurso seleccionado que coincidan con un uuid.
+     * @param {String} uuid del catalogo a buscar.
+     * @param {String} resourceType tipo de resursos a consultar.
+     * @returns {ConfiguracioCapa} objeto del recursos seleccionado.
+     */
+    findResource: (state) => (uuidToFind, resourceType) => {
+      return state[resourceType].find(({ uuid }) => uuid === uuidToFind);
+    },
+
+    /**
      * Devuelde los recursos almacenados en la selección en formato url para el query param.
      * @param {String} resourceType tipo de resursos a consultar.
      * @returns
@@ -45,18 +55,16 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
       } else {
         this[resourceType] = resources.map((uuid) => new ConfiguracionOtro({ uuid }));
       }
-      const last = this[resourceType].pop()
-      if(last)this[resourceType].unshift(last)
+      const last = this[resourceType].pop();
+      if (last) this[resourceType].unshift(last);
     },
     resetResources(resourceType) {
       this[resourceType] = [];
     },
     removeResource(resourceType, resourceUuid) {
       //Borramos el recurso
-      this[resourceType] = this[resourceType].filter(
-        (r) => r.uuid !== resourceUuid
-      )
-    },     
+      this[resourceType] = this[resourceType].filter((r) => r.uuid !== resourceUuid);
+    },
   },
 });
 
@@ -85,10 +93,23 @@ class ConfiguracioCapa {
 
   get asQueryParam() {
     // return `${this.estilo || ''},${this.opacidad},${this.visible}`;
-    return [this.uuid, this.estilo || '', this.opacidad, this.visible].join(this.separador_);
+    return [this.uuid, this.estilo || '', this.opacidad, Number(this.visible)].join(this.separador_);
+  }
+
+  get opacidad() {
+    return this.opacidad_
+  }
+  set opacidad(valor) {
+    this.opacidad_ = Number(valor)
+  }
+
+  get visible() {
+    return this.visible_
+  }
+  set visible(valor) {
+    this.visible_ = Boolean(Number(valor))
   }
 }
-
 
 class ConfiguracionOtro {
   separador_ = ',';
