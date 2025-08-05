@@ -17,8 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libsqlite3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-COPY package.json ./
-# COPY package.json package-lock.json ./
+COPY package.json package-lock.json ./
 
 RUN npm ci
 
@@ -38,7 +37,7 @@ WORKDIR /app
 
 COPY --from=builder /app/.output/ .output/
 COPY --from=builder /app/package.json .
-# COPY --from=builder /app/package-lock.json .
+COPY --from=builder /app/package-lock.json .
 
 RUN if [ "$NODE_ENV" = "development" ]; then \
       apt-get update && \
