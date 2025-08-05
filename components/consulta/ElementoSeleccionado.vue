@@ -7,9 +7,9 @@ const props = defineProps({
   resourceType: { type: String, required: true },
 });
 const { elementUuid, resourceType } = toRefs(props);
+const selectedStore = useSelectedResources2Store()
 const fetchedStore = useFetchedResourcesStore()
 const selectedElement = fetchedStore.findResource(elementUuid.value, resourceType.value)
-console.log("aqui:", selectedElement)
 /* if (!resourcesStore.shownFiles[resourceType.value]) {
   let firstSelection = resourcesStore.selectedResources[resourceType.value][0];
   resourcesStore.setShownFile(resourceType.value, firstSelection);
@@ -22,7 +22,7 @@ console.log("aqui:", selectedElement)
       <div class="flex flex-contenido-separado m-0 encabezado-tarjeta">
         <p class="tarjeta-texto-secundario m-0">Categoria</p>
         <div class="m-0">
-<!--           <button
+          <button
             v-globo-informacion:izquierda="{
               contenido: tooltipContent(selectedElement),
               desfase: [0, 8],
@@ -30,19 +30,14 @@ console.log("aqui:", selectedElement)
             class="boton-pictograma boton-sin-contenedor-secundario"
             aria-label="Mostrar información"
             type="button"
-          > -->
-          <button
-            class="boton-pictograma boton-sin-contenedor-secundario"
-            aria-label="Mostrar información"
-            type="button"
-          >
+          > 
             <span class="pictograma-informacion pictograma-mediano" aria-hidden="true" />
           </button>
-
           <button
             class="boton-pictograma boton-sin-contenedor-secundario"
             aria-label="Subir elemento"
             type="button"
+            @click="selectedStore.raiseIndex(resourceType, elementUuid)"
           >
             <span class="pictograma-subir-capa pictograma-mediano" aria-hidden="true" />
           </button>

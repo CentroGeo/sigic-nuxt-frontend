@@ -45,8 +45,33 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
       } else {
         this[resourceType] = resources.map((uuid) => new ConfiguracionOtro({ uuid }));
       }
+      const last = this[resourceType].pop()
+      if(last)this[resourceType].unshift(last)
     },
+    removeResource(resourceType, resourceUuid) {
+      //Borramos el recurso
+      this[resourceType] = this[resourceType].filter(
+        (r) => r.uuid !== resourceUuid
+      )
+    },
+    raiseIndex(resourceType, elementUuid) {
+      const currentIndex = this[resourceType].findIndex(
+        (resource) => resource.uuid === elementUuid
+      );
+      if (currentIndex !== 0) {
+        // Guardamos lo que hay en la posición previa
+        const anterior = this[resourceType][currentIndex - 1];
+        const current = this[resourceType][currentIndex]
+        // Subimos el index del elemento seleccionado
+        this[resourceType][currentIndex - 1] = current;
+        // Guardamos en el index actual el valor del previo
+        this[resourceType][currentIndex] = anterior;
+      } else {
+        console.warn('primer elemento');
+      }
+    }      
   },
+
 });
 
 class ConfiguracioCapa {

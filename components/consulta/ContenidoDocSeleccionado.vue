@@ -7,6 +7,7 @@ const props = defineProps({
   },
   resourceType: { type: String, required: true },
 });
+const resourcesStore = useSelectedResources2Store()
 const {groupName, selectedElement, resourceType } = toRefs(props);
 /* const shownFileUuid = computed(
   () => resourcesStore.shownFiles[resourceType.value].uuid
@@ -65,7 +66,7 @@ function downloadFromMap() {
         class="boton-pictograma boton-sin-contenedor-secundario"
         aria-label="Borrar selección"
         type="button"
-        @click="resourcesStore.removeResource(resourceType, selectedElement)"
+        @click="resourcesStore.removeResource(resourceType, selectedElement.uuid)"
       >
         <span class="pictograma-eliminar" aria-hidden="true" />
       </button>
