@@ -167,10 +167,6 @@ function updateQueryFromStore(queryParam) {
   if (query.capas !== route.query.capas) {
     router.replace({ query, hash: route.hash });
   }
-
-  const { uuid } = selectedStore[resourceType][0];
-  const { alternate } = fetchedStore.findResource(uuid, resourceType);
-  console.log(alternate);
 }
 watch(() => selectedStore.resourcesAsQueryParam(resourceType), updateQueryFromStore);
 
@@ -200,20 +196,12 @@ onMounted(() => {
 
     <template #visualizador>
       <ClientOnly>
-        <!--         <SisdaiMapa
-          class="gema"
-          :vista="{extension: extensionMapa}"
-          @click-centrar="storeConsulta.ajustarExtensionMapa = undefined"
-          @al-mover-vista="({ acercamiento, centro }) => {console.log(acercamiento, centro)}"
-                >
+        <!-- <SisdaiMapa>
           <SisdaiCapaXyz />
 
           <SisdaiCapaWms
-            v-for="(capa, index) in storeSelected.selectedResources[resourceType]"
-            :key="`${capa.uuid}_${randomNum}`"
             :fuente="`${config.public.geoserverUrl}/wms?`"
             :posicion="storeSelected.selectedResources.length - index"
-            :capa="capa.alternate"
             @alFinalizarCarga="isFinishedLoading += 1"
           />
         </SisdaiMapa> -->
@@ -226,11 +214,14 @@ onMounted(() => {
           <SisdaiCapaXyz />
 
           <SisdaiCapaWms
-            v-for="alternate in selectedStore.listaCapas"
-            :key="`wms-${alternate}`"
+            v-for="resource in fetchedStore.findResources(
+              selectedStore.resourcesList(resourceType),
+              resourceType
+            )"
+            :key="`wms-${resource.uuid}`"
             :fuente="`${config.public.geoserverUrl}/wms?`"
-            :capa="alternate"
-            :opacidad="selectedStore.capas[alternate].opacidad"
+            :capa="resource.alternate"
+            :opacidad="resource.opacidad"
           />
         </SisdaiMapa>
       </ClientOnly>
