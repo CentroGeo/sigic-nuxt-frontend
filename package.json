@@ -4,12 +4,14 @@
   "private": true,
   "scripts": {
     "build": "nuxt build",
-    "clean": "rm -rf node_modules .nuxt dist && rm -f package-lock.json && npm cache clean -f && npm cache verify",
+    "clean": "rm -rf node_modules .nuxt .output dist && rm -f package-lock.json && npm cache clean -f && npm cache verify",
+    "clean:ci": "rm -rf node_modules .nuxt .output dist && npm cache clean -f && npm cache verify",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "reinstall": "npm run clean && npm i",
+    "reinstall:ci": "npm run clean:ci && npm ci",
     "lint": "eslint . --ext .js,.ts,.vue",
     "lint:fix": "eslint . --ext .js,.ts,.vue --fix",
     "format": "prettier --write ."
