@@ -1,5 +1,4 @@
 <script setup>
-import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
 import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
 
 const resourceType = 'dataLayer';
@@ -102,7 +101,7 @@ watch(
 
 // Este watcher sirve para ajustar los índices de las capas montadas
 // cuando estas terminan de cargarse pero solo funciona cuando recién se montan las capas.
-watch(isFinishedLoading, () => {
+/* watch(isFinishedLoading, () => {
   console.log('cuenta: ', isFinishedLoading.value);
   const resourcesNum = storeSelected.selectedResources[resourceType].length;
   if (resourcesNum === isFinishedLoading.value) {
@@ -119,7 +118,7 @@ watch(
     console.log('watcher en capas', storeSelected.shownFiles.dataLayer);
   },
   { deep: true }
-);
+); */
 
 const route = useRoute();
 const router = useRouter();
@@ -217,7 +216,7 @@ onMounted(() => {
             @alFinalizarCarga="isFinishedLoading += 1"
           />
         </SisdaiMapa> -->
-        <SisdaiMapa
+<!--         <SisdaiMapa
           class="gema"
           :vista="vistaDelMapa"
           @click-centrar="clickCentrar"
@@ -232,7 +231,7 @@ onMounted(() => {
             :capa="alternate"
             :opacidad="selectedStore.capas[alternate].opacidad"
           />
-        </SisdaiMapa>
+        </SisdaiMapa> -->
       </ClientOnly>
     </template>
 

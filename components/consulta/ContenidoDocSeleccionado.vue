@@ -1,5 +1,4 @@
 <script setup>
-const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
   groupName: { type: String, required: true },
   selectedElement: {
@@ -8,15 +7,15 @@ const props = defineProps({
   },
   resourceType: { type: String, required: true },
 });
-const { selectedElement, resourceType } = toRefs(props);
-const shownFileUuid = computed(
+const {groupName, selectedElement, resourceType } = toRefs(props);
+/* const shownFileUuid = computed(
   () => resourcesStore.shownFiles[resourceType.value].uuid
-);
+); */
 const hasGeometry = ref();
 const noGeometry = [-1, -1, 0, 0];
 const mapChild = ref(null);
 const downloadChild = ref(null);
-
+console.log(selectedElement.value)
 if (resourceType.value === "dataTable") {
   let a = selectedElement.value.extent.coords.join(",");
   let b = noGeometry.join(",");
@@ -43,17 +42,15 @@ function downloadFromMap() {
 
 <template>
   <div>
-    <div @click="resourcesStore.setShownFile(resourceType, selectedElement)">
+   <div>
       <input
         :id="selectedElement.uuid"
-        v-model="shownFileUuid"
         type="radio"
         :name="groupName"
         :value="selectedElement.uuid"
       />
       <label :for="selectedElement.uuid">{{ selectedElement.title }}</label>
-    </div>
-
+    </div> 
     <div class="flex flex-contenido-final">
       <button
         v-if="hasGeometry"
@@ -83,7 +80,7 @@ function downloadFromMap() {
     </div>
   </div>
 
-  <ConsultaModalDescarga
+<!--   <ConsultaModalDescarga
     ref="downloadChild"
     :resource-type="resourceType"
     :selected-element="selectedElement"
@@ -93,7 +90,7 @@ function downloadFromMap() {
     ref="mapChild"
     :selected-element="selectedElement"
     @clickDownload="downloadFromMap"
-  />
+  /> -->
 </template>
 <style lang="scss" scoped>
 .flex {

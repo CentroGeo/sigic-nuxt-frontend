@@ -79,7 +79,7 @@ function shareState() {
       <ConsultaElementoSeleccionado
         v-for="resource in selectedResources"
         :key="`seleccion-${resource.uuid}`"
-        :selected-element="resource"
+        :element-uuid="resource.uuid"
         :resource-type="resourceType"
       />
     </div>

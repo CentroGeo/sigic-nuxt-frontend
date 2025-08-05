@@ -62,11 +62,11 @@ watch(
     </template>
 
     <template #seleccion>
-<!--       <ConsultaLayoutSeleccion
+    <ConsultaLayoutSeleccion
         titulo="Tabulados de datos"
         :resource-type="resourceType"
         etiqueta-elementos="Datos tabulados"
-      /> -->
+      />
     </template>
   </ConsultaLayoutPaneles>
 </template>

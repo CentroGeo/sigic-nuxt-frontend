@@ -77,12 +77,31 @@ class ConfiguracioCapa {
     return [this.uuid, this.estilo || '', this.opacidad, this.visible].join(this.separador_);
   }
 }
+
+
 class ConfiguracionOtro {
-  constructor() {
-    this.isSelected = false;
+  separador_ = ',';
+
+  /**
+   * Devuelve los atributos del query param en un objeto.
+   * @param {String} queryParam de un recurso con sus atributos separados por comas (,).
+   * @returns {Object}
+   */
+  fromQueryParam(queryParam) {
+    const [uuid, isSelected] = queryParam.split(this.separador_);
+    return { uuid, isSelected };
   }
 
-  get queryParam() {
-    return ``;
+  constructor(opciones = {}) {
+    const { uuid, isSelected } =
+      typeof opciones === 'string' ? this.fromQueryParam(opciones) : opciones;
+
+    this.isSelected = isSelected || false;
+    this.uuid = uuid || '';
+  }
+
+  get asQueryParam() {
+    // return `${this.estilo || ''},${this.opacidad},${this.visible}`;
+    return [this.uuid, this.isSelected].join(this.separador_);
   }
 }

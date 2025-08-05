@@ -1,5 +1,4 @@
 <script setup>
-const storeSelected = useSelectedResources2Store();
 const storeFetched = useFetchedResourcesStore()
 const props = defineProps({
   titulo: { type: String, default: 'Título' },
@@ -7,8 +6,8 @@ const props = defineProps({
   etiquetaElementos: { type: String, default: undefined },
 });
 const { titulo, resourceType } = toRefs(props);
-const resources = computed(()=> storeFetched[props.resourceType])
 const config = useRuntimeConfig();
+const resources = computed(()=> storeFetched[props.resourceType])
 const apiCategorias = `${config.public.geonodeApi}/facets/category`;
 const categoryList = ref([]);
 const categorizedResources = ref({});
