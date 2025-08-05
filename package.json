@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "nuxt build",
-    "clean": "rm -rf node_modules .nuxt .output dist && rm -rf package-lock.json && npm cache clean -f && npm cache verify",
+    "clean": "rm -rf node_modules .nuxt .output dist && rm -f package-lock.json && npm cache clean -f && npm cache verify",
     "clean:ci": "rm -rf node_modules .nuxt .output dist && npm cache clean -f && npm cache verify",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
