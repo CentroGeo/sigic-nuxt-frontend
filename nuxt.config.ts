@@ -1,7 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
 const isDev = process.env.NODE_ENV !== 'production';
-// const baseUrl = process.env.NUXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+const baseUrl = process.env.NUXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
 export default defineNuxtConfig({
   app: {
@@ -44,7 +44,7 @@ export default defineNuxtConfig({
 
   auth: {
     isEnabled: true,
-    baseURL: `/api/auth`,
+    baseURL: `${baseUrl}/api/auth`,
     originEnvKey: 'NUXT_AUTH_ORIGIN',
 
     globalAppMiddleware: false, // protege todas las páginas por defecto
@@ -67,7 +67,7 @@ export default defineNuxtConfig({
       geonodeApi: `${process.env.GEONODE_URL}/api/v2`,
       geoserverUrl: process.env.GEOSERVER_URL,
       geonodeUrl: process.env.GEONODE_URL,
-      baseURL: process.env.NUXT_PUBLIC_BASE_URL || 'http://localhost:3000',
+      baseURL: baseUrl,
 
       // geoserverApi: `${process.env.GEOSERVER_URL}/rest`,
     },
