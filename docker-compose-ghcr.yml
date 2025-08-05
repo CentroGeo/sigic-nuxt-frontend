@@ -1,7 +1,7 @@
 
 services:
   sigic-frontend:
-    image: ghcr.io/centrogeo/sigic-nuxt-frontend:main
+    image: ghcr.io/centrogeo/sigic-nuxt-frontend:develop
     ports:
       - "3000:3000"
     restart: unless-stopped

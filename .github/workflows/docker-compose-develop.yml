@@ -105,7 +105,7 @@ jobs:
 
       - name: Escribir archivo .env
         run: |
-          echo "NODE_ENV=${{ steps.env.outputs.NODE_ENV }}" >> .env
+          echo "NODE_ENV=development" >> .env
           echo "GEONODE_URL=${{ vars.GEONODE_URL }}" >> .env
           echo "GEOSERVER_URL=${{ vars.GEOSERVER_URL }}" >> .env
           echo "NUXT_AUTH_ORIGIN=${{ vars.NUXT_AUTH_ORIGIN }}" >> .env
@@ -118,7 +118,7 @@ jobs:
       - name: Docker Compose up
         run: |
           docker compose -f docker-compose-ghcr.yml down -v || true
-          docker compose --env-file .env -f docker-compose-ghcr.yml up -d --force-recreate
+          docker compose -f docker-compose-ghcr.yml up -d --force-recreate
         env:
           NODE_ENV: "development"
           GEONODE_URL: ${{ vars.GEONODE_URL }}
