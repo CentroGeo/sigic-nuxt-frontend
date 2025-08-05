@@ -62,7 +62,7 @@ function shareState() {
             type="button"
             class="boton-pictograma boton-con-contenedor-secundario"
             aria-label="Eliminar"
-            @click="resourcesStore.resetResource(resourceType)"
+            @click="storeSelected.resetResource(resourceType)"
           >
             <span class="pictograma-eliminar" aria-hidden="true" />
           </button>

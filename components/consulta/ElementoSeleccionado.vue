@@ -46,6 +46,8 @@ const selectedElement = fetchedStore.findResource(elementUuid.value, resourceTyp
             class="boton-pictograma boton-sin-contenedor-secundario"
             aria-label="Bajar Elemento"
             type="button"
+            @click="selectedStore.lowerIndex(resourceType, elementUuid)"
+
           >
             <span class="pictograma-bajar-capa pictograma-mediano" aria-hidden="true" />
           </button>

@@ -9,9 +9,6 @@ const props = defineProps({
 });
 const resourcesStore = useSelectedResources2Store()
 const {groupName, selectedElement, resourceType } = toRefs(props);
-/* const shownFileUuid = computed(
-  () => resourcesStore.shownFiles[resourceType.value].uuid
-); */
 const hasGeometry = ref();
 const noGeometry = [-1, -1, 0, 0];
 const mapChild = ref(null);
@@ -81,7 +78,7 @@ function downloadFromMap() {
     </div>
   </div>
 
-<!--   <ConsultaModalDescarga
+   <ConsultaModalDescarga
     ref="downloadChild"
     :resource-type="resourceType"
     :selected-element="selectedElement"
@@ -91,7 +88,7 @@ function downloadFromMap() {
     ref="mapChild"
     :selected-element="selectedElement"
     @clickDownload="downloadFromMap"
-  /> -->
+  /> 
 </template>
 <style lang="scss" scoped>
 .flex {

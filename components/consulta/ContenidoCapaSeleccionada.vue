@@ -3,7 +3,7 @@ import { SisdaiLeyendaWms } from "@centrogeomx/sisdai-mapas";
 
 const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
-const resourcesStore = useSelectedResourcesStore();
+const resourcesStore = useSelectedResources2Store();
 const props = defineProps({
   selectedElement: {
     type: Object,
@@ -76,10 +76,7 @@ const optionsButtons = ref([
     },
     action: () => {
       isVisible.value = !isVisible.value;
-      resourcesStore.updateLayerVisibility(
-        selectedElement.value.alternate,
-        isVisible.value
-      );
+      console.log(isVisible.value)
     },
   },
   {
@@ -93,7 +90,7 @@ const optionsButtons = ref([
     label: 'Eliminar selección',
     pictogram: 'pictograma-eliminar',
     action: () => {
-      resourcesStore.removeResource(resourceType.value, selectedElement.value);
+      resourcesStore.removeResource(resourceType.value, selectedElement.value.uuid);
     },
   },
   {

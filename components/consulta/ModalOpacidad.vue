@@ -1,6 +1,6 @@
 <script setup>
-import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
 import SisdaiControlDeslizante from "@centrogeomx/sisdai-componentes/src/componentes/control-deslizante/SisdaiControlDeslizante.vue";
+import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
 const props = defineProps({
   selectedElement: {
     type: Object,
@@ -8,7 +8,6 @@ const props = defineProps({
   },
 });
 const { selectedElement } = toRefs(props);
-const resourcesStore = useSelectedResourcesStore();
 const controlOpacidad = ref();
 const modalOpacidad = ref(null);
 function abrirModalOpacidad() {
@@ -20,10 +19,7 @@ defineExpose({
   abrirModalOpacidad,
 });
 watch(valorOpacidad, () => {
-  resourcesStore.updateLayerOpacity(
-    selectedElement.value.alternate,
-    valorOpacidad.value
-  );
+  console.log(valorOpacidad.value)
 });
 </script>
 <template>
