@@ -1,6 +1,38 @@
 <script setup>
-const resourcesStore = useSelectedResourcesStore();
+const resourcesStore = useSelectedResources2Store();
+const fetchedStore = useFetchedResourcesStore();
+const resourceType = 'document';
+const route = useRoute();
+const router = useRouter();
+/**
+ * Actualiza el queryParam desde los valores del store.
+ * @param queryParam generado por el store.
+ */
+function updateQueryFromStore(queryParam) {
+  const query = { recursos: queryParam };
 
+  if (query.recursos !== route.query.recursos) {
+    router.replace({ query});
+  }
+}
+watch(() => resourcesStore.resourcesAsQueryParam(resourceType), updateQueryFromStore)
+
+/**
+ * Actualiza el store desde los valores del queryParam.
+ * @param queryParam que llega desde la url.
+ */
+function updateStoreFromQuery(queryParam) {
+  resourcesStore.addFromQueryParam(queryParam, resourceType);
+  console.log("recursos tablas:", resourcesStore[resourceType])
+}
+
+onMounted(() => {
+  updateStoreFromQuery(route.query.recursos)
+  // Para cuando hacemos el cambio de página
+  if(resourcesStore[resourceType].length > 0){
+    updateQueryFromStore(resourcesStore.resourcesAsQueryParam(resourceType))
+  }
+})
 /* async function obtenerPDFs() {
   const res = await fetch(`${config.public.geonodeApi}/api/v2/documents/`);
   const data = await res.json();
@@ -12,7 +44,6 @@ const resourcesStore = useSelectedResourcesStore();
   });
 }
 obtenerPDFs(); */
-const resourceType = 'document';
 </script>
 
 <template>
@@ -26,18 +57,18 @@ const resourceType = 'document';
     </template>
 
     <template #visualizador>
-<!--       <div v-if="!resourcesStore.shownFiles[resourceType]" class="contenedor">
+      <div v-if="resourcesStore[resourceType].length === 0 || fetchedStore[resourceType].length === 0" class="contenedor">
         <h1>No hay seleccion</h1>
       </div>
-      <ConsultaVisualizacionDocumento v-else /> -->
+      <ConsultaVisualizacionDocumento v-else />
     </template>
 
     <template #seleccion>
-<!--       <ConsultaLayoutSeleccion
+       <ConsultaLayoutSeleccion
         titulo="Documentos seleccionados"
         :resource-type="resourceType"
         etiqueta-elementos="Documentos"
-      /> -->
+      />
     </template>
   </ConsultaLayoutPaneles>
 </template>

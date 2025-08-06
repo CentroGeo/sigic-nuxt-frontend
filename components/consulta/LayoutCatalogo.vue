@@ -55,13 +55,11 @@ function setSelectedCategory(categoria) {
 
 onMounted(async () => {
   if (resources.value.length === 0) {
-    console.log('la store esta vacia')
     const {resourcesList} = await useGeonodeResources({
       resourceType: resourceType.value,
     });
     storeFetched.updateFetchedResources(props.resourceType, resourcesList.value)
   }else{
-    console.log('hay cosas en la store')
   }
   groupResults()
 
@@ -75,6 +73,7 @@ onMounted(async () => {
 
       <div class="m-x-2 m-y-1">
         <p class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
+
 <!--         <ClientOnly>
           <ConsultaElementoBuscador
             :resources-list="resourcesList"
@@ -82,16 +81,10 @@ onMounted(async () => {
             :categories="categoryList"
           />
         </ClientOnly> -->
-
-         <UiNumeroElementos :numero="resources.length" :etiqueta="etiquetaElementos" />
+        <UiNumeroElementos :numero="resources.length" :etiqueta="etiquetaElementos" />
       </div>
     </div>
 
-    <!-- <ul class="lista-catalogo" @click="n++">
-      <li v-for="x in n" :key="x">
-        {{ x }}
-      </li>
-    </ul> -->
     <div v-for="category in Object.keys(categorizedResources)" :key="category" class="m-y-1">
       <div class="">
         <ConsultaElementoCategoria

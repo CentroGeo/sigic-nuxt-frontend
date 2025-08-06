@@ -39,7 +39,7 @@ export async function useGeonodeResources({ resourceType } = {}) {
       const data = await response.json();
       const resources = data.resources || [];
       allResults = allResults.concat(resources);
-      if (data.links.next) {
+      if (data.links.next && page < 3) {
         // Si la hay, volvemos a solicitar datos
         page += 1;
         return loadPage();

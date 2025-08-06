@@ -56,9 +56,11 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
       // Validar si el queryParam se puede parsear
       if (queryParam === undefined || queryParam === '') return;
 
-      this[resourceType] = queryParam
-        .split(';')
-        .map((capa, posicion) => new ConfiguracioCapa(`${capa},${posicion}`));
+      if (resourceType === 'dataLayer') {
+        this[resourceType] = queryParam.split(';').map((capa) => new ConfiguracioCapa(capa));
+      } else {
+        this[resourceType] = queryParam.split(';').map((recurso) => new ConfiguracionOtro(recurso));
+      }
     },
     updateResources(resources, resourceType) {
       if (resourceType === 'dataLayer') {
@@ -68,8 +70,11 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
       } else {
         this[resourceType] = resources.map((uuid) => new ConfiguracionOtro({ uuid }));
       }
-      const last = this[resourceType].pop();
-      if (last) this[resourceType].unshift(last);
+      // Seleccionamos el ultimo recurso para tablas y docs
+      if (resourceType !== 'dataLayer') {
+        const last = this[resourceType].at(-1);
+        last?.setSelected(1);
+      }
     },
     resetResources(resourceType) {
       this[resourceType] = [];
@@ -77,6 +82,15 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
     removeResource(resourceType, resourceUuid) {
       //Borramos el recurso
       this[resourceType] = this[resourceType].filter((r) => r.uuid !== resourceUuid);
+    },
+    setSelectedElement(resourceType, resourceUuid) {
+      this[resourceType].forEach((element) => {
+        if (element.uuid === resourceUuid) {
+          element.setSelected(1);
+        } else {
+          element.setSelected(0);
+        }
+      });
     },
   },
 });
@@ -152,5 +166,9 @@ class ConfiguracionOtro {
   get asQueryParam() {
     // return `${this.estilo || ''},${this.opacidad},${this.visible}`;
     return [this.uuid, this.isSelected].join(this.separador_);
+  }
+
+  setSelected(newValue) {
+    this.isSelected = newValue;
   }
 }
