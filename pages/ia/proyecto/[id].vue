@@ -6,11 +6,12 @@ import SisdaiBotonRadio from "@centrogeomx/sisdai-componentes/src/componentes/bo
 import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
 import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
 import SisdaiCasilla from "@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue";
-
 import { ref } from "vue";
 
 const catalogoModal = ref(null);
 const capasModal = ref(null);
+const archivosSeleccionados = ref([]);
+const inputArchivos = ref(null);
 
 const storeIA = useIAStore();
 
@@ -96,19 +97,87 @@ const seleccionarCategoria = categoria => {
 const botonRadioModal = ref("");
 const campoCasilla = ref(false);
 
+
+
+// Método para manejar la selección de archivos
+const manejarSeleccionArchivos = (event) => {
+  const nuevosArchivos = Array.from(event.target.files).map(file => ({
+    id: Date.now() + Math.random().toString(36).substr(2, 9),
+    nombre: file.name,
+    tipo: obtenerTipoArchivo(file.name),
+    archivo: file, // Objeto File original
+    categoria: "Archivo",
+    origen: "Propio"
+  }));
+  
+  archivosSeleccionados.value = [...archivosSeleccionados.value, ...nuevosArchivos];
+  event.target.value = ''; // Resetear el input para permitir seleccionar el mismo archivo otra vez
+};
+
+// Función para determinar el tipo de archivo
+const obtenerTipoArchivo = (nombre) => {
+  const extension = nombre.split('.').pop().toLowerCase();
+  const tipos = {
+    shp: 'Shapefile',
+    geojson: 'GeoJSON',
+    csv: 'CSV',
+    kml: 'KML',
+    zip: 'ZIP',
+    pdf: 'PDF',
+    doc: 'Word',
+    docx: 'Word',
+    xls: 'Excel',
+    xlsx: 'Excel'
+  };
+  return tipos[extension] || extension.toUpperCase();
+};
+
+// Método para eliminar archivo de la lista
+const eliminarArchivo = (id) => {
+  archivosSeleccionados.value = archivosSeleccionados.value.filter(archivo => archivo.id !== id);
+};
+
 // Función para guardar el proyecto
 const guardarProyecto = async () => {
-  //manda a guardar proyecto.
-  //TODO: enviar la visivilidad, el archivo y el usuario
-  storeIA.crearProyecto(
-    nombreProyecto.value,
-    descripcionProyecto.value,
-    visibilidadProyecto.value
-  );
-
-  //Redirigir después de guardar
-  navigateTo("/ia/proyectos");
+  try {
+    // Mostrar notificación de inicio
+/*     notificacion.mostrar({
+      tipo: 'info',
+      mensaje: 'Iniciando subida del proyecto...',
+      duracion: 3000
+    }); */
+    
+    await storeIA.crearProyecto(
+      nombreProyecto.value,
+      descripcionProyecto.value,
+      visibilidadProyecto.value,
+      archivosSeleccionados.value
+    );
+    
+    // Notificación de éxito
+    //alert("Proyecto guardado correctamente")
+    console.log("Proyecto guardado correctamente")
+ /*    notificacion.mostrar({
+      tipo: 'exito',
+      mensaje: 'Proyecto guardado correctamente',
+      duracion: 5000
+    }); */
+    
+    navigateTo("/ia/proyectos");
+    
+  } catch (error) {
+    alert('Error al guardar: ' + error.message)
+    console.log('Error al guardar: ' + error.message)
+    notificacion.mostrar({
+      tipo: 'error',
+      mensaje: 'Error al guardar: ' + error.message,
+      duracion: 7000
+    });
+  }
 };
+
+
+
 </script>
 
 <template>
@@ -171,6 +240,7 @@ const guardarProyecto = async () => {
             <div class="flex flex-contenido-separado fuentes-encabezado">
               <h2>Agregar fuentes de información</h2>
               <div>
+
                 <button
                   class="boton-pictograma boton-primario m-r-2"
                   aria-label="Agregar del catalogo"
@@ -179,13 +249,27 @@ const guardarProyecto = async () => {
                   Agregar del catálogo
                   <span class="pictograma-agregar" aria-hidden="true" />
                 </button>
+
+                <!-- botón "Subir archivos" -->
                 <button
                   class="boton-pictograma boton-primario"
                   aria-label="Subir archivos"
+                  @click="$refs.fileInput.click()"
                 >
                   Subir archivos
                   <span class="pictograma-archivo-subir" aria-hidden="true" />
                 </button>
+
+                <!-- Input de archivo oculto -->
+                <input
+                  ref="fileInput"
+                  type="file"
+                  multiple
+                  accept=".shp,.geojson,.csv,.kml,.zip,.pdf,.doc,.docx,.xls,.xlsx"
+                  style="display: none"
+                  @change="manejarSeleccionArchivos"
+                />                
+
               </div>
             </div>
             <div class="flex flex-contenido-final">
@@ -206,6 +290,40 @@ const guardarProyecto = async () => {
             </div>
           </div>
         </div>
+
+
+<div class="tabla-archivos m-t-3" v-if="archivosSeleccionados.length > 0">
+  <h3>Archivos a subir</h3>
+  <table class="tabla">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Tipo de archivo</th>
+        <th>Categoría</th>
+        <th>Origen</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="archivo in archivosSeleccionados" :key="archivo.id">
+        <td>{{ archivo.nombre }}</td>
+        <td>{{ archivo.tipo }}</td>
+        <td>{{ archivo.categoria }}</td>
+        <td>{{ archivo.origen }}</td>
+        <td>
+          <button
+            class="boton-pictograma boton-sin-contenedor-secundario boton-chico"
+            aria-label="Eliminar archivo"
+            @click="eliminarArchivo(archivo.id)"
+          >
+            <span class="pictograma-eliminar" aria-hidden="true" />
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
       </div>
 
       <ClientOnly>
@@ -388,6 +506,39 @@ const guardarProyecto = async () => {
       </ClientOnly>
     </template>
   </IaLayoutPaneles>
+
+<!-- barra de progreso de subida -->
+  <div class="grid">
+    <div class="columna-16">
+      <!-- Barra de progreso (mostrar solo durante subida) -->
+      <div v-if="storeIA.isUploading" class="upload-progress">
+        <progress :value="storeIA.uploadProgress" max="100"></progress>
+        <span>{{ storeIA.uploadProgress }}% completado</span>
+      </div>
+      
+      <div class="flex flex-contenido-final">
+        <NuxtLink
+          class="boton boton-chico boton-primario"
+          aria-label="Guardar proyecto"
+          @click="guardarProyecto"
+          :disabled="storeIA.isUploading"
+        >
+          <span v-if="!storeIA.isUploading">Guardar proyecto</span>
+          <span v-else>Subiendo...</span>
+        </NuxtLink>
+        
+        <nuxt-link
+          class="boton boton-chico boton-secundario"
+          aria-label="Cancelar"
+          to="/ia/proyectos/"
+          :disabled="storeIA.isUploading"
+        >
+          Cancelar
+        </nuxt-link>
+      </div>
+    </div>
+  </div>
+
 </template>
 
 <style lang="scss">
@@ -434,4 +585,68 @@ const guardarProyecto = async () => {
     align-items: center;
   }
 }
+
+//tabla de archivos. TODO: estilo sisdai
+.tabla-archivos {
+  margin-top: 2rem;
+  border: 1px solid var(--borde);
+  border-radius: 4px;
+  overflow: hidden;
+
+  h3 {
+    background: var(--fondo-acento);
+    padding: 1rem;
+    margin: 0;
+    font-size: 1.1rem;
+  }
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+
+  th, td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--borde);
+  }
+
+  th {
+    background-color: var(--fondo-acento);
+    font-weight: 500;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+//barra ed progreso. TODO: estilo sisdai
+.upload-progress {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: var(--fondo-acento);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.upload-progress progress {
+  width: 100%;
+  height: 20px;
+}
+
+.upload-progress span {
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.boton[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
+
 </style>

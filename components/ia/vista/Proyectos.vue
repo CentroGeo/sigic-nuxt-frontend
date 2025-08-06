@@ -4,6 +4,7 @@ import { ref } from "vue";
 const storeIA = useIAStore();
 
 const proyecto = computed(() => storeIA.proyectoSeleccionado);
+let arraySources = []
 
 const contextos = ref([
   {
@@ -23,6 +24,33 @@ const contextos = ref([
     numero_fuentes: 6
   }
 ]);
+
+
+// Función para cargar las fuentesl proyecto
+const loadSources = async () => {
+  //arraySources = [];
+
+  //Consulta fuentes
+  arraySources = await storeIA.getProjectSources(proyecto.value['id']);
+
+  console.log(arraySources);
+
+  //catalogo.value = arrayProjects;
+  //catalogoFiltrado.value = arrayProjects;
+};
+
+//carga fuentes del proyecto inicialmente seleccionado
+onMounted(() => {
+  //console.log(proyecto.value)
+  loadSources();
+});
+
+// Observador carga fuentes al cambiar de proyecto
+watch(proyecto, (nuevoProyecto, anteriorProyecto) => {
+  //console.log("Proyecto cambió:", nuevoProyecto);
+  loadSources();
+});
+
 </script>
 
 <template>
@@ -163,6 +191,39 @@ const contextos = ref([
               </button>
             </div>
           </div>
+
+<div class="tabla-archivos m-t-3" v-if="arraySources.length > 0">
+  <table class="tabla">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Tipo de archivo</th>
+<!--         <th>Categoría</th>
+        <th>Origen</th>
+        <th>Acciones</th> -->
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="archivo in arraySources" :key="archivo.id">
+        <td>{{ archivo.filename }}</td>
+        <td>{{ archivo.document_type }}</td>
+<!--         <td>{{ archivo.categoria }}</td>
+        <td>{{ archivo.origen }}</td> -->
+<!--         <td>
+          <button
+            class="boton-pictograma boton-sin-contenedor-secundario boton-chico"
+            aria-label="Eliminar archivo"
+            @click="eliminarArchivo(archivo.id)"
+          >
+            <span class="pictograma-eliminar" aria-hidden="true" />
+          </button>
+        </td> -->
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
         </div>
       </div>
     </div>
