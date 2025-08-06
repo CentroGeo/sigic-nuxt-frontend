@@ -1,5 +1,5 @@
 <script setup>
-const storeFetched = useFetchedResourcesStore()
+const storeFetched = useFetchedResourcesStore();
 const props = defineProps({
   titulo: { type: String, default: 'Título' },
   resourceType: { type: String, required: true },
@@ -7,7 +7,7 @@ const props = defineProps({
 });
 const { titulo, resourceType } = toRefs(props);
 const config = useRuntimeConfig();
-const resources = computed(()=> storeFetched[props.resourceType])
+const resources = computed(() => storeFetched[props.resourceType]);
 const apiCategorias = `${config.public.geonodeApi}/facets/category`;
 const categoryList = ref([]);
 const categorizedResources = ref({});
@@ -51,18 +51,16 @@ function setSelectedCategory(categoria) {
   } else {
     selectedCategories.value.push(categoria);
   }
-} 
+}
 
 onMounted(async () => {
   if (resources.value.length === 0) {
-    const {resourcesList} = await useGeonodeResources({
-      resourceType: resourceType.value,
-    });
-    storeFetched.updateFetchedResources(props.resourceType, resourcesList.value)
-  }else{
-  }
-  groupResults()
+    const { resourcesList } = await useGeonodeResources();
 
+    storeFetched.updateFetchedResources(props.resourceType, resourcesList.value);
+  }
+
+  groupResults();
 });
 </script>
 
@@ -74,7 +72,7 @@ onMounted(async () => {
       <div class="m-x-2 m-y-1">
         <p class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
 
-<!--         <ClientOnly>
+        <!--         <ClientOnly>
           <ConsultaElementoBuscador
             :resources-list="resourcesList"
             :resource-type="resourceType"
@@ -99,7 +97,7 @@ onMounted(async () => {
         :key="index"
         class="contenedor-archivos"
       >
-         <ConsultaElementoCatalogo
+        <ConsultaElementoCatalogo
           v-if="selectedCategories.includes(category)"
           :key="index"
           class="elemento-catalogo"
@@ -107,7 +105,7 @@ onMounted(async () => {
           :resource-type="resourceType"
         />
       </div>
-     </div> 
+    </div>
   </div>
 </template>
 

@@ -2,6 +2,10 @@
 const resourcesStore = useSelectedResources2Store();
 const fetchedStore = useFetchedResourcesStore();
 const resourceType = 'document';
+
+const storeConsulta = useConsultaStore();
+storeConsulta.resourceType = 'document';
+
 const route = useRoute();
 const router = useRouter();
 /**
@@ -12,10 +16,10 @@ function updateQueryFromStore(queryParam) {
   const query = { recursos: queryParam };
 
   if (query.recursos !== route.query.recursos) {
-    router.replace({ query});
+    router.replace({ query });
   }
 }
-watch(() => resourcesStore.resourcesAsQueryParam(resourceType), updateQueryFromStore)
+watch(() => resourcesStore.resourcesAsQueryParam(resourceType), updateQueryFromStore);
 
 /**
  * Actualiza el store desde los valores del queryParam.
@@ -23,16 +27,16 @@ watch(() => resourcesStore.resourcesAsQueryParam(resourceType), updateQueryFromS
  */
 function updateStoreFromQuery(queryParam) {
   resourcesStore.addFromQueryParam(queryParam, resourceType);
-  console.log("recursos tablas:", resourcesStore[resourceType])
+  console.log('recursos tablas:', resourcesStore[resourceType]);
 }
 
 onMounted(() => {
-  updateStoreFromQuery(route.query.recursos)
+  updateStoreFromQuery(route.query.recursos);
   // Para cuando hacemos el cambio de página
-  if(resourcesStore[resourceType].length > 0){
-    updateQueryFromStore(resourcesStore.resourcesAsQueryParam(resourceType))
+  if (resourcesStore[resourceType].length > 0) {
+    updateQueryFromStore(resourcesStore.resourcesAsQueryParam(resourceType));
   }
-})
+});
 /* async function obtenerPDFs() {
   const res = await fetch(`${config.public.geonodeApi}/api/v2/documents/`);
   const data = await res.json();
@@ -57,14 +61,17 @@ obtenerPDFs(); */
     </template>
 
     <template #visualizador>
-      <div v-if="resourcesStore[resourceType].length === 0 || fetchedStore[resourceType].length === 0" class="contenedor">
+      <div
+        v-if="resourcesStore[resourceType].length === 0 || fetchedStore[resourceType].length === 0"
+        class="contenedor"
+      >
         <h1>No hay seleccion</h1>
       </div>
       <ConsultaVisualizacionDocumento v-else />
     </template>
 
     <template #seleccion>
-       <ConsultaLayoutSeleccion
+      <ConsultaLayoutSeleccion
         titulo="Documentos seleccionados"
         :resource-type="resourceType"
         etiqueta-elementos="Documentos"

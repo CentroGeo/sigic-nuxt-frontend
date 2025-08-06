@@ -2,17 +2,16 @@
 import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
 import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
 
+const extensionNacional = '-118.3651,14.5321,-86.7104,32.7187';
 const resourceType = 'dataLayer';
 
-const extensionNacional = '-118.3651,14.5321,-86.7104,32.7187';
-const storeConsulta = useConsultaStore();
-const extensionMapa = computed(() => storeConsulta.ajustarExtensionMapa || extensionNacional);
-
 const config = useRuntimeConfig();
+const storeConsulta = useConsultaStore();
+storeConsulta.resourceType = 'dataLayer';
+
 const storeSelected = useSelectedResourcesStore();
 const randomNum = ref(0);
-const opacityDict = ref({});
-const isFinishedLoading = ref(0);
+// const isFinishedLoading = ref(0);
 const linkExportaMapa = ref();
 function exportarMapa() {
   exportarHTMLComoPNG(

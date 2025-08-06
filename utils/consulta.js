@@ -1,12 +1,21 @@
-import { useSelectedResourcesStore } from "@/stores/selectedResources.js";
+import { useSelectedResourcesStore } from '@/stores/selectedResources.js';
+
+export const resourceTypes = ['dataLayer', 'dataTable', 'document'];
+
+export const resourceTypeDict = {
+  dataLayer: 'dataset',
+  dataTable: 'dataset',
+  document: 'document',
+};
+
 export function tooltipContent(resource) {
-  let formatedAbstract = "Sin descripción";
+  let formatedAbstract = 'Sin descripción';
   if (resource.abstract) {
     formatedAbstract = resource.abstract
-      .replace(/^<p>/, "")
-      .replace(/<\/p>$/, "")
-      .replace(/^<pre>/, "")
-      .replace(/<\/pre>$/, "");
+      .replace(/^<p>/, '')
+      .replace(/<\/p>$/, '')
+      .replace(/^<pre>/, '')
+      .replace(/<\/pre>$/, '');
   }
   const content =
     `<p style="max-width:250px">${formatedAbstract}</p>` +
@@ -245,10 +254,10 @@ export async function setUrlDocs(resources, resourceType) {
   const route = useRoute();
   let params = [];
   let indicator = null;
-  if (resourceType === "dataTable") {
-    indicator = "alternate";
+  if (resourceType === 'dataTable') {
+    indicator = 'alternate';
   } else {
-    indicator = "title";
+    indicator = 'title';
   }
   params = resources.map((resource) => {
     let isSelected = 0;
@@ -260,7 +269,7 @@ export async function setUrlDocs(resources, resourceType) {
     return `${resource[indicator]},${isSelected}`;
   });
 
-  const paramsString = params.join(";");
+  const paramsString = params.join(';');
   await router.push({
     path: route.path,
     query: {
@@ -271,16 +280,16 @@ export async function setUrlDocs(resources, resourceType) {
 export function setDocView(resourceType, resources, paramsResources) {
   const resourcesStore = useSelectedResourcesStore();
   const attrDict = {
-    document: "title",
-    dataTable: "alternate",
+    document: 'title',
+    dataTable: 'alternate',
   };
 
   for (let i = paramsResources.length - 1; i >= 0; i--) {
-    let vals = paramsResources[i].split(",");
+    const vals = paramsResources[i].split(',');
     resources.forEach((d) => {
       if (d[attrDict[resourceType]] === vals[0]) {
         resourcesStore.addResource(resourceType, d);
-        if (vals[1] === "1") {
+        if (vals[1] === '1') {
           resourcesStore.setShownFile(resourceType, d);
         }
       }
@@ -289,37 +298,30 @@ export function setDocView(resourceType, resources, paramsResources) {
 }
 export async function setUrlLayers(resources) {
   const resourcesStore = useSelectedResourcesStore();
-  console.log("Se cambió la url: ", resources);
+  console.log('Se cambió la url: ', resources);
   const router = useRouter();
   const route = useRoute();
   let params = [];
-  let indicator = "alternate";
-  let opacidades = Object.keys(resourcesStore.shownFiles.dataLayer.opacity);
-  let visibilidades = Object.keys(
-    resourcesStore.shownFiles.dataLayer.visibility
-  );
+  const indicator = 'alternate';
+  const opacidades = Object.keys(resourcesStore.shownFiles.dataLayer.opacity);
+  const visibilidades = Object.keys(resourcesStore.shownFiles.dataLayer.visibility);
   params = resources.map((resource) => {
     let indOpacity = 1;
     let indVisibility = 1;
     if (opacidades.includes(resource.alternate)) {
-      indOpacity =
-        resourcesStore.shownFiles.dataLayer.opacity[resource.alternate] / 100;
+      indOpacity = resourcesStore.shownFiles.dataLayer.opacity[resource.alternate] / 100;
     }
     if (visibilidades.includes(resource.alternate)) {
-      indVisibility = resourcesStore.shownFiles.dataLayer.visibility[
-        resource.alternate
-      ]
-        ? 1
-        : 0;
+      indVisibility = resourcesStore.shownFiles.dataLayer.visibility[resource.alternate] ? 1 : 0;
     }
     return `${resource[indicator]},${indOpacity},${indVisibility}`;
   });
 
-  const paramsString = params.join(";");
+  const paramsString = params.join(';');
   await router.push({
     path: route.path,
     query: {
-      centro: resourcesStore.shownFiles.dataLayer.centro.join(","),
+      centro: resourcesStore.shownFiles.dataLayer.centro.join(','),
       acercamiento: resourcesStore.shownFiles.dataLayer.acercamiento,
       recursos: paramsString,
     },
