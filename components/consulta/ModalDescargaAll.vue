@@ -1,11 +1,6 @@
 <script setup>
-import {
-  downloadMetadata,
-  downloadPDF,
-  downloadVectorData,
-  wait,
-} from "@/utils/consulta.js";
-import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
+import { downloadMetadata, downloadPDF, downloadVectorData, wait } from '@/utils/consulta';
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
   resourceType: { type: String, required: true },
@@ -17,14 +12,14 @@ const tagTitle = ref();
 
 function abrirModalDescargaAll() {
   modalDescargaAll.value?.abrirModal();
-  optionsList.value = optionsDict[resourceType.value]["elements"];
-  tagTitle.value = optionsDict[resourceType.value]["title"];
+  optionsList.value = optionsDict[resourceType.value]['elements'];
+  tagTitle.value = optionsDict[resourceType.value]['title'];
 }
 
 async function downloadAllCSV() {
   const resourceList = resourcesStore.selectedResources[resourceType.value];
   for (let i = 0; i < resourceList.length; i++) {
-    await downloadVectorData(resourceList[i], "csv");
+    await downloadVectorData(resourceList[i], 'csv');
     await wait(1000);
   }
   modalDescargaAll.value?.cerrarModal();

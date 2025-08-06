@@ -1,6 +1,7 @@
 // Este composable hace peticiones de datos a Geonode
 // TODO: Resolver las peticiones de información para mostrar capas y datasets privados
 import { ref } from 'vue';
+import { resourceTypeDict } from '~/utils/consulta';
 
 export async function useGeonodeResources() {
   const config = useRuntimeConfig();

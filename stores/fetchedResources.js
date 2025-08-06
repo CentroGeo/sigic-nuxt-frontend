@@ -6,6 +6,7 @@ export const useFetchedResourcesStore = defineStore('fetchedResources', {
     dataTable: [],
     document: [],
     all: [],
+    isLoading: false,
   }),
   getters: {
     /**

@@ -1,7 +1,7 @@
 <script setup>
 // PENDING: Tener en cuenta que no solo tendremos archivos vectoriales
 import { onMounted, onUnmounted, ref, toRefs } from 'vue';
-import { fetchGeometryType, tooltipContent } from '~/utils/consulta.js';
+import { fetchGeometryType, tooltipContent } from '~/utils/consulta';
 
 const selectedStore = useSelectedResources2Store();
 const capasSeleccionadas = computed({

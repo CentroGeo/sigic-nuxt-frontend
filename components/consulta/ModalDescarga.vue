@@ -1,9 +1,5 @@
 <script setup>
-import {
-  downloadMetadata,
-  downloadPDF,
-  downloadVectorData
-} from '@/utils/consulta.js';
+import { downloadMetadata, downloadPDF, downloadVectorData } from '@/utils/consulta';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 const props = defineProps({
   resourceType: { type: String, required: true },

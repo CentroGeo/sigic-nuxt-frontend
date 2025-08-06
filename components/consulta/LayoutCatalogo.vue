@@ -55,9 +55,12 @@ function setSelectedCategory(categoria) {
 
 onMounted(async () => {
   if (resources.value.length === 0) {
+    storeFetched.isLoading = true;
     const { resourcesList } = await useGeonodeResources();
 
     storeFetched.updateFetchedResources(props.resourceType, resourcesList.value);
+
+    storeFetched.isLoading = false;
   }
 
   groupResults();
