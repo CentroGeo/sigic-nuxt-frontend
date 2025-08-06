@@ -18,18 +18,25 @@ const buttonTagDict = {
   document: 'archivos',
 };
 const route = useRoute();
+const shownModal = ref('ninguno')
 const downloadAllChild = ref(null);
 const shareChild = ref(null);
 function notifyDownloadAllChild() {
-  downloadAllChild.value?.abrirModalDescargaAll();
+  shownModal.value = 'downloadAll',
+    nextTick(() => {
+    downloadAllChild.value?.abrirModalDescargaAll();
+  });
 }
 function notifyShareChild() {
   shareChild.value?.abrirModalCompartir();
 }
 
 function shareState() {
+  shownModal.value = 'share'
   console.log('Se copia el url en el portapapeles: ', route.fullPath);
-  notifyShareChild();
+  nextTick(() => {
+    notifyShareChild();
+  });
 }
 </script>
 
@@ -83,9 +90,16 @@ function shareState() {
         :resource-type="resourceType"
       />
     </div>
+    <div id="los-modales">
+      <ConsultaModalDescargaAll
+      v-if="shownModal === 'downloadAll'" 
+      ref="downloadAllChild" 
+      :resource-type="resourceType" />
+      <ConsultaModalCompartir 
+      v-if="shownModal === 'share'" 
+      ref="shareChild" />
+    </div>
 
-    <ConsultaModalDescargaAll ref="downloadAllChild" :resource-type="resourceType" />
-    <ConsultaModalCompartir ref="shareChild" />
   </div>
 </template>
 
