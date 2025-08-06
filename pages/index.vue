@@ -300,7 +300,7 @@ onUnmounted(() => {
                 />
               </picture>
               <p>
-                Sube información en distintos formatos, agrégale un componente geográfico y y úsala
+                Sube información en distintos formatos, agrégale un componente geográfico y úsala
                 directamente en tus proyectos de IA, análisis o visualizaciones sin necesidad de
                 herramientas externas.
               </p>
