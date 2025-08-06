@@ -170,17 +170,9 @@ function updateQueryFromStore(queryParam) {
 }
 watch(() => selectedStore.resourcesAsQueryParam(resourceType), updateQueryFromStore);
 
-/**
- * Actualiza el store desde los valores del queryParam.
- * @param queryParam que llega desde la url.
- */
-function updateStoreFromQuery(queryParam) {
-  selectedStore.addFromQueryParam(queryParam, resourceType);
-}
-
 onMounted(() => {
   actualizarVistaDesdeHash(route.hash?.slice(1));
-  updateStoreFromQuery(route.query.capas);
+  selectedStore.addFromQueryParam(route.query.capas, resourceType);
 });
 
 function getFetchedResources() {
@@ -213,14 +205,15 @@ function getFetchedResources() {
           @click-centrar="clickCentrar"
           @al-mover-vista="actualizarHashDesdeVista"
         >
-          <SisdaiCapaXyz />
+          <SisdaiCapaXyz :posicion="0" />
 
           <SisdaiCapaWms
             v-for="resource in getFetchedResources()"
             :key="`wms-${resource.uuid}`"
-            :fuente="`${config.public.geoserverUrl}/wms?`"
             :capa="resource.alternate"
+            :fuente="`${config.public.geoserverUrl}/wms?`"
             :opacidad="selectedStore.findResource(resource.uuid, resourceType).opacidad"
+            :posicion="selectedStore.findResource(resource.uuid, resourceType).posicion + 1"
             :visible="selectedStore.findResource(resource.uuid, resourceType).visible"
           />
         </SisdaiMapa>

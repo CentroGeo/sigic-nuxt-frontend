@@ -6,8 +6,28 @@ const props = defineProps({
   },
   resourceType: { type: String, required: true },
 });
-const { selectedElement, resourceType } = toRefs(props);
-// console.log(selectedElement.value);
+const selectedStore = useSelectedResources2Store();
+
+const { uuid } = props.selectedElement;
+// const { posicion } = selectedStore.findResource(uuid, props.resourceType);
+const posicion = computed({
+  get: () => selectedStore.findResource(uuid, props.resourceType).posicion,
+  set: (nuevaPosicion) =>
+    (selectedStore.findResource(uuid, props.resourceType).posicion = nuevaPosicion),
+});
+
+function bajar() {
+  console.log('bajar', uuid, posicion.value, '->', posicion.value + 1);
+  posicion.value++;
+
+  console.log(toRaw(selectedStore.sortedAscending(props.resourceType)));
+}
+function subir() {
+  console.log('subir', uuid, posicion.value, '->', posicion.value - 1);
+  posicion.value--;
+
+  console.log(toRaw(selectedStore.sortedAscending(props.resourceType)));
+}
 </script>
 
 <template>
@@ -33,6 +53,8 @@ const { selectedElement, resourceType } = toRefs(props);
             class="boton-pictograma boton-sin-contenedor-secundario"
             aria-label="Subir elemento"
             type="button"
+            :disabled="posicion === 0"
+            @click="subir"
           >
             <span class="pictograma-subir-capa pictograma-mediano" aria-hidden="true" />
           </button>
@@ -41,6 +63,8 @@ const { selectedElement, resourceType } = toRefs(props);
             class="boton-pictograma boton-sin-contenedor-secundario"
             aria-label="Bajar Elemento"
             type="button"
+            :disabled="selectedStore[props.resourceType].length === posicion + 1"
+            @click="bajar"
           >
             <span class="pictograma-bajar-capa pictograma-mediano" aria-hidden="true" />
           </button>

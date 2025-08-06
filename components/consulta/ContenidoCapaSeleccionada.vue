@@ -13,7 +13,6 @@ const props = defineProps({
 });
 const { uuid } = props.selectedElement;
 
-const { selectedElement } = toRefs(props);
 const isVisible = ref(selectedStore.findResource(uuid, props.resourceType).visible);
 const tablaChild = ref(null);
 const downloadChild = ref(null);
@@ -60,7 +59,7 @@ const optionsButtons = ref([
     pictogram: 'pictograma-zoom-instruccional',
     action: () => {
       storeConsulta.ajustarExtensionMapa = getExtent(
-        selectedElement.value.bbox_polygon.coordinates[0]
+        props.selectedElement.bbox_polygon.coordinates[0]
       ).join(',');
     },
   },
@@ -93,7 +92,7 @@ const optionsButtons = ref([
     label: 'Eliminar selección',
     pictogram: 'pictograma-eliminar',
     action: () => {
-      selectedStore.removeResource(props.resourceType, selectedElement.value.uuid);
+      selectedStore.removeResource(props.resourceType, props.selectedElement.uuid);
     },
   },
   {

@@ -34,6 +34,17 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
     resourcesList: (state) => (resourceType) => {
       return state[resourceType].map(({ uuid }) => uuid);
     },
+
+    sortedAscending: (state) => (resourceType) => {
+      // sorted ascending, sorted descending
+      console.log(resourceType);
+
+      return state[resourceType].sort((a, b) => {
+        console.log(a, b);
+
+        return a.posicion - b.posicion;
+      });
+    },
   },
   actions: {
     /**
@@ -42,16 +53,18 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
      * @param {String} resourceType tipo de resursos a agregar.
      */
     addFromQueryParam(queryParam, resourceType) {
-      if (queryParam === undefined) {
-        // Validar si el queryParam se puede parsear
-        return;
-      }
+      // Validar si el queryParam se puede parsear
+      if (queryParam === undefined || queryParam === '') return;
 
-      this[resourceType] = queryParam.split(';').map((capa) => new ConfiguracioCapa(capa));
+      this[resourceType] = queryParam
+        .split(';')
+        .map((capa, posicion) => new ConfiguracioCapa(`${capa},${posicion}`));
     },
     updateResources(resources, resourceType) {
       if (resourceType === 'dataLayer') {
-        this[resourceType] = resources.map((uuid) => new ConfiguracioCapa({ uuid }));
+        this[resourceType] = resources.map((uuid, posicion) => {
+          return new ConfiguracioCapa({ uuid, posicion });
+        });
       } else {
         this[resourceType] = resources.map((uuid) => new ConfiguracionOtro({ uuid }));
       }
@@ -77,18 +90,19 @@ class ConfiguracioCapa {
    * @returns {Object}
    */
   fromQueryParam(queryParam) {
-    const [uuid, estilo, opacidad, visible] = queryParam.split(this.separador_);
-    return { uuid, estilo, opacidad, visible };
+    const [uuid, estilo, opacidad, visible, posicion] = queryParam.split(this.separador_);
+    return { uuid, estilo, opacidad, posicion, visible };
   }
 
   constructor(opciones = {}) {
-    const { estilo, opacidad, uuid, visible } =
+    const { estilo, opacidad, posicion, uuid, visible } =
       typeof opciones === 'string' ? this.fromQueryParam(opciones) : opciones;
 
     this.estilo = estilo || undefined;
     this.opacidad = opacidad || 1;
     this.uuid = uuid || '';
     this.visible = visible || 1;
+    this.posicion = posicion || 0;
   }
 
   get asQueryParam() {
@@ -102,6 +116,13 @@ class ConfiguracioCapa {
   }
   set opacidad(valor) {
     this.opacidad_ = Number(valor);
+  }
+
+  get posicion() {
+    return this.posicion_;
+  }
+  set posicion(valor) {
+    this.posicion_ = Number(valor);
   }
 
   get visible() {
