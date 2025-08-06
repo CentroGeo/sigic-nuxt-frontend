@@ -2,11 +2,17 @@
 const resourcesStore = useSelectedResources2Store();
 const fetchedStore = useFetchedResourcesStore();
 const resourceType = 'dataTable';
+
+const storeConsulta = useConsultaStore();
+storeConsulta.resourceType = 'dataTable';
+
 const paginaActual = ref(0);
 const tamanioPagina = 10;
-const selected = computed(() => resourcesStore[resourceType].filter((element) => element.isSelected === 1)[0] ?? null)
-const selectedUuid = computed(() => selected.value?.uuid ?? null)
-const selectedElement = ref()
+const selected = computed(
+  () => resourcesStore[resourceType].filter((element) => element.isSelected === 1)[0] ?? null
+);
+const selectedUuid = computed(() => selected.value?.uuid ?? null);
+const selectedElement = ref();
 
 const route = useRoute();
 const router = useRouter();
@@ -30,15 +36,15 @@ watch(paginaActual, () => {
   });
 });
 
-watch([() => selectedUuid.value, () => fetchedStore[resourceType]], ()=>{
-  selectedElement.value = fetchedStore.findResources([selectedUuid.value], resourceType)[0]
+watch([() => selectedUuid.value, () => fetchedStore[resourceType]], () => {
+  selectedElement.value = fetchedStore.findResources([selectedUuid.value], resourceType)[0];
   paginaActual.value = 0;
   fetchTable({
     paginaActual: paginaActual.value,
     tamanioPagina: tamanioPagina,
     resource: selectedElement.value,
-    });
-})
+  });
+});
 
 /**
  * Actualiza el queryParam desde los valores del store.
@@ -48,11 +54,10 @@ function updateQueryFromStore(queryParam) {
   const query = { recursos: queryParam };
 
   if (query.recursos !== route.query.recursos) {
-    router.replace({ query});
+    router.replace({ query });
   }
 }
-watch(() => resourcesStore.resourcesAsQueryParam(resourceType), updateQueryFromStore)
-
+watch(() => resourcesStore.resourcesAsQueryParam(resourceType), updateQueryFromStore);
 
 /**
  * Actualiza el store desde los valores del queryParam.
@@ -60,23 +65,22 @@ watch(() => resourcesStore.resourcesAsQueryParam(resourceType), updateQueryFromS
  */
 function updateStoreFromQuery(queryParam) {
   resourcesStore.addFromQueryParam(queryParam, resourceType);
-  console.log("recursos tablas:", resourcesStore[resourceType])
+  console.log('recursos tablas:', resourcesStore[resourceType]);
 }
 
 onMounted(() => {
-  updateStoreFromQuery(route.query.recursos)
+  updateStoreFromQuery(route.query.recursos);
   // Para cuando hacemos el cambio de página
-  if(resourcesStore[resourceType].length > 0){
-    updateQueryFromStore(resourcesStore.resourcesAsQueryParam(resourceType))
-    selectedElement.value = fetchedStore.findResources([selectedUuid.value], resourceType)[0]
+  if (resourcesStore[resourceType].length > 0) {
+    updateQueryFromStore(resourcesStore.resourcesAsQueryParam(resourceType));
+    selectedElement.value = fetchedStore.findResources([selectedUuid.value], resourceType)[0];
     fetchTable({
-    paginaActual: paginaActual.value,
-    tamanioPagina: tamanioPagina,
-    resource: selectedElement.value,
+      paginaActual: paginaActual.value,
+      tamanioPagina: tamanioPagina,
+      resource: selectedElement.value,
     });
   }
-})
-
+});
 </script>
 
 <template>
@@ -90,7 +94,10 @@ onMounted(() => {
     </template>
 
     <template #visualizador>
-       <div v-if="resourcesStore[resourceType].length === 0 || fetchedStore[resourceType].length === 0" class="contenedor">
+      <div
+        v-if="resourcesStore[resourceType].length === 0 || fetchedStore[resourceType].length === 0"
+        class="contenedor"
+      >
         <h1>No hay seleccion</h1>
       </div>
       <div v-else>
@@ -103,7 +110,7 @@ onMounted(() => {
     </template>
 
     <template #seleccion>
-    <ConsultaLayoutSeleccion
+      <ConsultaLayoutSeleccion
         titulo="Tabulados de datos"
         :resource-type="resourceType"
         etiqueta-elementos="Datos tabulados"

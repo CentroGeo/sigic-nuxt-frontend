@@ -2,17 +2,16 @@
 import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
 import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
 
+const extensionNacional = '-118.3651,14.5321,-86.7104,32.7187';
 const resourceType = 'dataLayer';
 
-const extensionNacional = '-118.3651,14.5321,-86.7104,32.7187';
-const storeConsulta = useConsultaStore();
-const extensionMapa = computed(() => storeConsulta.ajustarExtensionMapa || extensionNacional);
-
 const config = useRuntimeConfig();
+const storeConsulta = useConsultaStore();
+storeConsulta.resourceType = 'dataLayer';
+
 const storeSelected = useSelectedResourcesStore();
 const randomNum = ref(0);
-const opacityDict = ref({});
-const isFinishedLoading = ref(0);
+// const isFinishedLoading = ref(0);
 const linkExportaMapa = ref();
 function exportarMapa() {
   exportarHTMLComoPNG(
@@ -170,17 +169,9 @@ function updateQueryFromStore(queryParam) {
 }
 watch(() => selectedStore.resourcesAsQueryParam(resourceType), updateQueryFromStore);
 
-/**
- * Actualiza el store desde los valores del queryParam.
- * @param queryParam que llega desde la url.
- */
-function updateStoreFromQuery(queryParam) {
-  selectedStore.addFromQueryParam(queryParam, resourceType);
-}
-
 onMounted(() => {
   actualizarVistaDesdeHash(route.hash?.slice(1));
-  updateStoreFromQuery(route.query.capas);
+  selectedStore.addFromQueryParam(route.query.capas, resourceType);
 });
 
 function getFetchedResources() {
@@ -213,14 +204,15 @@ function getFetchedResources() {
           @click-centrar="clickCentrar"
           @al-mover-vista="actualizarHashDesdeVista"
         >
-          <SisdaiCapaXyz />
+          <SisdaiCapaXyz :posicion="0" />
 
           <SisdaiCapaWms
             v-for="resource in getFetchedResources()"
             :key="`wms-${resource.uuid}`"
-            :fuente="`${config.public.geoserverUrl}/wms?`"
             :capa="resource.alternate"
+            :fuente="`${config.public.geoserverUrl}/wms?`"
             :opacidad="selectedStore.findResource(resource.uuid, resourceType).opacidad"
+            :posicion="selectedStore.findResource(resource.uuid, resourceType).posicion + 1"
             :visible="selectedStore.findResource(resource.uuid, resourceType).visible"
           />
         </SisdaiMapa>
