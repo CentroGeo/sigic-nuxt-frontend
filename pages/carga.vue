@@ -3,6 +3,9 @@ import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/cam
 
 definePageMeta({
   middleware: 'sidebase-auth',
+  bodyAttrs: {
+    class: '',
+  },
 });
 
 const archivo = ref<File | null>(null);
