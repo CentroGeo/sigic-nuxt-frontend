@@ -1,6 +1,12 @@
 <script setup>
-definePageMeta({ middleware: 'redireccionar-modulo-ia' });
+definePageMeta({
+  middleware: 'redireccionar-modulo-ia',
+  bodyAttrs: {
+    class: '',
+  },
+});
 const ruta = '/ia';
+onMounted(() => (document.querySelector('body').className = ''));
 </script>
 <template>
   <div class="modulo-ia flex">

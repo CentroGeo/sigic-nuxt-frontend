@@ -6,7 +6,10 @@ import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/S
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
 definePageMeta({
-  // middleware: 'sidebase-auth',
+  middleware: 'sidebase-auth',
+  bodyAttrs: {
+    class: '',
+  },
 });
 
 const modalCatalogoExternos = ref(null);
@@ -34,19 +37,21 @@ watchEffect(() => {
   }
 });
 async function subirArchivo() {
-  const token = data.value?.accessToken;
-  const formData = new FormData();
-  formData.append('title', titulo.value);
-  formData.append('abstract', descripcion.value);
-  formData.append('base_file', archivo.value!);
-  formData.append('token', token);
+  if (descripcion.value !== '') {
+    const token = data.value?.accessToken;
+    const formData = new FormData();
+    formData.append('title', titulo.value);
+    formData.append('abstract', descripcion.value);
+    formData.append('base_file', archivo.value!);
+    formData.append('token', token);
 
-  await fetch('/api/subir', {
-    method: 'POST',
-    body: formData,
-  });
+    await fetch('/api/subir', {
+      method: 'POST',
+      body: formData,
+    });
 
-  // // const json = await res.json();
+    // // const json = await res.json();
+  }
 }
 </script>
 <template>
@@ -57,7 +62,18 @@ async function subirArchivo() {
         <h3>Sección</h3>
         <input type="file" @change="(e) => (archivo = e.target.files[0])" />
         <input v-model="titulo" placeholder="Título" />
-        <input v-model="descripcion" placeholder="Descripción" />
+        <!-- <input v-model="descripcion" placeholder="Descripción" /> -->
+        <ClientOnly>
+          <SisdaiCampoBase
+            v-model="descripcion"
+            etiqueta="Descripción"
+            ejemplo="Descripción"
+            tipo="text"
+            texto_ayuda="Texto de ayuda."
+            :es_obligatorio="true"
+            :es_etiqueta_visible="true"
+          />
+        </ClientOnly>
         <button @click="subirArchivo">Subir</button>
 
         <div class="m-t-3">

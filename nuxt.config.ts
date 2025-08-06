@@ -1,6 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
 const isDev = process.env.NODE_ENV !== 'production';
+const baseUrl = process.env.NUXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
 export default defineNuxtConfig({
   app: {
@@ -10,16 +11,9 @@ export default defineNuxtConfig({
           rel: 'shortcut icon',
           href: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/images/favicon.ico',
         },
-        {
-          rel: 'stylesheet',
-          // href: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/styles/main.css',
-        },
+
       ],
-      script: [
-        {
-          // src: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/js/gobmx.js',
-        },
-      ],
+
     },
   },
   compatibilityDate: '2025-05-15',
@@ -43,8 +37,7 @@ export default defineNuxtConfig({
 
   auth: {
     isEnabled: true,
-    baseURL: `${process.env.NUXT_PUBLIC_BASE_URL}/api/auth`,
-    originEnvKey: process.env.NUXT_AUTH_ORIGIN,
+    baseURL: `${baseUrl}/api/auth`,
 
     globalAppMiddleware: false, // protege todas las páginas por defecto
     provider: {
@@ -66,6 +59,7 @@ export default defineNuxtConfig({
       geonodeApi: `${process.env.GEONODE_URL}/api/v2`,
       geoserverUrl: process.env.GEOSERVER_URL,
       geonodeUrl: process.env.GEONODE_URL,
+      baseURL: baseUrl,
 
       // geoserverApi: `${process.env.GEOSERVER_URL}/rest`,
     },
