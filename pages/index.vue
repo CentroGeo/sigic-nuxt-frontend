@@ -25,19 +25,15 @@ watch(
   () => route.fullPath,
   (newPath) => {
     if (newPath === '/') {
-      setTimeout(
-        () => {
-          document.body.classList.add('solo-en-index');
-          if (!document?.querySelector('link[href*="framework-gb.cdn.gob.mx"]')) {
-            const link = document?.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = 'https://framework-gb.cdn.gob.mx/gm/v3/assets/styles/main.css';
-            document?.head.insertBefore(link, document.head.firstChild);
-          }
-        },
-
-        500
-      );
+      nextTick(() => {
+        document.body.classList.add('solo-en-index');
+        if (!document?.querySelector('link[href*="framework-gb.cdn.gob.mx"]')) {
+          const link = document?.createElement('link');
+          link.rel = 'stylesheet';
+          link.href = 'https://framework-gb.cdn.gob.mx/gm/v3/assets/styles/main.css';
+          document?.head.insertBefore(link, document.head.firstChild);
+        }
+      });
     } else {
       document.body.classList.remove('solo-en-index');
     }
@@ -515,7 +511,7 @@ onUnmounted(() => {
     </main>
   </div>
 </template>
-<style lang="scss" scoped>
+<style lang="scss">
 .init-sesion {
   display: inline;
 }
