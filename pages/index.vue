@@ -95,10 +95,10 @@ onUnmounted(() => {
     'FloatingUIDOM',
   ];
   for (const el of vars_window) {
-    if (window[el]) {
+    if (Object.prototype.hasOwnProperty.call(window, el)) {
       try {
-        delete window[el];
-      } catch (e) {
+        Reflect.deleteProperty(window, el);
+      } catch {
         window[el] = undefined;
       }
     }
