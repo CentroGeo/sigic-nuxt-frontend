@@ -55,7 +55,7 @@ async function subirArchivo() {
             :es_etiqueta_visible="true"
           />
         </ClientOnly>
-        <button @click="subirArchivo()">Subir</button>
+        <button @click="subirArchivo">Subir</button>
       </div>
     </section>
   </main>
