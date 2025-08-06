@@ -11,16 +11,9 @@ export default defineNuxtConfig({
           rel: 'shortcut icon',
           href: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/images/favicon.ico',
         },
-        {
-          rel: 'stylesheet',
-          // href: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/styles/main.css',
-        },
+
       ],
-      script: [
-        {
-          // src: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/js/gobmx.js',
-        },
-      ],
+
     },
   },
   compatibilityDate: '2025-05-15',
