@@ -8,7 +8,6 @@ const props = defineProps({
 const { titulo, resourceType } = toRefs(props);
 const config = useRuntimeConfig();
 const resources = computed(()=> storeFetched[props.resourceType])
-console.log("aqui",resources.value)
 const apiCategorias = `${config.public.geonodeApi}/facets/category`;
 const categoryList = ref([]);
 const categorizedResources = ref({});
@@ -56,13 +55,11 @@ function setSelectedCategory(categoria) {
 
 onMounted(async () => {
   if (resources.value.length === 0) {
-    console.log('la store esta vacia')
     const {resourcesList} = await useGeonodeResources({
       resourceType: resourceType.value,
     });
     storeFetched.updateFetchedResources(props.resourceType, resourcesList.value)
   }else{
-    console.log('hay cosas en la store')
   }
   groupResults()
 

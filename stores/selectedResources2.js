@@ -46,8 +46,12 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
         // Validar si el queryParam se puede parsear
         return;
       }
+      if(resourceType === 'dataLayer'){
+        this[resourceType] = queryParam.split(';').map((capa) => new ConfiguracioCapa(capa));
+      }else{
+        this[resourceType] = queryParam.split(';').map((recurso) => new ConfiguracionOtro(recurso));
+      }
 
-      this[resourceType] = queryParam.split(';').map((capa) => new ConfiguracioCapa(capa));
     },
     updateResources(resources, resourceType) {
       if (resourceType === 'dataLayer') {

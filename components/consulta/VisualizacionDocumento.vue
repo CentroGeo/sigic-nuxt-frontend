@@ -1,23 +1,23 @@
 <script setup>
-import { ref, watch, nextTick, onBeforeUnmount } from 'vue';
+import { onBeforeUnmount, ref } from 'vue';
 
-const resourcesStore = useSelectedResourcesStore();
+const resourcesStore = useSelectedResources2Store();
+const fetchedStore = useFetchedResourcesStore()
 const resourceType = 'document';
-
-const urlEmbebido = ref(null);
+//const urlEmbebido = ref(null);
 const embedRef = ref(null);
-
-// Esto es por si ya había un documento seleccionado
-if (resourcesStore.shownFiles[resourceType]) {
-  urlEmbebido.value = resourcesStore.shownFiles[resourceType]['embed_url'];
-}
-
+const selected = computed(() => resourcesStore[resourceType].filter((element) => element.isSelected === 1)[0])
+const selectedUuid = computed(() => selected.value?.uuid ?? null)
+const selectedElement = computed(() => {
+  if (!selectedUuid.value) return null;
+  return fetchedStore.findResources([selectedUuid.value], resourceType)[0] ?? null;
+});
+const urlEmbebido = ref(selectedElement.value.embed_url)
 let resizeObserver;
 
-// Observa cambios en el recurso seleccionado
-watch(
-  () => resourcesStore.shownFiles[resourceType],
-  async (nv) => {
+watch(selectedElement, (nv) => {
+  (async () => {
+    console.log('cambio el uuid')
     if (nv) {
       urlEmbebido.value = null; // limpiar antes de volver a asignar
       await nextTick(); // esperar a que el DOM reaccione
@@ -39,7 +39,8 @@ watch(
     } else {
       urlEmbebido.value = null;
     }
-  }
+  })()
+}
 );
 
 onBeforeUnmount(() => {
