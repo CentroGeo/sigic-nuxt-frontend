@@ -103,10 +103,22 @@ jobs:
         run: |
           sed -i "s|ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:.*|ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.sha }}|g" docker-compose-ghcr.yml
 
+      - name: Escribir archivo .env
+        run: |
+          echo "NODE_ENV=${{ steps.env.outputs.NODE_ENV }}" >> .env
+          echo "GEONODE_URL=${{ vars.GEONODE_URL }}" >> .env
+          echo "GEOSERVER_URL=${{ vars.GEOSERVER_URL }}" >> .env
+          echo "NUXT_AUTH_ORIGIN=${{ vars.NUXT_AUTH_ORIGIN }}" >> .env
+          echo "KEYCLOAK_ISSUER=${{ vars.KEYCLOAK_ISSUER }}" >> .env
+          echo "KEYCLOAK_CLIENT_ID=${{ secrets.KEYCLOAK_CLIENT_ID }}" >> .env
+          echo "KEYCLOAK_CLIENT_SECRET=${{ secrets.KEYCLOAK_CLIENT_SECRET }}" >> .env
+          echo "NUXT_AUTH_SECRET=${{ secrets.NUXT_AUTH_SECRET }}" >> .env
+          echo "VIRTUAL_PORT=3000" >> .env
+
       - name: Docker Compose up
         run: |
           docker compose -f docker-compose-ghcr.yml down -v || true
-          docker compose -f docker-compose-ghcr.yml up -d --force-recreate
+          docker compose --env-file .env -f docker-compose-ghcr.yml up -d --force-recreate
         env:
           NODE_ENV: "development"
           GEONODE_URL: ${{ vars.GEONODE_URL }}

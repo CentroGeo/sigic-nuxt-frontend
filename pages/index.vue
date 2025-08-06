@@ -1,4 +1,5 @@
 <script setup>
+import { watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 definePageMeta({ auth: false, key: 'inicio' });
@@ -20,6 +21,29 @@ useHead({
     },
   ],
 });
+watch(
+  () => route.fullPath,
+  (newPath) => {
+    if (newPath === '/') {
+      setTimeout(
+        () => {
+          document.body.classList.add('solo-en-index');
+          if (!document?.querySelector('link[href*="framework-gb.cdn.gob.mx"]')) {
+            const link = document?.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'https://framework-gb.cdn.gob.mx/gm/v3/assets/styles/main.css';
+            document?.head.insertBefore(link, document.head.firstChild);
+          }
+        },
+
+        500
+      );
+    } else {
+      document.body.classList.remove('solo-en-index');
+    }
+  },
+  { immediate: true }
+);
 onMounted(() => {
   const link = document.createElement('link');
   link.rel = 'stylesheet';
@@ -35,10 +59,8 @@ onUnmounted(() => {
 
   const agregadasPorFrameworkGogHead = [...document.head.children].filter(
     (el) =>
-      el.outerHTML.includes('framework-gb.cdn.gob.mx') ||
-      el.innerHTML.includes('framework-gb.cdn.gob.mx') ||
-      el.outerHTML.includes('ajax.googleapis.com/ajax/libs/webfont') ||
-      el.innerHTML.includes('ajax.googleapis.com/ajax/libs/webfont')
+      (el.outerHTML.includes('framework-gb.cdn.gob.mx') && !el.outerHTML.includes('favicon.ico')) ||
+      el.outerHTML.includes('ajax.googleapis.com/ajax/libs/webfont')
   );
   const agregadasPorFrameworkGogBody = [...document.body.children].filter(
     (el) =>
