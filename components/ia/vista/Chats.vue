@@ -1,9 +1,7 @@
 <script setup>
-import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
-import SisdaiControlDeslizante from "@centrogeomx/sisdai-componentes/src/componentes/control-deslizante/SisdaiControlDeslizante.vue";
-import { marked } from 'marked'; // Importar marked para mostrar formato markdown
-import DOMPurify from 'dompurify'; // Para seguridad XSS
-import { ref } from "vue";
+import SisdaiControlDeslizante from '@centrogeomx/sisdai-componentes/src/componentes/control-deslizante/SisdaiControlDeslizante.vue';
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+import { ref } from 'vue';
 
 const reporteModal = ref(null);
 const controlDeslizante = ref(null);
@@ -13,278 +11,48 @@ function enfocarAreaTexto() {
   areaTextoRef.value.focus();
 }
 
-const mensaje = ref("");
+const mensaje = ref('');
 const mensajes = ref([
   /* {
     id: 0,
-    actor: "AI",
-    message: "Hola, ¿En qué te puedo ayudar hoy?",
+    actor: 'AI',
+    message: 'Hola, ¿En qué te puedo ayudar hoy?',
     reporte: false,
   },
   {
     id: 1,
-    actor: "Humano",
+    actor: 'Humano',
     // message: "Por favor, cuéntame una historia",
     message:
-      "¿Cuáles serían los principales retos en el uso de estas tecnologías de monitoreo, considerando tanto la cobertura espacial como la integración de datos?",
+      '¿Cuáles serían los principales retos en el uso de estas tecnologías de monitoreo, considerando tanto la cobertura espacial como la integración de datos?',
     reporte: false,
   },
   {
     id: 2,
-    actor: "AI",
+    actor: 'AI',
     // message: "Era hace una vez...",
     message:
-      "Hasta ahora hemos identificado que los principales retos en el uso de tecnologías para monitoreo marino están relacionados con la baja cobertura de sensores en áreas clave de biodiversidad, como el Arrecife Alacranes y la costa norte de Quintana Roo. También se ha detectado una limitada integración de datos entre plataformas locales e internacionales, lo cual dificulta el análisis comparativo y la toma de decisiones.",
+      'Hasta ahora hemos identificado que los principales retos en el uso de tecnologías para monitoreo marino están relacionados con la baja cobertura de sensores en áreas clave de biodiversidad, como el Arrecife Alacranes y la costa norte de Quintana Roo. También se ha detectado una limitada integración de datos entre plataformas locales e internacionales, lo cual dificulta el análisis comparativo y la toma de decisiones.',
     reporte: true,
   }, */
 ]);
 
-
-// Agregar nueva referencia para el contenedor del chat
-const contenedorChatRef = ref(null);
-const usuarioHizoScroll = ref(false); 
-
-// Configurar marked (opcional)
-marked.setOptions({
-  breaks: true, // Convertir saltos de línea en <br>
-  gfm: true,    // Habilitar GitHub Flavored Markdown
-});
-
-// Función para convertir markdown a HTML seguro
-function renderMarkdown(content) {
-  return DOMPurify.sanitize(marked.parse(content));
-}
-
-
-// Función para manejar el scroll del usuario
-function manejarScroll() {
-  const contenedor = contenedorChatRef.value;
-  if (contenedor) {
-    // Verificamos si el usuario está cerca del fondo (con un margen de 100px)
-    const cercaDelFondo = contenedor.scrollTop + contenedor.clientHeight >= contenedor.scrollHeight - 100;
-    usuarioHizoScroll.value = !cercaDelFondo;
-  }
-}
-
-// Función para hacer scroll al final
-/* function scrollToBottom() {
-  nextTick(() => {
-    setTimeout(() => {
-      if (contenedorChatRef.value) {
-        contenedorChatRef.value.scrollTo({
-          top: contenedorChatRef.value.scrollHeight,
-          //behavior: 'smooth'
-          behavior: 'auto'
-        });
-      }
-    }, 50);
-  });
-} */
-
-// Función para hacer scroll al final solo si el usuario no ha hecho scroll manual
-function scrollToBottomIfNeeded() {
-  nextTick(() => {
-    if (contenedorChatRef.value && !usuarioHizoScroll.value) {
-      contenedorChatRef.value.scrollTo({
-        top: contenedorChatRef.value.scrollHeight,
-        behavior: 'smooth'
-      });
-    }
-  });
-}
-
-
-const submitMensaje = async () => {
-
-  const resultado = ref('')
-  const loading = ref(false)
-
-  if (mensaje.value === "") return;
-
-  const body = {
-    user_id: "c5461377-f021-402a-9700-a6d43c82e30c",
-    type: "Preguntar",
-    //model: "deepseek-r1",
-    model: "llama3.1",
-    messages: [
-      {
-        role: "system",
-        content:
-          "Eres un asistente amable que puede ayudar al usuario. Responde de manera cordial. Responde siempre en español."
-      },
-      { role: "user", content: mensaje.value }
-    ],
-    think: false,
-    chat_id:0,
-  };
-
-  console.log(body)
-
-  // Agregar mensaje del usuario
-  mensajes.value.push({ 
-    id: mensajes.value.length + 1,
-    actor: "Humano",
-    message: mensaje.value
-  });
-  mensaje.value = "";
-
-// Agregar mensaje vacío de la IA que se actualizará en el streaming
-  const aiMessageIndex = mensajes.value.push({
-    id: mensajes.value.length + 1,
-    actor: "AI",
-    message: ""
-  }) - 1; // Obtenemos el índice del nuevo mensaje    
-
-  // Hacer scroll inicial al nuevo mensaje
-  //scrollToBottom();
-
-
-// Envía la pregunta 
-  const res = await fetch('http://localhost:8000/start', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  })
-
-  //console.log(res)
-  if (!res.ok) {
-    //resultado.value = 'Error al iniciar solicitud.'
-    mensajes.value[aiMessageIndex].message = 'Error al iniciar solicitud.'
-    loading.value = false
-    return
-  }
-
-  const json = await res.json()
-  const jobId = json.job_id
-
-  if (!jobId) {
-    //resultado.value = 'No se recibió job_id.'
-    mensajes.value[aiMessageIndex].message = 'No se recibió job_id.'
-    loading.value = false
-    return
-  }
-  else{
-    console.log("jobId: ",jobId)
-  }
-
-  // Resetear el flag al enviar nuevo mensaje
-  usuarioHizoScroll.value = false;
-  
-  // Hacer scroll inicial al nuevo mensaje
-  scrollToBottomIfNeeded();  
-
-  let mensajeRespuesta="";
- // Hacer streaming de la respuesta
-  try {
-    const streamRes = await fetch(`http://localhost:8000/stream/${jobId}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' }
-    })
-
-    const reader = streamRes.body?.getReader()
-    const decoder = new TextDecoder('utf-8')
-
-    if (!reader) {
-      //resultado.value = 'No se pudo leer el stream.'
-      mensajes.value[aiMessageIndex].message = 'No se pudo leer el stream.'
-      loading.value = false
-      return
-    }
-    else{
-      //console.log(reader)
-    }
-
-    
-
-    //muestra la respuesta del modelo en streaming
-    while (true) { 
-      const { done, value } = await reader.read()
-      //console.log(done)
-      if (done) break
-      const chunk = decoder.decode(value)
-      //resultado.value += chunk
-      //console.log("chunk:",chunk)
-      resultado.value = chunk
-      //console.log(resultado.value)
-
-      let arrayResults = resultado.value.split("\n\n");
-      //console.log(arrayResults)
-
-      arrayResults.forEach((resultElement) => {
-        //console.log(resultElement)
-      
-
-        if(resultElement.includes("status:")){
-          try{
-            let statusStr=resultElement.replace("status:","")
-            let statusObj=JSON.parse(statusStr)
-            //console.log(statusObj["status"])
-          }
-          catch (err) {
-              console.log('Error Leyendo status: ' + err)
-              console.log(resultElement)
-          }          
-
-        }
-        if(resultElement.includes("event: done")){
-          //let statusStr=resultElement.replace("status:","")
-          //let statusObj=JSON.parse(statusStr)
-          //console.log(statusObj)
-        }        
-        if(resultElement.includes("data:")){
-          if(resultElement.includes("STREAM_COMPLETED")){
-            console.log("stream completado")
-          }
-          else{
-            try{
-              let dataStr=resultElement.replace("data:","")
-              //console.log(dataStr)
-              let dataObj=JSON.parse(dataStr)
-              //console.log(dataObj)
-              if(dataObj['status']=='started'){
-                //console.log(dataObj['message'])
-                  mensajeRespuesta+=dataObj['message'];
-                  //console.log(mensajeRespuesta)
-                  mensajes.value[aiMessageIndex].message = mensajeRespuesta;
-                  // Hacer scroll después de cada actualización
-                  //scrollToBottom();
-                  scrollToBottomIfNeeded();
-              }     
-            } 
-            catch (err) {
-              console.log('Error Leyendo data: ' + err)
-              console.log(resultElement)
-            }  
-
-          }
-
-
-        }
-
-      });
-    }
-
-  } catch (err) {
-    //resultado.value = 'Error en el streaming: ' + err
-    //mensajes.value[aiMessageIndex].message = 'Error en el streaming: ' + err
-    console.log('Error en el streaming: ' + err)
-    console.log(mensajeRespuesta)
-    //scrollToBottom();
-    scrollToBottomIfNeeded();
-  }
-
+const submitMensaje = () => {
+  if (mensaje.value === '') return;
+  mensajes.value.push({ actor: 'Humano', message: mensaje.value });
+  mensaje.value = '';
 };
 
 const generaIdAleatorio = el => {
   return el + Math.random().toString(36).substring(2);
 };
-const idAleatorio = generaIdAleatorio("areatexto-");
-const idAleatorioCD = generaIdAleatorio("controldeslizante-");
+const idAleatorio = generaIdAleatorio('areatexto-');
+const idAleatorioCD = generaIdAleatorio('controldeslizante-');
 </script>
 
 <template>
   <div class="grid">
-    <div class="columna-2"></div>
+    <div class="columna-2" />
 
     <div class="columna-12">
       <div class="contenedor-chat p-y-3">
@@ -294,23 +62,13 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
               <div :class="m.actor == 'Humano' ? 'p-y-2 ' : ''">
                 <div
                   class="contenedor-log-contenido"
-                  :style="
-                    m.actor == 'Humano' ? 'flex-direction:row-reverse' : ''
-                  "
+                  :style="m.actor == 'Humano' ? 'flex-direction:row-reverse' : ''"
                 >
                   <div>
                     <span
                       class="pictograma-grande p-1 borde-redondeado-8"
-                      :class="
-                        m.actor == 'Humano'
-                          ? 'pictograma-persona'
-                          : 'pictograma-bot'
-                      "
-                      style="
-                        background-color: var(
-                          --boton-primario-deshabilitado-fondo
-                        );
-                      "
+                      :class="m.actor == 'Humano' ? 'pictograma-persona' : 'pictograma-bot'"
+                      style="background-color: var(--boton-primario-deshabilitado-fondo)"
                     />
                   </div>
                   <div>
@@ -318,9 +76,7 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
 <!--                     <p
                       class="m-0 markdown-content"
                       :class="
-                        m.actor == 'Humano'
-                          ? 'fondo-color-neutro p-2 borde-redondeado-20'
-                          : ''
+                        m.actor == 'Humano' ? 'fondo-color-neutro p-2 borde-redondeado-20' : ''
                       "
                       :style="m.actor == 'Humano' ? 'max-width: 592px' : ''"
                     >
@@ -341,8 +97,8 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
                     <!-- Reporte -->
                     <div v-if="m.actor == 'AI' && m.reporte" class="">
                       <p>
-                        ¿Te gustaría que genere un reporte con esta información
-                        o prefieres seguir consultando?
+                        ¿Te gustaría que genere un reporte con esta información o prefieres seguir
+                        consultando?
                       </p>
                       <div class="flex">
                         <!-- Abril modal -->
@@ -353,10 +109,7 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
                           @click="reporteModal?.abrirModal()"
                         >
                           Generar reporte
-                          <span
-                            class="pictograma-reporte"
-                            aria-hidden="true"
-                          ></span>
+                          <span class="pictograma-reporte" aria-hidden="true" />
                         </button>
                         <!-- Enfocar Area Texto -->
                         <button
@@ -366,10 +119,7 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
                           @click="enfocarAreaTexto()"
                         >
                           Seguir consultando
-                          <span
-                            class="pictograma-actualizar"
-                            aria-hidden="true"
-                          ></span>
+                          <span class="pictograma-actualizar" aria-hidden="true" />
                         </button>
                       </div>
                     </div>
@@ -381,9 +131,7 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
 
           <div class="contenedor-area-texto">
             <form class="formulario-area-texto">
-              <label :for="idAleatorio" class="a11y-solo-lectura">
-                Nombre de la etiqueta
-              </label>
+              <label :for="idAleatorio" class="a11y-solo-lectura"> Nombre de la etiqueta </label>
               <textarea
                 :id="idAleatorio"
                 ref="areaTextoRef"
@@ -410,33 +158,28 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
       </div>
     </div>
 
-    <div class="columna-2"></div>
+    <div class="columna-2" />
   </div>
   <!-- Modal nuevo chat -->
   <ClientOnly>
     <SisdaiModal ref="reporteModal">
       <template #encabezado>
         <h2>
-          {{
-            controlDeslizante?.valor_seleccionado < 100
-              ? "Creando reporte"
-              : "Reporte listo"
-          }}
+          {{ controlDeslizante?.valor_seleccionado < 100 ? 'Creando reporte' : 'Reporte listo' }}
         </h2>
       </template>
 
       <template #cuerpo>
         <div>
           <p v-if="controlDeslizante?.valor_seleccionado < 100">
-            Tu archivo se está creando espera a que la barra de progreso se
-            complete
+            Tu archivo se está creando espera a que la barra de progreso se complete
           </p>
           <div
             v-if="controlDeslizante?.valor_seleccionado < 100"
             class="fondo-color-informacion p-x-2 p-y-1 borde borde-color-informacion borde-redondeado-20"
           >
             <p class="texto-color-informacion">
-              <span class="pictograma-informacion"></span>
+              <span class="pictograma-informacion" />
               Verifica siempre los datos antes de usarlos.
             </p>
           </div>
@@ -445,7 +188,7 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
             class="fondo-color-confirmacion p-x-2 p-y-1 borde borde-color-confirmacion borde-redondeado-20"
           >
             <p class="texto-color-confirmacion">
-              <span class="pictograma-aprobado"></span>
+              <span class="pictograma-aprobado" />
               Tu reporte está listo para descagar
             </p>
           </div>
@@ -462,18 +205,12 @@ const idAleatorioCD = generaIdAleatorio("controldeslizante-");
                 :val_entrada="90"
                 step="10"
                 @blur="false"
-                @update:val_entrada="
-                  $event => (controlDeslizante.valor_seleccionado = $event)
-                "
+                @update:val_entrada="($event) => (controlDeslizante.valor_seleccionado = $event)"
               />
             </ClientOnly>
             <div class="flex flex-contenido-final">
               <label :for="idAleatorioCD"
-                >{{
-                  controlDeslizante?.valor_seleccionado < 100
-                    ? "Progreso"
-                    : "Completado"
-                }}
+                >{{ controlDeslizante?.valor_seleccionado < 100 ? 'Progreso' : 'Completado' }}
                 {{ controlDeslizante?.valor_seleccionado }}%</label
               >
             </div>

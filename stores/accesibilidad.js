@@ -13,7 +13,7 @@
 //   You should have received a copy of the GNU Lesser General Public License
 //   along with sisdai-componentes. If not, see <https://www.gnu.org/licenses/>.
 
-import { defineStore } from 'pinia'
+import { defineStore } from 'pinia';
 
 export const useAccesibilidadStore = defineStore('accesibilidad', {
   state: () => ({ clasesAccesibles: [] }),
@@ -22,10 +22,10 @@ export const useAccesibilidadStore = defineStore('accesibilidad', {
   // },
   actions: {
     modificarClasesAccesibles(valor) {
-      this.clasesAccesibles = valor
+      this.clasesAccesibles = valor;
     },
     restablecer() {
-      this.clasesAccesibles = []
+      this.clasesAccesibles = [];
     },
   },
-})
+});

@@ -1,5 +1,5 @@
 <script setup></script>
-
+<!-- TODO: revisar si queda mejor el de ui/ -->
 <template>
   <div class="contenedor-paneles grid">
     <div class="columna-4">

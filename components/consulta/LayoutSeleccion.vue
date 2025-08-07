@@ -1,6 +1,6 @@
 <script setup>
 const props = defineProps({
-  titulo: { type: String, default: "Título" },
+  titulo: { type: String, default: 'Título' },
   resourceType: { type: String, required: true },
   etiquetaElementos: { type: String, default: undefined },
   funcionDescarga: { type: Function, default: undefined },
@@ -8,15 +8,19 @@ const props = defineProps({
 const { titulo, resourceType } = toRefs(props);
 const selectedStore = useSelectedResourcesStore();
 const buttonTagDict = {
-  dataLayer: "mapa",
-  dataTable: "archivo",
-  document: "archivo",
+  dataLayer: 'mapa',
+  dataTable: 'archivos',
+  document: 'archivos',
 };
+const downloadAllChild = ref(null);
+function notifyDownloadAllChild() {
+  downloadAllChild.value?.abrirModalDescargaAll();
+}
 </script>
 
 <template>
-  <div class="m0 seleccion-layout">
-    <div class="controles-seleccion">
+  <div class="seleccion-layout">
+    <div class="encabeado-seleccion">
       <p class="h4 fondo-color-acento p-3 m-0">{{ titulo }}</p>
 
       <div class="m-x-2 m-y-1">
@@ -27,7 +31,7 @@ const buttonTagDict = {
             type="button"
             class="boton-primario"
             aria-label="Descargar mapa"
-            @click="funcionDescarga"
+            @click="resourceType === 'dataLayer' ? funcionDescarga() : notifyDownloadAllChild()"
           >
             Descargar {{ buttonTagDict[resourceType] }}
             <span class="pictograma-mapa-generador" aria-hidden="true" />
@@ -66,18 +70,23 @@ const buttonTagDict = {
         :resource-type="resourceType"
       />
     </div>
+
+    <ConsultaModalDescargaAll ref="downloadAllChild" :resource-type="resourceType" />
   </div>
 </template>
+
 <style lang="scss" scoped>
 .seleccion-layout {
-  // height: 100vh;
+  height: var(--altura-consulta-esc);
   overflow-y: auto;
-}
-.controles-seleccion {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  background-color: var(--fondo);
-  padding-bottom: 8px;
+  overflow-x: hidden;
+
+  .encabeado-seleccion {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: var(--fondo);
+    padding-bottom: 8px;
+  }
 }
 </style>

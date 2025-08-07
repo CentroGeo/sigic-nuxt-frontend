@@ -1,5 +1,5 @@
 <script setup>
-const config = useRuntimeConfig();
+//const config = useRuntimeConfig();
 const resourcesStore = useSelectedResourcesStore();
 
 /* async function obtenerPDFs() {
@@ -13,7 +13,7 @@ const resourcesStore = useSelectedResourcesStore();
   });
 }
 obtenerPDFs(); */
-const resourceType = "document";
+const resourceType = 'document';
 </script>
 
 <template>
@@ -27,10 +27,10 @@ const resourceType = "document";
     </template>
 
     <template #visualizador>
-      <div class="contenedor" v-if="!resourcesStore.shownFiles[resourceType]">
+      <div v-if="!resourcesStore.shownFiles[resourceType]" class="contenedor">
         <h1>No hay seleccion</h1>
       </div>
-      <ConsultaVisualizacionDocumento v-else></ConsultaVisualizacionDocumento>
+      <ConsultaVisualizacionDocumento v-else />
     </template>
 
     <template #seleccion>
@@ -47,8 +47,5 @@ const resourceType = "document";
 .documento-embebido {
   width: 100%;
   height: 100%;
-}
-.contenedor {
-  color: var(--color-error-2);
 }
 </style>

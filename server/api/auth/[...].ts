@@ -1,5 +1,5 @@
-import { NuxtAuthHandler } from "#auth";
-import KeycloakProvider from "next-auth/providers/keycloak";
+import { NuxtAuthHandler } from '#auth';
+import KeycloakProvider from 'next-auth/providers/keycloak';
 
 export default NuxtAuthHandler({
   secret: process.env.NUXT_AUTH_SECRET,
@@ -27,7 +27,6 @@ export default NuxtAuthHandler({
     },
 
     async session({ session, token }) {
-      // @ts-ignore
       session.accessToken = token.accessToken as string;
       return session;
     },

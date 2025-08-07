@@ -1,52 +1,52 @@
 <script setup>
-import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
-import SisdaiSelector from "@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue";
-import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
-import { ref } from "vue";
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
+import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
+import { ref } from 'vue';
 
 const storeIA = useIAStore();
 
 const props = defineProps({
-  titulo: { type: String, default: "Título" },
-  textoBoton: { type: String, default: "Título" },
+  titulo: { type: String, default: 'Título' },
+  textoBoton: { type: String, default: 'Título' },
   etiquetaBusqueda: { type: String, default: undefined },
   // recursoLista: { type: Array, required: true },
 });
 const { titulo, textoBoton, recursoLista, etiquetaBusqueda } = toRefs(props);
 
 const nuevoChatModal = ref(null);
-const seleccionProyecto = ref("");
-const seleccionContexto = ref("");
+const seleccionProyecto = ref('');
+const seleccionContexto = ref('');
 
 // const fechaHoy = new Date();
-const fechaHoy = "01-07-2025";
+const fechaHoy = '01-07-2025';
 
 const catalogo = ref([
   {
-    fecha: "01-07-2025",
+    fecha: '01-07-2025',
     chat: [
       {
         id: 0,
-        titulo: "Cobertura e integración de datos en el monitoreo marino",
-        proyecto: "Biodiversidad de ecosistemas marinos",
-        contexto: "Tecnologías para monitoreo marino",
+        titulo: 'Cobertura e integración de datos en el monitoreo marino',
+        proyecto: 'Biodiversidad de ecosistemas marinos',
+        contexto: 'Tecnologías para monitoreo marino',
       },
     ],
   },
   {
-    fecha: "01-06-2025",
+    fecha: '01-06-2025',
     chat: [
       {
         id: 1,
-        titulo: "Análisis e integración de datos en el monitoreo marino",
-        proyecto: "Biodiversidad de ecosistemas marinos",
-        contexto: "Tecnologías para monitoreo marino",
+        titulo: 'Análisis e integración de datos en el monitoreo marino',
+        proyecto: 'Biodiversidad de ecosistemas marinos',
+        contexto: 'Tecnologías para monitoreo marino',
       },
       {
         id: 2,
-        titulo: "Diseño e integración de datos en el monitoreo marino",
-        proyecto: "Biodiversidad de ecosistemas marinos",
-        contexto: "Tecnologías para monitoreo marino",
+        titulo: 'Diseño e integración de datos en el monitoreo marino',
+        proyecto: 'Biodiversidad de ecosistemas marinos',
+        contexto: 'Tecnologías para monitoreo marino',
       },
     ],
   },
@@ -88,12 +88,8 @@ const catalogoFiltrado = ref(catalogo.value);
             {{ grupos }}
           </div> -->
           <ul class="lista-sin-estilo">
-            <li
-              v-for="grupo in catalogoFiltrado"
-              :id="grupo.id"
-              :key="grupo.id"
-            >
-              {{ grupo.fecha == fechaHoy ? "Hoy" : grupo.fecha }}
+            <li v-for="grupo in catalogoFiltrado" :id="grupo.id" :key="grupo.id">
+              {{ grupo.fecha == fechaHoy ? 'Hoy' : grupo.fecha }}
               <ul class="lista-sin-estilo">
                 <li v-for="chat in grupo.chat" :id="chat.id" :key="chat.id">
                   <nuxt-link
@@ -114,20 +110,14 @@ const catalogoFiltrado = ref(catalogo.value);
                             class="boton-pictograma boton-sin-contenedor-secundario"
                             to="#"
                           >
-                            <span
-                              class="pictograma-editar"
-                              aria-hidden="true"
-                            />
+                            <span class="pictograma-editar" aria-hidden="true" />
                           </nuxt-link>
                           <button
                             class="boton-pictograma boton-sin-contenedor-secundario"
                             aria-label="Remover chat"
                             type="button"
                           >
-                            <span
-                              class="pictograma-eliminar"
-                              aria-hidden="true"
-                            />
+                            <span class="pictograma-eliminar" aria-hidden="true" />
                           </button>
                         </div>
                       </div>
@@ -165,11 +155,7 @@ const catalogoFiltrado = ref(catalogo.value);
         </SisdaiSelector>
       </template>
       <template #pie>
-        <button
-          class="boton-primario boton-chico"
-          aria-label="Iniciar chat"
-          type="button"
-        >
+        <button class="boton-primario boton-chico" aria-label="Iniciar chat" type="button">
           Iniciar chat
         </button>
       </template>

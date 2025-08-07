@@ -1,8 +1,7 @@
 <script setup>
-// PENDING: El buscador sisdai genera un error que dice "Hidration completed but contains mismatches"
 const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
-  titulo: { type: String, default: "Título" },
+  titulo: { type: String, default: 'Título' },
   resourceType: { type: String, required: true },
   etiquetaElementos: { type: String, default: undefined },
 });
@@ -21,7 +20,7 @@ const selectedCategories = ref([]);
 // Esta parte es para obtener todas las categorias
 const { data: geonodeCategories } = await useFetch(`${apiCategorias}`);
 if (!geonodeCategories.value) {
-  categoryList.value = ["Sin clasificar"];
+  categoryList.value = ['Sin clasificar'];
 } else {
   geonodeCategories.value.topics.items.map((d) => {
     categoryList.value.push(d.label);
@@ -32,7 +31,7 @@ function groupResults() {
   categorizedResources.value = {};
   filteredResources.value.map((r) => {
     if (r.category) {
-      let title = r.category.gn_description;
+      const title = r.category.gn_description;
       if (Object.keys(categorizedResources.value).includes(title)) {
         categorizedResources.value[title].push(r);
       } else {
@@ -40,11 +39,11 @@ function groupResults() {
         categorizedResources.value[title].push(r);
       }
     } else {
-      if (Object.keys(categorizedResources.value).includes("Sin clasificar")) {
-        categorizedResources.value["Sin clasificar"].push(r);
+      if (Object.keys(categorizedResources.value).includes('Sin clasificar')) {
+        categorizedResources.value['Sin clasificar'].push(r);
       } else {
-        categorizedResources.value["Sin clasificar"] = [];
-        categorizedResources.value["Sin clasificar"].push(r);
+        categorizedResources.value['Sin clasificar'] = [];
+        categorizedResources.value['Sin clasificar'].push(r);
       }
     }
   });
@@ -52,9 +51,7 @@ function groupResults() {
 
 function setSelectedCategory(categoria) {
   if (selectedCategories.value.includes(categoria)) {
-    selectedCategories.value = selectedCategories.value.filter(
-      (c) => c !== categoria
-    );
+    selectedCategories.value = selectedCategories.value.filter((c) => c !== categoria);
   } else {
     selectedCategories.value.push(categoria);
   }
@@ -62,16 +59,12 @@ function setSelectedCategory(categoria) {
 
 // Se utiliza un watcher porque inicialmente resourcesList y filteredResources están vacías
 watch(resourcesList, () => {
-  resourcesStore.updateFilteredResources(
-    resourceType.value,
-    resourcesList.value
-  );
+  resourcesStore.updateFilteredResources(resourceType.value, resourcesList.value);
 });
 watch(
   () => resourcesStore.filteredResources[resourceType.value],
   () => {
-    filteredResources.value =
-      resourcesStore.filteredResources[resourceType.value];
+    filteredResources.value = resourcesStore.filteredResources[resourceType.value];
     groupResults();
   },
   { deep: true }
@@ -80,7 +73,7 @@ watch(
 
 <template>
   <div class="catalogo-layout">
-    <div class="controles-catalogo">
+    <div class="encabeado-catalogo">
       <p class="h4 fondo-color-acento p-3 m-0">{{ titulo }}</p>
 
       <div class="m-x-2 m-y-1">
@@ -93,18 +86,16 @@ watch(
           />
         </ClientOnly>
 
-        <UiNumeroElementos
-          :numero="filteredResources.length"
-          :etiqueta="etiquetaElementos"
-        />
+        <UiNumeroElementos :numero="filteredResources.length" :etiqueta="etiquetaElementos" />
       </div>
     </div>
 
-    <div
-      v-for="category in Object.keys(categorizedResources)"
-      :key="category"
-      class="m-y-1"
-    >
+    <!-- <ul class="lista-catalogo" @click="n++">
+      <li v-for="x in n" :key="x">
+        {{ x }}
+      </li>
+    </ul> -->
+    <div v-for="category in Object.keys(categorizedResources)" :key="category" class="m-y-1">
       <div class="">
         <ConsultaElementoCategoria
           :title="category"
@@ -115,11 +106,11 @@ watch(
       </div>
       <div
         v-for="(option, index) in categorizedResources[category]"
-        v-if="selectedCategories.includes(category)"
         :key="index"
         class="contenedor-archivos"
       >
         <ConsultaElementoCatalogo
+          v-if="selectedCategories.includes(category)"
           :key="index"
           class="elemento-catalogo"
           :catalogue-element="option"
@@ -129,20 +120,27 @@ watch(
     </div>
   </div>
 </template>
+
 <style lang="scss" scoped>
-.contenedor-archivos {
-  border-bottom: solid 2px var(--color-neutro-3);
-}
 .catalogo-layout {
-  height: 100vh;
-  overflow-x: hidden;
+  height: var(--altura-consulta-esc);
   overflow-y: auto;
-}
-.controles-catalogo {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  background-color: var(--fondo);
-  padding-bottom: 8px;
+  overflow-x: hidden;
+
+  .encabeado-catalogo {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: var(--fondo);
+    padding-bottom: 8px;
+  }
+
+  .lista-catalogo {
+    background-color: var(--color-neutro-3);
+
+    .contenedor-archivos {
+      border-bottom: solid 2px var(--color-neutro-3);
+    }
+  }
 }
 </style>

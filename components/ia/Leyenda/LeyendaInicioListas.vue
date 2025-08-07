@@ -1,5 +1,5 @@
 <script setup>
-import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
+import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
 const storeIA = useIAStore();
 </script>
 <template>
@@ -16,19 +16,15 @@ const storeIA = useIAStore();
 
       <!-- TODO: agregar estilo de campo de búsqueda deshabilitado -->
       <ClientOnly>
-        <SisdaiCampoBusqueda
-          style="width: 100%"
-          class="m-y-3"
-          etiqueta="Buscar chats"
-        />
+        <SisdaiCampoBusqueda style="width: 100%" class="m-y-3" etiqueta="Buscar chats" />
       </ClientOnly>
 
       <h6>Chats</h6>
       <div class="nota fondo-color-neutro p-2 borde-redondeado-8">
         <h6 class="m-t-0">Crea un contexto para iniciar un chat</h6>
         <p>
-          Después de crear un proyecto, crea un contexto para iniciar un chat.
-          Los nuevos chats aparecerán en esta sección.
+          Después de crear un proyecto, crea un contexto para iniciar un chat. Los nuevos chats
+          aparecerán en esta sección.
         </p>
       </div>
     </div>
