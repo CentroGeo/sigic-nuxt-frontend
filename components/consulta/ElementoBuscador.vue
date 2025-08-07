@@ -4,18 +4,17 @@
 // porque hay que revisar en el módulo de carga cómo se recolectará esa información
 // El filtro avanzado de keywords está buscando en el título únicamente
 // Falta poder volver a deseleccionar los filtros
+import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 
-const resourcesStore = useSelectedResourcesStore();
+const resourcesStore = useSelectedResources2Store();
 const props = defineProps({
   resourcesList: { type: Array, default: () => [] },
-  resourceType: { type: String, required: true },
   categories: { type: Array, default: () => [] },
 });
-const { resourcesList, resourceType, categories } = toRefs(props);
+const { resourcesList, categories } = toRefs(props);
 const catalogoFiltrado = ref(resourcesList.value);
 const modalFiltros = ref(null);
 const selectedFilter = ref({
@@ -86,14 +85,16 @@ function filterByModal() {
     }
   });
   catalogoFiltrado.value = results;
-  resourcesStore.updateFilteredResources(resourceType.value, catalogoFiltrado.value);
   modalFiltros.value.cerrarModal();
 }
 
 function filterByInput(r) {
   catalogoFiltrado.value = r;
-  resourcesStore.updateFilteredResources(resourceType.value, catalogoFiltrado.value);
 }
+
+watch(catalogoFiltrado, () => {
+  console.log("buscador", catalogoFiltrado.value)
+})
 </script>
 <template>
   <SisdaiModal ref="modalFiltros">

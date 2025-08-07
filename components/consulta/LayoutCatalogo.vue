@@ -72,13 +72,12 @@ onMounted(async () => {
       <div class="m-x-2 m-y-1">
         <p class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
 
-        <!--         <ClientOnly>
+        <ClientOnly>
           <ConsultaElementoBuscador
-            :resources-list="resourcesList"
-            :resource-type="resourceType"
+            :resources-list="resources"
             :categories="categoryList"
           />
-        </ClientOnly> -->
+        </ClientOnly> 
         <UiNumeroElementos :numero="resources.length" :etiqueta="etiquetaElementos" />
       </div>
     </div>
