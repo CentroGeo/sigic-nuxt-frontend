@@ -51,7 +51,11 @@ export async function useGeonodeResources() {
       //Si ya no hay paginas siguientes, filtramos los datos
       // Si son documentos, filtramos únicamente los pdfs
       resourcesList.value = allResults.filter((resource) =>
-        resource.links.some((link) => link.link_type === 'uploaded' && link.name.endsWith('.pdf'))
+        resource.links.some(
+          (link) =>
+            link.link_type === 'uploaded' &&
+            (link.name.endsWith('.pdf') || link.name.endsWith('.txt'))
+        )
       );
     } else if (storeConsulta.resourceType === 'dataLayer') {
       // Si son capas geográficas, excluimos aquellos que no tengan geometria
