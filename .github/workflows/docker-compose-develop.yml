@@ -69,7 +69,7 @@ jobs:
         run: |
           docker build --no-cache \
             --build-arg NODE_ENV=${{ steps.env.outputs.NODE_ENV }} \
-            --build-arg NUXT_AUTH_BASE_URL=${{ steps.env.outputs.NUXT_AUTH_BASE_URL }} \
+            --build-arg NUXT_PUBLIC_BASE_URL=${{ steps.env.outputs.NUXT_PUBLIC_BASE_URL }} \
             -t ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.branch }} \
             -t ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.sha }} \
             -f Dockerfile . 
