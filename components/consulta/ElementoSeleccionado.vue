@@ -1,4 +1,9 @@
 <script setup>
+import { tooltipContent } from '~/utils/consulta';
+
+const storeFetched = useFetchedResourcesStore();
+const storeSelected = useSelectedResources2Store();
+
 const props = defineProps({
   selectedElement: {
     type: Object,
@@ -6,27 +11,15 @@ const props = defineProps({
   },
   resourceType: { type: String, required: true },
 });
-const selectedStore = useSelectedResources2Store();
 
-const { uuid } = props.selectedElement;
-// const { posicion } = selectedStore.findResource(uuid, props.resourceType);
-const posicion = computed({
-  get: () => selectedStore.findResource(uuid, props.resourceType).posicion,
-  set: (nuevaPosicion) =>
-    (selectedStore.findResource(uuid, props.resourceType).posicion = nuevaPosicion),
-});
+const resourceElement = storeFetched.findResource(props.selectedElement.uuid, props.resourceType);
+// console.log(resourceElement);
 
-function bajar() {
-  console.log('bajar', uuid, posicion.value, '->', posicion.value + 1);
-  posicion.value++;
-
-  console.log(toRaw(selectedStore.sortedAscending(props.resourceType)));
+function goDown() {
+  storeSelected.changePosition(props.selectedElement.uuid, -1);
 }
-function subir() {
-  console.log('subir', uuid, posicion.value, '->', posicion.value - 1);
-  posicion.value--;
-
-  console.log(toRaw(selectedStore.sortedAscending(props.resourceType)));
+function goUp() {
+  storeSelected.changePosition(props.selectedElement.uuid, +1);
 }
 </script>
 
@@ -39,7 +32,7 @@ function subir() {
         <div class="m-0">
           <button
             v-globo-informacion:izquierda="{
-              contenido: tooltipContent(selectedElement),
+              contenido: tooltipContent(resourceElement),
               desfase: [0, 8],
             }"
             class="boton-pictograma boton-sin-contenedor-secundario"
@@ -53,8 +46,8 @@ function subir() {
             class="boton-pictograma boton-sin-contenedor-secundario"
             aria-label="Subir elemento"
             type="button"
-            :disabled="posicion === 0"
-            @click="subir"
+            :disabled="storeSelected.resourcesList().length === selectedElement.posicion + 1"
+            @click="goUp"
           >
             <span class="pictograma-subir-capa pictograma-mediano" aria-hidden="true" />
           </button>
@@ -63,8 +56,8 @@ function subir() {
             class="boton-pictograma boton-sin-contenedor-secundario"
             aria-label="Bajar Elemento"
             type="button"
-            :disabled="selectedStore[props.resourceType].length === posicion + 1"
-            @click="bajar"
+            :disabled="selectedElement.posicion === 0"
+            @click="goDown"
           >
             <span class="pictograma-bajar-capa pictograma-mediano" aria-hidden="true" />
           </button>
@@ -74,14 +67,14 @@ function subir() {
       <ConsultaContenidoCapaSeleccionada
         v-if="resourceType === 'dataLayer'"
         :resource-type="resourceType"
-        :selected-element="selectedElement"
+        :resource-element="resourceElement"
       />
 
       <ConsultaContenidoDocSeleccionado
         v-if="resourceType !== 'dataLayer'"
         :group-name="resourceType"
         :resource-type="resourceType"
-        :selected-element="selectedElement"
+        :selected-element="resourceElement"
       />
     </div>
   </div>

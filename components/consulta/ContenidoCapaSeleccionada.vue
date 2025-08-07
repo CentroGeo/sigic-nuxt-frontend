@@ -3,17 +3,17 @@ import { SisdaiLeyendaWms } from '@centrogeomx/sisdai-mapas';
 
 const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
-const selectedStore = useSelectedResources2Store();
+const storeSelected = useSelectedResources2Store();
+
 const props = defineProps({
-  selectedElement: {
+  resourceElement: {
     type: Object,
     default: () => ({}),
   },
   resourceType: { type: String, required: true },
 });
-const { uuid } = props.selectedElement;
+const { uuid } = props.resourceElement;
 
-const isVisible = ref(selectedStore.findResource(uuid, props.resourceType).visible);
 const tablaChild = ref(null);
 const downloadChild = ref(null);
 const opacityChild = ref(null);
@@ -59,7 +59,7 @@ const optionsButtons = ref([
     pictogram: 'pictograma-zoom-instruccional',
     action: () => {
       storeConsulta.ajustarExtensionMapa = getExtent(
-        props.selectedElement.bbox_polygon.coordinates[0]
+        props.resourceElement.bbox_polygon.coordinates[0]
       ).join(',');
     },
   },
@@ -73,12 +73,10 @@ const optionsButtons = ref([
   {
     label: 'Mostrar',
     get pictogram() {
-      return isVisible.value ? 'pictograma-ojo-ver' : 'pictograma-ojo-ocultar';
+      return storeSelected.resource(uuid).visible ? 'pictograma-ojo-ver' : 'pictograma-ojo-ocultar';
     },
     action: () => {
-      isVisible.value = !isVisible.value;
-
-      selectedStore.findResource(uuid, props.resourceType).visible = isVisible.value;
+      storeSelected.resource(uuid).visible = !storeSelected.resource(uuid).visible;
     },
   },
   {
@@ -92,7 +90,7 @@ const optionsButtons = ref([
     label: 'Eliminar selección',
     pictogram: 'pictograma-eliminar',
     action: () => {
-      selectedStore.removeResource(props.resourceType, props.selectedElement.uuid);
+      storeSelected.removeResource(props.resourceType, props.resourceElement.uuid);
     },
   },
   {
@@ -110,9 +108,9 @@ const optionsButtons = ref([
     <!-- El contenido de la tarjeta de capas -->
     <div class="m-y-2">
       <SisdaiLeyendaWms
-        :nombre="selectedElement.alternate"
+        :nombre="resourceElement.alternate"
         :fuente="`${config.public.geoserverUrl}/wms?`"
-        :titulo="selectedElement.title || 'cargando...'"
+        :titulo="resourceElement.title || 'cargando...'"
         :sin-control="true"
         :sin-control-clases="true"
       />
@@ -133,15 +131,15 @@ const optionsButtons = ref([
     <!-- Los modales-->
     <ConsultaModalTabla
       ref="tablaChild"
-      :selected-element="selectedElement"
+      :selected-element="resourceElement"
       @click-download="downloadFromTabla"
     />
     <ConsultaModalDescarga
       ref="downloadChild"
       :resource-type="resourceType"
-      :selected-element="selectedElement"
+      :selected-element="resourceElement"
     />
-    <ConsultaModalOpacidad ref="opacityChild" :selected-element="selectedElement" />
+    <ConsultaModalOpacidad ref="opacityChild" :selected-element="resourceElement" />
   </div>
 </template>
 

@@ -2,7 +2,77 @@ import { defineStore } from 'pinia';
 import ConfiguracioCapa from '~/utils/consulta/ConfiguracioCapa';
 import ConfiguracionOtro from '~/utils/consulta/ConfiguracionOtro';
 
-export const useSelectedResources2Store = defineStore('selectedResources2', {
+export const useSelectedResources2Store = defineStore('selectedResources2', () => {
+  const storeConsulta = useConsultaStore();
+
+  const resources = reactive({
+    dataLayer: {},
+    dataTable: [],
+    document: [],
+  });
+
+  function resourcesByType(resourceType = storeConsulta.resourceType) {
+    return resources[resourceType];
+  }
+
+  function resource(uuid) {
+    return resourcesByType()[uuid];
+  }
+
+  return {
+    changePosition(uuid, addPosition) {
+      const { posicion } = resource(uuid);
+      const newPosition = posicion + addPosition;
+      const { uuid: uuidB } = Object.values(resourcesByType()).find(
+        ({ posicion }) => posicion === newPosition
+      );
+
+      // console.log('cambiar:', uuid, 'de', posicion, 'a', newPosition);
+      // console.log('cambiar:', uuidB, 'de', newPosition, 'a', posicion);
+      resource(uuid).posicion = newPosition;
+      resource(uuidB).posicion = posicion;
+    },
+
+    resource,
+    resources: resourcesByType,
+
+    addFromQueryParam: () => undefined,
+    findResource: () => ({}),
+
+    sortedDescending() {
+      // sorted ascending, sorted descending
+      return Object.values(resourcesByType()).sort((a, b) => {
+        return b.posicion - a.posicion;
+      });
+    },
+
+    resourcesList() {
+      return Object.keys(resourcesByType());
+    },
+    resourcesAsQueryParam: () => undefined,
+
+    updateResources(uuids) {
+      if (storeConsulta.resourceType === 'dataLayer') {
+        resources[storeConsulta.resourceType] = uuids.reduce((acum, uuid, posicion) => {
+          return { ...acum, [uuid]: new ConfiguracioCapa({ uuid, posicion }) };
+        }, {});
+      } else {
+        // this[resourceType] = resources.map((uuid) => new ConfiguracionOtro({ uuid }));
+        resources[storeConsulta.resourceType] = uuids.reduce((acum, uuid) => {
+          return { ...acum, [uuid]: new ConfiguracionOtro({ uuid }) };
+        }, {});
+      }
+      // Seleccionamos el ultimo recurso para tablas y docs
+      if (storeConsulta.resourceType !== 'dataLayer') {
+        // const last = this[resourceType].at(-1);
+        const last = Object.values(resourcesByType()).at(-1);
+        last?.setSelected(1);
+      }
+    },
+  };
+});
+
+export const _useSelectedResources2Store_ = {
   state: () => ({
     dataLayer: [],
     dataTable: [],
@@ -39,10 +109,10 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
 
     sortedAscending: (state) => (resourceType) => {
       // sorted ascending, sorted descending
-      console.log(resourceType);
+      // console.log(resourceType);
 
       return state[resourceType].sort((a, b) => {
-        console.log(a, b);
+        // console.log(a, b);
 
         return a.posicion - b.posicion;
       });
@@ -95,4 +165,4 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
       });
     },
   },
-});
+};
