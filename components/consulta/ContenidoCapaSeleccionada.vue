@@ -29,7 +29,7 @@ function notifyOpacityChild() {
   opacityChild.value.abrirModalOpacidad();
 }
 function downloadFromTabla() {
-  console.log('el padre se enteró');
+  // console.log('el padre se enteró');
   downloadChild.value?.abrirModalDescarga();
 }
 /**
@@ -49,7 +49,7 @@ function getExtent(bboxPolygon) {
 
   const x = bboxPolygon.map(([x]) => x);
   const y = bboxPolygon.map(([, y]) => y);
-  return [Math.min(...x), Math.min(...y), Math.max(...x), Math.max(...y)];
+  return [Math.min(...x), Math.min(...y), Math.max(...x), Math.max(...y)].join(',');
 }
 
 // Aqui se acaba la parte nueva para la prueba
@@ -58,9 +58,10 @@ const optionsButtons = ref([
     label: 'Hacer zoom',
     pictogram: 'pictograma-zoom-instruccional',
     action: () => {
-      storeConsulta.ajustarExtensionMapa = getExtent(
-        props.resourceElement.bbox_polygon.coordinates[0]
-      ).join(',');
+      storeConsulta.mapExtent = getExtent(props.resourceElement.bbox_polygon.coordinates[0]);
+      // storeConsulta.ajustarExtensionMapa = getExtent(
+      //   props.resourceElement.bbox_polygon.coordinates[0]
+      // );
     },
   },
   {
@@ -90,7 +91,7 @@ const optionsButtons = ref([
     label: 'Eliminar selección',
     pictogram: 'pictograma-eliminar',
     action: () => {
-      storeSelected.removeResource(props.resourceType, props.resourceElement.uuid);
+      storeSelected.removeResource(props.resourceElement.uuid);
     },
   },
   {

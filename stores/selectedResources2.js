@@ -7,8 +7,8 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
 
   const resources = reactive({
     dataLayer: {},
-    dataTable: [],
-    document: [],
+    dataTable: {},
+    document: {},
   });
 
   function resourcesByType(resourceType = storeConsulta.resourceType) {
@@ -33,11 +33,20 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
       resource(uuidB).posicion = posicion;
     },
 
-    resource,
-    resources: resourcesByType,
-
     addFromQueryParam: () => undefined,
     findResource: () => ({}),
+
+    removeResource(uuid) {
+      //Borramos el recurso
+      // this[resourceType] = this[resourceType].filter((r) => r.uuid !== resourceUuid);
+      delete resourcesByType()[uuid];
+    },
+    resource,
+    resources: resourcesByType,
+    resourcesAsQueryParam: () => undefined,
+    resourcesList() {
+      return Object.keys(resourcesByType());
+    },
 
     sortedDescending() {
       // sorted ascending, sorted descending
@@ -46,10 +55,15 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
       });
     },
 
-    resourcesList() {
-      return Object.keys(resourcesByType());
+    setSelectedElement(_, resourceUuid) {
+      Object.values(resourcesByType()).forEach((element) => {
+        if (element.uuid === resourceUuid) {
+          element.setSelected(1);
+        } else {
+          element.setSelected(0);
+        }
+      });
     },
-    resourcesAsQueryParam: () => undefined,
 
     updateResources(uuids) {
       if (storeConsulta.resourceType === 'dataLayer') {

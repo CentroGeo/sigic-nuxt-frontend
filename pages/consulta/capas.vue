@@ -2,7 +2,6 @@
 import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
 import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
 
-const extensionNacional = '-118.3651,14.5321,-86.7104,32.7187';
 const resourceType = 'dataLayer';
 
 const config = useRuntimeConfig();
@@ -10,7 +9,7 @@ const storeConsulta = useConsultaStore();
 const fetchedStore = useFetchedResourcesStore();
 const storeSelected = useSelectedResources2Store();
 
-storeConsulta.resourceType = 'dataLayer';
+storeConsulta.resourceType = resourceType;
 
 // const randomNum = ref(0);
 // const isFinishedLoading = ref(0);
@@ -95,7 +94,11 @@ function exportarMapa() {
 
 const route = useRoute();
 const router = useRouter();
-const vistaDelMapa = ref({ extension: extensionNacional });
+const vistaDelMapa = ref({ extension: storeConsulta.mapExtent });
+watch(
+  () => storeConsulta.mapExtent,
+  (extension) => (vistaDelMapa.value = { extension })
+);
 
 /**
  * Agrega en un parametro hash los valores de la vista del mapa
@@ -118,13 +121,6 @@ function actualizarVistaDesdeHash(hashVista) {
 
   const [acercamiento, latitud, longitud] = hashVista.split('=')[1].split('/');
   vistaDelMapa.value = { acercamiento, centro: [longitud, latitud] };
-}
-
-/**
- * Función ejecutada cuando se dá click en el botón centrar del mapa.
- */
-function clickCentrar() {
-  vistaDelMapa.value = { extension: extensionNacional };
 }
 
 /**
@@ -168,7 +164,7 @@ function getFetchedResources() {
         <SisdaiMapa
           class="gema"
           :vista="vistaDelMapa"
-          @click-centrar="clickCentrar"
+          @click-centrar="storeConsulta.resetMapExtent"
           @al-mover-vista="actualizarHashDesdeVista"
         >
           <SisdaiCapaXyz :posicion="0" />
