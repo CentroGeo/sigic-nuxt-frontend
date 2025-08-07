@@ -1,97 +1,153 @@
 import { defineStore } from 'pinia';
+import { resourceTypeDic } from '~/utils/consulta';
+import ConfiguracionOtro from '~/utils/consulta/ConfiguracionOtro';
+import SelectedLayer from '~/utils/consulta/SelectedLayer';
 
-export const useSelectedResources2Store = defineStore('selectedResources2', {
-  state: () => ({
-    dataLayer: [],
-    dataTable: [],
-    document: [],
-  }),
-  getters: {
+export const useSelectedResources2Store = defineStore('selectedResources2', () => {
+  const storeConsulta = useConsultaStore();
+
+  const resources = reactive({
+    [resourceTypeDic.dataLayer]: {},
+    [resourceTypeDic.dataTable]: {},
+    [resourceTypeDic.document]: {},
+  });
+
+  /**
+   * Devuelve un objeto con los recursos seleccionados, el uuid es el key de
+   * cada objeto.
+   * @returns {Object} objeto de recursos seleccionados.
+   */
+  function byResourceType() {
+    return resources[storeConsulta.resourceType];
+  }
+
+  /**
+   * Devuelve un recurso seleccionado que coincidan con un uuid.
+   * @param {String} uuid del catalogo a buscar.
+   * @returns {Object} objeto del recurso seleccionado.
+   */
+  function byUuid(uuid) {
+    return byResourceType()[uuid];
+  }
+
+  /**
+   * Devuelve la lista de los recursos seleccionados.
+   * @returns {Array<Object>} lista de selección.
+   */
+  function list() {
+    return Object.values(byResourceType());
+  }
+
+  /**
+   * Devuelve la lista de objetos seleccionados ordenados de forma decendente
+   * por su posición.
+   * @returns {Array<SelectedLayer>}
+   */
+  function sortedDescending() {
+    // sorted ascending, sorted descending
+    return list().sort((a, b) => {
+      return b.posicion - a.posicion;
+    });
+  }
+
+  return {
     /**
-     * Devuelve un recurso seleccionado que coincidan con un uuid.
-     * @param {String} uuid del catalogo a buscar.
-     * @param {String} resourceType tipo de resursos a consultar.
-     * @returns {ConfiguracioCapa} objeto del recursos seleccionado.
+     * Vacía la selección de todos los recursos seleccionados.
      */
-    findResource: (state) => (uuidToFind, resourceType) => {
-      return state[resourceType].find(({ uuid }) => uuid === uuidToFind);
+    $reset() {
+      resources[resourceTypeDic.dataLayer] = {};
+      resources[resourceTypeDic.dataTable] = {};
+      resources[resourceTypeDic.document] = {};
     },
 
-    /**
-     * Devuelde los recursos almacenados en la selección en formato url para el query param.
-     * @param {String} resourceType tipo de resursos a consultar.
-     * @returns
-     */
-    resourcesAsQueryParam: (state) => (resourceType) => {
-      return state[resourceType].map((resource) => `${resource.asQueryParam}`).join(';');
-    },
-
-    /**
-     * Devuelve la lista de uuids en un arreglo.
-     * @param {String} resourceType tipo de resursos a consultar.
-     * @returns {Array<String>}
-     */
-    resourcesList: (state) => (resourceType) => {
-      return state[resourceType].map(({ uuid }) => uuid);
-    },
-
-    sortedAscending: (state) => (resourceType) => {
-      // sorted ascending, sorted descending
-      console.log(resourceType);
-
-      return state[resourceType].sort((a, b) => {
-        console.log(a, b);
-
-        return a.posicion - b.posicion;
-      });
-    },
-  },
-  actions: {
     /**
      * Agrega a la selección los recurson que encuentre en el queryParam.
      * @param {String} queryParam de los recursos separados por punto y coma (;).
-     * @param {String} resourceType tipo de resursos a agregar.
      */
-    addFromQueryParam(queryParam, resourceType) {
+    addFromQueryParam(queryParam) {
       // Validar si el queryParam se puede parsear
       if (queryParam === undefined || queryParam === '') return;
 
-      if (resourceType === 'dataLayer') {
-        this[resourceType] = queryParam.split(';').map((capa) => new ConfiguracioCapa(capa));
+      if (storeConsulta.resourceType === resourceTypeDic.dataLayer) {
+        resources[storeConsulta.resourceType] = queryParam
+          .split(';')
+          .reverse()
+          .reduce((acum, txt, posicion) => {
+            const obj = new SelectedLayer(`${txt},${posicion}`);
+
+            return { ...acum, [obj.uuid]: obj };
+          }, {});
       } else {
-        this[resourceType] = queryParam.split(';').map((recurso) => new ConfiguracionOtro(recurso));
+        // this[resourceType] = queryParam.split(';').map((recurso) => new ConfiguracionOtro(recurso));
+        resources[storeConsulta.resourceType] = queryParam
+          .split(';')
+          .reverse()
+          .reduce((acum, recurso) => {
+            const obj = new ConfiguracionOtro(recurso);
+
+            return { ...acum, [obj.uuid]: obj };
+          }, {});
       }
     },
-    updateResources(resources, resourceType) {
-      if (resourceType === 'dataLayer') {
-        this[resourceType] = resources.map((uuid, posicion) => {
-          return new ConfiguracioCapa({ uuid, posicion });
-        });
-      } else {
-        this[resourceType] = resources.map((uuid) => new ConfiguracionOtro({ uuid }));
-      }
-      // Seleccionamos el ultimo recurso para tablas y docs
-      if (resourceType !== 'dataLayer') {
-        const last = this[resourceType].at(-1);
-        last?.setSelected(1);
-      }
+
+    byUuid,
+
+    /**
+     * Cambia la posición de un elemento afectando a los otros. Si se sube una
+     * pocisión, al recurso que tenga la nueva posición se le asignará la posición
+     * original del uuid.
+     * @param {String} uuid del elemento a cabiar posición.
+     * @param {Number} addPosition nuemro de posiciones a modificar.
+     */
+    changePosition(uuid, addPosition) {
+      const { posicion } = byUuid(uuid);
+      const newPosition = posicion + addPosition;
+      const { uuid: uuidB } = list().find(({ posicion }) => posicion === newPosition);
+
+      // console.log('cambiar:', uuid, 'de', posicion, 'a', newPosition);
+      // console.log('cambiar:', uuidB, 'de', newPosition, 'a', posicion);
+      byUuid(uuid).posicion = newPosition;
+      byUuid(uuidB).posicion = posicion;
     },
-    resetResources(resourceType) {
-      this[resourceType] = [];
+
+    list,
+
+    /**
+     * Vacía la selección de los recursos seleccionados.
+     */
+    reset() {
+      resources[storeConsulta.resourceType] = {};
     },
-    removeResource(resourceType, resourceUuid) {
-      //Borramos el recurso
-      this[resourceType] = this[resourceType].filter((r) => r.uuid !== resourceUuid);
-      //Si borramos el recurso seleccionado, marcamos el primero de la lista
-      if(resourceType.value !== 'dataLayer'){
-        const remaining = this[resourceType].filter((r) => r.isSelected === 1)
-        if(remaining.length === 0 && this[resourceType].length > 0){
-          this[resourceType][0].setSelected(1)
+
+    /**
+     * Elimina un recurso de la selección. Si elimina una tabla o doc seleccionado, reselecciona el primero.
+     * @param {String} uuid del recurso a eliminar.
+     */
+    removeByUuid(uuid) {
+      delete byResourceType()[uuid];
+      if(storeConsulta.resourceType !== 'dataLayer'){
+        const remaining = this[storeConsulta.resourceType].filter((r) => r.isSelected === 1)
+        if(remaining.length === 0 && this[storeConsulta.resourceType].length > 0){
+          this[storeConsulta.resourceType][0].setSelected(1)
         }
       }
     },
-    setSelectedElement(resourceType, resourceUuid) {
-      this[resourceType].forEach((element) => {
+
+    /**
+     * Devuelde los recursos almacenados en la selección en formato url para el
+     * query param.
+     * @returns {String}
+     */
+    asQueryParam() {
+      return sortedDescending()
+        .map((resource) => resource.asQueryParam)
+        .join(';');
+    },
+
+    sortedDescending,
+
+    setSelectedElement(resourceUuid) {
+      list().forEach((element) => {
         if (element.uuid === resourceUuid) {
           element.setSelected(1);
         } else {
@@ -99,83 +155,46 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
         }
       });
     },
-  },
+
+    updateResources(_uuids) {
+      if (storeConsulta.resourceType === resourceTypeDic.dataLayer) {
+        resources[storeConsulta.resourceType] = _uuids.reduce((acum, uuid, posicion) => {
+          const newResource = { [uuid]: byUuid(uuid) };
+          if (newResource[uuid]) {
+            newResource[uuid].posicion = posicion;
+          } else {
+            newResource[uuid] = new SelectedLayer({ uuid, posicion });
+          }
+
+          return { ...acum, ...newResource };
+        }, {});
+      } else {
+        // this[resourceType] = resources.map((uuid) => new ConfiguracionOtro({ uuid }));
+        resources[storeConsulta.resourceType] = _uuids.reduce((acum, uuid, posicion) => {
+          return {
+            ...acum,
+            [uuid]: new ConfiguracionOtro({ uuid, isSelected: _uuids.length === posicion + 1 }),
+          };
+        }, {});
+      }
+      // Seleccionamos el ultimo recurso para tablas y docs
+      // if (storeConsulta.resourceType !== resourceTypeDic.dataLayer) {
+      //   const last = list().at(-1);
+      //   last?.setSelected(1);
+      // }
+    },
+
+    /**
+     * Contiene la lista de uuids de los elementos seleccionados en un arreglo.
+     * @type {Array<string>}
+     */
+    uuids: computed(() => Object.keys(byResourceType())),
+
+    visibleOnes() {
+      return list().filter((resource) => resource.visible);
+    },
+    selectedOnes() {
+      return list().filter((resource) => resource.isSelected === 1);
+    },
+  };
 });
-
-class ConfiguracioCapa {
-  separador_ = ',';
-
-  /**
-   * Devuelve los atributos del query param en un objeto.
-   * @param {String} queryParam de un recurso con sus atributos separados por comas (,).
-   * @returns {Object}
-   */
-  fromQueryParam(queryParam) {
-    const [uuid, estilo, opacidad, visible, posicion] = queryParam.split(this.separador_);
-    return { uuid, estilo, opacidad, posicion, visible };
-  }
-
-  constructor(opciones = {}) {
-    const { estilo, opacidad, posicion, uuid, visible } =
-      typeof opciones === 'string' ? this.fromQueryParam(opciones) : opciones;
-
-    this.estilo = estilo || undefined;
-    this.opacidad = opacidad || 1;
-    this.uuid = uuid || '';
-    this.visible = visible || 1;
-    this.posicion = posicion || 0;
-  }
-
-  get asQueryParam() {
-    return [this.uuid, this.estilo || '', this.opacidad, Number(this.visible)].join(
-      this.separador_
-    );
-  }
-
-  get opacidad() {
-    return this.opacidad_;
-  }
-  set opacidad(valor) {
-    this.opacidad_ = Number(valor);
-  }
-
-  get posicion() {
-    return this.posicion_;
-  }
-  set posicion(valor) {
-    this.posicion_ = Number(valor);
-  }
-
-  get visible() {
-    return this.visible_;
-  }
-  set visible(valor) {
-    this.visible_ = Boolean(Number(valor));
-  }
-}
-
-class ConfiguracionOtro {
-  separador_ = ',';
-
-  fromQueryParam(queryParam) {
-    const [uuid, isSelected] = queryParam.split(this.separador_);
-    return { uuid, isSelected };
-  }
-
-  constructor(opciones = {}) {
-    const { uuid, isSelected } =
-      typeof opciones === 'string' ? this.fromQueryParam(opciones) : opciones;
-
-    this.isSelected = Number(isSelected) || 0;
-    this.uuid = uuid || '';
-  }
-
-  get asQueryParam() {
-    // return `${this.estilo || ''},${this.opacidad},${this.visible}`;
-    return [this.uuid, this.isSelected].join(this.separador_);
-  }
-
-  setSelected(newValue) {
-    this.isSelected = newValue;
-  }
-}

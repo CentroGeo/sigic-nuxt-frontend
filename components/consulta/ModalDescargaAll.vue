@@ -17,14 +17,14 @@ const tagTitle = ref();
 
 function abrirModalDescargaAll() {
   modalDescargaAll.value?.abrirModal();
-  optionsList.value = optionsDict[resourceType.value]["elements"];
-  tagTitle.value = optionsDict[resourceType.value]["title"];
+  optionsList.value = optionsDict[resourceType.value]['elements'];
+  tagTitle.value = optionsDict[resourceType.value]['title'];
 }
 
 async function downloadAllCSV() {
   const resourceList = resourcesStore[resourceType.value];
   for (let i = 0; i < resourceList.length; i++) {
-    await downloadVectorData(resourceList[i], "csv");
+    await downloadVectorData(resourceList[i], 'csv');
     await wait(1000);
   }
   modalDescargaAll.value?.cerrarModal();
