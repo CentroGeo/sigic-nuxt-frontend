@@ -6,10 +6,12 @@ const resourceType = 'dataLayer';
 
 const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
-const fetchedStore = useFetchedResourcesStore();
+const storeFetched = useFetchedResourcesStore();
 const storeSelected = useSelectedResources2Store();
-
 storeConsulta.resourceType = resourceType;
+
+const route = useRoute();
+const router = useRouter();
 
 // const randomNum = ref(0);
 // const isFinishedLoading = ref(0);
@@ -92,12 +94,13 @@ function exportarMapa() {
 //   { deep: true }
 // );
 
-const route = useRoute();
-const router = useRouter();
 const vistaDelMapa = ref({ extension: storeConsulta.mapExtent });
 watch(
   () => storeConsulta.mapExtent,
-  (extension) => (vistaDelMapa.value = { extension })
+  (extension) => {
+    if (extension === undefined) return;
+    vistaDelMapa.value = { extension };
+  }
 );
 
 /**
@@ -116,10 +119,11 @@ function actualizarHashDesdeVista({ acercamiento, centro }) {
  * Actualiza la vista del mapa dependiendo del hash.
  * @param hashVista texto hash sin el carácter #.
  */
-function actualizarVistaDesdeHash(hashVista) {
+function updateMapFromHash(hashVista) {
   if (hashVista === '') return;
 
   const [acercamiento, latitud, longitud] = hashVista.split('=')[1].split('/');
+  storeConsulta.mapExtent = undefined;
   vistaDelMapa.value = { acercamiento, centro: [longitud, latitud] };
 }
 
@@ -134,15 +138,15 @@ function updateQueryFromStore(queryParam) {
     router.replace({ query, hash: route.hash });
   }
 }
-watch(() => storeSelected.resourcesAsQueryParam(resourceType), updateQueryFromStore);
+watch(() => storeSelected.asQueryParam(), updateQueryFromStore);
 
 onMounted(() => {
-  // actualizarVistaDesdeHash(route.hash?.slice(1));
-  // storeSelected.addFromQueryParam(route.query.capas, resourceType);
+  updateMapFromHash(route.hash?.slice(1));
+  storeSelected.addFromQueryParam(route.query.capas);
 });
 
 function getFetchedResources() {
-  return fetchedStore.findResources(storeSelected.resourcesList(), resourceType);
+  return storeFetched.findResources(storeSelected.uuids, resourceType);
 }
 
 // api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
@@ -159,7 +163,7 @@ function getFetchedResources() {
     </template>
 
     <template #visualizador>
-      <template v-if="fetchedStore.isLoading">Cargando...</template>
+      <template v-if="storeFetched.isLoading">Cargando...</template>
       <ClientOnly>
         <SisdaiMapa
           class="gema"
@@ -174,9 +178,9 @@ function getFetchedResources() {
             :key="`wms-${resource.uuid}`"
             :capa="resource.alternate"
             :fuente="`${config.public.geoserverUrl}/wms?`"
-            :opacidad="storeSelected.resource(resource.uuid).opacidad"
-            :posicion="storeSelected.resource(resource.uuid).posicion + 1"
-            :visible="storeSelected.resource(resource.uuid).visible"
+            :opacidad="storeSelected.byUuid(resource.uuid).opacidad"
+            :posicion="storeSelected.byUuid(resource.uuid).posicion + 1"
+            :visible="storeSelected.byUuid(resource.uuid).visible"
           />
         </SisdaiMapa>
 

@@ -12,7 +12,6 @@ const props = defineProps({
   },
   resourceType: { type: String, required: true },
 });
-const { uuid } = props.resourceElement;
 
 const tablaChild = ref(null);
 const downloadChild = ref(null);
@@ -44,7 +43,7 @@ function getExtent(bboxPolygon) {
       bboxPolygon
     );
 
-    return [];
+    return '';
   }
 
   const x = bboxPolygon.map(([x]) => x);
@@ -59,9 +58,6 @@ const optionsButtons = ref([
     pictogram: 'pictograma-zoom-instruccional',
     action: () => {
       storeConsulta.mapExtent = getExtent(props.resourceElement.bbox_polygon.coordinates[0]);
-      // storeConsulta.ajustarExtensionMapa = getExtent(
-      //   props.resourceElement.bbox_polygon.coordinates[0]
-      // );
     },
   },
   {
@@ -74,10 +70,12 @@ const optionsButtons = ref([
   {
     label: 'Mostrar',
     get pictogram() {
-      return storeSelected.resource(uuid).visible ? 'pictograma-ojo-ver' : 'pictograma-ojo-ocultar';
+      return storeSelected.byUuid(props.resourceElement.uuid)?.visible
+        ? 'pictograma-ojo-ver'
+        : 'pictograma-ojo-ocultar';
     },
     action: () => {
-      storeSelected.resource(uuid).visible = !storeSelected.resource(uuid).visible;
+      storeSelected.byUuid(props.resourceElement.uuid).toggleVisibility();
     },
   },
   {
@@ -91,7 +89,7 @@ const optionsButtons = ref([
     label: 'Eliminar selección',
     pictogram: 'pictograma-eliminar',
     action: () => {
-      storeSelected.removeResource(props.resourceElement.uuid);
+      storeSelected.removeByUuid(props.resourceElement.uuid);
     },
   },
   {

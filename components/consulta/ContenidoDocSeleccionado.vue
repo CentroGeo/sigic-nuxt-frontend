@@ -1,29 +1,31 @@
 <script setup>
+const storeSelected = useSelectedResources2Store();
+
 const props = defineProps({
   groupName: { type: String, required: true },
-  selectedElement: {
+  resourceElement: {
     type: Object,
     default: () => ({}),
   },
   resourceType: { type: String, required: true },
 });
-const resourcesStore = useSelectedResources2Store()
-const {groupName, selectedElement, resourceType } = toRefs(props);
+const { groupName, resourceElement } = toRefs(props);
+
 const selectedResource = computed({
-  get(){
-    return resourcesStore[props.resourceType].filter((element) => element.isSelected === 1)[0]['uuid']
+  get() {
+    return storeSelected.list().filter((element) => element.isSelected === 1)[0]['uuid'];
   },
-  set(newSelectedUuid){
-    resourcesStore.setSelectedElement(props.resourceType, newSelectedUuid)
+  set(newSelectedUuid) {
+    storeSelected.setSelectedElement(newSelectedUuid);
   },
-})
+});
 const hasGeometry = ref();
 const noGeometry = [-1, -1, 0, 0];
 const mapChild = ref(null);
 const downloadChild = ref(null);
-if (resourceType.value === "dataTable") {
-  let a = selectedElement.value.extent.coords.join(",");
-  let b = noGeometry.join(",");
+if (props.resourceType === 'dataTable') {
+  const a = resourceElement.value.extent.coords.join(',');
+  const b = noGeometry.join(',');
   if (a === b) {
     hasGeometry.value = false;
   } else {
@@ -40,24 +42,23 @@ function notifyDownloadChild() {
   downloadChild.value?.abrirModalDescarga();
 }
 function downloadFromMap() {
-  console.log("el padre se enteró");
+  // console.log('el padre se enteró');
   downloadChild.value?.abrirModalDescarga();
 }
-
 </script>
 
 <template>
   <div>
-   <div>
+    <div>
       <input
-        :id="selectedElement.uuid"
+        :id="resourceElement.uuid"
+        v-model="selectedResource"
         type="radio"
         :name="groupName"
-        :value="selectedElement.uuid"
-        v-model="selectedResource"
+        :value="resourceElement.uuid"
       />
-      <label :for="selectedElement.uuid">{{ selectedElement.title }}</label>
-    </div> 
+      <label :for="resourceElement.uuid">{{ resourceElement.title }}</label>
+    </div>
     <div class="flex flex-contenido-final">
       <button
         v-if="hasGeometry"
@@ -72,7 +73,7 @@ function downloadFromMap() {
         class="boton-pictograma boton-sin-contenedor-secundario"
         aria-label="Borrar selección"
         type="button"
-        @click="resourcesStore.removeResource(resourceType, selectedElement.uuid)"
+        @click="() => storeSelected.removeByUuid(resourceElement.uuid)"
       >
         <span class="pictograma-eliminar" aria-hidden="true" />
       </button>
@@ -87,19 +88,20 @@ function downloadFromMap() {
     </div>
   </div>
 
-   <ConsultaModalDescarga
+  <ConsultaModalDescarga
     ref="downloadChild"
     :resource-type="resourceType"
-    :selected-element="selectedElement"
+    :selected-element="resourceElement"
     :download-type="'individual'"
   />
   <ConsultaModalMapa
     v-if="hasGeometry"
     ref="mapChild"
-    :selected-element="selectedElement"
-    @clickDownload="downloadFromMap"
-  /> 
+    :selected-element="resourceElement"
+    @click-download="downloadFromMap"
+  />
 </template>
+
 <style lang="scss" scoped>
 .flex {
   gap: 8px;

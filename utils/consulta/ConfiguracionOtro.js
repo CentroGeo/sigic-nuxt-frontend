@@ -15,7 +15,6 @@ export default class ConfiguracionOtro {
   }
 
   get asQueryParam() {
-    // return `${this.estilo || ''},${this.opacidad},${this.visible}`;
     return [this.uuid, this.isSelected].join(this.separador_);
   }
 

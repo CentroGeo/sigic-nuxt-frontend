@@ -1,11 +1,15 @@
 import { useSelectedResourcesStore } from '@/stores/selectedResources.js';
 
-export const resourceTypes = ['dataLayer', 'dataTable', 'document'];
-
-export const resourceTypeDict = {
-  dataLayer: 'dataset',
-  dataTable: 'dataset',
+export const resourceTypeDic = {
+  dataLayer: 'dataLayer',
+  dataTable: 'dataTable',
   document: 'document',
+};
+
+export const resourceTypeGeonode = {
+  [resourceTypeDic.dataLayer]: 'dataset',
+  [resourceTypeDic.dataTable]: 'dataset',
+  [resourceTypeDic.document]: 'document',
 };
 
 export function tooltipContent(resource) {
@@ -19,7 +23,7 @@ export function tooltipContent(resource) {
   }
   const content =
     `<p style="max-width:250px">${formatedAbstract}</p>` +
-    `<p style="max-width:250px">${resource.attribution ? resource.attribution : 'Sin fuente'}</p>`;
+    `<p style="max-width:250px">${resource.attribution || 'Sin fuente'}</p>`;
   return content;
 }
 

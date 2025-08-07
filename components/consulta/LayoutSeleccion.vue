@@ -62,20 +62,18 @@ function shareState() {
             type="button"
             class="boton-pictograma boton-con-contenedor-secundario"
             aria-label="Eliminar"
-            @click="storeSelected.resetResources(resourceType)"
+            @click="storeSelected.reset()"
           >
             <span class="pictograma-eliminar" aria-hidden="true" />
           </button>
         </div>
 
-        <UiNumeroElementos
-          :numero="storeSelected.resourcesList().length"
-          :etiqueta="etiquetaElementos"
-        />
+        <UiNumeroElementos :numero="storeSelected.uuids.length" :etiqueta="etiquetaElementos" />
       </div>
     </div>
 
     <div class="m-x-2 m-y-1">
+      <!-- {{ JSON.stringify(storeSelected.sortedDescending()) }} -->
       <ConsultaElementoSeleccionado
         v-for="resource in storeSelected.sortedDescending()"
         :key="`seleccion-${resource.uuid}`"

@@ -12,8 +12,10 @@ const props = defineProps({
   resourceType: { type: String, required: true },
 });
 
-const resourceElement = storeFetched.findResource(props.selectedElement.uuid, props.resourceType);
-// console.log(resourceElement);
+const resourceElement = computed(() =>
+  storeFetched.findResource(props.selectedElement.uuid, props.resourceType)
+);
+// const resourceElement = storeFetched.findResource(props.selectedElement.uuid, props.resourceType);
 
 function goDown() {
   storeSelected.changePosition(props.selectedElement.uuid, -1);
@@ -32,7 +34,7 @@ function goUp() {
         <div class="m-0">
           <button
             v-globo-informacion:izquierda="{
-              contenido: tooltipContent(resourceElement),
+              contenido: tooltipContent(resourceElement || {}),
               desfase: [0, 8],
             }"
             class="boton-pictograma boton-sin-contenedor-secundario"
@@ -46,7 +48,7 @@ function goUp() {
             class="boton-pictograma boton-sin-contenedor-secundario"
             aria-label="Subir elemento"
             type="button"
-            :disabled="storeSelected.resourcesList().length === selectedElement.posicion + 1"
+            :disabled="storeSelected.uuids.length === selectedElement.posicion + 1"
             @click="goUp"
           >
             <span class="pictograma-subir-capa pictograma-mediano" aria-hidden="true" />
@@ -71,10 +73,10 @@ function goUp() {
       />
 
       <ConsultaContenidoDocSeleccionado
-        v-if="resourceType !== 'dataLayer'"
+        v-else
         :group-name="resourceType"
         :resource-type="resourceType"
-        :selected-element="resourceElement"
+        :resource-element="resourceElement"
       />
     </div>
   </div>

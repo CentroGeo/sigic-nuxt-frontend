@@ -1,23 +1,23 @@
 <script setup>
 import { onBeforeUnmount, ref } from 'vue';
 
-const resourcesStore = useSelectedResources2Store();
-const fetchedStore = useFetchedResourcesStore()
+const storeFetched = useFetchedResourcesStore();
+const storeSelected = useSelectedResources2Store();
+
 const resourceType = 'document';
 //const urlEmbebido = ref(null);
 const embedRef = ref(null);
-const selected = computed(() => resourcesStore[resourceType].filter((element) => element.isSelected === 1)[0])
-const selectedUuid = computed(() => selected.value?.uuid ?? null)
+const selectedUuid = computed(() => storeSelected.selectedOnes()[0]?.uuid ?? null);
 const selectedElement = computed(() => {
   if (!selectedUuid.value) return null;
-  return fetchedStore.findResources([selectedUuid.value], resourceType)[0] ?? null;
+  return storeFetched.findResources([selectedUuid.value], resourceType)[0] ?? null;
 });
-const urlEmbebido = ref(selectedElement.value.embed_url)
+const urlEmbebido = ref(selectedElement.value.embed_url);
 let resizeObserver;
 
 watch(selectedElement, (nv) => {
   (async () => {
-    console.log('cambio el uuid')
+    // console.log('cambio el uuid');
     if (nv) {
       urlEmbebido.value = null; // limpiar antes de volver a asignar
       await nextTick(); // esperar a que el DOM reaccione
@@ -39,9 +39,8 @@ watch(selectedElement, (nv) => {
     } else {
       urlEmbebido.value = null;
     }
-  })()
-}
-);
+  })();
+});
 
 onBeforeUnmount(() => {
   if (resizeObserver) resizeObserver.disconnect();
