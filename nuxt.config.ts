@@ -11,9 +11,7 @@ export default defineNuxtConfig({
           rel: 'shortcut icon',
           href: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/images/favicon.ico',
         },
-
       ],
-
     },
   },
   compatibilityDate: '2025-05-15',
@@ -38,6 +36,7 @@ export default defineNuxtConfig({
   auth: {
     isEnabled: true,
     baseURL: `${baseUrl}/api/auth`,
+    originEnvKey: 'NUXT_YOUR_ORIGIN',
 
     globalAppMiddleware: false, // protege todas las páginas por defecto
     provider: {
