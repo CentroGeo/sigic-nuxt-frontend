@@ -82,6 +82,13 @@ export const useSelectedResources2Store = defineStore('selectedResources2', {
     removeResource(resourceType, resourceUuid) {
       //Borramos el recurso
       this[resourceType] = this[resourceType].filter((r) => r.uuid !== resourceUuid);
+      //Si borramos el recurso seleccionado, marcamos el primero de la lista
+      if(resourceType.value !== 'dataLayer'){
+        const remaining = this[resourceType].filter((r) => r.isSelected === 1)
+        if(remaining.length === 0 && this[resourceType].length > 0){
+          this[resourceType][0].setSelected(1)
+        }
+      }
     },
     setSelectedElement(resourceType, resourceUuid) {
       this[resourceType].forEach((element) => {

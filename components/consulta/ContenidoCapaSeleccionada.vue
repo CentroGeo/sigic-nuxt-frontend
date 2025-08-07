@@ -12,26 +12,9 @@ const props = defineProps({
   resourceType: { type: String, required: true },
 });
 const { uuid } = props.selectedElement;
-
 const isVisible = ref(selectedStore.findResource(uuid, props.resourceType).visible);
-const tablaChild = ref(null);
-const downloadChild = ref(null);
-const opacityChild = ref(null);
+const emit = defineEmits(['opacidadClicked', 'descargaClicked', 'tablaClicked']);
 
-function notifyTabla() {
-  tablaChild.value?.abrirModalTabla();
-}
-function notifyDownloadChild() {
-  downloadChild.value?.abrirModalDescarga();
-}
-
-function notifyOpacityChild() {
-  opacityChild.value.abrirModalOpacidad();
-}
-function downloadFromTabla() {
-  console.log('el padre se enteró');
-  downloadChild.value?.abrirModalDescarga();
-}
 /**
  * Devuelve el extend de acuerdo a una capa en formato: left,bootom,rigth,top
  * @param {Array} bboxPolygon arreglo de corrdenadas envolventes de la capa
@@ -67,7 +50,7 @@ const optionsButtons = ref([
     label: 'Ver tablas',
     pictogram: 'pictograma-tabla',
     action: () => {
-      notifyTabla();
+      emit('tablaClicked')
     },
   },
   {
@@ -77,7 +60,6 @@ const optionsButtons = ref([
     },
     action: () => {
       isVisible.value = !isVisible.value;
-
       selectedStore.findResource(uuid, props.resourceType).visible = isVisible.value;
     },
   },
@@ -85,7 +67,7 @@ const optionsButtons = ref([
     label: 'Cambiar opacidad',
     pictogram: 'pictograma-editar',
     action: () => {
-      notifyOpacityChild();
+      emit("opacidadClicked")
     },
   },
   {
@@ -99,7 +81,7 @@ const optionsButtons = ref([
     label: 'Descargar archivo',
     pictogram: 'pictograma-archivo-descargar',
     action: () => {
-      notifyDownloadChild();
+      emit("descargaClicked")
     },
   },
 ]);
@@ -130,18 +112,6 @@ const optionsButtons = ref([
         <span :class="button.pictogram" aria-hidden="true" />
       </button>
     </div>
-    <!-- Los modales-->
-    <ConsultaModalTabla
-      ref="tablaChild"
-      :selected-element="selectedElement"
-      @click-download="downloadFromTabla"
-    />
-    <ConsultaModalDescarga
-      ref="downloadChild"
-      :resource-type="resourceType"
-      :selected-element="selectedElement"
-    />
-    <ConsultaModalOpacidad ref="opacityChild" :selected-element="selectedElement" />
   </div>
 </template>
 

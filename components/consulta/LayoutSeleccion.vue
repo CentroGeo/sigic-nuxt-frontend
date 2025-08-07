@@ -18,14 +18,53 @@ const buttonTagDict = {
   document: 'archivos',
 };
 const route = useRoute();
+
 const shownModal = ref('ninguno')
+const modalResource = ref(null)
+
 const downloadAllChild = ref(null);
+const downloadOneChild = ref(null)
+const opacityChild = ref(null)
+const tablaChild = ref(null);
 const shareChild = ref(null);
+const mapChild = ref(null);
+
 function notifyDownloadAllChild() {
   shownModal.value = 'downloadAll',
     nextTick(() => {
     downloadAllChild.value?.abrirModalDescargaAll();
   });
+}
+
+function notifyDownloadOneChild(resource){
+  shownModal.value = "downloadOne"
+  modalResource.value = resource
+  nextTick(() => {
+    downloadOneChild.value?.abrirModalDescarga();
+  })
+}
+function notifyTablaChild(resource){
+  shownModal.value = "tablaModal"
+  modalResource.value = resource
+  nextTick(() => {
+    tablaChild.value?.abrirModalTabla();
+  })
+}
+function notifyOpacityChild(resource){
+  shownModal.value = "opacityModal"
+  modalResource.value = resource
+  nextTick(() => {
+    opacityChild.value?.abrirModalOpacidad();
+  })
+}
+
+function notifyMapaChild(resource){
+  shownModal.value = 'mapModal'
+  modalResource.value = resource
+  nextTick(() => {
+    mapChild.value?.abrirModalMapa();
+  })
+  console.log(resource)
 }
 function notifyShareChild() {
   shareChild.value?.abrirModalCompartir();
@@ -38,6 +77,11 @@ function shareState() {
     notifyShareChild();
   });
 }
+
+function changeModal(to){
+  if(to === 'downloadOne'){
+    notifyDownloadOneChild(modalResource.value)
+  }}
 </script>
 
 <template>
@@ -88,16 +132,52 @@ function shareState() {
         :key="`seleccion-${resource.uuid}`"
         :selected-element="resource"
         :resource-type="resourceType"
+        @open-opacity="(resource) => notifyOpacityChild(resource)"
+        @open-download="(resource) => notifyDownloadOneChild(resource)"
+        @open-tabla="(resource) => notifyTablaChild(resource)"
+        @open-mapa="(resource) => notifyMapaChild(resource)"
       />
     </div>
+
     <div id="los-modales">
       <ConsultaModalDescargaAll
-      v-if="shownModal === 'downloadAll'" 
-      ref="downloadAllChild" 
-      :resource-type="resourceType" />
+        v-if="shownModal === 'downloadAll'" 
+        ref="downloadAllChild" 
+        :resource-type="resourceType" />
+
       <ConsultaModalCompartir 
-      v-if="shownModal === 'share'" 
-      ref="shareChild" />
+        v-if="shownModal === 'share'" 
+        ref="shareChild" />
+
+      <ConsultaModalDescarga
+        v-if="shownModal === 'downloadOne'"
+        ref="downloadOneChild"
+        :resource-type="resourceType"
+        :selected-element="modalResource"
+        :key="`${modalResource.uuid}_${resourceType}`"/>
+
+      <ConsultaModalOpacidad 
+        v-if="shownModal === 'opacityModal'"
+        ref="opacityChild" 
+        :selected-element="modalResource"
+        :key="`${modalResource.uuid}_${resourceType}`"
+       />
+      
+      <ConsultaModalTabla
+        v-if="shownModal === 'tablaModal'"
+        ref="tablaChild"
+        :selected-element="modalResource"
+        :key="`${modalResource.uuid}_${resourceType}`"
+        @notify-download="changeModal('downloadOne')"
+    />
+
+      <ConsultaModalMapa
+        v-if="shownModal === 'mapModal'"
+        ref="mapChild"
+        :selected-element="modalResource"  
+        :key="`${modalResource.uuid}_${resourceType}`"
+        @notify-download="changeModal('downloadOne')"
+      /> 
     </div>
 
   </div>

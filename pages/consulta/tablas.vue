@@ -65,7 +65,6 @@ watch(() => resourcesStore.resourcesAsQueryParam(resourceType), updateQueryFromS
  */
 function updateStoreFromQuery(queryParam) {
   resourcesStore.addFromQueryParam(queryParam, resourceType);
-  console.log('recursos tablas:', resourcesStore[resourceType]);
 }
 
 onMounted(() => {

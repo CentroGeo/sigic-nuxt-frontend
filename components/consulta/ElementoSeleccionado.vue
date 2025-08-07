@@ -7,9 +7,9 @@ const props = defineProps({
   resourceType: { type: String, required: true },
 });
 const selectedStore = useSelectedResources2Store();
-
 const { uuid } = props.selectedElement;
 // const { posicion } = selectedStore.findResource(uuid, props.resourceType);
+const emit = defineEmits(['openOpacity', 'openDownload', 'openTabla', 'openMapa']);
 const posicion = computed({
   get: () => selectedStore.findResource(uuid, props.resourceType).posicion,
   set: (nuevaPosicion) =>
@@ -75,6 +75,9 @@ function subir() {
         v-if="resourceType === 'dataLayer'"
         :resource-type="resourceType"
         :selected-element="selectedElement"
+        @opacidad-clicked="emit('openOpacity', props.selectedElement)"
+        @descarga-clicked="emit('openDownload', props.selectedElement)"
+        @tabla-clicked="emit('openTabla', props.selectedElement)"
       />
 
       <ConsultaContenidoDocSeleccionado
@@ -82,6 +85,8 @@ function subir() {
         :group-name="resourceType"
         :resource-type="resourceType"
         :selected-element="selectedElement"
+        @descarga-clicked="emit('openDownload', props.selectedElement)"
+        @mapa-clicked="emit('openMapa', props.selectedElement)"
       />
     </div>
   </div>

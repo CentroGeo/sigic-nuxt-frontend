@@ -14,28 +14,30 @@ const props = defineProps({
   },
 });
 const { selectedElement } = toRefs(props);
-const resourcesStore = useSelectedResourcesStore();
+const router = useRouter();
+const selectedStore = useSelectedResources2Store();
 const config = useRuntimeConfig();
 const extent = ref([-118.3651, 14.5321, -86.7104, 32.7187]);
 const estiloSeleccionado = ref("Opcion 1");
 const estilosLista = ref(["Opcion 1", "Opción 2", "Opcion 3"]);
 const modalMapa = ref(null);
-const emit = defineEmits(["clickDownload"]);
+const emit = defineEmits(["notifyDownload"]);
+
+function openLayerView() {
+  let uuids = selectedStore['dataLayer'].map((resource) => resource.uuid);
+  uuids.push(props.selectedElement.uuid);
+  selectedStore.updateResources(uuids, 'dataLayer'); 
+  router.push('/consulta/capas');
+}
+
+function downloadClicked() {
+  modalMapa.value?.cerrarModal();
+  emit('notifyDownload');
+}
 function abrirModalMapa() {
   modalMapa.value?.abrirModal();
 }
-function openLayerView() {
-  resourcesStore.addResource("dataLayer", selectedElement.value);
-  modalMapa.value?.cerrarModal();
-  console.log("Redirije al visor de capas");
-}
-function notifyDownload() {
-  console.log(
-    "se hizo click en download, se triggerea el custom emit para notificar al padre"
-  );
-  emit("clickDownload");
-  modalMapa.value?.cerrarModal();
-}
+
 defineExpose({
   abrirModalMapa,
 });
@@ -74,13 +76,11 @@ defineExpose({
       </template>
 
       <template #pie>
-        <nuxtLink to="/consulta/capas">
-          <button type="button" class="boton-primario" @click="openLayerView">
-            Abrir en Capas
-          </button>
-        </nuxtLink>
+        <button type="button" class="boton-primario" @click="openLayerView">
+          Abrir en Capas
+        </button>
 
-        <button type="button" class="boton-primario" @click="notifyDownload">
+        <button type="button" class="boton-primario" @click="downloadClicked()">
           Descargar
         </button>
       </template>

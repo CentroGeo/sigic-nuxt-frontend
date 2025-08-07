@@ -9,6 +9,7 @@ const props = defineProps({
 });
 const resourcesStore = useSelectedResources2Store()
 const {groupName, selectedElement, resourceType } = toRefs(props);
+const emit = defineEmits(['descargaClicked', 'mapaClicked']);
 const selectedResource = computed({
   get(){
     return resourcesStore[props.resourceType].filter((element) => element.isSelected === 1)[0]['uuid']
@@ -19,8 +20,6 @@ const selectedResource = computed({
 })
 const hasGeometry = ref();
 const noGeometry = [-1, -1, 0, 0];
-const mapChild = ref(null);
-const downloadChild = ref(null);
 if (resourceType.value === "dataTable") {
   let a = selectedElement.value.extent.coords.join(",");
   let b = noGeometry.join(",");
@@ -31,17 +30,6 @@ if (resourceType.value === "dataTable") {
   }
 } else {
   hasGeometry.value = false;
-}
-
-function notifyMapChild() {
-  mapChild.value?.abrirModalMapa();
-}
-function notifyDownloadChild() {
-  downloadChild.value?.abrirModalDescarga();
-}
-function downloadFromMap() {
-  console.log("el padre se enteró");
-  downloadChild.value?.abrirModalDescarga();
 }
 
 </script>
@@ -64,7 +52,7 @@ function downloadFromMap() {
         class="boton-pictograma boton-sin-contenedor-secundario"
         aria-label="Abrir vista previa"
         type="button"
-        @click="notifyMapChild"
+        @click="emit('mapaClicked')"
       >
         <span class="pictograma-capas" aria-hidden="true"></span>
       </button>
@@ -80,25 +68,13 @@ function downloadFromMap() {
         class="boton-pictograma boton-sin-contenedor-secundario"
         aria-label="Descargar selección"
         type="button"
-        @click="notifyDownloadChild"
+        @click="emit('descargaClicked')"
       >
         <span class="pictograma-archivo-descargar" aria-hidden="true" />
       </button>
     </div>
   </div>
 
-   <ConsultaModalDescarga
-    ref="downloadChild"
-    :resource-type="resourceType"
-    :selected-element="selectedElement"
-    :download-type="'individual'"
-  />
-  <ConsultaModalMapa
-    v-if="hasGeometry"
-    ref="mapChild"
-    :selected-element="selectedElement"
-    @clickDownload="downloadFromMap"
-  /> 
 </template>
 <style lang="scss" scoped>
 .flex {

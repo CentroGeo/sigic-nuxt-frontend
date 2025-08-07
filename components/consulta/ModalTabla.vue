@@ -6,9 +6,9 @@ const props = defineProps({
     default: () => ({}),
   },
 });
-const { selectedElement } = toRefs(props);
-const resourcesStore = useSelectedResourcesStore();
-const emit = defineEmits(["clickDownload"]);
+const router = useRouter();
+const selectedStore = useSelectedResources2Store()
+const emit = defineEmits(["notifyDownload"]);
 const modalTabla = ref(null);
 const paginaActual = ref(0);
 const tamanioPagina = 10;
@@ -20,35 +20,32 @@ const {
 } = useGeoserverDataTable({
   paginaActual: paginaActual.value,
   tamanioPagina: tamanioPagina,
-  resource: selectedElement.value,
+  resource: props.selectedElement,
 });
 
 function abrirModalTabla() {
   modalTabla.value?.abrirModal();
 }
-function openTableView() {
-  console.log(selectedElement.value);
-  resourcesStore.addResource("dataTable", selectedElement.value);
-  resourcesStore.setShownFile("dataTable", selectedElement.value);
+
+function openTablas(){
   modalTabla.value?.cerrarModal();
-  console.log("Redirije al visor de tablas");
+  let uuids = selectedStore['dataTable'].map((resource) => resource.uuid);
+  uuids.push(props.selectedElement.uuid);
+  selectedStore.updateResources(uuids, 'dataTable'); 
+  selectedStore.setSelectedElement('dataTable', props.selectedElement.uuid);
+  router.push('/consulta/tablas');
 }
-function notifyDownload() {
-  console.log(
-    "se hizo click en download, se triggerea el custom emit para notificar al padre"
-  );
-  emit("clickDownload");
-  modalTabla.value?.cerrarModal();
-}
+
+
 defineExpose({
   abrirModalTabla,
 });
 
-watch(paginaActual, () => {
+watch([paginaActual], () => {
   fetchTable({
     paginaActual: paginaActual.value,
     tamanioPagina: tamanioPagina,
-    resource: selectedElement.value,
+    resource: props.selectedElement,
   });
 });
 </script>
@@ -56,7 +53,7 @@ watch(paginaActual, () => {
   <ClientOnly>
     <SisdaiModal ref="modalTabla" id="modalTabla">
       <template #encabezado>
-        <h1>{{ selectedElement.title }}</h1>
+        <h1>{{ props.selectedElement.title }}</h1>
       </template>
 
       <template #cuerpo>
@@ -68,13 +65,11 @@ watch(paginaActual, () => {
       </template>
 
       <template #pie>
-        <nuxtLink to="/consulta/tablas">
-          <button type="button" class="boton-primario" @click="openTableView">
-            Abrir en Tablas
-          </button>
-        </nuxtLink>
+        <button type="button" class="boton-primario" @click="openTablas">
+          Abrir en Tablas
+        </button>
 
-        <button type="button" class="boton-primario" @click="notifyDownload">
+        <button type="button" class="boton-primario" @click="emit('notifyDownload')">
           Descargar
         </button>
       </template>
