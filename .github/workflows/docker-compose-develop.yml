@@ -61,8 +61,10 @@ jobs:
         run: |
           if [ "${{ github.ref_name }}" = "main" ]; then
             echo "NODE_ENV=production" >> "$GITHUB_OUTPUT"
+            echo "NUXT_PUBLIC_BASE_URL=https://sigic.geoint.mx" >> "$GITHUB_OUTPUT"
           else
             echo "NODE_ENV=development" >> "$GITHUB_OUTPUT"
+            echo "NUXT_PUBLIC_BASE_URL=https://sigic.dev.geoint.mx" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Build & tag Docker image
