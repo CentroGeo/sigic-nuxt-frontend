@@ -1,21 +1,18 @@
 <script setup>
-const resourcesStore = useSelectedResources2Store();
-const fetchedStore = useFetchedResourcesStore();
 const resourceType = 'dataTable';
 
 const storeConsulta = useConsultaStore();
-storeConsulta.resourceType = 'dataTable';
-
-const paginaActual = ref(0);
-const tamanioPagina = 10;
-const selected = computed(
-  () => resourcesStore[resourceType].filter((element) => element.isSelected === 1)[0] ?? null
-);
-const selectedUuid = computed(() => selected.value?.uuid ?? null);
-const selectedElement = ref();
+const storeFetched = useFetchedResourcesStore();
+const storeSelected = useSelectedResources2Store();
+storeConsulta.resourceType = resourceType;
 
 const route = useRoute();
 const router = useRouter();
+
+const paginaActual = ref(0);
+const tamanioPagina = 10;
+const selectedUuid = computed(() => storeSelected.selectedOnes()[0]?.uuid ?? null);
+const selectedElement = ref();
 
 const {
   variables,
@@ -36,8 +33,8 @@ watch(paginaActual, () => {
   });
 });
 
-watch([() => selectedUuid.value, () => fetchedStore[resourceType]], () => {
-  selectedElement.value = fetchedStore.findResources([selectedUuid.value], resourceType)[0];
+watch([() => selectedUuid.value, () => storeFetched[resourceType]], () => {
+  selectedElement.value = storeFetched.findResources([selectedUuid.value], resourceType)[0];
   paginaActual.value = 0;
   fetchTable({
     paginaActual: paginaActual.value,
@@ -57,22 +54,23 @@ function updateQueryFromStore(queryParam) {
     router.replace({ query });
   }
 }
-watch(() => resourcesStore.resourcesAsQueryParam(resourceType), updateQueryFromStore);
+watch(() => storeSelected.asQueryParam(), updateQueryFromStore);
 
 /**
  * Actualiza el store desde los valores del queryParam.
  * @param queryParam que llega desde la url.
  */
 function updateStoreFromQuery(queryParam) {
-  resourcesStore.addFromQueryParam(queryParam, resourceType);
+  storeSelected.addFromQueryParam(queryParam);
+  // console.log('recursos tablas:', storeSelected.list());
 }
 
 onMounted(() => {
   updateStoreFromQuery(route.query.recursos);
   // Para cuando hacemos el cambio de página
-  if (resourcesStore[resourceType].length > 0) {
-    updateQueryFromStore(resourcesStore.resourcesAsQueryParam(resourceType));
-    selectedElement.value = fetchedStore.findResources([selectedUuid.value], resourceType)[0];
+  if (storeSelected.uuids.length > 0) {
+    updateQueryFromStore(storeSelected.asQueryParam());
+    selectedElement.value = storeFetched.findResources([selectedUuid.value], resourceType)[0];
     fetchTable({
       paginaActual: paginaActual.value,
       tamanioPagina: tamanioPagina,
@@ -94,7 +92,7 @@ onMounted(() => {
 
     <template #visualizador>
       <div
-        v-if="resourcesStore[resourceType].length === 0 || fetchedStore[resourceType].length === 0"
+        v-if="storeSelected.uuids.length === 0 || storeFetched[resourceType].length === 0"
         class="contenedor"
       >
         <h1>No hay seleccion</h1>

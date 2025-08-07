@@ -1,6 +1,7 @@
 // Este composable hace peticiones de datos a Geonode
 // TODO: Resolver las peticiones de información para mostrar capas y datasets privados
 import { ref } from 'vue';
+import { resourceTypeGeonode } from '~/utils/consulta';
 
 export async function useGeonodeResources() {
   const config = useRuntimeConfig();
@@ -19,7 +20,7 @@ export async function useGeonodeResources() {
       const dataParams = new URLSearchParams({
         page: page,
         page_size: 15,
-        'filter{resource_type}': resourceTypeDict[resourceType],
+        'filter{resource_type}': resourceTypeGeonode[resourceType],
         //'filter{is_approved}':true,
       });
       const response = await fetch(`${api}?${dataParams.toString()}`, {

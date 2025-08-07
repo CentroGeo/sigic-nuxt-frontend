@@ -29,10 +29,7 @@ function abrirModalTabla() {
 
 function openTablas(){
   modalTabla.value?.cerrarModal();
-  let uuids = selectedStore['dataTable'].map((resource) => resource.uuid);
-  uuids.push(props.selectedElement.uuid);
-  selectedStore.updateResources(uuids, 'dataTable'); 
-  selectedStore.setSelectedElement('dataTable', props.selectedElement.uuid);
+  console.log('agregar la capa al store correspondiente')
   router.push('/consulta/tablas');
 }
 

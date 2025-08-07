@@ -1,23 +1,20 @@
 <script setup>
+const storeSelected = useSelectedResources2Store();
+
 const props = defineProps({
   titulo: { type: String, default: 'Título' },
   resourceType: { type: String, required: true },
   etiquetaElementos: { type: String, default: undefined },
   funcionDescarga: { type: Function, default: undefined },
 });
-const { titulo, resourceType } = toRefs(props);
-const storeFetched = useFetchedResourcesStore();
-const storeSelected = useSelectedResources2Store();
-const selectedUuid = computed(() => storeSelected[props.resourceType].map((d) => d.uuid));
-const selectedResources = computed(() =>
-  storeFetched.findResources(selectedUuid.value, props.resourceType)
-);
+const { titulo } = toRefs(props);
+
 const buttonTagDict = {
   dataLayer: 'mapa',
   dataTable: 'archivos',
   document: 'archivos',
 };
-const route = useRoute();
+//const route = useRoute();
 
 const shownModal = ref('ninguno')
 const modalResource = ref(null)
@@ -72,7 +69,7 @@ function notifyShareChild() {
 
 function shareState() {
   shownModal.value = 'share'
-  console.log('Se copia el url en el portapapeles: ', route.fullPath);
+  //console.log('Se copia el url en el portapapeles: ', route.fullPath);
   nextTick(() => {
     notifyShareChild();
   });
@@ -116,19 +113,20 @@ function changeModal(to){
             type="button"
             class="boton-pictograma boton-con-contenedor-secundario"
             aria-label="Eliminar"
-            @click="storeSelected.resetResources(resourceType)"
+            @click="storeSelected.reset()"
           >
             <span class="pictograma-eliminar" aria-hidden="true" />
           </button>
         </div>
 
-        <UiNumeroElementos :numero="selectedResources.length" :etiqueta="etiquetaElementos" />
+        <UiNumeroElementos :numero="storeSelected.uuids.length" :etiqueta="etiquetaElementos" />
       </div>
     </div>
 
     <div class="m-x-2 m-y-1">
+      <!-- {{ JSON.stringify(storeSelected.sortedDescending()) }} -->
       <ConsultaElementoSeleccionado
-        v-for="resource in selectedResources"
+        v-for="resource in storeSelected.sortedDescending()"
         :key="`seleccion-${resource.uuid}`"
         :selected-element="resource"
         :resource-type="resourceType"

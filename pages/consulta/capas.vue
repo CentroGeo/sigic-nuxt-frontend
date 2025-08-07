@@ -2,15 +2,18 @@
 import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
 import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
 
-const extensionNacional = '-118.3651,14.5321,-86.7104,32.7187';
 const resourceType = 'dataLayer';
 
 const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
-storeConsulta.resourceType = 'dataLayer';
+const storeFetched = useFetchedResourcesStore();
+const storeSelected = useSelectedResources2Store();
+storeConsulta.resourceType = resourceType;
 
-const storeSelected = useSelectedResourcesStore();
-const randomNum = ref(0);
+const route = useRoute();
+const router = useRouter();
+
+// const randomNum = ref(0);
 // const isFinishedLoading = ref(0);
 const linkExportaMapa = ref();
 function exportarMapa() {
@@ -19,112 +22,86 @@ function exportarMapa() {
     linkExportaMapa.value
   );
 }
-const attributos = reactive({});
-async function addAttribute(pk) {
-  attributos[pk] = [];
 
-  try {
-    const { attributes } = await fetch(
-      `${config.public.geonodeApi}/datasets/${pk}/attribute_set`
-    ).then((response) => response.json());
-    // console.log(attributes);
+// const attributos = reactive({});
+// async function addAttribute(pk) {
+//   attributos[pk] = [];
 
-    const etiquetas = {};
-    const columnas = attributes
-      .filter((a) => a.visible)
-      .sort((a, b) => a.display_order - b.display_order)
-      .map(({ attribute, attribute_label }) => {
-        etiquetas[attribute] = attribute_label || attribute;
-        return attribute;
-      });
-    // console.log(columnas);
+//   try {
+//     const { attributes } = await fetch(
+//       `${config.public.geonodeApi}/datasets/${pk}/attribute_set`
+//     ).then((response) => response.json());
+//     // console.log(attributes);
 
-    attributos[pk] = {
-      params: {
-        propertyName: columnas.join(','),
-      },
-      // attribute_label
-      contenido: (data) =>
-        columnas
-          .map((columna) => `<p><b>${etiquetas[columna] || columna}</b>: ${data[columna]}</p>`)
-          .join(''),
-    };
-    // console.log(attributos[pk]);
-  } catch (error) {
-    console.error('Error en la búsqueda:', error);
+//     const etiquetas = {};
+//     const columnas = attributes
+//       .filter((a) => a.visible)
+//       .sort((a, b) => a.display_order - b.display_order)
+//       .map(({ attribute, attribute_label }) => {
+//         etiquetas[attribute] = attribute_label || attribute;
+//         return attribute;
+//       });
+//     // console.log(columnas);
 
-    console.error(
-      'Ocurrió un problema al realizar la búsqueda. Por favor, verifica tu conexión o intenta de nuevo más tarde.'
-    );
+//     attributos[pk] = {
+//       params: {
+//         propertyName: columnas.join(','),
+//       },
+//       // attribute_label
+//       contenido: (data) =>
+//         columnas
+//           .map((columna) => `<p><b>${etiquetas[columna] || columna}</b>: ${data[columna]}</p>`)
+//           .join(''),
+//     };
+//     // console.log(attributos[pk]);
+//   } catch (error) {
+//     console.error('Error en la búsqueda:', error);
 
-    if (error.response && error.response.status === 400) {
-      console.error('Los parámetros de búsqueda no son válidos. Revisa los filtros ingresados.');
-    } else if (error.response && error.response.status === 500) {
-      console.error('El servidor encontró un problema. Intenta más tarde.');
-    }
-  }
-}
+//     console.error(
+//       'Ocurrió un problema al realizar la búsqueda. Por favor, verifica tu conexión o intenta de nuevo más tarde.'
+//     );
 
+//     if (error.response && error.response.status === 400) {
+//       console.error('Los parámetros de búsqueda no son válidos. Revisa los filtros ingresados.');
+//     } else if (error.response && error.response.status === 500) {
+//       console.error('El servidor encontró un problema. Intenta más tarde.');
+//     }
+//   }
+// }
+
+// watch(
+//   () => storeSelected.selectedResources[resourceType],
+//   (nv_) => {
+//     randomNum.value += Math.random();
+
+//     const arr1 = nv_.map((r) => r.pk);
+//     const arr2 = Object.keys(attributos);
+//     // console.log(arr1, arr2);
+
+//     const nv = arr1.filter((item) => !arr2.includes(item));
+//     // console.log("Se agregó:", nv);
+//     nv.forEach((r) => addAttribute(r));
+
+//     //const ov = arr2.filter((item) => !arr1.includes(item));
+//     // console.log("Se quitó:", ov);
+
+//     //ov.forEach((resource) => delete attributos[resource]);
+
+//     // console.log(attributos);
+
+//     //console.log();
+//   },
+//   { deep: true }
+// );
+
+const vistaDelMapa = ref({ extension: storeConsulta.mapExtent });
 watch(
-  () => storeSelected.selectedResources[resourceType],
-  (nv_) => {
-    randomNum.value += Math.random();
-
-    const arr1 = nv_.map((r) => r.pk);
-    const arr2 = Object.keys(attributos);
-    // console.log(arr1, arr2);
-
-    const nv = arr1.filter((item) => !arr2.includes(item));
-    // console.log("Se agregó:", nv);
-    nv.forEach((r) => addAttribute(r));
-
-    //const ov = arr2.filter((item) => !arr1.includes(item));
-    // console.log("Se quitó:", ov);
-
-    //ov.forEach((resource) => delete attributos[resource]);
-
-    // console.log(attributos);
-
-    //console.log();
-  },
-  { deep: true }
+  () => storeConsulta.mapExtent,
+  (extension) => {
+    if (extension === undefined) return;
+    vistaDelMapa.value = { extension };
+  }
 );
-
-// api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
-
-/** * Revisión!
- */
-
-/* function updateMapParams(centro, acercamiento) {
-  storeSelected.setMapViewParams(centro, acercamiento);
-} */
-
-// Este watcher sirve para ajustar los índices de las capas montadas
-// cuando estas terminan de cargarse pero solo funciona cuando recién se montan las capas.
-/* watch(isFinishedLoading, () => {
-  console.log('cuenta: ', isFinishedLoading.value);
-  const resourcesNum = storeSelected.selectedResources[resourceType].length;
-  if (resourcesNum === isFinishedLoading.value) {
-    opacityDict.value = storeSelected.shownFiles.dataLayer.opacity;
-    randomNum.value += 1;
-    console.log('Dict opacidad', opacityDict.value);
-  }
-});
-watch(
-  () => storeSelected.shownFiles.dataLayer,
-  () => {
-    isFinishedLoading.value = 0;
-    randomNum.value += 1;
-    console.log('watcher en capas', storeSelected.shownFiles.dataLayer);
-  },
-  { deep: true }
-); */
-
-const route = useRoute();
-const router = useRouter();
-const selectedStore = useSelectedResources2Store();
-const fetchedStore = useFetchedResourcesStore();
-const vistaDelMapa = ref({ extension: extensionNacional });
 
 /**
  * Agrega en un parametro hash los valores de la vista del mapa
@@ -142,18 +119,12 @@ function actualizarHashDesdeVista({ acercamiento, centro }) {
  * Actualiza la vista del mapa dependiendo del hash.
  * @param hashVista texto hash sin el carácter #.
  */
-function actualizarVistaDesdeHash(hashVista) {
+function updateMapFromHash(hashVista) {
   if (hashVista === '') return;
 
   const [acercamiento, latitud, longitud] = hashVista.split('=')[1].split('/');
+  storeConsulta.mapExtent = undefined;
   vistaDelMapa.value = { acercamiento, centro: [longitud, latitud] };
-}
-
-/**
- * Función ejecutada cuando se dá click en el botón centrar del mapa.
- */
-function clickCentrar() {
-  vistaDelMapa.value = { extension: extensionNacional };
 }
 
 /**
@@ -167,16 +138,18 @@ function updateQueryFromStore(queryParam) {
     router.replace({ query, hash: route.hash });
   }
 }
-watch(() => selectedStore.resourcesAsQueryParam(resourceType), updateQueryFromStore);
+watch(() => storeSelected.asQueryParam(), updateQueryFromStore);
 
 onMounted(() => {
-  actualizarVistaDesdeHash(route.hash?.slice(1));
-  selectedStore.addFromQueryParam(route.query.capas, resourceType);
+  updateMapFromHash(route.hash?.slice(1));
+  storeSelected.addFromQueryParam(route.query.capas);
 });
 
 function getFetchedResources() {
-  return fetchedStore.findResources(selectedStore.resourcesList(resourceType), resourceType);
+  return storeFetched.findResources(storeSelected.uuids, resourceType);
 }
+
+// api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
 </script>
 
 <template>
@@ -190,18 +163,12 @@ function getFetchedResources() {
     </template>
 
     <template #visualizador>
+      <template v-if="storeFetched.isLoading">Cargando...</template>
       <ClientOnly>
-        <!-- <SisdaiMapa>
-          <SisdaiCapaWms
-            :posicion="storeSelected.selectedResources.length - index"
-            @alFinalizarCarga="isFinishedLoading += 1"
-          />
-        </SisdaiMapa> -->
-
         <SisdaiMapa
           class="gema"
           :vista="vistaDelMapa"
-          @click-centrar="clickCentrar"
+          @click-centrar="storeConsulta.resetMapExtent"
           @al-mover-vista="actualizarHashDesdeVista"
         >
           <SisdaiCapaXyz :posicion="0" />
@@ -211,11 +178,13 @@ function getFetchedResources() {
             :key="`wms-${resource.uuid}`"
             :capa="resource.alternate"
             :fuente="`${config.public.geoserverUrl}/wms?`"
-            :opacidad="selectedStore.findResource(resource.uuid, resourceType).opacidad"
-            :posicion="selectedStore.findResource(resource.uuid, resourceType).posicion + 1"
-            :visible="selectedStore.findResource(resource.uuid, resourceType).visible"
+            :opacidad="storeSelected.byUuid(resource.uuid).opacidad"
+            :posicion="storeSelected.byUuid(resource.uuid).posicion + 1"
+            :visible="storeSelected.byUuid(resource.uuid).visible"
           />
         </SisdaiMapa>
+
+        <!-- @alFinalizarCarga="isFinishedLoading += 1" -->
       </ClientOnly>
     </template>
 

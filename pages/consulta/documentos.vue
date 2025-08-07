@@ -1,13 +1,14 @@
 <script setup>
-const resourcesStore = useSelectedResources2Store();
-const fetchedStore = useFetchedResourcesStore();
 const resourceType = 'document';
 
 const storeConsulta = useConsultaStore();
-storeConsulta.resourceType = 'document';
+const storeFetched = useFetchedResourcesStore();
+const storeSelected = useSelectedResources2Store();
+storeConsulta.resourceType = resourceType;
 
 const route = useRoute();
 const router = useRouter();
+
 /**
  * Actualiza el queryParam desde los valores del store.
  * @param queryParam generado por el store.
@@ -19,21 +20,22 @@ function updateQueryFromStore(queryParam) {
     router.replace({ query });
   }
 }
-watch(() => resourcesStore.resourcesAsQueryParam(resourceType), updateQueryFromStore);
+watch(() => storeSelected.asQueryParam(), updateQueryFromStore);
 
 /**
  * Actualiza el store desde los valores del queryParam.
  * @param queryParam que llega desde la url.
  */
 function updateStoreFromQuery(queryParam) {
-  resourcesStore.addFromQueryParam(queryParam, resourceType);
+  storeSelected.addFromQueryParam(queryParam);
+  // console.log('recursos tablas:', storeSelected[resourceType]);
 }
 
 onMounted(() => {
   updateStoreFromQuery(route.query.recursos);
   // Para cuando hacemos el cambio de página
-  if (resourcesStore[resourceType].length > 0) {
-    updateQueryFromStore(resourcesStore.resourcesAsQueryParam(resourceType));
+  if (storeSelected.uuids.length > 0) {
+    updateQueryFromStore(storeSelected.asQueryParam());
   }
 });
 /* async function obtenerPDFs() {
@@ -61,7 +63,7 @@ obtenerPDFs(); */
 
     <template #visualizador>
       <div
-        v-if="resourcesStore[resourceType].length === 0 || fetchedStore[resourceType].length === 0"
+        v-if="storeSelected.uuids.length === 0 || storeFetched[resourceType].length === 0"
         class="contenedor"
       >
         <h1>No hay seleccion</h1>

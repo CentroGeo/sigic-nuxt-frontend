@@ -24,10 +24,11 @@ const modalMapa = ref(null);
 const emit = defineEmits(["notifyDownload"]);
 
 function openLayerView() {
-  let uuids = selectedStore['dataLayer'].map((resource) => resource.uuid);
+  console.log('agregar la capa al store correspondiente')
+/*   const uuids = selectedStore.uuids
   uuids.push(props.selectedElement.uuid);
-  selectedStore.updateResources(uuids, 'dataLayer'); 
-  router.push('/consulta/capas');
+  selectedStore.updateResources(uuids);*/
+  router.push('/consulta/capas'); 
 }
 
 function downloadClicked() {
