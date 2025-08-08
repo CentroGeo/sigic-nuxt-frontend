@@ -118,14 +118,20 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
      * @param {String} uuid del recurso a eliminar.
      */
     removeByUuid(uuid) {
-      delete byResourceType()[uuid];
       //Si borramos el recurso seleccionado, marcamos el primero de la lista
-      /*      if(storeConsulta.resourceType !== resourceTypeDic.dataLayer){
-        const remaining = list().filter((r) => r.isSelected === 1)
-        if(remaining.length === 0 && list().length > 0){
-          this[resourceType][0].setSelected(1)
+/*       if(storeConsulta.resourceType !== resourceTypeDic.dataLayer){
+        const isVisible = byUuid(uuid).visible;
+        if(isVisible && this.uuids.length - 1 > 0){
+          byUuid(sortedDescending()[0].uuid).toggleVisibility();
         }
       } */
+      delete byResourceType()[uuid];
+      //Si borramos el recurso seleccionado, marcamos el primero de la lista
+      if (storeConsulta.resourceType !== resourceTypeDic.dataLayer){
+        if(this.visibleOnes().length === 0 && list().length > 0){
+          byUuid(sortedDescending()[0].uuid).toggleVisibility();
+        }
+      } 
     },
 
     /**
