@@ -133,6 +133,11 @@ const crearContexto = async () => {
     mensajeError.value = "";
     mensajeExito.value = "";
 
+    for (const pair of formData.entries()) {
+        console.log(`${pair[0]}: ${pair[1]}`);
+    }
+
+
     // Llamar a la acción del store
     await storeIA.crearContexto(formData);
     

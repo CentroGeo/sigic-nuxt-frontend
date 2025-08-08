@@ -159,7 +159,7 @@ watch(proyecto, (nuevoProyecto, anteriorProyecto) => {
                     <nuxt-link
                       class="boton-primario boton-chico"
                       type="button"
-                      to="/ia/chat/dinamica"
+                      :to="`/ia/chat/dinamica?context_id=${contexto.id}`"
                     >
                       Iniciar chat
                       <span class="pictograma-chat" aria-hidden="true" />

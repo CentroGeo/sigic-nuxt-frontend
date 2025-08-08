@@ -10,6 +10,16 @@ const controlDeslizante = ref(null);
 const areaTextoRef = ref(null);
 const isSubmitting = ref(false);
 
+const chatID = ref(0);
+
+/* defineProps({
+  contextId: String  //viene de dinamica.vue
+})
+ */
+const { contextId } = defineProps({
+  contextId: String
+})
+
 function enfocarAreaTexto() {
   areaTextoRef.value.focus();
 }
@@ -106,7 +116,10 @@ const submitMensaje = async () => {
 
   const body = {
     user_id: "c5461377-f021-402a-9700-a6d43c82e30c",
-    type: "Preguntar",
+    //type: "Preguntar",
+    type: "RAG",
+    context_id: parseInt(contextId),
+    //context_id: 9,
     model: "deepseek-r1",
     //model: "llama3.1",
     messages: [
@@ -118,7 +131,7 @@ const submitMensaje = async () => {
       { role: "user", content: mensaje.value }
     ],
     think: false,
-    chat_id: 0
+    chat_id: chatID.value
   };
 
   console.log(body);
@@ -159,7 +172,12 @@ const submitMensaje = async () => {
   }
 
   const json = await res.json();
+  console.log(json)
   const jobId = json.job_id;
+
+  if(json["chat_id"]!=null && json["chat_id"]!=undefined){
+    chatID.value=json["chat_id"]
+  }
 
   if (!jobId) {
     //resultado.value = 'No se recibió job_id.'
