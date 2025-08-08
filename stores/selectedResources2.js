@@ -71,14 +71,14 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
       // Validar si el queryParam se puede parsear
       if (queryParam === undefined || queryParam === '') return;
 
+      const ObjectToUse =
+        storeConsulta.resourceType === resourceTypeDic.dataLayer ? SelectedLayer : SelectedResource;
+
       resources[storeConsulta.resourceType] = queryParam
         .split(';')
         .reverse()
         .reduce((acum, txt, posicion) => {
-          const newResource =
-            storeConsulta.resourceType === resourceTypeDic.dataLayer
-              ? new SelectedLayer(`${txt},${posicion}`)
-              : new SelectedResource(`${txt},${posicion}`);
+          const newResource = new ObjectToUse(`${txt},${posicion}`);
 
           return { ...acum, [newResource.uuid]: newResource };
         }, {});
@@ -180,8 +180,8 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
     uuids: computed(() => Object.keys(byResourceType())),
 
     /**
-     *
-     * @returns
+     * Devuelve solo los recursos que son visibles.
+     * @returns {Array<Object>}
      */
     visibleOnes() {
       return list().filter((resource) => resource.visible);

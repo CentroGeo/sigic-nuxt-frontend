@@ -2,6 +2,7 @@
 import { resourceTypeDic } from '~/utils/consulta';
 
 const storeSelected = useSelectedResources2Store();
+const emit = defineEmits(['descargaClicked', 'mapaClicked']);
 
 const props = defineProps({
   groupName: { type: String, required: true },
@@ -11,8 +12,7 @@ const props = defineProps({
   },
   resourceType: { type: String, required: true },
 });
-const { groupName } = toRefs(props);
-const emit = defineEmits(['descargaClicked', 'mapaClicked']);
+const { groupName, resourceElement } = toRefs(props);
 
 const selectedResource = computed({
   get() {
@@ -25,18 +25,23 @@ const selectedResource = computed({
   },
 });
 const hasGeometry = ref();
-const noGeometry = [-1, -1, 0, 0];
-if (props.resourceType === resourceTypeDic.dataTable) {
-  const a = props.resourceElement.extent.coords.join(',');
-  const b = noGeometry.join(',');
-  if (a === b) {
-    hasGeometry.value = false;
+
+watch(resourceElement, () => {
+  // checkForGeometry
+  if (props.resourceType === resourceTypeDic.dataTable) {
+    const noGeometry = [-1, -1, 0, 0];
+
+    const a = resourceElement.value.extent.coords.join(',');
+    const b = noGeometry.join(',');
+    if (a === b) {
+      hasGeometry.value = false;
+    } else {
+      hasGeometry.value = true;
+    }
   } else {
-    hasGeometry.value = true;
+    hasGeometry.value = false;
   }
-} else {
-  hasGeometry.value = false;
-}
+});
 </script>
 
 <template>
@@ -51,6 +56,7 @@ if (props.resourceType === resourceTypeDic.dataTable) {
       />
       <label :for="resourceElement.uuid">{{ resourceElement.title }}</label>
     </div>
+
     <div class="flex flex-contenido-final">
       <button
         v-if="hasGeometry"
@@ -59,8 +65,9 @@ if (props.resourceType === resourceTypeDic.dataTable) {
         type="button"
         @click="emit('mapaClicked')"
       >
-        <span class="pictograma-capas" aria-hidden="true"></span>
+        <span class="pictograma-capas" aria-hidden="true" />
       </button>
+
       <button
         class="boton-pictograma boton-sin-contenedor-secundario"
         aria-label="Borrar selección"
@@ -69,6 +76,7 @@ if (props.resourceType === resourceTypeDic.dataTable) {
       >
         <span class="pictograma-eliminar" aria-hidden="true" />
       </button>
+
       <button
         class="boton-pictograma boton-sin-contenedor-secundario"
         aria-label="Descargar selección"
