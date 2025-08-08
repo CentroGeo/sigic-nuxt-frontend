@@ -27,10 +27,11 @@ function abrirModalTabla() {
   modalTabla.value?.abrirModal();
 }
 
-function openTablas(){
+async function openTablas(){
   modalTabla.value?.cerrarModal();
-  console.log('agregar la capa al store correspondiente')
-  router.push('/consulta/tablas');
+  selectedStore.updateOtherResources(props.selectedElement.uuid, 'dataTable')
+
+  await navigateTo('/consulta/tablas');
 }
 
 
@@ -74,8 +75,4 @@ watch([paginaActual], () => {
   </ClientOnly>
 </template>
 <style lang="scss" scoped>
-#modalTabla {
-  height: 80%;
-  gap: 0;
-}
 </style>

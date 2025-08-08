@@ -25,6 +25,20 @@ const selectedResource = computed({
   },
 });
 const hasGeometry = ref();
+if(resourceElement){
+  if (props.resourceType === resourceTypeDic.dataTable) {
+    const noGeometry = [-1, -1, 0, 0];
+
+    const a = resourceElement.value.extent.coords.join(',');
+    const b = noGeometry.join(',');
+    if (a === b) {
+      hasGeometry.value = false;
+    } else {
+      hasGeometry.value = true;
+    }
+  } else {
+    hasGeometry.value = false;
+  }}
 
 watch(resourceElement, () => {
   // checkForGeometry

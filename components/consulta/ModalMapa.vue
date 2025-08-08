@@ -23,12 +23,13 @@ const estilosLista = ref(["Opcion 1", "Opción 2", "Opcion 3"]);
 const modalMapa = ref(null);
 const emit = defineEmits(["notifyDownload"]);
 
-function openLayerView() {
+async function openLayerView() {
   console.log('agregar la capa al store correspondiente')
+  //selectedStore.updateOtherResources(props.selectedElement.uuid, 'dataLayer')
 /*   const uuids = selectedStore.uuids
   uuids.push(props.selectedElement.uuid);
   selectedStore.updateResources(uuids);*/
-  router.push('/consulta/capas'); 
+  await navigateTo('/consulta/capas'); 
 }
 
 function downloadClicked() {
