@@ -1,19 +1,31 @@
 <script setup>
 import { onBeforeUnmount, ref } from 'vue';
+import { resourceTypeDic } from '~/utils/consulta';
+
+const resourceType = resourceTypeDic.document;
 
 const storeFetched = useFetchedResourcesStore();
 const storeSelected = useSelectedResources2Store();
 
-const resourceType = 'document';
 //const urlEmbebido = ref(null);
 const embedRef = ref(null);
-const selectedUuid = computed(() => storeSelected.selectedOnes()[0]?.uuid ?? null);
+const selectedUuid = computed(() => storeSelected.visibleOnes()[0]?.uuid ?? null);
 const selectedElement = computed(() => {
   if (!selectedUuid.value) return null;
   return storeFetched.findResources([selectedUuid.value], resourceType)[0] ?? null;
 });
-const urlEmbebido = ref(selectedElement.value.embed_url);
 let resizeObserver;
+const extensionDocumento = computed(() => {
+  const linkCargado = selectedElement.value.links.find((link) => link.link_type === 'uploaded');
+  if (linkCargado) {
+    return linkCargado.extension;
+  } else return '';
+});
+const urlEmbebido = ref(
+  extensionDocumento.value === 'pdf'
+    ? selectedElement.value.embed_url
+    : selectedElement.value.embed_url.replace('/embed', '/link')
+);
 
 watch(selectedElement, (nv) => {
   (async () => {
@@ -21,7 +33,9 @@ watch(selectedElement, (nv) => {
     if (nv) {
       urlEmbebido.value = null; // limpiar antes de volver a asignar
       await nextTick(); // esperar a que el DOM reaccione
-      urlEmbebido.value = nv.embed_url;
+
+      urlEmbebido.value =
+        extensionDocumento.value === 'pdf' ? nv.embed_url : nv.embed_url.replace('/embed', '/link');
 
       await nextTick(); // esperar a que el <embed> esté en DOM
 
@@ -53,7 +67,7 @@ onBeforeUnmount(() => {
       v-if="urlEmbebido"
       ref="embedRef"
       :src="urlEmbebido"
-      type="application/pdf"
+      :type="extensionDocumento === 'pdf' ? 'application/pdf' : 'text/plain'"
       class="documento-embebido"
     />
   </div>

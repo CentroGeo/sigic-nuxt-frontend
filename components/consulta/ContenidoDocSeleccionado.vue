@@ -1,4 +1,6 @@
 <script setup>
+import { resourceTypeDic } from '~/utils/consulta';
+
 const storeSelected = useSelectedResources2Store();
 
 const props = defineProps({
@@ -9,20 +11,23 @@ const props = defineProps({
   },
   resourceType: { type: String, required: true },
 });
-const { groupName, resourceElement } = toRefs(props);
+const { groupName } = toRefs(props);
+const emit = defineEmits(['descargaClicked', 'mapaClicked']);
 
 const selectedResource = computed({
   get() {
-    return storeSelected.list().filter((element) => element.isSelected === 1)[0]['uuid'];
+    return storeSelected.visibleOnes()?.[0]['uuid'];
   },
   set(newSelectedUuid) {
-    storeSelected.setSelectedElement(newSelectedUuid);
+    const oldSelectedUuid = storeSelected.visibleOnes()?.[0]['uuid'];
+    storeSelected.byUuid(oldSelectedUuid).toggleVisibility();
+    storeSelected.byUuid(newSelectedUuid).toggleVisibility();
   },
 });
 const hasGeometry = ref();
 const noGeometry = [-1, -1, 0, 0];
-if (props.resourceType === 'dataTable') {
-  const a = resourceElement.value.extent.coords.join(',');
+if (props.resourceType === resourceTypeDic.dataTable) {
+  const a = props.resourceElement.extent.coords.join(',');
   const b = noGeometry.join(',');
   if (a === b) {
     hasGeometry.value = false;
@@ -32,7 +37,6 @@ if (props.resourceType === 'dataTable') {
 } else {
   hasGeometry.value = false;
 }
-
 </script>
 
 <template>
@@ -75,7 +79,6 @@ if (props.resourceType === 'dataTable') {
       </button>
     </div>
   </div>
-
 </template>
 
 <style lang="scss" scoped>

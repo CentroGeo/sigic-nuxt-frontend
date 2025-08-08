@@ -1,5 +1,7 @@
 <script setup>
-const resourceType = 'dataTable';
+import { resourceTypeDic } from '~/utils/consulta';
+
+const resourceType = resourceTypeDic.dataTable;
 
 const storeConsulta = useConsultaStore();
 const storeFetched = useFetchedResourcesStore();
@@ -11,7 +13,7 @@ const router = useRouter();
 
 const paginaActual = ref(0);
 const tamanioPagina = 10;
-const selectedUuid = computed(() => storeSelected.selectedOnes()[0]?.uuid ?? null);
+const selectedUuid = computed(() => storeSelected.visibleOnes()[0]?.uuid ?? null);
 const selectedElement = ref();
 
 const {
@@ -36,6 +38,7 @@ watch(paginaActual, () => {
 watch([() => selectedUuid.value, () => storeFetched[resourceType]], () => {
   selectedElement.value = storeFetched.findResources([selectedUuid.value], resourceType)[0];
   paginaActual.value = 0;
+  // console.log(selectedUuid.value);
   fetchTable({
     paginaActual: paginaActual.value,
     tamanioPagina: tamanioPagina,

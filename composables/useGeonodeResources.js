@@ -1,7 +1,7 @@
 // Este composable hace peticiones de datos a Geonode
 // TODO: Resolver las peticiones de información para mostrar capas y datasets privados
 import { ref } from 'vue';
-import { resourceTypeGeonode } from '~/utils/consulta';
+import { resourceTypeDic, resourceTypeGeonode } from '~/utils/consulta';
 
 export async function useGeonodeResources() {
   const config = useRuntimeConfig();
@@ -48,13 +48,17 @@ export async function useGeonodeResources() {
 
     await loadPage();
 
-    if (storeConsulta.resourceType === 'document') {
+    if (storeConsulta.resourceType === resourceTypeDic.document) {
       //Si ya no hay paginas siguientes, filtramos los datos
       // Si son documentos, filtramos únicamente los pdfs
       resourcesList.value = allResults.filter((resource) =>
-        resource.links.some((link) => link.link_type === 'uploaded' && link.name.endsWith('.pdf'))
+        resource.links.some(
+          (link) =>
+            link.link_type === 'uploaded' &&
+            (link.name.endsWith('.pdf') || link.name.endsWith('.txt'))
+        )
       );
-    } else if (storeConsulta.resourceType === 'dataLayer') {
+    } else if (storeConsulta.resourceType === resourceTypeDic.dataLayer) {
       // Si son capas geográficas, excluimos aquellos que no tengan geometria
       const noGeometryExtent = [-1, -1, 0, 0];
       resourcesList.value = allResults.filter(

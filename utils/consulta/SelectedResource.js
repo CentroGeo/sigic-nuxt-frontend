@@ -15,7 +15,7 @@ export default class SelectedResource {
     const _options = typeof options === 'string' ? fromQueryParam(options, vars) : options;
 
     this.uuid = _options.uuid || undefined;
-    this.visible = _options.visible || 1;
+    this.visible = _options.visible ?? 1;
     this.posicion = _options.posicion || 0;
   }
 
@@ -40,4 +40,5 @@ export default class SelectedResource {
   toggleVisibility() {
     this.visible = !this.visible;
   }
+
 }

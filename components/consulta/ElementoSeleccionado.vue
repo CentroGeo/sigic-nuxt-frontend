@@ -1,5 +1,5 @@
 <script setup>
-import { tooltipContent } from '~/utils/consulta';
+import { resourceTypeDic, tooltipContent } from '~/utils/consulta';
 
 const storeFetched = useFetchedResourcesStore();
 const storeSelected = useSelectedResources2Store();
@@ -11,17 +11,10 @@ const props = defineProps({
   },
   resourceType: { type: String, required: true },
 });
-
+const emit = defineEmits(['openOpacity', 'openDownload', 'openTabla', 'openMapa']);
 const resourceElement = computed(() =>
   storeFetched.findResource(props.selectedElement.uuid, props.resourceType)
 );
-// const resourceElement = storeFetched.findResource(props.selectedElement.uuid, props.resourceType);}
-const emit = defineEmits(['openOpacity', 'openDownload', 'openTabla', 'openMapa']);
-/* const posicion = computed({
-  get: () => selectedStore.findResource(uuid, props.resourceType).posicion,
-  set: (nuevaPosicion) =>
-    (selectedStore.findResource(uuid, props.resourceType).posicion = nuevaPosicion),
-}); */
 
 function goDown() {
   storeSelected.changePosition(props.selectedElement.uuid, -1);
@@ -73,19 +66,21 @@ function goUp() {
       </div>
 
       <ConsultaContenidoCapaSeleccionada
-        v-if="resourceType === 'dataLayer'"
+        v-if="resourceType === resourceTypeDic.dataLayer"
         :resource-type="resourceType"
         :resource-element="resourceElement"
-        @opacidad-clicked="emit('openOpacity', props.selectedElement)"
-        @descarga-clicked="emit('openDownload', props.selectedElement)"
-        @tabla-clicked="emit('openTabla', props.selectedElement)"
+        @opacidad-clicked="emit('openOpacity', resourceElement)"
+        @descarga-clicked="emit('openDownload', resourceElement)"
+        @tabla-clicked="emit('openTabla', resourceElement)"
       />
 
       <ConsultaContenidoDocSeleccionado
         v-else
         :group-name="resourceType"
         :resource-type="resourceType"
-        :selected-element="selectedElement"
+        :resource-element="resourceElement"
+        @descarga-clicked="emit('openDownload', resourceElement)"
+        @mapa-clicked="emit('openMapa', resourceElement)"
       />
     </div>
   </div>

@@ -12,7 +12,6 @@ const props = defineProps({
   },
   resourceType: { type: String, required: true },
 });
-const { uuid } = props.selectedElement;
 const emit = defineEmits(['opacidadClicked', 'descargaClicked', 'tablaClicked']);
 
 /**
@@ -48,7 +47,7 @@ const optionsButtons = ref([
     label: 'Ver tablas',
     pictogram: 'pictograma-tabla',
     action: () => {
-      emit('tablaClicked')
+      emit('tablaClicked');
     },
   },
   {
@@ -66,7 +65,7 @@ const optionsButtons = ref([
     label: 'Cambiar opacidad',
     pictogram: 'pictograma-editar',
     action: () => {
-      emit("opacidadClicked")
+      emit('opacidadClicked');
     },
   },
   {
@@ -80,7 +79,7 @@ const optionsButtons = ref([
     label: 'Descargar archivo',
     pictogram: 'pictograma-archivo-descargar',
     action: () => {
-      emit("descargaClicked")
+      emit('descargaClicked');
     },
   },
 ]);
