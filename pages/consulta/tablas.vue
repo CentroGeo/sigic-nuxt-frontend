@@ -36,7 +36,6 @@ watch(paginaActual, () => {
 watch([() => selectedUuid.value, () => storeFetched[resourceType]], () => {
   selectedElement.value = storeFetched.findResources([selectedUuid.value], resourceType)[0];
   paginaActual.value = 0;
-  console.log(selectedUuid.value)
   fetchTable({
     paginaActual: paginaActual.value,
     tamanioPagina: tamanioPagina,
