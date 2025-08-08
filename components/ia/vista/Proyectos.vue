@@ -4,7 +4,8 @@ import { ref } from "vue";
 const storeIA = useIAStore();
 
 const proyecto = computed(() => storeIA.proyectoSeleccionado);
-let arraySources = []
+const arraySources = ref([]);
+const arrayContexts = ref([]);
 
 const contextos = ref([
   {
@@ -31,24 +32,47 @@ const loadSources = async () => {
   //arraySources = [];
 
   //Consulta fuentes
-  arraySources = await storeIA.getProjectSources(proyecto.value['id']);
+  arraySources.value = await storeIA.getProjectSources(proyecto.value['id']);
 
-  console.log(arraySources);
+  //console.log(arraySources);
+
+  //catalogo.value = arrayProjects;
+  //catalogoFiltrado.value = arrayProjects;
+};
+
+// Función para cargar las contextos proyecto
+const loadContexts = async () => {
+  //arraySources = [];
+
+  //Consulta fuentes
+  arrayContexts.value = await storeIA.getProjectContexts(proyecto.value['id']);
+
+  //console.log("arrayContexts: ",arrayContexts);
 
   //catalogo.value = arrayProjects;
   //catalogoFiltrado.value = arrayProjects;
 };
 
 //carga fuentes del proyecto inicialmente seleccionado
-onMounted(() => {
+/* onMounted(() => {
   //console.log(proyecto.value)
   loadSources();
-});
+  loadContexts();
+}); */
+
+watch(proyecto, (nuevo) => {
+  if (nuevo?.id) {
+    loadSources();
+    loadContexts();
+  }
+}, { immediate: true }); // Esto lo ejecuta también en el primer render
+
 
 // Observador carga fuentes al cambiar de proyecto
 watch(proyecto, (nuevoProyecto, anteriorProyecto) => {
   //console.log("Proyecto cambió:", nuevoProyecto);
   loadSources();
+  loadContexts();
 });
 
 </script>
@@ -101,7 +125,7 @@ watch(proyecto, (nuevoProyecto, anteriorProyecto) => {
           <NuxtLink
             class="boton boton-secundario boton-chico"
             aria-label="Crear proyecto"
-            to="/ia/proyecto/crea-contexto"
+            :to="`/ia/proyecto/crea-contexto?proyecto_id=${proyecto.id}`"
           >
             Crear contexto
           </NuxtLink>
@@ -112,24 +136,24 @@ watch(proyecto, (nuevoProyecto, anteriorProyecto) => {
           <div v-if="storeIA.existeContexto">
             <div class="flex m-y-3">
               <div
-                v-for="contexto in contextos"
+                v-for="contexto in arrayContexts"
                 :key="contexto.id"
                 class="columna-4"
               >
                 <div class="tarjeta">
                   <img
                     class="tarjeta-imagen"
-                    :src="contexto.tarjeta_img"
+                    :src="`http://localhost:8080/media/${contexto.image_type}`"
                     alt=""
                   />
                   <div class="tarjeta-cuerpo">
                     <p class="tarjeta-titulo">
-                      {{ contexto.tarjeta_titulo }}
+                      {{ contexto.title }}
                     </p>
-                    <UiNumeroElementos
+<!--                     <UiNumeroElementos
                       :numero="contexto.numero_fuentes"
                       etiqueta="Fuentes"
-                    />
+                    /> -->
                   </div>
                   <div class="tarjeta-pie">
                     <nuxt-link

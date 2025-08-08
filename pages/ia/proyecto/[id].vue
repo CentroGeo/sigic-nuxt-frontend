@@ -234,6 +234,23 @@ const guardarProyecto = async () => {
             </form>
           </div>
         </div>
+            <div class="flex flex-contenido-final">
+              <NuxtLink
+                class="boton boton-chico boton-primario"
+                aria-label="Guardar proyecto"
+                @click="guardarProyecto"
+              >
+                Guardar proyecto
+              </NuxtLink>
+              <nuxt-link
+                class="boton boton-chico boton-secundario"
+                aria-label="Cancelar"
+                to="/ia/proyectos/"
+              >
+                Cancelar
+              </nuxt-link>
+            </div>
+
         <div class="grid">
           <div class="columna-16">
             <p class="seperador borde-b" />
@@ -272,7 +289,7 @@ const guardarProyecto = async () => {
 
               </div>
             </div>
-            <div class="flex flex-contenido-final">
+<!--             <div class="flex flex-contenido-final">
               <NuxtLink
                 class="boton boton-chico boton-primario"
                 aria-label="Guardar proyecto"
@@ -287,7 +304,7 @@ const guardarProyecto = async () => {
               >
                 Cancelar
               </nuxt-link>
-            </div>
+            </div> -->
           </div>
         </div>
 
@@ -516,7 +533,7 @@ const guardarProyecto = async () => {
         <span>{{ storeIA.uploadProgress }}% completado</span>
       </div>
       
-      <div class="flex flex-contenido-final">
+<!--       <div class="flex flex-contenido-final">
         <NuxtLink
           class="boton boton-chico boton-primario"
           aria-label="Guardar proyecto"
@@ -535,7 +552,7 @@ const guardarProyecto = async () => {
         >
           Cancelar
         </nuxt-link>
-      </div>
+      </div> -->
     </div>
   </div>
 

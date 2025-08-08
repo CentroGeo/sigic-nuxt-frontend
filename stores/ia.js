@@ -8,6 +8,7 @@ export const useIAStore = defineStore("ia", {
     proyectos: [],
     proyectoSeleccionado: null,
     fuentesProyecto: [],
+    contextsProyecto: [],
     uploadProgress: 0,
     isUploading: false,
   }),
@@ -88,12 +89,49 @@ export const useIAStore = defineStore("ia", {
       }
     },
 
-    crearContexto() {
-      this.existeContexto = true;
+    async crearContexto(formData) {
+      //this.existeContexto = true;
+  
+      console.log("crear crearContexto");
+      try {
+/*         const formData = new FormData();
+        formData.append("title", title);
+        formData.append("description", description);
+        //formData.append('visibility', visibilidadProyecto.value);
+        formData.append("public", isPublic === "publico" ? "True" : "False");
+ */
+  
+        const response = await fetch(
+          "http://localhost:8080/api/fileuploads/workspaces/admin/contexts/create",
+          {
+            method: "POST",
+            body: formData
+          }
+        );
+
+        console.log(response)
+
+        if (!response.ok) {
+          throw new Error("Error al guardar el contexto");
+        }
+
+        const data = await response.json();
+        console.log("Contexto guardado:", data);
+
+        // Redirigir después de guardar
+        //this.existenProyectos = true;
+        //navigateTo('/ia/proyectos');
+      } catch (error) {
+        console.error("Error:", error);
+         throw error; 
+        // Aquí podrías mostrar un mensaje de error al usuario
+      }
+
+
     },
 
     async getProjectsList() {
-      this.existeContexto = true;
+      //this.existeContexto = true;
 
       const response = await fetch(
         "http://localhost:8080/api/fileuploads/workspaces/admin",
@@ -132,7 +170,7 @@ export const useIAStore = defineStore("ia", {
       );
 
       if (!response.ok) {
-        throw new Error("Error al consultar proyectos");
+        throw new Error("Error al consultar fuentes de proyectos");
       }
 
       const data = await response.json();
@@ -148,6 +186,38 @@ export const useIAStore = defineStore("ia", {
       //console.log('Proyectos:', data);
       return data;
     },    
+
+
+    async getProjectContexts(project_id) {
+
+      const response = await fetch( 
+        "http://localhost:8080/api/fileuploads/workspaces/admin/"+project_id+"/contexts",
+        {
+          method: "POST",
+          body: {}
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Error al consultar contextos");
+      }
+
+      const data = await response.json();
+      this.contextosProyecto = data;
+
+       this.existeContexto = true;
+
+   /*    if (data.length > 0) {
+        this.proyectoSeleccionado = data[0];
+      } else {
+        this.proyectoSeleccionado = null;
+      }
+
+      this.existenProyectos = true; */
+      //console.log('Proyectos:', data);
+      return data;
+    },    
+
 
     seleccionarProyecto(proyecto) {
       //console.log("seleccionarProyecto: ",proyecto)
