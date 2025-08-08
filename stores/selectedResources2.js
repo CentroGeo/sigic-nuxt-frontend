@@ -39,18 +39,6 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
     return Object.values(byResourceType());
   }
 
-  /**
-   * Devuelve la lista de objetos seleccionados ordenados de forma decendente
-   * por su posición.
-   * @returns {Array<SelectedLayer>}
-   */
-  function sortedDescending() {
-    // sorted ascending, sorted descending
-    return list().sort((a, b) => {
-      return b.posicion - a.posicion;
-    });
-  }
-
   return {
     /**
      * Vacía la selección de todos los recursos seleccionados.
@@ -61,7 +49,21 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
       resources[resourceTypeDic.document] = {};
     },
 
-    // addByUuid() {},
+    /**
+     * Agrega un nuevo elemento a los recursos seleccionados.
+     * @param {SelectedResource} newResource
+     */
+    add(newResource, resourceType = storeConsulta.resourceType) {
+      // Cuando no se agrega una capa
+      if (resourceType !== resourceTypeDic.dataLayer) {
+        // Si el nuevo recurso tiene visibilidad, quitar visibiidad a los demás
+        if (newResource.visible) {
+          this.uuids.forEach((uuid) => (this.byUuid(uuid).visible = false));
+        }
+      }
+
+      resources[resourceType][newResource.uuid] = newResource;
+    },
 
     /**
      * Agrega a la selección los recurson que encuentre en el queryParam.
@@ -71,17 +73,22 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
       // Validar si el queryParam se puede parsear
       if (queryParam === undefined || queryParam === '') return;
 
-      const ObjectToUse =
+      const ClassToUse =
         storeConsulta.resourceType === resourceTypeDic.dataLayer ? SelectedLayer : SelectedResource;
 
-      resources[storeConsulta.resourceType] = queryParam
+      queryParam
         .split(';')
         .reverse()
-        .reduce((acum, txt, posicion) => {
-          const newResource = new ObjectToUse(`${txt},${posicion}`);
+        .forEach((txt, position) => this.add(new ClassToUse(`${txt},${position}`)));
 
-          return { ...acum, [newResource.uuid]: newResource };
-        }, {});
+      // resources[storeConsulta.resourceType] = queryParam
+      //   .split(';')
+      //   .reverse()
+      //   .reduce((acum, txt, posicion) => {
+      //     const newResource = new ClassToUse(`${txt},${posicion}`);
+
+      //     return { ...acum, [newResource.uuid]: newResource };
+      //   }, {});
     },
 
     byUuid,
@@ -117,19 +124,21 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
      * Elimina un recurso de la selección. Si elimina una tabla o doc seleccionado, reselecciona el primero.
      * @param {String} uuid del recurso a eliminar.
      */
-    removeByUuid(uuid) {
-      //Si borramos el recurso seleccionado, marcamos el primero de la lista
-      /*       if(storeConsulta.resourceType !== resourceTypeDic.dataLayer){
-        const isVisible = byUuid(uuid).visible;
-        if(isVisible && this.uuids.length - 1 > 0){
-          byUuid(sortedDescending()[0].uuid).toggleVisibility();
-        }
-      } */
-      delete byResourceType()[uuid];
-      //Si borramos el recurso seleccionado, marcamos el primero de la lista
+    removeByUuid(uuidToRemove) {
+      const wasVisible = this.byUuid(uuidToRemove).visible;
+
+      delete byResourceType()[uuidToRemove];
+
+      // Reasignar las posiciones cada que se elimine un elemento
+      this.sortedAscending().forEach(({ uuid }, idx) => {
+        this.byUuid(uuid).posicion = idx;
+      });
+
+      // Cuando no se elimine una capa
       if (storeConsulta.resourceType !== resourceTypeDic.dataLayer) {
-        if (this.visibleOnes().length === 0 && list().length > 0) {
-          byUuid(sortedDescending()[0].uuid).toggleVisibility();
+        // Si se elimina el recurso seleccionado, marca el último de la lista
+        if (wasVisible && this.uuids.length > 0) {
+          this.byUuid(this.sortedDescending()[0].uuid).visible = true;
         }
       }
     },
@@ -140,15 +149,67 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
      * @returns {String}
      */
     asQueryParam() {
-      return sortedDescending()
+      return this.sortedDescending()
         .map((resource) => resource.asQueryParam)
         .join(';');
     },
 
-    sortedDescending,
+    /**
+     * Devuelve la lista de objetos seleccionados ordenados de forma ascendente.
+     * por su posición.
+     * @returns {Array<SelectedLayer>}
+     */
+    sortedAscending() {
+      // sorted ascending, sorted descending
+      return this.list().sort((a, b) => {
+        return a.posicion - b.posicion;
+      });
+    },
 
+    /**
+     * Devuelve la lista de objetos seleccionados ordenados de forma decendente.
+     * por su posición.
+     * @returns {Array<SelectedLayer>}
+     */
+    sortedDescending() {
+      // sorted ascending, sorted descending
+      return this.list().sort((a, b) => {
+        return b.posicion - a.posicion;
+      });
+    },
+
+    /**
+     *
+     * @param {String} uuid
+     */
     setOnlyOneVisible(uuid) {
       this.uuids.forEach((_uuid) => (this.byUuid(_uuid).visible = _uuid === uuid));
+    },
+
+    /**
+     * Actualiza los elementos seleccionados de acuerdo a una lista de uuids,
+     * si detecta que se deben quitar elementos los elimina, si detecta que debe
+     * agregar elementos los agrega. Los uuids que no deba quitar o agregar, los
+     * conserva.
+     * @param {Array<String>} newUuids
+     */
+    updateByUuids(newUuids) {
+      // function arrayNewsOlds(array1, array2) {
+      //   const news = array2.filter((item) => !array1.includes(item));
+      //   const olds = array1.filter((item) => !array2.includes(item));
+
+      //   return { news, olds };
+      // }
+      // const { news, olds } = arrayNewsOlds(this.uuids, newUuids);
+
+      const news = newUuids.filter((item) => !this.uuids.includes(item));
+      const olds = this.uuids.filter((item) => !newUuids.includes(item));
+
+      olds.forEach((uuid) => this.removeByUuid(uuid));
+
+      const ClassToUse =
+        storeConsulta.resourceType === resourceTypeDic.dataLayer ? SelectedLayer : SelectedResource;
+      news.forEach((uuid) => this.add(new ClassToUse({ uuid, posicion: this.uuids.length })));
     },
 
     updateResources(_uuids) {
@@ -195,6 +256,10 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
      */
     visibleOnes() {
       return this.sortedDescending().filter((resource) => resource.visible);
+    },
+
+    lastVisible() {
+      return this.sortedDescending().find((resource) => resource.visible);
     },
 
     updateOtherResources(addedUuid, toType) {
