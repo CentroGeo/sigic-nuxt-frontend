@@ -1,8 +1,9 @@
 <script setup>
 import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
 import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
+import { resourceTypeDic } from '~/utils/consulta';
 
-const resourceType = 'dataLayer';
+const resourceType = resourceTypeDic.dataLayer;
 
 const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();

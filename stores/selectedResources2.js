@@ -61,6 +61,8 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
       resources[resourceTypeDic.document] = {};
     },
 
+    // addByUuid() {},
+
     /**
      * Agrega a la selección los recurson que encuentre en el queryParam.
      * @param {String} queryParam de los recursos separados por punto y coma (;).
@@ -69,26 +71,17 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
       // Validar si el queryParam se puede parsear
       if (queryParam === undefined || queryParam === '') return;
 
-      if (storeConsulta.resourceType === resourceTypeDic.dataLayer) {
-        resources[storeConsulta.resourceType] = queryParam
-          .split(';')
-          .reverse()
-          .reduce((acum, txt, posicion) => {
-            const obj = new SelectedLayer(`${txt},${posicion}`);
+      resources[storeConsulta.resourceType] = queryParam
+        .split(';')
+        .reverse()
+        .reduce((acum, txt, posicion) => {
+          const newResource =
+            storeConsulta.resourceType === resourceTypeDic.dataLayer
+              ? new SelectedLayer(`${txt},${posicion}`)
+              : new SelectedResource(`${txt},${posicion}`);
 
-            return { ...acum, [obj.uuid]: obj };
-          }, {});
-      } else {
-        // this[resourceType] = queryParam.split(';').map((recurso) => new ConfiguracionOtro(recurso));
-        resources[storeConsulta.resourceType] = queryParam
-          .split(';')
-          .reverse()
-          .reduce((acum, recurso) => {
-            const obj = new SelectedLayer(`${recurso}`);
-
-            return { ...acum, [obj.uuid]: obj };
-          }, {});
-      }
+          return { ...acum, [newResource.uuid]: newResource };
+        }, {});
     },
 
     byUuid,
@@ -186,11 +179,12 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
      */
     uuids: computed(() => Object.keys(byResourceType())),
 
+    /**
+     *
+     * @returns
+     */
     visibleOnes() {
       return list().filter((resource) => resource.visible);
-    },
-    selectedOnes() {
-      return list().filter((resource) => resource.isSelected === 1);
     },
   };
 });
