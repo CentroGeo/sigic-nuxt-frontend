@@ -35,7 +35,7 @@ const catalogo = ref([
 
 const catalogoFiltrado = ref(catalogo.value);
 
-// Función para guardar el proyecto
+// Función para consultar lista de proyectos
 const loadProjectList = async () => {
   let arrayProjects = [];
 

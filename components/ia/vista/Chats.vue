@@ -3,7 +3,9 @@ import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/S
 import SisdaiControlDeslizante from "@centrogeomx/sisdai-componentes/src/componentes/control-deslizante/SisdaiControlDeslizante.vue";
 import { marked } from "marked"; // Importar marked para mostrar formato markdown
 import DOMPurify from "dompurify"; // Para seguridad XSS
-import { ref } from "vue";
+import { ref, watch } from "vue";
+
+const storeIA = useIAStore();
 
 const reporteModal = ref(null);
 const controlDeslizante = ref(null);
@@ -11,14 +13,77 @@ const areaTextoRef = ref(null);
 const isSubmitting = ref(false);
 
 const chatID = ref(0);
+const contextID = ref(0);
+
 
 /* defineProps({
   contextId: String  //viene de dinamica.vue
 })
  */
-const { contextId } = defineProps({
-  contextId: String
-})
+const { contextId, chatId } = defineProps({
+  contextId: String,
+  chatId: String
+});
+
+
+if (contextId) {
+  contextID.value = parseInt(contextId); // Asegura que sea número si es necesario
+
+/*   if(chatID.value>0){
+    console.log("chat existente")
+  } */
+}
+
+
+watch(() => chatId, (nuevoValor) => {
+  chatID.value = Number(nuevoValor || 0);
+  console.log("chat existente")
+  if(nuevoValor>0){
+    loadExistentChat(nuevoValor)
+  }
+});
+
+watch(() => contextId, (nuevoValor) => {
+  contextID.value = Number(nuevoValor || 0);
+});
+
+
+/* watch(chatId, (nuevoValor, valorAnterior) => {
+  console.log('chatId cambió de', valorAnterior, 'a', nuevoValor);
+
+  // Aquí puedes realizar alguna acción cada vez que cambie
+  // Por ejemplo:
+  // cargarHistorialDeChat(nuevoValor);
+});
+ */
+
+
+
+// Función para cargar historico de chat
+const loadExistentChat = async (idchat) => {
+  //arraySources = [];
+  let historyChat;
+  //Consulta fuentes
+  historyChat = await storeIA.getChat(idchat);
+  console.log(historyChat["history_array"])
+  let historial_chat=historyChat["history_array"]
+
+
+  mensajes.value = historial_chat.map((item, index) => {
+    return {
+      id: index,
+      actor: item.role === "user" ? "Humano" : "AI",
+      message: item.content,
+      reporte: false, // puedes cambiar esta lógica si necesitas condicionar
+    };
+  });
+
+  //console.log("arrayContexts: ",arrayContexts);
+
+  //catalogo.value = arrayProjects;
+  //catalogoFiltrado.value = arrayProjects;
+};
+
 
 function enfocarAreaTexto() {
   areaTextoRef.value.focus();
@@ -118,7 +183,8 @@ const submitMensaje = async () => {
     user_id: "c5461377-f021-402a-9700-a6d43c82e30c",
     //type: "Preguntar",
     type: "RAG",
-    context_id: parseInt(contextId),
+    //context_id: parseInt(contextId),
+    context_id: contextID.value,
     //context_id: 9,
     model: "deepseek-r1",
     //model: "llama3.1",

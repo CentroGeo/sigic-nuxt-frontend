@@ -11,6 +11,8 @@ export const useIAStore = defineStore("ia", {
     contextsProyecto: [],
     uploadProgress: 0,
     isUploading: false,
+    chats: [],
+    chatSeleccionado: null,
   }),
   actions: {
     async crearProyecto(title, description, isPublic, archivos = []) {
@@ -217,6 +219,70 @@ export const useIAStore = defineStore("ia", {
       //console.log('Proyectos:', data);
       return data;
     },    
+
+
+    async getChatList(user_id) {
+      //this.existeContexto = true;
+
+      const response = await fetch(
+        "http://localhost:8080/api/chat/history/getchats",
+        {
+          method: "POST",
+          body: {}
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Error al consultar chats");
+      }
+
+      const data = await response.json();
+      this.chats = data;
+
+/*       if (data.length > 0) {
+        this.proyectoSeleccionado = data[0];
+      } else {
+        this.proyectoSeleccionado = null;
+      } */
+
+      //this.existenProyectos = true;
+      //console.log('Proyectos:', data);
+      return data;
+    },    
+
+    async getChat(chat_id) {
+      //this.existeContexto = true;
+      console.log(chat_id)
+
+      const response = await fetch( 
+        "http://localhost:8080/api/chat/history/user",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ chat_id: parseInt(chat_id) }) 
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Error al consultar chat");
+      }
+
+      const data = await response.json();
+      console.log(data)
+      //this.chats = data;
+
+/*       if (data.length > 0) {
+        this.proyectoSeleccionado = data[0];
+      } else {
+        this.proyectoSeleccionado = null;
+      } */
+
+      //this.existenProyectos = true;
+      //console.log('Proyectos:', data);
+      return data;
+    },        
 
 
     seleccionarProyecto(proyecto) {
