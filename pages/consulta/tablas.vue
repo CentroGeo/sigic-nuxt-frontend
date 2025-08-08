@@ -51,16 +51,16 @@ watch([() => selectedUuid.value, () => storeFetched[resourceType]], () => {
  * @param queryParam generado por el store.
  */
 function updateQueryFromStore(queryParam) {
-  const query = { recursos: queryParam };
+  const query = { tablas: queryParam };
 
-  if (query.recursos !== route.query.recursos) {
+  if (query.tablas !== route.query.tablas) {
     router.replace({ query });
   }
 }
 watch(() => storeSelected.asQueryParam(), updateQueryFromStore);
 
 onMounted(() => {
-  storeSelected.addFromQueryParam(route.query.recursos);
+  storeSelected.addFromQueryParam(route.query.tablas);
 
   // Para cuando hacemos el cambio de página
   if (storeSelected.uuids.length > 0) {

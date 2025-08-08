@@ -15,32 +15,20 @@ const props = defineProps({
 const { groupName, resourceElement } = toRefs(props);
 
 const selectedResource = computed({
-  get() {
-    return storeSelected.visibleOnes()?.[0]['uuid'];
-  },
-  set(newSelectedUuid) {
-    const oldSelectedUuid = storeSelected.visibleOnes()?.[0]['uuid'];
-    storeSelected.byUuid(oldSelectedUuid).toggleVisibility();
-    storeSelected.byUuid(newSelectedUuid).toggleVisibility();
-  },
+  get: () => storeSelected.visibleOnes()[0].uuid,
+  set: (newSelectedUuid) => storeSelected.setOnlyOneVisible(newSelectedUuid),
 });
-const hasGeometry = ref();
 
-watch(resourceElement, () => {
-  // checkForGeometry
-  if (props.resourceType === resourceTypeDic.dataTable) {
-    const noGeometry = [-1, -1, 0, 0];
+const hasGeometry = computed(() => {
+  if (props.resourceType !== resourceTypeDic.dataTable) return false;
 
-    const a = resourceElement.value.extent.coords.join(',');
-    const b = noGeometry.join(',');
-    if (a === b) {
-      hasGeometry.value = false;
-    } else {
-      hasGeometry.value = true;
-    }
-  } else {
-    hasGeometry.value = false;
-  }
+  if (resourceElement.value['extent'] === undefined) return false;
+
+  const a = resourceElement.value.extent.coords.join(',');
+  const b = [-1, -1, 0, 0].join(',');
+  if (a === b) return false;
+
+  return true;
 });
 </script>
 
@@ -53,8 +41,14 @@ watch(resourceElement, () => {
         type="radio"
         :name="groupName"
         :value="resourceElement.uuid"
+        :checked="resourceElement.uuid === selectedResource"
       />
-      <label :for="resourceElement.uuid">{{ resourceElement.title }}</label>
+      <label :for="resourceElement.uuid">{{ resourceElement.title || 'Cargando...' }}</label>
+      <!-- <label :for="resourceElement.uuid">
+        {{ selectedResource }}, {{ resourceElement.uuid }} ({{
+          selectedResource === resourceElement.uuid
+        }})
+      </label> -->
     </div>
 
     <div class="flex flex-contenido-final">

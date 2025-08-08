@@ -3,6 +3,7 @@ import { resourceTypeDic, tooltipContent } from '~/utils/consulta';
 
 const storeFetched = useFetchedResourcesStore();
 const storeSelected = useSelectedResources2Store();
+const emit = defineEmits(['openOpacity', 'openDownload', 'openTabla', 'openMapa']);
 
 const props = defineProps({
   selectedElement: {
@@ -11,7 +12,7 @@ const props = defineProps({
   },
   resourceType: { type: String, required: true },
 });
-const emit = defineEmits(['openOpacity', 'openDownload', 'openTabla', 'openMapa']);
+
 const resourceElement = computed(() =>
   storeFetched.findResource(props.selectedElement.uuid, props.resourceType)
 );

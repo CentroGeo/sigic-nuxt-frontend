@@ -4,6 +4,7 @@ import { SisdaiLeyendaWms } from '@centrogeomx/sisdai-mapas';
 const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
 const storeSelected = useSelectedResources2Store();
+const emit = defineEmits(['opacidadClicked', 'descargaClicked', 'tablaClicked']);
 
 const props = defineProps({
   resourceElement: {
@@ -12,7 +13,6 @@ const props = defineProps({
   },
   resourceType: { type: String, required: true },
 });
-const emit = defineEmits(['opacidadClicked', 'descargaClicked', 'tablaClicked']);
 
 /**
  * Devuelve el extend de acuerdo a una capa en formato: left,bootom,rigth,top

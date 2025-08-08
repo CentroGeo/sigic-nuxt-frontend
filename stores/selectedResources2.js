@@ -141,6 +141,10 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
 
     sortedDescending,
 
+    setOnlyOneVisible(uuid) {
+      this.uuids.forEach((_uuid) => (this.byUuid(_uuid).visible = _uuid === uuid));
+    },
+
     updateResources(_uuids) {
       if (storeConsulta.resourceType === resourceTypeDic.dataLayer) {
         resources[storeConsulta.resourceType] = _uuids.reduce((acum, uuid, posicion) => {
@@ -184,7 +188,7 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
      * @returns {Array<Object>}
      */
     visibleOnes() {
-      return list().filter((resource) => resource.visible);
+      return this.sortedDescending().filter((resource) => resource.visible);
     },
   };
 });

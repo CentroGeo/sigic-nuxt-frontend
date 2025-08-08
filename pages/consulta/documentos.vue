@@ -16,16 +16,16 @@ const router = useRouter();
  * @param queryParam generado por el store.
  */
 function updateQueryFromStore(queryParam) {
-  const query = { recursos: queryParam };
+  const query = { docs: queryParam };
 
-  if (query.recursos !== route.query.recursos) {
+  if (query.docs !== route.query.docs) {
     router.replace({ query });
   }
 }
 watch(() => storeSelected.asQueryParam(), updateQueryFromStore);
 
 onMounted(() => {
-  storeSelected.addFromQueryParam(route.query.recursos);
+  storeSelected.addFromQueryParam(route.query.docs);
 
   // Para cuando hacemos el cambio de página
   if (storeSelected.uuids.length > 0) {
