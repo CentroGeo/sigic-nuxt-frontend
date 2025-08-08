@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia';
+import { reactive } from 'vue';
 import { resourceTypeDic } from '~/utils/consulta';
-import ConfiguracionOtro from '~/utils/consulta/ConfiguracionOtro';
 import SelectedLayer from '~/utils/consulta/SelectedLayer';
+import SelectedResource from '~/utils/consulta/SelectedResource';
 
 export const useSelectedResources2Store = defineStore('selectedResources2', () => {
   const storeConsulta = useConsultaStore();
@@ -83,7 +84,7 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
           .split(';')
           .reverse()
           .reduce((acum, recurso) => {
-            const obj = new ConfiguracionOtro(recurso);
+            const obj = new SelectedLayer(`${recurso}`);
 
             return { ...acum, [obj.uuid]: obj };
           }, {});
@@ -147,16 +148,6 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
 
     sortedDescending,
 
-    setSelectedElement(resourceUuid) {
-      list().forEach((element) => {
-        if (element.uuid === resourceUuid) {
-          element.setSelected(1);
-        } else {
-          element.setSelected(0);
-        }
-      });
-    },
-
     updateResources(_uuids) {
       if (storeConsulta.resourceType === resourceTypeDic.dataLayer) {
         resources[storeConsulta.resourceType] = _uuids.reduce((acum, uuid, posicion) => {
@@ -174,7 +165,7 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
         resources[storeConsulta.resourceType] = _uuids.reduce((acum, uuid, posicion) => {
           return {
             ...acum,
-            [uuid]: new ConfiguracionOtro({ uuid, isSelected: _uuids.length === posicion + 1 }),
+            [uuid]: new SelectedResource({ uuid, posicion, visible: posicion === _uuids.length - 1 }),
           };
         }, {});
       }

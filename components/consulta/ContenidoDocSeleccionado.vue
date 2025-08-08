@@ -14,12 +14,14 @@ const { groupName, resourceElement } = toRefs(props);
 
 const selectedResource = computed({
   get() {
-    return storeSelected.list().filter((element) => element.isSelected === 1)[0]['uuid'];
+    return storeSelected.visibleOnes()?.[0]['uuid'];
   },
   set(newSelectedUuid) {
-    storeSelected.setSelectedElement(newSelectedUuid);
+    const oldSelectedUuid = storeSelected.visibleOnes()?.[0]['uuid']
+    storeSelected.byUuid(oldSelectedUuid).toggleVisibility();
+    storeSelected.byUuid(newSelectedUuid).toggleVisibility();
   },
-});
+}); 
 const hasGeometry = ref();
 const noGeometry = [-1, -1, 0, 0];
 if (props.resourceType === 'dataTable') {

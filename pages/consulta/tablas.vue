@@ -11,7 +11,7 @@ const router = useRouter();
 
 const paginaActual = ref(0);
 const tamanioPagina = 10;
-const selectedUuid = computed(() => storeSelected.selectedOnes()[0]?.uuid ?? null);
+const selectedUuid = computed(() => storeSelected.visibleOnes()[0]?.uuid ?? null);
 const selectedElement = ref();
 
 const {
@@ -36,12 +36,13 @@ watch(paginaActual, () => {
 watch([() => selectedUuid.value, () => storeFetched[resourceType]], () => {
   selectedElement.value = storeFetched.findResources([selectedUuid.value], resourceType)[0];
   paginaActual.value = 0;
+  console.log(selectedUuid.value)
   fetchTable({
     paginaActual: paginaActual.value,
     tamanioPagina: tamanioPagina,
     resource: selectedElement.value,
-  });
-});
+  }); 
+}); 
 
 /**
  * Actualiza el queryParam desde los valores del store.
@@ -77,7 +78,7 @@ onMounted(() => {
       resource: selectedElement.value,
     });
   }
-});
+}); 
 </script>
 
 <template>
@@ -103,7 +104,7 @@ onMounted(() => {
           :total-paginas="Math.ceil(totalFeatures / tamanioPagina)"
           @cambio="paginaActual = $event"
         />
-      </div>
+      </div> 
     </template>
 
     <template #seleccion>
