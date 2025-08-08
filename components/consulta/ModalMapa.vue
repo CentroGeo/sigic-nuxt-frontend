@@ -1,11 +1,7 @@
 <script setup>
-import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
-import SisdaiSelector from "@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue";
-import {
-  SisdaiCapaWms,
-  SisdaiCapaXyz,
-  SisdaiMapa,
-} from "@centrogeomx/sisdai-mapas";
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
+import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
 
 const props = defineProps({
   selectedElement: {
@@ -14,21 +10,22 @@ const props = defineProps({
   },
 });
 const { selectedElement } = toRefs(props);
-const router = useRouter();
+// const router = useRouter();
 const selectedStore = useSelectedResources2Store();
 const config = useRuntimeConfig();
 const extent = ref([-118.3651, 14.5321, -86.7104, 32.7187]);
-const estiloSeleccionado = ref("Opcion 1");
-const estilosLista = ref(["Opcion 1", "Opción 2", "Opcion 3"]);
+const estiloSeleccionado = ref('Opcion 1');
+const estilosLista = ref(['Opcion 1', 'Opción 2', 'Opcion 3']);
 const modalMapa = ref(null);
-const emit = defineEmits(["notifyDownload"]);
+const emit = defineEmits(['notifyDownload']);
 
-function openLayerView() {
-  console.log('agregar la capa al store correspondiente')
-/*   const uuids = selectedStore.uuids
+async function openLayerView() {
+  console.log('agregar la capa al store correspondiente');
+  //selectedStore.updateOtherResources(props.selectedElement.uuid, 'dataLayer')
+  /*   const uuids = selectedStore.uuids
   uuids.push(props.selectedElement.uuid);
   selectedStore.updateResources(uuids);*/
-  router.push('/consulta/capas'); 
+  await navigateTo('/consulta/capas');
 }
 
 function downloadClicked() {
@@ -56,11 +53,7 @@ defineExpose({
           etiqueta="Selecciona un estilo disponible"
           instruccional="Selecciona el estilo para visualizar"
         >
-          <option
-            v-for="(estilo, index) in estilosLista"
-            :key="`estilo-${index}`"
-            :value="estilo"
-          >
+          <option v-for="(estilo, index) in estilosLista" :key="`estilo-${index}`" :value="estilo">
             {{ estilo }}
           </option>
         </SisdaiSelector>
@@ -71,19 +64,15 @@ defineExpose({
           <SisdaiCapaWms
             :capa="selectedElement.alternate"
             :fuente="`${config.public.geoserverUrl}/wms?`"
-            @alFinalizarCarga="extent = selectedElement.extent.coords"
+            @al-finalizar-carga="extent = selectedElement.extent.coords"
           />
         </SisdaiMapa>
       </template>
 
       <template #pie>
-        <button type="button" class="boton-primario" @click="openLayerView">
-          Abrir en Capas
-        </button>
+        <button type="button" class="boton-primario" @click="openLayerView">Abrir en Capas</button>
 
-        <button type="button" class="boton-primario" @click="downloadClicked()">
-          Descargar
-        </button>
+        <button type="button" class="boton-primario" @click="downloadClicked()">Descargar</button>
       </template>
     </SisdaiModal>
   </ClientOnly>

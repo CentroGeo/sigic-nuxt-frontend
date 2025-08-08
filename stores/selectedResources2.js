@@ -119,7 +119,7 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
      */
     removeByUuid(uuid) {
       //Si borramos el recurso seleccionado, marcamos el primero de la lista
-/*       if(storeConsulta.resourceType !== resourceTypeDic.dataLayer){
+      /*       if(storeConsulta.resourceType !== resourceTypeDic.dataLayer){
         const isVisible = byUuid(uuid).visible;
         if(isVisible && this.uuids.length - 1 > 0){
           byUuid(sortedDescending()[0].uuid).toggleVisibility();
@@ -127,11 +127,11 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
       } */
       delete byResourceType()[uuid];
       //Si borramos el recurso seleccionado, marcamos el primero de la lista
-      if (storeConsulta.resourceType !== resourceTypeDic.dataLayer){
-        if(this.visibleOnes().length === 0 && list().length > 0){
+      if (storeConsulta.resourceType !== resourceTypeDic.dataLayer) {
+        if (this.visibleOnes().length === 0 && list().length > 0) {
           byUuid(sortedDescending()[0].uuid).toggleVisibility();
         }
-      } 
+      }
     },
 
     /**
@@ -195,6 +195,39 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
      */
     visibleOnes() {
       return this.sortedDescending().filter((resource) => resource.visible);
+    },
+
+    updateOtherResources(addedUuid, toType) {
+      const otherKeys = Object.keys(resources[toType]);
+      if (otherKeys.includes(addedUuid)) {
+        console.log('ya en tablas');
+      } else {
+        otherKeys.push(addedUuid);
+      }
+      console.log(otherKeys, addedUuid, toType);
+      if (toType === 'dataTable') {
+        resources[toType] = otherKeys.reduce((acum, uuid, posicion) => {
+          return {
+            ...acum,
+            [uuid]: new SelectedResource({
+              uuid,
+              posicion,
+              visible: posicion === otherKeys.length - 1,
+            }),
+          };
+        }, {});
+      } else {
+        resources[toType] = otherKeys.reduce((acum, uuid, posicion) => {
+          const newResource = { [uuid]: byUuid(uuid) };
+          if (newResource[uuid]) {
+            newResource[uuid].posicion = posicion;
+          } else {
+            newResource[uuid] = new SelectedLayer({ uuid, posicion });
+          }
+
+          return { ...acum, ...newResource };
+        }, {});
+      }
     },
   };
 });

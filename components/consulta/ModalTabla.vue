@@ -6,9 +6,9 @@ const props = defineProps({
     default: () => ({}),
   },
 });
-const router = useRouter();
-const selectedStore = useSelectedResources2Store()
-const emit = defineEmits(["notifyDownload"]);
+// const router = useRouter();
+const selectedStore = useSelectedResources2Store();
+const emit = defineEmits(['notifyDownload']);
 const modalTabla = ref(null);
 const paginaActual = ref(0);
 const tamanioPagina = 10;
@@ -27,12 +27,12 @@ function abrirModalTabla() {
   modalTabla.value?.abrirModal();
 }
 
-function openTablas(){
+async function openTablas() {
   modalTabla.value?.cerrarModal();
-  console.log('agregar la capa al store correspondiente')
-  router.push('/consulta/tablas');
-}
+  selectedStore.updateOtherResources(props.selectedElement.uuid, 'dataTable');
 
+  await navigateTo('/consulta/tablas');
+}
 
 defineExpose({
   abrirModalTabla,
@@ -48,7 +48,7 @@ watch([paginaActual], () => {
 </script>
 <template>
   <ClientOnly>
-    <SisdaiModal ref="modalTabla" id="modalTabla">
+    <SisdaiModal id="modalTabla" ref="modalTabla">
       <template #encabezado>
         <h1>{{ props.selectedElement.title }}</h1>
       </template>
@@ -62,9 +62,7 @@ watch([paginaActual], () => {
       </template>
 
       <template #pie>
-        <button type="button" class="boton-primario" @click="openTablas">
-          Abrir en Tablas
-        </button>
+        <button type="button" class="boton-primario" @click="openTablas">Abrir en Tablas</button>
 
         <button type="button" class="boton-primario" @click="emit('notifyDownload')">
           Descargar
@@ -73,9 +71,4 @@ watch([paginaActual], () => {
     </SisdaiModal>
   </ClientOnly>
 </template>
-<style lang="scss" scoped>
-#modalTabla {
-  height: 80%;
-  gap: 0;
-}
-</style>
+<style lang="scss" scoped></style>
