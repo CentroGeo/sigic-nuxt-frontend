@@ -1,5 +1,8 @@
 <script setup>
+import { resourceTypeDic } from '~/utils/consulta';
+
 const storeSelected = useSelectedResources2Store();
+const emit = defineEmits(['descargaClicked', 'mapaClicked']);
 
 const props = defineProps({
   groupName: { type: String, required: true },
@@ -9,7 +12,6 @@ const props = defineProps({
   },
   resourceType: { type: String, required: true },
 });
-const emit = defineEmits(['descargaClicked', 'mapaClicked']);
 const { groupName, resourceElement } = toRefs(props);
 
 const selectedResource = computed({
@@ -17,25 +19,29 @@ const selectedResource = computed({
     return storeSelected.visibleOnes()?.[0]['uuid'];
   },
   set(newSelectedUuid) {
-    const oldSelectedUuid = storeSelected.visibleOnes()?.[0]['uuid']
+    const oldSelectedUuid = storeSelected.visibleOnes()?.[0]['uuid'];
     storeSelected.byUuid(oldSelectedUuid).toggleVisibility();
     storeSelected.byUuid(newSelectedUuid).toggleVisibility();
   },
-}); 
+});
 const hasGeometry = ref();
-const noGeometry = [-1, -1, 0, 0];
-if (props.resourceType === 'dataTable') {
-  const a = resourceElement.value.extent.coords.join(',');
-  const b = noGeometry.join(',');
-  if (a === b) {
-    hasGeometry.value = false;
-  } else {
-    hasGeometry.value = true;
-  }
-} else {
-  hasGeometry.value = false;
-}
 
+watch(resourceElement, () => {
+  // checkForGeometry
+  if (props.resourceType === resourceTypeDic.dataTable) {
+    const noGeometry = [-1, -1, 0, 0];
+
+    const a = resourceElement.value.extent.coords.join(',');
+    const b = noGeometry.join(',');
+    if (a === b) {
+      hasGeometry.value = false;
+    } else {
+      hasGeometry.value = true;
+    }
+  } else {
+    hasGeometry.value = false;
+  }
+});
 </script>
 
 <template>
@@ -50,6 +56,7 @@ if (props.resourceType === 'dataTable') {
       />
       <label :for="resourceElement.uuid">{{ resourceElement.title }}</label>
     </div>
+
     <div class="flex flex-contenido-final">
       <button
         v-if="hasGeometry"
@@ -58,8 +65,9 @@ if (props.resourceType === 'dataTable') {
         type="button"
         @click="emit('mapaClicked')"
       >
-        <span class="pictograma-capas" aria-hidden="true"></span>
+        <span class="pictograma-capas" aria-hidden="true" />
       </button>
+
       <button
         class="boton-pictograma boton-sin-contenedor-secundario"
         aria-label="Borrar selección"
@@ -68,6 +76,7 @@ if (props.resourceType === 'dataTable') {
       >
         <span class="pictograma-eliminar" aria-hidden="true" />
       </button>
+
       <button
         class="boton-pictograma boton-sin-contenedor-secundario"
         aria-label="Descargar selección"
@@ -78,7 +87,6 @@ if (props.resourceType === 'dataTable') {
       </button>
     </div>
   </div>
-
 </template>
 
 <style lang="scss" scoped>

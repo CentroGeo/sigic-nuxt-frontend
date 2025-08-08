@@ -1,5 +1,5 @@
 <script setup>
-import { tooltipContent } from '~/utils/consulta';
+import { resourceTypeDic, tooltipContent } from '~/utils/consulta';
 
 const storeFetched = useFetchedResourcesStore();
 const storeSelected = useSelectedResources2Store();
@@ -15,7 +15,6 @@ const emit = defineEmits(['openOpacity', 'openDownload', 'openTabla', 'openMapa'
 const resourceElement = computed(() =>
   storeFetched.findResource(props.selectedElement.uuid, props.resourceType)
 );
-// const resourceElement = storeFetched.findResource(props.selectedElement.uuid, props.resourceType);
 
 function goDown() {
   storeSelected.changePosition(props.selectedElement.uuid, -1);
@@ -67,7 +66,7 @@ function goUp() {
       </div>
 
       <ConsultaContenidoCapaSeleccionada
-        v-if="resourceType === 'dataLayer'"
+        v-if="resourceType === resourceTypeDic.dataLayer"
         :resource-type="resourceType"
         :resource-element="resourceElement"
         @opacidad-clicked="emit('openOpacity', resourceElement)"

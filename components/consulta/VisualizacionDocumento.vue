@@ -1,10 +1,12 @@
 <script setup>
 import { onBeforeUnmount, ref } from 'vue';
+import { resourceTypeDic } from '~/utils/consulta';
+
+const resourceType = resourceTypeDic.document;
 
 const storeFetched = useFetchedResourcesStore();
 const storeSelected = useSelectedResources2Store();
 
-const resourceType = 'document';
 //const urlEmbebido = ref(null);
 const embedRef = ref(null);
 const selectedUuid = computed(() => storeSelected.visibleOnes()[0]?.uuid ?? null);
@@ -27,7 +29,7 @@ const urlEmbebido = ref(
 
 watch(selectedElement, (nv) => {
   (async () => {
-    console.log('cambio el uuid');
+    // console.log('cambio el uuid');
     if (nv) {
       urlEmbebido.value = null; // limpiar antes de volver a asignar
       await nextTick(); // esperar a que el DOM reaccione

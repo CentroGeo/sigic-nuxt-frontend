@@ -61,6 +61,8 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
       resources[resourceTypeDic.document] = {};
     },
 
+    // addByUuid() {},
+
     /**
      * Agrega a la selección los recurson que encuentre en el queryParam.
      * @param {String} queryParam de los recursos separados por punto y coma (;).
@@ -69,26 +71,17 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
       // Validar si el queryParam se puede parsear
       if (queryParam === undefined || queryParam === '') return;
 
-      if (storeConsulta.resourceType === resourceTypeDic.dataLayer) {
-        resources[storeConsulta.resourceType] = queryParam
-          .split(';')
-          .reverse()
-          .reduce((acum, txt, posicion) => {
-            const obj = new SelectedLayer(`${txt},${posicion}`);
+      const ObjectToUse =
+        storeConsulta.resourceType === resourceTypeDic.dataLayer ? SelectedLayer : SelectedResource;
 
-            return { ...acum, [obj.uuid]: obj };
-          }, {});
-      } else {
-        // this[resourceType] = queryParam.split(';').map((recurso) => new ConfiguracionOtro(recurso));
-        resources[storeConsulta.resourceType] = queryParam
-          .split(';')
-          .reverse()
-          .reduce((acum, recurso) => {
-            const obj = new SelectedLayer(`${recurso}`);
+      resources[storeConsulta.resourceType] = queryParam
+        .split(';')
+        .reverse()
+        .reduce((acum, txt, posicion) => {
+          const newResource = new ObjectToUse(`${txt},${posicion}`);
 
-            return { ...acum, [obj.uuid]: obj };
-          }, {});
-      }
+          return { ...acum, [newResource.uuid]: newResource };
+        }, {});
     },
 
     byUuid,
@@ -121,7 +114,7 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
     },
 
     /**
-     * Elimina un recurso de la selección.
+     * Elimina un recurso de la selección. Si elimina una tabla o doc seleccionado, reselecciona el primero.
      * @param {String} uuid del recurso a eliminar.
      */
     removeByUuid(uuid) {
@@ -171,7 +164,11 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
         resources[storeConsulta.resourceType] = _uuids.reduce((acum, uuid, posicion) => {
           return {
             ...acum,
-            [uuid]: new SelectedResource({ uuid, posicion, visible: posicion === _uuids.length - 1 }),
+            [uuid]: new SelectedResource({
+              uuid,
+              posicion,
+              visible: posicion === _uuids.length - 1,
+            }),
           };
         }, {});
       }
@@ -188,11 +185,12 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
      */
     uuids: computed(() => Object.keys(byResourceType())),
 
+    /**
+     * Devuelve solo los recursos que son visibles.
+     * @returns {Array<Object>}
+     */
     visibleOnes() {
       return list().filter((resource) => resource.visible);
-    },
-    selectedOnes() {
-      return list().filter((resource) => resource.isSelected === 1);
     },
   };
 });

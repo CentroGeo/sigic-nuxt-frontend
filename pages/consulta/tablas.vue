@@ -1,5 +1,7 @@
 <script setup>
-const resourceType = 'dataTable';
+import { resourceTypeDic } from '~/utils/consulta';
+
+const resourceType = resourceTypeDic.dataTable;
 
 const storeConsulta = useConsultaStore();
 const storeFetched = useFetchedResourcesStore();
@@ -36,12 +38,13 @@ watch(paginaActual, () => {
 watch([() => selectedUuid.value, () => storeFetched[resourceType]], () => {
   selectedElement.value = storeFetched.findResources([selectedUuid.value], resourceType)[0];
   paginaActual.value = 0;
+  // console.log(selectedUuid.value);
   fetchTable({
     paginaActual: paginaActual.value,
     tamanioPagina: tamanioPagina,
     resource: selectedElement.value,
-  }); 
-}); 
+  });
+});
 
 /**
  * Actualiza el queryParam desde los valores del store.
@@ -56,17 +59,9 @@ function updateQueryFromStore(queryParam) {
 }
 watch(() => storeSelected.asQueryParam(), updateQueryFromStore);
 
-/**
- * Actualiza el store desde los valores del queryParam.
- * @param queryParam que llega desde la url.
- */
-function updateStoreFromQuery(queryParam) {
-  storeSelected.addFromQueryParam(queryParam);
-  // console.log('recursos tablas:', storeSelected.list());
-}
-
 onMounted(() => {
-  updateStoreFromQuery(route.query.recursos);
+  storeSelected.addFromQueryParam(route.query.recursos);
+
   // Para cuando hacemos el cambio de página
   if (storeSelected.uuids.length > 0) {
     updateQueryFromStore(storeSelected.asQueryParam());
@@ -77,7 +72,7 @@ onMounted(() => {
       resource: selectedElement.value,
     });
   }
-}); 
+});
 </script>
 
 <template>
@@ -103,7 +98,7 @@ onMounted(() => {
           :total-paginas="Math.ceil(totalFeatures / tamanioPagina)"
           @cambio="paginaActual = $event"
         />
-      </div> 
+      </div>
     </template>
 
     <template #seleccion>

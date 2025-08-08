@@ -40,5 +40,4 @@ export default class SelectedResource {
   toggleVisibility() {
     this.visible = !this.visible;
   }
-
 }

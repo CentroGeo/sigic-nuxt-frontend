@@ -1,5 +1,7 @@
 <script setup>
-const resourceType = 'document';
+import { resourceTypeDic } from '~/utils/consulta';
+
+const resourceType = resourceTypeDic.document;
 
 const storeConsulta = useConsultaStore();
 const storeFetched = useFetchedResourcesStore();
@@ -22,17 +24,9 @@ function updateQueryFromStore(queryParam) {
 }
 watch(() => storeSelected.asQueryParam(), updateQueryFromStore);
 
-/**
- * Actualiza el store desde los valores del queryParam.
- * @param queryParam que llega desde la url.
- */
-function updateStoreFromQuery(queryParam) {
-  storeSelected.addFromQueryParam(queryParam);
-  // console.log('recursos tablas:', storeSelected[resourceType]);
-}
-
 onMounted(() => {
-  updateStoreFromQuery(route.query.recursos);
+  storeSelected.addFromQueryParam(route.query.recursos);
+
   // Para cuando hacemos el cambio de página
   if (storeSelected.uuids.length > 0) {
     updateQueryFromStore(storeSelected.asQueryParam());

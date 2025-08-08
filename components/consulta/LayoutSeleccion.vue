@@ -1,4 +1,6 @@
 <script setup>
+import { resourceTypeDic } from '~/utils/consulta';
+
 const storeSelected = useSelectedResources2Store();
 
 const props = defineProps({
@@ -14,71 +16,72 @@ const buttonTagDict = {
   dataTable: 'archivos',
   document: 'archivos',
 };
-//const route = useRoute();
+// const route = useRoute();
 
-const shownModal = ref('ninguno')
-const modalResource = ref(null)
+const shownModal = ref('ninguno');
+const modalResource = ref(null);
 
 const downloadAllChild = ref(null);
-const downloadOneChild = ref(null)
-const opacityChild = ref(null)
+const downloadOneChild = ref(null);
+const opacityChild = ref(null);
 const tablaChild = ref(null);
 const shareChild = ref(null);
 const mapChild = ref(null);
 
 function notifyDownloadAllChild() {
-  shownModal.value = 'downloadAll',
-    nextTick(() => {
+  shownModal.value = 'downloadAll';
+  nextTick(() => {
     downloadAllChild.value?.abrirModalDescargaAll();
   });
 }
 
-function notifyDownloadOneChild(resource){
-  shownModal.value = "downloadOne"
-  modalResource.value = resource
+function notifyDownloadOneChild(resource) {
+  shownModal.value = 'downloadOne';
+  modalResource.value = resource;
   nextTick(() => {
     downloadOneChild.value?.abrirModalDescarga();
-  })
+  });
 }
-function notifyTablaChild(resource){
-  shownModal.value = "tablaModal"
-  modalResource.value = resource
+function notifyTablaChild(resource) {
+  shownModal.value = 'tablaModal';
+  modalResource.value = resource;
   nextTick(() => {
     tablaChild.value?.abrirModalTabla();
-  })
+  });
 }
-function notifyOpacityChild(resource){
-  shownModal.value = "opacityModal"
-  modalResource.value = resource
+function notifyOpacityChild(resource) {
+  shownModal.value = 'opacityModal';
+  modalResource.value = resource;
   nextTick(() => {
     opacityChild.value?.abrirModalOpacidad();
-  })
+  });
 }
 
-function notifyMapaChild(resource){
-  shownModal.value = 'mapModal'
-  modalResource.value = resource
+function notifyMapaChild(resource) {
+  shownModal.value = 'mapModal';
+  modalResource.value = resource;
   nextTick(() => {
     mapChild.value?.abrirModalMapa();
-  })
-  console.log(resource)
+  });
+  // console.log(resource);
 }
 function notifyShareChild() {
   shareChild.value?.abrirModalCompartir();
 }
 
 function shareState() {
-  shownModal.value = 'share'
+  shownModal.value = 'share';
   //console.log('Se copia el url en el portapapeles: ', route.fullPath);
   nextTick(() => {
     notifyShareChild();
   });
 }
 
-function changeModal(to){
-  if(to === 'downloadOne'){
-    notifyDownloadOneChild(modalResource.value)
-  }}
+function changeModal(to) {
+  if (to === 'downloadOne') {
+    notifyDownloadOneChild(modalResource.value);
+  }
+}
 </script>
 
 <template>
@@ -94,7 +97,11 @@ function changeModal(to){
             type="button"
             class="boton-primario"
             aria-label="Descargar mapa"
-            @click="resourceType === 'dataLayer' ? funcionDescarga() : notifyDownloadAllChild()"
+            @click="
+              resourceType === resourceTypeDic.dataLayer
+                ? funcionDescarga()
+                : notifyDownloadAllChild()
+            "
           >
             Descargar {{ buttonTagDict[resourceType] }}
             <span class="pictograma-mapa-generador" aria-hidden="true" />
@@ -139,45 +146,44 @@ function changeModal(to){
 
     <div id="los-modales">
       <ConsultaModalDescargaAll
-        v-if="shownModal === 'downloadAll'" 
-        ref="downloadAllChild" 
-        :resource-type="resourceType" />
+        v-if="shownModal === 'downloadAll'"
+        ref="downloadAllChild"
+        :resource-type="resourceType"
+      />
 
-      <ConsultaModalCompartir 
-        v-if="shownModal === 'share'" 
-        ref="shareChild" />
+      <ConsultaModalCompartir v-if="shownModal === 'share'" ref="shareChild" />
 
       <ConsultaModalDescarga
         v-if="shownModal === 'downloadOne'"
         ref="downloadOneChild"
+        :key="`${modalResource.uuid}_${resourceType}`"
         :resource-type="resourceType"
         :selected-element="modalResource"
-        :key="`${modalResource.uuid}_${resourceType}`"/>
+      />
 
-      <ConsultaModalOpacidad 
+      <ConsultaModalOpacidad
         v-if="shownModal === 'opacityModal'"
-        ref="opacityChild" 
-        :selected-element="modalResource"
+        ref="opacityChild"
         :key="`${modalResource.uuid}_${resourceType}`"
-       />
-      
+        :selected-element="modalResource"
+      />
+
       <ConsultaModalTabla
         v-if="shownModal === 'tablaModal'"
         ref="tablaChild"
-        :selected-element="modalResource"
         :key="`${modalResource.uuid}_${resourceType}`"
+        :selected-element="modalResource"
         @notify-download="changeModal('downloadOne')"
-    />
+      />
 
       <ConsultaModalMapa
         v-if="shownModal === 'mapModal'"
         ref="mapChild"
-        :selected-element="modalResource"  
         :key="`${modalResource.uuid}_${resourceType}`"
+        :selected-element="modalResource"
         @notify-download="changeModal('downloadOne')"
-      /> 
+      />
     </div>
-
   </div>
 </template>
 
