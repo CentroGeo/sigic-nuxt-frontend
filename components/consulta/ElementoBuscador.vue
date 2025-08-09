@@ -9,7 +9,6 @@ import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
-const resourcesStore = useSelectedResources2Store();
 const props = defineProps({
   resourcesList: { type: Array, default: () => [] },
   categories: { type: Array, default: () => [] },
@@ -93,8 +92,8 @@ function filterByInput(r) {
 }
 
 watch(catalogoFiltrado, () => {
-  console.log("buscador", catalogoFiltrado.value)
-})
+  console.log('buscador', catalogoFiltrado.value);
+});
 </script>
 <template>
   <SisdaiModal ref="modalFiltros">
