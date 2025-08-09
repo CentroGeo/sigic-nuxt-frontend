@@ -64,18 +64,18 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
     /**
      * Agrega a la selección los recurson que encuentre en el queryParam.
      * @param {String} queryParam de los recursos separados por punto y coma (;).
+     * @param {String} resourceType tipo de recursos a modificar.
      */
-    addFromQueryParam(queryParam) {
+    addFromQueryParam(queryParam, resourceType = storeConsulta.resourceType) {
       // Validar si el queryParam se puede parsear
       if (queryParam === undefined || queryParam === '') return;
 
       const ClassToUse =
-        storeConsulta.resourceType === resourceTypeDic.dataLayer ? SelectedLayer : SelectedResource;
-
+        resourceType === resourceTypeDic.dataLayer ? SelectedLayer : SelectedResource;
       queryParam
         .split(';')
         .reverse()
-        .forEach((txt, position) => this.add(new ClassToUse(`${txt},${position}`)));
+        .forEach((txt, position) => this.add(new ClassToUse(`${txt},${position}`), resourceType));
     },
 
     /**
@@ -125,6 +125,7 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
     /**
      * Elimina un recurso de la selección. Si elimina una tabla o doc seleccionado, reselecciona el primero.
      * @param {String} uuid del recurso a eliminar.
+     * @param {String} resourceType tipo de resurso a consultar.
      */
     removeByUuid(uuidToRemove, resourceType = storeConsulta.resourceType) {
       const wasVisible = this.byUuid(uuidToRemove, resourceType).visible;
@@ -181,8 +182,8 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
     },
 
     /**
-     *
-     * @param {String} uuid
+     * Asigna visivilidad solo a un elemento de la selección.
+     * @param {String} uuid del recurso a modificar.
      */
     setOnlyOneVisible(uuid) {
       this.uuids.forEach((_uuid) => (this.byUuid(_uuid).visible = _uuid === uuid));
@@ -234,9 +235,9 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
  * Devuelve las listas de elementos no encontrados en dos listas.
  * @param {Array<String>} list1
  * @param {Array<String>} list2
- * @returns {Object} objeto con dos propiedades: `news` -> elementos del list2
- * no entontrados en list1 y `olds` -> elementos del list1 no entontrados en
- * list2
+ * @returns {Object} objeto con dos propiedades:
+ * - `news` -> elementos de list2 no entontrados en list1
+ * - `olds` -> elementos de list1 no entontrados en list2
  */
 function arrayNewsOlds(list1, list2) {
   const news = list2.filter((item) => !list1.includes(item));
