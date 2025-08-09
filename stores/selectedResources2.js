@@ -16,27 +16,11 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
   /**
    * Devuelve un objeto con los recursos seleccionados, el uuid es el key de
    * cada objeto.
+   * @param {String} resourceType tipo de resursos a consultar.
    * @returns {Object} objeto de recursos seleccionados.
    */
-  function byResourceType() {
-    return resources[storeConsulta.resourceType];
-  }
-
-  /**
-   * Devuelve un recurso seleccionado que coincidan con un uuid.
-   * @param {String} uuid del catalogo a buscar.
-   * @returns {Object} objeto del recurso seleccionado.
-   */
-  function byUuid(uuid) {
-    return byResourceType()[uuid];
-  }
-
-  /**
-   * Devuelve la lista de los recursos seleccionados.
-   * @returns {Array<Object>} lista de selección.
-   */
-  function list() {
-    return Object.values(byResourceType());
+  function byResourceType(resourceType = storeConsulta.resourceType) {
+    return resources[resourceType];
   }
 
   return {
@@ -51,14 +35,26 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
 
     /**
      * Agrega un nuevo elemento a los recursos seleccionados.
-     * @param {SelectedResource} newResource
+     * @param {SelectedResource} newResource instancia del recurso.
+     * @param {String} resourceType tipo de resurso a agregar.
      */
     add(newResource, resourceType = storeConsulta.resourceType) {
+      if (this.byUuid(newResource.uuid, resourceType)) {
+        this.removeByUuid(newResource.uuid, resourceType);
+      }
+
+      // Si el nuevo recurso no tiene posición asignada
+      if (isNaN(newResource.posicion)) {
+        newResource.posicion = this.list(resourceType).length;
+      }
+
       // Cuando no se agrega una capa
       if (resourceType !== resourceTypeDic.dataLayer) {
         // Si el nuevo recurso tiene visibilidad, quitar visibiidad a los demás
         if (newResource.visible) {
-          this.uuids.forEach((uuid) => (this.byUuid(uuid).visible = false));
+          this.list(resourceType).forEach(({ uuid }) => {
+            this.byUuid(uuid, resourceType).visible = false;
+          });
         }
       }
 
@@ -80,18 +76,17 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
         .split(';')
         .reverse()
         .forEach((txt, position) => this.add(new ClassToUse(`${txt},${position}`)));
-
-      // resources[storeConsulta.resourceType] = queryParam
-      //   .split(';')
-      //   .reverse()
-      //   .reduce((acum, txt, posicion) => {
-      //     const newResource = new ClassToUse(`${txt},${posicion}`);
-
-      //     return { ...acum, [newResource.uuid]: newResource };
-      //   }, {});
     },
 
-    byUuid,
+    /**
+     * Devuelve un recurso seleccionado que coincidan con un uuid.
+     * @param {String} uuid del catalogo a buscar.
+     * @param {String} resourceType tipo de resurso a consultar.
+     * @returns {Object} objeto del recurso seleccionado.
+     */
+    byUuid(uuid, resourceType = storeConsulta.resourceType) {
+      return byResourceType(resourceType)[uuid];
+    },
 
     /**
      * Cambia la posición de un elemento afectando a los otros. Si se sube una
@@ -101,17 +96,24 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
      * @param {Number} addPosition nuemro de posiciones a modificar.
      */
     changePosition(uuid, addPosition) {
-      const { posicion } = byUuid(uuid);
+      const { posicion } = this.byUuid(uuid);
       const newPosition = posicion + addPosition;
-      const { uuid: uuidB } = list().find(({ posicion }) => posicion === newPosition);
+      const { uuid: uuidB } = this.list().find(({ posicion }) => posicion === newPosition);
 
       // console.log('cambiar:', uuid, 'de', posicion, 'a', newPosition);
       // console.log('cambiar:', uuidB, 'de', newPosition, 'a', posicion);
-      byUuid(uuid).posicion = newPosition;
-      byUuid(uuidB).posicion = posicion;
+      this.byUuid(uuid).posicion = newPosition;
+      this.byUuid(uuidB).posicion = posicion;
     },
 
-    list,
+    /**
+     * Devuelve la lista de los recursos seleccionados.
+     * @param {String} resourceType tipo de recursos a consultar.
+     * @returns {Array<Object>} lista de selección.
+     */
+    list(resourceType = storeConsulta.resourceType) {
+      return Object.values(byResourceType(resourceType));
+    },
 
     /**
      * Vacía la selección de los recursos seleccionados.
@@ -124,21 +126,21 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
      * Elimina un recurso de la selección. Si elimina una tabla o doc seleccionado, reselecciona el primero.
      * @param {String} uuid del recurso a eliminar.
      */
-    removeByUuid(uuidToRemove) {
-      const wasVisible = this.byUuid(uuidToRemove).visible;
+    removeByUuid(uuidToRemove, resourceType = storeConsulta.resourceType) {
+      const wasVisible = this.byUuid(uuidToRemove, resourceType).visible;
 
-      delete byResourceType()[uuidToRemove];
+      delete byResourceType(resourceType)[uuidToRemove];
 
       // Reasignar las posiciones cada que se elimine un elemento
-      this.sortedAscending().forEach(({ uuid }, idx) => {
-        this.byUuid(uuid).posicion = idx;
+      this.sortedAscending(resourceType).forEach(({ uuid }, idx) => {
+        this.byUuid(uuid, resourceType).posicion = idx;
       });
 
       // Cuando no se elimine una capa
-      if (storeConsulta.resourceType !== resourceTypeDic.dataLayer) {
+      if (resourceType !== resourceTypeDic.dataLayer) {
         // Si se elimina el recurso seleccionado, marca el último de la lista
-        if (wasVisible && this.uuids.length > 0) {
-          this.byUuid(this.sortedDescending()[0].uuid).visible = true;
+        if (wasVisible && this.list(resourceType).length > 0) {
+          this.byUuid(this.sortedDescending(resourceType)[0].uuid, resourceType).visible = true;
         }
       }
     },
@@ -157,11 +159,11 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
     /**
      * Devuelve la lista de objetos seleccionados ordenados de forma ascendente.
      * por su posición.
+     * @param {String} resourceType tipo de recursos a consultar.
      * @returns {Array<SelectedLayer>}
      */
-    sortedAscending() {
-      // sorted ascending, sorted descending
-      return this.list().sort((a, b) => {
+    sortedAscending(resourceType = storeConsulta.resourceType) {
+      return this.list(resourceType).sort((a, b) => {
         return a.posicion - b.posicion;
       });
     },
@@ -169,11 +171,11 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
     /**
      * Devuelve la lista de objetos seleccionados ordenados de forma decendente.
      * por su posición.
+     * @param {String} resourceType tipo de recursos a consultar.
      * @returns {Array<SelectedLayer>}
      */
-    sortedDescending() {
-      // sorted ascending, sorted descending
-      return this.list().sort((a, b) => {
+    sortedDescending(resourceType = storeConsulta.resourceType) {
+      return this.list(resourceType).sort((a, b) => {
         return b.posicion - a.posicion;
       });
     },
@@ -192,56 +194,16 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
      * agregar elementos los agrega. Los uuids que no deba quitar o agregar, los
      * conserva.
      * @param {Array<String>} newUuids
+     * @param {String} resourceType tipo de recursos a modificar.
      */
-    updateByUuids(newUuids) {
-      // function arrayNewsOlds(array1, array2) {
-      //   const news = array2.filter((item) => !array1.includes(item));
-      //   const olds = array1.filter((item) => !array2.includes(item));
+    updateByUuids(newUuids, resourceType = storeConsulta.resourceType) {
+      const { news, olds } = arrayNewsOlds(this.uuids, newUuids);
 
-      //   return { news, olds };
-      // }
-      // const { news, olds } = arrayNewsOlds(this.uuids, newUuids);
-
-      const news = newUuids.filter((item) => !this.uuids.includes(item));
-      const olds = this.uuids.filter((item) => !newUuids.includes(item));
-
-      olds.forEach((uuid) => this.removeByUuid(uuid));
+      olds.forEach((uuid) => this.removeByUuid(uuid, resourceType));
 
       const ClassToUse =
-        storeConsulta.resourceType === resourceTypeDic.dataLayer ? SelectedLayer : SelectedResource;
-      news.forEach((uuid) => this.add(new ClassToUse({ uuid, posicion: this.uuids.length })));
-    },
-
-    updateResources(_uuids) {
-      if (storeConsulta.resourceType === resourceTypeDic.dataLayer) {
-        resources[storeConsulta.resourceType] = _uuids.reduce((acum, uuid, posicion) => {
-          const newResource = { [uuid]: byUuid(uuid) };
-          if (newResource[uuid]) {
-            newResource[uuid].posicion = posicion;
-          } else {
-            newResource[uuid] = new SelectedLayer({ uuid, posicion });
-          }
-
-          return { ...acum, ...newResource };
-        }, {});
-      } else {
-        // this[resourceType] = resources.map((uuid) => new ConfiguracionOtro({ uuid }));
-        resources[storeConsulta.resourceType] = _uuids.reduce((acum, uuid, posicion) => {
-          return {
-            ...acum,
-            [uuid]: new SelectedResource({
-              uuid,
-              posicion,
-              visible: posicion === _uuids.length - 1,
-            }),
-          };
-        }, {});
-      }
-      // Seleccionamos el ultimo recurso para tablas y docs
-      // if (storeConsulta.resourceType !== resourceTypeDic.dataLayer) {
-      //   const last = list().at(-1);
-      //   last?.setSelected(1);
-      // }
+        resourceType === resourceTypeDic.dataLayer ? SelectedLayer : SelectedResource;
+      news.forEach((uuid) => this.add(new ClassToUse({ uuid }), resourceType));
     },
 
     /**
@@ -250,49 +212,35 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
      */
     uuids: computed(() => Object.keys(byResourceType())),
 
-    /**
+    /** D E P R E C A D O: si solo necesita un elemento, usar: lastVisible()
      * Devuelve solo los recursos que son visibles.
      * @returns {Array<Object>}
      */
-    visibleOnes() {
-      return this.sortedDescending().filter((resource) => resource.visible);
-    },
+    // visibleOnes() {
+    //   return this.sortedDescending().filter((resource) => resource.visible);
+    // },
 
+    /**
+     * Devuelve el último objeto que esté visible.
+     * @returns {SelectedResource}
+     */
     lastVisible() {
       return this.sortedDescending().find((resource) => resource.visible);
     },
-
-    updateOtherResources(addedUuid, toType) {
-      const otherKeys = Object.keys(resources[toType]);
-      if (otherKeys.includes(addedUuid)) {
-        console.log('ya en tablas');
-      } else {
-        otherKeys.push(addedUuid);
-      }
-      console.log(otherKeys, addedUuid, toType);
-      if (toType === 'dataTable') {
-        resources[toType] = otherKeys.reduce((acum, uuid, posicion) => {
-          return {
-            ...acum,
-            [uuid]: new SelectedResource({
-              uuid,
-              posicion,
-              visible: posicion === otherKeys.length - 1,
-            }),
-          };
-        }, {});
-      } else {
-        resources[toType] = otherKeys.reduce((acum, uuid, posicion) => {
-          const newResource = { [uuid]: byUuid(uuid) };
-          if (newResource[uuid]) {
-            newResource[uuid].posicion = posicion;
-          } else {
-            newResource[uuid] = new SelectedLayer({ uuid, posicion });
-          }
-
-          return { ...acum, ...newResource };
-        }, {});
-      }
-    },
   };
 });
+
+/**
+ * Devuelve las listas de elementos no encontrados en dos listas.
+ * @param {Array<String>} list1
+ * @param {Array<String>} list2
+ * @returns {Object} objeto con dos propiedades: `news` -> elementos del list2
+ * no entontrados en list1 y `olds` -> elementos del list1 no entontrados en
+ * list2
+ */
+function arrayNewsOlds(list1, list2) {
+  const news = list2.filter((item) => !list1.includes(item));
+  const olds = list1.filter((item) => !list2.includes(item));
+
+  return { news, olds };
+}

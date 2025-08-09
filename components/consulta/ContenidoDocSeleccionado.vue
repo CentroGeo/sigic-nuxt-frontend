@@ -15,7 +15,7 @@ const props = defineProps({
 const { groupName, resourceElement } = toRefs(props);
 
 const selectedResource = computed({
-  get: () => storeSelected.visibleOnes()[0].uuid,
+  get: () => storeSelected.lastVisible().uuid,
   set: (newSelectedUuid) => storeSelected.setOnlyOneVisible(newSelectedUuid),
 });
 
@@ -44,11 +44,6 @@ const hasGeometry = computed(() => {
         :checked="resourceElement.uuid === selectedResource"
       />
       <label :for="resourceElement.uuid">{{ resourceElement.title || 'Cargando...' }}</label>
-      <!-- <label :for="resourceElement.uuid">
-        {{ selectedResource }}, {{ resourceElement.uuid }} ({{
-          selectedResource === resourceElement.uuid
-        }})
-      </label> -->
     </div>
 
     <div class="flex flex-contenido-final">

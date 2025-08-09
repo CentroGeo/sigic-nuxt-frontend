@@ -16,7 +16,7 @@ export default class SelectedResource {
 
     this.uuid = _options.uuid || undefined;
     this.visible = _options.visible ?? 1;
-    this.posicion = _options.posicion || 0;
+    this.posicion = _options.posicion;
   }
 
   get asQueryParam() {

@@ -9,7 +9,7 @@ const storeSelected = useSelectedResources2Store();
 
 //const urlEmbebido = ref(null);
 const embedRef = ref(null);
-const selectedUuid = computed(() => storeSelected.visibleOnes()[0]?.uuid ?? null);
+const selectedUuid = computed(() => storeSelected.lastVisible()?.uuid ?? null);
 const selectedElement = computed(() => {
   if (!selectedUuid.value) return null;
   return storeFetched.findResources([selectedUuid.value], resourceType)[0] ?? null;
