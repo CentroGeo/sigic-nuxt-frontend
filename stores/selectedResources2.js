@@ -79,6 +79,17 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
     },
 
     /**
+     * Devuelde los recursos almacenados en la selección en formato url para el
+     * query param.
+     * @returns {String}
+     */
+    asQueryParam() {
+      return this.sortedDescending()
+        .map((resource) => resource.asQueryParam)
+        .join(';');
+    },
+
+    /**
      * Devuelve un recurso seleccionado que coincidan con un uuid.
      * @param {String} uuid del catalogo a buscar.
      * @param {String} resourceType tipo de resurso a consultar.
@@ -107,19 +118,20 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
     },
 
     /**
+     * Devuelve el último objeto que esté visible.
+     * @returns {SelectedResource}
+     */
+    lastVisible() {
+      return this.sortedDescending().find((resource) => resource.visible);
+    },
+
+    /**
      * Devuelve la lista de los recursos seleccionados.
      * @param {String} resourceType tipo de recursos a consultar.
      * @returns {Array<Object>} lista de selección.
      */
     list(resourceType = storeConsulta.resourceType) {
       return Object.values(byResourceType(resourceType));
-    },
-
-    /**
-     * Vacía la selección de los recursos seleccionados.
-     */
-    reset() {
-      resources[storeConsulta.resourceType] = {};
     },
 
     /**
@@ -147,14 +159,18 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
     },
 
     /**
-     * Devuelde los recursos almacenados en la selección en formato url para el
-     * query param.
-     * @returns {String}
+     * Vacía la selección de los recursos seleccionados.
      */
-    asQueryParam() {
-      return this.sortedDescending()
-        .map((resource) => resource.asQueryParam)
-        .join(';');
+    reset() {
+      resources[storeConsulta.resourceType] = {};
+    },
+
+    /**
+     * Asigna visivilidad solo a un elemento de la selección.
+     * @param {String} uuid del recurso a modificar.
+     */
+    setOnlyOneVisible(uuid) {
+      this.uuids.forEach((_uuid) => (this.byUuid(_uuid).visible = _uuid === uuid));
     },
 
     /**
@@ -182,14 +198,6 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
     },
 
     /**
-     * Asigna visivilidad solo a un elemento de la selección.
-     * @param {String} uuid del recurso a modificar.
-     */
-    setOnlyOneVisible(uuid) {
-      this.uuids.forEach((_uuid) => (this.byUuid(_uuid).visible = _uuid === uuid));
-    },
-
-    /**
      * Actualiza los elementos seleccionados de acuerdo a una lista de uuids,
      * si detecta que se deben quitar elementos los elimina, si detecta que debe
      * agregar elementos los agrega. Los uuids que no deba quitar o agregar, los
@@ -212,22 +220,6 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
      * @type {Array<string>}
      */
     uuids: computed(() => Object.keys(byResourceType())),
-
-    /** D E P R E C A D O: si solo necesita un elemento, usar: lastVisible()
-     * Devuelve solo los recursos que son visibles.
-     * @returns {Array<Object>}
-     */
-    // visibleOnes() {
-    //   return this.sortedDescending().filter((resource) => resource.visible);
-    // },
-
-    /**
-     * Devuelve el último objeto que esté visible.
-     * @returns {SelectedResource}
-     */
-    lastVisible() {
-      return this.sortedDescending().find((resource) => resource.visible);
-    },
   };
 });
 
