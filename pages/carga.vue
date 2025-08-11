@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import SisdaiAreaTexto from '@centrogeomx/sisdai-componentes/src/componentes/area-texto/SisdaiAreaTexto.vue';
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiCasillaVerificacion from '@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
@@ -19,13 +18,43 @@ const campoURL = ref('');
 const campoCapaODataset = ref('');
 const seleccionFormatoRespuesta = ref('');
 const areaTextoDescripcion = ref('');
-const casillaUnicaAutenticacion = ref(false);
+// const casillaUnicaAutenticacion = ref(false);
+const casillaUnicaAutenticacion0 = ref(false);
+const casillaUnicaAutenticacion1 = ref(false);
+const casillaUnicaAutenticacion2 = ref(false);
 const seleccionTipoAutenticacion = ref('');
 const campoContrasenia = ref('');
 const campoUsuario = ref('');
 const campoToken = ref('');
+const modalImportar = ref(null);
+const mensajeImportarCatalogo = ref('');
 
-function conectarCatalogoExterno() {}
+async function importarCatalogoExterno() {
+  const token = ref(data.value?.accessToken);
+  // type: 'REST_MAP'
+  // url:
+  // const { body } = await $fetch('/api/externo', {
+  //   method: 'POST',
+  //   body: { url: campoURL.value, type: 'REST_MAP', token: token.value },
+  // });
+  // console.log('body', body)
+  // modalCatalogoExternos.value?.cerrarModal()
+  modalImportar.value?.cerrarModal();
+  mensajeImportarCatalogo.value = 'Los recursos seleccionados han sido importados';
+}
+
+async function crearCatalogoExterno() {
+  const token = ref(data.value?.accessToken);
+  // type: 'REST_MAP'
+  // url:
+  // const { body } = await $fetch('/api/externo', {
+  //   method: 'POST',
+  //   body: { url: campoURL.value, type: 'REST_MAP', token: token.value },
+  // });
+  // console.log('body', body)
+  modalCatalogoExternos.value?.cerrarModal();
+  modalImportar.value?.abrirModal();
+}
 
 const archivo = ref<File | null>(null);
 const titulo = ref('');
@@ -61,7 +90,7 @@ async function subirArchivo() {
       <div class="contenedor">
         <h3>Sección</h3>
         <input type="file" @change="(e) => (archivo = e.target.files[0])" />
-        <input v-model="titulo" placeholder="Título" />
+        <input v-model="titulo" placeholder="Título" class="m-y-1" />
         <!-- <input v-model="descripcion" placeholder="Descripción" /> -->
         <ClientOnly>
           <SisdaiCampoBase
@@ -78,7 +107,7 @@ async function subirArchivo() {
 
         <div class="m-t-3">
           <ClientOnly>
-            <SisdaiModal ref="modalCatalogoExternos" tamanio-modal="modal-grande">
+            <SisdaiModal ref="modalCatalogoExternos" tamanio-modal="modal-chico">
               <template #encabezado>
                 <h2>Conexión a catálogos externos</h2>
               </template>
@@ -87,27 +116,33 @@ async function subirArchivo() {
                 <!-- se añida formulario Form -->
                 <h3>Datos generales del servicio</h3>
                 <form @keypress.enter.exact.prevent="conectarCatalogoExterno()">
-                  <ClientOnly>
-                    <SisdaiCampoBase
+                  <ClientOnly class="flex">
+                    <!-- <SisdaiCampoBase
                       v-model="campoTitulo"
                       etiqueta="Título"
                       ejemplo="Añade un nombre"
+                    /> -->
+                    <SisdaiCampoBase
+                      v-model="campoURL"
+                      etiqueta="Servicio URL"
+                      ejemplo="http://"
+                      tipo="url"
                     />
-                    <SisdaiSelector v-model="seleccionTipoFuente" etiqueta="Tipo de fuente">
-                      <option value="1">WMS</option>
+                    <SisdaiSelector
+                      v-model="seleccionTipoFuente"
+                      etiqueta="Tipo de servicio"
+                      class="m-y-1"
+                    >
+                      <option value="1">...</option>
+                      <option value="2">...</option>
+                      <!-- <option value="1">WMS</option>
                       <option value="2">WFS</option>
                       <option value="3">GeoJSON</option>
                       <option value="4">CSV</option>
                       <option value="5">REST JSON</option>
-                      <option value="6">Excel</option>
+                      <option value="6">Excel</option> -->
                     </SisdaiSelector>
-                    <SisdaiCampoBase
-                      v-model="campoURL"
-                      etiqueta="Campo de URL"
-                      ejemplo="http://"
-                      tipo="url"
-                    />
-                    <SisdaiCampoBase
+                    <!-- <SisdaiCampoBase
                       v-model="campoCapaODataset"
                       etiqueta="Nombre de la capa o dataset a consultar (opcional)"
                       ejemplo="Capa o dataset a consultar"
@@ -135,9 +170,9 @@ async function subirArchivo() {
                       texto_ayuda="Texto de ayuda"
                       :es_ayuda_visible="true"
                       titulo="Título leyenda"
-                    />
+                    /> -->
                   </ClientOnly>
-                  <h3>Autenticación (si aplica)</h3>
+                  <!-- <h3>Autenticación (si aplica)</h3>
                   <ClientOnly>
                     <SisdaiSelector
                       v-model="seleccionTipoAutenticacion"
@@ -158,7 +193,7 @@ async function subirArchivo() {
                       ejemplo="***"
                     />
                     <SisdaiCampoBase v-model="campoToken" etiqueta="Token" ejemplo="***" />
-                  </ClientOnly>
+                  </ClientOnly> -->
                 </form>
               </template>
 
@@ -168,9 +203,88 @@ async function subirArchivo() {
                   class="boton-primario"
                   aria-label="Aplicar filtros"
                   type="button"
-                  @click="conectarCatalogoExterno()"
+                  @click="crearCatalogoExterno()"
                 >
-                  Conectar
+                  Crear
+                </button>
+              </template>
+            </SisdaiModal>
+
+            <SisdaiModal ref="modalImportar" tamanio-modal="modal-grande">
+              <template #encabezado>
+                <h2>Conexión a catálogos externos</h2>
+              </template>
+
+              <template #cuerpo>
+                <!-- se añida formulario Form -->
+                <h3>Importar</h3>
+                <form @keypress.enter.exact.prevent="importarCatalogoExterno()">
+                  <table class="tabla-condensada">
+                    <caption>
+                      Nombre del servicio
+                    </caption>
+                    <thead>
+                      <tr>
+                        <th>Nombre</th>
+                        <th>Título</th>
+                        <th>Resumen</th>
+                        <th>Tipo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <ClientOnly>
+                            <SisdaiCasillaVerificacion
+                              v-model="casillaUnicaAutenticacion0"
+                              :etiqueta="`https://sampleserver6.arcgisonline.com/arcgis/rest/services/USA/MapServer/1`"
+                            />
+                          </ClientOnly>
+                        </td>
+                        <td>Estados</td>
+                        <td></td>
+                        <td>Capa</td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <ClientOnly>
+                            <SisdaiCasillaVerificacion
+                              v-model="casillaUnicaAutenticacion1"
+                              :etiqueta="`https://sampleserver6.arcgisonline.com/arcgis/rest/services/USA/MapServer/2`"
+                            />
+                          </ClientOnly>
+                        </td>
+                        <td>Municipios</td>
+                        <td></td>
+                        <td>Capa</td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <ClientOnly>
+                            <SisdaiCasillaVerificacion
+                              v-model="casillaUnicaAutenticacion2"
+                              :etiqueta="`https://sampleserver6.arcgisonline.com/arcgis/rest/services/USA/MapServer/3`"
+                            />
+                          </ClientOnly>
+                        </td>
+                        <td>Localidades</td>
+                        <td></td>
+                        <td>Capa</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </form>
+              </template>
+
+              <template #pie>
+                <!-- se agrega aria-label -->
+                <button
+                  class="boton-primario"
+                  aria-label="Aplicar filtros"
+                  type="button"
+                  @click="importarCatalogoExterno()"
+                >
+                  Importar
                 </button>
               </template>
             </SisdaiModal>
@@ -183,6 +297,13 @@ async function subirArchivo() {
           >
             Añadir catálogo externos
           </button>
+          <p
+            v-if="mensajeImportarCatalogo"
+            class="texto-color-confirmacion fondo-color-confirmacion p-1 borde borde-color-confirmacion borde-redondeado-8"
+            style="width: fit-content"
+          >
+            <span class="pictograma-aprobado"></span>{{ mensajeImportarCatalogo }}
+          </p>
         </div>
       </div>
     </section>
