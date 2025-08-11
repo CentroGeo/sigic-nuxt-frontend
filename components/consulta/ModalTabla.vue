@@ -1,14 +1,16 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+import { resourceTypeDic } from '~/utils/consulta';
+import SelectedResource from '~/utils/consulta/SelectedResource';
+
+const emit = defineEmits(['notifyDownload']);
 const props = defineProps({
   selectedElement: {
     type: Object,
     default: () => ({}),
   },
 });
-// const router = useRouter();
-const selectedStore = useSelectedResources2Store();
-const emit = defineEmits(['notifyDownload']);
+
 const modalTabla = ref(null);
 const paginaActual = ref(0);
 const tamanioPagina = 10;
@@ -28,8 +30,11 @@ function abrirModalTabla() {
 }
 
 async function openTablas() {
-  modalTabla.value?.cerrarModal();
-  selectedStore.updateOtherResources(props.selectedElement.uuid, 'dataTable');
+  // modalTabla.value?.cerrarModal();
+  useSelectedResources2Store().add(
+    new SelectedResource({ uuid: props.selectedElement.uuid }),
+    resourceTypeDic.dataTable
+  );
 
   await navigateTo('/consulta/tablas');
 }

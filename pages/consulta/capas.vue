@@ -129,21 +129,24 @@ function updateMapFromHash(hashVista) {
 }
 
 /**
- * Actualiza el queryParam desde los valores del store.
- * @param queryParam generado por el store.
+ * Actualiza el queryParam.
+ * @param newQueryParam para asignar.
  */
-function updateQueryFromStore(queryParam) {
-  const query = { capas: queryParam };
-
-  if (query.capas !== route.query.capas) {
-    router.replace({ query, hash: route.hash });
+function updateQueryParam(capas) {
+  if (capas !== route.query.capas) {
+    router.replace({ query: { capas }, hash: route.hash });
   }
 }
-watch(() => storeSelected.asQueryParam(), updateQueryFromStore);
+watch(() => storeSelected.asQueryParam(), updateQueryParam);
 
 onMounted(() => {
   updateMapFromHash(route.hash?.slice(1));
   storeSelected.addFromQueryParam(route.query.capas);
+
+  // Para cuando hace el cambio de página
+  if (storeSelected.uuids.length > 0) {
+    updateQueryParam(storeSelected.asQueryParam());
+  }
 });
 
 function getFetchedResources() {

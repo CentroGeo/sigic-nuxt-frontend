@@ -13,7 +13,7 @@ const router = useRouter();
 
 const paginaActual = ref(0);
 const tamanioPagina = 10;
-const selectedUuid = computed(() => storeSelected.visibleOnes()[0]?.uuid ?? null);
+const selectedUuid = computed(() => storeSelected.lastVisible()?.uuid ?? null);
 const selectedElement = ref();
 
 const {
@@ -47,24 +47,23 @@ watch([() => selectedUuid.value, () => storeFetched[resourceType]], () => {
 });
 
 /**
- * Actualiza el queryParam desde los valores del store.
- * @param queryParam generado por el store.
+ * Actualiza el queryParam.
+ * @param newQueryParam para asignar.
  */
-function updateQueryFromStore(queryParam) {
-  const query = { tablas: queryParam };
-
-  if (query.tablas !== route.query.tablas) {
-    router.replace({ query });
+function updateQueryParam(tablas) {
+  if (tablas !== route.query.tablas) {
+    router.replace({ query: { tablas } });
   }
 }
-watch(() => storeSelected.asQueryParam(), updateQueryFromStore);
+watch(() => storeSelected.asQueryParam(), updateQueryParam);
 
 onMounted(() => {
   storeSelected.addFromQueryParam(route.query.tablas);
 
-  // Para cuando hacemos el cambio de página
+  // Para cuando hacem el cambio de página
   if (storeSelected.uuids.length > 0) {
-    updateQueryFromStore(storeSelected.asQueryParam());
+    updateQueryParam(storeSelected.asQueryParam());
+
     selectedElement.value = storeFetched.findResources([selectedUuid.value], resourceType)[0];
     fetchTable({
       paginaActual: paginaActual.value,

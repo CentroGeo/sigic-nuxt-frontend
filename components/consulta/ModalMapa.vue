@@ -2,6 +2,8 @@
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
+import { resourceTypeDic } from '~/utils/consulta';
+import SelectedLayer from '~/utils/consulta/SelectedLayer';
 
 const props = defineProps({
   selectedElement: {
@@ -9,22 +11,19 @@ const props = defineProps({
     default: () => ({}),
   },
 });
-const { selectedElement } = toRefs(props);
-// const router = useRouter();
-const selectedStore = useSelectedResources2Store();
 const config = useRuntimeConfig();
-const extent = ref([-118.3651, 14.5321, -86.7104, 32.7187]);
-const estiloSeleccionado = ref('Opcion 1');
+const extentMap = ref(undefined);
 const estilosLista = ref(['Opcion 1', 'Opción 2', 'Opcion 3']);
+const estiloSeleccionado = ref(estilosLista.value[0]);
 const modalMapa = ref(null);
 const emit = defineEmits(['notifyDownload']);
 
 async function openLayerView() {
-  console.log('agregar la capa al store correspondiente');
-  //selectedStore.updateOtherResources(props.selectedElement.uuid, 'dataLayer')
-  /*   const uuids = selectedStore.uuids
-  uuids.push(props.selectedElement.uuid);
-  selectedStore.updateResources(uuids);*/
+  useSelectedResources2Store().add(
+    new SelectedLayer({ uuid: props.selectedElement.uuid }),
+    resourceTypeDic.dataLayer
+  );
+
   await navigateTo('/consulta/capas');
 }
 
@@ -58,13 +57,13 @@ defineExpose({
           </option>
         </SisdaiSelector>
 
-        <SisdaiMapa class="gema" :vista="{ extension: extent }">
+        <SisdaiMapa class="gema" :vista="{ extension: extentMap }">
           <SisdaiCapaXyz />
 
           <SisdaiCapaWms
             :capa="selectedElement.alternate"
             :fuente="`${config.public.geoserverUrl}/wms?`"
-            @al-finalizar-carga="extent = selectedElement.extent.coords"
+            @al-finalizar-carga="extentMap = selectedElement.extent.coords"
           />
         </SisdaiMapa>
       </template>
