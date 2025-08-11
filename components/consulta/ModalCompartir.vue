@@ -4,7 +4,13 @@ const modalCompartir = ref(null);
 function abrirModalCompartir() {
   modalCompartir.value?.abrirModal();
 }
+const route = useRoute()
+const origin = window.location.origin
+const currentPath = computed(() => origin + route.fullPath)
 
+watch(currentPath, () => {
+  console.log(currentPath.value)
+})
 const botonesEnlaces = [
   {
     label: "X",
