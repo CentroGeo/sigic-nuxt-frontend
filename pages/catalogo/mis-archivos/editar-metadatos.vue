@@ -1,7 +1,7 @@
 <script setup>
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 
-const campoResumen = ref('foo');
+const campoResumen = ref('Resumen desde sigic');
 // const campoTitulo = ref('');
 // const campoPalabrasClave = ref('');
 // const campoAutor = ref('');
@@ -53,13 +53,15 @@ const campoResumen = ref('foo');
 //   .then((response) => response.json())
 //   .then((json) => console.log(json));
 const { data } = useAuth();
-async function submit() {
+
+async function actualizaMetadatos() {
   const token = ref(data.value?.accessToken);
-  const { body } = await $fetch('/api/metadatos', {
+
+  await $fetch('/api/metadatos', {
     method: 'POST',
-    body: { abstract: 'foo', token: token.value },
+    // body: { pk: '20', abstract: campoResumen.value, token: token.value },
+    body: { pk: '22', abstract: campoResumen.value, token: token.value },
   });
-  console.log('body', body);
 }
 </script>
 
@@ -195,7 +197,11 @@ async function submit() {
             </div> -->
             <div class="flex p-t-3">
               <button class="boton-secundario boton-chico" type="button">Ir a mis archivos</button>
-              <button class="boton-primario boton-chico" :disabled="false" @click="submit()">
+              <button
+                class="boton-primario boton-chico"
+                :disabled="false"
+                @click="actualizaMetadatos()"
+              >
                 Actualizar
               </button>
               <button class="boton-primario boton-chico" :disabled="false">Siguiente</button>
