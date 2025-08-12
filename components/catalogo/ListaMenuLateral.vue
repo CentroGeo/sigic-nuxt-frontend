@@ -23,6 +23,11 @@
             <li>
               <nuxt-link to="/catalogo/mis-archivos/carga-archivos">Carga de archivos</nuxt-link>
             </li>
+            <li>
+              <nuxt-link to="/catalogo/mis-archivos/servicios-externos"
+                >Servicios externos</nuxt-link
+              >
+            </li>
           </ul>
         </li>
       </ul>
