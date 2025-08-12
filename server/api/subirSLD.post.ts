@@ -55,8 +55,7 @@ export default defineEventHandler(async (event) => {
     const response = await fetch(url, {
       method: "POST",
       headers: {
-        // Authorization: `Bearer ${data.fields.token[0]}`,
-        Authorization: `Bearer Nr25BB5lq4vd9SoTBGGdlwGp4tcKIW`,
+        Authorization: `Bearer ${data.fields.token[0]}`,
       },
       body: formData,
     });

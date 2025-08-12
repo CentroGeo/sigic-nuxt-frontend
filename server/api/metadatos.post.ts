@@ -14,8 +14,7 @@ export default defineEventHandler(async (event) => {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
-        // Authorization: `Bearer ${data.fields.token[0]}`
-        'Authorization': `Bearer Nr25BB5lq4vd9SoTBGGdlwGp4tcKIW`
+        'Authorization': `Bearer ${body.token}`
       },
       body: JSON.stringify({ "abstract": body.abstract }),
     });
@@ -37,7 +36,7 @@ export default defineEventHandler(async (event) => {
   // let responseGet;
   // try {
   //   responseGet = await fetch(url, {
-  //     headers: { 'Authorization': `Bearer Nr25BB5lq4vd9SoTBGGdlwGp4tcKIW` }
+  //     headers: { 'Authorization': `Bearer ${body.token}` }
   //   });
   // } catch (error) {
   //   console.error('Error al obtener el recurso', error);
@@ -58,7 +57,7 @@ export default defineEventHandler(async (event) => {
   //   const putResponse = await fetch(url, {
   //     method: 'PUT',
   //     headers: {
-  //       'Authorization': `Bearer Nr25BB5lq4vd9SoTBGGdlwGp4tcKIW`,
+  //        'Authorization': `Bearer ${body.token}`,
   //       'Content-Type': 'application/json'
   //     },
   //     body: JSON.stringify(updatedResource),
