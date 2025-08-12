@@ -18,15 +18,15 @@ async function copyToClipboard() {
   }
 }
 
-useHead({
+useHead(() => ({
   meta: [
-    { property: 'og:url', content: currentPath },
+    { property: 'og:url', content: currentPath.value },
     { property: 'og:type', content: 'article' },
     { property: 'og:title', content: 'SIGIC' },
     { property: 'og:title', content: 'Esta es la descripcion' },
     { property: 'og:image', content: 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg' },
   ]
-});
+}));
 
 
 const botonesEnlaces = computed(() => [
