@@ -1,40 +1,42 @@
 <script setup>
 // TODO: añadir selector a tipo de archivo a filtros y mejorar tabla
 const resourcesStore = useSelectedResourcesStore();
-
 const recursosFiltrados = ref([]);
 const recursosTipo = ref('todos');
-
-const variables = ref([]);
-const datos = ref([]);
 
 // todos
 const { resourcesList } = useGeonodeResources({
   resourceType: recursosTipo.value,
 });
+
+// para la tabla
+const variables = ref([]);
+const datos = ref([]);
+// para filtar por los archivos de la usuaria
+const { data } = useAuth();
+const userEmail = ref(data.value.user.email);
+
 watch(resourcesList, () => {
   resourcesStore.updateFilteredResources(recursosTipo.value, resourcesList.value);
-});
-watch(
-  () => resourcesStore.filteredResources[recursosTipo.value],
-  () => {
-    recursosFiltrados.value = resourcesStore.filteredResources[recursosTipo.value];
-    // obteniendo datos por las props que necesito
-    datos.value = recursosFiltrados.value.map((d) => ({
+
+  // filtrar y seleccionar metadatos
+  datos.value = resourcesList.value
+    .filter((resource) => resource.owner.email === userEmail.value)
+    .map((d) => ({
+      pk: d.pk,
       titulo: d.title,
       tipo_recurso: d.resource_type,
-      // tipo_recurso: "Capa geográfica",
-      categoria: d.category.gn_description,
+      categoria: d.category,
       actualizacion: d.last_updated,
-      acciones: 'Editar, Descargar, Remover',
+      acciones: 'Editar, Ver, Descargar, Remover',
       enlace_descarga: d.download_url,
     }));
-    // obteniendo las variables de las keys
-    variables.value = Object.keys(datos.value[0]);
-  },
-  { deep: true }
-);
+
+  // obteniendo las keys
+  variables.value = Object.keys(datos.value[0]);
+});
 </script>
+
 <template>
   <UiLayoutPaneles>
     <template #catalogo>
@@ -46,16 +48,12 @@ watch(
         <CatalogoElementoFiltros
           :recursos-lista="recursosFiltrados"
           :recursos-tipo="recursosTipo"
-          :categorias="[
-            'categoría_0: Todas',
-            'categoría_1: capas',
-            'categoría_2: tablas',
-            'categoría_3: documentos',
-          ]"
         />
+
         <h2>Todos mis archivos</h2>
         <div class="flex">
           <div class="columna-15">
+            <!-- {{ datos }} -->
             <ClientOnly>
               <UiTablaAccesibleV2 :variables="variables" :datos="datos" />
               <UiPaginador :total-paginas="1" @cambio="1" />

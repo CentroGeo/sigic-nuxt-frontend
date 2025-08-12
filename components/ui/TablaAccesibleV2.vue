@@ -56,7 +56,7 @@ const idAleatorio = generaIdAleatorio();
             <p
               v-if="variable === 'tipo_recurso'"
               class="texto-centrado fondo-color-acento p-1 texto-color-acento borde borde-redondeado-16"
-              style="min-width: 168px"
+              style="width: max-content"
             >
               <span v-if="datum[variable]?.toLocaleString('en') === 'document'"
                 >{{ datum[variable]?.toLocaleString('en') }}
@@ -73,30 +73,57 @@ const idAleatorio = generaIdAleatorio();
             </p>
 
             <div v-if="variable === 'acciones'">
-              <div
-                v-if="datum[variable]?.includes('Editar, Descargar, Remover')"
-                style="display: flex; gap: 16px; max-width: 168px"
-              >
-                <button class="boton-pictograma boton-secundario" aria-label="" type="button">
+              <div v-if="datum[variable] === 'Editar, Ver, Descargar, Remover'" class="flex-width">
+                <nuxt-link
+                  class="boton-pictograma boton-secundario"
+                  aria-label="Editar metadatos"
+                  type="button"
+                  :to="{
+                    path: '/catalogo/mis-archivos/editar-metadatos',
+                    query: { userObject: JSON.stringify(datum) },
+                  }"
+                >
                   <span class="pictograma-editar"></span>
+                </nuxt-link>
+                <button
+                  class="boton-pictograma boton-secundario"
+                  aria-label="Ver en visualizador"
+                  type="button"
+                >
+                  <span class="pictograma-ayuda"></span>
                 </button>
-                <button class="boton-pictograma boton-secundario" aria-label="" type="button">
+                <a
+                  class="boton-pictograma boton-secundario"
+                  aria-label="Descargar archivo"
+                  type="button"
+                  :href="datum['enlace_descarga']"
+                >
                   <span class="pictograma-archivo-descargar"></span>
-                </button>
-                <button class="boton-pictograma boton-secundario" aria-label="" type="button">
+                </a>
+                <button
+                  class="boton-pictograma boton-secundario"
+                  aria-label="Remover archivo"
+                  type="button"
+                >
                   <span class="pictograma-eliminar"></span>
                 </button>
               </div>
-              <div
-                v-if="datum[variable]?.includes('Ver, Descargar')"
-                style="display: flex; gap: 16px; max-width: 168px"
-              >
-                <button class="boton-pictograma boton-secundario" aria-label="" type="button">
+              <div v-if="datum[variable] === 'Ver, Descargar'" class="flex-width">
+                <button
+                  class="boton-pictograma boton-secundario"
+                  aria-label="Ver en visualizador"
+                  type="button"
+                >
                   <span class="pictograma-ayuda"></span>
                 </button>
-                <button class="boton-pictograma boton-secundario" aria-label="" type="button">
+                <a
+                  class="boton-pictograma boton-secundario"
+                  aria-label="Descargar archivo"
+                  type="button"
+                  :href="datum['enlace_descarga']"
+                >
                   <span class="pictograma-archivo-descargar"></span>
-                </button>
+                </a>
               </div>
             </div>
           </td>
@@ -105,12 +132,17 @@ const idAleatorio = generaIdAleatorio();
     </table>
   </div>
 </template>
-<style lang="scss">
+<style lang="scss" scoped>
 .contenedor-tabla {
   overflow: auto;
   display: inline-grid;
 }
 table {
   min-width: 600px;
+  .flex-width {
+    display: flex;
+    gap: 16px;
+    max-width: 168px;
+  }
 }
 </style>

@@ -1,6 +1,20 @@
 <script setup>
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 
+const route = useRoute();
+
+function getUserData() {
+  if (route.query.userObject) {
+    try {
+      return JSON.parse(route.query.userObject);
+    } catch (e) {
+      console.error('Error parsing user object', e);
+      return null;
+    }
+  }
+}
+const resource = getUserData();
+
 const campoResumen = ref('Resumen desde sigic');
 // const campoTitulo = ref('');
 // const campoPalabrasClave = ref('');
@@ -59,8 +73,12 @@ async function actualizaMetadatos() {
 
   await $fetch('/api/metadatos', {
     method: 'POST',
-    // body: { pk: '20', abstract: campoResumen.value, token: token.value },
-    body: { pk: '22', abstract: campoResumen.value, token: token.value },
+    body: {
+      pk: resource.pk,
+      resource_type: resource.tipo_recurso,
+      abstract: campoResumen.value,
+      token: token.value,
+    },
   });
 }
 </script>
@@ -83,7 +101,7 @@ async function actualizaMetadatos() {
               <span class="h2 texto-color-primario p-l-2">Editar</span>
             </nuxt-link>
           </div>
-          <h2>nombre de la capa.json</h2>
+          <h2>{{ resource.titulo }}</h2>
           <div class="flex">
             <nuxt-link to="/catalogo/mis-archivos/editar-metadatos" exact-path>Metadatos</nuxt-link>
             <nuxt-link to="/catalogo/mis-archivos/editar-estilo">Estilo</nuxt-link>

@@ -4,10 +4,10 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event);
   const id = body.pk;
   const baseUrl = configEnv.public.geonodeApi
+  const url = `${baseUrl}/${body.resource_type}s/${id}/`;
   // esta es la máquina con la que se probó
   // const baseUrl = 'http://10.2.102.239/api/v2';
   // const url = `${baseUrl}/documents/${id}/`;
-  const url = `${baseUrl}/datasets/${id}/`;
 
   try {
     const response = await fetch(url, {
