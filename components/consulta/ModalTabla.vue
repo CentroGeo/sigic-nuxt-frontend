@@ -53,7 +53,7 @@ watch([paginaActual], () => {
 </script>
 <template>
   <ClientOnly>
-    <SisdaiModal id="modalTabla" ref="modalTabla">
+    <SisdaiModal id="modal-tabla" ref="modalTabla">
       <template #encabezado>
         <h1>{{ props.selectedElement.title }}</h1>
       </template>
@@ -76,4 +76,8 @@ watch([paginaActual], () => {
     </SisdaiModal>
   </ClientOnly>
 </template>
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+#modal-tabla{
+  max-height: 70%;
+}
+</style>

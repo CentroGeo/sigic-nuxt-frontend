@@ -33,7 +33,7 @@ export default defineNuxtConfig({
   },
 
   modules: ["@pinia/nuxt", // "@nuxt/content",
-  "@nuxt/eslint", "@nuxt/image", "@nuxt/test-utils", "@sidebase/nuxt-auth", '@vueuse/nuxt', '@nuxt/scripts'],
+    "@nuxt/eslint", "@nuxt/image", "@nuxt/test-utils", "@sidebase/nuxt-auth", '@vueuse/nuxt', '@nuxt/scripts'],
 
   css: ["@centrogeomx/sisdai-css/dist/sisdai.min.css"],
 
@@ -62,6 +62,7 @@ export default defineNuxtConfig({
       geonodeApi: `${process.env.GEONODE_URL}/api/v2`,
       geoserverUrl: process.env.GEOSERVER_URL,
       geonodeUrl: process.env.GEONODE_URL,
+      domain: process.env.DOMAIN
 
       // geoserverApi: `${process.env.GEOSERVER_URL}/rest`,
     }
