@@ -1,40 +1,46 @@
 <script setup>
 // TODO: añadir selector a tipo de archivo a filtros y mejorar tabla
 const resourcesStore = useSelectedResourcesStore();
-const recursosFiltrados = ref([]);
+
 const recursosTipo = ref('todos');
+const recursosFiltrados = ref([]);
 
 // todos
+const variables = ref([]);
+const datos = ref([]);
+
 const { resourcesList } = useGeonodeResources({
   resourceType: recursosTipo.value,
 });
 
-// para la tabla
-const variables = ref([]);
-const datos = ref([]);
 // para filtar por los archivos de la usuaria
 const { data } = useAuth();
 const userEmail = ref(data.value.user.email);
 
 watch(resourcesList, () => {
   resourcesStore.updateFilteredResources(recursosTipo.value, resourcesList.value);
-
-  // filtrar y seleccionar metadatos
-  datos.value = resourcesList.value
-    .filter((resource) => resource.owner.email === userEmail.value)
-    .map((d) => ({
-      pk: d.pk,
-      titulo: d.title,
-      tipo_recurso: d.resource_type,
-      categoria: d.category,
-      actualizacion: d.last_updated,
-      acciones: 'Editar, Ver, Descargar, Remover',
-      enlace_descarga: d.download_url,
-    }));
-
-  // obteniendo las keys
-  variables.value = Object.keys(datos.value[0]);
 });
+watch(
+  () => resourcesStore.filteredResources[recursosTipo.value],
+  () => {
+    // filtrar y seleccionar metadatos
+    datos.value = resourcesStore.filteredResources[recursosTipo.value]
+      .filter((resource) => resource.owner.email === userEmail.value)
+      .map((d) => ({
+        pk: d.pk,
+        titulo: d.title,
+        tipo_recurso: d.resource_type,
+        categoria: d.category,
+        actualizacion: d.last_updated,
+        acciones: 'Editar, Ver, Descargar, Remover',
+        enlace_descarga: d.download_url,
+      }));
+
+    // obteniendo las keys
+    variables.value = Object.keys(datos.value[0]);
+  },
+  { deep: true }
+);
 </script>
 
 <template>

@@ -17,17 +17,17 @@ const { resourcesList: listaRecursosCapas } = useGeonodeResources({
 watch(listaRecursosCapas, () => {
   resourcesStore.updateFilteredResources(recursosTipo.value, listaRecursosCapas.value);
 });
-
 watch(
   () => resourcesStore.filteredResources[recursosTipo.value],
   () => {
     recursosFiltradosCapas.value = resourcesStore.filteredResources[recursosTipo.value];
     // obteniendo datos por las props que necesito
     datos.value = recursosFiltradosCapas.value.map((d) => ({
+      pk: d.pk,
       nombre: d.title,
       // tipo_recurso: d.resource_type,
       tipo_recurso: 'Capa geográfica',
-      categoria: d.category.gn_description,
+      categoria: d.category,
       actualizacion: d.last_updated,
       acciones: 'Ver, Descargar',
       enlace_descarga: d.download_url,
@@ -38,6 +38,7 @@ watch(
   { deep: true }
 );
 </script>
+
 <template>
   <UiLayoutPaneles>
     <template #catalogo>
@@ -49,12 +50,6 @@ watch(
         <CatalogoElementoFiltros
           :recursos-lista="recursosFiltrados"
           :recursos-tipo="recursosTipo"
-          :categorias="[
-            'categoría_0: Todas',
-            'categoría_1: capas',
-            'categoría_2: tablas',
-            'categoría_3: documentos',
-          ]"
         />
 
         <div class="flex">

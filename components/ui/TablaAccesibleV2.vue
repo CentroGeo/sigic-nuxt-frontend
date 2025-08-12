@@ -62,6 +62,10 @@ const idAleatorio = generaIdAleatorio();
                 >{{ datum[variable]?.toLocaleString('en') }}
                 <span class="pictograma-documento"></span>
               </span>
+              <span v-if="datum[variable]?.toLocaleString('en') === 'Datos tabulados'"
+                >{{ datum[variable]?.toLocaleString('en') }}
+                <span class="pictograma-ayuda"></span>
+              </span>
               <span
                 v-if="
                   datum[variable]?.toLocaleString('en') === 'dataset' ||
