@@ -20,6 +20,19 @@ function generaIdAleatorio() {
   return 'id-' + Math.random().toString(36).substring(2);
 }
 const idAleatorio = generaIdAleatorio();
+
+function IrARuta(objeto) {
+  // Función para codificar un objeto que se va a pasar
+  // al navegar a otra vista
+
+  // evitar problemas con espacios con JSON.stingify
+  const dataStr = encodeURIComponent(JSON.stringify({ pk: objeto.pk }));
+
+  navigateTo({
+    path: '/catalogo/mis-archivos/editar-metadatos',
+    query: { data: dataStr },
+  });
+}
 </script>
 <template>
   <div class="contenedor-tabla p-2">
@@ -78,17 +91,14 @@ const idAleatorio = generaIdAleatorio();
 
             <div v-if="variable === 'acciones'">
               <div v-if="datum[variable] === 'Editar, Ver, Descargar, Remover'" class="flex-width">
-                <nuxt-link
+                <button
                   class="boton-pictograma boton-secundario"
                   aria-label="Editar metadatos"
                   type="button"
-                  :to="{
-                    path: '/catalogo/mis-archivos/editar-metadatos',
-                    query: { userObject: JSON.stringify(datum) },
-                  }"
+                  @click="IrARuta(datum)"
                 >
                   <span class="pictograma-editar"></span>
-                </nuxt-link>
+                </button>
                 <button
                   class="boton-pictograma boton-secundario"
                   aria-label="Ver en visualizador"

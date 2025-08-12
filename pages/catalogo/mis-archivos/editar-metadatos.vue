@@ -1,40 +1,57 @@
 <script setup>
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
+import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
 const route = useRoute();
-
 function getUserData() {
-  if (route.query.userObject) {
+  // Función que devuelve el objeto decodificado
+  // de la vista de donde viene
+  // if (route.query.userObject) {
+  //   try {
+  //     return JSON.parse(route.query.userObject);
+  //   } catch (e) {
+  //     console.error('Error parsing user object', e);
+  //     return null;
+  //   }
+  // }
+  if (route.query.data) {
     try {
-      return JSON.parse(route.query.userObject);
+      const dataStr = decodeURIComponent(route.query.data);
+      return computed(() => JSON.parse(dataStr));
     } catch (e) {
-      console.error('Error parsing user object', e);
+      console.error('Error al parsear el objeto', e);
       return null;
     }
   }
 }
-const resource = getUserData();
+const objetoId = ref(getUserData());
 
 const campoResumen = ref('Resumen desde sigic');
-// const campoTitulo = ref('');
-// const campoPalabrasClave = ref('');
-// const campoAutor = ref('');
-// const campoAnioPublicacion = ref('');
-// const seleccionEjemplo = ref('');
-// const seleccionCategoria = ref('');
-// const seleccionGrupo = ref('');
-// const ejemplo = ref({});
+const campoTitulo = ref('');
+const campoPalabrasClave = ref('');
+const campoAutor = ref('');
+const campoAnioPublicacion = ref('');
+const seleccionEjemplo = ref('');
+const seleccionFecha = ref('');
+const seleccionCategoria = ref('');
+const seleccionGrupo = ref('');
 
+// obtener el resource completo a partir del id
+const resource = ref({});
+resource.value = await $fetch('/api/objeto', {
+  method: 'POST',
+  body: { id: objetoId.value.pk },
+});
+
+// TODO: actualizar varios metadatos al mismo tiempo
 const { data } = useAuth();
-
 async function actualizaMetadatos() {
   const token = ref(data.value?.accessToken);
-
   await $fetch('/api/metadatos', {
     method: 'POST',
     body: {
-      pk: resource.pk,
-      resource_type: resource.tipo_recurso,
+      pk: resource.value.pk,
+      resource_type: resource.value.resource_type,
       abstract: campoResumen.value,
       token: token.value,
     },
@@ -60,7 +77,7 @@ async function actualizaMetadatos() {
               <span class="h2 texto-color-primario p-l-2">Editar</span>
             </nuxt-link>
           </div>
-          <h2>{{ resource.titulo }}</h2>
+          <h2>{{ resource.title }}</h2>
           <div class="flex">
             <nuxt-link to="/catalogo/mis-archivos/editar-metadatos" exact-path>Metadatos</nuxt-link>
             <nuxt-link to="/catalogo/mis-archivos/editar-estilo">Estilo</nuxt-link>
@@ -74,13 +91,13 @@ async function actualizaMetadatos() {
           </p>
 
           <!-- Drag & Drop -->
-          <!-- <ClientOnly>
+          <ClientOnly>
             <CatalogoElementoDragNdDrop />
-          </ClientOnly> -->
+          </ClientOnly>
 
           <!-- Formulario -->
           <div class="m-t-3">
-            <!-- <div class="flex">
+            <div class="flex">
               <div class="columna-16">
                 <ClientOnly>
                   <SisdaiCampoBase
@@ -89,17 +106,17 @@ async function actualizaMetadatos() {
                     ejemplo="Añade un nombre"
                   />
                 </ClientOnly>
-              </div> -->
-            <div class="columna-16">
-              <ClientOnly>
-                <SisdaiCampoBase
-                  v-model="campoResumen"
-                  etiqueta="Resumen"
-                  ejemplo="El texto descriptivo es conciso y significativo. Debe ayudar a la persona usuaria a..."
-                />
-              </ClientOnly>
-            </div>
-            <!-- <div class="columna-8">
+              </div>
+              <div class="columna-16">
+                <ClientOnly>
+                  <SisdaiCampoBase
+                    v-model="campoResumen"
+                    etiqueta="Resumen"
+                    ejemplo="El texto descriptivo es conciso y significativo. Debe ayudar a la persona usuaria a..."
+                  />
+                </ClientOnly>
+              </div>
+              <div class="columna-8">
                 <ClientOnly>
                   <SisdaiSelector
                     v-model="seleccionEjemplo"
@@ -115,7 +132,7 @@ async function actualizaMetadatos() {
               <div class="columna-8">
                 <ClientOnly>
                   <SisdaiCampoBase
-                    v-model="ejemplo.fecha"
+                    v-model="seleccionFecha"
                     etiqueta="Fecha"
                     ejemplo="tipo date"
                     tipo="date"
@@ -171,7 +188,7 @@ async function actualizaMetadatos() {
                   />
                 </ClientOnly>
               </div>
-            </div> -->
+            </div>
             <div class="flex p-t-3">
               <button class="boton-secundario boton-chico" type="button">Ir a mis archivos</button>
               <button
