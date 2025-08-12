@@ -25,47 +25,6 @@ const campoResumen = ref('Resumen desde sigic');
 // const seleccionGrupo = ref('');
 // const ejemplo = ref({});
 
-// const { data } = useAuth();
-
-// async function patchData() {
-//   const token = data.value?.accessToken;
-//   const formData = new FormData();
-//   formData.append('abstract', 'foo');
-//   formData.append('token', token);
-//   await fetch('/api/metadatos', { method: 'POST', body: formData });
-// }
-
-// console.log('index patch');
-// fetch('https://jsonplaceholder.typicode.com/posts/1', {
-//   method: 'PATCH',
-//   body: JSON.stringify({
-//     title: 'foo',
-//   }),
-//   headers: {
-//     'Content-type': 'application/json; charset=UTF-8',
-//   },
-// })
-//   .then((response) => response.json())
-//   .then((json) => console.log('index patch', json));
-
-// console.log('geonode');
-
-// fetch('http://10.2.102.239/api/v2/datasets/1/', {
-//   method: 'PATCH',
-//   body: JSON.stringify({
-//     abstract: 'foo',
-//   }),
-//   headers: {
-//     'Content-type': 'application/json; charset=UTF-8',
-//   },
-// })
-//   .then((response) => response.json())
-//   .then((json) => console.log(json));
-// fetch('/api/metadatos', {
-//   method: 'POST',
-// })
-//   .then((response) => response.json())
-//   .then((json) => console.log(json));
 const { data } = useAuth();
 
 async function actualizaMetadatos() {

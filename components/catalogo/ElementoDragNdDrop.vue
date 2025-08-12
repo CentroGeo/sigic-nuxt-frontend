@@ -12,132 +12,30 @@ const props = defineProps({
   },
 });
 const { tipoArchivoValidos } = toRefs(props);
-
-const emit = defineEmits(['guardarArchivo']);
-
-const ejemplo = ref({});
-
-const formData = ref(new FormData());
-
-// para obtener el token para bearer
-const { data } = useAuth();
-
 const datosArriba = ref(false);
-const datos = ref({});
+const datos = ref([]);
+const ejemplo = ref();
+const archivoValido = false;
 
-const esSLD = ref(false);
-const todosLosDemas = ref(false);
-const archivoValido = ref(false);
-
-function appendSLD(files, layerSlug, token) {
-  files.forEach((file) => {
-    formData.value.append('base_file', file);
-    formData.value.append('sld_file', file);
-    formData.value.append('dataset_title', layerSlug);
-    // formData.value.append("dataset_title", "geonode:coordinaciones");
-    formData.value.append('style_upload_form', 'true');
-    formData.value.append('permissions', JSON.stringify({}));
-    formData.value.append('charset', 'undefined');
-    // token importante
-    formData.value.append('token', token);
-  });
-  // console.log("formData.value", formData.value);
-}
-
-function appendOtros(files, token) {
-  // TODO: hacer append de otros
-  files.forEach((file) => {
-    formData.value.append('base_file', file);
-    formData.value.append('sld_file', file);
-    // formData.value.append("dataset_title", layerSlug);
-    formData.value.append('dataset_title', 'geonode:coordinaciones');
-    formData.value.append('style_upload_form', 'true');
-    formData.value.append('permissions', JSON.stringify({}));
-    formData.value.append('charset', 'undefined');
-    // token importante
-    formData.value.append('token', token);
-  });
-  // console.log("formData.value", formData.value);
-}
-
-const validarTipoArchivo = (files) => {
-  // TODO: revisar bien los MIME de los archivos válidos
-  files.forEach((file) => {
-    if (
-      tipoArchivoValidos.value === 'sld' &&
-      (file.name.slice(-4) === '.sld' ||
-        file.name.endsWith('.sld') ||
-        file.type === '.sld' ||
-        file.type === 'application/vnd.sld+xml' ||
-        file.type === 'application/vnd.sld+xml,.sld')
-    ) {
-      esSLD.value = true;
-    } else if (
-      tipoArchivoValidos.value !== 'sld' &&
-      (file.type === 'application/vnd.geo+json' ||
-        file.type === 'application/json' ||
-        file.type === 'application/geo+json' ||
-        file.type === 'application/geopackage+sqlite3' ||
-        file.type === 'text/csv' ||
-        file.type === 'application/xml' ||
-        file.type === 'application/pdf' ||
-        file.type === 'image/jpeg' ||
-        file.type === 'image/png')
-    ) {
-      todosLosDemas.value = true;
-    } else {
-      archivoValido.value = true;
-      datosArriba.value = false;
-    }
-  });
-};
-
-function appendFormData(files, token) {
-  if (esSLD.value && tipoArchivoValidos.value === 'sld') {
-    appendSLD(files, 'geonode:coordinaciones', token);
-  }
-  if (todosLosDemas.value) {
-    appendOtros(files, token);
-  }
-}
+// emit para pasar los archivos al componente padre
+const emit = defineEmits(['pasarArchivo']);
+const archivos = ref();
 
 const onDropZone = ref(null);
 const { files } = useDropZone(onDropZone, { onDrop });
 async function onDrop() {
   // imprime el archivo que se suba mediante el drop
-  // console.log("files", files.value);
-  files.value = Array.from(files.value);
-
-  if (files.value) {
-    // obtén el token para el bearer
-    const token = data.value?.accessToken;
-    // console.log("token", token);
-    datos.value = files.value;
-    datosArriba.value = true;
-
-    validarTipoArchivo(files.value);
-
-    appendFormData(files.value, token);
-  }
+  console.log('files', files.value);
+  archivos.value = files.value;
+  // files.value = Array.from(files.value);
 }
 
 const { open, onChange } = useFileDialog();
 onChange(async (files) => {
   // imprime el archivo que se suba mediante el diálogo
-  // console.log("files", files);
-  files = Array.from(files);
-
-  if (files) {
-    // obtén el token para el bearer
-    const token = data.value?.accessToken;
-    // console.log("token", token);
-    datos.value = files;
-    datosArriba.value = true;
-
-    validarTipoArchivo(files);
-
-    appendFormData(files, token);
-  }
+  console.log('files', files);
+  archivos.value = files;
+  // const files = Array.from(files);
 });
 </script>
 <template>
@@ -190,8 +88,8 @@ onChange(async (files) => {
             class="boton-primario boton-chico"
             aria-label="Guardar"
             type="button"
-            :disabled="!datosArriba"
-            @click="emit('guardarArchivo', formData)"
+            :disabled="false"
+            @click="emit('pasarArchivo', archivos)"
           >
             Guardar
           </button>

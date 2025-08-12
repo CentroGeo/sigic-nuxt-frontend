@@ -8,19 +8,46 @@ const idAleatorioControlDes = generaIdAleatorio('controldeslizante-');
 
 const statusOk = ref(false);
 const pending = ref(false);
-async function guardarArchivo(formData) {
-  const res = await fetch('/api/subirSLD', {
+
+const route = useRoute();
+
+function getUserData() {
+  if (route.query.userObject) {
+    try {
+      return JSON.parse(route.query.userObject);
+    } catch (e) {
+      console.error('Error parsing user object', e);
+      return null;
+    }
+  }
+}
+const resource = getUserData();
+
+const { data } = useAuth();
+
+async function guardarArchivo(files) {
+  const token = ref(data.value?.accessToken);
+
+  const formData = new FormData();
+  // solo el primer elemento del arreglo
+  formData.append('base_file', files[0]);
+  // formData.append('dataset_title', resource.dataset_title);
+  formData.append('dataset_title', 'geonode:coordinaciones');
+  formData.append('token', token.value);
+
+  await $fetch('/api/subirSLD', {
     method: 'POST',
     body: formData,
   });
-  pending.value = true;
-  // remover timeout
-  setTimeout(() => {
-    if (res.ok) {
-      pending.value = false;
-      statusOk.value = true;
-    }
-  }, '2500');
+
+  // pending.value = true;
+  // // remover timeout
+  // setTimeout(() => {
+  //   if (res.ok) {
+  //     pending.value = false;
+  //     statusOk.value = true;
+  //   }
+  // }, '2500');
 }
 </script>
 <template>
@@ -44,7 +71,7 @@ async function guardarArchivo(formData) {
 
           <div class="flex">
             <div class="columna-16">
-              <h2>nombre de la capa.json</h2>
+              <h2>resource.title</h2>
               <div class="flex">
                 <nuxt-link to="/catalogo/mis-archivos/editar-metadatos" exact-path
                   >Metadatos</nuxt-link
@@ -56,10 +83,7 @@ async function guardarArchivo(formData) {
 
               <!-- Drag & Drop -->
               <ClientOnly>
-                <CatalogoElementoDragNdDrop
-                  tipo-archivo-validos="sld"
-                  @guardar-archivo="(i) => guardarArchivo(i)"
-                />
+                <CatalogoElementoDragNdDrop @pasar-archivo="(i) => guardarArchivo(i)" />
               </ClientOnly>
             </div>
 

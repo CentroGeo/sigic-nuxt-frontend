@@ -8,20 +8,30 @@ const idAleatorioControlDes = generaIdAleatorio('controldeslizante-');
 
 const statusOk = ref(false);
 const pending = ref(false);
-async function guardarArchivo(formData) {
-  // TODO: editar subirSLD por subirArchivos
-  const res = await fetch('/api/subirSLD', {
+
+const { data } = useAuth();
+
+async function guardarArchivo(files) {
+  const token = ref(data.value?.accessToken);
+
+  const formData = new FormData();
+  // solo el primer elemento del arreglo
+  formData.append('base_file', files[0]);
+  formData.append('token', token.value);
+
+  await $fetch('/api/cargar', {
     method: 'POST',
     body: formData,
   });
-  pending.value = true;
-  // remover timeout
-  setTimeout(() => {
-    if (res.ok) {
-      pending.value = false;
-      statusOk.value = true;
-    }
-  }, '2500');
+
+  // pending.value = true;
+  // // remover timeout
+  // setTimeout(() => {
+  //   if (res.ok) {
+  //     pending.value = false;
+  //     statusOk.value = true;
+  //   }
+  // }, '2500');
 }
 </script>
 
@@ -40,7 +50,7 @@ async function guardarArchivo(formData) {
           </p>
 
           <ClientOnly>
-            <CatalogoElementoDragNdDrop @guardar-archivo="(i) => guardarArchivo(i)" />
+            <CatalogoElementoDragNdDrop @pasar-archivo="(i) => guardarArchivo(i)" />
           </ClientOnly>
 
           <!-- <div v-if="statusOk"> -->

@@ -3,9 +3,12 @@ import { promises as fsp } from "fs";
 const configEnv = useRuntimeConfig();
 
 export default defineEventHandler(async (event) => {
+  const baseUrl = configEnv.public.geonodeApi
+  const url = `${baseUrl}/upload/uploads/upload`;
+  // esta es la máquina con la que se probó
+  // const url = "http://10.2.102.239/upload/uploads/upload";
 
   const form = formidable({ multiples: false });
-  // console.log("form", form);
 
   const data = await new Promise<{ fields: Fields; files: Files }>((resolve, reject) => {
     form.parse(event.node.req, (err, fields, files) => {
@@ -13,8 +16,6 @@ export default defineEventHandler(async (event) => {
       else resolve({ fields, files });
     });
   });
-  // console.log('data', data)
-  // console.log('data.fields.token[0]', data.fields.token[0]);
 
   const { base_file } = data.files;
   if (!base_file) {
@@ -42,9 +43,8 @@ export default defineEventHandler(async (event) => {
     base_file[0].originalFilename
   );
 
-  // TODO: cambiar el layerSlug según la capa
-  // formData.append('dataset_title', layerSlug);
-  formData.append("dataset_title", "geonode:coordinaciones");
+  formData.append('dataset_title', data.fields.dataset_title[0]);
+  // formData.append("dataset_title", "geonode:coordinaciones");
   formData.append("style_upload_form", "true");
   formData.append("permissions", JSON.stringify({}));
   formData.append("charset", "undefined");
@@ -52,9 +52,7 @@ export default defineEventHandler(async (event) => {
   console.warn('formData', formData);
 
   try {
-    const response = await fetch(`${configEnv.public.geonodeApi}/upload/uploads/upload`, {
-      // esta es la máquina con la que se probó
-      // const res = await fetch("http://10.2.102.239/upload/uploads/upload", {
+    const response = await fetch(url, {
       method: "POST",
       headers: {
         // Authorization: `Bearer ${data.fields.token[0]}`,
