@@ -26,13 +26,12 @@ const contextos = ref([
   }
 ]);
 
-
 // Función para cargar las fuentesl proyecto
 const loadSources = async () => {
   //arraySources = [];
 
   //Consulta fuentes
-  arraySources.value = await storeIA.getProjectSources(proyecto.value['id']);
+  arraySources.value = await storeIA.getProjectSources(proyecto.value["id"]);
 
   //console.log(arraySources);
 
@@ -45,7 +44,7 @@ const loadContexts = async () => {
   //arraySources = [];
 
   //Consulta fuentes
-  arrayContexts.value = await storeIA.getProjectContexts(proyecto.value['id']);
+  arrayContexts.value = await storeIA.getProjectContexts(proyecto.value["id"]);
 
   //console.log("arrayContexts: ",arrayContexts);
 
@@ -60,13 +59,16 @@ const loadContexts = async () => {
   loadContexts();
 }); */
 
-watch(proyecto, (nuevo) => {
-  if (nuevo?.id) {
-    loadSources();
-    loadContexts();
-  }
-}, { immediate: true }); // Esto lo ejecuta también en el primer render
-
+watch(
+  proyecto,
+  nuevo => {
+    if (nuevo?.id) {
+      loadSources();
+      loadContexts();
+    }
+  },
+  { immediate: true }
+); // Esto lo ejecuta también en el primer render
 
 // Observador carga fuentes al cambiar de proyecto
 watch(proyecto, (nuevoProyecto, anteriorProyecto) => {
@@ -74,7 +76,6 @@ watch(proyecto, (nuevoProyecto, anteriorProyecto) => {
   loadSources();
   loadContexts();
 });
-
 </script>
 
 <template>
@@ -150,7 +151,7 @@ watch(proyecto, (nuevoProyecto, anteriorProyecto) => {
                     <p class="tarjeta-titulo">
                       {{ contexto.title }}
                     </p>
-<!--                     <UiNumeroElementos
+                    <!--                     <UiNumeroElementos
                       :numero="contexto.numero_fuentes"
                       etiqueta="Fuentes"
                     /> -->
@@ -216,24 +217,24 @@ watch(proyecto, (nuevoProyecto, anteriorProyecto) => {
             </div>
           </div>
 
-<div class="tabla-archivos m-t-3" v-if="arraySources.length > 0">
-  <table class="tabla">
-    <thead>
-      <tr>
-        <th>Nombre</th>
-        <th>Tipo de archivo</th>
-<!--         <th>Categoría</th>
+          <div class="tabla-archivos m-t-3" v-if="arraySources.length > 0">
+            <table class="tabla">
+              <thead>
+                <tr>
+                  <th class="p-x-3 p-y-2">Nombre</th>
+                  <th class="p-x-3 p-y-2">Tipo de archivo</th>
+                  <!--         <th>Categoría</th>
         <th>Origen</th>
         <th>Acciones</th> -->
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="archivo in arraySources" :key="archivo.id">
-        <td>{{ archivo.filename }}</td>
-        <td>{{ archivo.document_type }}</td>
-<!--         <td>{{ archivo.categoria }}</td>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="archivo in arraySources" :key="archivo.id">
+                  <td class="p-3">{{ archivo.filename }}</td>
+                  <td class="p-3">{{ archivo.document_type }}</td>
+                  <!--         <td>{{ archivo.categoria }}</td>
         <td>{{ archivo.origen }}</td> -->
-<!--         <td>
+                  <!--         <td>
           <button
             class="boton-pictograma boton-sin-contenedor-secundario boton-chico"
             aria-label="Eliminar archivo"
@@ -242,12 +243,10 @@ watch(proyecto, (nuevoProyecto, anteriorProyecto) => {
             <span class="pictograma-eliminar" aria-hidden="true" />
           </button>
         </td> -->
-      </tr>
-    </tbody>
-  </table>
-</div>
-
-
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
