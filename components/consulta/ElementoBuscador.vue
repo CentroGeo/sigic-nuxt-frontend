@@ -160,6 +160,7 @@ watch(catalogoFiltrado, () => {
       type="button"
       class="boton-primario boton-pictograma boton-grande"
       aria-label="Filtro Avanzado"
+      v-globo-informacion="'Filtro avanzado'"
       @click="modalFiltros?.abrirModal()"
     >
       <span class="pictograma-filtro" aria-hidden="true" />

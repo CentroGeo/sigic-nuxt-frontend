@@ -49,6 +49,7 @@ function goUp() {
             aria-label="Subir elemento"
             type="button"
             :disabled="storeSelected.uuids.length === selectedElement.posicion + 1"
+            v-globo-informacion:derecha="'Subir elemento'"
             @click="goUp"
           >
             <span class="pictograma-subir-capa pictograma-mediano" aria-hidden="true" />
@@ -59,6 +60,7 @@ function goUp() {
             aria-label="Bajar Elemento"
             type="button"
             :disabled="selectedElement.posicion === 0"
+            v-globo-informacion:derecha="'Bajar elemento'"
             @click="goDown"
           >
             <span class="pictograma-bajar-capa pictograma-mediano" aria-hidden="true" />

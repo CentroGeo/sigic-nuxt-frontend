@@ -52,6 +52,7 @@ const hasGeometry = computed(() => {
         class="boton-pictograma boton-sin-contenedor-secundario"
         aria-label="Abrir vista previa"
         type="button"
+        v-globo-informacion:derecha="'Capas'"
         @click="emit('mapaClicked')"
       >
         <span class="pictograma-capas" aria-hidden="true" />
@@ -61,6 +62,7 @@ const hasGeometry = computed(() => {
         class="boton-pictograma boton-sin-contenedor-secundario"
         aria-label="Borrar selección"
         type="button"
+        v-globo-informacion:derecha="'Eliminar'"
         @click="() => storeSelected.removeByUuid(resourceElement.uuid)"
       >
         <span class="pictograma-eliminar" aria-hidden="true" />
@@ -70,6 +72,7 @@ const hasGeometry = computed(() => {
         class="boton-pictograma boton-sin-contenedor-secundario"
         aria-label="Descargar selección"
         type="button"
+        v-globo-informacion:derecha="'Descargar'"
         @click="emit('descargaClicked')"
       >
         <span class="pictograma-archivo-descargar" aria-hidden="true" />

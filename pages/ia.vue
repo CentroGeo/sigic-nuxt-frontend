@@ -10,10 +10,12 @@ const ruta = '/ia';
         {
           pictograma: 'pictograma-chat',
           ruta: `${ruta}/chats`,
+          globo: 'Chats',
         },
         {
           pictograma: 'pictograma-proyectos',
           ruta: `${ruta}/proyectos`,
+          globo: 'Proyectos',
         },
       ]"
     />
