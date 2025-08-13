@@ -15,6 +15,7 @@ const apiCategorias = `${config.public.geonodeApi}/facets/category`;
 const categoryList = ref([]);
 const categorizedResources = ref({});
 const selectedCategories = ref([]);
+const modalFiltroAvanzado = ref(null)
 
 // Esta parte es para obtener todas las categorias
 const { data: geonodeCategories } = await useFetch(`${apiCategorias}`);
@@ -58,32 +59,28 @@ function setSelectedCategory(categoria) {
 
 function filterByInput(r) {
   filteredResources.value = r;
-  console.log(filteredResources.value)
+  groupResults()
+}
+
+function updateByModal(resources){
+  filteredResources.value = resources
+  groupResults()
+  console.log('escuchó')
 }
 
 onMounted(async () => {
   if (resources.value.length === 0) {
     storeFetched.isLoading = true;
     const { resourcesList } = await useGeonodeResources();
-
     storeFetched.updateFetchedResources(props.resourceType, resourcesList.value);
     filteredResources.value = storeFetched[props.resourceType];
-    console.log(filteredResources.value)
     storeFetched.isLoading = false;
   }else{
     filteredResources.value = storeFetched[props.resourceType];
   }
-
   groupResults();
 });
 
-watch(
-  filteredResources,
-  () => {
-    groupResults();
-  },
-  { deep: true }
-);
 </script>
 
 <template>
@@ -107,6 +104,7 @@ watch(
               type="button"
               class="boton-primario boton-pictograma boton-grande"
               aria-label="Filtro Avanzado"
+              @click="modalFiltroAvanzado.abrirModalBusqueda"
             >
               <span class="pictograma-filtro" aria-hidden="true" />
             </button>
@@ -140,6 +138,12 @@ watch(
       </div>
     </div>
   </div>
+  <ConsultaModalBusqueda 
+    ref="modalFiltroAvanzado"
+    :resource-type="props.resourceType"
+    :categories="categoryList"
+    @update-results="(results) => updateByModal(results)"
+  />
 </template>
 
 <style lang="scss" scoped>
