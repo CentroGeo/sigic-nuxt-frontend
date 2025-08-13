@@ -6,11 +6,13 @@ export const useSelectedResourcesStore = defineStore('selectedResources', {
       dataLayer: [],
       dataTable: [],
       document: [],
+      todos: [],
     },
     filteredResources: {
       dataLayer: [],
       dataTable: [],
       document: [],
+      todos: [],
     },
     shownFiles: {
       dataLayer: {
@@ -21,6 +23,7 @@ export const useSelectedResourcesStore = defineStore('selectedResources', {
       },
       dataTable: undefined,
       document: undefined,
+      todos: undefined,
     },
   }),
   actions: {

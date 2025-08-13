@@ -17,12 +17,20 @@ export async function useGeonodeResources() {
     let allResults = [];
 
     const loadPage = async () => {
-      const dataParams = new URLSearchParams({
-        page: page,
-        page_size: 15,
-        'filter{resource_type}': resourceTypeGeonode[resourceType],
-        //'filter{is_approved}':true,
-      });
+      // cuando se requiere todos los recursos sin filtrar?
+      const dataParams =
+        resourceType === 'todos'
+          ? new URLSearchParams({
+              page: page,
+              page_size: 15,
+            })
+          : new URLSearchParams({
+              page: page,
+              page_size: 15,
+              'filter{resource_type}': resourceTypeGeonode[resourceType],
+              //"filter{subtype.in}": "raster",
+              //"filter{subtype.in}": "vector",
+            });
       const response = await fetch(`${api}?${dataParams.toString()}`, {
         method: 'GET',
         /*headers: {

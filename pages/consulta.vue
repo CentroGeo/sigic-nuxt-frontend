@@ -1,9 +1,15 @@
 <script setup>
-definePageMeta({ middleware: 'redireccionar-modulo-consulta' });
+definePageMeta({
+  middleware: 'redireccionar-modulo-consulta',
+  bodyAttrs: {
+    class: '',
+  },
+});
 
 const ruta = '/consulta';
 
 const storeConsulta = useConsultaStore();
+onUnmounted(() => (document.querySelector('body').className = ''));
 </script>
 
 <template>

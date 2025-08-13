@@ -1,9 +1,13 @@
 <script setup>
 definePageMeta({
   middleware: ['sidebase-auth', 'redireccionar-modulo-catalogo'],
+  bodyAttrs: {
+    class: '',
+  },
 });
 const ruta = '/catalogo';
 const storeCatalogo = useCatalogoStore();
+onUnmounted(() => (document.querySelector('body').className = ''));
 </script>
 
 <template>
