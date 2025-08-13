@@ -90,16 +90,16 @@ export const useSelectedResourcesStore = defineStore('selectedResources', {
     },
     updateLayerOpacity(alternate, value) {
       this.shownFiles.dataLayer.opacity[alternate] = value / 100;
-      console.log('cambio store opacidad', this.shownFiles.dataLayer.opacity);
+      // console.log('cambio store opacidad', this.shownFiles.dataLayer.opacity);
     },
     updateLayerVisibility(alternate, value) {
       this.shownFiles.dataLayer.visibility[alternate] = value;
-      console.log(this.shownFiles.dataLayer.visibility);
+      // console.log(this.shownFiles.dataLayer.visibility);
     },
     setMapViewParams(centroArg, acercamientoArg) {
       this.shownFiles.dataLayer.centro = centroArg;
       this.shownFiles.dataLayer.acercamiento = acercamientoArg;
-      console.log('cambiaron centro y zoom: ', this.shownFiles.dataLayer);
+      // console.log('cambiaron centro y zoom: ', this.shownFiles.dataLayer);
     },
   },
 });

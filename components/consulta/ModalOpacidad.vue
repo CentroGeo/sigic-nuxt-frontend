@@ -1,6 +1,9 @@
 <script setup>
 import SisdaiControlDeslizante from '@centrogeomx/sisdai-componentes/src/componentes/control-deslizante/SisdaiControlDeslizante.vue';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+
+const storeSelected = useSelectedResources2Store();
+
 const props = defineProps({
   selectedElement: {
     type: Object,
@@ -10,6 +13,7 @@ const props = defineProps({
 const { selectedElement } = toRefs(props);
 const controlOpacidad = ref();
 const modalOpacidad = ref(null);
+
 function abrirModalOpacidad() {
   modalOpacidad.value?.abrirModal();
 }
@@ -18,10 +22,12 @@ const valorOpacidad = ref();
 defineExpose({
   abrirModalOpacidad,
 });
-watch(valorOpacidad, () => {
-  console.log(valorOpacidad.value);
+
+watch(valorOpacidad, (nv) => {
+  storeSelected.byUuid(selectedElement.value.uuid).opacidad = nv / 100;
 });
 </script>
+
 <template>
   <ClientOnly>
     <SisdaiModal ref="modalOpacidad">
@@ -47,8 +53,7 @@ watch(valorOpacidad, () => {
                   valorOpacidad = controlOpacidad.valor_seleccionado;
                 }
               "
-            >
-            </SisdaiControlDeslizante>
+            />
           </div>
 
           <div class="tarjeta columna-5">
@@ -59,6 +64,7 @@ watch(valorOpacidad, () => {
     </SisdaiModal>
   </ClientOnly>
 </template>
+
 <style lang="scss" scoped>
 .contenedor {
   margin: 0px;
