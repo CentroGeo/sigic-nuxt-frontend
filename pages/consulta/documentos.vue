@@ -45,8 +45,9 @@ onMounted(() => {
     </template>
 
     <template #visualizador>
+      <template v-if="storeFetched.isLoading">Cargando...</template>
       <div
-        v-if="storeSelected.uuids.length === 0 || storeFetched[resourceType].length === 0"
+        v-else-if="storeSelected.uuids.length === 0"
         class="contenedor"
       >
         <h1>No hay seleccion</h1>

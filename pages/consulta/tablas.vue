@@ -85,8 +85,9 @@ onMounted(() => {
     </template>
 
     <template #visualizador>
+      <template v-if="storeFetched.isLoading">Cargando...</template>
       <div
-        v-if="storeSelected.uuids.length === 0 || storeFetched[resourceType].length === 0"
+        v-else-if="storeSelected.uuids.length === 0"
         class="contenedor"
       >
         <h1>No hay seleccion</h1>
@@ -97,7 +98,7 @@ onMounted(() => {
             :total-paginas="Math.ceil(totalFeatures / tamanioPagina)"
             @cambio="paginaActual = $event"
           />
-          <h2 class="m-t-1 m-b-0 m-x-2">{{ selectedElement.title }}</h2>
+          <h2 class="m-t-1 m-b-0 m-x-2" v-if="selectedElement">{{ selectedElement.title }}</h2>
           <UiTablaAccesible class="tabla" :variables="variables" :datos="datos" />
         </div>
 
