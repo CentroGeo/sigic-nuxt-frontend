@@ -49,6 +49,7 @@ const hasGeometry = computed(() => {
     <div class="flex flex-contenido-final">
       <button
         v-if="hasGeometry"
+        v-globo-informacion:derecha="'Capas'"
         class="boton-pictograma boton-sin-contenedor-secundario"
         aria-label="Abrir vista previa"
         type="button"
@@ -58,6 +59,7 @@ const hasGeometry = computed(() => {
       </button>
 
       <button
+        v-globo-informacion:derecha="'Eliminar'"
         class="boton-pictograma boton-sin-contenedor-secundario"
         aria-label="Borrar selección"
         type="button"
@@ -67,6 +69,7 @@ const hasGeometry = computed(() => {
       </button>
 
       <button
+        v-globo-informacion:derecha="'Descargar'"
         class="boton-pictograma boton-sin-contenedor-secundario"
         aria-label="Descargar selección"
         type="button"

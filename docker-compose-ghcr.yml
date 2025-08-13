@@ -1,9 +1,8 @@
-
 services:
   sigic-frontend:
     image: ghcr.io/centrogeo/sigic-nuxt-frontend:develop
     ports:
-      - "3000:3000"
+      - '3000:3000'
     restart: unless-stopped
     environment:
       NUXT_PUBLIC_GEONODE_API: ${NUXT_PUBLIC_GEONODE_API}

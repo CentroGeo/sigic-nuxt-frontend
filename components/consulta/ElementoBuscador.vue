@@ -157,6 +157,7 @@ watch(catalogoFiltrado, () => {
       @al-filtrar="filterByInput"
     />
     <button
+      v-globo-informacion="'Filtro avanzado'"
       type="button"
       class="boton-primario boton-pictograma boton-grande"
       aria-label="Filtro Avanzado"

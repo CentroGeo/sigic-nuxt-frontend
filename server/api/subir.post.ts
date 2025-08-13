@@ -1,4 +1,4 @@
-import type { Fields, Files } from "formidable";
+import type { Fields, Files } from 'formidable';
 import formidable from 'formidable';
 
 import { promises as fsp } from 'fs';
@@ -33,8 +33,8 @@ export default defineEventHandler(async (event) => {
     'base_file',
     base_file[0].filepath
       ? new Blob([await fsp.readFile(base_file[0].filepath)], {
-        type: base_file[0].mimetype,
-      })
+          type: base_file[0].mimetype,
+        })
       : base_file[0],
     base_file[0].originalFilename
   );

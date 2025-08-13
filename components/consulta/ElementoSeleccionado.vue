@@ -41,6 +41,7 @@ const goUp = () => storeSelected.changePosition(props.selectedElement.uuid, +1);
           </button>
 
           <button
+            v-globo-informacion:derecha="'Subir elemento'"
             class="boton-pictograma boton-sin-contenedor-secundario"
             aria-label="Subir elemento"
             type="button"
@@ -51,6 +52,7 @@ const goUp = () => storeSelected.changePosition(props.selectedElement.uuid, +1);
           </button>
 
           <button
+            v-globo-informacion:derecha="'Bajar elemento'"
             class="boton-pictograma boton-sin-contenedor-secundario"
             aria-label="Bajar Elemento"
             type="button"

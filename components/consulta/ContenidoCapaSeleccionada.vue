@@ -39,6 +39,7 @@ const optionsButtons = ref([
   {
     label: 'Hacer zoom',
     pictogram: 'pictograma-zoom-instruccional',
+    globo: 'Zoom a la capa',
     action: () => {
       storeConsulta.mapExtent = getExtent(props.resourceElement.bbox_polygon.coordinates[0]);
     },
@@ -46,6 +47,7 @@ const optionsButtons = ref([
   {
     label: 'Ver tablas',
     pictogram: 'pictograma-tabla',
+    globo: 'Ver tabla',
     action: () => {
       emit('tablaClicked');
     },
@@ -57,6 +59,11 @@ const optionsButtons = ref([
         ? 'pictograma-ojo-ver'
         : 'pictograma-ojo-ocultar';
     },
+    get globo() {
+      return storeSelected.byUuid(props.resourceElement.uuid)?.visible
+        ? 'Ocultar capa'
+        : 'Mostrar capa';
+    },
     action: () => {
       storeSelected.byUuid(props.resourceElement.uuid).toggleVisibility();
     },
@@ -64,6 +71,7 @@ const optionsButtons = ref([
   {
     label: 'Cambiar opacidad',
     pictogram: 'pictograma-editar',
+    globo: 'Opacidad',
     action: () => {
       emit('opacidadClicked');
     },
@@ -71,6 +79,7 @@ const optionsButtons = ref([
   {
     label: 'Eliminar selección',
     pictogram: 'pictograma-eliminar',
+    globo: 'Eliminar',
     action: () => {
       storeSelected.removeByUuid(props.resourceElement.uuid);
     },
@@ -78,6 +87,7 @@ const optionsButtons = ref([
   {
     label: 'Descargar archivo',
     pictogram: 'pictograma-archivo-descargar',
+    globo: 'Descargar',
     action: () => {
       emit('descargaClicked');
     },
@@ -102,6 +112,7 @@ const optionsButtons = ref([
       <button
         v-for="button in optionsButtons"
         :key="button.label"
+        v-globo-informacion:derecha="button.globo"
         class="boton-pictograma boton-sin-contenedor-secundario"
         :aria-label="button.label"
         type="button"

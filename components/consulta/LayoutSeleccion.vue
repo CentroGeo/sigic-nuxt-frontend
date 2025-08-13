@@ -108,6 +108,7 @@ function changeModal(to) {
           </button>
 
           <button
+            v-globo-informacion:derecha="'Compartir'"
             type="button"
             class="boton-pictograma boton-con-contenedor-secundario"
             aria-label="Compartir"
@@ -117,6 +118,7 @@ function changeModal(to) {
           </button>
 
           <button
+            v-globo-informacion:derecha="'Eliminar selección'"
             type="button"
             class="boton-pictograma boton-con-contenedor-secundario"
             aria-label="Eliminar"

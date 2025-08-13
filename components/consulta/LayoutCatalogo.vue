@@ -76,11 +76,8 @@ onMounted(async () => {
         <p class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
 
         <ClientOnly>
-          <ConsultaElementoBuscador
-            :resources-list="resources"
-            :categories="categoryList"
-          />
-        </ClientOnly> 
+          <ConsultaElementoBuscador :resources-list="resources" :categories="categoryList" />
+        </ClientOnly>
         <UiNumeroElementos :numero="resources.length" :etiqueta="etiquetaElementos" />
       </div>
     </div>
