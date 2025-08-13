@@ -56,10 +56,12 @@ watch(
           :recursos-tipo="recursosTipo"
         />
 
-        <h2>Todos mis archivos</h2>
+        <div class="flex">
+          <h2>Todos mis archivos</h2>
+          <UiNumeroElementos :numero="datos.length" />
+        </div>
         <div class="flex">
           <div class="columna-15">
-            <!-- {{ datos }} -->
             <ClientOnly>
               <UiTablaAccesibleV2 :variables="variables" :datos="datos" />
               <UiPaginador :total-paginas="1" @cambio="1" />

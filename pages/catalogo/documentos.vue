@@ -25,7 +25,8 @@ watch(
     datos.value = recursosFiltradosDocumentos.value.map((d) => ({
       pk: d.pk,
       nombre: d.title,
-      tipo_recurso: d.resource_type,
+      // tipo_recurso: d.resource_type,
+      tipo_recurso: 'Documentos',
       categoria: d.category,
       actualizacion: d.last_updated,
       acciones: 'Ver, Descargar',
