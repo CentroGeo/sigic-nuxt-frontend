@@ -1,21 +1,22 @@
 <script setup>
-const resourcesStore = useSelectedResourcesStore();
+import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
+import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
+
+const storeFetched = useFetchedResourcesStore();
 const props = defineProps({
   titulo: { type: String, default: 'Título' },
   resourceType: { type: String, required: true },
   etiquetaElementos: { type: String, default: undefined },
 });
 const { titulo, resourceType } = toRefs(props);
-const { resourcesList } = useGeonodeResources({
-  resourceType: resourceType.value,
-});
-
-const filteredResources = ref([]);
 const config = useRuntimeConfig();
+const resources = computed(() => storeFetched[props.resourceType]);
+const filteredResources = ref()
 const apiCategorias = `${config.public.geonodeApi}/facets/category`;
 const categoryList = ref([]);
 const categorizedResources = ref({});
 const selectedCategories = ref([]);
+const modalFiltroAvanzado = ref(null)
 
 // Esta parte es para obtener todas las categorias
 const { data: geonodeCategories } = await useFetch(`${apiCategorias}`);
@@ -57,18 +58,29 @@ function setSelectedCategory(categoria) {
   }
 }
 
-// Se utiliza un watcher porque inicialmente resourcesList y filteredResources están vacías
-watch(resourcesList, () => {
-  resourcesStore.updateFilteredResources(resourceType.value, resourcesList.value);
+function filterByInput(r) {
+  filteredResources.value = r;
+  groupResults()
+}
+
+function updateByModal(resources){
+  filteredResources.value = resources
+  groupResults()
+}
+
+onMounted(async () => {
+  if (resources.value.length === 0) {
+    storeFetched.isLoading = true;
+    const { resourcesList } = await useGeonodeResources();
+    storeFetched.updateFetchedResources(props.resourceType, resourcesList.value);
+    filteredResources.value = storeFetched[props.resourceType];
+    storeFetched.isLoading = false;
+  }else{
+    filteredResources.value = storeFetched[props.resourceType];
+  }
+  groupResults();
 });
-watch(
-  () => resourcesStore.filteredResources[resourceType.value],
-  () => {
-    filteredResources.value = resourcesStore.filteredResources[resourceType.value];
-    groupResults();
-  },
-  { deep: true }
-);
+
 </script>
 
 <template>
@@ -79,22 +91,40 @@ watch(
       <div class="m-x-2 m-y-1">
         <p class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
         <ClientOnly>
-          <ConsultaElementoBuscador
-            :resources-list="resourcesList"
-            :resource-type="resourceType"
-            :categories="categoryList"
-          />
+          <SisdaiSelector
+            class="m-y-2"
+            etiqueta="Permisos"
+            instruccional="Selecciona los recursos por permisos"
+          >
+            <option>Opcion 1 </option>
+            <option>Opcion 2 </option>
+            <option>Opcion 3 </option>
+          </SisdaiSelector>
         </ClientOnly>
 
-        <UiNumeroElementos :numero="filteredResources.length" :etiqueta="etiquetaElementos" />
+        <ClientOnly>
+          <div class="flex flex-contenido-equidistante m-y-3">
+            <SisdaiCampoBusqueda
+              class="columna-13"
+              :catalogo="resources"
+              :propiedad-busqueda="'title'"
+              :etiqueta="'Usa palabras clave...'"
+              @al-filtrar="filterByInput"
+            />
+            <button
+              type="button"
+              class="boton-primario boton-pictograma boton-grande"
+              aria-label="Filtro Avanzado"
+              @click="modalFiltroAvanzado.abrirModalBusqueda"
+            >
+              <span class="pictograma-filtro" aria-hidden="true" />
+            </button>
+          </div>
+        </ClientOnly> 
+        <UiNumeroElementos :numero="resources.length" :etiqueta="etiquetaElementos" />
       </div>
     </div>
 
-    <!-- <ul class="lista-catalogo" @click="n++">
-      <li v-for="x in n" :key="x">
-        {{ x }}
-      </li>
-    </ul> -->
     <div v-for="category in Object.keys(categorizedResources)" :key="category" class="m-y-1">
       <div class="">
         <ConsultaElementoCategoria
@@ -105,7 +135,7 @@ watch(
         />
       </div>
       <div
-        v-for="(option, index) in categorizedResources[category]"
+        v-for="(resource, index) in categorizedResources[category]"
         :key="index"
         class="contenedor-archivos"
       >
@@ -113,12 +143,18 @@ watch(
           v-if="selectedCategories.includes(category)"
           :key="index"
           class="elemento-catalogo"
-          :catalogue-element="option"
+          :catalogue-element="resource"
           :resource-type="resourceType"
         />
       </div>
     </div>
   </div>
+  <ConsultaModalBusqueda 
+    ref="modalFiltroAvanzado"
+    :resource-type="props.resourceType"
+    :categories="categoryList"
+    @update-results="(results) => updateByModal(results)"
+  />
 </template>
 
 <style lang="scss" scoped>

@@ -1,28 +1,30 @@
 <script setup>
-// De momento el campo de búsqueda, busca únicamente en el titulo
-// Además, el filtro avanzado de institución no funciona
-// porque hay que revisar en el módulo de carga cómo se recolectará esa información
-// El filtro avanzado de keywords está buscando en el título únicamente
-// Falta poder volver a deseleccionar los filtros
-import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
+import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 
-const resourcesStore = useSelectedResourcesStore();
 const props = defineProps({
-  resourcesList: { type: Array, default: () => [] },
-  resourceType: { type: String, required: true },
   categories: { type: Array, default: () => [] },
+  resourceType: { type: String, required: true },
 });
-const { resourcesList, resourceType, categories } = toRefs(props);
-const catalogoFiltrado = ref(resourcesList.value);
-const modalFiltros = ref(null);
+const { categories } = toRefs(props);
+const storeFetched = useFetchedResourcesStore();
+const resources = computed(() => storeFetched[props.resourceType]);
+const emit = defineEmits(['updateResults']);
+const modalBusqueda = ref(null);
 const selectedFilter = ref({
   selectedCategory: null,
   institucionInput: null,
   yearInput: null,
   keywordsInput: null,
+});
+const results = ref([])
+function abrirModalBusqueda() {
+  modalBusqueda.value?.abrirModal();
+}
+
+defineExpose({
+  abrirModalBusqueda,
 });
 
 function filterByCategory(d) {
@@ -65,13 +67,13 @@ function filterByKeyword(d) {
   } else {
     return 0;
   }
-}
+} 
 
 // La idea sería generar un filtro por categoría y, sacar el numero de filtros aplicados y
 // revisar que sumen un total
 function filterByModal() {
   let total = 0;
-  const results = [];
+  const prevResults = [];
   // Revisamos cuántos filtros se aplicaron
   Object.keys(selectedFilter.value).forEach((d) => {
     if (selectedFilter.value[d]) {
@@ -79,30 +81,32 @@ function filterByModal() {
     }
   });
   // Revisamos la suma por filtro
-  resourcesList.value.forEach((d) => {
+   resources.value.forEach((d) => {
     const i = filterByCategory(d) + filterByYear(d) + filterByKeyword(d);
     if (i === total) {
-      results.push(d);
+      prevResults.push(d);
     }
   });
-  catalogoFiltrado.value = results;
-  resourcesStore.updateFilteredResources(resourceType.value, catalogoFiltrado.value);
-  modalFiltros.value.cerrarModal();
+  results.value = prevResults;
+  emit('updateResults', results.value)
+  modalBusqueda.value.cerrarModal();
 }
 
-function filterByInput(r) {
-  catalogoFiltrado.value = r;
-  resourcesStore.updateFilteredResources(resourceType.value, catalogoFiltrado.value);
+function resetResults(){
+  results.value = resources.value
+  emit('updateResults', results.value)
+  modalBusqueda.value.cerrarModal();
 }
+
 </script>
 <template>
-  <SisdaiModal ref="modalFiltros">
-    <template #encabezado>
-      <h1>Filtro avanzado</h1>
-    </template>
+  <ClientOnly>
+    <SisdaiModal ref="modalBusqueda">
+      <template #encabezado>
+        <h1>Filtro avanzado</h1>
+      </template>
 
-    <template #cuerpo>
-      <ClientOnly>
+      <template #cuerpo>
         <div>
           <SisdaiSelector
             v-model="selectedFilter['selectedCategory']"
@@ -140,29 +144,12 @@ function filterByInput(r) {
             ejemplo="agua, casas..."
           />
         </div>
-      </ClientOnly>
-    </template>
+      </template>
 
-    <template #pie>
-      <button @click="filterByModal">Aplicar</button>
-    </template>
-  </SisdaiModal>
-
-  <div class="flex flex-contenido-equidistante m-y-3">
-    <SisdaiCampoBusqueda
-      class="columna-13"
-      :catalogo="resourcesList"
-      :propiedad-busqueda="'title'"
-      :etiqueta="'Usa palabras clave...'"
-      @al-filtrar="filterByInput"
-    />
-    <button
-      type="button"
-      class="boton-primario boton-pictograma boton-grande"
-      aria-label="Filtro Avanzado"
-      @click="modalFiltros?.abrirModal()"
-    >
-      <span class="pictograma-filtro" aria-hidden="true" />
-    </button>
-  </div>
+      <template #pie>
+        <button @click="filterByModal">Buscar</button>
+        <button @click="resetResults">Restablecer filtros</button>
+      </template>
+    </SisdaiModal>
+  </ClientOnly>
 </template>

@@ -1,5 +1,5 @@
-import formidable from "formidable";
-import { promises as fsp } from "fs";
+import formidable from 'formidable';
+import { promises as fsp } from 'fs';
 const configEnv = useRuntimeConfig();
 
 export default defineEventHandler(async (event) => {
@@ -19,13 +19,13 @@ export default defineEventHandler(async (event) => {
 
   const { base_file } = data.files;
   if (!base_file) {
-    throw createError({ statusCode: 400, message: "Archivo faltante" });
+    throw createError({ statusCode: 400, message: 'Archivo faltante' });
   }
 
   const formData = new FormData();
 
   formData.append(
-    "base_file",
+    'base_file',
     base_file[0].filepath
       ? new Blob([await fsp.readFile(base_file[0].filepath)], {
         type: base_file[0].mimetype,
@@ -34,7 +34,7 @@ export default defineEventHandler(async (event) => {
     base_file[0].originalFilename
   );
   formData.append(
-    "sld_file",
+    'sld_file',
     base_file[0].filepath
       ? new Blob([await fsp.readFile(base_file[0].filepath)], {
         type: base_file[0].mimetype,
@@ -70,7 +70,7 @@ export default defineEventHandler(async (event) => {
 
     return json;
   } catch (error) {
-    console.error("Error al subir al GeoNode:", error);
+    console.error('Error al subir al GeoNode:', error);
 
     throw createError({ statusCode: 500, statusMessage: 'Error al subir al GeoNode', data: error });
   }

@@ -15,7 +15,12 @@ export const useSelectedResourcesStore = defineStore('selectedResources', {
       todos: [],
     },
     shownFiles: {
-      dataLayer: undefined,
+      dataLayer: {
+        centro: [-102.53775, 23.6254],
+        acercamiento: 4.818118060279814,
+        opacity: {},
+        visibility: {},
+      },
       dataTable: undefined,
       document: undefined,
       todos: undefined,
@@ -82,6 +87,19 @@ export const useSelectedResourcesStore = defineStore('selectedResources', {
       } else {
         console.warn('ultimo elemento');
       }
+    },
+    updateLayerOpacity(alternate, value) {
+      this.shownFiles.dataLayer.opacity[alternate] = value / 100;
+      console.log('cambio store opacidad', this.shownFiles.dataLayer.opacity);
+    },
+    updateLayerVisibility(alternate, value) {
+      this.shownFiles.dataLayer.visibility[alternate] = value;
+      console.log(this.shownFiles.dataLayer.visibility);
+    },
+    setMapViewParams(centroArg, acercamientoArg) {
+      this.shownFiles.dataLayer.centro = centroArg;
+      this.shownFiles.dataLayer.acercamiento = acercamientoArg;
+      console.log('cambiaron centro y zoom: ', this.shownFiles.dataLayer);
     },
   },
 });

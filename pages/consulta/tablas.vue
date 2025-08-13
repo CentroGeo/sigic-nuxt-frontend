@@ -1,9 +1,20 @@
 <script setup>
-const resourcesStore = useSelectedResourcesStore();
-const resourceType = 'dataTable';
+import { resourceTypeDic } from '~/utils/consulta';
+
+const resourceType = resourceTypeDic.dataTable;
+
+const storeConsulta = useConsultaStore();
+const storeFetched = useFetchedResourcesStore();
+const storeSelected = useSelectedResources2Store();
+storeConsulta.resourceType = resourceType;
+
+const route = useRoute();
+const router = useRouter();
 
 const paginaActual = ref(0);
 const tamanioPagina = 10;
+const selectedUuid = computed(() => storeSelected.lastVisible()?.uuid ?? null);
+const selectedElement = ref();
 
 const {
   variables,
@@ -13,29 +24,54 @@ const {
 } = useGeoserverDataTable({
   paginaActual: paginaActual.value,
   tamanioPagina: tamanioPagina,
-  resource: resourcesStore.shownFiles[resourceType],
+  resource: selectedElement.value,
 });
 
 watch(paginaActual, () => {
   fetchTable({
     paginaActual: paginaActual.value,
     tamanioPagina: tamanioPagina,
-    resource: resourcesStore.shownFiles[resourceType],
+    resource: selectedElement.value,
   });
 });
 
-// Observa cambios en el recurso seleccionado
-watch(
-  () => resourcesStore.shownFiles[resourceType],
-  () => {
-    paginaActual.value = 0;
+watch([() => selectedUuid.value, () => storeFetched[resourceType]], () => {
+  selectedElement.value = storeFetched.findResources([selectedUuid.value], resourceType)[0];
+  paginaActual.value = 0;
+  // console.log(selectedUuid.value);
+  fetchTable({
+    paginaActual: paginaActual.value,
+    tamanioPagina: tamanioPagina,
+    resource: selectedElement.value,
+  });
+});
+
+/**
+ * Actualiza el queryParam.
+ * @param newQueryParam para asignar.
+ */
+function updateQueryParam(tablas) {
+  if (tablas !== route.query.tablas) {
+    router.replace({ query: { tablas } });
+  }
+}
+watch(() => storeSelected.asQueryParam(), updateQueryParam);
+
+onMounted(() => {
+  storeSelected.addFromQueryParam(route.query.tablas);
+
+  // Para cuando hacem el cambio de página
+  if (storeSelected.uuids.length > 0) {
+    updateQueryParam(storeSelected.asQueryParam());
+
+    selectedElement.value = storeFetched.findResources([selectedUuid.value], resourceType)[0];
     fetchTable({
       paginaActual: paginaActual.value,
       tamanioPagina: tamanioPagina,
-      resource: resourcesStore.shownFiles[resourceType],
+      resource: selectedElement.value,
     });
   }
-);
+});
 </script>
 
 <template>
@@ -49,15 +85,23 @@ watch(
     </template>
 
     <template #visualizador>
-      <div v-if="!resourcesStore.shownFiles[resourceType]" class="contenedor">
+      <template v-if="storeFetched.isLoading">Cargando...</template>
+      <div
+        v-else-if="storeSelected.uuids.length === 0"
+        class="contenedor"
+      >
         <h1>No hay seleccion</h1>
       </div>
       <div v-else>
-        <UiTablaAccesible :variables="variables" :datos="datos" :caption="'una descripción'" />
-        <UiPaginador
-          :total-paginas="Math.ceil(totalFeatures / tamanioPagina)"
-          @cambio="paginaActual = $event"
-        />
+        <div class="contenedor-tabla">
+          <UiPaginador
+            :total-paginas="Math.ceil(totalFeatures / tamanioPagina)"
+            @cambio="paginaActual = $event"
+          />
+          <h2 class="m-t-1 m-b-0 m-x-2" v-if="selectedElement">{{ selectedElement.title }}</h2>
+          <UiTablaAccesible class="tabla" :variables="variables" :datos="datos" />
+        </div>
+
       </div>
     </template>
 
@@ -70,3 +114,10 @@ watch(
     </template>
   </ConsultaLayoutPaneles>
 </template>
+<style scoped>
+.contenedor-tabla {
+  height: var(--altura-consulta-esc);
+
+}
+
+</style>

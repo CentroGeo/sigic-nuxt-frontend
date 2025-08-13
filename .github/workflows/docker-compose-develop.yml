@@ -74,7 +74,7 @@ jobs:
             --build-arg NUXT_PUBLIC_BASE_URL=${{ steps.env.outputs.NUXT_PUBLIC_BASE_URL }} \
             -t ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.branch }} \
             -t ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.sha }} \
-            -f Dockerfile . 
+            -f Dockerfile .
 
       - name: Push image
         run: |
@@ -126,7 +126,7 @@ jobs:
           docker compose -f docker-compose-ghcr.yml down -v || true
           docker compose -f docker-compose-ghcr.yml up -d --force-recreate
         env:
-          NODE_ENV: "development"
+          NODE_ENV: 'development'
           NUXT_PUBLIC_GEONODE_API: ${{ vars.NUXT_PUBLIC_GEONODE_API }}
           NUXT_PUBLIC_GEONODE_URL: ${{ vars.NUXT_PUBLIC_GEONODE_URL }}
           NUXT_PUBLIC_GEOSERVER_URL: ${{ vars.NUXT_PUBLIC_GEOSERVER_URL }}
@@ -136,7 +136,7 @@ jobs:
           KEYCLOAK_CLIENT_ID: ${{ secrets.KEYCLOAK_CLIENT_ID }}
           KEYCLOAK_CLIENT_SECRET: ${{ secrets.KEYCLOAK_CLIENT_SECRET }}
           NUXT_AUTH_SECRET: ${{ secrets.NUXT_AUTH_SECRET }}
-          VIRTUAL_PORT: "3000"
+          VIRTUAL_PORT: '3000'
 
       - name: Clean old Docker images
         run: |

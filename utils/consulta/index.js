@@ -1,7 +1,29 @@
+import { useSelectedResourcesStore } from '@/stores/selectedResources.js';
+
+export const resourceTypeDic = {
+  dataLayer: 'dataLayer',
+  dataTable: 'dataTable',
+  document: 'document',
+};
+
+export const resourceTypeGeonode = {
+  [resourceTypeDic.dataLayer]: 'dataset',
+  [resourceTypeDic.dataTable]: 'dataset',
+  [resourceTypeDic.document]: 'document',
+};
+
 export function tooltipContent(resource) {
+  let formatedAbstract = 'Sin descripción';
+  if (resource.abstract) {
+    formatedAbstract = resource.abstract
+      .replace(/^<p>/, '')
+      .replace(/<\/p>$/, '')
+      .replace(/^<pre>/, '')
+      .replace(/<\/pre>$/, '');
+  }
   const content =
-    `<p style="max-width:250px">${resource.abstract ? resource.abstract : 'Sin descripción'}</p>` +
-    `<p>${resource.attribution ? resource.attribution : 'Sin fuente'}</p>`;
+    `<p style="max-width:250px">${formatedAbstract}</p>` +
+    `<p style="max-width:250px">${resource.attribution || 'Sin fuente'}</p>`;
   return content;
 }
 
@@ -36,6 +58,10 @@ export async function fetchGeometryType(resource) {
   }
 }
 
+export async function wait(miliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, miliseconds));
+}
+
 export function downloadPDF(resource) {
   const anchor = document.createElement('a');
   anchor.href = resource.download_url;
@@ -68,6 +94,7 @@ export async function downloadMetadata(resource) {
   document.body.removeChild(anchor);
   URL.revokeObjectURL(blobLink);
 }
+
 export async function downloadExcel(resource, format) {
   const config = useRuntimeConfig();
   const formatDict = {
@@ -222,4 +249,95 @@ export async function downloadVectorData(resource, format) {
   document.body.appendChild(anchor);
   anchor.click();
   document.body.removeChild(anchor);
+}
+
+export async function setUrlDocs(resources, resourceType) {
+  const resourcesStore = useSelectedResourcesStore();
+  //console.log("Se cambió la url: ", resources);
+  const router = useRouter();
+  const route = useRoute();
+  let params = [];
+  let indicator = null;
+  if (resourceType === 'dataTable') {
+    indicator = 'alternate';
+  } else {
+    indicator = 'title';
+  }
+  params = resources.map((resource) => {
+    let isSelected = 0;
+    if (resource.uuid === resourcesStore.shownFiles[resourceType]?.uuid) {
+      isSelected = 1;
+    } else {
+      isSelected = 0;
+    }
+    return `${resource[indicator]},${isSelected}`;
+  });
+
+  const paramsString = params.join(';');
+  await router.push({
+    path: route.path,
+    query: {
+      recursos: paramsString,
+    },
+  });
+}
+export function setDocView(resourceType, resources, paramsResources) {
+  const resourcesStore = useSelectedResourcesStore();
+  const attrDict = {
+    document: 'title',
+    dataTable: 'alternate',
+  };
+
+  for (let i = paramsResources.length - 1; i >= 0; i--) {
+    const vals = paramsResources[i].split(',');
+    resources.forEach((d) => {
+      if (d[attrDict[resourceType]] === vals[0]) {
+        resourcesStore.addResource(resourceType, d);
+        if (vals[1] === '1') {
+          resourcesStore.setShownFile(resourceType, d);
+        }
+      }
+    });
+  }
+}
+export async function setUrlLayers(resources) {
+  const resourcesStore = useSelectedResourcesStore();
+  console.log('Se cambió la url: ', resources);
+  const router = useRouter();
+  const route = useRoute();
+  let params = [];
+  const indicator = 'alternate';
+  const opacidades = Object.keys(resourcesStore.shownFiles.dataLayer.opacity);
+  const visibilidades = Object.keys(resourcesStore.shownFiles.dataLayer.visibility);
+  params = resources.map((resource) => {
+    let indOpacity = 1;
+    let indVisibility = 1;
+    if (opacidades.includes(resource.alternate)) {
+      indOpacity = resourcesStore.shownFiles.dataLayer.opacity[resource.alternate] / 100;
+    }
+    if (visibilidades.includes(resource.alternate)) {
+      indVisibility = resourcesStore.shownFiles.dataLayer.visibility[resource.alternate] ? 1 : 0;
+    }
+    return `${resource[indicator]},${indOpacity},${indVisibility}`;
+  });
+
+  const paramsString = params.join(';');
+  await router.push({
+    path: route.path,
+    query: {
+      centro: resourcesStore.shownFiles.dataLayer.centro.join(','),
+      acercamiento: resourcesStore.shownFiles.dataLayer.acercamiento,
+      recursos: paramsString,
+    },
+  });
+}
+export function setMapView(resourceType, resources, paramsResources) {
+  const resourcesStore = useSelectedResourcesStore();
+  for (let i = paramsResources.length - 1; i >= 0; i--) {
+    resources.forEach((d) => {
+      if (d.alternate === paramsResources[i]) {
+        resourcesStore.addResource(resourceType, d);
+      }
+    });
+  }
 }

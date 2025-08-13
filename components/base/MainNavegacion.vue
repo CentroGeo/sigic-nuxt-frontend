@@ -19,13 +19,13 @@ async function cerrarSesion() {
     <!--Definiendo el logo del sitio-->
     <template #identidad>
       <a href="#" target="_blank" rel="noopener noreferrer" class="nav-hiperviculo-logo">
-        <img
+        <!-- <img
           src="https://www.centrogeo.org.mx/templates/ja_resume/images/logo_centrogeo_wide.svg"
           class="nav-logo color-invertir"
           alt="logo"
           width="232"
           height="38"
-        />
+        /> -->
       </a>
     </template>
     <ul class="nav-menu">
