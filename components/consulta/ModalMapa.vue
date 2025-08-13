@@ -41,7 +41,7 @@ defineExpose({
 </script>
 <template>
   <ClientOnly>
-    <SisdaiModal ref="modalMapa">
+    <SisdaiModal ref="modalMapa" id="modal-mapa">
       <template #encabezado>
         <h1>{{ selectedElement.title }}</h1>
       </template>
@@ -49,8 +49,9 @@ defineExpose({
       <template #cuerpo>
         <SisdaiSelector
           v-model="estiloSeleccionado"
-          etiqueta="Selecciona un estilo disponible"
+          etiqueta="Variables disponibles para visualizar"
           instruccional="Selecciona el estilo para visualizar"
+          class="m-y-2"
         >
           <option v-for="(estilo, index) in estilosLista" :key="`estilo-${index}`" :value="estilo">
             {{ estilo }}
@@ -69,10 +70,31 @@ defineExpose({
       </template>
 
       <template #pie>
-        <button type="button" class="boton-primario" @click="openLayerView">Abrir en Capas</button>
-
-        <button type="button" class="boton-primario" @click="downloadClicked()">Descargar</button>
+        <button type="button" 
+          class="boton-con-contenedor-secundario boton-grande ancho" 
+          @click="openLayerView">
+          Ver Capa en Visualizador
+          <span aria-hidden="true" class="pictograma-tabla"></span>
+        </button>
+        <button type="button" 
+          class="boton-primario boton-grande ancho" 
+          @click="downloadClicked()">
+          Descarga Archivo
+          <span aria-hidden="true" class="pictograma-archivo-descargar pictograma-grande"></span>
+        </button>
       </template>
     </SisdaiModal>
   </ClientOnly>
 </template>
+<style lang="scss" scoped>
+#modal-mapa{
+  max-width: 40%;
+}
+
+.ancho{
+  width: 50%;
+  display: flex;
+  justify-content: center; /* horizontal center */
+}
+</style>
+

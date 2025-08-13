@@ -92,11 +92,15 @@ onMounted(() => {
         <h1>No hay seleccion</h1>
       </div>
       <div v-else>
-        <UiTablaAccesible :variables="variables" :datos="datos" :caption="'una descripción'" />
-        <UiPaginador
-          :total-paginas="Math.ceil(totalFeatures / tamanioPagina)"
-          @cambio="paginaActual = $event"
-        />
+        <div class="contenedor-tabla">
+          <UiPaginador
+            :total-paginas="Math.ceil(totalFeatures / tamanioPagina)"
+            @cambio="paginaActual = $event"
+          />
+          <h2 class="m-t-1 m-b-0 m-x-2">{{ selectedElement.title }}</h2>
+          <UiTablaAccesible class="tabla" :variables="variables" :datos="datos" />
+        </div>
+
       </div>
     </template>
 
@@ -109,3 +113,10 @@ onMounted(() => {
     </template>
   </ConsultaLayoutPaneles>
 </template>
+<style scoped>
+.contenedor-tabla {
+  height: var(--altura-consulta-esc);
+
+}
+
+</style>

@@ -13,7 +13,7 @@ const props = defineProps({
 
 const modalTabla = ref(null);
 const paginaActual = ref(0);
-const tamanioPagina = 10;
+const tamanioPagina = 6;
 const {
   variables,
   datos,
@@ -59,18 +59,28 @@ watch([paginaActual], () => {
       </template>
 
       <template #cuerpo>
-        <UiTablaAccesible :variables="variables" :datos="datos" />
+      <div class="contenedor-tabla">
         <UiPaginador
           :total-paginas="Math.ceil(totalFeatures / tamanioPagina)"
           @cambio="paginaActual = $event"
         />
+        <UiTablaAccesible :variables="variables" :datos="datos" />
+      </div>
+
       </template>
 
       <template #pie>
-        <button type="button" class="boton-primario" @click="openTablas">Abrir en Tablas</button>
-
-        <button type="button" class="boton-primario" @click="emit('notifyDownload')">
-          Descargar
+        <button type="button" 
+        class="boton-con-contenedor-secundario boton-grande ancho" 
+        @click="openTablas">
+          Ver Tabla en Visualizador
+          <span aria-hidden="true" class="pictograma-tabla"></span>
+        </button>
+        <button type="button" 
+        class="boton-primario boton-grande ancho" 
+        @click="emit('notifyDownload')">
+          Descarga Archivo
+          <span aria-hidden="true" class="pictograma-archivo-descargar pictograma-grande"></span>
         </button>
       </template>
     </SisdaiModal>
@@ -78,6 +88,15 @@ watch([paginaActual], () => {
 </template>
 <style lang="scss" scoped>
 #modal-tabla{
-  max-height: 70%;
+  max-width: 40%;
+  margin-top: 64px;
+}
+.contenedor-tabla{
+  overflow-y: auto;
+}
+.ancho{
+  width: 50%;
+  display: flex;
+  justify-content: center; /* horizontal center */
 }
 </style>
