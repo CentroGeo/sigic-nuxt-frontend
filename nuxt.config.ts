@@ -11,9 +11,7 @@ export default defineNuxtConfig({
           rel: 'shortcut icon',
           href: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/images/favicon.ico',
         },
-
       ],
-
     },
   },
   compatibilityDate: '2025-05-15',
@@ -38,6 +36,7 @@ export default defineNuxtConfig({
   auth: {
     isEnabled: true,
     baseURL: `${baseUrl}/api/auth`,
+    // originEnvKey: 'NUXT_AUTH_ORIGIN',  // TODO: pendiente de definir
 
     globalAppMiddleware: false, // protege todas las páginas por defecto
     provider: {
@@ -56,9 +55,9 @@ export default defineNuxtConfig({
 
     // Variables públicas (disponibles también en el cliente)
     public: {
-      geonodeApi: `${process.env.GEONODE_URL}/api/v2`,
-      geoserverUrl: process.env.GEOSERVER_URL,
-      geonodeUrl: process.env.GEONODE_URL,
+      geonodeApi: process.env.NUXT_PUBLIC_GEONODE_API,
+      geonodeUrl: process.env.NUXT_PUBLIC_GEONODE_URL,
+      geoserverUrl: process.env.NUXT_PUBLIC_GEOSERVER_URL,
       baseURL: baseUrl,
 
       // geoserverApi: `${process.env.GEOSERVER_URL}/rest`,
