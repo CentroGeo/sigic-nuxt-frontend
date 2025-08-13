@@ -1,6 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
-const isDev = process.env.NODE_ENV === 'production' ? false : true
+const isDev = process.env.NODE_ENV !== 'production';
+const baseUrl = process.env.NUXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
 export default defineNuxtConfig({
   app: {
@@ -10,48 +11,43 @@ export default defineNuxtConfig({
           rel: 'shortcut icon',
           href: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/images/favicon.ico',
         },
-        {
-          rel: 'stylesheet',
-          // href: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/styles/main.css',
-        },
-      ],
-      script: [
-        {
-          // src: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/js/gobmx.js',
-        },
       ],
     },
   },
-  compatibilityDate: "2025-05-15",
+  compatibilityDate: '2025-05-15',
   devtools: { enabled: isDev },
-  experimental: {
-    devTools: isDev
-  },
   sourcemap: {
     server: isDev,
-    client: isDev
+    client: isDev,
   },
 
-  modules: ["@pinia/nuxt", // "@nuxt/content",
-  "@nuxt/eslint", "@nuxt/image", "@nuxt/test-utils", "@sidebase/nuxt-auth", '@vueuse/nuxt', '@nuxt/scripts'],
+  modules: [
+    '@pinia/nuxt',
+    // "@nuxt/content",
+    '@nuxt/eslint',
+    '@nuxt/image',
+    '@nuxt/test-utils',
+    '@sidebase/nuxt-auth',
+    '@vueuse/nuxt',
+  ],
 
-  css: ["@centrogeomx/sisdai-css/dist/sisdai.min.css"],
+  css: ['@centrogeomx/sisdai-css/dist/sisdai.min.css'],
 
   auth: {
     isEnabled: true,
-    baseURL: 'http://localhost:3000/api/auth',
-    originEnvKey: process.env.NUXT_AUTH_ORIGIN,
+    baseURL: `${baseUrl}/api/auth`,
+    // originEnvKey: 'NUXT_AUTH_ORIGIN',  // TODO: pendiente de definir
 
     globalAppMiddleware: false, // protege todas las páginas por defecto
     provider: {
-      type: "authjs",
+      type: 'authjs',
       trustHost: true,
-      defaultProvider: "keycloak",
+      defaultProvider: 'keycloak',
     },
     sessionRefresh: {
       enablePeriodically: true,
       enableOnWindowFocus: true,
-    }
+    },
   },
 
   runtimeConfig: {
@@ -59,12 +55,13 @@ export default defineNuxtConfig({
 
     // Variables públicas (disponibles también en el cliente)
     public: {
-      geonodeApi: `${process.env.GEONODE_URL}/api/v2`,
-      geoserverUrl: process.env.GEOSERVER_URL,
-      geonodeUrl: process.env.GEONODE_URL,
+      geonodeApi: process.env.NUXT_PUBLIC_GEONODE_API,
+      geonodeUrl: process.env.NUXT_PUBLIC_GEONODE_URL,
+      geoserverUrl: process.env.NUXT_PUBLIC_GEOSERVER_URL,
+      baseURL: baseUrl,
 
       // geoserverApi: `${process.env.GEOSERVER_URL}/rest`,
-    }
+    },
   },
 
   nitro: {
@@ -72,9 +69,9 @@ export default defineNuxtConfig({
     storage: {
       fs: {
         driver: 'fs',
-        base: './public'
-      }
-    }
+        base: './public',
+      },
+    },
   },
 
   devServer: {

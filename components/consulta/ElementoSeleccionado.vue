@@ -17,12 +17,8 @@ const resourceElement = computed(() =>
   storeFetched.findResource(props.selectedElement.uuid, props.resourceType)
 );
 
-function goDown() {
-  storeSelected.changePosition(props.selectedElement.uuid, -1);
-}
-function goUp() {
-  storeSelected.changePosition(props.selectedElement.uuid, +1);
-}
+const goDown = () => storeSelected.changePosition(props.selectedElement.uuid, -1);
+const goUp = () => storeSelected.changePosition(props.selectedElement.uuid, +1);
 </script>
 
 <template>
@@ -91,12 +87,13 @@ function goUp() {
 .tarjeta-selected {
   padding: 16px;
   background-color: var(--color-secundario-2);
+
+  .encabezado-tarjeta {
+    align-items: center;
+  }
 }
 .selected-unselected {
   padding: 16px;
   background-color: var(--color-neutro-1);
-}
-.encabezado-tarjeta {
-  align-items: center;
 }
 </style>
