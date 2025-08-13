@@ -21,8 +21,15 @@ export default defineNuxtConfig({
     client: isDev,
   },
 
-  modules: ["@pinia/nuxt", // "@nuxt/content",
-    "@nuxt/eslint", "@nuxt/image", "@nuxt/test-utils", "@sidebase/nuxt-auth", '@vueuse/nuxt', '@nuxt/scripts'],
+  modules: [
+    '@pinia/nuxt',
+    // "@nuxt/content",
+    '@nuxt/eslint',
+    '@nuxt/image',
+    '@nuxt/test-utils',
+    '@sidebase/nuxt-auth',
+    '@vueuse/nuxt',
+  ],
 
   css: ['@centrogeomx/sisdai-css/dist/sisdai.min.css'],
 
@@ -48,10 +55,11 @@ export default defineNuxtConfig({
 
     // Variables públicas (disponibles también en el cliente)
     public: {
-      geonodeApi: `${process.env.GEONODE_URL}/api/v2`,
-      geoserverUrl: process.env.GEOSERVER_URL,
-      geonodeUrl: process.env.GEONODE_URL,
-      domain: process.env.DOMAIN
+      geonodeApi: process.env.NUXT_PUBLIC_GEONODE_API,
+      geonodeUrl: process.env.NUXT_PUBLIC_GEONODE_URL,
+      geoserverUrl: process.env.NUXT_PUBLIC_GEOSERVER_URL,
+      baseURL: baseUrl,
+      domain: process.env.DOMAIN,
 
       // geoserverApi: `${process.env.GEOSERVER_URL}/rest`,
     },

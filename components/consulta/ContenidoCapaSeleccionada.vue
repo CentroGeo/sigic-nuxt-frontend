@@ -59,7 +59,7 @@ const optionsButtons = ref([
         ? 'pictograma-ojo-ver'
         : 'pictograma-ojo-ocultar';
     },
-    get globo(){
+    get globo() {
       return storeSelected.byUuid(props.resourceElement.uuid)?.visible
         ? 'Ocultar capa'
         : 'Mostrar capa';
@@ -112,10 +112,10 @@ const optionsButtons = ref([
       <button
         v-for="button in optionsButtons"
         :key="button.label"
+        v-globo-informacion:derecha="button.globo"
         class="boton-pictograma boton-sin-contenedor-secundario"
         :aria-label="button.label"
         type="button"
-        v-globo-informacion:derecha="button.globo"
         @click="button.action"
       >
         <span :class="button.pictogram" aria-hidden="true" />

@@ -1,6 +1,6 @@
 <script setup>
-import SisdaiControlDeslizante from "@centrogeomx/sisdai-componentes/src/componentes/control-deslizante/SisdaiControlDeslizante.vue";
-import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
+import SisdaiControlDeslizante from '@centrogeomx/sisdai-componentes/src/componentes/control-deslizante/SisdaiControlDeslizante.vue';
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 const props = defineProps({
   selectedElement: {
     type: Object,
@@ -19,7 +19,7 @@ defineExpose({
   abrirModalOpacidad,
 });
 watch(valorOpacidad, () => {
-  console.log(valorOpacidad.value)
+  console.log(valorOpacidad.value);
 });
 </script>
 <template>
@@ -34,13 +34,13 @@ watch(valorOpacidad, () => {
         <div class="contenedor flex">
           <div class="columna-11">
             <SisdaiControlDeslizante
+              id="contro-opacidad"
+              ref="controlOpacidad"
               class="deslizante"
               :val_min="0"
               :val_max="100"
               :val_entrada="100"
-              id="contro-opacidad"
               step="10"
-              ref="controlOpacidad"
               @update:val_entrada="
                 ($event) => {
                   controlOpacidad.valor_seleccionado = $event;
@@ -52,9 +52,7 @@ watch(valorOpacidad, () => {
           </div>
 
           <div class="tarjeta columna-5">
-            <p class="m-x-2 m-y-1">
-              {{ controlOpacidad?.valor_seleccionado }}%
-            </p>
+            <p class="m-x-2 m-y-1">{{ controlOpacidad?.valor_seleccionado }}%</p>
           </div>
         </div>
       </template>

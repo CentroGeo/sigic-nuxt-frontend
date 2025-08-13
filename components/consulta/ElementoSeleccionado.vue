@@ -41,22 +41,22 @@ const goUp = () => storeSelected.changePosition(props.selectedElement.uuid, +1);
           </button>
 
           <button
+            v-globo-informacion:derecha="'Subir elemento'"
             class="boton-pictograma boton-sin-contenedor-secundario"
             aria-label="Subir elemento"
             type="button"
             :disabled="storeSelected.uuids.length === selectedElement.posicion + 1"
-            v-globo-informacion:derecha="'Subir elemento'"
             @click="goUp"
           >
             <span class="pictograma-subir-capa pictograma-mediano" aria-hidden="true" />
           </button>
 
           <button
+            v-globo-informacion:derecha="'Bajar elemento'"
             class="boton-pictograma boton-sin-contenedor-secundario"
             aria-label="Bajar Elemento"
             type="button"
             :disabled="selectedElement.posicion === 0"
-            v-globo-informacion:derecha="'Bajar elemento'"
             @click="goDown"
           >
             <span class="pictograma-bajar-capa pictograma-mediano" aria-hidden="true" />

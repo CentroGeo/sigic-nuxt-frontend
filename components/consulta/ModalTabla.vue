@@ -51,6 +51,7 @@ watch([paginaActual], () => {
   });
 });
 </script>
+
 <template>
   <ClientOnly>
     <SisdaiModal id="modal-tabla" ref="modalTabla">
@@ -86,6 +87,7 @@ watch([paginaActual], () => {
     </SisdaiModal>
   </ClientOnly>
 </template>
+
 <style lang="scss" scoped>
 #modal-tabla{
   max-width: 40%;

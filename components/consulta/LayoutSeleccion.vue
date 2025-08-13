@@ -108,20 +108,20 @@ function changeModal(to) {
           </button>
 
           <button
+            v-globo-informacion:derecha="'Compartir'"
             type="button"
             class="boton-pictograma boton-con-contenedor-secundario"
             aria-label="Compartir"
-            v-globo-informacion:derecha="'Compartir'"
             @click="shareState"
           >
             <span class="pictograma-compartir" aria-hidden="true" />
           </button>
 
           <button
+            v-globo-informacion:derecha="'Eliminar selección'"
             type="button"
             class="boton-pictograma boton-con-contenedor-secundario"
             aria-label="Eliminar"
-            v-globo-informacion:derecha="'Eliminar selección'"
             @click="storeSelected.reset()"
           >
             <span class="pictograma-eliminar" aria-hidden="true" />
