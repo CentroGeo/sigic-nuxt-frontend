@@ -29,7 +29,7 @@ useHead(() => ({
       content: 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg',
     },
   ],
-});
+}));
 
 const botonesEnlaces = computed(() => [
   {

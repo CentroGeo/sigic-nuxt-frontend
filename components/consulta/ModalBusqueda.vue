@@ -100,13 +100,13 @@ function resetResults(){
 
 </script>
 <template>
-  <SisdaiModal ref="modalBusqueda">
-    <template #encabezado>
-      <h1>Filtro avanzado</h1>
-    </template>
+  <ClientOnly>
+    <SisdaiModal ref="modalBusqueda">
+      <template #encabezado>
+        <h1>Filtro avanzado</h1>
+      </template>
 
-    <template #cuerpo>
-      <ClientOnly>
+      <template #cuerpo>
         <div>
           <SisdaiSelector
             v-model="selectedFilter['selectedCategory']"
@@ -144,12 +144,12 @@ function resetResults(){
             ejemplo="agua, casas..."
           />
         </div>
-      </ClientOnly>
-    </template>
+      </template>
 
-    <template #pie>
-      <button @click="filterByModal">Buscar</button>
-      <button @click="resetResults">Restablecer filtros</button>
-    </template>
-  </SisdaiModal>
+      <template #pie>
+        <button @click="filterByModal">Buscar</button>
+        <button @click="resetResults">Restablecer filtros</button>
+      </template>
+    </SisdaiModal>
+  </ClientOnly>
 </template>
