@@ -10,7 +10,7 @@ const statusOk = ref(false);
 const pending = ref(false);
 
 const route = useRoute();
-
+const resource = ref({});
 function getUserData() {
   if (route.query.userObject) {
     try {
@@ -21,24 +21,44 @@ function getUserData() {
     }
   }
 }
-const resource = getUserData();
+resource.value = getUserData();
 
 const { data } = useAuth();
+
+const dragNdDrop = ref(null);
 
 async function guardarArchivo(files) {
   const token = ref(data.value?.accessToken);
 
-  const formData = new FormData();
-  // solo el primer elemento del arreglo
-  formData.append('base_file', files[0]);
-  // formData.append('dataset_title', resource.dataset_title);
-  formData.append('dataset_title', 'geonode:coordinaciones');
-  formData.append('token', token.value);
+  if (
+    files[0].name.split('.')[1] === '.sld' ||
+    files[0].name.endsWith('.sld') ||
+    files[0].type === '.sld' ||
+    files[0].type === 'application/vnd.sld+xml' ||
+    files[0].type === 'application/vnd.sld+xml,.sld'
+  ) {
+    const formData = new FormData();
+    // solo el primer elemento del arreglo
+    formData.append('base_file', files[0]);
+    // formData.append('dataset_title', resource.dataset_title);
+    formData.append('dataset_title', 'geonode:coordinaciones');
+    formData.append('token', token.value);
 
-  await $fetch('/api/subirSLD', {
-    method: 'POST',
-    body: formData,
-  });
+    const response = await $fetch('/api/subirSLD', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error al cargar archivos: ${response.status}`);
+    } else {
+      // pending.value = false;
+      // statusOk.value = true;
+      // TODO: recuperar recurso o recursos mediante el name y title
+    }
+  } else {
+    dragNdDrop.value?.archivoNoValido();
+  }
 
   // pending.value = true;
   // // remover timeout
@@ -83,7 +103,10 @@ async function guardarArchivo(files) {
 
               <!-- Drag & Drop -->
               <ClientOnly>
-                <CatalogoElementoDragNdDrop @pasar-archivo="(i) => guardarArchivo(i)" />
+                <CatalogoElementoDragNdDrop
+                  ref="dragNdDrop"
+                  @pasar-archivo="(i) => guardarArchivo(i)"
+                />
               </ClientOnly>
             </div>
 

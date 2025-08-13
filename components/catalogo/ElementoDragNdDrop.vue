@@ -1,41 +1,56 @@
 <script setup>
-/**
- * @typedef {Object} Props
- * @property {String} [tipoArchivoValidos=''] - Indica los tipos de archivo válidos.
- */
-
-/** @type {Props} */
-const props = defineProps({
-  tipoArchivoValidos: {
-    type: String,
-    default: '',
-  },
-});
-const { tipoArchivoValidos } = toRefs(props);
-const datosArriba = ref(false);
-const datos = ref([]);
-const ejemplo = ref();
-const archivoValido = false;
-
 // emit para pasar los archivos al componente padre
 const emit = defineEmits(['pasarArchivo']);
-const archivos = ref();
+
+const archivos = ref({});
+const archivosArriba = ref(false);
+const archivoValido = ref(false);
 
 const onDropZone = ref(null);
 const { files } = useDropZone(onDropZone, { onDrop });
 async function onDrop() {
   // imprime el archivo que se suba mediante el drop
-  console.log('files', files.value);
+  // console.log('files', files.value);
   archivos.value = files.value;
+  archivosArriba.value = true;
   // files.value = Array.from(files.value);
 }
 
 const { open, onChange } = useFileDialog();
 onChange(async (files) => {
   // imprime el archivo que se suba mediante el diálogo
-  console.log('files', files);
+  // console.log('files', files);
   archivos.value = files;
+  archivosArriba.value = true;
   // const files = Array.from(files);
+});
+
+const convertirBytes = (bytes) => {
+  const decimals = 2;
+  if (!+bytes) return '0 Bytes';
+
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['Bytes', 'Kib', 'MiB', 'GiB', 'TiB', 'EiB', 'ZiB', ' YiB'];
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+};
+
+const removerArchivos = () => {
+  archivos.value = {};
+  archivosArriba.value = false;
+  archivoValido.value = false;
+};
+
+const archivoNoValido = () => {
+  archivoValido.value = true;
+};
+
+defineExpose({
+  archivoValido,
+  archivoNoValido,
 });
 </script>
 <template>
@@ -44,45 +59,58 @@ onChange(async (files) => {
     <div>
       <div
         ref="onDropZone"
-        class="contenedor-dragnddrop flex flex-contenido-centrado borde borde-redondeado-16 p-1 m-b-3"
+        class="contenedor-dragnddrop borde borde-redondeado-16 p-1 m-b-3"
         @click="open()"
       >
-        <div class="flex flex-vertical-centrado">
-          <div class="texto-centrado">
-            <div v-if="!datosArriba">
-              <div>
-                <span class="pictograma-archivo-subir pictograma-mediano" />
-              </div>
-              <p>Arratra o suelta tu archivo</p>
-            </div>
-            <div class="texto-izquierda">
-              <p v-for="d in datos" :key="d.name">
-                {{ d.name }}
+        <div
+          v-if="archivosArriba"
+          class="m-x-2 m-y-1"
+          style="max-height: 184px; overflow-y: scroll"
+        >
+          <div v-for="archivo in archivos" :key="archivo.name" class="flex flex-contenido-separado">
+            <p class="flex flex-vertical-centrado m-y-1">{{ archivo.name }}</p>
+            <div class="flex">
+              <p class="fondo-color-neutro borde borde-redondeado-8 m-y-1" style="padding: 4px">
+                .{{ archivo.name.split('.')[1] }}
               </p>
+              <p class="flex flex-vertical-centrado m-y-1">{{ convertirBytes(archivo.size) }}</p>
             </div>
+          </div>
+        </div>
+        <div
+          class="flex flex-contenido-centrado"
+          :style="`min-height: ${!archivosArriba ? '281px' : '0px; margin-top: 32px;'}`"
+        >
+          <div class="flex flex-vertical-centrado">
+            <div class="texto-centrado m-b-1">
+              <div v-if="!archivosArriba">
+                <div>
+                  <span class="pictograma-archivo-subir pictograma-mediano" />
+                </div>
+                <p>Arratra o suelta tu archivo</p>
+              </div>
 
-            <label
-              class="boton boton-secundario boton-chico"
-              for="identificadorCAMPOFILE"
-              @click="open()"
-            >
-              Elige Archivo
-            </label>
-            <input
-              id="identificadorCAMPOFILE"
-              name="identificadorCAMPOFILE"
-              placeholder="ejemplo"
-              type="file"
-              :v-model="ejemplo"
-              @click="open()"
-            />
+              <label
+                class="boton boton-secundario boton-chico"
+                for="identificadorCAMPOFILE"
+                @click="open()"
+              >
+                Elige Archivo
+              </label>
+              <input
+                id="identificadorCAMPOFILE"
+                name="identificadorCAMPOFILE"
+                type="file"
+                @click="open()"
+              />
+            </div>
           </div>
         </div>
       </div>
 
       <p v-if="archivoValido" class="texto-color-error">Archivo inválido</p>
 
-      <div class="flex">
+      <div class="botones-dragnddrop flex">
         <client-only>
           <button
             class="boton-primario boton-chico"
@@ -97,7 +125,8 @@ onChange(async (files) => {
             class="boton-secundario boton-chico"
             aria-label="Eliminar"
             type="button"
-            :disabled="true"
+            :disabled="!archivosArriba"
+            @click="removerArchivos"
           >
             Eliminar
           </button>
@@ -109,7 +138,8 @@ onChange(async (files) => {
 
 <style lang="scss">
 .contenedor-dragnddrop {
-  min-height: 281px;
+  // min-height: 281px;
+  height: 300px;
   border-style: dashed;
   cursor: pointer;
 }
