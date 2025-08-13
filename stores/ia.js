@@ -1,6 +1,8 @@
 import { defineStore } from "pinia";
 // TODO: intentar hacer un módulo para cada set proyectos,fuentes,contextos,chats
 
+const backend="http://localhost:8181/"
+
 export const useIAStore = defineStore("ia", {
   state: () => ({
     existenProyectos: false,
@@ -79,7 +81,7 @@ export const useIAStore = defineStore("ia", {
             reject(new Error("Subida cancelada"));
           });
           
-          xhr.open('POST', "http://localhost:8080/api/fileuploads/workspaces/admin/create");
+          xhr.open('POST', backend+"api/fileuploads/workspaces/admin/create");
           xhr.send(formData);
         });
 
@@ -104,7 +106,7 @@ export const useIAStore = defineStore("ia", {
  */
   
         const response = await fetch(
-          "http://localhost:8080/api/fileuploads/workspaces/admin/contexts/create",
+          backend+"api/fileuploads/workspaces/admin/contexts/create",
           {
             method: "POST",
             body: formData
@@ -136,7 +138,7 @@ export const useIAStore = defineStore("ia", {
       //this.existeContexto = true;
 
       const response = await fetch(
-        "http://localhost:8080/api/fileuploads/workspaces/admin",
+        backend+"api/fileuploads/workspaces/admin",
         {
           method: "POST",
           body: {}
@@ -164,7 +166,7 @@ export const useIAStore = defineStore("ia", {
     async getProjectSources(project_id) {
 
       const response = await fetch(
-        "http://localhost:8080/api/fileuploads/workspaces/admin/"+project_id+"/files",
+        backend+"api/fileuploads/workspaces/admin/"+project_id+"/files",
         {
           method: "POST",
           body: {}
@@ -193,7 +195,7 @@ export const useIAStore = defineStore("ia", {
     async getProjectContexts(project_id) {
 
       const response = await fetch( 
-        "http://localhost:8080/api/fileuploads/workspaces/admin/"+project_id+"/contexts",
+        backend+"api/fileuploads/workspaces/admin/"+project_id+"/contexts",
         {
           method: "POST",
           body: {}
@@ -225,7 +227,7 @@ export const useIAStore = defineStore("ia", {
       //this.existeContexto = true;
 
       const response = await fetch(
-        "http://localhost:8080/api/chat/history/getchats",
+        backend+"api/chat/history/getchats",
         {
           method: "POST",
           body: {}
@@ -255,7 +257,7 @@ export const useIAStore = defineStore("ia", {
       console.log(chat_id)
 
       const response = await fetch( 
-        "http://localhost:8080/api/chat/history/user",
+        backend+"api/chat/history/user",
         {
           method: "POST",
           headers: {

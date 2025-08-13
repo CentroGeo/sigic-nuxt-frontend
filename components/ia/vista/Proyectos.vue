@@ -144,7 +144,7 @@ watch(proyecto, (nuevoProyecto, anteriorProyecto) => {
                 <div class="tarjeta">
                   <img
                     class="tarjeta-imagen"
-                    :src="`http://localhost:8080/media/${contexto.image_type}`"
+                    :src="`http://localhost:8181/media/${contexto.image_type}`"
                     alt=""
                   />
                   <div class="tarjeta-cuerpo">
