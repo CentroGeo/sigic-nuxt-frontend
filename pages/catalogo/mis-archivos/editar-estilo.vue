@@ -93,11 +93,19 @@ async function guardarArchivo(files) {
             <div class="columna-16">
               <h2>resource.title</h2>
               <div class="flex">
-                <nuxt-link to="/catalogo/mis-archivos/editar-metadatos" exact-path
+                <nuxt-link
+                  :class="`${route.path === '/catalogo/mis-archivos/editar-metadatos' ? 'borde-enlace-activo' : ''}`"
+                  to="/catalogo/mis-archivos/editar-metadatos"
                   >Metadatos</nuxt-link
                 >
-                <nuxt-link to="/catalogo/mis-archivos/editar-estilo">Estilo</nuxt-link>
+                <nuxt-link
+                  :class="`${route.path === '/catalogo/mis-archivos/editar-estilo' ? 'borde-enlace-activo' : ''}`"
+                  to="/catalogo/mis-archivos/editar-estilo"
+                  style=""
+                  >Estilo</nuxt-link
+                >
               </div>
+              <div class="borde-b borde-color-secundario"></div>
               <h2>Estilo</h2>
               <p><b>Estilo, solo archivos .sld</b></p>
 
@@ -168,3 +176,10 @@ async function guardarArchivo(files) {
     </template>
   </UiLayoutPaneles>
 </template>
+
+<style lang="scss" scoped>
+.borde-enlace-activo {
+  border-bottom: 4px solid var(--boton-primario-borde);
+  border-radius: 0px;
+}
+</style>

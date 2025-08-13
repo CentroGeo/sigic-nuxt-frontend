@@ -26,6 +26,7 @@ function getUserData() {
 }
 const objetoId = ref(getUserData());
 
+const imagen = ref();
 const campoResumen = ref('Resumen desde sigic');
 const campoTitulo = ref('');
 const campoPalabrasClave = ref('');
@@ -57,6 +58,25 @@ async function actualizaMetadatos() {
     },
   });
 }
+
+const dragNdDrop = ref(null);
+
+async function guardarImagen(files) {
+  if (
+    files[0].name.split('.')[1] === '.jpg' ||
+    files[0].name.endsWith('.jpg') ||
+    files[0].name.split('.')[1] === '.jpeg' ||
+    files[0].name.endsWith('.jpeg') ||
+    files[0].type === 'image/jpeg' ||
+    files[0].name.split('.')[1] === '.png' ||
+    files[0].name.endsWith('.png') ||
+    files[0].type === 'image/png'
+  ) {
+    imagen.value = files;
+  } else {
+    dragNdDrop.value?.archivoNoValido();
+  }
+}
 </script>
 
 <template>
@@ -79,10 +99,38 @@ async function actualizaMetadatos() {
           </div>
           <h2>{{ resource.title }}</h2>
           <div class="flex">
-            <nuxt-link to="/catalogo/mis-archivos/editar-metadatos" exact-path>Metadatos</nuxt-link>
-            <nuxt-link to="/catalogo/mis-archivos/editar-estilo">Estilo</nuxt-link>
+            <nuxt-link
+              :class="`${route.path === '/catalogo/mis-archivos/editar-metadatos' ? 'borde-enlace-activo' : ''}`"
+              to="/catalogo/mis-archivos/editar-metadatos"
+              >Metadatos</nuxt-link
+            >
+            <nuxt-link
+              :class="`${route.path === '/catalogo/mis-archivos/editar-estilo' ? 'borde-enlace-activo' : ''}`"
+              to="/catalogo/mis-archivos/editar-estilo"
+              style=""
+              >Estilo</nuxt-link
+            >
           </div>
+          <div class="borde-b borde-color-secundario"></div>
           <h2>Metadatos</h2>
+          <div style="display: flex; gap: 4px">
+            <div
+              class="borde borde-grosor-2"
+              style="width: 25%; border-color: var(--color-primario-1)"
+            ></div>
+            <div
+              class="borde borde-grosor-2"
+              style="width: 25%; border-color: var(--color-neutro-2)"
+            ></div>
+            <div
+              class="borde borde-grosor-2"
+              style="width: 25%; border-color: var(--color-neutro-2)"
+            ></div>
+            <div
+              class="borde borde-grosor-2"
+              style="width: 25%; border-color: var(--color-neutro-2)"
+            ></div>
+          </div>
           <ol>
             <li>Metadatos básicos</li>
           </ol>
@@ -92,7 +140,7 @@ async function actualizaMetadatos() {
 
           <!-- Drag & Drop -->
           <ClientOnly>
-            <CatalogoElementoDragNdDrop />
+            <CatalogoElementoDragNdDrop ref="dragNdDrop" @pasar-archivo="(i) => guardarImagen(i)" />
           </ClientOnly>
 
           <!-- Formulario -->
@@ -190,7 +238,12 @@ async function actualizaMetadatos() {
               </div>
             </div>
             <div class="flex p-t-3">
-              <button class="boton-secundario boton-chico" type="button">Ir a mis archivos</button>
+              <nuxt-link
+                class="boton-secundario boton-chico"
+                type="button"
+                to="/catalogo/mis-archivos"
+                >Ir a mis archivos</nuxt-link
+              >
               <button
                 class="boton-primario boton-chico"
                 :disabled="false"
@@ -206,3 +259,10 @@ async function actualizaMetadatos() {
     </template>
   </UiLayoutPaneles>
 </template>
+
+<style lang="scss" scoped>
+.borde-enlace-activo {
+  border-bottom: 4px solid var(--boton-primario-borde);
+  border-radius: 0px;
+}
+</style>
