@@ -159,13 +159,11 @@ const { data } = useAuth();
 
 await $fetch('/api/catalogo', {
   method: 'GET',
-  query: {'filter{resource_type}': resourceTypeGeonode[resourceType]},
+  query: { 'filter{resource_type}': resourceTypeGeonode[resourceType] },
   headers: {
-    Authorization: `${data.value?.accessToken}`
-  }
-  });
-
-
+    Authorization: `${data.value?.accessToken}`,
+  },
+});
 </script>
 
 <template>

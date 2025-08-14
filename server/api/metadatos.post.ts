@@ -3,7 +3,7 @@ const configEnv = useRuntimeConfig();
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
   const id = body.pk;
-  const baseUrl = configEnv.public.geonodeApi
+  const baseUrl = configEnv.public.geonodeApi;
   const url = `${baseUrl}/${body.resource_type}s/${id}/`;
   // esta es la máquina con la que se probó
   // const baseUrl = 'http://10.2.102.239/api/v2';
@@ -14,22 +14,22 @@ export default defineEventHandler(async (event) => {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${body.token}`
+        Authorization: `Bearer ${body.token}`,
       },
-      body: JSON.stringify({ "abstract": body.abstract }),
+      body: JSON.stringify({ abstract: body.abstract }),
     });
 
     if (!response.ok) {
       throw new Error(`Error PATCH (${id}): ${response.status}`);
     }
-    console.warn("response status:", response.status);
+    console.warn('response status:', response.status);
 
     const json = await response.json();
     // console.warn("json:", json);
 
     return json;
   } catch (error) {
-    console.error("Error al subir al GeoNode:", error);
+    console.error('Error al subir al GeoNode:', error);
   }
 
   // // First get the current resource
@@ -68,6 +68,4 @@ export default defineEventHandler(async (event) => {
   //   console.error(error);
   //   return null;
   // }
-
-
-})
+});

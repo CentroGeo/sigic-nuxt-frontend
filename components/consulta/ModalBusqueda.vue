@@ -18,7 +18,7 @@ const selectedFilter = ref({
   yearInput: null,
   keywordsInput: null,
 });
-const results = ref([])
+const results = ref([]);
 function abrirModalBusqueda() {
   modalBusqueda.value?.abrirModal();
 }
@@ -27,19 +27,17 @@ defineExpose({
   abrirModalBusqueda,
 });
 
-
-
-function filterByCategory(d) {
-  if (
-    d.category !== null &&
-    selectedFilter.value['selectedCategory'].length > 0 &&
-    selectedFilter.value['selectedCategory'].includes(d.category.gn_description)
-  ) {
-    return 1;
-  } else {
-    return 0;
-  }
-} 
+// function filterByCategory(d) {
+//   if (
+//     d.category !== null &&
+//     selectedFilter.value['selectedCategory'].length > 0 &&
+//     selectedFilter.value['selectedCategory'].includes(d.category.gn_description)
+//   ) {
+//     return 1;
+//   } else {
+//     return 0;
+//   }
+// }
 
 function filterByYear(d) {
   if (
@@ -69,12 +67,12 @@ function filterByKeyword(d) {
   } else {
     return 0;
   }
-} 
+}
 
 // La idea sería generar un filtro por categoría y, sacar el numero de filtros aplicados y
 // revisar que sumen un total
 function filterByModal() {
-   let total = 0;
+  let total = 0;
   const prevResults = [];
   // Revisamos cuántos filtros se aplicaron
   Object.keys(selectedFilter.value).forEach((d) => {
@@ -83,23 +81,22 @@ function filterByModal() {
     }
   });
   // Revisamos la suma por filtro
-   resources.value.forEach((d) => {
+  resources.value.forEach((d) => {
     const i = filterByYear(d) + filterByKeyword(d);
     if (i === total) {
       prevResults.push(d);
     }
   });
-  results.value = prevResults; 
-  emit('updateResults', results.value)
+  results.value = prevResults;
+  emit('updateResults', results.value);
   modalBusqueda.value.cerrarModal();
 }
 
-function resetResults(){
-  results.value = resources.value
-  emit('updateResults', results.value)
+function resetResults() {
+  results.value = resources.value;
+  emit('updateResults', results.value);
   modalBusqueda.value.cerrarModal();
 }
-
 </script>
 <template>
   <ClientOnly>
@@ -109,45 +106,47 @@ function resetResults(){
       </template>
 
       <template #cuerpo>
-          <label>Categoria</label>
-          <div class="grupo-categoria flex">
-            <SisdaiCasillaVerificacion 
-              v-model="selectedFilter['selectedCategory']"
-              v-for="(category, index) in categories"
-              :key="`${index}-category`"
-              :value="category"
-              :etiqueta="category"
-              class="opcion-checkbox"
-              />
-              <button class="boton-chico opcion-checkbox">Limpiar selección</button>
-          </div>
-
-          <SisdaiCampoBase
-            v-model="selectedFilter['institucionInput']"
-            class="m-y-2"
-            etiqueta="Institución"
-            ejemplo="SECIHTI, INEGI, entre otras"
+        <label>Categoria</label>
+        <div class="grupo-categoria flex">
+          <SisdaiCasillaVerificacion
+            v-for="(category, index) in categories"
+            :key="`${index}-category`"
+            v-model="selectedFilter['selectedCategory']"
+            :value="category"
+            :etiqueta="category"
+            class="opcion-checkbox"
           />
+          <button class="boton-chico opcion-checkbox">Limpiar selección</button>
+        </div>
 
-          <SisdaiCampoBase
-            v-model="selectedFilter['yearInput']"
-            class="m-y-2"
-            etiqueta="Año de publicación"
-            ejemplo="1995..."
-          />
+        <SisdaiCampoBase
+          v-model="selectedFilter['institucionInput']"
+          class="m-y-2"
+          etiqueta="Institución"
+          ejemplo="SECIHTI, INEGI, entre otras"
+        />
 
-          <SisdaiCampoBase
-            v-model="selectedFilter['keywordsInput']"
-            class="m-y-2"
-            etiqueta="Palabras clave"
-            ejemplo="agua, casas..."
-          />
+        <SisdaiCampoBase
+          v-model="selectedFilter['yearInput']"
+          class="m-y-2"
+          etiqueta="Año de publicación"
+          ejemplo="1995..."
+        />
+
+        <SisdaiCampoBase
+          v-model="selectedFilter['keywordsInput']"
+          class="m-y-2"
+          etiqueta="Palabras clave"
+          ejemplo="agua, casas..."
+        />
       </template>
 
       <template #pie>
         <div class="contenedor-botones flex flex-contenido-centrado">
-          <button @click="filterByModal" class="boton-chico boton-primario">Buscar</button>
-          <button @click="resetResults" class="boton-chico boton-secundario">Restablecer filtros</button>
+          <button class="boton-chico boton-primario" @click="filterByModal">Buscar</button>
+          <button class="boton-chico boton-secundario" @click="resetResults">
+            Restablecer filtros
+          </button>
         </div>
       </template>
     </SisdaiModal>
@@ -159,21 +158,21 @@ function resetResults(){
   border-radius: 8px;
   gap: 0px;
 
-  button{
+  button {
     font-size: 1rem;
     color: var(--color-interactivo-1);
     background-color: var(--color-neutro-0);
     border-radius: 8px;
   }
 }
-.opcion-checkbox{
+.opcion-checkbox {
   width: 50%;
 }
-.contenedor-botones{
+.contenedor-botones {
   width: 100%;
-  
-  button{
-   width: 45%
-   }
+
+  button {
+    width: 45%;
+  }
 }
 </style>

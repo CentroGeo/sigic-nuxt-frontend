@@ -60,26 +60,29 @@ watch([paginaActual], () => {
       </template>
 
       <template #cuerpo>
-      <div class="contenedor-tabla">
-        <UiPaginador
-          :total-paginas="Math.ceil(totalFeatures / tamanioPagina)"
-          @cambio="paginaActual = $event"
-        />
-        <UiTablaAccesible :variables="variables" :datos="datos" />
-      </div>
-
+        <div class="contenedor-tabla">
+          <UiPaginador
+            :total-paginas="Math.ceil(totalFeatures / tamanioPagina)"
+            @cambio="paginaActual = $event"
+          />
+          <UiTablaAccesible :variables="variables" :datos="datos" />
+        </div>
       </template>
 
       <template #pie>
-        <button type="button" 
-        class="boton-con-contenedor-secundario boton-grande ancho" 
-        @click="openTablas">
+        <button
+          type="button"
+          class="boton-con-contenedor-secundario boton-grande ancho"
+          @click="openTablas"
+        >
           Ver Tabla en Visualizador
           <span aria-hidden="true" class="pictograma-previsualizar"></span>
         </button>
-        <button type="button" 
-        class="boton-primario boton-grande ancho" 
-        @click="emit('notifyDownload')">
+        <button
+          type="button"
+          class="boton-primario boton-grande ancho"
+          @click="emit('notifyDownload')"
+        >
           Descarga Archivo
           <span aria-hidden="true" class="pictograma-archivo-descargar pictograma-grande"></span>
         </button>
@@ -89,14 +92,14 @@ watch([paginaActual], () => {
 </template>
 
 <style lang="scss" scoped>
-#modal-tabla{
+#modal-tabla {
   max-width: 40%;
   margin-top: 64px;
 }
-.contenedor-tabla{
+.contenedor-tabla {
   overflow-y: auto;
 }
-.ancho{
+.ancho {
   width: 50%;
   display: flex;
   justify-content: center; /* horizontal center */

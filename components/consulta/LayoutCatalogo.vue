@@ -11,12 +11,12 @@ const props = defineProps({
 const { titulo, resourceType } = toRefs(props);
 const config = useRuntimeConfig();
 const resources = computed(() => storeFetched[props.resourceType]);
-const filteredResources = ref()
+const filteredResources = ref();
 const apiCategorias = `${config.public.geonodeApi}/facets/category`;
 const categoryList = ref([]);
 const categorizedResources = ref({});
 const selectedCategories = ref([]);
-const modalFiltroAvanzado = ref(null)
+const modalFiltroAvanzado = ref(null);
 
 // Esta parte es para obtener todas las categorias
 const { data: geonodeCategories } = await useFetch(`${apiCategorias}`);
@@ -60,12 +60,12 @@ function setSelectedCategory(categoria) {
 
 function filterByInput(r) {
   filteredResources.value = r;
-  groupResults()
+  groupResults();
 }
 
-function updateByModal(resources){
-  filteredResources.value = resources
-  groupResults()
+function updateByModal(resources) {
+  filteredResources.value = resources;
+  groupResults();
 }
 
 onMounted(async () => {
@@ -75,12 +75,11 @@ onMounted(async () => {
     storeFetched.updateFetchedResources(props.resourceType, resourcesList.value);
     filteredResources.value = storeFetched[props.resourceType];
     storeFetched.isLoading = false;
-  }else{
+  } else {
     filteredResources.value = storeFetched[props.resourceType];
   }
   groupResults();
 });
-
 </script>
 
 <template>
@@ -96,9 +95,9 @@ onMounted(async () => {
             etiqueta="Permisos"
             instruccional="Selecciona los recursos por permisos"
           >
-            <option>Opcion 1 </option>
-            <option>Opcion 2 </option>
-            <option>Opcion 3 </option>
+            <option>Opcion 1</option>
+            <option>Opcion 2</option>
+            <option>Opcion 3</option>
           </SisdaiSelector>
         </ClientOnly>
 
@@ -120,7 +119,7 @@ onMounted(async () => {
               <span class="pictograma-filtro" aria-hidden="true" />
             </button>
           </div>
-        </ClientOnly> 
+        </ClientOnly>
         <UiNumeroElementos :numero="resources.length" :etiqueta="etiquetaElementos" />
       </div>
     </div>
@@ -149,7 +148,7 @@ onMounted(async () => {
       </div>
     </div>
   </div>
-  <ConsultaModalBusqueda 
+  <ConsultaModalBusqueda
     ref="modalFiltroAvanzado"
     :resource-type="props.resourceType"
     :categories="categoryList"

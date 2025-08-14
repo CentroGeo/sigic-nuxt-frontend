@@ -6,13 +6,13 @@ export default defineEventHandler(async (event) => {
   let page = 1;
   let allResults = [];
   const query = getQuery(event);
-  const token = getHeader(event, "Authorization")
+  const token = getHeader(event, 'Authorization');
   //console.log("token", token)
-  let header = {}
+  let header = {};
   if (token) {
-    header = { Authorization: `Bearer ${token}` }
+    header = { Authorization: `Bearer ${token}` };
   } else {
-    header = {}
+    header = {};
   }
 
   // Función para hacer la petición recursiva y traer todos los recursos
@@ -20,19 +20,18 @@ export default defineEventHandler(async (event) => {
     const dataParams = new URLSearchParams({
       page: page,
       page_size: 15,
-      ...query
+      ...query,
     });
-
 
     const response = await fetch(`${api}?${dataParams.toString()}`, {
       method: 'GET',
-      headers: header
+      headers: header,
     });
     //console.log("server api", response)
     if (!response.ok) {
       throw new Error(`HTTP ${response.status} – ${response.statusText}`);
     }
-    console.log('respuesta', response.headers)
+    console.log('respuesta', response.headers);
     const data = await response.json();
     const resources = data.resources;
     allResults = allResults.concat(resources);
@@ -44,5 +43,5 @@ export default defineEventHandler(async (event) => {
   };
 
   await loadPage();
-  console.log("catalogo server api: ", allResults.length)
-})
+  console.log('catalogo server api: ', allResults.length);
+});

@@ -3,7 +3,7 @@ import { promises as fsp } from 'fs';
 const configEnv = useRuntimeConfig();
 
 export default defineEventHandler(async (event) => {
-  const baseUrl = configEnv.public.geonodeApi
+  const baseUrl = configEnv.public.geonodeApi;
   const url = `${baseUrl}/upload/uploads/upload`;
   // esta es la máquina con la que se probó
   // const url = "http://10.2.102.239/upload/uploads/upload";
@@ -28,8 +28,8 @@ export default defineEventHandler(async (event) => {
     'base_file',
     base_file[0].filepath
       ? new Blob([await fsp.readFile(base_file[0].filepath)], {
-        type: base_file[0].mimetype,
-      })
+          type: base_file[0].mimetype,
+        })
       : base_file[0],
     base_file[0].originalFilename
   );
@@ -37,23 +37,23 @@ export default defineEventHandler(async (event) => {
     'sld_file',
     base_file[0].filepath
       ? new Blob([await fsp.readFile(base_file[0].filepath)], {
-        type: base_file[0].mimetype,
-      })
+          type: base_file[0].mimetype,
+        })
       : base_file[0],
     base_file[0].originalFilename
   );
 
   formData.append('dataset_title', data.fields.dataset_title[0]);
   // formData.append("dataset_title", "geonode:coordinaciones");
-  formData.append("style_upload_form", "true");
-  formData.append("permissions", JSON.stringify({}));
-  formData.append("charset", "undefined");
+  formData.append('style_upload_form', 'true');
+  formData.append('permissions', JSON.stringify({}));
+  formData.append('charset', 'undefined');
 
   console.warn('formData', formData);
 
   try {
     const response = await fetch(url, {
-      method: "POST",
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${data.fields.token[0]}`,
       },
@@ -66,7 +66,7 @@ export default defineEventHandler(async (event) => {
     // console.warn("response status:", response.status);
 
     const json = await response.json();
-    console.warn("json:", json);
+    console.warn('json:', json);
 
     return json;
   } catch (error) {

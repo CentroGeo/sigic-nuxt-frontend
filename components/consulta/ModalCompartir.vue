@@ -63,8 +63,8 @@ defineExpose({
         <div class="tarjeta m-y-3">
           <div class="tarjeta-cuerpo">
             <p>
-              Solo se compartirán las capas públicas. Si tu selección contiene
-              capas de usuario, estas no se visualizarán de forma pública.
+              Solo se compartirán las capas públicas. Si tu selección contiene capas de usuario,
+              estas no se visualizarán de forma pública.
             </p>
           </div>
         </div>

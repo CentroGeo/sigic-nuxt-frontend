@@ -9,15 +9,14 @@ export default defineEventHandler(async (event) => {
   try {
     const response = await fetch(url, {
       method: 'GET',
-    })
+    });
     if (!response.ok) {
       throw new Error(`Error GET (${id}): ${response.status}`);
     }
-    console.warn("response status:", response.status);
+    console.warn('response status:', response.status);
     const json = await response.json();
     return json.resource;
-
   } catch (error) {
-    console.error("Error al obtener de GeoNode:", error);
+    console.error('Error al obtener de GeoNode:', error);
   }
 });
