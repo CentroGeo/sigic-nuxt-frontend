@@ -17,18 +17,22 @@ onUnmounted(() => (document.querySelector('body').className = ''));
         {
           pictograma: 'pictograma-explorar',
           ruta: `${ruta}/explorar`,
+          globo: 'Explorar',
         },
         {
           pictograma: 'pictograma-capas',
           ruta: `${ruta}/capas`,
+          globo: 'Capas',
         },
         {
           pictograma: 'pictograma-tabla',
           ruta: `${ruta}/tablas`,
+          globo: 'Datos tabulados',
         },
         {
           pictograma: 'pictograma-documento',
           ruta: `${ruta}/documentos`,
+          globo: 'Documentos',
         },
       ]"
       :id-colapsable="storeCatalogo.idNavegacionLateral"

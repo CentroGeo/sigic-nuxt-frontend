@@ -1,11 +1,6 @@
 <script setup>
+import { downloadMetadata, downloadPDF, downloadVectorData } from '@/utils/consulta';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
-import {
-  downloadVectorData,
-  downloadExcel,
-  downloadMetadata,
-  downloadPDF,
-} from '@/utils/consulta.js';
 const props = defineProps({
   resourceType: { type: String, required: true },
   selectedElement: {
@@ -40,8 +35,8 @@ const optionsDict = {
           downloadVectorData(selectedElement.value, 'csv');
         },
       },
-      {
-        label: 'XLS',
+      /*       {
+        label: "XLS",
         action: () => {
           downloadExcel(selectedElement.value, 'xls');
         },
@@ -51,7 +46,7 @@ const optionsDict = {
         action: () => {
           downloadExcel(selectedElement.value, 'xlsx');
         },
-      },
+      }, */
       {
         label: 'GeoPackage',
         action: () => {
@@ -81,8 +76,8 @@ const optionsDict = {
           downloadVectorData(selectedElement.value, 'csv');
         },
       },
-      {
-        label: 'XLS',
+      /*       {
+        label: "XLS",
         action: () => {
           downloadExcel(selectedElement.value, 'xls');
         },
@@ -92,7 +87,7 @@ const optionsDict = {
         action: () => {
           downloadExcel(selectedElement.value, 'xlsx');
         },
-      },
+      }, */
       {
         label: 'Metadatos',
         action: () => {

@@ -1,7 +1,27 @@
+export const resourceTypeDic = {
+  dataLayer: 'dataLayer',
+  dataTable: 'dataTable',
+  document: 'document',
+};
+
+export const resourceTypeGeonode = {
+  [resourceTypeDic.dataLayer]: 'dataset',
+  [resourceTypeDic.dataTable]: 'dataset',
+  [resourceTypeDic.document]: 'document',
+};
+
 export function tooltipContent(resource) {
+  let formatedAbstract = 'Sin descripción';
+  if (resource.abstract) {
+    formatedAbstract = resource.abstract
+      .replace(/^<p>/, '')
+      .replace(/<\/p>$/, '')
+      .replace(/^<pre>/, '')
+      .replace(/<\/pre>$/, '');
+  }
   const content =
-    `<p style="max-width:250px">${resource.abstract ? resource.abstract : 'Sin descripción'}</p>` +
-    `<p>${resource.attribution ? resource.attribution : 'Sin fuente'}</p>`;
+    `<p style="max-width:250px">${formatedAbstract}</p>` +
+    `<p style="max-width:250px">${resource.attribution || 'Sin fuente'}</p>`;
   return content;
 }
 
@@ -36,6 +56,10 @@ export async function fetchGeometryType(resource) {
   }
 }
 
+export async function wait(miliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, miliseconds));
+}
+
 export function downloadPDF(resource) {
   const anchor = document.createElement('a');
   anchor.href = resource.download_url;
@@ -68,6 +92,7 @@ export async function downloadMetadata(resource) {
   document.body.removeChild(anchor);
   URL.revokeObjectURL(blobLink);
 }
+
 export async function downloadExcel(resource, format) {
   const config = useRuntimeConfig();
   const formatDict = {
