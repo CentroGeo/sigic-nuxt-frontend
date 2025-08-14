@@ -1,42 +1,84 @@
 <script setup>
-// TODO: fix tabla, filtros y paginador
-const resourcesStore = useSelectedResourcesStore();
+import { resourceTypeDic } from '~/utils/consulta';
 
-const recursosTipo = ref('dataLayer');
-const recursosFiltrados = ref([]);
+const storeConsulta = useConsultaStore();
+const storeFetched = useFetchedResourcesStore();
 
-// tablas
-const recursosFiltradosTablas = ref([]);
+const resources = computed(() => storeFetched['dataLayer']);
+
+const filteredResourcesTablas = ref({});
 const variables = ref([]);
 const datos = ref([]);
 
-const { resourcesList: listaRecursosTablas } = useGeonodeResources({
-  resourceType: recursosTipo.value,
-});
+const obtenerRecursosFiltrados = async (resourceTypeLayer) => {
+  storeConsulta.resourceType = resourceTypeLayer;
+  const { resourcesList } = await useGeonodeResources();
+  storeFetched.updateFetchedResources(resourceTypeLayer, resourcesList.value);
+  return storeFetched[resourceTypeLayer];
+};
 
-watch(listaRecursosTablas, () => {
-  resourcesStore.updateFilteredResources(recursosTipo.value, listaRecursosTablas.value);
+onMounted(async () => {
+  if (resources.value.length === 0) {
+    storeFetched.isLoading = true;
+    // dataLayer
+    filteredResourcesTablas.value = await obtenerRecursosFiltrados(resourceTypeDic.dataLayer);
+    storeFetched.isLoading = false;
+  } else {
+    filteredResourcesTablas.value = storeFetched['dataLayer'];
+  }
+  // groupResults();
+  // obteniendo datos por las props que necesito
+  datos.value = filteredResourcesTablas.value.map((d) => ({
+    pk: d.pk,
+    nombre: d.title,
+    // tipo_recurso: d.resource_type,
+    tipo_recurso: 'Datos tabulados',
+    categoria: d.category,
+    actualizacion: d.last_updated,
+    acciones: 'Ver, Descargar',
+    enlace_descarga: d.download_url,
+  }));
+  // obteniendo las variables de las keys
+  variables.value = Object.keys(datos.value[0]);
 });
-watch(
-  () => resourcesStore.filteredResources[recursosTipo.value],
-  () => {
-    recursosFiltradosTablas.value = resourcesStore.filteredResources[recursosTipo.value];
-    // obteniendo datos por las props que necesito
-    datos.value = recursosFiltradosTablas.value.map((d) => ({
-      pk: d.pk,
-      nombre: d.title,
-      // tipo_recurso: d.resource_type,
-      tipo_recurso: 'Datos tabulados',
-      categoria: d.category,
-      actualizacion: d.last_updated,
-      acciones: 'Ver, Descargar',
-      enlace_descarga: d.download_url,
-    }));
-    // obteniendo las variables de las keys
-    variables.value = Object.keys(datos.value[0]);
-  },
-  { deep: true }
-);
+// // TODO: fix tabla, filtros y paginador
+// const resourcesStore = useSelectedResourcesStore();
+
+// const recursosTipo = ref('dataLayer');
+// const recursosFiltrados = ref([]);
+
+// // tablas
+// const recursosFiltradosTablas = ref([]);
+// const variables = ref([]);
+// const datos = ref([]);
+
+// const { resourcesList: listaRecursosTablas } = useGeonodeResources({
+//   resourceType: recursosTipo.value,
+// });
+
+// watch(listaRecursosTablas, () => {
+//   resourcesStore.updateFilteredResources(recursosTipo.value, listaRecursosTablas.value);
+// });
+// watch(
+//   () => resourcesStore.filteredResources[recursosTipo.value],
+//   () => {
+//     recursosFiltradosTablas.value = resourcesStore.filteredResources[recursosTipo.value];
+//     // obteniendo datos por las props que necesito
+//     datos.value = recursosFiltradosTablas.value.map((d) => ({
+//       pk: d.pk,
+//       nombre: d.title,
+//       // tipo_recurso: d.resource_type,
+//       tipo_recurso: 'Datos tabulados',
+//       categoria: d.category,
+//       actualizacion: d.last_updated,
+//       acciones: 'Ver, Descargar',
+//       enlace_descarga: d.download_url,
+//     }));
+//     // obteniendo las variables de las keys
+//     variables.value = Object.keys(datos.value[0]);
+//   },
+//   { deep: true }
+// );
 </script>
 
 <template>
@@ -47,14 +89,14 @@ watch(
 
     <template #visualizador>
       <main id="principal" class="contenedor m-b-10 m-t-3">
-        <CatalogoElementoFiltros
+        <!-- <CatalogoElementoFiltros
           :recursos-lista="recursosFiltrados"
           :recursos-tipo="recursosTipo"
-        />
+        /> -->
 
         <div class="flex">
           <h2>Tablas</h2>
-          <UiNumeroElementos :numero="listaRecursosTablas.length" />
+          <UiNumeroElementos :numero="filteredResourcesTablas.length" />
         </div>
 
         <div class="flex">
