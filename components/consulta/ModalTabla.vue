@@ -75,7 +75,7 @@ watch([paginaActual], () => {
         class="boton-con-contenedor-secundario boton-grande ancho" 
         @click="openTablas">
           Ver Tabla en Visualizador
-          <span aria-hidden="true" class="pictograma-tabla"></span>
+          <span aria-hidden="true" class="pictograma-previsualizar"></span>
         </button>
         <button type="button" 
         class="boton-primario boton-grande ancho" 

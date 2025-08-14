@@ -1,7 +1,7 @@
 <script setup>
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
+import SisdaiCasillaVerificacion from '@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
-import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
 const props = defineProps({
   categories: { type: Array, default: () => [] },
@@ -13,7 +13,7 @@ const resources = computed(() => storeFetched[props.resourceType]);
 const emit = defineEmits(['updateResults']);
 const modalBusqueda = ref(null);
 const selectedFilter = ref({
-  selectedCategory: null,
+  selectedCategory: [],
   institucionInput: null,
   yearInput: null,
   keywordsInput: null,
@@ -27,17 +27,19 @@ defineExpose({
   abrirModalBusqueda,
 });
 
+
+
 function filterByCategory(d) {
   if (
     d.category !== null &&
-    selectedFilter.value['selectedCategory'] &&
-    d.category.gn_description === selectedFilter.value['selectedCategory']
+    selectedFilter.value['selectedCategory'].length > 0 &&
+    selectedFilter.value['selectedCategory'].includes(d.category.gn_description)
   ) {
     return 1;
   } else {
     return 0;
   }
-}
+} 
 
 function filterByYear(d) {
   if (
@@ -72,7 +74,7 @@ function filterByKeyword(d) {
 // La idea sería generar un filtro por categoría y, sacar el numero de filtros aplicados y
 // revisar que sumen un total
 function filterByModal() {
-  let total = 0;
+   let total = 0;
   const prevResults = [];
   // Revisamos cuántos filtros se aplicaron
   Object.keys(selectedFilter.value).forEach((d) => {
@@ -82,12 +84,12 @@ function filterByModal() {
   });
   // Revisamos la suma por filtro
    resources.value.forEach((d) => {
-    const i = filterByCategory(d) + filterByYear(d) + filterByKeyword(d);
+    const i = filterByYear(d) + filterByKeyword(d);
     if (i === total) {
       prevResults.push(d);
     }
   });
-  results.value = prevResults;
+  results.value = prevResults; 
   emit('updateResults', results.value)
   modalBusqueda.value.cerrarModal();
 }
@@ -107,21 +109,18 @@ function resetResults(){
       </template>
 
       <template #cuerpo>
-        <div>
-          <SisdaiSelector
-            v-model="selectedFilter['selectedCategory']"
-            class="m-y-2"
-            etiqueta="Categoría"
-            instruccional="Selecciona Categoría"
-          >
-            <option
+          <label>Categoria</label>
+          <div class="grupo-categoria flex">
+            <SisdaiCasillaVerificacion 
+              v-model="selectedFilter['selectedCategory']"
               v-for="(category, index) in categories"
               :key="`${index}-category`"
               :value="category"
-            >
-              {{ category }}
-            </option>
-          </SisdaiSelector>
+              :etiqueta="category"
+              class="opcion-checkbox"
+              />
+              <button class="boton-chico opcion-checkbox">Limpiar selección</button>
+          </div>
 
           <SisdaiCampoBase
             v-model="selectedFilter['institucionInput']"
@@ -143,13 +142,38 @@ function resetResults(){
             etiqueta="Palabras clave"
             ejemplo="agua, casas..."
           />
-        </div>
       </template>
 
       <template #pie>
-        <button @click="filterByModal">Buscar</button>
-        <button @click="resetResults">Restablecer filtros</button>
+        <div class="contenedor-botones flex flex-contenido-centrado">
+          <button @click="filterByModal" class="boton-chico boton-primario">Buscar</button>
+          <button @click="resetResults" class="boton-chico boton-secundario">Restablecer filtros</button>
+        </div>
       </template>
     </SisdaiModal>
   </ClientOnly>
 </template>
+<style lang="scss" scoped>
+.grupo-categoria {
+  border: solid var(--campo-etiqueta-color) 1px;
+  border-radius: 8px;
+  gap: 0px;
+
+  button{
+    font-size: 1rem;
+    color: var(--color-interactivo-1);
+    background-color: var(--color-neutro-0);
+    border-radius: 8px;
+  }
+}
+.opcion-checkbox{
+  width: 50%;
+}
+.contenedor-botones{
+  width: 100%;
+  
+  button{
+   width: 45%
+   }
+}
+</style>

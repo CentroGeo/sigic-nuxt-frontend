@@ -74,7 +74,7 @@ defineExpose({
           class="boton-con-contenedor-secundario boton-grande ancho" 
           @click="openLayerView">
           Ver Capa en Visualizador
-          <span aria-hidden="true" class="pictograma-tabla"></span>
+          <span aria-hidden="true" class="pictograma-previsualizar"></span>
         </button>
         <button type="button" 
           class="boton-primario boton-grande ancho" 
