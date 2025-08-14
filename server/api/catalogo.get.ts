@@ -19,23 +19,27 @@ export default defineEventHandler(async (event) => {
   const loadPage = async () => {
     const dataParams = new URLSearchParams({
       page: page,
-      page_size: 15,
+      // page_size: 15,
       ...query,
     });
 
-    const response = await fetch(`${api}?${dataParams.toString()}`, {
+    const endpoint = `${api}?${dataParams.toString()}`
+    console.log(endpoint);
+    const response = await fetch(endpoint, {
       method: 'GET',
       headers: header,
     });
     //console.log("server api", response)
+
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status} – ${response.statusText}`);
+      throw new Error(`HTTP ${response.status} - ${response.statusText}`);
     }
-    console.log('respuesta', response.headers);
-    const data = await response.json();
-    const resources = data.resources;
+
+    // console.log('respuesta', response.headers);
+    const { links, resources } = await response.json();
     allResults = allResults.concat(resources);
-    if (data.links.next && page < 2) {
+
+    if (links.next && page < 2) {
       // Si la hay, volvemos a solicitar datos
       page += 1;
       return loadPage();
@@ -44,4 +48,6 @@ export default defineEventHandler(async (event) => {
 
   await loadPage();
   console.log('catalogo server api: ', allResults.length);
+
+  return allResults
 });

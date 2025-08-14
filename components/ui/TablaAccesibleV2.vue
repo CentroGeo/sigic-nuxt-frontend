@@ -132,7 +132,7 @@ function IrARuta(objeto) {
                   aria-label="Ver en visualizador"
                   type="button"
                 >
-                  <span class="pictograma-ayuda"></span>
+                  <span class="pictograma-previsualizar"></span>
                 </button>
                 <a
                   class="boton-pictograma boton-secundario"
