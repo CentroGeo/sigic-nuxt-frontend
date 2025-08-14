@@ -1,143 +1,56 @@
 <script setup>
-/**
- * @typedef {Object} Props
- * @property {String} [tipoArchivoValidos=''] - Indica los tipos de archivo válidos.
- */
+// emit para pasar los archivos al componente padre
+const emit = defineEmits(['pasarArchivo']);
 
-/** @type {Props} */
-const props = defineProps({
-  tipoArchivoValidos: {
-    type: String,
-    default: '',
-  },
-});
-const { tipoArchivoValidos } = toRefs(props);
-
-const emit = defineEmits(['guardarArchivo']);
-
-const ejemplo = ref({});
-
-const formData = ref(new FormData());
-
-// para obtener el token para bearer
-const { data } = useAuth();
-
-const datosArriba = ref(false);
-const datos = ref({});
-
-const esSLD = ref(false);
-const todosLosDemas = ref(false);
+const archivos = ref({});
+const archivosArriba = ref(false);
 const archivoValido = ref(false);
-
-function appendSLD(files, layerSlug, token) {
-  files.forEach((file) => {
-    formData.value.append('base_file', file);
-    formData.value.append('sld_file', file);
-    formData.value.append('dataset_title', layerSlug);
-    // formData.value.append("dataset_title", "geonode:coordinaciones");
-    formData.value.append('style_upload_form', 'true');
-    formData.value.append('permissions', JSON.stringify({}));
-    formData.value.append('charset', 'undefined');
-    // token importante
-    formData.value.append('token', token);
-  });
-  // console.log("formData.value", formData.value);
-}
-
-function appendOtros(files, token) {
-  // TODO: hacer append de otros
-  files.forEach((file) => {
-    formData.value.append('base_file', file);
-    formData.value.append('sld_file', file);
-    // formData.value.append("dataset_title", layerSlug);
-    formData.value.append('dataset_title', 'geonode:coordinaciones');
-    formData.value.append('style_upload_form', 'true');
-    formData.value.append('permissions', JSON.stringify({}));
-    formData.value.append('charset', 'undefined');
-    // token importante
-    formData.value.append('token', token);
-  });
-  // console.log("formData.value", formData.value);
-}
-
-const validarTipoArchivo = (files) => {
-  // TODO: revisar bien los MIME de los archivos válidos
-  files.forEach((file) => {
-    if (
-      tipoArchivoValidos.value === 'sld' &&
-      (file.name.slice(-4) === '.sld' ||
-        file.name.endsWith('.sld') ||
-        file.type === '.sld' ||
-        file.type === 'application/vnd.sld+xml' ||
-        file.type === 'application/vnd.sld+xml,.sld')
-    ) {
-      esSLD.value = true;
-    } else if (
-      tipoArchivoValidos.value !== 'sld' &&
-      (file.type === 'application/vnd.geo+json' ||
-        file.type === 'application/json' ||
-        file.type === 'application/geo+json' ||
-        file.type === 'application/geopackage+sqlite3' ||
-        file.type === 'text/csv' ||
-        file.type === 'application/xml' ||
-        file.type === 'application/pdf' ||
-        file.type === 'image/jpeg' ||
-        file.type === 'image/png')
-    ) {
-      todosLosDemas.value = true;
-    } else {
-      archivoValido.value = true;
-      datosArriba.value = false;
-    }
-  });
-};
-
-function appendFormData(files, token) {
-  if (esSLD.value && tipoArchivoValidos.value === 'sld') {
-    appendSLD(files, 'geonode:coordinaciones', token);
-  }
-  if (todosLosDemas.value) {
-    appendOtros(files, token);
-  }
-}
 
 const onDropZone = ref(null);
 const { files } = useDropZone(onDropZone, { onDrop });
 async function onDrop() {
   // imprime el archivo que se suba mediante el drop
-  // console.log("files", files.value);
-  files.value = Array.from(files.value);
-
-  if (files.value) {
-    // obtén el token para el bearer
-    const token = data.value?.accessToken;
-    // console.log("token", token);
-    datos.value = files.value;
-    datosArriba.value = true;
-
-    validarTipoArchivo(files.value);
-
-    appendFormData(files.value, token);
-  }
+  // console.log('files', files.value);
+  archivos.value = files.value;
+  archivosArriba.value = true;
+  // files.value = Array.from(files.value);
 }
 
 const { open, onChange } = useFileDialog();
 onChange(async (files) => {
   // imprime el archivo que se suba mediante el diálogo
-  // console.log("files", files);
-  files = Array.from(files);
+  // console.log('files', files);
+  archivos.value = files;
+  archivosArriba.value = true;
+  // const files = Array.from(files);
+});
 
-  if (files) {
-    // obtén el token para el bearer
-    const token = data.value?.accessToken;
-    // console.log("token", token);
-    datos.value = files;
-    datosArriba.value = true;
+const convertirBytes = (bytes) => {
+  const decimals = 2;
+  if (!+bytes) return '0 Bytes';
 
-    validarTipoArchivo(files);
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['Bytes', 'Kib', 'MiB', 'GiB', 'TiB', 'EiB', 'ZiB', ' YiB'];
 
-    appendFormData(files, token);
-  }
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+};
+
+const removerArchivos = () => {
+  archivos.value = {};
+  archivosArriba.value = false;
+  archivoValido.value = false;
+};
+
+const archivoNoValido = () => {
+  archivoValido.value = true;
+};
+
+defineExpose({
+  archivoValido,
+  archivoNoValido,
 });
 </script>
 <template>
@@ -146,52 +59,65 @@ onChange(async (files) => {
     <div>
       <div
         ref="onDropZone"
-        class="contenedor-dragnddrop flex flex-contenido-centrado borde borde-redondeado-16 p-1 m-b-3"
+        class="contenedor-dragnddrop borde borde-redondeado-16 p-1 m-b-3"
         @click="open()"
       >
-        <div class="flex flex-vertical-centrado">
-          <div class="texto-centrado">
-            <div v-if="!datosArriba">
-              <div>
-                <span class="pictograma-archivo-subir pictograma-mediano" />
-              </div>
-              <p>Arratra o suelta tu archivo</p>
-            </div>
-            <div class="texto-izquierda">
-              <p v-for="d in datos" :key="d.name">
-                {{ d.name }}
+        <div
+          v-if="archivosArriba"
+          class="m-x-2 m-y-1"
+          style="max-height: 184px; overflow-y: scroll"
+        >
+          <div v-for="archivo in archivos" :key="archivo.name" class="flex flex-contenido-separado">
+            <p class="flex flex-vertical-centrado m-y-1">{{ archivo.name }}</p>
+            <div class="flex">
+              <p class="fondo-color-neutro borde borde-redondeado-8 m-y-1" style="padding: 4px">
+                .{{ archivo.name.split('.')[1] }}
               </p>
+              <p class="flex flex-vertical-centrado m-y-1">{{ convertirBytes(archivo.size) }}</p>
             </div>
+          </div>
+        </div>
+        <div
+          class="flex flex-contenido-centrado"
+          :style="`min-height: ${!archivosArriba ? '281px' : '0px; margin-top: 32px;'}`"
+        >
+          <div class="flex flex-vertical-centrado">
+            <div class="texto-centrado m-b-1">
+              <div v-if="!archivosArriba">
+                <div>
+                  <span class="pictograma-archivo-subir pictograma-mediano" />
+                </div>
+                <p>Arratra o suelta tu archivo</p>
+              </div>
 
-            <label
-              class="boton boton-secundario boton-chico"
-              for="identificadorCAMPOFILE"
-              @click="open()"
-            >
-              Elige Archivo
-            </label>
-            <input
-              id="identificadorCAMPOFILE"
-              name="identificadorCAMPOFILE"
-              placeholder="ejemplo"
-              type="file"
-              :v-model="ejemplo"
-              @click="open()"
-            />
+              <label
+                class="boton boton-secundario boton-chico"
+                for="identificadorCAMPOFILE"
+                @click="open()"
+              >
+                Elige Archivo
+              </label>
+              <input
+                id="identificadorCAMPOFILE"
+                name="identificadorCAMPOFILE"
+                type="file"
+                @click="open()"
+              />
+            </div>
           </div>
         </div>
       </div>
 
       <p v-if="archivoValido" class="texto-color-error">Archivo inválido</p>
 
-      <div class="flex">
+      <div class="botones-dragnddrop flex">
         <client-only>
           <button
             class="boton-primario boton-chico"
             aria-label="Guardar"
             type="button"
-            :disabled="!datosArriba"
-            @click="emit('guardarArchivo', formData)"
+            :disabled="false"
+            @click="emit('pasarArchivo', archivos)"
           >
             Guardar
           </button>
@@ -199,7 +125,8 @@ onChange(async (files) => {
             class="boton-secundario boton-chico"
             aria-label="Eliminar"
             type="button"
-            :disabled="true"
+            :disabled="!archivosArriba"
+            @click="removerArchivos"
           >
             Eliminar
           </button>
@@ -211,7 +138,8 @@ onChange(async (files) => {
 
 <style lang="scss">
 .contenedor-dragnddrop {
-  min-height: 281px;
+  // min-height: 281px;
+  height: 300px;
   border-style: dashed;
   cursor: pointer;
 }

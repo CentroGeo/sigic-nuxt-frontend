@@ -6,22 +6,48 @@ const generaIdAleatorio = (el) => {
 };
 const idAleatorioControlDes = generaIdAleatorio('controldeslizante-');
 
-const statusOk = ref(false);
+const statusOk = ref(true);
 const pending = ref(false);
-async function guardarArchivo(formData) {
-  // TODO: editar subirSLD por subirArchivos
-  const res = await fetch('/api/subirSLD', {
+
+const { data } = useAuth();
+
+const dragNdDrop = ref(null);
+
+async function guardarArchivo(files) {
+  const token = ref(data.value?.accessToken);
+
+  // TODO: validación de formatos
+  // if (
+  //   files.type === 'application/vnd.geo+json' ||
+  //   files.type === 'application/json' ||
+  //   files.type === 'application/geo+json' ||
+  //   files.type === 'application/geopackage+sqlite3' ||
+  //   files.type === 'text/csv' ||
+  //   files.type === 'application/xml' ||
+  //   files.type === 'application/pdf' ||
+  //   files.type === 'image/jpeg' ||
+  //   files.type === 'image/png'
+  // ) {
+  // } else {
+  //   dragNdDrop.value?.archivoNoValido();
+  // }
+  const formData = new FormData();
+  // solo el primer elemento del arreglo
+  formData.append('base_file', files[0]);
+  formData.append('token', token.value);
+
+  const response = await $fetch('/api/cargar', {
     method: 'POST',
     body: formData,
   });
-  pending.value = true;
-  // remover timeout
-  setTimeout(() => {
-    if (res.ok) {
-      pending.value = false;
-      statusOk.value = true;
-    }
-  }, '2500');
+
+  if (!response.ok) {
+    throw new Error(`Error al cargar archivos: ${response.status}`);
+  } else {
+    // pending.value = false;
+    // statusOk.value = true;
+    // TODO: recuperar recurso o recursos mediante el name y title
+  }
 }
 </script>
 
@@ -40,11 +66,13 @@ async function guardarArchivo(formData) {
           </p>
 
           <ClientOnly>
-            <CatalogoElementoDragNdDrop @guardar-archivo="(i) => guardarArchivo(i)" />
+            <CatalogoElementoDragNdDrop
+              ref="dragNdDrop"
+              @pasar-archivo="(i) => guardarArchivo(i)"
+            />
           </ClientOnly>
 
-          <!-- <div v-if="statusOk"> -->
-          <div v-if="true">
+          <div v-if="statusOk">
             <h2>Cargas recientes</h2>
             <div class="fondo-color-confirmacion p-3 borde-redondeado-16">
               <div class="flex texto-color-confirmacion">

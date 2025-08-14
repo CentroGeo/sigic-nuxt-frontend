@@ -18,9 +18,9 @@ async function copyToClipboard() {
   }
 }
 
-useHead({
+useHead(() => ({
   meta: [
-    { property: 'og:url', content: currentPath },
+    { property: 'og:url', content: currentPath.value },
     { property: 'og:type', content: 'article' },
     { property: 'og:title', content: 'SIGIC' },
     { property: 'og:title', content: 'Esta es la descripcion' },
@@ -29,7 +29,7 @@ useHead({
       content: 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg',
     },
   ],
-});
+}));
 
 const botonesEnlaces = computed(() => [
   {
@@ -60,6 +60,15 @@ defineExpose({
       </template>
 
       <template #cuerpo>
+        <div class="tarjeta m-y-3">
+          <div class="tarjeta-cuerpo">
+            <p>
+              Solo se compartirán las capas públicas. Si tu selección contiene
+              capas de usuario, estas no se visualizarán de forma pública.
+            </p>
+          </div>
+        </div>
+
         <div class="flex flex-contenido-alrededor">
           <div
             v-for="(boton, index) in botonesEnlaces"
@@ -93,15 +102,6 @@ defineExpose({
             <div class="flex flex-contenido-centrado">
               <p>Enlace</p>
             </div>
-          </div>
-        </div>
-
-        <div class="tarjeta m-y-3">
-          <div class="tarjeta-cuerpo">
-            <p>
-              Solo se compartirán las capas públicas. Si tu selección contiene capas de usuario,
-              estas no se visualizarán de forma pública.
-            </p>
           </div>
         </div>
       </template>

@@ -8,19 +8,66 @@ const idAleatorioControlDes = generaIdAleatorio('controldeslizante-');
 
 const statusOk = ref(false);
 const pending = ref(false);
-async function guardarArchivo(formData) {
-  const res = await fetch('/api/subirSLD', {
-    method: 'POST',
-    body: formData,
-  });
-  pending.value = true;
-  // remover timeout
-  setTimeout(() => {
-    if (res.ok) {
-      pending.value = false;
-      statusOk.value = true;
+
+const route = useRoute();
+const resource = ref({});
+function getUserData() {
+  if (route.query.userObject) {
+    try {
+      return JSON.parse(route.query.userObject);
+    } catch (e) {
+      console.error('Error parsing user object', e);
+      return null;
     }
-  }, '2500');
+  }
+}
+resource.value = getUserData();
+
+const { data } = useAuth();
+
+const dragNdDrop = ref(null);
+
+async function guardarArchivo(files) {
+  const token = ref(data.value?.accessToken);
+
+  if (
+    files[0].name.split('.')[1] === '.sld' ||
+    files[0].name.endsWith('.sld') ||
+    files[0].type === '.sld' ||
+    files[0].type === 'application/vnd.sld+xml' ||
+    files[0].type === 'application/vnd.sld+xml,.sld'
+  ) {
+    const formData = new FormData();
+    // solo el primer elemento del arreglo
+    formData.append('base_file', files[0]);
+    // formData.append('dataset_title', resource.dataset_title);
+    formData.append('dataset_title', 'geonode:coordinaciones');
+    formData.append('token', token.value);
+
+    const response = await $fetch('/api/subirSLD', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error al cargar archivos: ${response.status}`);
+    } else {
+      // pending.value = false;
+      // statusOk.value = true;
+      // TODO: recuperar recurso o recursos mediante el name y title
+    }
+  } else {
+    dragNdDrop.value?.archivoNoValido();
+  }
+
+  // pending.value = true;
+  // // remover timeout
+  // setTimeout(() => {
+  //   if (res.ok) {
+  //     pending.value = false;
+  //     statusOk.value = true;
+  //   }
+  // }, '2500');
 }
 </script>
 <template>
@@ -44,21 +91,29 @@ async function guardarArchivo(formData) {
 
           <div class="flex">
             <div class="columna-16">
-              <h2>nombre de la capa.json</h2>
+              <h2>resource.title</h2>
               <div class="flex">
-                <nuxt-link to="/catalogo/mis-archivos/editar-metadatos" exact-path
+                <nuxt-link
+                  :class="`${route.path === '/catalogo/mis-archivos/editar-metadatos' ? 'borde-enlace-activo' : ''}`"
+                  to="/catalogo/mis-archivos/editar-metadatos"
                   >Metadatos</nuxt-link
                 >
-                <nuxt-link to="/catalogo/mis-archivos/editar-estilo">Estilo</nuxt-link>
+                <nuxt-link
+                  :class="`${route.path === '/catalogo/mis-archivos/editar-estilo' ? 'borde-enlace-activo' : ''}`"
+                  to="/catalogo/mis-archivos/editar-estilo"
+                  style=""
+                  >Estilo</nuxt-link
+                >
               </div>
+              <div class="borde-b borde-color-secundario"></div>
               <h2>Estilo</h2>
               <p><b>Estilo, solo archivos .sld</b></p>
 
               <!-- Drag & Drop -->
               <ClientOnly>
                 <CatalogoElementoDragNdDrop
-                  tipo-archivo-validos="sld"
-                  @guardar-archivo="(i) => guardarArchivo(i)"
+                  ref="dragNdDrop"
+                  @pasar-archivo="(i) => guardarArchivo(i)"
                 />
               </ClientOnly>
             </div>
@@ -121,3 +176,10 @@ async function guardarArchivo(formData) {
     </template>
   </UiLayoutPaneles>
 </template>
+
+<style lang="scss" scoped>
+.borde-enlace-activo {
+  border-bottom: 4px solid var(--boton-primario-borde);
+  border-radius: 0px;
+}
+</style>

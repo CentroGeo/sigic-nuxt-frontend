@@ -1,4 +1,7 @@
 <script setup>
+import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
+import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
+
 const storeFetched = useFetchedResourcesStore();
 const props = defineProps({
   titulo: { type: String, default: 'Título' },
@@ -8,10 +11,12 @@ const props = defineProps({
 const { titulo, resourceType } = toRefs(props);
 const config = useRuntimeConfig();
 const resources = computed(() => storeFetched[props.resourceType]);
+const filteredResources = ref()
 const apiCategorias = `${config.public.geonodeApi}/facets/category`;
 const categoryList = ref([]);
 const categorizedResources = ref({});
 const selectedCategories = ref([]);
+const modalFiltroAvanzado = ref(null)
 
 // Esta parte es para obtener todas las categorias
 const { data: geonodeCategories } = await useFetch(`${apiCategorias}`);
@@ -25,7 +30,7 @@ if (!geonodeCategories.value) {
 
 function groupResults() {
   categorizedResources.value = {};
-  resources.value.map((r) => {
+  filteredResources.value.map((r) => {
     if (r.category) {
       const title = r.category.gn_description;
       if (Object.keys(categorizedResources.value).includes(title)) {
@@ -53,18 +58,29 @@ function setSelectedCategory(categoria) {
   }
 }
 
+function filterByInput(r) {
+  filteredResources.value = r;
+  groupResults()
+}
+
+function updateByModal(resources){
+  filteredResources.value = resources
+  groupResults()
+}
+
 onMounted(async () => {
   if (resources.value.length === 0) {
     storeFetched.isLoading = true;
     const { resourcesList } = await useGeonodeResources();
-
     storeFetched.updateFetchedResources(props.resourceType, resourcesList.value);
-
+    filteredResources.value = storeFetched[props.resourceType];
     storeFetched.isLoading = false;
+  }else{
+    filteredResources.value = storeFetched[props.resourceType];
   }
-
   groupResults();
 });
+
 </script>
 
 <template>
@@ -74,10 +90,37 @@ onMounted(async () => {
 
       <div class="m-x-2 m-y-1">
         <p class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
+        <ClientOnly>
+          <SisdaiSelector
+            class="m-y-2"
+            etiqueta="Permisos"
+            instruccional="Selecciona los recursos por permisos"
+          >
+            <option>Opcion 1 </option>
+            <option>Opcion 2 </option>
+            <option>Opcion 3 </option>
+          </SisdaiSelector>
+        </ClientOnly>
 
         <ClientOnly>
-          <ConsultaElementoBuscador :resources-list="resources" :categories="categoryList" />
-        </ClientOnly>
+          <div class="flex flex-contenido-equidistante m-y-3">
+            <SisdaiCampoBusqueda
+              class="columna-13"
+              :catalogo="resources"
+              :propiedad-busqueda="'title'"
+              :etiqueta="'Usa palabras clave...'"
+              @al-filtrar="filterByInput"
+            />
+            <button
+              type="button"
+              class="boton-primario boton-pictograma boton-grande"
+              aria-label="Filtro Avanzado"
+              @click="modalFiltroAvanzado.abrirModalBusqueda"
+            >
+              <span class="pictograma-filtro" aria-hidden="true" />
+            </button>
+          </div>
+        </ClientOnly> 
         <UiNumeroElementos :numero="resources.length" :etiqueta="etiquetaElementos" />
       </div>
     </div>
@@ -106,6 +149,12 @@ onMounted(async () => {
       </div>
     </div>
   </div>
+  <ConsultaModalBusqueda 
+    ref="modalFiltroAvanzado"
+    :resource-type="props.resourceType"
+    :categories="categoryList"
+    @update-results="(results) => updateByModal(results)"
+  />
 </template>
 
 <style lang="scss" scoped>

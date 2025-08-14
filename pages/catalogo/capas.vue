@@ -1,43 +1,86 @@
 <script setup>
-// TODO: fix tabla, filtros y paginador
-const resourcesStore = useSelectedResourcesStore();
+import { resourceTypeDic } from '~/utils/consulta';
 
-const recursosTipo = ref('dataLayer');
-const recursosFiltrados = ref([]);
+const storeConsulta = useConsultaStore();
+const storeFetched = useFetchedResourcesStore();
 
-// dataLayer
-const recursosFiltradosCapas = ref([]);
+const resources = computed(() => storeFetched['dataLayer']);
+
+const filteredResourcesCapas = ref({});
 const variables = ref([]);
 const datos = ref([]);
 
-const { resourcesList: listaRecursosCapas } = useGeonodeResources({
-  resourceType: recursosTipo.value,
-});
+const obtenerRecursosFiltrados = async (resourceTypeLayer) => {
+  storeConsulta.resourceType = resourceTypeLayer;
+  const { resourcesList } = await useGeonodeResources();
+  storeFetched.updateFetchedResources(resourceTypeLayer, resourcesList.value);
+  return storeFetched[resourceTypeLayer];
+};
 
-watch(listaRecursosCapas, () => {
-  resourcesStore.updateFilteredResources(recursosTipo.value, listaRecursosCapas.value);
+onMounted(async () => {
+  if (resources.value.length === 0) {
+    storeFetched.isLoading = true;
+    // dataLayer
+    filteredResourcesCapas.value = await obtenerRecursosFiltrados(resourceTypeDic.dataLayer);
+    storeFetched.isLoading = false;
+  } else {
+    filteredResourcesCapas.value = storeFetched['dataLayer'];
+  }
+  // groupResults();
+  // obteniendo datos por las props que necesito
+  datos.value = filteredResourcesCapas.value.map((d) => ({
+    pk: d.pk,
+    nombre: d.title,
+    // tipo_recurso: d.resource_type,
+    tipo_recurso: 'Capa geográfica',
+    categoria: d.category,
+    actualizacion: d.last_updated,
+    acciones: 'Ver, Descargar',
+    enlace_descarga: d.download_url,
+  }));
+  // obteniendo las variables de las keys
+  variables.value = Object.keys(datos.value[0]);
 });
+// // TODO: fix tabla, filtros y paginador
+// const resourcesStore = useSelectedResourcesStore();
 
-watch(
-  () => resourcesStore.filteredResources[recursosTipo.value],
-  () => {
-    recursosFiltradosCapas.value = resourcesStore.filteredResources[recursosTipo.value];
-    // obteniendo datos por las props que necesito
-    datos.value = recursosFiltradosCapas.value.map((d) => ({
-      nombre: d.title,
-      // tipo_recurso: d.resource_type,
-      tipo_recurso: 'Capa geográfica',
-      categoria: d.category.gn_description,
-      actualizacion: d.last_updated,
-      acciones: 'Ver, Descargar',
-      enlace_descarga: d.download_url,
-    }));
-    // obteniendo las variables de las keys
-    variables.value = Object.keys(datos.value[0]);
-  },
-  { deep: true }
-);
+// const recursosTipo = ref('dataLayer');
+// const recursosFiltrados = ref([]);
+
+// // dataLayer
+// const recursosFiltradosCapas = ref([]);
+// const variables = ref([]);
+// const datos = ref([]);
+
+// const { resourcesList: listaRecursosCapas } = useGeonodeResources({
+//   resourceType: recursosTipo.value,
+// });
+
+// watch(listaRecursosCapas, () => {
+//   resourcesStore.updateFilteredResources(recursosTipo.value, listaRecursosCapas.value);
+// });
+// watch(
+//   () => resourcesStore.filteredResources[recursosTipo.value],
+//   () => {
+//     recursosFiltradosCapas.value = resourcesStore.filteredResources[recursosTipo.value];
+//     // obteniendo datos por las props que necesito
+//     datos.value = recursosFiltradosCapas.value.map((d) => ({
+//       pk: d.pk,
+//       nombre: d.title,
+//       // tipo_recurso: d.resource_type,
+//       tipo_recurso: 'Capa geográfica',
+//       categoria: d.category,
+//       actualizacion: d.last_updated,
+//       acciones: 'Ver, Descargar',
+//       enlace_descarga: d.download_url,
+//     }));
+//     // obteniendo las variables de las keys
+//     variables.value = Object.keys(datos.value[0]);
+//   },
+//   { deep: true }
+// );
 </script>
+
 <template>
   <UiLayoutPaneles>
     <template #catalogo>
@@ -46,20 +89,14 @@ watch(
 
     <template #visualizador>
       <main id="principal" class="contenedor m-b-10 m-t-3">
-        <CatalogoElementoFiltros
+        <!-- <CatalogoElementoFiltros
           :recursos-lista="recursosFiltrados"
           :recursos-tipo="recursosTipo"
-          :categorias="[
-            'categoría_0: Todas',
-            'categoría_1: capas',
-            'categoría_2: tablas',
-            'categoría_3: documentos',
-          ]"
-        />
+        /> -->
 
         <div class="flex">
           <h2>Capas geográficas</h2>
-          <UiNumeroElementos :numero="listaRecursosCapas.length" />
+          <UiNumeroElementos :numero="filteredResourcesCapas.length" />
         </div>
 
         <div class="flex">
