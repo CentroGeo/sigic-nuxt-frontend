@@ -1,7 +1,7 @@
 <script setup>
 import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
 import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
-import { resourceTypeDic, resourceTypeGeonode } from '~/utils/consulta';
+import { resourceTypeDic } from '~/utils/consulta';
 
 const resourceType = resourceTypeDic.dataLayer;
 
@@ -155,15 +155,9 @@ function getFetchedResources() {
 
 // api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
 
-const { data } = useAuth();
+const storeFetched2 = useFetchedResources2Store();
 
-await $fetch('/api/catalogo', {
-  method: 'GET',
-  query: { 'filter{resource_type}': resourceTypeGeonode[resourceType] },
-  headers: {
-    Authorization: `${data.value?.accessToken}`,
-  },
-});
+storeFetched2.fill();
 </script>
 
 <template>
