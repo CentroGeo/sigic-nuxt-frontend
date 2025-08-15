@@ -112,6 +112,7 @@ function resetResults() {
 
         <SisdaiCampoBase
           v-model="institutionInput"
+          tipo='text'
           id="filtro-institicion"
           class="m-y-2"
           etiqueta="Institución"
@@ -120,6 +121,7 @@ function resetResults() {
 
         <SisdaiCampoBase
           v-model="yearInput"
+          tipo='text'
           id="filtro-anio"
           class="m-y-2"
           etiqueta="Año de publicación"
@@ -128,6 +130,7 @@ function resetResults() {
 
         <SisdaiCampoBase
           v-model="keywordsInput"
+          tipo='text'
           id="filtro-keywords"
           class="m-y-2"
           etiqueta="Palabras clave"
