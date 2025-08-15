@@ -13,8 +13,20 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
     [resourceTypeDic.document]: [],
   });
 
+  /**
+   * Devuelve un objeto con los recursos seleccionados, el uuid es el key de
+   * cada objeto.
+   * @param {String} resourceType tipo de recursos a consultar.
+   * @returns {Object} objeto de recursos seleccionados.
+   */
+  function byResourceType(resourceType = storeConsulta.resourceType) {
+    return resources[resourceType];
+  }
+
   return {
     isLoading: ref(false),
+
+    byResourceType,
 
     all: computed(() => Object.values(resources).flat()),
 
@@ -28,6 +40,7 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
     async fill(resourceType = storeConsulta.resourceType) {
       console.log('fill:', resourceType);
       const { data } = useAuth();
+      // this.isLoading = true;
 
       const r = await $fetch('/api/catalogo', {
         // method: 'GET',
@@ -42,6 +55,8 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
 
       // T E M P O R A L
       resources[resourceType] = validacionTemporal(r, resourceType);
+
+      // this.isLoading = false;
     },
 
     /**
