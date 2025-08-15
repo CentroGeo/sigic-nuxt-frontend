@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 // TODO: intentar hacer un módulo para cada set proyectos,fuentes,contextos,chats
 
-const backend="http://localhost:8181/"
+const backend = "http://localhost:8181/";
 
 export const useIAStore = defineStore("ia", {
   state: () => ({
@@ -14,7 +14,7 @@ export const useIAStore = defineStore("ia", {
     uploadProgress: 0,
     isUploading: false,
     chats: [],
-    chatSeleccionado: null,
+    chatSeleccionado: null
   }),
   actions: {
     async crearProyecto(title, description, isPublic, archivos = []) {
@@ -33,32 +33,33 @@ export const useIAStore = defineStore("ia", {
         //formData.append('visibility', visibilidadProyecto.value);
         formData.append("public", isPublic === "publico" ? "True" : "False");
 
-        console.log(archivos)
+        console.log(archivos);
 
         // Agregar archivos si existen
         archivos.forEach((archivo, index) => {
           formData.append(`archivos`, archivo.archivo);
         });
 
-         // Log para depuración
+        // Log para depuración
         for (let pair of formData.entries()) {
-          console.log(pair[0] + ', ' + (pair[1] instanceof File ? pair[1].name : pair[1]));
+          console.log(
+            pair[0] + ", " + (pair[1] instanceof File ? pair[1].name : pair[1])
+          );
         }
-
 
         // Usar XMLHttpRequest para monitorear progreso
         return new Promise((resolve, reject) => {
           const xhr = new XMLHttpRequest();
-          
-          xhr.upload.addEventListener('progress', (event) => {
+
+          xhr.upload.addEventListener("progress", event => {
             if (event.lengthComputable) {
               const percent = Math.round((event.loaded / event.total) * 100);
               this.uploadProgress = percent;
               console.log(`Progreso: ${percent}%`);
             }
           });
-          
-          xhr.addEventListener('load', () => {
+
+          xhr.addEventListener("load", () => {
             this.isUploading = false;
             if (xhr.status >= 200 && xhr.status < 300) {
               const data = JSON.parse(xhr.responseText);
@@ -66,26 +67,25 @@ export const useIAStore = defineStore("ia", {
               this.existenProyectos = true;
               resolve(data);
             } else {
-              const error = JSON.parse(xhr.responseText)?.message || "Error al guardar";
+              const error =
+                JSON.parse(xhr.responseText)?.message || "Error al guardar";
               reject(new Error(error));
             }
           });
-          
-          xhr.addEventListener('error', () => {
+
+          xhr.addEventListener("error", () => {
             this.isUploading = false;
             reject(new Error("Error de conexión"));
           });
-          
-          xhr.addEventListener('abort', () => {
+
+          xhr.addEventListener("abort", () => {
             this.isUploading = false;
             reject(new Error("Subida cancelada"));
           });
-          
-          xhr.open('POST', backend+"api/fileuploads/workspaces/admin/create");
+
+          xhr.open("POST", backend + "api/fileuploads/workspaces/admin/create");
           xhr.send(formData);
         });
-
-
       } catch (error) {
         this.isUploading = false;
         console.error("Error:", error);
@@ -95,25 +95,25 @@ export const useIAStore = defineStore("ia", {
 
     async crearContexto(formData) {
       //this.existeContexto = true;
-  
+
       console.log("crear crearContexto");
       try {
-/*         const formData = new FormData();
+        /*         const formData = new FormData();
         formData.append("title", title);
         formData.append("description", description);
         //formData.append('visibility', visibilidadProyecto.value);
         formData.append("public", isPublic === "publico" ? "True" : "False");
  */
-  
+
         const response = await fetch(
-          backend+"api/fileuploads/workspaces/admin/contexts/create",
+          backend + "api/fileuploads/workspaces/admin/contexts/create",
           {
             method: "POST",
             body: formData
           }
         );
 
-        console.log(response)
+        console.log(response);
 
         if (!response.ok) {
           throw new Error("Error al guardar el contexto");
@@ -127,18 +127,16 @@ export const useIAStore = defineStore("ia", {
         //navigateTo('/ia/proyectos');
       } catch (error) {
         console.error("Error:", error);
-         throw error; 
+        throw error;
         // Aquí podrías mostrar un mensaje de error al usuario
       }
-
-
     },
 
     async getProjectsList() {
       //this.existeContexto = true;
 
       const response = await fetch(
-        backend+"api/fileuploads/workspaces/admin",
+        backend + "api/fileuploads/workspaces/admin",
         {
           method: "POST",
           body: {}
@@ -164,9 +162,8 @@ export const useIAStore = defineStore("ia", {
     },
 
     async getProjectSources(project_id) {
-
       const response = await fetch(
-        backend+"api/fileuploads/workspaces/admin/"+project_id+"/files",
+        backend + "api/fileuploads/workspaces/admin/" + project_id + "/files",
         {
           method: "POST",
           body: {}
@@ -180,7 +177,7 @@ export const useIAStore = defineStore("ia", {
       const data = await response.json();
       this.fuentesProyecto = data;
 
-   /*    if (data.length > 0) {
+      /*    if (data.length > 0) {
         this.proyectoSeleccionado = data[0];
       } else {
         this.proyectoSeleccionado = null;
@@ -189,13 +186,14 @@ export const useIAStore = defineStore("ia", {
       this.existenProyectos = true; */
       //console.log('Proyectos:', data);
       return data;
-    },    
-
+    },
 
     async getProjectContexts(project_id) {
-
-      const response = await fetch( 
-        backend+"api/fileuploads/workspaces/admin/"+project_id+"/contexts",
+      const response = await fetch(
+        backend +
+          "api/fileuploads/workspaces/admin/" +
+          project_id +
+          "/contexts",
         {
           method: "POST",
           body: {}
@@ -209,9 +207,9 @@ export const useIAStore = defineStore("ia", {
       const data = await response.json();
       this.contextosProyecto = data;
 
-       this.existeContexto = true;
+      this.existeContexto = true;
 
-   /*    if (data.length > 0) {
+      /*    if (data.length > 0) {
         this.proyectoSeleccionado = data[0];
       } else {
         this.proyectoSeleccionado = null;
@@ -220,19 +218,15 @@ export const useIAStore = defineStore("ia", {
       this.existenProyectos = true; */
       //console.log('Proyectos:', data);
       return data;
-    },    
-
+    },
 
     async getChatList(user_id) {
       //this.existeContexto = true;
 
-      const response = await fetch(
-        backend+"api/chat/history/getchats",
-        {
-          method: "POST",
-          body: {}
-        }
-      );
+      const response = await fetch(backend + "api/chat/history/getchats", {
+        method: "POST",
+        body: {}
+      });
 
       if (!response.ok) {
         throw new Error("Error al consultar chats");
@@ -241,7 +235,7 @@ export const useIAStore = defineStore("ia", {
       const data = await response.json();
       this.chats = data;
 
-/*       if (data.length > 0) {
+      /*       if (data.length > 0) {
         this.proyectoSeleccionado = data[0];
       } else {
         this.proyectoSeleccionado = null;
@@ -250,32 +244,29 @@ export const useIAStore = defineStore("ia", {
       //this.existenProyectos = true;
       //console.log('Proyectos:', data);
       return data;
-    },    
+    },
 
     async getChat(chat_id) {
       //this.existeContexto = true;
-      console.log(chat_id)
+      console.log(chat_id);
 
-      const response = await fetch( 
-        backend+"api/chat/history/user",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ chat_id: parseInt(chat_id) }) 
-        }
-      );
+      const response = await fetch(backend + "api/chat/history/user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ chat_id: parseInt(chat_id) })
+      });
 
       if (!response.ok) {
         throw new Error("Error al consultar chat");
       }
 
       const data = await response.json();
-      console.log(data)
+      console.log(data);
       //this.chats = data;
 
-/*       if (data.length > 0) {
+      /*       if (data.length > 0) {
         this.proyectoSeleccionado = data[0];
       } else {
         this.proyectoSeleccionado = null;
@@ -284,8 +275,7 @@ export const useIAStore = defineStore("ia", {
       //this.existenProyectos = true;
       //console.log('Proyectos:', data);
       return data;
-    },        
-
+    },
 
     seleccionarProyecto(proyecto) {
       //console.log("seleccionarProyecto: ",proyecto)

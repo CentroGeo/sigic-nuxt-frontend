@@ -3,15 +3,15 @@ import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/S
 import SisdaiSelector from "@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue";
 import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
 import { ref } from "vue";
-import { useRouter } from 'vue-router'
+import { useRouter } from "vue-router";
 
-const router = useRouter()
+const router = useRouter();
 const storeIA = useIAStore();
 
 const props = defineProps({
   titulo: { type: String, default: "Título" },
   textoBoton: { type: String, default: "Título" },
-  etiquetaBusqueda: { type: String, default: undefined },
+  etiquetaBusqueda: { type: String, default: undefined }
   // recursoLista: { type: Array, required: true },
 });
 const { titulo, textoBoton, recursoLista, etiquetaBusqueda } = toRefs(props);
@@ -66,31 +66,30 @@ const loadChatsList = async () => {
   arrayChats = await storeIA.getChatList(1);
 
   console.log(arrayChats);
-  transformarHistorial(arrayChats)
+  transformarHistorial(arrayChats);
 
-/*   catalogo.value = arrayProjects;
+  /*   catalogo.value = arrayProjects;
   catalogoFiltrado.value = arrayProjects; */
 };
-
 
 function transformarHistorial(historiales) {
   const agrupadoPorFecha = {};
 
   historiales.forEach(historial => {
     const fechaISO = historial.credate_date;
-    const fecha = new Date(fechaISO).toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
+    const fecha = new Date(fechaISO).toLocaleDateString("es-ES", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric"
     });
 
     historial.context.forEach(contexto => {
       const chatItem = {
         id: historial.id,
-        titulo: 'Chat '+historial.id || '',
-        proyecto: contexto.workspace?.title || '',
-        contexto: contexto.title || '',
-        id_contexto: contexto.id || '',
+        titulo: "Chat " + historial.id || "",
+        proyecto: contexto.workspace?.title || "",
+        contexto: contexto.title || "",
+        id_contexto: contexto.id || ""
       };
 
       if (!agrupadoPorFecha[fecha]) {
@@ -105,8 +104,8 @@ function transformarHistorial(historiales) {
   const resultado = Object.keys(agrupadoPorFecha)
     .sort((a, b) => {
       // Comparar fechas como objetos Date
-      const [da, ma, ya] = a.split('-');
-      const [db, mb, yb] = b.split('-');
+      const [da, ma, ya] = a.split("-");
+      const [db, mb, yb] = b.split("-");
       return new Date(yb, mb - 1, db) - new Date(ya, ma - 1, da);
     })
     .map(fecha => ({
@@ -120,12 +119,9 @@ function transformarHistorial(historiales) {
   //return resultado;
 }
 
-
-
 onMounted(() => {
   loadChatsList();
 });
-
 </script>
 
 <template>
@@ -152,59 +148,78 @@ onMounted(() => {
               :catalogo-anidado="true"
               catalogo-anidado-propiedad-elementos="chat"
               propiedad-busqueda="titulo"
-              @al-filtrar="(r) => (catalogoFiltrado = r)"
+              @al-filtrar="r => (catalogoFiltrado = r)"
             />
           </ClientOnly>
 
-          <h6>{{ titulo }}</h6>
+          <h6>
+            Selecciona un chat para empezar a interactuar con el asistente
+          </h6>
           <!-- <div v-for="grupos in catalogoFiltrado">
             {{ grupos }}
           </div> -->
-<ul class="lista-sin-estilo">
-  <li
-    v-for="grupo in catalogoFiltrado"
-    :id="grupo.id"
-    :key="grupo.id"
-  >
-    <p class="fecha-grupo">
-      {{ grupo.fecha == fechaHoy ? "Hoy" : grupo.fecha }}
-    </p>
+          <ul class="lista-sin-estilo">
+            <li
+              v-for="grupo in catalogoFiltrado"
+              :id="grupo.id"
+              :key="grupo.id"
+            >
+              <p class="fecha-grupo">
+                {{ grupo.fecha == fechaHoy ? "Hoy" : grupo.fecha }}
+              </p>
 
-    <ul class="lista-sin-estilo tarjetas-grid">
-      <li v-for="chat in grupo.chat" :id="chat.id" :key="chat.id">
-        <nuxt-link
-          class="tarjeta-chat"
-          :to="{
-            path: '/ia/chat/dinamica',
-            query: {
-              chat_id: chat.id,
-              context_id: chat.id_contexto
-            }
-          }"
-        >
-          <div class="contenido-chat">
-            <h5 class="tarjeta-titulo">{{ chat.titulo }}</h5>
-            <p class="tarjeta-nombre-proyecto">{{ chat.proyecto }}</p>
-            <p class="tarjeta-nombre-contexto">{{ chat.contexto }}</p>
-
-            <div class="acciones-chat">
-              <nuxt-link class="boton-pictograma" to="#">
-                <span class="pictograma-editar" aria-hidden="true" />
-              </nuxt-link>
-              <button
-                class="boton-pictograma"
-                aria-label="Remover chat"
-                type="button"
-              >
-                <span class="pictograma-eliminar" aria-hidden="true" />
-              </button>
-            </div>
-          </div>
-        </nuxt-link>
-      </li>
-    </ul>
-  </li>
-</ul>
+              <ul class="lista-sin-estilo">
+                <li v-for="chat in grupo.chat" :id="chat.id" :key="chat.id">
+                  <nuxt-link
+                    class="tarjeta-chat p-3 borde borde-redondeado-20"
+                    :to="{
+                      path: '/ia/chat/dinamica',
+                      query: {
+                        chat_id: chat.id,
+                        context_id: chat.id_contexto
+                      }
+                    }"
+                  >
+                    <div>
+                      <h5 class="tarjeta-titulo m-t-0 m-b-2">
+                        {{ chat.titulo }}
+                      </h5>
+                      <p class="tarjeta-nombre-proyecto m-t-0 m-b-1">
+                        {{ chat.proyecto }}
+                      </p>
+                      <p class="tarjeta-nombre-contexto m-t-0 m-b-2">
+                        {{ chat.contexto }}
+                      </p>
+                      <div class="flex flex-contenido-final">
+                        <div>
+                          <button
+                            class="boton-pictograma boton-sin-contenedor-secundario"
+                            aria-label="Editar chat"
+                            type="button"
+                          >
+                            <span
+                              class="pictograma-editar"
+                              aria-hidden="true"
+                            />
+                          </button>
+                          <button
+                            class="boton-pictograma boton-sin-contenedor-secundario"
+                            aria-label="Remover chat"
+                            type="button"
+                          >
+                            <span
+                              class="pictograma-eliminar"
+                              aria-hidden="true"
+                            />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </nuxt-link>
+                </li>
+              </ul>
+            </li>
+          </ul>
         </div>
       </div>
     </div>
@@ -245,65 +260,39 @@ onMounted(() => {
   </ClientOnly>
 </template>
 <style lang="scss">
-
-.tarjetas-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* columnas adaptables */
-  gap: 1rem;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.tarjetas-grid li {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
 .tarjeta-chat {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  
-  
-  border-radius: 12px;
-  padding: 1rem;
-  box-sizing: border-box;
-  text-decoration: none;
   background-color: var(--fondo-acento);
   border: 1px solid var(--borde-acento);
+  width: 100%;
+  &:hover {
+    text-decoration: none !important;
+    background-color: var(--fondo-acento);
+    border-color: var(--borde-acento);
+    box-shadow: none;
+    color: inherit;
+  }
   h5 {
     color: var(--texto-acento);
   }
   p {
     color: var(--texto-primario);
-  }  
-}
+  }
 
-.contenido-chat {
-  flex-grow: 1; /* esto fuerza que todos crezcan igual */
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
+  .tarjeta-titulo {
+    color: var(--Base-Tipografa---texto-acento, #9d2148);
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: var(--Tipos-Interlineado-Ttulos-y-subttulos-Nivel-6, 22.5px);
+  }
 
-.acciones-chat {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  margin-top: auto; /* empuja hacia abajo */
+  .tarjeta-nombre-proyecto,
+  .tarjeta-nombre-contexto {
+    color: var(--Base-Tipografa---texto-primario, #141414);
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 18.2px;
+  }
 }
-
-.tarjeta-titulo,
-.tarjeta-nombre-proyecto,
-.tarjeta-nombre-contexto {
-  margin-bottom: 0.25rem; /* o 4px */
-  line-height: 1.2;
-}
-
-.tarjeta-nombre-contexto {
-  margin-bottom: 0; /* última línea sin espacio extra */
-}
-
 </style>

@@ -323,9 +323,13 @@ const guardarProyecto = async () => {
             <tbody>
               <tr v-for="archivo in archivosSeleccionados" :key="archivo.id">
                 <td class="p-3">{{ archivo.nombre }}</td>
-                <td class="p-3">{{ archivo.tipo }}</td>
+                <td class="p-3 etiqueta-tabla">
+                  <span class="p-x-1 p-y-minimo">{{ archivo.tipo }}</span>
+                </td>
                 <td class="p-3">{{ archivo.categoria }}</td>
-                <td class="p-3">{{ archivo.origen }}</td>
+                <td class="p-3 etiqueta-tabla">
+                  <span class="p-x-1 p-y-minimo">{{ archivo.origen }}</span>
+                </td>
                 <td class="p-x-3 p-y-1">
                   <button
                     class="boton-pictograma boton-secundario boton-chico"
@@ -521,38 +525,6 @@ const guardarProyecto = async () => {
       </ClientOnly>
     </template>
   </IaLayoutPaneles>
-
-  <!-- barra de progreso de subida -->
-  <div class="grid">
-    <div class="columna-16">
-      <!-- Barra de progreso (mostrar solo durante subida) -->
-      <div v-if="storeIA.isUploading" class="upload-progress">
-        <progress :value="storeIA.uploadProgress" max="100"></progress>
-        <span>{{ storeIA.uploadProgress }}% completado</span>
-      </div>
-
-      <!--       <div class="flex flex-contenido-final">
-        <NuxtLink
-          class="boton boton-chico boton-primario"
-          aria-label="Guardar proyecto"
-          @click="guardarProyecto"
-          :disabled="storeIA.isUploading"
-        >
-          <span v-if="!storeIA.isUploading">Guardar proyecto</span>
-          <span v-else>Subiendo...</span>
-        </NuxtLink>
-        
-        <nuxt-link
-          class="boton boton-chico boton-secundario"
-          aria-label="Cancelar"
-          to="/ia/proyectos/"
-          :disabled="storeIA.isUploading"
-        >
-          Cancelar
-        </nuxt-link>
-      </div> -->
-    </div>
-  </div>
 </template>
 
 <style lang="scss">
@@ -632,11 +604,23 @@ const guardarProyecto = async () => {
     font-size: var(--Tipos-Tamao-Prrafos-Prrafo-base, 16px);
     font-style: normal;
     font-weight: 600;
-    line-height: var(--Tipos-Interlineado-Prrafos-Prrafos, 24px); /* 150% */
+    line-height: var(--Tipos-Interlineado-Prrafos-Prrafos, 24px);
   }
 
   tr:last-child td {
     border-bottom: none;
+  }
+
+  .etiqueta-tabla span {
+    border-radius: var(--Escalas-Bordes-redondeados-br-2, 8px);
+    border: 1px solid var(--Base-Borde---borde-acento, #53323c);
+    background: var(--Base-Fondo---fondo-acento, #fcf3f5);
+
+    color: var(--Base-Tipografa---texto-secundario, #5f3e47);
+    font-size: var(--Tipos-Tamao-Prrafos-Prrafo-base, 16px);
+    font-style: normal;
+    font-weight: 400;
+    line-height: var(--Tipos-Interlineado-Prrafos-Prrafos, 24px);
   }
 }
 

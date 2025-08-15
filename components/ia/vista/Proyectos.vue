@@ -151,10 +151,10 @@ watch(proyecto, (nuevoProyecto, anteriorProyecto) => {
                     <p class="tarjeta-titulo">
                       {{ contexto.title }}
                     </p>
-                    <!--                     <UiNumeroElementos
-                      :numero="contexto.numero_fuentes"
+                    <UiNumeroElementos
+                      :numero="contexto.num_files"
                       etiqueta="Fuentes"
-                    /> -->
+                    />
                   </div>
                   <div class="tarjeta-pie">
                     <nuxt-link

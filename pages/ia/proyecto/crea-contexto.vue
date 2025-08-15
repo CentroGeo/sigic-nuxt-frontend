@@ -283,7 +283,7 @@ watch(
             </form>
           </div>
         </div>
-        <div class="flex flex-contenido-final">
+        <!--<div class="flex flex-contenido-final">
           <NuxtLink
             class="boton boton-primario boton-chico"
             aria-label="Guardar contexto"
@@ -291,13 +291,10 @@ watch(
           >
             Guardar contexto
           </NuxtLink>
-          <!--   <button
-    class="boton-chico boton-secundario"
-    aria-label="Cancelar"
-  >
-    Cancelar
-  </button> -->
-        </div>
+          <button class="boton-chico boton-secundario" aria-label="Cancelar">
+            Cancelar
+          </button>
+        </div>-->
         <div class="grid">
           <div class="columna-16">
             <p class="separador borde-b" />
@@ -315,7 +312,36 @@ watch(
               </span>
               :
             </h6>
-            <!--             <div class="flex flex-contenido-final">
+            <div class="tabla-archivos m-y-3" v-if="arraySources.length > 0">
+              <table class="tabla">
+                <thead>
+                  <tr>
+                    <th class="checkbox-header">Selección</th>
+                    <th>Nombre</th>
+                    <th>Tipo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="fuente in arraySources" :key="fuente.id">
+                    <td class="checkbox-cell">
+                      <label class="checkbox-wrapper">
+                        <input
+                          type="checkbox"
+                          :checked="
+                            fuentesSeleccionadas.some(f => f.id === fuente.id)
+                          "
+                          @change="toggleSeleccionFuente(fuente)"
+                        />
+                        <span class="checkmark"></span>
+                      </label>
+                    </td>
+                    <td>{{ fuente.filename }}</td>
+                    <td>{{ fuente.document_type }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="flex flex-contenido-final m-b-3">
               <NuxtLink
                 class="boton boton-primario boton-chico"
                 aria-label="Guardar contexto"
@@ -323,44 +349,15 @@ watch(
               >
                 Guardar contexto
               </NuxtLink>
-              <button
-                class="boton-chico boton-secundario"
+              <NuxtLink
+                class="boton boton-secundario boton-chico"
                 aria-label="Cancelar"
+                to="/ia/proyectos/"
               >
                 Cancelar
-              </button>
-            </div> -->
+              </NuxtLink>
+            </div>
           </div>
-        </div>
-
-        <div class="tabla-archivos m-t-3" v-if="arraySources.length > 0">
-          <table class="tabla">
-            <thead>
-              <tr>
-                <th class="checkbox-header">Selección</th>
-                <th>Nombre</th>
-                <th>Tipo</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="fuente in arraySources" :key="fuente.id">
-                <td class="checkbox-cell">
-                  <label class="checkbox-wrapper">
-                    <input
-                      type="checkbox"
-                      :checked="
-                        fuentesSeleccionadas.some(f => f.id === fuente.id)
-                      "
-                      @change="toggleSeleccionFuente(fuente)"
-                    />
-                    <span class="checkmark"></span>
-                  </label>
-                </td>
-                <td>{{ fuente.filename }}</td>
-                <td>{{ fuente.document_type }}</td>
-              </tr>
-            </tbody>
-          </table>
         </div>
       </div>
     </template>
