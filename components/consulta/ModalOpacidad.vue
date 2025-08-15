@@ -24,7 +24,7 @@ defineExpose({
 });
 
 watch(valorOpacidad, (nv) => {
-  storeSelected.byUuid(selectedElement.value.uuid).opacidad = nv / 100;
+  storeSelected.byUuid(selectedElement.value.uuid).updateOpacity(nv / 100)
 });
 </script>
 
