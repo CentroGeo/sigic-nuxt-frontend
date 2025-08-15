@@ -2,9 +2,10 @@
 // TODO: fix tabla, filtros y paginador
 import { resourceTypeDic } from '~/utils/consulta';
 const storeFetched = useFetchedResources2Store();
-storeFetched.checkFilling(resourceTypeDic.dataTable);
 
+storeFetched.checkFilling(resourceTypeDic.dataTable);
 const resourcesTablas = computed(() => storeFetched.byResourceType(resourceTypeDic.dataTable));
+
 // obteniendo datos por las props de la tabla
 const datos = computed(() =>
   resourcesTablas.value.map((d) => ({

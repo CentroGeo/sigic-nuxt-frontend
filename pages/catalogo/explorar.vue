@@ -1,36 +1,36 @@
 <script setup>
 import { resourceTypeDic } from '~/utils/consulta';
-
 const storeFetched = useFetchedResources2Store();
 
 storeFetched.checkFilling(resourceTypeDic.dataLayer);
 storeFetched.checkFilling(resourceTypeDic.dataTable);
 storeFetched.checkFilling(resourceTypeDic.document);
 
-const resourcesCapas = computed(() => storeFetched.byResourceType(resourceTypeDic.dataLayer));
-const resourcesTablas = computed(() => storeFetched.byResourceType(resourceTypeDic.dataTable));
-const resourcesDocumentos = computed(() => storeFetched.byResourceType(resourceTypeDic.document));
+/**
+ * Devuelve un número con el tamaño de recursos.
+ * @param {String} type tipo de recursos a obtener el tamaño.
+ * @returns {Number} número de recursos.
+ */
+const obtenerLength = (type) => {
+  return computed(() => storeFetched.byResourceType(type).length);
+};
+
+const resourcesCapasLength = obtenerLength(resourceTypeDic.dataLayer);
+const resourcesTablasLength = obtenerLength(resourceTypeDic.dataTable);
+const resourcesDocumentosLength = obtenerLength(resourceTypeDic.document);
 
 /**
  * Devuelve un objeto con el recurso más reciente.
- * @param {String} objeto recursos a obtener el más reciente.
+ * @param {String} type tipo de recursos a obtener más reciente.
  * @returns {Object} objeto de recursos más reciente.
  */
-const obtenerMasReciente = (objeto) => ({
-  titulo: objeto[0].title,
-  resumen: objeto[0].abstract,
-  imagen: objeto[0].thumbnail_url,
-});
+const obtenerMasReciente = (type) => {
+  return computed(() => storeFetched.byResourceType(type)[0] || {});
+};
 
-const capaMasReciente = ref({});
-const tablaMasReciente = ref({});
-const documentoMasReciente = ref({});
-
-watch([resourcesCapas, resourcesTablas, resourcesDocumentos], () => {
-  capaMasReciente.value = obtenerMasReciente(resourcesCapas.value);
-  tablaMasReciente.value = obtenerMasReciente(resourcesTablas.value);
-  documentoMasReciente.value = obtenerMasReciente(resourcesDocumentos.value);
-});
+const capaMasReciente = obtenerMasReciente(resourceTypeDic.dataLayer);
+const tablaMasReciente = obtenerMasReciente(resourceTypeDic.dataTable);
+const documentoMasReciente = obtenerMasReciente(resourceTypeDic.document);
 </script>
 
 <template>
@@ -42,11 +42,6 @@ watch([resourcesCapas, resourcesTablas, resourcesDocumentos], () => {
 
       <template #visualizador>
         <main id="principal" class="contenedor m-b-10 p-t-3">
-          <!-- <CatalogoElementoFiltros
-            :recursos-lista="recursosFiltrados"
-            :recursos-tipo="recursosTipo"
-          /> -->
-
           <h2>Explora</h2>
           <div class="flex">
             <div class="columna-5">
@@ -58,7 +53,7 @@ watch([resourcesCapas, resourcesTablas, resourcesDocumentos], () => {
                 />
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-titulo">Capas geográficas</p>
-                  <p class="tarjeta-etiqueta">{{ resourcesCapas.length }} capas</p>
+                  <p class="tarjeta-etiqueta">{{ resourcesCapasLength }} capas</p>
                 </div>
               </nuxt-link>
             </div>
@@ -71,7 +66,7 @@ watch([resourcesCapas, resourcesTablas, resourcesDocumentos], () => {
                 />
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-titulo">Datos tabulados</p>
-                  <p>{{ resourcesTablas.length }} datos tabulados</p>
+                  <p>{{ resourcesTablasLength }} datos tabulados</p>
                 </div>
               </nuxt-link>
             </div>
@@ -84,7 +79,7 @@ watch([resourcesCapas, resourcesTablas, resourcesDocumentos], () => {
                 />
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-titulo">Documentos</p>
-                  <p>{{ resourcesDocumentos.length }} documentos</p>
+                  <p>{{ resourcesDocumentosLength }} documentos</p>
                 </div>
               </nuxt-link>
             </div>
@@ -94,11 +89,11 @@ watch([resourcesCapas, resourcesTablas, resourcesDocumentos], () => {
           <div class="flex">
             <div class="columna-5">
               <div class="tarjeta">
-                <img class="tarjeta-imagen" :src="capaMasReciente.imagen" alt="" />
+                <img class="tarjeta-imagen" :src="capaMasReciente.thumbnail_url" alt="" />
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-etiqueta">Capa geográfica</p>
-                  <p class="tarjeta-titulo">{{ capaMasReciente.titulo }}</p>
-                  <p>{{ capaMasReciente.resumen }}</p>
+                  <p class="tarjeta-titulo">{{ capaMasReciente.title }}</p>
+                  <p>{{ capaMasReciente.abstract }}</p>
                 </div>
                 <div class="tarjeta-pie">
                   <nuxt-link
@@ -113,11 +108,11 @@ watch([resourcesCapas, resourcesTablas, resourcesDocumentos], () => {
             </div>
             <div class="columna-5">
               <div class="tarjeta">
-                <img class="tarjeta-imagen" :src="tablaMasReciente.imagen" alt="" />
+                <img class="tarjeta-imagen" :src="tablaMasReciente.thumbnail_url" alt="" />
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-etiqueta">Datos tabulados</p>
-                  <p class="tarjeta-titulo">{{ tablaMasReciente.titulo }}</p>
-                  <p>{{ tablaMasReciente.resumen }}</p>
+                  <p class="tarjeta-titulo">{{ tablaMasReciente.title }}</p>
+                  <p>{{ tablaMasReciente.abstract }}</p>
                 </div>
                 <div class="tarjeta-pie">
                   <nuxt-link
@@ -132,14 +127,14 @@ watch([resourcesCapas, resourcesTablas, resourcesDocumentos], () => {
             </div>
             <div class="columna-5">
               <div class="tarjeta">
-                <img class="tarjeta-imagen" :src="documentoMasReciente.imagen" alt="" />
+                <img class="tarjeta-imagen" :src="documentoMasReciente.thumbnail_url" alt="" />
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-etiqueta">Documento</p>
                   <p class="tarjeta-titulo">
-                    {{ documentoMasReciente.titulo }}
+                    {{ documentoMasReciente.title }}
                   </p>
                   <p>
-                    {{ documentoMasReciente.resumen }}
+                    {{ documentoMasReciente.abstract }}
                   </p>
                 </div>
                 <div class="tarjeta-pie">
