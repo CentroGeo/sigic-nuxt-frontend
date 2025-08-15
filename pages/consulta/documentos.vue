@@ -5,8 +5,11 @@ const resourceType = resourceTypeDic.document;
 
 const storeConsulta = useConsultaStore();
 const storeFetched = useFetchedResourcesStore();
+const storeFetched2 = useFetchedResources2Store();
 const storeSelected = useSelectedResources2Store();
-storeConsulta.resourceType = resourceType;
+
+storeConsulta.resourceType = resourceTypeDic.document;
+storeFetched2.checkFilling();
 
 const route = useRoute();
 const router = useRouter();
