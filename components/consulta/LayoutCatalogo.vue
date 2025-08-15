@@ -2,16 +2,18 @@
 import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
-const storeFetched = useFetchedResourcesStore();
+const config = useRuntimeConfig();
+const storeFetched = useFetchedResources2Store();
+
 const props = defineProps({
   titulo: { type: String, default: 'Título' },
   resourceType: { type: String, required: true },
   etiquetaElementos: { type: String, default: undefined },
 });
-const { titulo, resourceType } = toRefs(props);
-const config = useRuntimeConfig();
-const resources = computed(() => storeFetched[props.resourceType]);
-const filteredResources = ref();
+
+const resources = computed(() => storeFetched.byResourceType());
+const filteredResources = ref([]);
+
 const apiCategorias = `${config.public.geonodeApi}/facets/category`;
 const categoryList = ref([]);
 const categorizedResources = ref({});
@@ -69,15 +71,19 @@ function updateByModal(resources) {
 }
 
 onMounted(async () => {
-  if (resources.value.length === 0) {
-    storeFetched.isLoading = true;
-    const { resourcesList } = await useGeonodeResources();
-    storeFetched.updateFetchedResources(props.resourceType, resourcesList.value);
-    filteredResources.value = storeFetched[props.resourceType];
-    storeFetched.isLoading = false;
-  } else {
-    filteredResources.value = storeFetched[props.resourceType];
-  }
+  // if (resources.value.length === 0) {
+  //   storeFetched.isLoading = true;
+  //   const { resourcesList } = await useGeonodeResources();
+  //   storeFetched.updateFetchedResources(props.resourceType, resourcesList.value);
+  //   filteredResources.value = storeFetched[props.resourceType];
+  //   storeFetched.isLoading = false;
+  // } else {
+  //   filteredResources.value = storeFetched[props.resourceType];
+  // }
+  // groupResults();
+});
+watch(resources, (nv) => {
+  filteredResources.value = nv;
   groupResults();
 });
 </script>
@@ -89,6 +95,7 @@ onMounted(async () => {
 
       <div class="m-x-2 m-y-1">
         <p class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
+
         <ClientOnly>
           <SisdaiSelector
             class="m-y-2"
@@ -125,14 +132,13 @@ onMounted(async () => {
     </div>
 
     <div v-for="category in Object.keys(categorizedResources)" :key="category" class="m-y-1">
-      <div class="">
-        <ConsultaElementoCategoria
-          :title="category"
-          :tag="etiquetaElementos"
-          :number-elements="categorizedResources[category].length"
-          @click="setSelectedCategory(category)"
-        />
-      </div>
+      <ConsultaElementoCategoria
+        :title="category"
+        :tag="etiquetaElementos"
+        :number-elements="categorizedResources[category].length"
+        @click="setSelectedCategory(category)"
+      />
+
       <div
         v-for="(resource, index) in categorizedResources[category]"
         :key="index"
@@ -148,6 +154,7 @@ onMounted(async () => {
       </div>
     </div>
   </div>
+
   <ConsultaModalBusqueda
     ref="modalFiltroAvanzado"
     :resource-type="props.resourceType"

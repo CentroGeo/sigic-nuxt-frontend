@@ -3,17 +3,15 @@ import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-ma
 import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
 import { resourceTypeDic } from '~/utils/consulta';
 
-const resourceType = resourceTypeDic.dataLayer;
-
 const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
-const storeFetched2 = useFetchedResources2Store();
+const storeFetched = useFetchedResources2Store();
 const storeSelected = useSelectedResources2Store();
 const route = useRoute();
 const router = useRouter();
 
-storeConsulta.resourceType = resourceType;
-storeFetched2.checkFilling();
+storeConsulta.resourceType = resourceTypeDic.dataLayer;
+storeFetched.checkFilling();
 
 // const randomNum = ref(0);
 // const isFinishedLoading = ref(0);
@@ -150,10 +148,6 @@ onMounted(() => {
   }
 });
 
-function getFetchedResources() {
-  return storeFetched2.findResources(storeSelected.uuids, resourceType);
-}
-
 // api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
 </script>
 
@@ -162,13 +156,13 @@ function getFetchedResources() {
     <template #catalogo>
       <ConsultaLayoutCatalogo
         :titulo="'Capas geográficas'"
-        :resource-type="resourceType"
+        :resource-type="storeConsulta.resourceType"
         etiqueta-elementos="Capas"
       />
     </template>
 
     <template #visualizador>
-      <!-- <template v-if="storeFetched2.isLoading">Cargando...</template> -->
+      <template v-if="storeFetched.isLoading">Cargando...</template>
 
       <ClientOnly>
         <SisdaiMapa
@@ -180,7 +174,7 @@ function getFetchedResources() {
           <SisdaiCapaXyz :posicion="0" />
 
           <SisdaiCapaWms
-            v-for="resource in getFetchedResources()"
+            v-for="resource in storeFetched.findResources(storeSelected.uuids)"
             :key="`wms-${resource.uuid}`"
             :capa="resource.alternate"
             :fuente="`${config.public.geoserverUrl}/wms?`"
@@ -197,7 +191,7 @@ function getFetchedResources() {
     <template #seleccion>
       <ConsultaLayoutSeleccion
         titulo="Capas seleccionadas"
-        :resource-type="resourceType"
+        :resource-type="storeConsulta.resourceType"
         etiqueta-elementos="Capas"
         :funcion-descarga="exportarMapa"
       />

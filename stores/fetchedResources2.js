@@ -31,16 +31,16 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
     all: computed(() => Object.values(resources).flat()),
 
     checkFilling(resourceType = storeConsulta.resourceType) {
-      console.log('checkFilling:', resourceType);
+      // console.log('checkFilling:', resourceType);
       if (resources[resourceType].length > 0) return;
 
       this.fill(resourceType);
     },
 
     async fill(resourceType = storeConsulta.resourceType) {
-      console.log('fill:', resourceType);
+      // console.log('fill:', resourceType);
       const { data } = useAuth();
-      // this.isLoading = true;
+      this.isLoading = true;
 
       const r = await $fetch('/api/catalogo', {
         // method: 'GET',
@@ -56,7 +56,7 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
       // T E M P O R A L
       resources[resourceType] = validacionTemporal(r, resourceType);
 
-      // this.isLoading = false;
+      this.isLoading = false;
     },
 
     /**
@@ -79,27 +79,6 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
       return resources[resourceType].filter(({ uuid }) => uuidsToFind.includes(uuid));
     },
   };
-
-  // state: () => ({
-  //   dataLayer: [],
-  //   dataTable: [],
-  //   document: [],
-  //   all: [],
-  //   isLoading: false,
-  // }),
-  // getters: {
-
-  // },
-  // actions: {
-  //   /**
-  //    *
-  //    * @param {String} resourceType
-  //    * @param {Array<Object>} newArray
-  //    */
-  //   updateFetchedResources(resourceType, newArray) {
-  //     this[resourceType] = newArray;
-  //   },
-  // },
 });
 
 function validacionTemporal(resources, resourceType) {
