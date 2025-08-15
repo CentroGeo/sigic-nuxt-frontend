@@ -87,6 +87,32 @@ watch(resources, (nv) => {
   filteredResources.value = nv;
   groupResults();
 });
+
+const { data } = useAuth();
+const isLoggedIn = ref(data.value ? true : false);
+const userEmail = ref(data.value?.user.email);
+//console.log('auth data', data.value);
+
+const selectorAuthor = ref('todos');
+
+function filterByAuthor() {
+  if (selectorAuthor.value === 'todos') {
+    filteredResources.value = resources.value;
+  } else if (selectorAuthor.value === 'catalogo') {
+    filteredResources.value = resources.value.filter(
+      (resource) => resource.owner.email !== userEmail.value
+    );
+  } else {
+    filteredResources.value = resources.value.filter(
+      (resource) => resource.owner.email === userEmail.value
+    );
+  }
+  groupResults();
+}
+
+watch(selectorAuthor, () => {
+  filterByAuthor();
+});
 </script>
 
 <template>
@@ -95,24 +121,26 @@ watch(resources, (nv) => {
       <p class="h4 fondo-color-acento p-3 m-0">{{ titulo }}</p>
 
       <div class="m-x-2 m-y-1">
-        <p class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
+        <p v-if="!isLoggedIn" class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
 
         <ClientOnly>
           <SisdaiSelector
+            v-if="isLoggedIn"
+            v-model="selectorAuthor"
             class="m-y-2"
-            etiqueta="Permisos"
+            etiqueta="Buscar en catálogo y tus archivos:"
             instruccional="Selecciona los recursos por permisos"
           >
-            <option>Opcion 1</option>
-            <option>Opcion 2</option>
-            <option>Opcion 3</option>
+            <option value="todos">Todos los conjuntos de datos</option>
+            <option value="catalogo">Archivos del catálogo</option>
+            <option value="misArchivos">Mis Archivos</option>
           </SisdaiSelector>
         </ClientOnly>
 
         <ClientOnly>
-          <div class="flex flex-contenido-equidistante m-y-3">
+          <div class="flex flex-contenido-centrado m-y-3">
             <SisdaiCampoBusqueda
-              class="columna-13"
+              class="columna-12"
               :catalogo="resources"
               :propiedad-busqueda="'title'"
               :etiqueta="'Usa palabras clave...'"
@@ -132,7 +160,7 @@ watch(resources, (nv) => {
             </button>
           </div>
         </ClientOnly>
-        <UiNumeroElementos :numero="resources.length" :etiqueta="etiquetaElementos" />
+        <UiNumeroElementos :numero="filteredResources.length" :etiqueta="etiquetaElementos" />
       </div>
     </div>
 

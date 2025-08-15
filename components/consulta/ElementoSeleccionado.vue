@@ -89,6 +89,7 @@ const goUp = () => storeSelected.changePosition(props.selectedElement.uuid, +1);
 .tarjeta-selected {
   padding: 16px;
   background-color: var(--color-secundario-2);
+  color: var(--campo-etiqueta-color);
 
   .encabezado-tarjeta {
     align-items: center;

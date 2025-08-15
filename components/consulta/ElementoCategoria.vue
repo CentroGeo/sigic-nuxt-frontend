@@ -44,6 +44,7 @@ const estadoAbierto = ref(false);
   // justify-content: space-between;
   width: 100%;
   align-items: flex-start;
+  color: var(--color-secundario-11);
 
   [class^='pictograma-'] {
     font-size: 1.75rem;
