@@ -5,24 +5,8 @@ const storeIA = useIAStore();
 
 const proyecto = computed(() => storeIA.proyectoSeleccionado);
 const arraySources = ref([]);
-const arrayContexts = ref([]);
 
-const contextos = ref([
-  {
-    id: 0,
-    tarjeta_img: 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/kale-1.jpg',
-    tarjeta_titulo: 'Tecnologías para monitoreo marino',
-    tarjeta_etiqueta: '5 Fuentes',
-    numero_fuentes: 5,
-  },
-  {
-    id: 1,
-    tarjeta_img: 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/becka.jpg',
-    tarjeta_titulo: 'Zonas de riesgo ecológico marino',
-    tarjeta_etiqueta: '6 Fuentes',
-    numero_fuentes: 6,
-  },
-]);
+const contextos = ref([]);
 
 // Función para cargar las fuentesl proyecto
 const loadSources = async () => {
@@ -42,9 +26,9 @@ const loadContexts = async () => {
   //arraySources = [];
 
   //Consulta fuentes
-  arrayContexts.value = await storeIA.getProjectContexts(proyecto.value['id']);
+  contextos.value = await storeIA.getProjectContexts(proyecto.value['id']);
 
-  //console.log("arrayContexts: ",arrayContexts);
+  //console.log("contextos: ",contextos);
 
   //catalogo.value = arrayProjects;
   //catalogoFiltrado.value = arrayProjects;
@@ -69,7 +53,7 @@ watch(
 ); // Esto lo ejecuta también en el primer render
 
 // Observador carga fuentes al cambiar de proyecto
-watch(proyecto, (nuevoProyecto, anteriorProyecto) => {
+watch(proyecto, () => {
   //console.log("Proyecto cambió:", nuevoProyecto);
   loadSources();
   loadContexts();
@@ -128,7 +112,7 @@ watch(proyecto, (nuevoProyecto, anteriorProyecto) => {
         <div class="columna-16">
           <div v-if="storeIA.existeContexto">
             <div class="flex m-y-3">
-              <div v-for="contexto in arrayContexts" :key="contexto.id" class="columna-4">
+              <div v-for="contexto in contextos" :key="contexto.id" class="columna-4">
                 <div class="tarjeta">
                   <img
                     class="tarjeta-imagen"

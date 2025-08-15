@@ -3,9 +3,7 @@ import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
 
-const router = useRouter();
 const storeIA = useIAStore();
 
 const props = defineProps({
@@ -65,7 +63,6 @@ const loadChatsList = async () => {
   // Consulta proyectos
   arrayChats = await storeIA.getChatList(1);
 
-  console.log(arrayChats);
   transformarHistorial(arrayChats);
 
   /*   catalogo.value = arrayProjects;
@@ -263,7 +260,6 @@ onMounted(() => {
   }
 
   .tarjeta-titulo {
-    color: var(--Base-Tipografa---texto-acento, #9d2148);
     font-size: 18px;
     font-style: normal;
     font-weight: 500;
@@ -272,7 +268,6 @@ onMounted(() => {
 
   .tarjeta-nombre-proyecto,
   .tarjeta-nombre-contexto {
-    color: var(--Base-Tipografa---texto-primario, #141414);
     font-size: 14px;
     font-style: normal;
     font-weight: 400;

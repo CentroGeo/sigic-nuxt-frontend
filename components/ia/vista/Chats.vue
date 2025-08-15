@@ -62,10 +62,9 @@ watch(
 // Función para cargar historico de chat
 const loadExistentChat = async (idchat) => {
   //arraySources = [];
-  let historyChat;
   //Consulta fuentes
-  historyChat = await storeIA.getChat(idchat);
-  console.log(historyChat['history_array']);
+  const historyChat = await storeIA.getChat(idchat);
+
   const historial_chat = historyChat['history_array'];
 
   mensajes.value = historial_chat.map((item, index) => {
@@ -197,8 +196,6 @@ const submitMensaje = async () => {
     chat_id: chatID.value,
   };
 
-  console.log(body);
-
   // Agregar mensaje del usuario
   mensajes.value.push({
     id: mensajes.value.length + 1,
@@ -235,10 +232,10 @@ const submitMensaje = async () => {
   }
 
   const json = await res.json();
-  console.log(json);
+
   const jobId = json.job_id;
 
-  if (json['chat_id'] != null && json['chat_id'] != undefined) {
+  if (json['chat_id'] !== null && json['chat_id'] !== undefined) {
     chatID.value = json['chat_id'];
   }
 
@@ -249,7 +246,7 @@ const submitMensaje = async () => {
     isSubmitting.value = false;
     return;
   } else {
-    console.log('jobId: ', jobId);
+    /* console.log('jobId: ', jobId); */
   }
 
   // Resetear el flag al enviar nuevo mensaje
@@ -297,8 +294,8 @@ const submitMensaje = async () => {
 
         if (resultElement.includes('status:')) {
           try {
-            const statusStr = resultElement.replace('status:', '');
-            const statusObj = JSON.parse(statusStr);
+            //const statusStr = resultElement.replace('status:', '');
+            //const statusObj = JSON.parse(statusStr);
             //console.log(statusObj["status"])
           } catch (err) {
             console.log('Error Leyendo status: ' + err);
@@ -312,14 +309,14 @@ const submitMensaje = async () => {
         }
         if (resultElement.includes('data:')) {
           if (resultElement.includes('STREAM_COMPLETED')) {
-            console.log('stream completado');
+            /* console.log('stream completado'); */
           } else {
             try {
               const dataStr = resultElement.replace('data:', '');
               //console.log(dataStr)
               const dataObj = JSON.parse(dataStr);
               //console.log(dataObj)
-              if (dataObj['status'] == 'started') {
+              if (dataObj['status'] === 'started') {
                 //console.log(dataObj['message'])
                 mensajeRespuesta += dataObj['message'];
                 //console.log(mensajeRespuesta)

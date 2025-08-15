@@ -42,8 +42,6 @@ const loadProjectList = async () => {
   // Consulta proyectos
   arrayProjects = await storeIA.getProjectsList();
 
-  console.log(arrayProjects);
-
   catalogo.value = arrayProjects;
   catalogoFiltrado.value = arrayProjects;
 };

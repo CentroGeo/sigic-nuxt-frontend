@@ -36,7 +36,7 @@ export const useIAStore = defineStore('ia', {
         console.log(archivos);
 
         // Agregar archivos si existen
-        archivos.forEach((archivo, index) => {
+        archivos.forEach((archivo) => {
           formData.append(`archivos`, archivo.archivo);
         });
 
@@ -210,6 +210,7 @@ export const useIAStore = defineStore('ia', {
 
     async getChatList(user_id) {
       //this.existeContexto = true;
+      console.log(user_id);
 
       const response = await fetch(backend + 'api/chat/history/getchats', {
         method: 'POST',

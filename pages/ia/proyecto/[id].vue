@@ -11,7 +11,6 @@ import { ref } from 'vue';
 const catalogoModal = ref(null);
 const capasModal = ref(null);
 const archivosSeleccionados = ref([]);
-const inputArchivos = ref(null);
 
 const storeIA = useIAStore();
 
