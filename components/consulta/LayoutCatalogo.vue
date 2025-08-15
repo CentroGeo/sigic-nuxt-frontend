@@ -16,6 +16,7 @@ const apiCategorias = `${config.public.geonodeApi}/facets/category`;
 const categoryList = ref([]);
 const categorizedResources = ref({});
 const selectedCategories = ref([]);
+const isFilterActive = ref(false)
 const modalFiltroAvanzado = ref(null);
 
 // Esta parte es para obtener todas las categorias
@@ -63,7 +64,13 @@ function filterByInput(r) {
   groupResults();
 }
 
-function updateByModal(resources) {
+function applyAdvancedFilters(resources){
+  isFilterActive.value = true;
+  filteredResources.value = resources;
+  groupResults();
+}
+function resetAdvancedFilter(resources) {
+  isFilterActive.value = false;
   filteredResources.value = resources;
   groupResults();
 }
@@ -112,7 +119,7 @@ onMounted(async () => {
             />
             <button
               type="button"
-              class="boton-primario boton-pictograma boton-grande"
+              :class="isFilterActive ? 'boton-primario boton-pictograma boton-grande' :'boton-secundario boton-pictograma boton-grande'"
               aria-label="Filtro Avanzado"
               @click="modalFiltroAvanzado.abrirModalBusqueda"
             >
@@ -152,7 +159,8 @@ onMounted(async () => {
     ref="modalFiltroAvanzado"
     :resource-type="props.resourceType"
     :categories="categoryList"
-    @update-results="(results) => updateByModal(results)"
+    @apply-filter="(results) => applyAdvancedFilters(results)"
+    @reset-filter="(results) => resetAdvancedFilter(results)"
   />
 </template>
 

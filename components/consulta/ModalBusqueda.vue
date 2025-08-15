@@ -2,6 +2,7 @@
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiCasillaVerificacion from '@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+import { resourceTypeGeonode } from '~/utils/consulta';
 
 const props = defineProps({
   categories: { type: Array, default: () => [] },
@@ -10,15 +11,37 @@ const props = defineProps({
 const { categories } = toRefs(props);
 const storeFetched = useFetchedResourcesStore();
 const resources = computed(() => storeFetched[props.resourceType]);
-const emit = defineEmits(['updateResults']);
+const emit = defineEmits(['applyFilter','resetFilter']);
 const modalBusqueda = ref(null);
-const selectedFilter = ref({
-  selectedCategory: [],
-  institucionInput: null,
-  yearInput: null,
-  keywordsInput: null,
-});
+const institutionInput = ref('');
+const yearInput = ref('');
+const keywordsInput = ref('');
+const inputCategories = ref([]);
+
+
 const results = ref([]);
+const categoriesDict = {
+  "Imagery Base Maps Earth Cover": 'imageryBaseMapsEarthCover',
+  "Society": 'society',
+  "Economy": 'economy',
+  "Utilities Communication": 'utilitiesCommunication',
+  "Environment": 'environment',
+  'Oceans': 'oceans',
+  'Biota': 'biota',
+  'Health': 'health',
+  'Elevation': 'elevation',
+  'Geoscientific Information': 'geoscientificInformation',
+  'Planning Cadastre': 'planningCadastre',
+  'Inland Waters': 'inlandWaters',
+  'Boundaries': 'boundaries',
+  'Structure': 'structure',
+  'Transportation': 'transportation',
+  'Intelligence Military': 'intelligenceMilitary',
+  'Location': 'location',
+  'Climatology Meteorology Atmosphere': 'climatologyMeteorologyAtmosphere',
+  'Farming': 'farming',
+  'Population': 'population',
+}
 function abrirModalBusqueda() {
   modalBusqueda.value?.abrirModal();
 }
@@ -27,74 +50,42 @@ defineExpose({
   abrirModalBusqueda,
 });
 
-// function filterByCategory(d) {
-//   if (
-//     d.category !== null &&
-//     selectedFilter.value['selectedCategory'].length > 0 &&
-//     selectedFilter.value['selectedCategory'].includes(d.category.gn_description)
-//   ) {
-//     return 1;
-//   } else {
-//     return 0;
-//   }
-// }
 
-function filterByYear(d) {
-  if (
-    d.date !== null &&
-    selectedFilter.value['yearInput'] &&
-    d.date.slice(0, 4) === selectedFilter.value['yearInput']
-  ) {
-    return 1;
-  } else {
-    return 0;
+async function filterByModal() {
+  const { data } = useAuth();
+  let queryParams = {'filter{resource_type}': resourceTypeGeonode[props.resourceType]}
+
+  if(institutionInput.value){
+    queryParams['institution'] = institutionInput.value
   }
-}
-
-// Para esta función haría falta formatear el input y el título del recursp
-function filterByKeyword(d) {
-  if (selectedFilter.value['keywordsInput']) {
-    const keywordsList = selectedFilter.value['keywordsInput']
-      .split(',')
-      .map((word) => word.trim())
-      .filter((word) => word.length > 0);
-    const includesWord = keywordsList.some((keyword) => d.title.includes(keyword));
-    if (includesWord) {
-      return 1;
-    } else {
-      return 0;
-    }
-  } else {
-    return 0;
+  if(yearInput.value){
+    queryParams['year'] = yearInput.value
   }
-}
+  if(keywordsInput.value){
+    queryParams['keywords_csv'] = keywordsInput.value
+  }
+  if(inputCategories.value.length > 0){
+    let catParam = []
+    inputCategories.value.forEach((d) => {
+      catParam.push(categoriesDict[d])
+    })
+    queryParams['filter{category.identifier}'] = catParam
+  } 
 
-// La idea sería generar un filtro por categoría y, sacar el numero de filtros aplicados y
-// revisar que sumen un total
-function filterByModal() {
-  let total = 0;
-  const prevResults = [];
-  // Revisamos cuántos filtros se aplicaron
-  Object.keys(selectedFilter.value).forEach((d) => {
-    if (selectedFilter.value[d]) {
-      total += 1;
+  results.value = await $fetch('/api/catalogo', {
+    method: 'GET',
+    query: queryParams,
+    headers: {
+      Authorization: `${data.value?.accessToken}`
     }
   });
-  // Revisamos la suma por filtro
-  resources.value.forEach((d) => {
-    const i = filterByYear(d) + filterByKeyword(d);
-    if (i === total) {
-      prevResults.push(d);
-    }
-  });
-  results.value = prevResults;
-  emit('updateResults', results.value);
+  emit('applyFilter', results.value) 
   modalBusqueda.value.cerrarModal();
 }
 
 function resetResults() {
   results.value = resources.value;
-  emit('updateResults', results.value);
+  emit('resetFilter', results.value);
   modalBusqueda.value.cerrarModal();
 }
 </script>
@@ -111,7 +102,7 @@ function resetResults() {
           <SisdaiCasillaVerificacion
             v-for="(category, index) in categories"
             :key="`${index}-category`"
-            v-model="selectedFilter['selectedCategory']"
+            v-model="inputCategories"
             :value="category"
             :etiqueta="category"
             class="opcion-checkbox"
@@ -120,21 +111,24 @@ function resetResults() {
         </div>
 
         <SisdaiCampoBase
-          v-model="selectedFilter['institucionInput']"
+          v-model="institutionInput"
+          id="filtro-institicion"
           class="m-y-2"
           etiqueta="Institución"
           ejemplo="SECIHTI, INEGI, entre otras"
         />
 
         <SisdaiCampoBase
-          v-model="selectedFilter['yearInput']"
+          v-model="yearInput"
+          id="filtro-anio"
           class="m-y-2"
           etiqueta="Año de publicación"
           ejemplo="1995..."
         />
 
         <SisdaiCampoBase
-          v-model="selectedFilter['keywordsInput']"
+          v-model="keywordsInput"
+          id="filtro-keywords"
           class="m-y-2"
           etiqueta="Palabras clave"
           ejemplo="agua, casas..."

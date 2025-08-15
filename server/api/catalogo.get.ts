@@ -6,6 +6,7 @@ export default defineEventHandler(async (event) => {
   let page = 1;
   let allResults = [];
   const query = getQuery(event);
+  console.log("query", query)
   const token = getHeader(event, 'Authorization');
   //console.log("token", token)
   let header = {};
@@ -24,7 +25,7 @@ export default defineEventHandler(async (event) => {
     });
 
     const endpoint = `${api}?${dataParams.toString()}`
-    console.log(endpoint);
+    console.log("endnpoint: ", endpoint);
     const response = await fetch(endpoint, {
       method: 'GET',
       headers: header,
@@ -38,8 +39,7 @@ export default defineEventHandler(async (event) => {
     // console.log('respuesta', response.headers);
     const { links, resources } = await response.json();
     allResults = allResults.concat(resources);
-
-    if (links.next && page < 2) {
+    if (links.next) {
       // Si la hay, volvemos a solicitar datos
       page += 1;
       return loadPage();
@@ -47,7 +47,6 @@ export default defineEventHandler(async (event) => {
   };
 
   await loadPage();
-  console.log('catalogo server api: ', allResults.length);
 
   return allResults
-});
+})
