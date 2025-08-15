@@ -1,16 +1,17 @@
 <script setup>
+import { resourceTypeDic } from '~/utils/consulta';
 // TODO: añadir selector a tipo de archivo a filtros y mejorar tabla
-const resourcesFetched2 = useFetchedResources2Store();
+const storeFetched = useFetchedResources2Store();
 
-resourcesFetched2.checkFilling('dataTable');
-resourcesFetched2.checkFilling('document');
+storeFetched.checkFilling(resourceTypeDic.dataTable);
+storeFetched.checkFilling(resourceTypeDic.document);
 
 // // para filtar por los archivos de la usuaria
 const { data } = useAuth();
 const userEmail = data.value.user.email;
 
 const datos = computed(() =>
-  resourcesFetched2.all
+  storeFetched.all
     .filter((resource) => resource.owner.email === userEmail)
     .map((d) => ({
       pk: d.pk,
