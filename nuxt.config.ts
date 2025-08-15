@@ -1,39 +1,52 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
-const isDev = process.env.NODE_ENV !== 'production'
+const isDev = process.env.NODE_ENV !== 'production';
+const baseUrl = process.env.NUXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
 export default defineNuxtConfig({
-  compatibilityDate: "2025-05-15",
-  devtools: { enabled: isDev },
-  experimental: {
-    devTools: isDev
+  app: {
+    head: {
+      link: [
+        {
+          rel: 'shortcut icon',
+          href: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/images/favicon.ico',
+        },
+      ],
+    },
   },
+  compatibilityDate: '2025-05-15',
+  devtools: { enabled: isDev },
   sourcemap: {
     server: isDev,
-    client: isDev
+    client: isDev,
   },
 
   modules: [
-    "@pinia/nuxt",
+    '@pinia/nuxt',
     // "@nuxt/content",
-    "@nuxt/eslint",
-    "@nuxt/image",
-    "@nuxt/test-utils",
-    "@sidebase/nuxt-auth",
+    '@nuxt/eslint',
+    '@nuxt/image',
+    '@nuxt/test-utils',
+    '@sidebase/nuxt-auth',
+    '@vueuse/nuxt',
   ],
 
-  css: ["@centrogeomx/sisdai-css/dist/sisdai.min.css"],
+  css: ['@centrogeomx/sisdai-css/dist/sisdai.min.css'],
 
   auth: {
     isEnabled: true,
-    baseURL: 'http://localhost:3000/api/auth',
-    originEnvKey: process.env.NUXT_AUTH_ORIGIN,
+    baseURL: `${baseUrl}/api/auth`,
+    // originEnvKey: 'NUXT_AUTH_ORIGIN',  // TODO: pendiente de definir
 
     globalAppMiddleware: false, // protege todas las páginas por defecto
     provider: {
-      type: "authjs",
+      type: 'authjs',
       trustHost: true,
-      defaultProvider: "keycloak",
+      defaultProvider: 'keycloak',
+    },
+    sessionRefresh: {
+      enablePeriodically: true,
+      enableOnWindowFocus: true,
     },
   },
 
@@ -42,12 +55,34 @@ export default defineNuxtConfig({
 
     // Variables públicas (disponibles también en el cliente)
     public: {
-      geonodeApi: `${process.env.GEONODE_URL}/api/v2`,
-      geoserverUrl: process.env.GEOSERVER_URL,
+      geonodeApi: process.env.NUXT_PUBLIC_GEONODE_API,
+      geonodeUrl: process.env.NUXT_PUBLIC_GEONODE_URL,
+      geoserverUrl: process.env.NUXT_PUBLIC_GEOSERVER_URL,
+      baseURL: baseUrl,
+      domain: process.env.DOMAIN,
+
       // geoserverApi: `${process.env.GEOSERVER_URL}/rest`,
-    }
+    },
   },
+
+  nitro: {
+    // TODO: remover cuando catálogo se conecte con el backend
+    storage: {
+      fs: {
+        driver: 'fs',
+        base: './public',
+      },
+    },
+  },
+
   devServer: {
+    // TODO: remover, solo se utiliza cuando se levanta el chat-front del módulo de IA
     // port: 3001
+  },
+
+  vite: {
+    ssr: {
+      noExternal: ['@centrogeomx/sisdai-mapas'],
+    },
   },
 });

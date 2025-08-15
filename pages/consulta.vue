@@ -1,9 +1,15 @@
 <script setup>
-definePageMeta({ middleware: "redireccionar-modulo-consulta" });
+definePageMeta({
+  middleware: 'redireccionar-modulo-consulta',
+  bodyAttrs: {
+    class: '',
+  },
+});
 
-const ruta = "/consulta";
+const ruta = '/consulta';
 
 const storeConsulta = useConsultaStore();
+onUnmounted(() => (document.querySelector('body').className = ''));
 </script>
 
 <template>
@@ -13,19 +19,22 @@ const storeConsulta = useConsultaStore();
         {
           pictograma: 'pictograma-capas',
           ruta: `${ruta}/capas`,
+          globo: 'Capas geográficas',
         },
         {
           pictograma: 'pictograma-tabla',
           ruta: `${ruta}/tablas`,
+          globo: 'Tabulados de datos',
         },
         {
           pictograma: 'pictograma-documento',
           ruta: `${ruta}/documentos`,
+          globo: 'Documentos',
         },
       ]"
       :funcion-colapsar="storeConsulta.alternarCatalogoColapsable"
       :estado-colapable="storeConsulta.catalogoColapsado"
-      :idColapsable="storeConsulta.idNavegacionLateral"
+      :id-colapsable="storeConsulta.idNavegacionLateral"
     />
 
     <div class="contenedor-contenido">
@@ -36,8 +45,9 @@ const storeConsulta = useConsultaStore();
 
 <style lang="scss" scoped>
 .modulo-consultas {
+  --altura-consulta-esc: 85vh;
+  height: var(--altura-consulta-esc);
   gap: 0;
-  height: 85vh;
 
   .contenedor-contenido {
     flex: 1;

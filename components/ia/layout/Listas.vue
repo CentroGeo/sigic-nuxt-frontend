@@ -1,13 +1,13 @@
 <script setup>
-import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
-import { ref, onMounted } from "vue";
+import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
+import { onMounted, ref } from 'vue';
 
 const storeIA = useIAStore();
 
 const props = defineProps({
-  titulo: { type: String, default: "Título" },
-  textoBoton: { type: String, default: "Título" },
-  etiquetaBusqueda: { type: String, default: undefined }
+  titulo: { type: String, default: 'Título' },
+  textoBoton: { type: String, default: 'Título' },
+  etiquetaBusqueda: { type: String, default: undefined },
   // recursoLista: { type: Array, required: true },
 });
 const { titulo, textoBoton, recursoLista, etiquetaBusqueda } = toRefs(props);
@@ -15,7 +15,7 @@ const { titulo, textoBoton, recursoLista, etiquetaBusqueda } = toRefs(props);
 const catalogo = ref([
   /* {
     id: 0,
-    titulo: "Biodiversidad de ecosistemas marinos",
+    titulo: 'Biodiversidad de ecosistemas marinos',
     numero_contextos: 0,
     numero_fuentes: 9
   },
@@ -92,19 +92,13 @@ onMounted(() => {
             <div
               class="proyecto p-l-4 p-r-2 p-y-1"
               :class="{
-                seleccionado: proyecto.id === storeIA.proyectoSeleccionado?.id
+                seleccionado: proyecto.id === storeIA.proyectoSeleccionado?.id,
               }"
             >
               <div class="proyecto-titulo m-b-1">{{ proyecto.title }}</div>
               <div class="flex">
-                <UiNumeroElementos
-                  :numero="proyecto.numero_contextos"
-                  etiqueta="Contextos"
-                />
-                <UiNumeroElementos
-                  :numero="proyecto.numero_fuentes"
-                  etiqueta="Fuentes"
-                />
+                <UiNumeroElementos :numero="proyecto.numero_contextos" etiqueta="Contextos" />
+                <UiNumeroElementos :numero="proyecto.numero_fuentes" etiqueta="Fuentes" />
               </div>
             </div>
           </li>

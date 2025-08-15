@@ -1,106 +1,129 @@
 <script setup>
-import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
-const resourcesStore = useSelectedResourcesStore();
+import { SisdaiLeyendaWms } from '@centrogeomx/sisdai-mapas';
+
+const config = useRuntimeConfig();
+const storeConsulta = useConsultaStore();
+const storeSelected = useSelectedResources2Store();
+const emit = defineEmits(['opacidadClicked', 'descargaClicked', 'tablaClicked']);
+
 const props = defineProps({
-  selectedElement: {
+  resourceElement: {
     type: Object,
     default: () => ({}),
   },
   resourceType: { type: String, required: true },
 });
-const { selectedElement, resourceType } = toRefs(props);
-const modalTabla = ref(null);
-const paginaActual = ref(0);
-const tamanioPagina = 10;
-const {
-  variables,
-  datos,
-  totalFeatures,
-  refetch: fetchTable,
-} = useGeoserverDataTable({
-  paginaActual: paginaActual.value,
-  tamanioPagina: tamanioPagina,
-  resource: selectedElement.value,
-});
 
-watch(paginaActual, () => {
-  fetchTable({
-    paginaActual: paginaActual.value,
-    tamanioPagina: tamanioPagina,
-    resource: selectedElement.value,
-  });
-});
+/**
+ * Devuelve el extend de acuerdo a una capa en formato: left,bootom,rigth,top
+ * @param {Array} bboxPolygon arreglo de corrdenadas envolventes de la capa
+ * @returns {Array} left,bootom,rigth,top
+ */
+function getExtent(bboxPolygon) {
+  if (!Array.isArray(bboxPolygon)) {
+    console.error(
+      'El valor de la extensión no está definida o no es una lista de coordenadas:',
+      bboxPolygon
+    );
+
+    return '';
+  }
+
+  const x = bboxPolygon.map(([x]) => x);
+  const y = bboxPolygon.map(([, y]) => y);
+  return [Math.min(...x), Math.min(...y), Math.max(...x), Math.max(...y)].join(',');
+}
+
+// Aqui se acaba la parte nueva para la prueba
+const optionsButtons = ref([
+  {
+    label: 'Hacer zoom',
+    pictogram: 'pictograma-zoom-instruccional',
+    globo: 'Zoom a la capa',
+    action: () => {
+      storeConsulta.mapExtent = getExtent(props.resourceElement.bbox_polygon.coordinates[0]);
+    },
+  },
+  {
+    label: 'Ver tablas',
+    pictogram: 'pictograma-tabla',
+    globo: 'Ver tabla',
+    action: () => {
+      emit('tablaClicked');
+    },
+  },
+  {
+    label: 'Mostrar',
+    get pictogram() {
+      return storeSelected.byUuid(props.resourceElement.uuid)?.visible
+        ? 'pictograma-ojo-ver'
+        : 'pictograma-ojo-ocultar';
+    },
+    get globo() {
+      return storeSelected.byUuid(props.resourceElement.uuid)?.visible
+        ? 'Ocultar capa'
+        : 'Mostrar capa';
+    },
+    action: () => {
+      storeSelected.byUuid(props.resourceElement.uuid).toggleVisibility();
+    },
+  },
+  {
+    label: 'Cambiar opacidad',
+    pictogram: 'pictograma-editar',
+    globo: 'Opacidad',
+    action: () => {
+      emit('opacidadClicked');
+    },
+  },
+  {
+    label: 'Eliminar selección',
+    pictogram: 'pictograma-eliminar',
+    globo: 'Eliminar',
+    action: () => {
+      storeSelected.removeByUuid(props.resourceElement.uuid);
+    },
+  },
+  {
+    label: 'Descargar archivo',
+    pictogram: 'pictograma-archivo-descargar',
+    globo: 'Descargar',
+    action: () => {
+      emit('descargaClicked');
+    },
+  },
+]);
 </script>
+
 <template>
-  <SisdaiModal ref="modalTabla">
-    <template #encabezado>
-      <h1>{{ selectedElement.title }}</h1>
-    </template>
-
-    <template #cuerpo>
-      <UiTablaAccesible :variables="variables" :datos="datos" />
-      <UiPaginador
-        :totalPaginas="Math.ceil(totalFeatures / tamanioPagina)"
-        @cambio="paginaActual = $event"
+  <div>
+    <!-- El contenido de la tarjeta de capas -->
+    <div class="m-y-2">
+      <SisdaiLeyendaWms
+        :nombre="resourceElement.alternate"
+        :fuente="`${config.public.geoserverUrl}/wms?`"
+        :titulo="resourceElement.title || 'cargando...'"
+        :sin-control="true"
+        :sin-control-clases="true"
       />
-    </template>
-  </SisdaiModal>
+    </div>
 
-  <!-- El contenido de la tarjeta de capas  -->
-  <div class="m-b-5">
-    <p class="tarjeta-titulo m-y-2">
-      {{ selectedElement.title }}
-    </p>
-    <p class="tarjeta-etiqueta">Variables disponibles</p>
-  </div>
-
-  <div class="flex flex-contenido-final">
-    <button
-      class="boton-pictograma boton-sin-contenedor-secundario"
-      aria-label="Hacer zoom"
-      type="button"
-    >
-      <span class="pictograma-zoom-instruccional" aria-hidden="true"></span>
-    </button>
-    <button
-      class="boton-pictograma boton-sin-contenedor-secundario"
-      aria-label="Ver tablas"
-      type="button"
-      @click="modalTabla?.abrirModal()"
-    >
-      <span class="pictograma-tabla" aria-hidden="true"></span>
-    </button>
-    <button
-      class="boton-pictograma boton-sin-contenedor-secundario"
-      aria-label="Ver"
-      type="button"
-    >
-      <span class="pictograma-ojo-ver" aria-hidden="true"></span>
-    </button>
-    <button
-      class="boton-pictograma boton-sin-contenedor-secundario"
-      aria-label="Editar"
-      type="button"
-    >
-      <span class="pictograma-editar" aria-hidden="true"></span>
-    </button>
-    <button
-      class="boton-pictograma boton-sin-contenedor-secundario"
-      aria-label="Quitar selección"
-      type="button"
-      @click="resourcesStore.removeResource(resourceType, selectedElement)"
-    >
-      <span class="pictograma-eliminar" aria-hidden="true"></span>
-    </button>
-    <button
-      class="boton-pictograma boton-sin-contenedor-secundario"
-      aria-label="Descargar selección"
-      type="button"
-    >
-      <span class="pictograma-archivo-descargar" aria-hidden="true"></span>
-    </button>
+    <div class="flex flex-contenido-final">
+      <button
+        v-for="button in optionsButtons"
+        :key="button.label"
+        v-globo-informacion:derecha="button.globo"
+        class="boton-pictograma boton-sin-contenedor-secundario"
+        :aria-label="button.label"
+        type="button"
+        @click="button.action"
+      >
+        <span :class="button.pictogram" aria-hidden="true" />
+      </button>
+    </div>
   </div>
 </template>
+
 <style lang="scss" scoped>
 .flex {
   gap: 8px;

@@ -1,8 +1,13 @@
 <script setup>
-import { ref, toRefs } from "vue";
-import { useSelectedResourcesStore } from "~/stores/selectedResources.js";
+// PENDING: Tener en cuenta que no solo tendremos archivos vectoriales
+import { onMounted, onUnmounted, ref, toRefs } from 'vue';
+import { fetchGeometryType, tooltipContent } from '~/utils/consulta';
 
-const resourcesStore = useSelectedResourcesStore();
+const storeSelected = useSelectedResources2Store();
+const capasSeleccionadas = computed({
+  get: () => storeSelected.uuids,
+  set: (uuids) => storeSelected.updateByUuids(uuids),
+});
 const props = defineProps({
   resourceType: {
     type: String,
@@ -13,124 +18,155 @@ const props = defineProps({
     default: Object,
   },
 });
-const { resourceType, catalogueElement } = toRefs(props);
-const type = ref(catalogueElement.value.resource_type);
+const { catalogueElement } = toRefs(props);
+
 const subtype = ref(catalogueElement.value.subtype);
-const bbox_polygon = ref(catalogueElement.value.bbox_polygon.type);
-const buttons = ref([
-  {
-    label: "Información",
-    class: "pictograma-informacion",
-    index: 3,
+const geomType = ref(null);
+const buttons = ref([]);
+const optionsDict = {
+  Point: { tooltipText: 'Capa de puntos', class: 'pictograma-capa-puntos' },
+  MultiPoint: {
+    tooltipText: 'Capa de puntos',
+    class: 'pictograma-capa-puntos',
   },
-]);
-const isChecked = ref(false);
+  Polygon: {
+    tooltipText: 'Capa de poligonos',
+    class: 'pictograma-capa-poligono',
+  },
+  MultiPolygon: {
+    tooltipText: 'Capa de poligonos',
+    class: 'pictograma-capa-poligono',
+  },
+  LineString: {
+    tooltipText: 'Capa de lineas',
+    class: 'pictograma-capa-lineas',
+  },
+  LinearRing: {
+    tooltipText: 'Capa de lineas',
+    class: 'pictograma-capa-lineas',
+  },
+  MultiLineString: {
+    tooltipText: 'Capa de lineas',
+    class: 'pictograma-capa-lineas',
+  },
+  GeometryCollection: {
+    tooltipText: 'Colección de geometrías',
+    class: 'pictograma-capas',
+  },
+  Raster: {
+    tooltipText: 'Raster',
+    class: 'pictograma-capas',
+  },
+  Otro: {
+    tooltipText: 'Ni raster ni vector',
+    class: 'pictograma-flkt',
+  },
+  Error: {
+    tooltipText: 'No se pudo recuperar la información',
+    class: 'pictograma-alerta',
+  },
+};
+// Para triggerear la función de observar
+let observer;
+const rootEl = ref();
 
-//console.log(type.value, subtype.value, bbox_polygon.value);
-
-// Si está en la lista de elementos seleccionados, mostrarla palomeada. Esto es para cuando cambiamos de vista
-function setCheck() {
-  if (
-    resourcesStore.selectedResources[resourceType.value]?.some(
-      (r) => r.uuid === catalogueElement.value.uuid
-    )
-  ) {
-    isChecked.value = true;
-  } else {
-    isChecked.value = false;
-  }
-}
-setCheck();
-
-// Revisamos qué tipo de documento estamos mostrando para decidir qué botones mostrar
-if (type.value === "dataset") {
-  buttons.value.push({
-    label: "Variables disponibles",
-    class: "pictograma-visualizador",
-    index: 2,
-  });
-
-  if (subtype.value == "vector") {
-    if (bbox_polygon.value === "Polygon") {
-      buttons.value.push({
-        label: "Capa de poligonos",
-        class: "pictograma-capa-poligono",
-        index: 1,
-      });
-    } else if (bbox_polygon.value === "LineString") {
-      buttons.value.push({
-        label: "Capa de lineas",
-        class: "pictograma-capa-lineas",
-        index: 1,
-      });
-    } else if (bbox_polygon.value === "Points") {
-      buttons.value.push({
-        label: "Capa de puntos",
-        class: "pictograma-capa-puntos",
-        index: 1,
-      });
+onMounted(() => {
+  // Esto es para observar cuando la tarjeta entra en la vista
+  observer = new IntersectionObserver(
+    async (entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          // Primero checamos si no es dataset
+          if (props.resourceType !== 'dataLayer') {
+            buttons.value = [
+              {
+                tooltipText: tooltipContent(catalogueElement.value),
+                class: 'pictograma-informacion',
+                position: 'derecha',
+              },
+            ];
+          } else {
+            // Si es raster
+            if (subtype.value === 'raster') {
+              geomType.value = 'Raster';
+            } else if (subtype.value === 'vector') {
+              // Si es vectorial
+              // Solicitamos la geometría hasta que la tarjeta va a entrar a la vista
+              geomType.value = await fetchGeometryType(catalogueElement.value);
+              //geomType.value = "Point";
+            } else {
+              geomType.value = 'Otro';
+            }
+            buttons.value = [
+              {
+                tooltipText: optionsDict[geomType.value].tooltipText,
+                class: optionsDict[geomType.value].class,
+                position: 'arriba',
+              },
+              {
+                tooltipText: 'Variables disponibles',
+                class: 'pictograma-visualizador',
+                position: 'arriba',
+              },
+              {
+                tooltipText: tooltipContent(catalogueElement.value),
+                class: 'pictograma-informacion',
+                position: 'derecha',
+              },
+            ];
+          }
+          observer.unobserve(entry.target);
+        }
+      }
+    },
+    {
+      //Esto es para que se dispare la función de petición de recursos
+      // 300px antes de que el componente entre a la vista
+      root: null,
+      rootMargin: '300px',
     }
-  } else {
-    buttons.value.push({
-      label: "Raster",
-      class: "pictograma-capas",
-      index: 1,
-    });
-  }
-}
-// Ordenamos la lista de botones
-buttons.value.sort((a, b) => a.index - b.index);
+  );
 
-// Manjeamos el checkbox y controlamos los elementos seleccionados
-function selectElement(resourceType, option) {
-  isChecked.value = !isChecked.value;
-  if (isChecked.value) {
-    resourcesStore.addResource(resourceType, option);
-  } else {
-    resourcesStore.removeResource(resourceType, option);
+  if (rootEl.value) {
+    observer.observe(rootEl.value);
   }
-}
-
-// Como también se puede modificar la lista desde el panel de seleccion, montamos un watcher
-// para despalomear las opciones que se borraron
-watch(
-  () => resourcesStore.selectedResources[resourceType.value],
-  () => {
-    setCheck();
-  },
-  { deep: true }
-);
+});
+onUnmounted(() => {
+  if (observer && rootEl.value) {
+    observer.unobserve(rootEl.value);
+  }
+});
 </script>
+
 <template>
-  <div class="m-x-5 m-y-2" :id="`elemento-${catalogueElement.uuid}`">
-    <div
-      class="tarjeta-elemento"
-      @click="selectElement(resourceType, catalogueElement)"
-    >
+  <div :id="`elemento-${catalogueElement.uuid}`" ref="rootEl" class="m-x-5 m-y-2">
+    <div class="tarjeta-elemento">
       <input
+        :id="`checkbox-consulta-catalogo-${catalogueElement.uuid}`"
+        v-model="capasSeleccionadas"
         type="checkbox"
-        :id="`checkbox-${catalogueElement.uuid}`"
-        v-model="isChecked"
+        :value="catalogueElement.uuid"
       />
-      <label :for="catalogueElement.uuid">{{ catalogueElement.title }}</label>
+
+      <label :for="`checkbox-consulta-catalogo-${catalogueElement.uuid}`">
+        {{ catalogueElement.title }}
+      </label>
     </div>
 
     <div class="flex flex-contenido-inicio m-y-3">
       <span
-        v-for="button in buttons"
+        v-for="(button, i) in buttons"
+        :key="i"
+        v-globo-informacion:[button.position]="button.tooltipText"
         :class="[button.class, 'pictograma-mediano']"
         aria-hidden="true"
-      ></span>
+      />
     </div>
   </div>
 </template>
+
 <style lang="scss" scoped>
 .flex {
   gap: 8px;
-}
-.tarjeta-elemento:hover {
-  background-color: var(--color-secundario-2);
-  border: 1px solid var(--color-secundario-8);
-  border-radius: 8px;
 }
 </style>

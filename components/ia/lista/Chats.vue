@@ -1,56 +1,56 @@
 <script setup>
-import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
-import SisdaiSelector from "@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue";
-import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const storeIA = useIAStore();
 
 const props = defineProps({
-  titulo: { type: String, default: "Título" },
-  textoBoton: { type: String, default: "Título" },
-  etiquetaBusqueda: { type: String, default: undefined }
+  titulo: { type: String, default: 'Título' },
+  textoBoton: { type: String, default: 'Título' },
+  etiquetaBusqueda: { type: String, default: undefined },
   // recursoLista: { type: Array, required: true },
 });
 const { titulo, textoBoton, recursoLista, etiquetaBusqueda } = toRefs(props);
 
 const nuevoChatModal = ref(null);
-const seleccionProyecto = ref("");
-const seleccionContexto = ref("");
+const seleccionProyecto = ref('');
+const seleccionContexto = ref('');
 
 // const fechaHoy = new Date();
-const fechaHoy = "01-07-2025";
+const fechaHoy = '01-07-2025';
 
 const catalogo = ref([]);
 /* 
 const catalogo = ref([
   {
-    fecha: "01-07-2025",
+    fecha: '01-07-2025',
     chat: [
       {
         id: 0,
-        titulo: "Cobertura e integración de datos en el monitoreo marino",
-        proyecto: "Biodiversidad de ecosistemas marinos",
-        contexto: "Tecnologías para monitoreo marino",
+        titulo: 'Cobertura e integración de datos en el monitoreo marino',
+        proyecto: 'Biodiversidad de ecosistemas marinos',
+        contexto: 'Tecnologías para monitoreo marino',
       },
     ],
   },
   {
-    fecha: "01-06-2025",
+    fecha: '01-06-2025',
     chat: [
       {
         id: 1,
-        titulo: "Análisis e integración de datos en el monitoreo marino",
-        proyecto: "Biodiversidad de ecosistemas marinos",
-        contexto: "Tecnologías para monitoreo marino",
+        titulo: 'Análisis e integración de datos en el monitoreo marino',
+        proyecto: 'Biodiversidad de ecosistemas marinos',
+        contexto: 'Tecnologías para monitoreo marino',
       },
       {
         id: 2,
-        titulo: "Diseño e integración de datos en el monitoreo marino",
-        proyecto: "Biodiversidad de ecosistemas marinos",
-        contexto: "Tecnologías para monitoreo marino",
+        titulo: 'Diseño e integración de datos en el monitoreo marino',
+        proyecto: 'Biodiversidad de ecosistemas marinos',
+        contexto: 'Tecnologías para monitoreo marino',
       },
     ],
   },
@@ -75,21 +75,21 @@ const loadChatsList = async () => {
 function transformarHistorial(historiales) {
   const agrupadoPorFecha = {};
 
-  historiales.forEach(historial => {
+  historiales.forEach((historial) => {
     const fechaISO = historial.credate_date;
-    const fecha = new Date(fechaISO).toLocaleDateString("es-ES", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric"
+    const fecha = new Date(fechaISO).toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
     });
 
-    historial.context.forEach(contexto => {
+    historial.context.forEach((contexto) => {
       const chatItem = {
         id: historial.id,
-        titulo: "Chat " + historial.id || "",
-        proyecto: contexto.workspace?.title || "",
-        contexto: contexto.title || "",
-        id_contexto: contexto.id || ""
+        titulo: 'Chat ' + historial.id || '',
+        proyecto: contexto.workspace?.title || '',
+        contexto: contexto.title || '',
+        id_contexto: contexto.id || '',
       };
 
       if (!agrupadoPorFecha[fecha]) {
@@ -104,13 +104,13 @@ function transformarHistorial(historiales) {
   const resultado = Object.keys(agrupadoPorFecha)
     .sort((a, b) => {
       // Comparar fechas como objetos Date
-      const [da, ma, ya] = a.split("-");
-      const [db, mb, yb] = b.split("-");
+      const [da, ma, ya] = a.split('-');
+      const [db, mb, yb] = b.split('-');
       return new Date(yb, mb - 1, db) - new Date(ya, ma - 1, da);
     })
-    .map(fecha => ({
+    .map((fecha) => ({
       fecha: fecha,
-      chat: agrupadoPorFecha[fecha].sort((a, b) => b.id - a.id) // 👈 orden por id DESC
+      chat: agrupadoPorFecha[fecha].sort((a, b) => b.id - a.id), // 👈 orden por id DESC
     }));
 
   catalogo.value = resultado;
@@ -148,24 +148,18 @@ onMounted(() => {
               :catalogo-anidado="true"
               catalogo-anidado-propiedad-elementos="chat"
               propiedad-busqueda="titulo"
-              @al-filtrar="r => (catalogoFiltrado = r)"
+              @al-filtrar="(r) => (catalogoFiltrado = r)"
             />
           </ClientOnly>
 
-          <h6>
-            Selecciona un chat para empezar a interactuar con el asistente
-          </h6>
+          <h6>Selecciona un chat para empezar a interactuar con el asistente</h6>
           <!-- <div v-for="grupos in catalogoFiltrado">
             {{ grupos }}
           </div> -->
           <ul class="lista-sin-estilo">
-            <li
-              v-for="grupo in catalogoFiltrado"
-              :id="grupo.id"
-              :key="grupo.id"
-            >
+            <li v-for="grupo in catalogoFiltrado" :id="grupo.id" :key="grupo.id">
               <p class="fecha-grupo">
-                {{ grupo.fecha == fechaHoy ? "Hoy" : grupo.fecha }}
+                {{ grupo.fecha == fechaHoy ? 'Hoy' : grupo.fecha }}
               </p>
 
               <ul class="lista-sin-estilo">
@@ -176,8 +170,8 @@ onMounted(() => {
                       path: '/ia/chat/dinamica',
                       query: {
                         chat_id: chat.id,
-                        context_id: chat.id_contexto
-                      }
+                        context_id: chat.id_contexto,
+                      },
                     }"
                   >
                     <div>
@@ -197,20 +191,14 @@ onMounted(() => {
                             aria-label="Editar chat"
                             type="button"
                           >
-                            <span
-                              class="pictograma-editar"
-                              aria-hidden="true"
-                            />
+                            <span class="pictograma-editar" aria-hidden="true" />
                           </button>
                           <button
                             class="boton-pictograma boton-sin-contenedor-secundario"
                             aria-label="Remover chat"
                             type="button"
                           >
-                            <span
-                              class="pictograma-eliminar"
-                              aria-hidden="true"
-                            />
+                            <span class="pictograma-eliminar" aria-hidden="true" />
                           </button>
                         </div>
                       </div>
@@ -248,11 +236,7 @@ onMounted(() => {
         </SisdaiSelector>
       </template>
       <template #pie>
-        <button
-          class="boton-primario boton-chico"
-          aria-label="Iniciar chat"
-          type="button"
-        >
+        <button class="boton-primario boton-chico" aria-label="Iniciar chat" type="button">
           Iniciar chat
         </button>
       </template>

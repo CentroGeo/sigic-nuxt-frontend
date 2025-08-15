@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref } from 'vue';
 
 const storeIA = useIAStore();
 
@@ -10,20 +10,18 @@ const arrayContexts = ref([]);
 const contextos = ref([
   {
     id: 0,
-    tarjeta_img:
-      "https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/kale-1.jpg",
-    tarjeta_titulo: "Tecnologías para monitoreo marino",
-    tarjeta_etiqueta: "5 Fuentes",
-    numero_fuentes: 5
+    tarjeta_img: 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/kale-1.jpg',
+    tarjeta_titulo: 'Tecnologías para monitoreo marino',
+    tarjeta_etiqueta: '5 Fuentes',
+    numero_fuentes: 5,
   },
   {
     id: 1,
-    tarjeta_img:
-      "https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/becka.jpg",
-    tarjeta_titulo: "Zonas de riesgo ecológico marino",
-    tarjeta_etiqueta: "6 Fuentes",
-    numero_fuentes: 6
-  }
+    tarjeta_img: 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/becka.jpg',
+    tarjeta_titulo: 'Zonas de riesgo ecológico marino',
+    tarjeta_etiqueta: '6 Fuentes',
+    numero_fuentes: 6,
+  },
 ]);
 
 // Función para cargar las fuentesl proyecto
@@ -31,7 +29,7 @@ const loadSources = async () => {
   //arraySources = [];
 
   //Consulta fuentes
-  arraySources.value = await storeIA.getProjectSources(proyecto.value["id"]);
+  arraySources.value = await storeIA.getProjectSources(proyecto.value['id']);
 
   //console.log(arraySources);
 
@@ -44,7 +42,7 @@ const loadContexts = async () => {
   //arraySources = [];
 
   //Consulta fuentes
-  arrayContexts.value = await storeIA.getProjectContexts(proyecto.value["id"]);
+  arrayContexts.value = await storeIA.getProjectContexts(proyecto.value['id']);
 
   //console.log("arrayContexts: ",arrayContexts);
 
@@ -61,7 +59,7 @@ const loadContexts = async () => {
 
 watch(
   proyecto,
-  nuevo => {
+  (nuevo) => {
     if (nuevo?.id) {
       loadSources();
       loadContexts();
@@ -80,11 +78,7 @@ watch(proyecto, (nuevoProyecto, anteriorProyecto) => {
 
 <template>
   <div>
-    <div
-      v-if="proyecto"
-      class="contenedor"
-      style="max-height: 85vh; overflow-y: auto"
-    >
+    <div v-if="proyecto" class="contenedor" style="max-height: 85vh; overflow-y: auto">
       <div class="grid">
         <div class="columna-16">
           <div class="flex flex-contenido-separado proyecto-encabezado">
@@ -93,9 +87,9 @@ watch(proyecto, (nuevoProyecto, anteriorProyecto) => {
               <p
                 class="p-x-1 p-y-minimo fondo-color-acento texto-color-secundario borde borde-color-acento borde-redondeado-8"
               >
-                <span>{{ proyecto.public ? "Público" : "Privado" }}</span>
+                <span>{{ proyecto.public ? 'Público' : 'Privado' }}</span>
                 <!-- TODO: agregar icono de para privado/publico -->
-                <span class="pictograma-privado" aria-hidden="true"></span>
+                <span class="pictograma-privado" aria-hidden="true" />
               </p>
             </div>
             <nuxt-link
@@ -119,9 +113,7 @@ watch(proyecto, (nuevoProyecto, anteriorProyecto) => {
         </div>
       </div>
       <div class="grid">
-        <div
-          class="flex flex-contenido-separado contexto-encabezado columna-16"
-        >
+        <div class="flex flex-contenido-separado contexto-encabezado columna-16">
           <h4>Contextos:</h4>
           <NuxtLink
             class="boton boton-secundario boton-chico"
@@ -136,11 +128,7 @@ watch(proyecto, (nuevoProyecto, anteriorProyecto) => {
         <div class="columna-16">
           <div v-if="storeIA.existeContexto">
             <div class="flex m-y-3">
-              <div
-                v-for="contexto in arrayContexts"
-                :key="contexto.id"
-                class="columna-4"
-              >
+              <div v-for="contexto in arrayContexts" :key="contexto.id" class="columna-4">
                 <div class="tarjeta">
                   <img
                     class="tarjeta-imagen"
@@ -151,10 +139,7 @@ watch(proyecto, (nuevoProyecto, anteriorProyecto) => {
                     <p class="tarjeta-titulo">
                       {{ contexto.title }}
                     </p>
-                    <UiNumeroElementos
-                      :numero="contexto.num_files"
-                      etiqueta="Fuentes"
-                    />
+                    <UiNumeroElementos :numero="contexto.num_files" etiqueta="Fuentes" />
                   </div>
                   <div class="tarjeta-pie">
                     <nuxt-link
@@ -165,11 +150,7 @@ watch(proyecto, (nuevoProyecto, anteriorProyecto) => {
                       Iniciar chat
                       <span class="pictograma-chat" aria-hidden="true" />
                     </nuxt-link>
-                    <nuxt-link
-                      class="boton-secundario boton-chico"
-                      type="button"
-                      to="#"
-                    >
+                    <nuxt-link class="boton-secundario boton-chico" type="button" to="#">
                       Editar contexto
                       <span class="pictograma-editar" aria-hidden="true" />
                     </nuxt-link>
@@ -181,13 +162,10 @@ watch(proyecto, (nuevoProyecto, anteriorProyecto) => {
           <div v-else class="flex flex-contenido-centrado">
             <div class="columna-8">
               <div class="nota fondo-color-neutro p-2 borde-redondeado-8 m-t-0">
-                <h6 class="m-t-0 m-b-2">
-                  Aún no hay contextos en este proyecto.
-                </h6>
+                <h6 class="m-t-0 m-b-2">Aún no hay contextos en este proyecto.</h6>
                 <p class="m-y-0">
-                  Para comenzar, haz clic en "Crear contexto" y selecciona las
-                  fuentes que quieres usar. Esto te permitirá activar el
-                  análisis dentro del chat.
+                  Para comenzar, haz clic en "Crear contexto" y selecciona las fuentes que quieres
+                  usar. Esto te permitirá activar el análisis dentro del chat.
                 </p>
               </div>
             </div>
@@ -207,17 +185,14 @@ watch(proyecto, (nuevoProyecto, anteriorProyecto) => {
                 Agregar del catálogo
                 <span class="pictograma-agregar" aria-hidden="true" />
               </button>
-              <button
-                class="boton-pictograma boton-secundario"
-                aria-label="Subir archivos"
-              >
+              <button class="boton-pictograma boton-secundario" aria-label="Subir archivos">
                 Subir archivos
                 <span class="pictograma-archivo-subir" aria-hidden="true" />
               </button>
             </div>
           </div>
 
-          <div class="tabla-archivos m-t-3" v-if="arraySources.length > 0">
+          <div v-if="arraySources.length > 0" class="tabla-archivos m-t-3">
             <table class="tabla">
               <thead>
                 <tr>

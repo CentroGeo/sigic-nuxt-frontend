@@ -1,9 +1,9 @@
-import { defineStore } from "pinia";
+import { defineStore } from 'pinia';
 // TODO: intentar hacer un módulo para cada set proyectos,fuentes,contextos,chats
 
-const backend = "http://localhost:8181/";
+const backend = 'http://localhost:8181/';
 
-export const useIAStore = defineStore("ia", {
+export const useIAStore = defineStore('ia', {
   state: () => ({
     existenProyectos: false,
     existeContexto: false,
@@ -14,11 +14,11 @@ export const useIAStore = defineStore("ia", {
     uploadProgress: 0,
     isUploading: false,
     chats: [],
-    chatSeleccionado: null
+    chatSeleccionado: null,
   }),
   actions: {
     async crearProyecto(title, description, isPublic, archivos = []) {
-      console.log("crear proyecto");
+      console.log('crear proyecto');
 
       // Activar estado de subida
       this.isUploading = true;
@@ -28,10 +28,10 @@ export const useIAStore = defineStore("ia", {
         const formData = new FormData();
 
         // Datos básicos del proyecto
-        formData.append("title", title);
-        formData.append("description", description);
+        formData.append('title', title);
+        formData.append('description', description);
         //formData.append('visibility', visibilidadProyecto.value);
-        formData.append("public", isPublic === "publico" ? "True" : "False");
+        formData.append('public', isPublic === 'publico' ? 'True' : 'False');
 
         console.log(archivos);
 
@@ -41,17 +41,15 @@ export const useIAStore = defineStore("ia", {
         });
 
         // Log para depuración
-        for (let pair of formData.entries()) {
-          console.log(
-            pair[0] + ", " + (pair[1] instanceof File ? pair[1].name : pair[1])
-          );
+        for (const pair of formData.entries()) {
+          console.log(pair[0] + ', ' + (pair[1] instanceof File ? pair[1].name : pair[1]));
         }
 
         // Usar XMLHttpRequest para monitorear progreso
         return new Promise((resolve, reject) => {
           const xhr = new XMLHttpRequest();
 
-          xhr.upload.addEventListener("progress", event => {
+          xhr.upload.addEventListener('progress', (event) => {
             if (event.lengthComputable) {
               const percent = Math.round((event.loaded / event.total) * 100);
               this.uploadProgress = percent;
@@ -59,36 +57,35 @@ export const useIAStore = defineStore("ia", {
             }
           });
 
-          xhr.addEventListener("load", () => {
+          xhr.addEventListener('load', () => {
             this.isUploading = false;
             if (xhr.status >= 200 && xhr.status < 300) {
               const data = JSON.parse(xhr.responseText);
-              console.log("Proyecto guardado:", data);
+              console.log('Proyecto guardado:', data);
               this.existenProyectos = true;
               resolve(data);
             } else {
-              const error =
-                JSON.parse(xhr.responseText)?.message || "Error al guardar";
+              const error = JSON.parse(xhr.responseText)?.message || 'Error al guardar';
               reject(new Error(error));
             }
           });
 
-          xhr.addEventListener("error", () => {
+          xhr.addEventListener('error', () => {
             this.isUploading = false;
-            reject(new Error("Error de conexión"));
+            reject(new Error('Error de conexión'));
           });
 
-          xhr.addEventListener("abort", () => {
+          xhr.addEventListener('abort', () => {
             this.isUploading = false;
-            reject(new Error("Subida cancelada"));
+            reject(new Error('Subida cancelada'));
           });
 
-          xhr.open("POST", backend + "api/fileuploads/workspaces/admin/create");
+          xhr.open('POST', backend + 'api/fileuploads/workspaces/admin/create');
           xhr.send(formData);
         });
       } catch (error) {
         this.isUploading = false;
-        console.error("Error:", error);
+        console.error('Error:', error);
         throw error; // Re-lanzamos el error para manejarlo en el componente
       }
     },
@@ -96,7 +93,7 @@ export const useIAStore = defineStore("ia", {
     async crearContexto(formData) {
       //this.existeContexto = true;
 
-      console.log("crear crearContexto");
+      console.log('crear crearContexto');
       try {
         /*         const formData = new FormData();
         formData.append("title", title);
@@ -105,28 +102,25 @@ export const useIAStore = defineStore("ia", {
         formData.append("public", isPublic === "publico" ? "True" : "False");
  */
 
-        const response = await fetch(
-          backend + "api/fileuploads/workspaces/admin/contexts/create",
-          {
-            method: "POST",
-            body: formData
-          }
-        );
+        const response = await fetch(backend + 'api/fileuploads/workspaces/admin/contexts/create', {
+          method: 'POST',
+          body: formData,
+        });
 
         console.log(response);
 
         if (!response.ok) {
-          throw new Error("Error al guardar el contexto");
+          throw new Error('Error al guardar el contexto');
         }
 
         const data = await response.json();
-        console.log("Contexto guardado:", data);
+        console.log('Contexto guardado:', data);
 
         // Redirigir después de guardar
         //this.existenProyectos = true;
         //navigateTo('/ia/proyectos');
       } catch (error) {
-        console.error("Error:", error);
+        console.error('Error:', error);
         throw error;
         // Aquí podrías mostrar un mensaje de error al usuario
       }
@@ -135,16 +129,13 @@ export const useIAStore = defineStore("ia", {
     async getProjectsList() {
       //this.existeContexto = true;
 
-      const response = await fetch(
-        backend + "api/fileuploads/workspaces/admin",
-        {
-          method: "POST",
-          body: {}
-        }
-      );
+      const response = await fetch(backend + 'api/fileuploads/workspaces/admin', {
+        method: 'POST',
+        body: {},
+      });
 
       if (!response.ok) {
-        throw new Error("Error al consultar proyectos");
+        throw new Error('Error al consultar proyectos');
       }
 
       const data = await response.json();
@@ -163,15 +154,15 @@ export const useIAStore = defineStore("ia", {
 
     async getProjectSources(project_id) {
       const response = await fetch(
-        backend + "api/fileuploads/workspaces/admin/" + project_id + "/files",
+        backend + 'api/fileuploads/workspaces/admin/' + project_id + '/files',
         {
-          method: "POST",
-          body: {}
+          method: 'POST',
+          body: {},
         }
       );
 
       if (!response.ok) {
-        throw new Error("Error al consultar fuentes de proyectos");
+        throw new Error('Error al consultar fuentes de proyectos');
       }
 
       const data = await response.json();
@@ -190,18 +181,15 @@ export const useIAStore = defineStore("ia", {
 
     async getProjectContexts(project_id) {
       const response = await fetch(
-        backend +
-          "api/fileuploads/workspaces/admin/" +
-          project_id +
-          "/contexts",
+        backend + 'api/fileuploads/workspaces/admin/' + project_id + '/contexts',
         {
-          method: "POST",
-          body: {}
+          method: 'POST',
+          body: {},
         }
       );
 
       if (!response.ok) {
-        throw new Error("Error al consultar contextos");
+        throw new Error('Error al consultar contextos');
       }
 
       const data = await response.json();
@@ -223,13 +211,13 @@ export const useIAStore = defineStore("ia", {
     async getChatList(user_id) {
       //this.existeContexto = true;
 
-      const response = await fetch(backend + "api/chat/history/getchats", {
-        method: "POST",
-        body: {}
+      const response = await fetch(backend + 'api/chat/history/getchats', {
+        method: 'POST',
+        body: {},
       });
 
       if (!response.ok) {
-        throw new Error("Error al consultar chats");
+        throw new Error('Error al consultar chats');
       }
 
       const data = await response.json();
@@ -250,16 +238,16 @@ export const useIAStore = defineStore("ia", {
       //this.existeContexto = true;
       console.log(chat_id);
 
-      const response = await fetch(backend + "api/chat/history/user", {
-        method: "POST",
+      const response = await fetch(backend + 'api/chat/history/user', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json"
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ chat_id: parseInt(chat_id) })
+        body: JSON.stringify({ chat_id: parseInt(chat_id) }),
       });
 
       if (!response.ok) {
-        throw new Error("Error al consultar chat");
+        throw new Error('Error al consultar chat');
       }
 
       const data = await response.json();
@@ -280,6 +268,6 @@ export const useIAStore = defineStore("ia", {
     seleccionarProyecto(proyecto) {
       //console.log("seleccionarProyecto: ",proyecto)
       this.proyectoSeleccionado = proyecto;
-    }
-  }
+    },
+  },
 });

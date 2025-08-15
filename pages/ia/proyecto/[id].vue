@@ -1,12 +1,12 @@
 <script setup>
-import SisdaiCampoBase from "@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue";
-import SisdaiAreaTexto from "@centrogeomx/sisdai-componentes/src/componentes/area-texto/SisdaiAreaTexto.vue";
-import SisdaiGrupoBotonesRadio from "@centrogeomx/sisdai-componentes/src/componentes/boton-radio-grupo/SisdaiBotonesRadioGrupo.vue";
-import SisdaiBotonRadio from "@centrogeomx/sisdai-componentes/src/componentes/boton-radio/SisdaiBotonRadio.vue";
-import SisdaiModal from "@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue";
-import SisdaiCampoBusqueda from "@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue";
-import SisdaiCasilla from "@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue";
-import { ref } from "vue";
+import SisdaiAreaTexto from '@centrogeomx/sisdai-componentes/src/componentes/area-texto/SisdaiAreaTexto.vue';
+import SisdaiGrupoBotonesRadio from '@centrogeomx/sisdai-componentes/src/componentes/boton-radio-grupo/SisdaiBotonesRadioGrupo.vue';
+import SisdaiBotonRadio from '@centrogeomx/sisdai-componentes/src/componentes/boton-radio/SisdaiBotonRadio.vue';
+import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
+import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
+import SisdaiCasilla from '@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue';
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+import { ref } from 'vue';
 
 const catalogoModal = ref(null);
 const capasModal = ref(null);
@@ -16,60 +16,60 @@ const inputArchivos = ref(null);
 const storeIA = useIAStore();
 
 // Datos del formulario
-const nombreProyecto = ref("");
-const descripcionProyecto = ref("");
-const visibilidadProyecto = ref("publico"); // Valor por defecto
+const nombreProyecto = ref('');
+const descripcionProyecto = ref('');
+const visibilidadProyecto = ref('publico'); // Valor por defecto
 
 const categorias = ref([
   {
     id: 0,
-    titulo: "Nombre de categoría 1"
+    titulo: 'Nombre de categoría 1',
   },
   {
     id: 1,
-    titulo: "Nombre de categoría 2"
+    titulo: 'Nombre de categoría 2',
   },
   {
     id: 2,
-    titulo: "Nombre de categoría 3"
+    titulo: 'Nombre de categoría 3',
   },
   {
     id: 3,
-    titulo: "Nombre de categoría 4"
-  }
+    titulo: 'Nombre de categoría 4',
+  },
 ]);
 
 const capasGeograficas = ref([
   {
     id: 0,
-    titulo: "Nombre de la fuente de información",
-    tipo: "Poligonos"
+    titulo: 'Nombre de la fuente de información',
+    tipo: 'Poligonos',
   },
   {
     id: 1,
-    titulo: "Nombre de la fuente de información",
-    tipo: "Puntos"
+    titulo: 'Nombre de la fuente de información',
+    tipo: 'Puntos',
   },
   {
     id: 2,
-    titulo: "Nombre de la fuente de información",
-    tipo: "Líneas"
-  }
+    titulo: 'Nombre de la fuente de información',
+    tipo: 'Líneas',
+  },
 ]);
 
 const capasSeleccionadas = ref([
   {
     id: 0,
-    titulo: "Nombre de la fuente de información",
-    cateogria: "Categoría 1",
-    tipo: "Poligonos"
+    titulo: 'Nombre de la fuente de información',
+    cateogria: 'Categoría 1',
+    tipo: 'Poligonos',
   },
   {
     id: 1,
-    titulo: "Nombre de la fuente de información",
-    cateogria: "Categoría 3",
-    tipo: "Puntos"
-  }
+    titulo: 'Nombre de la fuente de información',
+    cateogria: 'Categoría 3',
+    tipo: 'Puntos',
+  },
 ]);
 
 const categoriaSeleccionada = ref(null);
@@ -80,64 +80,59 @@ const esEdicion = ref(false);
 const proyecto = computed(() => storeIA.proyectoSeleccionado);
 
 onMounted(async () => {
-  if (route.params.id !== "nuevo") {
+  if (route.params.id !== 'nuevo') {
     esEdicion.value = true;
 
     nombreProyecto.value = proyecto.value.title;
     descripcionProyecto.value = proyecto.value.description;
-    visibilidadProyecto.value = proyecto.value.public ? "publico" : "privado";
+    visibilidadProyecto.value = proyecto.value.public ? 'publico' : 'privado';
   }
 });
 
-const seleccionarCategoria = categoria => {
+const seleccionarCategoria = (categoria) => {
   categoriaSeleccionada.value = categoria;
 };
 
 //const botonRadio = ref("");
-const botonRadioModal = ref("");
+const botonRadioModal = ref('');
 const campoCasilla = ref(false);
 
 // Método para manejar la selección de archivos
-const manejarSeleccionArchivos = event => {
-  const nuevosArchivos = Array.from(event.target.files).map(file => ({
+const manejarSeleccionArchivos = (event) => {
+  const nuevosArchivos = Array.from(event.target.files).map((file) => ({
     id: Date.now() + Math.random().toString(36).substr(2, 9),
     nombre: file.name,
     tipo: obtenerTipoArchivo(file.name),
     archivo: file, // Objeto File original
-    categoria: "Archivo",
-    origen: "Propio"
+    categoria: 'Archivo',
+    origen: 'Propio',
   }));
 
-  archivosSeleccionados.value = [
-    ...archivosSeleccionados.value,
-    ...nuevosArchivos
-  ];
-  event.target.value = ""; // Resetear el input para permitir seleccionar el mismo archivo otra vez
+  archivosSeleccionados.value = [...archivosSeleccionados.value, ...nuevosArchivos];
+  event.target.value = ''; // Resetear el input para permitir seleccionar el mismo archivo otra vez
 };
 
 // Función para determinar el tipo de archivo
-const obtenerTipoArchivo = nombre => {
-  const extension = nombre.split(".").pop().toLowerCase();
+const obtenerTipoArchivo = (nombre) => {
+  const extension = nombre.split('.').pop().toLowerCase();
   const tipos = {
-    shp: "Shapefile",
-    geojson: "GeoJSON",
-    csv: "CSV",
-    kml: "KML",
-    zip: "ZIP",
-    pdf: "PDF",
-    doc: "Word",
-    docx: "Word",
-    xls: "Excel",
-    xlsx: "Excel"
+    shp: 'Shapefile',
+    geojson: 'GeoJSON',
+    csv: 'CSV',
+    kml: 'KML',
+    zip: 'ZIP',
+    pdf: 'PDF',
+    doc: 'Word',
+    docx: 'Word',
+    xls: 'Excel',
+    xlsx: 'Excel',
   };
   return tipos[extension] || extension.toUpperCase();
 };
 
 // Método para eliminar archivo de la lista
-const eliminarArchivo = id => {
-  archivosSeleccionados.value = archivosSeleccionados.value.filter(
-    archivo => archivo.id !== id
-  );
+const eliminarArchivo = (id) => {
+  archivosSeleccionados.value = archivosSeleccionados.value.filter((archivo) => archivo.id !== id);
 };
 
 // Función para guardar el proyecto
@@ -159,21 +154,21 @@ const guardarProyecto = async () => {
 
     // Notificación de éxito
     //alert("Proyecto guardado correctamente")
-    console.log("Proyecto guardado correctamente");
+    console.log('Proyecto guardado correctamente');
     /*    notificacion.mostrar({
       tipo: 'exito',
       mensaje: 'Proyecto guardado correctamente',
       duracion: 5000
     }); */
 
-    navigateTo("/ia/proyectos");
+    navigateTo('/ia/proyectos');
   } catch (error) {
-    alert("Error al guardar: " + error.message);
-    console.log("Error al guardar: " + error.message);
+    alert('Error al guardar: ' + error.message);
+    console.log('Error al guardar: ' + error.message);
     notificacion.mostrar({
-      tipo: "error",
-      mensaje: "Error al guardar: " + error.message,
-      duracion: 7000
+      tipo: 'error',
+      mensaje: 'Error al guardar: ' + error.message,
+      duracion: 7000,
     });
   }
 };
@@ -305,10 +300,7 @@ const guardarProyecto = async () => {
           </div>
         </div>
 
-        <div
-          class="tabla-archivos m-t-3"
-          v-if="archivosSeleccionados.length > 0"
-        >
+        <div v-if="archivosSeleccionados.length > 0" class="tabla-archivos m-t-3">
           <h3>Archivos a subir</h3>
           <table class="tabla">
             <thead>
@@ -352,15 +344,8 @@ const guardarProyecto = async () => {
           </template>
 
           <template #cuerpo>
-            <p>
-              Selecciona el tipo de fuente de información que deseas agregar a
-              tu proyecto
-            </p>
-            <SisdaiGrupoBotonesRadio
-              leyenda=""
-              :es_obligatorio="false"
-              class="radio-catalogo"
-            >
+            <p>Selecciona el tipo de fuente de información que deseas agregar a tu proyecto</p>
+            <SisdaiGrupoBotonesRadio leyenda="" :es_obligatorio="false" class="radio-catalogo">
               <SisdaiBotonRadio
                 v-model="botonRadioModal"
                 etiqueta="Capas geográficas"
@@ -405,29 +390,18 @@ const guardarProyecto = async () => {
           </template>
 
           <template #cuerpo>
-            <p>
-              Explora el catálogo y selecciona fuentes de información para el
-              proyecto
-            </p>
+            <p>Explora el catálogo y selecciona fuentes de información para el proyecto</p>
             <SisdaiCampoBusqueda class="m-y-3" etiqueta="Buscar del catálogo" />
             <div class="flex flex-contenido-separado">
               <div class="columna-5">
                 <div>
-                  <UiNumeroElementos
-                    :numero="12"
-                    etiqueta="Categorías"
-                    class="m-b-3"
-                  />
+                  <UiNumeroElementos :numero="12" etiqueta="Categorías" class="m-b-3" />
                   <ul class="lista-sin-estilo" style="overflow-y: auto">
-                    <li
-                      v-for="categoria in categorias"
-                      :key="categoria.titulo"
-                      class="m-y-0"
-                    >
+                    <li v-for="categoria in categorias" :key="categoria.titulo" class="m-y-0">
                       <div
                         class="categoria p-l-6 p-r-2 p-y-1"
                         :class="{
-                          seleccionada: categoria === categoriaSeleccionada
+                          seleccionada: categoria === categoriaSeleccionada,
                         }"
                         @click="seleccionarCategoria(categoria)"
                       >
@@ -439,27 +413,13 @@ const guardarProyecto = async () => {
               </div>
               <div class="columna-5">
                 <div>
-                  <UiNumeroElementos
-                    :numero="7"
-                    etiqueta="Capas geográficas"
-                    class="m-b-3"
-                  />
+                  <UiNumeroElementos :numero="7" etiqueta="Capas geográficas" class="m-b-3" />
                   <ul class="lista-sin-estilo" style="overflow-y: auto">
-                    <li
-                      v-for="capa in capasGeograficas"
-                      :key="capa.id"
-                      class="m-y-0"
-                    >
+                    <li v-for="capa in capasGeograficas" :key="capa.id" class="m-y-0">
                       <div class="capa p-2 m-b-2 borde-redondeado-20">
-                        <SisdaiCasilla
-                          v-model="campoCasilla"
-                          :etiqueta="capa.titulo"
-                        />
+                        <SisdaiCasilla v-model="campoCasilla" :etiqueta="capa.titulo" />
                         <div class="icono">
-                          <span
-                            class="pictograma-capa-poligono m-r-1"
-                            aria-hidden="true"
-                          />
+                          <span class="pictograma-capa-poligono m-r-1" aria-hidden="true" />
                           <span>{{ capa.tipo }}</span>
                         </div>
                       </div>
@@ -469,27 +429,16 @@ const guardarProyecto = async () => {
               </div>
               <div class="columna-5">
                 <div>
-                  <UiNumeroElementos
-                    :numero="4"
-                    etiqueta="Capas seleccionadas"
-                    class="m-b-3"
-                  />
+                  <UiNumeroElementos :numero="4" etiqueta="Capas seleccionadas" class="m-b-3" />
                   <ul class="lista-sin-estilo" style="overflow-y: auto">
-                    <li
-                      v-for="capa in capasSeleccionadas"
-                      :key="capa.id"
-                      class="m-y-0"
-                    >
+                    <li v-for="capa in capasSeleccionadas" :key="capa.id" class="m-y-0">
                       <div class="capa p-2 m-b-2 borde-redondeado-20">
                         <h6 class="m-t-0 m-b-1">{{ capa.titulo }}</h6>
                         <div class="m-b-1">
-                          {{ capa.cateogria }}
+                          {{ capa.categoria }}
                         </div>
                         <div class="icono m-b-1">
-                          <span
-                            class="pictograma-capa-poligono m-r-1"
-                            aria-hidden="true"
-                          />
+                          <span class="pictograma-capa-poligono m-r-1" aria-hidden="true" />
                           <span>{{ capa.tipo }}</span>
                         </div>
                         <div class="flex flex-contenido-final">
@@ -498,10 +447,7 @@ const guardarProyecto = async () => {
                             aria-label="Remover"
                             type="button"
                           >
-                            <span
-                              class="pictograma-eliminar"
-                              aria-hidden="true"
-                            />
+                            <span class="pictograma-eliminar" aria-hidden="true" />
                           </button>
                         </div>
                       </div>

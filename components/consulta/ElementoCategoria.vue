@@ -6,7 +6,7 @@ const props = defineProps({
   },
   tag: {
     type: String,
-    default: "Capas",
+    default: 'Capas',
   },
   numberElements: {
     type: Number,
@@ -45,7 +45,7 @@ const estadoAbierto = ref(false);
   width: 100%;
   align-items: flex-start;
 
-  [class^="pictograma-"] {
+  [class^='pictograma-'] {
     font-size: 1.75rem;
   }
 }

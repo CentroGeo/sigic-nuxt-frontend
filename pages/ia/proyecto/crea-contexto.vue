@@ -1,7 +1,7 @@
 <script setup>
-import SisdaiCampoBase from "@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue";
-import SisdaiAreaTexto from "@centrogeomx/sisdai-componentes/src/componentes/area-texto/SisdaiAreaTexto.vue";
-import { useRoute } from "vue-router";
+import SisdaiAreaTexto from '@centrogeomx/sisdai-componentes/src/componentes/area-texto/SisdaiAreaTexto.vue';
+import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
+import { useRoute } from 'vue-router';
 
 const storeIA = useIAStore();
 const route = useRoute();
@@ -10,14 +10,14 @@ const route = useRoute();
 const proyectoId = ref(route.query.proyecto_id);
 
 // Datos del formulario
-const nombreContexto = ref("");
-const descripcionContexto = ref("");
+const nombreContexto = ref('');
+const descripcionContexto = ref('');
 const portadaContexto = ref(null);
 const previewImagen = ref(null);
 const fileInput = ref(null);
 const estaCargando = ref(false);
-const mensajeError = ref("");
-const mensajeExito = ref("");
+const mensajeError = ref('');
+const mensajeExito = ref('');
 
 const arraySources = ref([]);
 const fuentesSeleccionadas = ref([]);
@@ -25,7 +25,7 @@ const fuentesSeleccionadas = ref([]);
 // Si necesitas reaccionar a cambios en el parámetro
 watch(
   () => route.query.proyecto_id,
-  newId => {
+  (newId) => {
     proyectoId.value = newId;
     // Aquí puedes hacer algo cuando cambie el ID
     loadSources();
@@ -33,8 +33,8 @@ watch(
 );
 
 // Manejar selección/deselección de fuentes
-const toggleSeleccionFuente = fuente => {
-  const index = fuentesSeleccionadas.value.findIndex(f => f.id === fuente.id);
+const toggleSeleccionFuente = (fuente) => {
+  const index = fuentesSeleccionadas.value.findIndex((f) => f.id === fuente.id);
   if (index === -1) {
     fuentesSeleccionadas.value.push(fuente);
   } else {
@@ -43,7 +43,7 @@ const toggleSeleccionFuente = fuente => {
 };
 
 // Manejar cambio de archivo y generar preview
-const manejarArchivo = event => {
+const manejarArchivo = (event) => {
   const archivo = event.target.files[0];
 
   mensajeError.value = null;
@@ -56,17 +56,16 @@ const manejarArchivo = event => {
 
   if (archivo) {
     // Validar tipo de archivo (ej. solo imágenes)
-    const tiposPermitidos = ["image/jpeg", "image/png", "image/gif"];
+    const tiposPermitidos = ['image/jpeg', 'image/png', 'image/gif'];
     if (!tiposPermitidos.includes(archivo.type)) {
-      mensajeError.value =
-        "Por favor, sube una imagen válida (JPEG, PNG o GIF)";
+      mensajeError.value = 'Por favor, sube una imagen válida (JPEG, PNG o GIF)';
       return;
     }
 
     // Validar tamaño (ej. máximo 5MB)
     const tamañoMaximo = 5 * 1024 * 1024; // 5MB
     if (archivo.size > tamañoMaximo) {
-      mensajeError.value = "La imagen no debe exceder los 5MB";
+      mensajeError.value = 'La imagen no debe exceder los 5MB';
       return;
     }
 
@@ -84,7 +83,7 @@ const eliminarImagen = () => {
   if (fileInput.value && fileInput.value.$el) {
     // Para componentes Sisdai, necesitamos acceder al input interno
     const input = fileInput.value.$el.querySelector('input[type="file"]');
-    if (input) input.value = "";
+    if (input) input.value = '';
   }
 };
 
@@ -100,43 +99,40 @@ const crearContexto = async () => {
   console.log(proyectoId);
   // Validaciones
   if (!proyectoId.value) {
-    mensajeError.value = "No se proporcionó proyecto_id";
+    mensajeError.value = 'No se proporcionó proyecto_id';
     return;
   }
 
   if (!nombreContexto.value.trim()) {
-    mensajeError.value = "El nombre del contexto es obligatorio";
+    mensajeError.value = 'El nombre del contexto es obligatorio';
     return;
   }
 
   if (fuentesSeleccionadas.value.length === 0) {
-    mensajeError.value = "Debes seleccionar al menos una fuente de información";
+    mensajeError.value = 'Debes seleccionar al menos una fuente de información';
     return;
   }
 
-  console.log("proyecto:" + proyectoId.value);
+  console.log('proyecto:' + proyectoId.value);
   console.log(portadaContexto);
 
   // Preparar datos del formulario
   const formData = new FormData();
-  formData.append("proyecto_id", proyectoId.value);
-  formData.append("nombre", nombreContexto.value);
-  formData.append("descripcion", descripcionContexto.value);
+  formData.append('proyecto_id', proyectoId.value);
+  formData.append('nombre', nombreContexto.value);
+  formData.append('descripcion', descripcionContexto.value);
 
   // Agregar las fuentes seleccionadas como array JSON
-  formData.append(
-    "fuentes",
-    JSON.stringify(fuentesSeleccionadas.value.map(f => f.id))
-  );
+  formData.append('fuentes', JSON.stringify(fuentesSeleccionadas.value.map((f) => f.id)));
 
   if (portadaContexto.value) {
-    formData.append("file", portadaContexto.value);
+    formData.append('file', portadaContexto.value);
   }
 
   try {
     estaCargando.value = true;
-    mensajeError.value = "";
-    mensajeExito.value = "";
+    mensajeError.value = '';
+    mensajeExito.value = '';
 
     for (const pair of formData.entries()) {
       console.log(`${pair[0]}: ${pair[1]}`);
@@ -146,17 +142,16 @@ const crearContexto = async () => {
     await storeIA.crearContexto(formData);
 
     // Éxito
-    mensajeExito.value = "Contexto creado exitosamente";
-    console.log("Contexto creado exitosamente");
+    mensajeExito.value = 'Contexto creado exitosamente';
+    console.log('Contexto creado exitosamente');
 
     // Redirigir después de 2 segundos (opcional)
     setTimeout(() => {
-      navigateTo("/ia/proyectos");
+      navigateTo('/ia/proyectos');
     }, 2000);
   } catch (error) {
-    console.error("Error al crear contexto:", error);
-    mensajeError.value =
-      error.message || "Ocurrió un error al crear el contexto";
+    console.error('Error al crear contexto:', error);
+    mensajeError.value = error.message || 'Ocurrió un error al crear el contexto';
   } finally {
     estaCargando.value = false;
   }
@@ -192,7 +187,7 @@ onMounted(() => {
 
 watch(
   proyectoId,
-  nuevo => {
+  (nuevo) => {
     if (nuevo?.id) {
       loadSources();
     }
@@ -222,9 +217,7 @@ watch(
         </div>
 
         <div class="grid">
-          <div
-            class="columna-16 flex flex-contenido-separado contexto-encabezado"
-          >
+          <div class="columna-16 flex flex-contenido-separado contexto-encabezado">
             <h2>Configuración del contexto</h2>
             <NuxtLink
               class="boton boton-secundario boton-chico"
@@ -260,8 +253,8 @@ watch(
                   etiqueta="Portada del proyecto"
                   tipo="file"
                   class="m-b-3"
-                  @change="manejarArchivo"
                   accept="image/jpeg, image/png, image/gif"
+                  @change="manejarArchivo"
                 />
                 <!-- Preview de la imagen -->
                 <div v-if="previewImagen" class="preview-imagen-contenedor">
@@ -300,9 +293,8 @@ watch(
             <p class="separador borde-b" />
             <h2 class="m-b-2">Selecciona fuentes de información</h2>
             <div class="m-b-2">
-              Puedes seleccionar fuentes de información agregadas o subidas al
-              proyecto, para añadir más fuentes de información ve a la
-              configuración del proyecto
+              Puedes seleccionar fuentes de información agregadas o subidas al proyecto, para añadir
+              más fuentes de información ve a la configuración del proyecto
             </div>
 
             <h6 class="m-t-0 m-b-2">
@@ -312,7 +304,7 @@ watch(
               </span>
               :
             </h6>
-            <div class="tabla-archivos m-y-3" v-if="arraySources.length > 0">
+            <div v-if="arraySources.length > 0" class="tabla-archivos m-y-3">
               <table class="tabla">
                 <thead>
                   <tr>
@@ -327,9 +319,7 @@ watch(
                       <label class="checkbox-wrapper">
                         <input
                           type="checkbox"
-                          :checked="
-                            fuentesSeleccionadas.some(f => f.id === fuente.id)
-                          "
+                          :checked="fuentesSeleccionadas.some((f) => f.id === fuente.id)"
                           @change="toggleSeleccionFuente(fuente)"
                         />
                         <span class="checkmark"></span>
@@ -408,7 +398,7 @@ button:disabled {
 }
 
 /* Asegúrate de que el input file no se vea cuando no es necesario */
-input[type="file"] {
+input[type='file'] {
   display: block;
   margin-bottom: 1rem;
 }
@@ -476,7 +466,7 @@ input[type="file"] {
 }
 
 .checkmark:after {
-  content: "";
+  content: '';
   position: absolute;
   display: none;
 }
