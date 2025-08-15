@@ -1,157 +1,36 @@
 <script setup>
 import { resourceTypeDic } from '~/utils/consulta';
 
-const storeConsulta = useConsultaStore();
-const storeFetched = useFetchedResourcesStore();
-// const resources = computed(() => storeFetched[props.resourceType]);
-const resources = computed(() => storeFetched['dataLayer']);
-// const filteredResources = ref();
-const filteredResourcesCapas = ref({});
-const filteredResourcesTablas = ref({});
-const filteredResourcesDocumentos = ref({});
+const storeFetched = useFetchedResources2Store();
+
+storeFetched.checkFilling(resourceTypeDic.dataLayer);
+storeFetched.checkFilling(resourceTypeDic.dataTable);
+storeFetched.checkFilling(resourceTypeDic.document);
+
+const resourcesCapas = computed(() => storeFetched.byResourceType(resourceTypeDic.dataLayer));
+const resourcesTablas = computed(() => storeFetched.byResourceType(resourceTypeDic.dataTable));
+const resourcesDocumentos = computed(() => storeFetched.byResourceType(resourceTypeDic.document));
+
+/**
+ * Devuelve un objeto con el recurso más reciente.
+ * @param {String} objeto recursos a obtener el más reciente.
+ * @returns {Object} objeto de recursos más reciente.
+ */
+const obtenerMasReciente = (objeto) => ({
+  titulo: objeto[0].title,
+  resumen: objeto[0].abstract,
+  imagen: objeto[0].thumbnail_url,
+});
 
 const capaMasReciente = ref({});
 const tablaMasReciente = ref({});
 const documentoMasReciente = ref({});
 
-const obtenerRecursosFiltrados = async (resourceTypeLayer) => {
-  storeConsulta.resourceType = resourceTypeLayer;
-  const { resourcesList } = await useGeonodeResources();
-  storeFetched.updateFetchedResources(resourceTypeLayer, resourcesList.value);
-  return storeFetched[resourceTypeLayer];
-};
-
-const obtenerMasReciente = (objeto) => ({
-  titulo: objeto.title,
-  resumen: objeto.abstract,
-  imagen: objeto.thumbnail_url,
+watch([resourcesCapas, resourcesTablas, resourcesDocumentos], () => {
+  capaMasReciente.value = obtenerMasReciente(resourcesCapas.value);
+  tablaMasReciente.value = obtenerMasReciente(resourcesTablas.value);
+  documentoMasReciente.value = obtenerMasReciente(resourcesDocumentos.value);
 });
-
-onMounted(async () => {
-  if (resources.value.length === 0) {
-    storeFetched.isLoading = true;
-    // dataLayer
-    filteredResourcesCapas.value = await obtenerRecursosFiltrados(resourceTypeDic.dataLayer);
-    // dataTable
-    filteredResourcesTablas.value = await obtenerRecursosFiltrados(resourceTypeDic.dataTable);
-    // document
-    filteredResourcesDocumentos.value = await obtenerRecursosFiltrados(resourceTypeDic.document);
-    //
-    storeFetched.isLoading = false;
-  } else {
-    filteredResourcesCapas.value = storeFetched['dataLayer'];
-    filteredResourcesTablas.value = storeFetched['dataTable'];
-    filteredResourcesDocumentos.value = storeFetched['document'];
-  }
-  // groupResults();
-  capaMasReciente.value = obtenerMasReciente(filteredResourcesCapas.value[0]);
-  tablaMasReciente.value = obtenerMasReciente(filteredResourcesTablas.value[0]);
-  documentoMasReciente.value = obtenerMasReciente(filteredResourcesDocumentos.value[0]);
-});
-
-// watch(
-//   () => filteredResourcesCapas.value,
-//   () => {
-//     // recursosFiltradosTablas.value = resourcesStore.filteredResources['dataTable'];
-//     const tablaOrdenada = filteredResourcesCapas.value[0];
-//     capaMasReciente.value = {
-//       titulo: tablaOrdenada.title,
-//       resumen: tablaOrdenada.abstract,
-//       imagen: tablaOrdenada.thumbnail_url,
-//     };
-//   },
-//   { deep: true }
-// );
-
-// // TODO: integrar los filtros de información
-// const resourcesStore = useSelectedResourcesStore();
-
-// const recursosTipo = ref('dataLayer');
-// const recursosFiltrados = ref([]);
-
-// const sortDateArray = (array) => {
-//   return array.sort((a, b) => {
-//     return b.last_updated - a.last_updated;
-//   });
-// };
-
-// // dataLayer
-// const { resourcesList: listaRecursosCapas } = useGeonodeResources({
-//   resourceType: 'dataLayer',
-// });
-// const recursosFiltradosCapas = ref([]);
-// const capaMasReciente = ref([]);
-// watch(listaRecursosCapas, () => {
-//   resourcesStore.updateFilteredResources('dataLayer', listaRecursosCapas.value);
-// });
-// watch(
-//   () => resourcesStore.filteredResources['dataLayer'],
-//   () => {
-//     recursosFiltradosCapas.value = resourcesStore.filteredResources['dataLayer'];
-//     const capaOrdenada = sortDateArray(recursosFiltradosCapas.value)[0];
-//     capaMasReciente.value = {
-//       titulo: capaOrdenada.title,
-//       resumen: capaOrdenada.abstract,
-//       imagen: capaOrdenada.thumbnail_url,
-//     };
-//   },
-//   { deep: true }
-// );
-
-// // dataTable
-// const { resourcesList: listaRecursosTablas } = useGeonodeResources({
-//   resourceType: 'dataTable',
-// });
-// const recursosFiltradosTablas = ref([]);
-// const tablaMasReciente = ref([]);
-// watch(listaRecursosTablas, () => {
-//   resourcesStore.updateFilteredResources('dataTable', listaRecursosTablas.value);
-// });
-// watch(
-//   () => resourcesStore.filteredResources['dataTable'],
-//   () => {
-//     recursosFiltradosTablas.value = resourcesStore.filteredResources['dataTable'];
-//     const tablaOrdenada = sortDateArray(recursosFiltradosTablas.value)[0];
-//     tablaMasReciente.value = {
-//       titulo: tablaOrdenada.title,
-//       resumen: tablaOrdenada.abstract,
-//       imagen: tablaOrdenada.thumbnail_url,
-//     };
-//   },
-//   { deep: true }
-// );
-
-// // document
-// const { resourcesList: listaRecursosDocumentos } = useGeonodeResources({
-//   resourceType: 'document',
-// });
-// const recursosFiltradosDocumentos = ref([]);
-// const documentoMasReciente = ref([]);
-// watch(listaRecursosDocumentos, () => {
-//   resourcesStore.updateFilteredResources('document', listaRecursosDocumentos.value);
-//   // console.log(
-//   //   "Copia de los Recursos filtrados en el store",
-//   //   resourcesStore.filteredResources["document"].length
-//   // );
-// });
-// watch(
-//   () => resourcesStore.filteredResources['document'],
-//   () => {
-//     recursosFiltradosDocumentos.value = resourcesStore.filteredResources['document'];
-//     const documentoOrdenado = sortDateArray(recursosFiltradosDocumentos.value)[0];
-//     documentoMasReciente.value = {
-//       titulo: documentoOrdenado.title,
-//       resumen: documentoOrdenado.abstract,
-//       imagen: documentoOrdenado.thumbnail_url,
-//     };
-//     // groupResults();
-//     // console.log(
-//     //   "Copia de los Recursos filtrados en la vista",
-//     //   recursosFiltradosDocumentos.value
-//     // );
-//   },
-//   { deep: true }
-// );
 </script>
 
 <template>
@@ -179,7 +58,7 @@ onMounted(async () => {
                 />
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-titulo">Capas geográficas</p>
-                  <p class="tarjeta-etiqueta">{{ filteredResourcesCapas.length }} capas</p>
+                  <p class="tarjeta-etiqueta">{{ resourcesCapas.length }} capas</p>
                 </div>
               </nuxt-link>
             </div>
@@ -192,7 +71,7 @@ onMounted(async () => {
                 />
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-titulo">Datos tabulados</p>
-                  <p>{{ filteredResourcesTablas.length }} datos tabulados</p>
+                  <p>{{ resourcesTablas.length }} datos tabulados</p>
                 </div>
               </nuxt-link>
             </div>
@@ -205,7 +84,7 @@ onMounted(async () => {
                 />
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-titulo">Documentos</p>
-                  <p>{{ filteredResourcesDocumentos.length }} documentos</p>
+                  <p>{{ resourcesDocumentos.length }} documentos</p>
                 </div>
               </nuxt-link>
             </div>
