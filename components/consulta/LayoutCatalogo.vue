@@ -4,10 +4,11 @@ import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/sele
 
 const config = useRuntimeConfig();
 const storeFetched = useFetchedResources2Store();
+const storeConsulta = useConsultaStore();
 
-const props = defineProps({
+defineProps({
   titulo: { type: String, default: 'Título' },
-  resourceType: { type: String, required: true },
+  // resourceType: { type: String, required: true },
   etiquetaElementos: { type: String, default: undefined },
 });
 
@@ -149,7 +150,7 @@ watch(resources, (nv) => {
           :key="index"
           class="elemento-catalogo"
           :catalogue-element="resource"
-          :resource-type="resourceType"
+          :resource-type="storeConsulta.resourceType"
         />
       </div>
     </div>
@@ -157,9 +158,9 @@ watch(resources, (nv) => {
 
   <ConsultaModalBusqueda
     ref="modalFiltroAvanzado"
-    :resource-type="props.resourceType"
+    :resource-type="storeConsulta.resourceType"
     :categories="categoryList"
-    @update-results="(results) => updateByModal(results)"
+    @update-results="updateByModal"
   />
 </template>
 

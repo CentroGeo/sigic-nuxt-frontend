@@ -154,11 +154,7 @@ onMounted(() => {
 <template>
   <ConsultaLayoutPaneles>
     <template #catalogo>
-      <ConsultaLayoutCatalogo
-        :titulo="'Capas geográficas'"
-        :resource-type="storeConsulta.resourceType"
-        etiqueta-elementos="Capas"
-      />
+      <ConsultaLayoutCatalogo titulo="Capas geográficas" etiqueta-elementos="Capas" />
     </template>
 
     <template #visualizador>
