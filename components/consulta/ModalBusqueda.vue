@@ -9,39 +9,38 @@ const props = defineProps({
   resourceType: { type: String, required: true },
 });
 const { categories } = toRefs(props);
-const storeFetched = useFetchedResourcesStore();
-const resources = computed(() => storeFetched[props.resourceType]);
-const emit = defineEmits(['applyFilter','resetFilter']);
+const storeFetched = useFetchedResources2Store();
+const resources = computed(() => storeFetched.byResourceType(props.resourceType));
+const emit = defineEmits(['applyFilter', 'resetFilter']);
 const modalBusqueda = ref(null);
 const institutionInput = ref('');
 const yearInput = ref('');
 const keywordsInput = ref('');
 const inputCategories = ref([]);
 
-
 const results = ref([]);
 const categoriesDict = {
-  "Imagery Base Maps Earth Cover": 'imageryBaseMapsEarthCover',
-  "Society": 'society',
-  "Economy": 'economy',
-  "Utilities Communication": 'utilitiesCommunication',
-  "Environment": 'environment',
-  'Oceans': 'oceans',
-  'Biota': 'biota',
-  'Health': 'health',
-  'Elevation': 'elevation',
+  'Imagery Base Maps Earth Cover': 'imageryBaseMapsEarthCover',
+  Society: 'society',
+  Economy: 'economy',
+  'Utilities Communication': 'utilitiesCommunication',
+  Environment: 'environment',
+  Oceans: 'oceans',
+  Biota: 'biota',
+  Health: 'health',
+  Elevation: 'elevation',
   'Geoscientific Information': 'geoscientificInformation',
   'Planning Cadastre': 'planningCadastre',
   'Inland Waters': 'inlandWaters',
-  'Boundaries': 'boundaries',
-  'Structure': 'structure',
-  'Transportation': 'transportation',
+  Boundaries: 'boundaries',
+  Structure: 'structure',
+  Transportation: 'transportation',
   'Intelligence Military': 'intelligenceMilitary',
-  'Location': 'location',
+  Location: 'location',
   'Climatology Meteorology Atmosphere': 'climatologyMeteorologyAtmosphere',
-  'Farming': 'farming',
-  'Population': 'population',
-}
+  Farming: 'farming',
+  Population: 'population',
+};
 function abrirModalBusqueda() {
   modalBusqueda.value?.abrirModal();
 }
@@ -50,36 +49,35 @@ defineExpose({
   abrirModalBusqueda,
 });
 
-
 async function filterByModal() {
   const { data } = useAuth();
-  let queryParams = {'filter{resource_type}': resourceTypeGeonode[props.resourceType]}
+  const queryParams = { 'filter{resource_type}': resourceTypeGeonode[props.resourceType] };
 
-  if(institutionInput.value){
-    queryParams['institution'] = institutionInput.value
+  if (institutionInput.value) {
+    queryParams['institution'] = institutionInput.value;
   }
-  if(yearInput.value){
-    queryParams['year'] = yearInput.value
+  if (yearInput.value) {
+    queryParams['year'] = yearInput.value;
   }
-  if(keywordsInput.value){
-    queryParams['keywords_csv'] = keywordsInput.value
+  if (keywordsInput.value) {
+    queryParams['keywords_csv'] = keywordsInput.value;
   }
-  if(inputCategories.value.length > 0){
-    let catParam = []
+  if (inputCategories.value.length > 0) {
+    const catParam = [];
     inputCategories.value.forEach((d) => {
-      catParam.push(categoriesDict[d])
-    })
-    queryParams['filter{category.identifier}'] = catParam
-  } 
+      catParam.push(categoriesDict[d]);
+    });
+    queryParams['filter{category.identifier}'] = catParam;
+  }
 
   results.value = await $fetch('/api/catalogo', {
     method: 'GET',
     query: queryParams,
     headers: {
-      Authorization: `${data.value?.accessToken}`
-    }
+      Authorization: `${data.value?.accessToken}`,
+    },
   });
-  emit('applyFilter', results.value) 
+  emit('applyFilter', results.value);
   modalBusqueda.value.cerrarModal();
 }
 
@@ -111,27 +109,27 @@ function resetResults() {
         </div>
 
         <SisdaiCampoBase
-          v-model="institutionInput"
-          tipo='text'
           id="filtro-institicion"
+          v-model="institutionInput"
+          tipo='"text"'
           class="m-y-2"
           etiqueta="Institución"
           ejemplo="SECIHTI, INEGI, entre otras"
         />
 
         <SisdaiCampoBase
-          v-model="yearInput"
-          tipo='text'
           id="filtro-anio"
+          v-model="yearInput"
+          tipo='"text"'
           class="m-y-2"
           etiqueta="Año de publicación"
           ejemplo="1995..."
         />
 
         <SisdaiCampoBase
-          v-model="keywordsInput"
-          tipo='text'
           id="filtro-keywords"
+          v-model="keywordsInput"
+          tipo='"text"'
           class="m-y-2"
           etiqueta="Palabras clave"
           ejemplo="agua, casas..."

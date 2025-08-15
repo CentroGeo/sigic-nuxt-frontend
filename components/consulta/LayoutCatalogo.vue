@@ -13,12 +13,11 @@ const props = defineProps({
 
 const resources = computed(() => storeFetched.byResourceType());
 const filteredResources = ref([]);
-
 const apiCategorias = `${config.public.geonodeApi}/facets/category`;
 const categoryList = ref([]);
 const categorizedResources = ref({});
 const selectedCategories = ref([]);
-const isFilterActive = ref(false)
+const isFilterActive = ref(false);
 const modalFiltroAvanzado = ref(null);
 
 // Esta parte es para obtener todas las categorias
@@ -66,7 +65,7 @@ function filterByInput(r) {
   groupResults();
 }
 
-function applyAdvancedFilters(resources){
+function applyAdvancedFilters(resources) {
   isFilterActive.value = true;
   filteredResources.value = resources;
   groupResults();
@@ -77,18 +76,13 @@ function resetAdvancedFilter(resources) {
   groupResults();
 }
 
-onMounted(async () => {
-  // if (resources.value.length === 0) {
-  //   storeFetched.isLoading = true;
-  //   const { resourcesList } = await useGeonodeResources();
-  //   storeFetched.updateFetchedResources(props.resourceType, resourcesList.value);
-  //   filteredResources.value = storeFetched[props.resourceType];
-  //   storeFetched.isLoading = false;
-  // } else {
-  //   filteredResources.value = storeFetched[props.resourceType];
-  // }
-  // groupResults();
+onMounted(() => {
+  if (resources.value.length !== 0) {
+    filteredResources.value = resources.value;
+    groupResults();
+  }
 });
+
 watch(resources, (nv) => {
   filteredResources.value = nv;
   groupResults();
@@ -126,7 +120,11 @@ watch(resources, (nv) => {
             />
             <button
               type="button"
-              :class="isFilterActive ? 'boton-primario boton-pictograma boton-grande' :'boton-secundario boton-pictograma boton-grande'"
+              :class="
+                isFilterActive
+                  ? 'boton-primario boton-pictograma boton-grande'
+                  : 'boton-secundario boton-pictograma boton-grande'
+              "
               aria-label="Filtro Avanzado"
               @click="modalFiltroAvanzado.abrirModalBusqueda"
             >
