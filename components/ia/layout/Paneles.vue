@@ -10,7 +10,7 @@
 
     <div class="columna-12">
       <slot name="vistas-ia">
-        <p>Panel vista</p>
+        <!-- <p>Panel vista</p> -->
       </slot>
     </div>
   </div>

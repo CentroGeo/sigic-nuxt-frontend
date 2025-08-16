@@ -1,6 +1,6 @@
 <script setup>
 import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
 const storeIA = useIAStore();
 
@@ -13,21 +13,42 @@ const props = defineProps({
 const { titulo, textoBoton, recursoLista, etiquetaBusqueda } = toRefs(props);
 
 const catalogo = ref([
-  {
+  /* {
     id: 0,
     titulo: 'Biodiversidad de ecosistemas marinos',
     numero_contextos: 0,
-    numero_fuentes: 9,
+    numero_fuentes: 9
   },
-  // {
-  //   id: 1,
-  //   titulo: "Nombre del proyecto",
-  //   numero_contextos: 5,
-  //   numero_fuentes: 5,
-  // },
+  {
+    id: 1,
+    titulo: "Nombre del proyecto",
+    numero_contextos: 5,
+    numero_fuentes: 5
+  },
+  {
+    id: 2,
+    titulo: "Nombre del proyecto",
+    numero_contextos: 5,
+    numero_fuentes: 5
+  } */
 ]);
 
 const catalogoFiltrado = ref(catalogo.value);
+
+// Función para consultar lista de proyectos
+const loadProjectList = async () => {
+  let arrayProjects = [];
+
+  // Consulta proyectos
+  arrayProjects = await storeIA.getProjectsList();
+
+  catalogo.value = arrayProjects;
+  catalogoFiltrado.value = arrayProjects;
+};
+
+onMounted(() => {
+  loadProjectList();
+});
 </script>
 
 <template>
@@ -39,7 +60,7 @@ const catalogoFiltrado = ref(catalogo.value);
           style="width: 100%; text-align: center; display: inline-block"
           class="boton boton-primario"
           aria-label="Crear proyecto"
-          to="/ia/proyecto/crea-proyecto"
+          to="/ia/proyecto/nuevo"
         >
           {{ textoBoton }}
           <span class="pictograma-agregar" aria-hidden="true" />
@@ -60,9 +81,19 @@ const catalogoFiltrado = ref(catalogo.value);
 
       <div v-if="storeIA.existenProyectos">
         <ul class="lista-chats lista-sin-estilo">
-          <li v-for="proyecto in catalogoFiltrado" :key="proyecto.id" class="m-0">
-            <div class="proyecto seleccionado p-l-4 p-r-2 p-y-1">
-              <div class="proyecto-titulo m-b-1">{{ proyecto.titulo }}</div>
+          <li
+            v-for="proyecto in catalogoFiltrado"
+            :key="proyecto.id"
+            class="m-0"
+            @click="storeIA.seleccionarProyecto(proyecto)"
+          >
+            <div
+              class="proyecto p-l-4 p-r-2 p-y-1"
+              :class="{
+                seleccionado: proyecto.id === storeIA.proyectoSeleccionado?.id,
+              }"
+            >
+              <div class="proyecto-titulo m-b-1">{{ proyecto.title }}</div>
               <div class="flex">
                 <UiNumeroElementos :numero="proyecto.numero_contextos" etiqueta="Contextos" />
                 <UiNumeroElementos :numero="proyecto.numero_fuentes" etiqueta="Fuentes" />
@@ -81,6 +112,9 @@ const catalogoFiltrado = ref(catalogo.value);
 }
 
 .proyecto {
+  cursor: pointer;
+  border-left: var(--Escalas-Bordes-borde-8, 8px) solid transparent;
+
   &.seleccionado {
     border-left: var(--Escalas-Bordes-borde-8, 8px) solid var(--borde-acento);
     background: var(--fondo-acento);
