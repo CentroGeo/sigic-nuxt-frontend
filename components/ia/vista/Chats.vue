@@ -4,6 +4,7 @@ import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/S
 import DOMPurify from 'dompurify'; // Para seguridad XSS
 import { marked } from 'marked'; // Importar marked para mostrar formato markdown
 import { ref, watch } from 'vue';
+import { defineProps } from 'vue'
 
 const storeIA = useIAStore();
 
@@ -25,11 +26,20 @@ const { contextId, chatId } = defineProps({
 });
 
 if (contextId) {
+  console.log("contextId:",contextId)
+  console.log("chatId:",chatId)
   contextID.value = parseInt(contextId); // Asegura que sea número si es necesario
+  chatID.value = parseInt(chatId); 
+  console.log(contextID.value)
+  console.log(chatID.value)
 
-  /*   if(chatID.value>0){
+  if(chatID.value>0){
     console.log("chat existente")
-  } */
+    loadExistentChat(chatID.value);
+  }
+}
+else{
+  console.log("Chat no válido")
 }
 
 watch(
@@ -60,7 +70,8 @@ watch(
  */
 
 // Función para cargar historico de chat
-const loadExistentChat = async (idchat) => {
+async function loadExistentChat(idchat) {
+  console.log("loadExistentChat")
   //arraySources = [];
   //Consulta fuentes
   const historyChat = await storeIA.getChat(idchat);

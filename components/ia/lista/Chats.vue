@@ -112,8 +112,18 @@ function transformarHistorial(historiales) {
 
   catalogo.value = resultado;
   catalogoFiltrado.value = resultado;
-
   //return resultado;
+}
+
+function openChat(chat) {
+  console.log("openChat: ",chat)
+  return {
+    path: '/ia/chat/dinamica',
+    query: {
+      chat_id: chat.id,
+      context_id: chat.id_contexto,
+    },
+  }
 }
 
 onMounted(() => {
@@ -163,13 +173,7 @@ onMounted(() => {
                 <li v-for="chat in grupo.chat" :id="chat.id" :key="chat.id">
                   <nuxt-link
                     class="tarjeta-chat p-3 borde borde-redondeado-20"
-                    :to="{
-                      path: '/ia/chat/dinamica',
-                      query: {
-                        chat_id: chat.id,
-                        context_id: chat.id_contexto,
-                      },
-                    }"
+                    :to="openChat(chat)"
                   >
                     <div>
                       <h5 class="tarjeta-titulo m-t-0 m-b-2">
