@@ -62,6 +62,7 @@ const loadChatsList = async () => {
 
   // Consulta proyectos
   arrayChats = await storeIA.getChatList(1);
+  console.log(arrayChats)
 
   transformarHistorial(arrayChats);
 
@@ -83,7 +84,7 @@ function transformarHistorial(historiales) {
     historial.context.forEach((contexto) => {
       const chatItem = {
         id: historial.id,
-        titulo: 'Chat ' + historial.id || '',
+        titulo: historial.title ||'Chat ' + historial.id,
         proyecto: contexto.workspace?.title || '',
         contexto: contexto.title || '',
         id_contexto: contexto.id || '',
@@ -116,7 +117,7 @@ function transformarHistorial(historiales) {
 }
 
 function openChat(chat) {
-  console.log("openChat: ",chat)
+  //console.log("openChat: ",chat)
   return {
     path: '/ia/chat/dinamica',
     query: {
