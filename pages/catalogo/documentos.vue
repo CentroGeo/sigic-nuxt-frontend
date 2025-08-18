@@ -2,9 +2,10 @@
 // TODO: fix tabla, filtros y paginador
 import { resourceTypeDic } from '~/utils/consulta';
 const storeFetched = useFetchedResources2Store();
-storeFetched.checkFilling(resourceTypeDic.document);
 
+storeFetched.checkFilling(resourceTypeDic.document);
 const resourcesDocumentos = computed(() => storeFetched.byResourceType(resourceTypeDic.document));
+
 // obteniendo datos por las props de la tabla
 const datos = computed(() =>
   resourcesDocumentos.value.map((d) => ({
@@ -36,8 +37,8 @@ const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion',
         /> -->
 
         <div class="flex">
-          <h2>Capas geográficas</h2>
-          <UiNumeroElementos :numero="resourcesDocumentos.length" />
+          <h2>Documentos</h2>
+          <UiNumeroElementos :numero="datos.length" />
         </div>
 
         <div class="flex">
