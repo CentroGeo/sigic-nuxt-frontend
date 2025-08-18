@@ -3,8 +3,7 @@ import SisdaiControlDeslizante from '@centrogeomx/sisdai-componentes/src/compone
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import DOMPurify from 'dompurify'; // Para seguridad XSS
 import { marked } from 'marked'; // Importar marked para mostrar formato markdown
-import { ref, watch } from 'vue';
-import { defineProps } from 'vue'
+import { defineProps, ref, watch } from 'vue';
 
 const storeIA = useIAStore();
 
@@ -26,20 +25,19 @@ const { contextId, chatId } = defineProps({
 });
 
 if (contextId) {
-  console.log("contextId:",contextId)
-  console.log("chatId:",chatId)
+  console.log('contextId:', contextId);
+  console.log('chatId:', chatId);
   contextID.value = parseInt(contextId); // Asegura que sea número si es necesario
-  chatID.value = parseInt(chatId); 
-  console.log(contextID.value)
-  console.log(chatID.value)
+  chatID.value = parseInt(chatId);
+  console.log(contextID.value);
+  console.log(chatID.value);
 
-  if(chatID.value>0){
-    console.log("chat existente")
+  if (chatID.value > 0) {
+    console.log('chat existente');
     loadExistentChat(chatID.value);
   }
-}
-else{
-  console.log("Chat no válido")
+} else {
+  console.log('Chat no válido');
 }
 
 watch(
@@ -71,7 +69,7 @@ watch(
 
 // Función para cargar historico de chat
 async function loadExistentChat(idchat) {
-  console.log("loadExistentChat")
+  console.log('loadExistentChat');
   //arraySources = [];
   //Consulta fuentes
   const historyChat = await storeIA.getChat(idchat);
@@ -91,7 +89,7 @@ async function loadExistentChat(idchat) {
 
   //catalogo.value = arrayProjects;
   //catalogoFiltrado.value = arrayProjects;
-};
+}
 
 function enfocarAreaTexto() {
   areaTextoRef.value.focus();

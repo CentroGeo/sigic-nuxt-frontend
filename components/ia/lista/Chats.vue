@@ -62,7 +62,7 @@ const loadChatsList = async () => {
 
   // Consulta proyectos
   arrayChats = await storeIA.getChatList(1);
-  console.log(arrayChats)
+  console.log(arrayChats);
 
   transformarHistorial(arrayChats);
 
@@ -84,7 +84,7 @@ function transformarHistorial(historiales) {
     historial.context.forEach((contexto) => {
       const chatItem = {
         id: historial.id,
-        titulo: historial.title ||'Chat ' + historial.id,
+        titulo: historial.title || 'Chat ' + historial.id,
         proyecto: contexto.workspace?.title || '',
         contexto: contexto.title || '',
         id_contexto: contexto.id || '',
@@ -124,7 +124,7 @@ function openChat(chat) {
       chat_id: chat.id,
       context_id: chat.id_contexto,
     },
-  }
+  };
 }
 
 onMounted(() => {
