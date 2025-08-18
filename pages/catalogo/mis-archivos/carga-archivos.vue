@@ -15,6 +15,7 @@ const dragNdDrop = ref(null);
 
 async function guardarArchivo(files) {
   const token = ref(data.value?.accessToken);
+  console.log('files', files);
 
   // TODO: validación de formatos
   // if (
@@ -36,7 +37,7 @@ async function guardarArchivo(files) {
   formData.append('base_file', files[0]);
   formData.append('token', token.value);
 
-  const response = await $fetch('/api/cargar', {
+  const response = await fetch('/api/cargar', {
     method: 'POST',
     body: formData,
   });
