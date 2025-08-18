@@ -11,7 +11,6 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
-  resourceType: { type: String, required: true },
 });
 
 /**
@@ -92,7 +91,38 @@ const optionsButtons = ref([
       emit('descargaClicked');
     },
   },
+
+  {
+    label: 'Mover a la izquierda',
+    get pictogram() {
+      return lado.value === 'izquierda'
+        ? 'pictograma-flechas-horizontales'
+        : 'pictograma-flecha-izquierda';
+    },
+    globo: 'Mover a la izquierda',
+    action: () => {
+      lado.value = lado.value === 'izquierda' ? undefined : 'izquierda';
+    },
+  },
+  {
+    label: 'Mover a la derecha',
+    get pictogram() {
+      return lado.value === 'derecha'
+        ? 'pictograma-flechas-horizontales'
+        : 'pictograma-flecha-derecha';
+    },
+    // pictogram: 'pictograma-flecha-derecha',
+    globo: 'Mover a la derecha',
+    action: () => {
+      lado.value = lado.value === 'derecha' ? undefined : 'derecha';
+    },
+  },
 ]);
+
+const lado = computed({
+  get: () => storeSelected.byUuid(props.resourceElement.uuid)?.lado,
+  set: (nuevoValor) => (storeSelected.byUuid(props.resourceElement.uuid).lado = nuevoValor),
+});
 </script>
 
 <template>

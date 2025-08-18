@@ -149,6 +149,8 @@ onMounted(() => {
 });
 
 // api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
+
+const dividir = ref(undefined);
 </script>
 
 <template>
@@ -164,6 +166,7 @@ onMounted(() => {
         <SisdaiMapa
           class="gema"
           :vista="vistaDelMapa"
+          :dividir="Number(dividir)"
           @click-centrar="storeConsulta.resetMapExtent"
           @al-mover-vista="actualizarHashDesdeVista"
         >
@@ -177,6 +180,7 @@ onMounted(() => {
             :opacidad="storeSelected.byUuid(resource.uuid).opacidad"
             :posicion="storeSelected.byUuid(resource.uuid).posicion + 1"
             :visible="storeSelected.byUuid(resource.uuid).visible"
+            :lado="storeSelected.byUuid(resource.uuid).lado"
           />
         </SisdaiMapa>
 
@@ -185,6 +189,9 @@ onMounted(() => {
     </template>
 
     <template #seleccion>
+      <button @click="() => (dividir = dividir === undefined ? 50 : undefined)">Dividir</button>
+      <input v-model="dividir" type="range" :disabled="dividir === undefined" />
+
       <ConsultaLayoutSeleccion
         titulo="Capas seleccionadas"
         :resource-type="storeConsulta.resourceType"
