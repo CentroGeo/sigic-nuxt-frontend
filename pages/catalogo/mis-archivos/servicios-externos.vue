@@ -10,8 +10,8 @@ const casillaUnicaAutenticacion1 = ref(false);
 const casillaUnicaAutenticacion2 = ref(false);
 const mensajeImportarCatalogo = ref('');
 
-const { data } = useAuth();
-const token = ref(data.value?.accessToken);
+// const { data } = useAuth();
+// const token = data.value?.accessToken;
 const responseOk = ref(false);
 const servicioExternoCreado = ref(true);
 
@@ -51,19 +51,13 @@ async function crearCatalogoExterno() {
       <main id="principal" class="contenedor m-b-10">
         <div class="alineacion-izquierda ancho-lectura">
           <h2>Conexión a catálogos externos</h2>
-          <h3>Datos generales del servicio</h3>
 
           <form @keypress.enter.exact.prevent="conectarCatalogoExterno()">
             <ClientOnly class="flex">
-              <!-- <SisdaiCampoBase
-                      v-model="campoTitulo"
-                      etiqueta="Título"
-                      ejemplo="Añade un nombre"
-                    /> -->
               <SisdaiCampoBase
                 v-model="campoURL"
                 etiqueta="Servicio URL"
-                ejemplo="http://"
+                ejemplo="URL de servicio externo"
                 tipo="url"
               />
               <SisdaiSelector
@@ -75,25 +69,28 @@ async function crearCatalogoExterno() {
                 <option value="2">las opciones las pasa el backend</option>
               </SisdaiSelector>
             </ClientOnly>
-            <div class="flex flex-contenido-final">
+            <div class="flex flex-contenido-inicio m-t-3">
               <button
                 class="boton-primario"
                 aria-label="Aplicar filtros"
                 type="button"
                 @click="crearCatalogoExterno()"
               >
-                Crear
+                Crear conexión
               </button>
             </div>
           </form>
+        </div>
 
+        <div class="ancho-fijo">
           <div v-if="servicioExternoCreado">
-            <h3>Importar</h3>
+            <h3>Título de servicio externo</h3>
+            <p>Selecciona los recursos que quieres importar</p>
             <form @keypress.enter.exact.prevent="importarCatalogoExterno()">
               <table class="tabla-condensada">
-                <caption>
+                <!-- <caption>
                   Nombre del servicio
-                </caption>
+                </caption> -->
                 <thead>
                   <tr>
                     <th>Nombre</th>
@@ -144,26 +141,72 @@ async function crearCatalogoExterno() {
                   </tr>
                 </tbody>
               </table>
-              <div class="flex flex-contenido-final m-t-2">
+              <div class="flex flex-contenido-inicio m-t-3">
                 <button
                   class="boton-primario"
                   aria-label="Aplicar filtros"
                   type="button"
                   @click="importarCatalogoExterno()"
                 >
-                  Importar
+                  Importar recursos
                 </button>
               </div>
             </form>
           </div>
-
-          <p
+          <!-- <p
             v-if="mensajeImportarCatalogo"
             class="texto-color-confirmacion fondo-color-confirmacion p-1 borde borde-color-confirmacion borde-redondeado-8"
             style="width: fit-content"
           >
             <span class="pictograma-aprobado"></span>{{ mensajeImportarCatalogo }}
-          </p>
+          </p> -->
+        </div>
+
+        <div class="ancho-fijo">
+          <h3>Recursos cargados</h3>
+          <form @keypress.enter.exact.prevent="agregarServicioRemoto()">
+            <table>
+              <!-- <caption>
+                Nombre del servicio
+              </caption> -->
+              <thead>
+                <tr>
+                  <th>Nombre de servicio externo</th>
+                  <th>Recursos exportados</th>
+                  <th>Recursos pendientes</th>
+                  <th>URL</th>
+                  <th>Tipo</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Nombre de servicio externo</td>
+                  <td><a href="#">1</a></td>
+                  <td><a href="#">3</a></td>
+                  <td>https://</td>
+                  <td>ArcGIS REST MapServer</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="flex flex-contenido-inicio m-t-3">
+              <button
+                class="boton-primario"
+                aria-label="Ir a catálogo externo en mis archivos"
+                type="button"
+                @click="verCatalogoExternoMisArchivos()"
+              >
+                Ver catálogo Externo en Mis Archivos
+              </button>
+              <button
+                class="boton-secundario"
+                aria-label="Aplicar filtros"
+                type="button"
+                @click="agregarServicioRemoto()"
+              >
+                Agregar servicio remoto
+              </button>
+            </div>
+          </form>
         </div>
       </main>
     </template>
