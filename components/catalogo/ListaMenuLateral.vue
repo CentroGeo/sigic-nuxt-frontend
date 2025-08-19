@@ -24,7 +24,9 @@
               <nuxt-link to="/catalogo/mis-archivos/carga-archivos">Carga de archivos</nuxt-link>
             </li>
             <li>
-              <nuxt-link to="/catalogo/mis-archivos/servicios-externos"
+              <!-- TODO: verificar si existen servicios remotos -->
+              <nuxt-link
+                :to="`${true ? '/catalogo/mis-archivos/servicios-externos' : '/catalogo/mis-archivos/servicios-cargados'}`"
                 >Servicios externos</nuxt-link
               >
             </li>
