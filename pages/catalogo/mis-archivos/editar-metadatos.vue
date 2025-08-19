@@ -2,18 +2,81 @@
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
+const route = useRoute();
+function getUserData() {
+  // Función que devuelve el objeto decodificado
+  // de la vista de donde viene
+  // if (route.query.userObject) {
+  //   try {
+  //     return JSON.parse(route.query.userObject);
+  //   } catch (e) {
+  //     console.error('Error parsing user object', e);
+  //     return null;
+  //   }
+  // }
+  if (route.query.data) {
+    try {
+      const dataStr = decodeURIComponent(route.query.data);
+      return computed(() => JSON.parse(dataStr));
+    } catch (e) {
+      console.error('Error al parsear el objeto', e);
+      return null;
+    }
+  }
+}
+const objetoId = ref(getUserData());
+
+const imagen = ref();
+const campoResumen = ref('Resumen desde sigic');
 const campoTitulo = ref('');
-const campoResumen = ref('');
 const campoPalabrasClave = ref('');
 const campoAutor = ref('');
 const campoAnioPublicacion = ref('');
-
 const seleccionEjemplo = ref('');
-
+const seleccionFecha = ref('');
 const seleccionCategoria = ref('');
 const seleccionGrupo = ref('');
 
-const ejemplo = ref({});
+// obtener el resource completo a partir del id
+const resource = ref({});
+resource.value = await $fetch('/api/objeto', {
+  method: 'POST',
+  body: { id: objetoId.value.pk },
+});
+
+// TODO: actualizar varios metadatos al mismo tiempo
+const { data } = useAuth();
+async function actualizaMetadatos() {
+  const token = ref(data.value?.accessToken);
+  await $fetch('/api/metadatos', {
+    method: 'POST',
+    body: {
+      pk: resource.value.pk,
+      resource_type: resource.value.resource_type,
+      abstract: campoResumen.value,
+      token: token.value,
+    },
+  });
+}
+
+const dragNdDrop = ref(null);
+
+async function guardarImagen(files) {
+  if (
+    files[0].name.split('.')[1] === '.jpg' ||
+    files[0].name.endsWith('.jpg') ||
+    files[0].name.split('.')[1] === '.jpeg' ||
+    files[0].name.endsWith('.jpeg') ||
+    files[0].type === 'image/jpeg' ||
+    files[0].name.split('.')[1] === '.png' ||
+    files[0].name.endsWith('.png') ||
+    files[0].type === 'image/png'
+  ) {
+    imagen.value = files;
+  } else {
+    dragNdDrop.value?.archivoNoValido();
+  }
+}
 </script>
 
 <template>
@@ -34,12 +97,40 @@ const ejemplo = ref({});
               <span class="h2 texto-color-primario p-l-2">Editar</span>
             </nuxt-link>
           </div>
-          <h2>nombre de la capa.json</h2>
+          <h2>{{ resource.title }}</h2>
           <div class="flex">
-            <nuxt-link to="/catalogo/mis-archivos/editar-metadatos" exact-path>Metadatos</nuxt-link>
-            <nuxt-link to="/catalogo/mis-archivos/editar-estilo">Estilo</nuxt-link>
+            <nuxt-link
+              :class="`${route.path === '/catalogo/mis-archivos/editar-metadatos' ? 'borde-enlace-activo' : ''}`"
+              to="/catalogo/mis-archivos/editar-metadatos"
+              >Metadatos</nuxt-link
+            >
+            <nuxt-link
+              :class="`${route.path === '/catalogo/mis-archivos/editar-estilo' ? 'borde-enlace-activo' : ''}`"
+              to="/catalogo/mis-archivos/editar-estilo"
+              style=""
+              >Estilo</nuxt-link
+            >
           </div>
+          <div class="borde-b borde-color-secundario"></div>
           <h2>Metadatos</h2>
+          <div style="display: flex; gap: 4px">
+            <div
+              class="borde borde-grosor-2"
+              style="width: 25%; border-color: var(--color-primario-1)"
+            ></div>
+            <div
+              class="borde borde-grosor-2"
+              style="width: 25%; border-color: var(--color-neutro-2)"
+            ></div>
+            <div
+              class="borde borde-grosor-2"
+              style="width: 25%; border-color: var(--color-neutro-2)"
+            ></div>
+            <div
+              class="borde borde-grosor-2"
+              style="width: 25%; border-color: var(--color-neutro-2)"
+            ></div>
+          </div>
           <ol>
             <li>Metadatos básicos</li>
           </ol>
@@ -49,11 +140,11 @@ const ejemplo = ref({});
 
           <!-- Drag & Drop -->
           <ClientOnly>
-            <CatalogoElementoDragNdDrop />
+            <CatalogoElementoDragNdDrop ref="dragNdDrop" @pasar-archivo="(i) => guardarImagen(i)" />
           </ClientOnly>
 
           <!-- Formulario -->
-          <form class="m-t-3">
+          <div class="m-t-3">
             <div class="flex">
               <div class="columna-16">
                 <ClientOnly>
@@ -89,7 +180,7 @@ const ejemplo = ref({});
               <div class="columna-8">
                 <ClientOnly>
                   <SisdaiCampoBase
-                    v-model="ejemplo.fecha"
+                    v-model="seleccionFecha"
                     etiqueta="Fecha"
                     ejemplo="tipo date"
                     tipo="date"
@@ -147,13 +238,31 @@ const ejemplo = ref({});
               </div>
             </div>
             <div class="flex p-t-3">
-              <button class="boton-secundario boton-chico" type="button">Ir a mis archivos</button>
-              <button class="boton-primario boton-chico" disabled="disabled">Actualizar</button>
+              <nuxt-link
+                class="boton-secundario boton-chico"
+                type="button"
+                to="/catalogo/mis-archivos"
+                >Ir a mis archivos</nuxt-link
+              >
+              <button
+                class="boton-primario boton-chico"
+                :disabled="false"
+                @click="actualizaMetadatos()"
+              >
+                Actualizar
+              </button>
               <button class="boton-primario boton-chico" :disabled="false">Siguiente</button>
             </div>
-          </form>
+          </div>
         </div>
       </main>
     </template>
   </UiLayoutPaneles>
 </template>
+
+<style lang="scss" scoped>
+.borde-enlace-activo {
+  border-bottom: 4px solid var(--boton-primario-borde);
+  border-radius: 0px;
+}
+</style>
