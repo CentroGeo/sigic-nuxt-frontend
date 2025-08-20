@@ -82,7 +82,7 @@ export default defineNuxtConfig({
 
   vite: {
     ssr: {
-      noExternal: ['@centrogeomx/sisdai-mapas'],
+      noExternal: ['@centrogeomx/sisdai-mapas', 'ol-displaced-points', 'circle-properties'],
     },
   },
 });

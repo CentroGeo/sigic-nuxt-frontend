@@ -11,7 +11,6 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
-  resourceType: { type: String, required: true },
 });
 
 /**

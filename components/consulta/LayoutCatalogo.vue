@@ -71,21 +71,16 @@ function updateByModal(resources) {
   groupResults();
 }
 
-onMounted(async () => {
-  // if (resources.value.length === 0) {
-  //   storeFetched.isLoading = true;
-  //   const { resourcesList } = await useGeonodeResources();
-  //   storeFetched.updateFetchedResources(props.resourceType, resourcesList.value);
-  //   filteredResources.value = storeFetched[props.resourceType];
-  //   storeFetched.isLoading = false;
-  // } else {
-  //   filteredResources.value = storeFetched[props.resourceType];
-  // }
-  // groupResults();
-});
-watch(resources, (nv) => {
+function updateResuruces(nv) {
   filteredResources.value = nv;
   groupResults();
+}
+watch(resources, updateResuruces);
+
+onMounted(async () => {
+  if (resources.value.length !== 0) {
+    updateResuruces(resources.value);
+  }
 });
 </script>
 
