@@ -6,13 +6,12 @@ function abrirModalCompartir() {
 }
 const route = useRoute();
 const config = useRuntimeConfig();
-const origin = config.public.domain;
-const currentPath = computed(() => origin + route.fullPath);
-
+const baseUrl = config.public.baseURL;
+const currentPath = computed(() => baseUrl + route.fullPath);
 async function copyToClipboard() {
   try {
     await navigator.clipboard.writeText(currentPath.value);
-    alert('Enlace copiado al portapapeles.');
+    alert('Enlace copiado al portapapeles: ' + currentPath.value);
   } catch (err) {
     console.error('Error al copiar: ', err);
   }

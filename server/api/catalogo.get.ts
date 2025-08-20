@@ -39,7 +39,7 @@ export default defineEventHandler(async (event) => {
     // console.log('respuesta', response.headers);
     const { links, resources } = await response.json();
     allResults = allResults.concat(resources);
-    if (links.next) {
+    if (links.next && page < 2) {
       // Si la hay, volvemos a solicitar datos
       page += 1;
       return loadPage();

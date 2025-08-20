@@ -13,13 +13,22 @@ const props = defineProps({
 
 const resources = computed(() => storeFetched.byResourceType());
 const filteredResources = ref([]);
+const asyncResources = ref([]);
+const authoredResources = ref([]);
+const searchInputresources = ref([]);
 const apiCategorias = `${config.public.geonodeApi}/facets/category`;
 const categoryList = ref([]);
 const categorizedResources = ref({});
 const selectedCategories = ref([]);
-const isFilterActive = ref(false);
 const modalFiltroAvanzado = ref(null);
+const isFilterActive = ref(false);
 
+const { data } = useAuth();
+const isLoggedIn = ref(data.value ? true : false);
+const userEmail = ref(data.value?.user.email);
+//console.log('auth data', data.value);
+
+const selectorAuthor = ref('todos');
 // Esta parte es para obtener todas las categorias
 const { data: geonodeCategories } = await useFetch(`${apiCategorias}`);
 if (!geonodeCategories.value) {
@@ -61,57 +70,89 @@ function setSelectedCategory(categoria) {
 }
 
 function filterByInput(r) {
-  filteredResources.value = r;
-  groupResults();
+  searchInputresources.value = r;
 }
 
-function applyAdvancedFilters(resources) {
-  isFilterActive.value = true;
-  filteredResources.value = resources;
-  groupResults();
+function filterByAuthor() {
+  if (selectorAuthor.value === 'todos') {
+    authoredResources.value = resources.value;
+  } else if (selectorAuthor.value === 'catalogo') {
+    authoredResources.value = resources.value.filter(
+      (resource) => resource.owner.email !== userEmail.value
+    );
+  } else {
+    authoredResources.value = resources.value.filter(
+      (resource) => resource.owner.email === userEmail.value
+    );
+  }
 }
+
+async function filterByModal() {
+  isFilterActive.value = true;
+  asyncResources.value = await modalFiltroAvanzado.value.filterByModal();
+}
+
 function resetAdvancedFilter(resources) {
   isFilterActive.value = false;
-  filteredResources.value = resources;
-  groupResults();
+  asyncResources.value = resources;
 }
+
+function intersectObjectsByKey(key, ...arrays) {
+  return arrays.reduce((acc, arr) => {
+    const set = new Set(arr.map((o) => o[key]));
+    return acc.filter((o) => set.has(o[key]));
+  });
+}
+
+watch(resources, () => {
+  filteredResources.value = resources.value;
+  searchInputresources.value = resources.value;
+  authoredResources.value = resources.value;
+  asyncResources.value = resources.value;
+  groupResults();
+});
+watch(searchInputresources, (nv) => {
+  searchInputresources.value = nv;
+  filteredResources.value = intersectObjectsByKey(
+    'uuid',
+    searchInputresources.value,
+    authoredResources.value,
+    asyncResources.value
+  );
+  groupResults();
+});
+watch(selectorAuthor, () => {
+  filterByAuthor();
+  filteredResources.value = intersectObjectsByKey(
+    'uuid',
+    searchInputresources.value,
+    authoredResources.value,
+    asyncResources.value
+  );
+  groupResults();
+});
+watch(
+  asyncResources,
+  () => {
+    filteredResources.value = intersectObjectsByKey(
+      'uuid',
+      searchInputresources.value,
+      authoredResources.value,
+      asyncResources.value
+    );
+    groupResults();
+  },
+  { deep: true }
+);
 
 onMounted(() => {
   if (resources.value.length !== 0) {
     filteredResources.value = resources.value;
+    searchInputresources.value = resources.value;
+    authoredResources.value = resources.value;
+    asyncResources.value = resources.value;
     groupResults();
   }
-});
-
-watch(resources, (nv) => {
-  filteredResources.value = nv;
-  groupResults();
-});
-
-const { data } = useAuth();
-const isLoggedIn = ref(data.value ? true : false);
-const userEmail = ref(data.value?.user.email);
-//console.log('auth data', data.value);
-
-const selectorAuthor = ref('todos');
-
-function filterByAuthor() {
-  if (selectorAuthor.value === 'todos') {
-    filteredResources.value = resources.value;
-  } else if (selectorAuthor.value === 'catalogo') {
-    filteredResources.value = resources.value.filter(
-      (resource) => resource.owner.email !== userEmail.value
-    );
-  } else {
-    filteredResources.value = resources.value.filter(
-      (resource) => resource.owner.email === userEmail.value
-    );
-  }
-  groupResults();
-}
-
-watch(selectorAuthor, () => {
-  filterByAuthor();
 });
 </script>
 
@@ -191,8 +232,7 @@ watch(selectorAuthor, () => {
   <ConsultaModalBusqueda
     ref="modalFiltroAvanzado"
     :resource-type="props.resourceType"
-    :categories="categoryList"
-    @apply-filter="(results) => applyAdvancedFilters(results)"
+    @apply-filter="filterByModal()"
     @reset-filter="(results) => resetAdvancedFilter(results)"
   />
 </template>

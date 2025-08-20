@@ -5,10 +5,9 @@ import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/S
 import { resourceTypeGeonode } from '~/utils/consulta';
 
 const props = defineProps({
-  categories: { type: Array, default: () => [] },
   resourceType: { type: String, required: true },
 });
-const { categories } = toRefs(props);
+
 const storeFetched = useFetchedResources2Store();
 const resources = computed(() => storeFetched.byResourceType(props.resourceType));
 const emit = defineEmits(['applyFilter', 'resetFilter']);
@@ -47,6 +46,7 @@ function abrirModalBusqueda() {
 
 defineExpose({
   abrirModalBusqueda,
+  filterByModal,
 });
 
 async function filterByModal() {
@@ -67,7 +67,7 @@ async function filterByModal() {
     inputCategories.value.forEach((d) => {
       catParam.push(categoriesDict[d]);
     });
-    queryParams['filter{category.identifier}'] = catParam;
+    queryParams['filter{category.identifier.in}'] = catParam;
   }
 
   results.value = await $fetch('/api/catalogo', {
@@ -77,19 +77,18 @@ async function filterByModal() {
       Authorization: `${data.value?.accessToken}`,
     },
   });
-  emit('applyFilter', results.value);
   modalBusqueda.value.cerrarModal();
+  return results.value;
 }
 
 function resetResults() {
   results.value = resources.value;
-  emit('resetFilter', results.value);
   modalBusqueda.value.cerrarModal();
 }
 </script>
 <template>
   <ClientOnly>
-    <SisdaiModal ref="modalBusqueda">
+    <SisdaiModal id="modal-busqueda" ref="modalBusqueda">
       <template #encabezado>
         <h1>Filtro avanzado</h1>
       </template>
@@ -98,7 +97,7 @@ function resetResults() {
         <label>Categoria</label>
         <div class="grupo-categoria flex">
           <SisdaiCasillaVerificacion
-            v-for="(category, index) in categories"
+            v-for="(category, index) in Object.keys(categoriesDict)"
             :key="`${index}-category`"
             v-model="inputCategories"
             :value="category"
@@ -112,7 +111,7 @@ function resetResults() {
           id="filtro-institicion"
           v-model="institutionInput"
           tipo='"text"'
-          class="m-y-2"
+          class="m-y-1"
           etiqueta="Institución"
           ejemplo="SECIHTI, INEGI, entre otras"
         />
@@ -121,7 +120,7 @@ function resetResults() {
           id="filtro-anio"
           v-model="yearInput"
           tipo='"text"'
-          class="m-y-2"
+          class="m-y-1"
           etiqueta="Año de publicación"
           ejemplo="1995..."
         />
@@ -130,7 +129,7 @@ function resetResults() {
           id="filtro-keywords"
           v-model="keywordsInput"
           tipo='"text"'
-          class="m-y-2"
+          class="m-y-1"
           etiqueta="Palabras clave"
           ejemplo="agua, casas..."
         />
@@ -138,7 +137,7 @@ function resetResults() {
 
       <template #pie>
         <div class="contenedor-botones flex flex-contenido-centrado">
-          <button class="boton-chico boton-primario" @click="filterByModal">Buscar</button>
+          <button class="boton-chico boton-primario" @click="emit('applyFilter')">Buscar</button>
           <button class="boton-chico boton-secundario" @click="resetResults">
             Restablecer filtros
           </button>
@@ -148,6 +147,10 @@ function resetResults() {
   </ClientOnly>
 </template>
 <style lang="scss" scoped>
+#modal-busqueda {
+  max-width: 32%;
+}
+
 .grupo-categoria {
   border: solid var(--campo-etiqueta-color) 1px;
   border-radius: 8px;
@@ -161,7 +164,7 @@ function resetResults() {
   }
 }
 .opcion-checkbox {
-  width: 50%;
+  width: 33%;
 }
 .contenedor-botones {
   width: 100%;

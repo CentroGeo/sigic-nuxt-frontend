@@ -71,7 +71,6 @@ const optionsDict = {
 // Para triggerear la función de observar
 let observer;
 const rootEl = ref();
-console.log(catalogueElement.value.owner.email);
 onMounted(() => {
   // Esto es para observar cuando la tarjeta entra en la vista
   observer = new IntersectionObserver(
