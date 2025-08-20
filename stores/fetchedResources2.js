@@ -20,6 +20,15 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
    * @returns {Object} objeto de recursos seleccionados.
    */
   function byResourceType(resourceType = storeConsulta.resourceType) {
+    // if (resourceType === resourceTypeDic.dataLayer) {
+    //   const noGeometryExtent = [-1, -1, 0, 0].join('');
+
+    //   return resources[resourceTypeDic.dataTable].fillter(
+    //     U S A R -> tableHaveGeometry
+    //     (resource) => resource.extent.coords.join('') !== noGeometryExtent
+    //   );
+    // }
+
     return resources[resourceType];
   }
 
@@ -28,7 +37,11 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
 
     byResourceType,
 
-    all: computed(() => Object.values(resources).flat()),
+    // all: computed(() => Object.values(resources).flat()),
+    all: computed(() => [
+      ...resources[resourceTypeDic.dataTable],
+      ...resources[resourceTypeDic.document],
+    ]),
 
     checkFilling(resourceType = storeConsulta.resourceType) {
       // console.log('checkFilling:', resourceType);

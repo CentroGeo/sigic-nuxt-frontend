@@ -24,8 +24,8 @@ export default defineEventHandler(async (event) => {
       ...query,
     });
 
-    const endpoint = `${api}?${dataParams.toString()}`
-    console.log("endnpoint: ", endpoint);
+    const endpoint = `${api}?${dataParams.toString()}`;
+    console.log(endpoint);
     const response = await fetch(endpoint, {
       method: 'GET',
       headers: header,
@@ -39,7 +39,7 @@ export default defineEventHandler(async (event) => {
     // console.log('respuesta', response.headers);
     const { links, resources } = await response.json();
     allResults = allResults.concat(resources);
-    if (links.next && page < 2) {
+    if (links.next && page) {
       // Si la hay, volvemos a solicitar datos
       page += 1;
       return loadPage();
@@ -48,5 +48,5 @@ export default defineEventHandler(async (event) => {
 
   await loadPage();
 
-  return allResults
-})
+  return allResults;
+});

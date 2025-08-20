@@ -4,6 +4,7 @@ import { onMounted, onUnmounted, ref, toRefs } from 'vue';
 import { fetchGeometryType, tooltipContent } from '~/utils/consulta';
 
 const storeSelected = useSelectedResources2Store();
+
 const capasSeleccionadas = computed({
   get: () => storeSelected.uuids,
   set: (uuids) => storeSelected.updateByUuids(uuids),
@@ -132,6 +133,7 @@ onMounted(() => {
     observer.observe(rootEl.value);
   }
 });
+
 onUnmounted(() => {
   if (observer && rootEl.value) {
     observer.unobserve(rootEl.value);
