@@ -17,7 +17,7 @@ const datos = computed(() =>
       pk: d.pk,
       titulo: d.title,
       // tipo_recurso: d.resource_typed.resource_type,
-      tipo_recurso: tableHaveGeometry(d.extent.coords) ? 'Capa geográfica' : 'Dato tabulado',
+      tipo_recurso: isGeometricExtension(d.extent) ? 'Capa geográfica' : 'Dato tabulado',
       categoria: d.category,
       actualizacion: d.last_updated,
       acciones: 'Editar, Ver, Descargar, Remover',
