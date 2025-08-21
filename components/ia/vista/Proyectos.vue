@@ -212,7 +212,9 @@ const obtenerTipoArchivo = (nombre) => {
               <tbody>
                 <tr v-for="archivo in arraySources" :key="archivo.id">
                   <td class="p-3">{{ archivo.filename }}</td>
-                  <td class="p-3">{{ obtenerTipoArchivo(archivo.filename) }}</td>
+                  <td class="p-3 etiqueta-tabla">
+                    <span class="p-x-1 p-y-minimo">{{ obtenerTipoArchivo(archivo.filename) }}</span>
+                  </td>
                   <!--         <td>{{ archivo.categoria }}</td>
         <td>{{ archivo.origen }}</td> -->
                   <!--         <td>

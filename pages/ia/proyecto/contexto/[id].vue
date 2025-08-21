@@ -203,6 +203,23 @@ watch(
   },
   { immediate: true }
 ); // Esto lo ejecuta también en el primer render
+
+const obtenerTipoArchivo = (nombre) => {
+  const extension = nombre.split('.').pop().toLowerCase();
+  const tipos = {
+    shp: 'Shapefile',
+    geojson: 'GeoJSON',
+    csv: 'CSV',
+    kml: 'KML',
+    zip: 'ZIP',
+    pdf: 'PDF',
+    doc: 'Word',
+    docx: 'Word',
+    xls: 'Excel',
+    xlsx: 'Excel',
+  };
+  return tipos[extension] || extension.toUpperCase();
+};
 </script>
 
 <template>
@@ -318,14 +335,14 @@ watch(
               <table class="tabla">
                 <thead>
                   <tr>
-                    <th class="checkbox-header">Selección</th>
-                    <th>Nombre</th>
-                    <th>Tipo</th>
+                    <th class="checkbox-header p-x-3 p-y-2">Selección</th>
+                    <th class="p-x-3 p-y-2">Nombre</th>
+                    <th class="p-x-3 p-y-2">Tipo</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="fuente in arraySources" :key="fuente.id">
-                    <td class="checkbox-cell">
+                    <td class="checkbox-cell p-3">
                       <label class="checkbox-wrapper">
                         <input
                           type="checkbox"
@@ -335,8 +352,12 @@ watch(
                         <span class="checkmark"></span>
                       </label>
                     </td>
-                    <td>{{ fuente.filename }}</td>
-                    <td>{{ fuente.document_type }}</td>
+                    <td class="p-3">{{ fuente.filename }}</td>
+                    <td class="p-3 etiqueta-tabla">
+                      <span class="p-x-1 p-y-minimo">{{
+                        obtenerTipoArchivo(fuente.filename)
+                      }}</span>
+                    </td>
                   </tr>
                 </tbody>
               </table>
