@@ -79,11 +79,7 @@ onMounted(() => {
 <template>
   <ConsultaLayoutPaneles>
     <template #catalogo>
-      <ConsultaLayoutCatalogo
-        titulo="Tabulados de datos"
-        :resource-type="resourceType"
-        etiqueta-elementos="Datos tabulados"
-      />
+      <ConsultaLayoutCatalogo titulo="Tabulados de datos" etiqueta-elementos="Datos tabulados" />
     </template>
 
     <template #visualizador>

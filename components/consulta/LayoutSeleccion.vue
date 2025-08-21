@@ -147,11 +147,11 @@ function changeModal(to) {
     </div>
 
     <div id="los-modales">
-      <ConsultaModalDescargaAll
+      <!--       <ConsultaModalDescargaAll
         v-if="shownModal === 'downloadAll'"
         ref="downloadAllChild"
         :resource-type="resourceType"
-      />
+      /> -->
 
       <ConsultaModalCompartir v-if="shownModal === 'share'" ref="shareChild" />
 

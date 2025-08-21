@@ -4,16 +4,13 @@ import { onMounted, onUnmounted, ref, toRefs } from 'vue';
 import { fetchGeometryType, tooltipContent } from '~/utils/consulta';
 
 const storeSelected = useSelectedResources2Store();
+const storeConsulta = useConsultaStore();
 
 const capasSeleccionadas = computed({
   get: () => storeSelected.uuids,
   set: (uuids) => storeSelected.updateByUuids(uuids),
 });
 const props = defineProps({
-  resourceType: {
-    type: String,
-    default: String,
-  },
   catalogueElement: {
     type: Object,
     default: Object,
@@ -79,7 +76,7 @@ onMounted(() => {
       for (const entry of entries) {
         if (entry.isIntersecting) {
           // Primero checamos si no es dataset
-          if (props.resourceType !== 'dataLayer') {
+          if (storeConsulta.resourceType !== 'dataLayer') {
             buttons.value = [
               {
                 tooltipText: tooltipContent(catalogueElement.value),

@@ -5,10 +5,9 @@ import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/sele
 const config = useRuntimeConfig();
 const storeFetched = useFetchedResources2Store();
 const storeConsulta = useConsultaStore();
-
 defineProps({
   titulo: { type: String, default: 'Título' },
-  // resourceType: { type: String, required: true },
+  //resourceType: { type: String, required: true },
   etiquetaElementos: { type: String, default: undefined },
 });
 
@@ -27,7 +26,6 @@ const isFilterActive = ref(false);
 const { data } = useAuth();
 const isLoggedIn = ref(data.value ? true : false);
 const userEmail = ref(data.value?.user.email);
-//console.log('auth data', data.value);
 
 const selectorAuthor = ref('todos');
 // Esta parte es para obtener todas las categorias
@@ -232,7 +230,6 @@ onMounted(() => {
 
   <ConsultaModalBusqueda
     ref="modalFiltroAvanzado"
-    :resource-type="props.resourceType"
     @apply-filter="filterByModal()"
     @reset-filter="(results) => resetAdvancedFilter(results)"
   />

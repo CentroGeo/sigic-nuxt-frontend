@@ -4,12 +4,10 @@ import SisdaiCasillaVerificacion from '@centrogeomx/sisdai-componentes/src/compo
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import { resourceTypeGeonode } from '~/utils/consulta';
 
-const props = defineProps({
-  resourceType: { type: String, required: true },
-});
-
 const storeFetched = useFetchedResources2Store();
-const resources = computed(() => storeFetched.byResourceType(props.resourceType));
+const storeConsulta = useConsultaStore();
+
+const resources = computed(() => storeFetched.byResourceType(storeConsulta.resourceType));
 const emit = defineEmits(['applyFilter', 'resetFilter']);
 const modalBusqueda = ref(null);
 const institutionInput = ref('');
@@ -51,7 +49,7 @@ defineExpose({
 
 async function filterByModal() {
   const { data } = useAuth();
-  const queryParams = { 'filter{resource_type}': resourceTypeGeonode[props.resourceType] };
+  const queryParams = { 'filter{resource_type}': resourceTypeGeonode[storeConsulta.resourceType] };
 
   if (institutionInput.value) {
     queryParams['institution'] = institutionInput.value;
