@@ -13,9 +13,9 @@ defineProps({
 
 const resources = computed(() => storeFetched.byResourceType());
 const filteredResources = ref([]);
-const asyncResources = ref([]);
-const authoredResources = ref([]);
-const searchInputresources = ref([]);
+// const asyncResources = ref([]);
+// const authoredResources = ref([]);
+// const searchInputresources = ref([]);
 const apiCategorias = `${config.public.geonodeApi}/facets/category`;
 const categoryList = ref([]);
 const categorizedResources = ref({});
@@ -25,7 +25,7 @@ const isFilterActive = ref(false);
 
 const { data } = useAuth();
 const isLoggedIn = ref(data.value ? true : false);
-const userEmail = ref(data.value?.user.email);
+// const userEmail = ref(data.value?.user.email);
 
 const selectorAuthor = ref('todos');
 // Esta parte es para obtener todas las categorias
@@ -68,95 +68,95 @@ function setSelectedCategory(categoria) {
   }
 }
 
-function filterByInput(r) {
-  searchInputresources.value = r;
-}
+// function filterByInput(r) {
+//   searchInputresources.value = r;
+// }
 
-function filterByAuthor() {
-  if (selectorAuthor.value === 'todos') {
-    authoredResources.value = resources.value;
-  } else if (selectorAuthor.value === 'catalogo') {
-    authoredResources.value = resources.value.filter(
-      (resource) => resource.owner.email !== userEmail.value
-    );
-  } else {
-    authoredResources.value = resources.value.filter(
-      (resource) => resource.owner.email === userEmail.value
-    );
-  }
-}
+// function filterByAuthor() {
+//   if (selectorAuthor.value === 'todos') {
+//     authoredResources.value = resources.value;
+//   } else if (selectorAuthor.value === 'catalogo') {
+//     authoredResources.value = resources.value.filter(
+//       (resource) => resource.owner.email !== userEmail.value
+//     );
+//   } else {
+//     authoredResources.value = resources.value.filter(
+//       (resource) => resource.owner.email === userEmail.value
+//     );
+//   }
+// }
 
-async function filterByModal() {
-  isFilterActive.value = true;
-  asyncResources.value = await modalFiltroAvanzado.value.filterByModal();
-}
+// async function filterByModal() {
+//   isFilterActive.value = true;
+//   asyncResources.value = await modalFiltroAvanzado.value.filterByModal();
+// }
 
-function resetAdvancedFilter(resources) {
-  isFilterActive.value = false;
-  asyncResources.value = resources;
-}
+// function resetAdvancedFilter(resources) {
+//   isFilterActive.value = false;
+//   asyncResources.value = resources;
+// }
 
-function intersectObjectsByKey(key, ...arrays) {
-  return arrays.reduce((acc, arr) => {
-    const set = new Set(arr.map((o) => o[key]));
-    return acc.filter((o) => set.has(o[key]));
-  });
-}
+// function intersectObjectsByKey(key, ...arrays) {
+//   return arrays.reduce((acc, arr) => {
+//     const set = new Set(arr.map((o) => o[key]));
+//     return acc.filter((o) => set.has(o[key]));
+//   });
+// }
 
-watch(resources, () => {
-  filteredResources.value = resources.value;
-  searchInputresources.value = resources.value;
-  authoredResources.value = resources.value;
-  asyncResources.value = resources.value;
-  groupResults();
-});
-watch(searchInputresources, (nv) => {
-  searchInputresources.value = nv;
-  filteredResources.value = intersectObjectsByKey(
-    'uuid',
-    searchInputresources.value,
-    authoredResources.value,
-    asyncResources.value
-  );
-  groupResults();
-});
+// watch(resources, () => {
+//   filteredResources.value = resources.value;
+//   searchInputresources.value = resources.value;
+//   authoredResources.value = resources.value;
+//   asyncResources.value = resources.value;
+//   groupResults();
+// });
+// watch(searchInputresources, (nv) => {
+//   searchInputresources.value = nv;
+//   filteredResources.value = intersectObjectsByKey(
+//     'uuid',
+//     searchInputresources.value,
+//     authoredResources.value,
+//     asyncResources.value
+//   );
+//   groupResults();
+// });
 // watch(resources, updateResuruces);
 
-onMounted(async () => {
-  if (resources.value.length !== 0) {
-    updateResuruces(resources.value);
-  }
-});
-watch(selectorAuthor, () => {
-  filterByAuthor();
-  filteredResources.value = intersectObjectsByKey(
-    'uuid',
-    searchInputresources.value,
-    authoredResources.value,
-    asyncResources.value
-  );
-  groupResults();
-});
-watch(
-  asyncResources,
-  () => {
-    filteredResources.value = intersectObjectsByKey(
-      'uuid',
-      searchInputresources.value,
-      authoredResources.value,
-      asyncResources.value
-    );
-    groupResults();
-  },
-  { deep: true }
-);
+// onMounted(async () => {
+//   if (resources.value.length !== 0) {
+//     updateResuruces(resources.value);
+//   }
+// });
+// watch(selectorAuthor, () => {
+//   filterByAuthor();
+//   filteredResources.value = intersectObjectsByKey(
+//     'uuid',
+//     searchInputresources.value,
+//     authoredResources.value,
+//     asyncResources.value
+//   );
+//   groupResults();
+// });
+// watch(
+//   asyncResources,
+//   () => {
+//     filteredResources.value = intersectObjectsByKey(
+//       'uuid',
+//       searchInputresources.value,
+//       authoredResources.value,
+//       asyncResources.value
+//     );
+//     groupResults();
+//   },
+//   { deep: true }
+// );
 
 onMounted(() => {
   if (resources.value.length !== 0) {
     filteredResources.value = resources.value;
-    searchInputresources.value = resources.value;
-    authoredResources.value = resources.value;
-    asyncResources.value = resources.value;
+    // searchInputresources.value = resources.value;
+    // authoredResources.value = resources.value;
+    // asyncResources.value = resources.value;
     groupResults();
   }
 });
@@ -191,8 +191,8 @@ onMounted(() => {
               :catalogo="resources"
               :propiedad-busqueda="'title'"
               :etiqueta="'Usa palabras clave...'"
-              @al-filtrar="filterByInput"
             />
+            <!-- @al-filtrar="filterByInput" -->
             <button
               type="button"
               :class="
@@ -237,9 +237,9 @@ onMounted(() => {
 
   <ConsultaModalBusqueda
     ref="modalFiltroAvanzado"
-    @apply-filter="filterByModal()"
     @reset-filter="(results) => resetAdvancedFilter(results)"
   />
+  <!-- @apply-filter="filterByModal()" -->
 </template>
 
 <style lang="scss" scoped>
