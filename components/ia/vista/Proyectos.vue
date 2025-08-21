@@ -58,6 +58,23 @@ watch(proyecto, () => {
   loadSources();
   loadContexts();
 });
+
+const obtenerTipoArchivo = (nombre) => {
+  const extension = nombre.split('.').pop().toLowerCase();
+  const tipos = {
+    shp: 'Shapefile',
+    geojson: 'GeoJSON',
+    csv: 'CSV',
+    kml: 'KML',
+    zip: 'ZIP',
+    pdf: 'PDF',
+    doc: 'Word',
+    docx: 'Word',
+    xls: 'Excel',
+    xlsx: 'Excel',
+  };
+  return tipos[extension] || extension.toUpperCase();
+};
 </script>
 
 <template>
@@ -102,7 +119,7 @@ watch(proyecto, () => {
           <NuxtLink
             class="boton boton-secundario boton-chico"
             aria-label="Crear proyecto"
-            :to="`/ia/proyecto/crea-contexto?proyecto_id=${proyecto.id}`"
+            :to="`/ia/proyecto/contexto/nuevo?proyecto_id=${proyecto.id}`"
           >
             Crear contexto
           </NuxtLink>
@@ -134,7 +151,12 @@ watch(proyecto, () => {
                       Iniciar chat
                       <span class="pictograma-chat" aria-hidden="true" />
                     </nuxt-link>
-                    <nuxt-link class="boton-secundario boton-chico" type="button" to="#">
+                    <nuxt-link
+                      class="boton-secundario boton-chico"
+                      type="button"
+                      :to="`/ia/proyecto/contexto/${contexto.id}?proyecto_id=${proyecto.id}`"
+                      @click="storeIA.seleccionarContexto(contexto)"
+                    >
                       Editar contexto
                       <span class="pictograma-editar" aria-hidden="true" />
                     </nuxt-link>
@@ -190,7 +212,7 @@ watch(proyecto, () => {
               <tbody>
                 <tr v-for="archivo in arraySources" :key="archivo.id">
                   <td class="p-3">{{ archivo.filename }}</td>
-                  <td class="p-3">{{ archivo.document_type }}</td>
+                  <td class="p-3">{{ obtenerTipoArchivo(archivo.filename) }}</td>
                   <!--         <td>{{ archivo.categoria }}</td>
         <td>{{ archivo.origen }}</td> -->
                   <!--         <td>

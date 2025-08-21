@@ -85,6 +85,19 @@ onMounted(async () => {
     nombreProyecto.value = proyecto.value.title;
     descripcionProyecto.value = proyecto.value.description;
     visibilidadProyecto.value = proyecto.value.public ? 'publico' : 'privado';
+
+    const arraySources = await storeIA.getProjectSources(proyecto.value['id']);
+
+    const archivosBackend = arraySources.map((archivo) => ({
+      id: archivo.id,
+      nombre: archivo.filename,
+      tipo: obtenerTipoArchivo(archivo.filename),
+      archivo: null,
+      categoria: 'Archivo',
+      origen: 'Propio',
+    }));
+
+    archivosSeleccionados.value = [...archivosSeleccionados.value, ...archivosBackend];
   }
 });
 
@@ -187,7 +200,7 @@ const guardarProyecto = async () => {
     </template>
 
     <template #vistas-ia>
-      <div class="contenedor">
+      <div class="contenedor" style="max-height: 85vh; overflow-y: auto">
         <h2>Configuración de proyecto</h2>
         <div class="grid">
           <div class="columna-10">
@@ -227,7 +240,7 @@ const guardarProyecto = async () => {
             </form>
           </div>
         </div>
-        <div class="flex flex-contenido-final">
+        <!-- <div class="flex flex-contenido-final">
           <NuxtLink
             class="boton boton-chico boton-primario"
             aria-label="Guardar proyecto"
@@ -242,7 +255,7 @@ const guardarProyecto = async () => {
           >
             Cancelar
           </nuxt-link>
-        </div>
+        </div> -->
 
         <div class="grid">
           <div class="columna-16">
@@ -280,7 +293,42 @@ const guardarProyecto = async () => {
                 />
               </div>
             </div>
-            <!--             <div class="flex flex-contenido-final">
+            <div v-if="archivosSeleccionados.length > 0" class="tabla-archivos m-y-3">
+              <h3>Archivos a subir</h3>
+              <table class="tabla">
+                <thead>
+                  <tr>
+                    <th class="p-x-3 p-y-2">Nombre</th>
+                    <th class="p-x-3 p-y-2">Tipo de archivo</th>
+                    <th class="p-x-3 p-y-2">Categoría</th>
+                    <th class="p-x-3 p-y-2">Origen</th>
+                    <th class="p-x-3 p-y-2">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="archivo in archivosSeleccionados" :key="archivo.id">
+                    <td class="p-3">{{ archivo.nombre }}</td>
+                    <td class="p-3 etiqueta-tabla">
+                      <span class="p-x-1 p-y-minimo">{{ archivo.tipo }}</span>
+                    </td>
+                    <td class="p-3">{{ archivo.categoria }}</td>
+                    <td class="p-3 etiqueta-tabla">
+                      <span class="p-x-1 p-y-minimo">{{ archivo.origen }}</span>
+                    </td>
+                    <td class="p-x-3 p-y-1">
+                      <button
+                        class="boton-pictograma boton-secundario boton-chico"
+                        aria-label="Eliminar archivo"
+                        @click="eliminarArchivo(archivo.id)"
+                      >
+                        <span class="pictograma-eliminar" aria-hidden="true" />
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="flex flex-contenido-final">
               <NuxtLink
                 class="boton boton-chico boton-primario"
                 aria-label="Guardar proyecto"
@@ -295,44 +343,8 @@ const guardarProyecto = async () => {
               >
                 Cancelar
               </nuxt-link>
-            </div> -->
+            </div>
           </div>
-        </div>
-
-        <div v-if="archivosSeleccionados.length > 0" class="tabla-archivos m-t-3">
-          <h3>Archivos a subir</h3>
-          <table class="tabla">
-            <thead>
-              <tr>
-                <th class="p-x-3 p-y-2">Nombre</th>
-                <th class="p-x-3 p-y-2">Tipo de archivo</th>
-                <th class="p-x-3 p-y-2">Categoría</th>
-                <th class="p-x-3 p-y-2">Origen</th>
-                <th class="p-x-3 p-y-2">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="archivo in archivosSeleccionados" :key="archivo.id">
-                <td class="p-3">{{ archivo.nombre }}</td>
-                <td class="p-3 etiqueta-tabla">
-                  <span class="p-x-1 p-y-minimo">{{ archivo.tipo }}</span>
-                </td>
-                <td class="p-3">{{ archivo.categoria }}</td>
-                <td class="p-3 etiqueta-tabla">
-                  <span class="p-x-1 p-y-minimo">{{ archivo.origen }}</span>
-                </td>
-                <td class="p-x-3 p-y-1">
-                  <button
-                    class="boton-pictograma boton-secundario boton-chico"
-                    aria-label="Eliminar archivo"
-                    @click="eliminarArchivo(archivo.id)"
-                  >
-                    <span class="pictograma-eliminar" aria-hidden="true" />
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
         </div>
       </div>
 
@@ -544,7 +556,6 @@ const guardarProyecto = async () => {
 
   th {
     border-bottom: 1px solid var(--borde);
-    color: var(--Base-Tipografa---texto-primario, #141414);
     text-align: center;
     font-size: var(--Tipos-Tamao-Prrafos-Prrafo-base, 16px);
     font-style: normal;

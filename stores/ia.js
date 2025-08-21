@@ -15,6 +15,7 @@ export const useIAStore = defineStore('ia', {
     isUploading: false,
     chats: [],
     chatSeleccionado: null,
+    contextoSeleccionado: null,
   }),
   actions: {
     async crearProyecto(title, description, isPublic, archivos = []) {
@@ -269,6 +270,9 @@ export const useIAStore = defineStore('ia', {
     seleccionarProyecto(proyecto) {
       //console.log("seleccionarProyecto: ",proyecto)
       this.proyectoSeleccionado = proyecto;
+    },
+    seleccionarContexto(contexto) {
+      this.contextoSeleccionado = contexto;
     },
   },
 });

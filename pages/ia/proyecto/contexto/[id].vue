@@ -22,6 +22,9 @@ const mensajeExito = ref('');
 const arraySources = ref([]);
 const fuentesSeleccionadas = ref([]);
 
+const esEdicion = ref(false);
+const contexto = computed(() => storeIA.contextoSeleccionado);
+
 // Si necesitas reaccionar a cambios en el parámetro
 watch(
   () => route.query.proyecto_id,
@@ -181,6 +184,12 @@ const loadSources = async () => {
 
 //carga fuentes del proyecto inicialmente seleccionado
 onMounted(() => {
+  if (route.params.id !== 'nuevo') {
+    esEdicion.value = true;
+
+    nombreContexto.value = contexto.value.title;
+    descripcionContexto.value = contexto.value.description;
+  }
   //console.log(proyecto.value)
   loadSources();
 });
@@ -254,6 +263,7 @@ watch(
                   tipo="file"
                   class="m-b-3"
                   accept="image/jpeg, image/png, image/gif"
+                  texto_ayuda="Sube una imagen en formato JPG o PNG (máx. 5MB)."
                   @change="manejarArchivo"
                 />
                 <!-- Preview de la imagen -->
