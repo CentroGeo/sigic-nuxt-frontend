@@ -79,17 +79,20 @@ function IrARuta(objeto) {
                 >{{ datum[variable]?.toLocaleString('en') }}
                 <span class="pictograma-documento"></span>
               </span>
-              <span v-if="datum[variable]?.toLocaleString('en') === 'Datos tabulados'"
-                >{{ datum[variable]?.toLocaleString('en') }}
-                <span class="pictograma-tabla"></span>
+
+              <span v-if="datum[variable]?.toLocaleString('en') === 'Datos tabulados'">
+                {{ datum[variable]?.toLocaleString('en') }}
+                <span class="pictograma-tabla" />
               </span>
+
               <span
                 v-if="
                   datum[variable]?.toLocaleString('en') === 'dataset' ||
                   datum[variable]?.toLocaleString('en') === 'Capa geográfica'
                 "
-                >{{ datum[variable]?.toLocaleString('en') }}
-                <span class="pictograma-capas"></span>
+              >
+                {{ datum[variable]?.toLocaleString('en') }}
+                <span class="pictograma-capas" />
               </span>
             </p>
 

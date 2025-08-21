@@ -13,8 +13,6 @@ const router = useRouter();
 storeConsulta.resourceType = resourceTypeDic.dataLayer;
 storeFetched.checkFilling();
 
-// const randomNum = ref(0);
-// const isFinishedLoading = ref(0);
 const linkExportaMapa = ref();
 function exportarMapa() {
   exportarHTMLComoPNG(
@@ -183,8 +181,6 @@ const dividir = ref(undefined);
             :lado="storeSelected.byUuid(resource.uuid).lado"
           />
         </SisdaiMapa>
-
-        <!-- @alFinalizarCarga="isFinishedLoading += 1" -->
       </ClientOnly>
     </template>
 

@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
       ...query,
     });
 
-    const endpoint = `${api}?${dataParams.toString()}`
+    const endpoint = `${api}?${dataParams.toString()}`;
     console.log(endpoint);
     const response = await fetch(endpoint, {
       method: 'GET',
@@ -49,5 +49,5 @@ export default defineEventHandler(async (event) => {
   await loadPage();
   console.log('catalogo server api: ', allResults.length);
 
-  return allResults
+  return allResults;
 });
