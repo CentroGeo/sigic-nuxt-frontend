@@ -1,6 +1,6 @@
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
-  const url = 'https://geonode.dev.geoint.mx/services/register'
+  const body = await readBody(event);
+  const url = 'https://geonode.dev.geoint.mx/services/register';
 
   const formData = new FormData();
   formData.append('url', body.url);
@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
         Authorization: `Bearer ${body.token}`,
       },
       body: formData,
-    })
+    });
     // .then(response => console.log(response))
 
     if (!response.ok) {
@@ -29,4 +29,4 @@ export default defineEventHandler(async (event) => {
   } catch (error) {
     console.error('Error al subir al GeoNode:', error);
   }
-})
+});

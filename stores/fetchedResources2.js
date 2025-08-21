@@ -52,57 +52,30 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
 
     async fill(resourceType = storeConsulta.resourceType) {
       // console.log('fill:', resourceType);
-      const config = useRuntimeConfig();
       const { data } = useAuth();
       this.isLoading = true;
 
-      const options = {
-        method: 'GET',
-        // headers: {
-        //   Authorization:
-        //     'Bearer <>',
-        // },
-      };
-
-      if (data.value?.accessToken !== undefined) {
-        options.headers = { Authorization: `Bearer ${data.value?.accessToken}` };
-      }
-
-      const dataParams = new URLSearchParams({
-        // page: page,
-        // page_size: 15,
-        'filter{resource_type}': resourceTypeGeonode[resourceType],
-        // agregar querry para tablas
+      const { error, allResults } = await $fetch('/api/catalogo', {
+        query: {
+          page_size: 100,
+          'filter{resource_type}': resourceTypeGeonode[resourceType],
+          // agregar filtro
+        },
+        headers: {
+          token: `${data.value?.accessToken}`,
+        },
       });
 
-      const endpoint = `${config.public.geonodeApi}/resources?${dataParams.toString()}`;
-      // console.log(endpoint);
-
-      fetch(endpoint, options)
-        .then((response) => response.json())
-        .then((response) => {
-          console.log(response);
-
-          resources[resourceType] = response.resources;
-          this.isLoading = false;
-        })
-        .catch((err) => console.error(err));
-
-      // const r = await $fetch('/api/catalogo', {
-      //   // method: 'GET',
-      //   query: {
-      //     'filter{resource_type}': resourceTypeGeonode[resourceType],
-      //     // agregar filtro
-      //   },
-      //   headers: {
-      //     Authorization: `${data.value?.accessToken}`,
-      //   },
-      // });
+      // console.log('ver error', error);
+      if (error !== undefined) {
+        alert('Vuelve a iniciar sesión');
+        return;
+      }
 
       // // T E M P O R A L
-      // resources[resourceType] = validacionTemporal(r, resourceType);
+      resources[resourceType] = validacionTemporal(allResults, resourceType);
 
-      // this.isLoading = false;
+      this.isLoading = false;
     },
 
     /**

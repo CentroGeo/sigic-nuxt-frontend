@@ -3,49 +3,48 @@ const config = useRuntimeConfig();
 export default defineEventHandler(async (event) => {
   const api = `${config.public.geonodeApi}/resources`;
 
-  let page = 1;
+  // let page = 1;
   let allResults = [];
   const query = getQuery(event);
-  const token = getHeader(event, 'Authorization');
-  //console.log("token", token)
-  let header = {};
-  if (token) {
-    header = { Authorization: `Bearer ${token}` };
-  } else {
-    header = {};
-  }
+  const token = getHeader(event, 'token');
 
-  // Función para hacer la petición recursiva y traer todos los recursos
-  const loadPage = async () => {
-    const dataParams = new URLSearchParams({
-      page: page,
-      // page_size: 15,
-      ...query,
-    });
+  const dataParams = new URLSearchParams(query);
+  let endpoint = `${api}?${dataParams.toString()}`;
+  let error;
 
-    const endpoint = `${api}?${dataParams.toString()}`;
+  do {
     console.log(endpoint);
-    const response = await fetch(endpoint, {
+
+    const options = {
       method: 'GET',
-      headers: header,
-    });
-    //console.log("server api", response)
+      headers: {
+        // Authorization:
+        //   'Bearer <>',
+      },
+    };
+
+    if (token !== undefined) {
+      console.log(token);
+      options.headers = { Authorization: `Bearer ${token}` };
+    }
+
+    const response = await fetch(endpoint, options);
 
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+      // console.log(response);
+
+      error = await response.json();
+      console.log(error);
+
+      return { error };
+      // throw new Error(`HTTP ${response.status} - ${response.statusText}`);
     }
 
-    // console.log('respuesta', response.headers);
     const { links, resources } = await response.json();
     allResults = allResults.concat(resources);
-    if (links.next && page) {
-      // Si la hay, volvemos a solicitar datos
-      page += 1;
-      return loadPage();
-    }
-  };
 
-  await loadPage();
+    endpoint = links.next;
+  } while (endpoint !== null);
 
-  return allResults;
+  return { allResults };
 });
