@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { resourceTypeDic } from '~/utils/consulta';
+import { resourceTypeDic, resourceTypeGeonode } from '~/utils/consulta';
 
 export const useFetchedResources2Store = defineStore('fetchedResources2', () => {
   const storeConsulta = useConsultaStore();
@@ -68,12 +68,23 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
         options.headers = { Authorization: `Bearer ${data.value?.accessToken}` };
       }
 
-      fetch(`${config.public.geonodeApi}/resources`, options)
+      const dataParams = new URLSearchParams({
+        // page: page,
+        // page_size: 15,
+        'filter{resource_type}': resourceTypeGeonode[resourceType],
+        // agregar querry para tablas
+      });
+
+      const endpoint = `${config.public.geonodeApi}/resources?${dataParams.toString()}`;
+      // console.log(endpoint);
+
+      fetch(endpoint, options)
         .then((response) => response.json())
         .then((response) => {
-          console.log(response);
+          // console.log(response);
 
           resources[resourceType] = response.resources;
+          this.isLoading = false;
         })
         .catch((err) => console.error(err));
 

@@ -6,7 +6,6 @@ export default defineEventHandler(async (event) => {
   let page = 1;
   let allResults = [];
   const query = getQuery(event);
-  console.log("query", query)
   const token = getHeader(event, 'Authorization');
   //console.log("token", token)
   let header = {};
