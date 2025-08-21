@@ -1,9 +1,13 @@
 <script setup>
 // PENDING: Tener en cuenta que no solo tendremos archivos vectoriales
 import { onMounted, onUnmounted, ref, toRefs } from 'vue';
-import { useSelectedResourcesStore } from '~/stores/selectedResources.js';
-import { fetchGeometryType, tooltipContent } from '~/utils/consulta.js';
-const resourcesStore = useSelectedResourcesStore();
+import { fetchGeometryType, tooltipContent } from '~/utils/consulta';
+
+const storeSelected = useSelectedResources2Store();
+const capasSeleccionadas = computed({
+  get: () => storeSelected.uuids,
+  set: (uuids) => storeSelected.updateByUuids(uuids),
+});
 const props = defineProps({
   resourceType: {
     type: String,
@@ -14,11 +18,10 @@ const props = defineProps({
     default: Object,
   },
 });
-const { resourceType, catalogueElement } = toRefs(props);
-// const api = config.public.geoserverUrl;
+const { catalogueElement } = toRefs(props);
+
 const subtype = ref(catalogueElement.value.subtype);
 const geomType = ref(null);
-const isChecked = ref(false);
 const buttons = ref([]);
 const optionsDict = {
   Point: { tooltipText: 'Capa de puntos', class: 'pictograma-capa-puntos' },
@@ -67,40 +70,6 @@ const optionsDict = {
 let observer;
 const rootEl = ref();
 
-// Manjeamos el checkbox y controlamos los elementos seleccionados
-function selectElement(resourceType, option) {
-  isChecked.value = !isChecked.value;
-  if (isChecked.value) {
-    resourcesStore.addResource(resourceType, option);
-  } else {
-    resourcesStore.removeResource(resourceType, option);
-  }
-}
-
-// Si está en la lista de elementos seleccionados, mostrarla palomeada. Esto es para cuando cambiamos de vista
-function setCheck() {
-  if (
-    resourcesStore.selectedResources[resourceType.value]?.some(
-      (r) => r.uuid === catalogueElement.value.uuid
-    )
-  ) {
-    isChecked.value = true;
-  } else {
-    isChecked.value = false;
-  }
-}
-setCheck();
-
-// Como también se puede modificar la lista desde el panel de seleccion, montamos un watcher
-// para despalomear las opciones que se borraron
-watch(
-  () => resourcesStore.selectedResources[resourceType.value],
-  () => {
-    setCheck();
-  },
-  { deep: true }
-);
-
 onMounted(() => {
   // Esto es para observar cuando la tarjeta entra en la vista
   observer = new IntersectionObserver(
@@ -108,7 +77,7 @@ onMounted(() => {
       for (const entry of entries) {
         if (entry.isIntersecting) {
           // Primero checamos si no es dataset
-          if (resourceType.value !== 'dataLayer') {
+          if (props.resourceType !== 'dataLayer') {
             buttons.value = [
               {
                 tooltipText: tooltipContent(catalogueElement.value),
@@ -168,11 +137,20 @@ onUnmounted(() => {
   }
 });
 </script>
+
 <template>
   <div :id="`elemento-${catalogueElement.uuid}`" ref="rootEl" class="m-x-5 m-y-2">
-    <div class="tarjeta-elemento" @click="selectElement(resourceType, catalogueElement)">
-      <input :id="`checkbox-${catalogueElement.uuid}`" v-model="isChecked" type="checkbox" />
-      <label :for="catalogueElement.uuid">{{ catalogueElement.title }}</label>
+    <div class="tarjeta-elemento">
+      <input
+        :id="`checkbox-consulta-catalogo-${catalogueElement.uuid}`"
+        v-model="capasSeleccionadas"
+        type="checkbox"
+        :value="catalogueElement.uuid"
+      />
+
+      <label :for="`checkbox-consulta-catalogo-${catalogueElement.uuid}`">
+        {{ catalogueElement.title }}
+      </label>
     </div>
 
     <div class="flex flex-contenido-inicio m-y-3">
@@ -186,13 +164,9 @@ onUnmounted(() => {
     </div>
   </div>
 </template>
+
 <style lang="scss" scoped>
 .flex {
   gap: 8px;
-}
-.tarjeta-elemento:hover {
-  background-color: var(--color-secundario-2);
-  border: 1px solid var(--color-secundario-8);
-  border-radius: 8px;
 }
 </style>

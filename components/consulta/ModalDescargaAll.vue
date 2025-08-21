@@ -1,47 +1,44 @@
 <script setup>
+import { downloadMetadata, downloadPDF, downloadVectorData, wait } from '@/utils/consulta';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
-import { downloadVectorData, downloadPDF, downloadMetadata } from '@/utils/consulta.js';
-const resourcesStore = useSelectedResourcesStore();
+
+const storeSelected = useSelectedResources2Store();
+
 const props = defineProps({
   resourceType: { type: String, required: true },
 });
-const { resourceType } = toRefs(props);
 const modalDescargaAll = ref(null);
 const optionsList = ref(null);
 const tagTitle = ref();
 
 function abrirModalDescargaAll() {
   modalDescargaAll.value?.abrirModal();
-  optionsList.value = optionsDict[resourceType.value]['elements'];
-  tagTitle.value = optionsDict[resourceType.value]['title'];
-}
-
-function wait() {
-  return new Promise((resolve) => setTimeout(resolve, 1000));
+  optionsList.value = optionsDict[props.resourceType]['elements'];
+  tagTitle.value = optionsDict[props.resourceType]['title'];
 }
 
 async function downloadAllCSV() {
-  const resourceList = resourcesStore.selectedResources[resourceType.value];
+  const resourceList = storeSelected.list();
   for (let i = 0; i < resourceList.length; i++) {
     await downloadVectorData(resourceList[i], 'csv');
-    await wait();
+    await wait(1000);
   }
   modalDescargaAll.value?.cerrarModal();
 }
 async function downloadAllPDF() {
-  const resourceList = resourcesStore.selectedResources[resourceType.value];
+  const resourceList = storeSelected.list();
   for (let i = 0; i < resourceList.length; i++) {
     downloadPDF(resourceList[i]);
-    await wait();
+    await wait(1000);
   }
   modalDescargaAll.value?.cerrarModal();
 }
 
 async function downloadAllMetadata() {
-  const resourceList = resourcesStore.selectedResources[resourceType.value];
+  const resourceList = storeSelected.list();
   for (let i = 0; i < resourceList.length; i++) {
     await downloadMetadata(resourceList[i]);
-    await wait();
+    await wait(1000);
   }
   modalDescargaAll.value?.cerrarModal();
 }
@@ -86,6 +83,7 @@ defineExpose({
   abrirModalDescargaAll,
 });
 </script>
+
 <template>
   <ClientOnly>
     <SisdaiModal ref="modalDescargaAll">
@@ -109,6 +107,7 @@ defineExpose({
     </SisdaiModal>
   </ClientOnly>
 </template>
+
 <style lang="scss" scoped>
 .boton-secundario {
   width: 90%;

@@ -1,62 +1,86 @@
 <script setup>
-const resourcesStore = useSelectedResourcesStore();
+import { resourceTypeDic } from '~/utils/consulta';
+
+const storeSelected = useSelectedResources2Store();
+const emit = defineEmits(['descargaClicked', 'mapaClicked']);
+
 const props = defineProps({
   groupName: { type: String, required: true },
-  selectedElement: {
+  resourceElement: {
     type: Object,
     default: () => ({}),
   },
   resourceType: { type: String, required: true },
 });
-const { selectedElement, resourceType } = toRefs(props);
-const shownFileUuid = computed(() => resourcesStore.shownFiles[resourceType.value].uuid);
+const { groupName, resourceElement } = toRefs(props);
 
-const downloadChild = ref(null);
-function notifyDownloadChild() {
-  downloadChild.value?.abrirModalDescarga();
-}
+const selectedResource = computed({
+  get: () => storeSelected.lastVisible().uuid,
+  set: (newSelectedUuid) => storeSelected.setOnlyOneVisible(newSelectedUuid),
+});
+
+const hasGeometry = computed(() => {
+  if (props.resourceType !== resourceTypeDic.dataTable) return false;
+
+  if (resourceElement.value['extent'] === undefined) return false;
+
+  const a = resourceElement.value.extent.coords.join(',');
+  const b = [-1, -1, 0, 0].join(',');
+  if (a === b) return false;
+
+  return true;
+});
 </script>
 
 <template>
   <div>
-    <div @click="resourcesStore.setShownFile(resourceType, selectedElement)">
+    <div>
       <input
-        :id="selectedElement.uuid"
-        v-model="shownFileUuid"
+        :id="resourceElement.uuid"
+        v-model="selectedResource"
         type="radio"
         :name="groupName"
-        :value="selectedElement.uuid"
+        :value="resourceElement.uuid"
+        :checked="resourceElement.uuid === selectedResource"
       />
-      <label :for="selectedElement.uuid">{{ selectedElement.title }}</label>
+      <label :for="resourceElement.uuid">{{ resourceElement.title || 'Cargando...' }}</label>
     </div>
 
     <div class="flex flex-contenido-final">
       <button
+        v-if="hasGeometry"
+        v-globo-informacion:derecha="'Capas'"
+        class="boton-pictograma boton-sin-contenedor-secundario"
+        aria-label="Abrir vista previa"
+        type="button"
+        @click="emit('mapaClicked')"
+      >
+        <span class="pictograma-capas" aria-hidden="true" />
+      </button>
+
+      <button
+        v-globo-informacion:derecha="'Eliminar'"
         class="boton-pictograma boton-sin-contenedor-secundario"
         aria-label="Borrar selección"
         type="button"
-        @click="resourcesStore.removeResource(resourceType, selectedElement)"
+        @click="() => storeSelected.removeByUuid(resourceElement.uuid)"
       >
         <span class="pictograma-eliminar" aria-hidden="true" />
       </button>
+
       <button
+        v-globo-informacion:derecha="'Descargar'"
         class="boton-pictograma boton-sin-contenedor-secundario"
         aria-label="Descargar selección"
         type="button"
-        @click="notifyDownloadChild"
+        @click="emit('descargaClicked')"
       >
         <span class="pictograma-archivo-descargar" aria-hidden="true" />
       </button>
     </div>
   </div>
-
-  <ConsultaModalDescarga
-    ref="downloadChild"
-    :resource-type="resourceType"
-    :selected-element="selectedElement"
-    :download-type="'individual'"
-  />
 </template>
+
 <style lang="scss" scoped>
 .flex {
   gap: 8px;

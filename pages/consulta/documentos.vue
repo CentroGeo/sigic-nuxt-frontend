@@ -1,19 +1,37 @@
 <script setup>
-//const config = useRuntimeConfig();
-const resourcesStore = useSelectedResourcesStore();
+import { resourceTypeDic } from '~/utils/consulta';
 
-/* async function obtenerPDFs() {
-  const res = await fetch(`${config.public.geonodeApi}/api/v2/documents/`);
-  const data = await res.json();
-  const docs = data.results;
+const resourceType = resourceTypeDic.document;
 
-  docs.forEach((doc) => {
-    console.log(`Título: ${doc.title}`);
-    console.log(`Descargar: ${config.public.geonodeApi}${doc.download_url}`);
-  });
+const storeConsulta = useConsultaStore();
+const storeFetched = useFetchedResourcesStore();
+const storeSelected = useSelectedResources2Store();
+storeConsulta.resourceType = resourceType;
+
+const route = useRoute();
+const router = useRouter();
+
+/**
+ * Actualiza el queryParam desde los valores del store.
+ * @param queryParam generado por el store.
+ */
+function updateQueryFromStore(queryParam) {
+  const query = { docs: queryParam };
+
+  if (query.docs !== route.query.docs) {
+    router.replace({ query });
+  }
 }
-obtenerPDFs(); */
-const resourceType = 'document';
+watch(() => storeSelected.asQueryParam(), updateQueryFromStore);
+
+onMounted(() => {
+  storeSelected.addFromQueryParam(route.query.docs);
+
+  // Para cuando hacemos el cambio de página
+  if (storeSelected.uuids.length > 0) {
+    updateQueryFromStore(storeSelected.asQueryParam());
+  }
+});
 </script>
 
 <template>
@@ -27,7 +45,8 @@ const resourceType = 'document';
     </template>
 
     <template #visualizador>
-      <div v-if="!resourcesStore.shownFiles[resourceType]" class="contenedor">
+      <template v-if="storeFetched.isLoading">Cargando...</template>
+      <div v-else-if="storeSelected.uuids.length === 0" class="contenedor">
         <h1>No hay seleccion</h1>
       </div>
       <ConsultaVisualizacionDocumento v-else />

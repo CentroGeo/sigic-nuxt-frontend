@@ -1,27 +1,41 @@
 <script setup>
-import { ref, watch, nextTick, onBeforeUnmount } from 'vue';
+import { onBeforeUnmount, ref } from 'vue';
+import { resourceTypeDic } from '~/utils/consulta';
 
-const resourcesStore = useSelectedResourcesStore();
-const resourceType = 'document';
+const resourceType = resourceTypeDic.document;
 
-const urlEmbebido = ref(null);
+const storeFetched = useFetchedResourcesStore();
+const storeSelected = useSelectedResources2Store();
+
+//const urlEmbebido = ref(null);
 const embedRef = ref(null);
-
-// Esto es por si ya había un documento seleccionado
-if (resourcesStore.shownFiles[resourceType]) {
-  urlEmbebido.value = resourcesStore.shownFiles[resourceType]['embed_url'];
-}
-
+const selectedUuid = computed(() => storeSelected.lastVisible()?.uuid ?? null);
+const selectedElement = computed(() => {
+  if (!selectedUuid.value) return null;
+  return storeFetched.findResources([selectedUuid.value], resourceType)[0] ?? null;
+});
 let resizeObserver;
+const extensionDocumento = computed(() => {
+  const linkCargado = selectedElement.value.links.find((link) => link.link_type === 'uploaded');
+  if (linkCargado) {
+    return linkCargado.extension;
+  } else return '';
+});
+const urlEmbebido = ref(
+  extensionDocumento.value === 'pdf'
+    ? selectedElement.value.embed_url
+    : selectedElement.value.embed_url.replace('/embed', '/link')
+);
 
-// Observa cambios en el recurso seleccionado
-watch(
-  () => resourcesStore.shownFiles[resourceType],
-  async (nv) => {
+watch(selectedElement, (nv) => {
+  (async () => {
+    // console.log('cambio el uuid');
     if (nv) {
       urlEmbebido.value = null; // limpiar antes de volver a asignar
       await nextTick(); // esperar a que el DOM reaccione
-      urlEmbebido.value = nv.embed_url;
+
+      urlEmbebido.value =
+        extensionDocumento.value === 'pdf' ? nv.embed_url : nv.embed_url.replace('/embed', '/link');
 
       await nextTick(); // esperar a que el <embed> esté en DOM
 
@@ -39,8 +53,8 @@ watch(
     } else {
       urlEmbebido.value = null;
     }
-  }
-);
+  })();
+});
 
 onBeforeUnmount(() => {
   if (resizeObserver) resizeObserver.disconnect();
@@ -53,7 +67,7 @@ onBeforeUnmount(() => {
       v-if="urlEmbebido"
       ref="embedRef"
       :src="urlEmbebido"
-      type="application/pdf"
+      :type="extensionDocumento === 'pdf' ? 'application/pdf' : 'text/plain'"
       class="documento-embebido"
     />
   </div>

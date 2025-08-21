@@ -47,7 +47,7 @@ async function subirArchivo() {
       </div>
       <IaLeyendaInicioVistas v-if="!storeIA.existenProyectos" />
 
-      <div v-else>Da click en un chat para iniciar o crea un nuevo chat</div>
+      <!-- <div v-else>Da click en un chat para iniciar o crea un nuevo chat</div> -->
     </template>
   </IaLayoutPaneles>
 </template>

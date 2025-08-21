@@ -3,7 +3,7 @@
 import { ref } from 'vue';
 import { resourceTypeDic, resourceTypeGeonode } from '~/utils/consulta';
 
-export async function useGeonodeResources() {
+export async function useGeonodeResourcesBackup() {
   const config = useRuntimeConfig();
   const storeConsulta = useConsultaStore();
   //const { data: authData, status: authStatus } = useAuth();

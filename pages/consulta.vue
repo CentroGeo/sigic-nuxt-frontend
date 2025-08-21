@@ -19,14 +19,17 @@ onUnmounted(() => (document.querySelector('body').className = ''));
         {
           pictograma: 'pictograma-capas',
           ruta: `${ruta}/capas`,
+          globo: 'Capas geográficas',
         },
         {
           pictograma: 'pictograma-tabla',
           ruta: `${ruta}/tablas`,
+          globo: 'Tabulados de datos',
         },
         {
           pictograma: 'pictograma-documento',
           ruta: `${ruta}/documentos`,
+          globo: 'Documentos',
         },
       ]"
       :funcion-colapsar="storeConsulta.alternarCatalogoColapsable"

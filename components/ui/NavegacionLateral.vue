@@ -52,7 +52,11 @@ defineProps({
           </button>
         </li>
 
-        <li v-for="subPagina in subPaginas" :key="`elemento-${subPagina.ruta}`">
+        <li
+          v-for="subPagina in subPaginas"
+          :key="`elemento-${subPagina.ruta}`"
+          v-globo-informacion="subPagina.globo"
+        >
           <nuxt-link class="boton-pictograma boton-sin-contenedor-primario" :to="subPagina.ruta">
             <span :class="subPagina.pictograma" aria-hidden="true" />
           </nuxt-link>

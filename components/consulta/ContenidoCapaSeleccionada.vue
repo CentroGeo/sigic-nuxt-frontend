@@ -1,34 +1,37 @@
 <script setup>
+import { SisdaiLeyendaWms } from '@centrogeomx/sisdai-mapas';
+
+const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
-const resourcesStore = useSelectedResourcesStore();
+const storeSelected = useSelectedResources2Store();
+const emit = defineEmits(['opacidadClicked', 'descargaClicked', 'tablaClicked']);
+
 const props = defineProps({
-  selectedElement: {
+  resourceElement: {
     type: Object,
     default: () => ({}),
   },
   resourceType: { type: String, required: true },
 });
-const { selectedElement, resourceType } = toRefs(props);
-
-const tablaChild = ref(null);
-const downloadChild = ref(null);
-
-function notifyTabla() {
-  tablaChild.value?.abrirModalTabla();
-}
-function notifyDownloadChild() {
-  downloadChild.value?.abrirModalDescarga();
-}
 
 /**
  * Devuelve el extend de acuerdo a una capa en formato: left,bootom,rigth,top
  * @param {Array} bboxPolygon arreglo de corrdenadas envolventes de la capa
- * @returns {Array}
+ * @returns {Array} left,bootom,rigth,top
  */
 function getExtent(bboxPolygon) {
+  if (!Array.isArray(bboxPolygon)) {
+    console.error(
+      'El valor de la extensión no está definida o no es una lista de coordenadas:',
+      bboxPolygon
+    );
+
+    return '';
+  }
+
   const x = bboxPolygon.map(([x]) => x);
   const y = bboxPolygon.map(([, y]) => y);
-  return [Math.min(...x), Math.min(...y), Math.max(...x), Math.max(...y)];
+  return [Math.min(...x), Math.min(...y), Math.max(...x), Math.max(...y)].join(',');
 }
 
 // Aqui se acaba la parte nueva para la prueba
@@ -36,67 +39,80 @@ const optionsButtons = ref([
   {
     label: 'Hacer zoom',
     pictogram: 'pictograma-zoom-instruccional',
+    globo: 'Zoom a la capa',
     action: () => {
-      // console.log("hacer zoom", {
-      //   extension: getExtent(selectedElement.value.bbox_polygon.coordinates[0]),
-      // });
-
-      storeConsulta.ajustarExtensionMapa = getExtent(
-        selectedElement.value.bbox_polygon.coordinates[0]
-      ).join(',');
+      storeConsulta.mapExtent = getExtent(props.resourceElement.bbox_polygon.coordinates[0]);
     },
   },
   {
     label: 'Ver tablas',
     pictogram: 'pictograma-tabla',
+    globo: 'Ver tabla',
     action: () => {
-      notifyTabla();
+      emit('tablaClicked');
     },
   },
   {
     label: 'Mostrar',
-    pictogram: 'pictograma-ojo-ver',
+    get pictogram() {
+      return storeSelected.byUuid(props.resourceElement.uuid)?.visible
+        ? 'pictograma-ojo-ver'
+        : 'pictograma-ojo-ocultar';
+    },
+    get globo() {
+      return storeSelected.byUuid(props.resourceElement.uuid)?.visible
+        ? 'Ocultar capa'
+        : 'Mostrar capa';
+    },
     action: () => {
-      console.warn('Mostrar u ocultar la capa');
+      storeSelected.byUuid(props.resourceElement.uuid).toggleVisibility();
     },
   },
   {
     label: 'Cambiar opacidad',
     pictogram: 'pictograma-editar',
+    globo: 'Opacidad',
     action: () => {
-      console.warn('cambiar opacidad');
+      emit('opacidadClicked');
     },
   },
   {
     label: 'Eliminar selección',
     pictogram: 'pictograma-eliminar',
+    globo: 'Eliminar',
     action: () => {
-      resourcesStore.removeResource(resourceType.value, selectedElement.value);
+      storeSelected.removeByUuid(props.resourceElement.uuid);
     },
   },
   {
     label: 'Descargar archivo',
     pictogram: 'pictograma-archivo-descargar',
+    globo: 'Descargar',
     action: () => {
-      notifyDownloadChild();
+      emit('descargaClicked');
     },
   },
 ]);
 </script>
+
 <template>
   <div>
-    <!-- El contenido de la tarjeta de capas  -->
-    <div class="m-b-5">
-      <p class="tarjeta-titulo m-y-2">
-        {{ selectedElement.title }}
-      </p>
-      <p class="tarjeta-etiqueta">Variables disponibles</p>
+    <!-- El contenido de la tarjeta de capas -->
+    <div class="m-y-2">
+      <SisdaiLeyendaWms
+        :nombre="resourceElement.alternate"
+        :fuente="`${config.public.geoserverUrl}/wms?`"
+        :titulo="resourceElement.title || 'cargando...'"
+        :sin-control="true"
+        :sin-control-clases="true"
+      />
     </div>
 
     <div class="flex flex-contenido-final">
       <button
         v-for="button in optionsButtons"
         :key="button.label"
+        v-globo-informacion:derecha="button.globo"
         class="boton-pictograma boton-sin-contenedor-secundario"
         :aria-label="button.label"
         type="button"
@@ -105,16 +121,9 @@ const optionsButtons = ref([
         <span :class="button.pictogram" aria-hidden="true" />
       </button>
     </div>
-    <!-- Los modales-->
-    <ConsultaModalTabla ref="tablaChild" :selected-element="selectedElement" />
-    <ConsultaModalDescarga
-      ref="downloadChild"
-      :resource-type="resourceType"
-      :selected-element="selectedElement"
-      :download-type="'individual'"
-    />
   </div>
 </template>
+
 <style lang="scss" scoped>
 .flex {
   gap: 8px;
