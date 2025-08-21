@@ -133,7 +133,6 @@ function changeModal(to) {
     </div>
 
     <div class="m-x-2 m-y-1">
-      <!-- {{ JSON.stringify(storeSelected.sortedDescending()) }} -->
       <ConsultaElementoSeleccionado
         v-for="resource in storeSelected.sortedDescending()"
         :key="`seleccion-${resource.uuid}`"

@@ -24,7 +24,7 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
     //   const noGeometryExtent = [-1, -1, 0, 0].join('');
 
     //   return resources[resourceTypeDic.dataTable].fillter(
-    //     U S A R -> tableHaveGeometry
+    //     U S A R -> isGeometricExtension
     //     (resource) => resource.extent.coords.join('') !== noGeometryExtent
     //   );
     // }
