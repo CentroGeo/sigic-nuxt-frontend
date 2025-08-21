@@ -147,7 +147,6 @@ onMounted(() => {
 });
 
 // api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
-
 const dividir = ref(undefined);
 </script>
 
@@ -186,7 +185,6 @@ const dividir = ref(undefined);
 
     <template #seleccion>
       <button @click="() => (dividir = dividir === undefined ? 50 : undefined)">Dividir</button>
-      <input v-model="dividir" type="range" :disabled="dividir === undefined" />
 
       <ConsultaLayoutSeleccion
         titulo="Capas seleccionadas"
