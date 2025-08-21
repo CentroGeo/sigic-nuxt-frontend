@@ -81,7 +81,7 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
       fetch(endpoint, options)
         .then((response) => response.json())
         .then((response) => {
-          // console.log(response);
+          console.log(response);
 
           resources[resourceType] = response.resources;
           this.isLoading = false;

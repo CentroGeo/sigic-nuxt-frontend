@@ -103,13 +103,14 @@ function setSelectedCategory(categoria) {
 //   });
 // }
 
-// watch(resources, () => {
-//   filteredResources.value = resources.value;
-//   searchInputresources.value = resources.value;
-//   authoredResources.value = resources.value;
-//   asyncResources.value = resources.value;
-//   groupResults();
-// });
+function updateResuruces(nuevosRecursos) {
+  filteredResources.value = nuevosRecursos;
+  // searchInputresources.value = resources.value;
+  // authoredResources.value = resources.value;
+  // asyncResources.value = resources.value;
+  groupResults();
+}
+
 // watch(searchInputresources, (nv) => {
 //   searchInputresources.value = nv;
 //   filteredResources.value = intersectObjectsByKey(
@@ -120,13 +121,13 @@ function setSelectedCategory(categoria) {
 //   );
 //   groupResults();
 // });
-// watch(resources, updateResuruces);
+watch(resources, updateResuruces);
 
-// onMounted(async () => {
-//   if (resources.value.length !== 0) {
-//     updateResuruces(resources.value);
-//   }
-// });
+onMounted(async () => {
+  if (resources.value.length !== 0) {
+    updateResuruces(resources.value);
+  }
+});
 // watch(selectorAuthor, () => {
 //   filterByAuthor();
 //   filteredResources.value = intersectObjectsByKey(
@@ -150,16 +151,6 @@ function setSelectedCategory(categoria) {
 //   },
 //   { deep: true }
 // );
-
-onMounted(() => {
-  if (resources.value.length !== 0) {
-    filteredResources.value = resources.value;
-    // searchInputresources.value = resources.value;
-    // authoredResources.value = resources.value;
-    // asyncResources.value = resources.value;
-    groupResults();
-  }
-});
 </script>
 
 <template>
