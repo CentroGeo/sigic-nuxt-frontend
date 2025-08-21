@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { resourceTypeDic, resourceTypeGeonode } from '~/utils/consulta';
+import { resourceTypeDic } from '~/utils/consulta';
 
 export const useFetchedResources2Store = defineStore('fetchedResources2', () => {
   const storeConsulta = useConsultaStore();
@@ -52,24 +52,46 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
 
     async fill(resourceType = storeConsulta.resourceType) {
       // console.log('fill:', resourceType);
+      const config = useRuntimeConfig();
       const { data } = useAuth();
       this.isLoading = true;
 
-      const r = await $fetch('/api/catalogo', {
-        // method: 'GET',
-        query: {
-          'filter{resource_type}': resourceTypeGeonode[resourceType],
-          // agregar filtro
-        },
-        headers: {
-          Authorization: `${data.value?.accessToken}`,
-        },
-      });
+      const options = {
+        method: 'GET',
+        // headers: {
+        //   Authorization:
+        //     'Bearer <>',
+        // },
+      };
 
-      // T E M P O R A L
-      resources[resourceType] = validacionTemporal(r, resourceType);
+      if (data.value?.accessToken !== undefined) {
+        options.headers = { Authorization: `Bearer ${data.value?.accessToken}` };
+      }
 
-      this.isLoading = false;
+      fetch(`${config.public.geonodeApi}/resources`, options)
+        .then((response) => response.json())
+        .then((response) => {
+          console.log(response);
+
+          resources[resourceType] = response.resources;
+        })
+        .catch((err) => console.error(err));
+
+      // const r = await $fetch('/api/catalogo', {
+      //   // method: 'GET',
+      //   query: {
+      //     'filter{resource_type}': resourceTypeGeonode[resourceType],
+      //     // agregar filtro
+      //   },
+      //   headers: {
+      //     Authorization: `${data.value?.accessToken}`,
+      //   },
+      // });
+
+      // // T E M P O R A L
+      // resources[resourceType] = validacionTemporal(r, resourceType);
+
+      // this.isLoading = false;
     },
 
     /**
