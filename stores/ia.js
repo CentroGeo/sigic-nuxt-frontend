@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 // TODO: intentar hacer un módulo para cada set proyectos,fuentes,contextos,chats
 
-const backend = 'http://localhost:8181/';
+//const backend = 'http://localhost:8181/';
 
 export const useIAStore = defineStore('ia', {
   state: () => ({
@@ -16,6 +16,7 @@ export const useIAStore = defineStore('ia', {
     chats: [],
     chatSeleccionado: null,
     contextoSeleccionado: null,
+    backend: useRuntimeConfig().public.iaBackendUrl,
   }),
   actions: {
     async crearProyecto(title, description, isPublic, archivos = []) {
@@ -81,7 +82,7 @@ export const useIAStore = defineStore('ia', {
             reject(new Error('Subida cancelada'));
           });
 
-          xhr.open('POST', backend + 'api/fileuploads/workspaces/admin/create');
+          xhr.open('POST', this.backend + 'api/fileuploads/workspaces/admin/create');
           xhr.send(formData);
         });
       } catch (error) {
@@ -103,10 +104,13 @@ export const useIAStore = defineStore('ia', {
         formData.append("public", isPublic === "publico" ? "True" : "False");
  */
 
-        const response = await fetch(backend + 'api/fileuploads/workspaces/admin/contexts/create', {
-          method: 'POST',
-          body: formData,
-        });
+        const response = await fetch(
+          this.backend + 'api/fileuploads/workspaces/admin/contexts/create',
+          {
+            method: 'POST',
+            body: formData,
+          }
+        );
 
         console.log(response);
 
@@ -130,7 +134,7 @@ export const useIAStore = defineStore('ia', {
     async getProjectsList() {
       //this.existeContexto = true;
 
-      const response = await fetch(backend + 'api/fileuploads/workspaces/admin', {
+      const response = await fetch(this.backend + 'api/fileuploads/workspaces/admin', {
         method: 'POST',
         body: {},
       });
@@ -155,7 +159,7 @@ export const useIAStore = defineStore('ia', {
 
     async getProjectSources(project_id) {
       const response = await fetch(
-        backend + 'api/fileuploads/workspaces/admin/' + project_id + '/files',
+        this.backend + 'api/fileuploads/workspaces/admin/' + project_id + '/files',
         {
           method: 'POST',
           body: {},
@@ -182,7 +186,7 @@ export const useIAStore = defineStore('ia', {
 
     async getProjectContexts(project_id) {
       const response = await fetch(
-        backend + 'api/fileuploads/workspaces/admin/' + project_id + '/contexts',
+        this.backend + 'api/fileuploads/workspaces/admin/' + project_id + '/contexts',
         {
           method: 'POST',
           body: {},
@@ -213,7 +217,7 @@ export const useIAStore = defineStore('ia', {
       //this.existeContexto = true;
       console.log(user_id);
 
-      const response = await fetch(backend + 'api/chat/history/getchats', {
+      const response = await fetch(this.backend + 'api/chat/history/getchats', {
         method: 'POST',
         body: {},
       });
@@ -240,7 +244,7 @@ export const useIAStore = defineStore('ia', {
       //this.existeContexto = true;
       console.log(chat_id);
 
-      const response = await fetch(backend + 'api/chat/history/user', {
+      const response = await fetch(this.backend + 'api/chat/history/user', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
