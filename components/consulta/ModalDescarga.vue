@@ -1,5 +1,5 @@
 <script setup>
-import { downloadMetadata, downloadPDF, downloadVectorData } from '@/utils/consulta';
+import { downloadDocs, downloadMetadata, downloadWMS } from '@/utils/consulta';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 const props = defineProps({
   resourceType: { type: String, required: true },
@@ -12,7 +12,9 @@ const { resourceType, selectedElement } = toRefs(props);
 const modalDescarga = ref(null);
 const optionsList = ref(null);
 const tagTitle = ref();
-
+const extension = ref(
+  selectedElement.value.links.find((link) => link.link_type === 'uploaded').extension
+);
 function abrirModalDescarga() {
   modalDescarga.value?.abrirModal();
   optionsList.value = optionsDict[resourceType.value]['elements'];
@@ -26,37 +28,25 @@ const optionsDict = {
       {
         label: 'GeoJson',
         action: () => {
-          downloadVectorData(selectedElement.value, 'geojson');
+          downloadWMS(selectedElement.value, 'geojson');
         },
       },
       {
         label: 'CSV',
         action: () => {
-          downloadVectorData(selectedElement.value, 'csv');
+          downloadWMS(selectedElement.value, 'csv');
         },
       },
-      /*       {
-        label: "XLS",
-        action: () => {
-          downloadExcel(selectedElement.value, 'xls');
-        },
-      },
-      {
-        label: 'XLSX',
-        action: () => {
-          downloadExcel(selectedElement.value, 'xlsx');
-        },
-      }, */
       {
         label: 'GeoPackage',
         action: () => {
-          downloadVectorData(selectedElement.value, 'gpkg');
+          downloadWMS(selectedElement.value, 'gpkg');
         },
       },
       {
         label: 'KML',
         action: () => {
-          downloadVectorData(selectedElement.value, 'kml');
+          downloadWMS(selectedElement.value, 'kml');
         },
       },
       {
@@ -73,21 +63,21 @@ const optionsDict = {
       {
         label: 'CSV',
         action: () => {
-          downloadVectorData(selectedElement.value, 'csv');
+          downloadWMS(selectedElement.value, 'csv');
         },
       },
-      /*       {
-        label: "XLS",
+      {
+        label: 'XLS',
         action: () => {
-          downloadExcel(selectedElement.value, 'xls');
+          downloadWMS(selectedElement.value, 'xls');
         },
       },
       {
         label: 'XLSX',
         action: () => {
-          downloadExcel(selectedElement.value, 'xlsx');
+          downloadWMS(selectedElement.value, 'xlsx');
         },
-      }, */
+      },
       {
         label: 'Metadatos',
         action: () => {
@@ -100,9 +90,9 @@ const optionsDict = {
     title: 'documento',
     elements: [
       {
-        label: 'PDF',
+        label: extension.value === 'pdf' ? 'PDF' : 'TXT',
         action: () => {
-          downloadPDF(selectedElement.value);
+          downloadDocs(selectedElement.value);
         },
       },
       {

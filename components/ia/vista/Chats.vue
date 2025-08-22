@@ -1,11 +1,95 @@
 <script setup>
-import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import SisdaiControlDeslizante from '@centrogeomx/sisdai-componentes/src/componentes/control-deslizante/SisdaiControlDeslizante.vue';
-import { ref } from 'vue';
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+import DOMPurify from 'dompurify'; // Para seguridad XSS
+import { marked } from 'marked'; // Importar marked para mostrar formato markdown
+import { defineProps, ref, watch } from 'vue';
+
+const storeIA = useIAStore();
 
 const reporteModal = ref(null);
 const controlDeslizante = ref(null);
 const areaTextoRef = ref(null);
+const isSubmitting = ref(false);
+
+const chatID = ref(0);
+const contextID = ref(0);
+
+/* defineProps({
+  contextId: String  //viene de dinamica.vue
+})
+ */
+const { contextId, chatId } = defineProps({
+  contextId: String,
+  chatId: String,
+});
+
+if (contextId) {
+  console.log('contextId:', contextId);
+  console.log('chatId:', chatId);
+  contextID.value = parseInt(contextId); // Asegura que sea número si es necesario
+  chatID.value = parseInt(chatId);
+  console.log(contextID.value);
+  console.log(chatID.value);
+
+  if (chatID.value > 0) {
+    console.log('chat existente');
+    loadExistentChat(chatID.value);
+  }
+} else {
+  console.log('Chat no válido');
+}
+
+watch(
+  () => chatId,
+  (nuevoValor) => {
+    chatID.value = Number(nuevoValor || 0);
+    console.log('chat existente');
+    if (nuevoValor > 0) {
+      loadExistentChat(nuevoValor);
+    }
+  }
+);
+
+watch(
+  () => contextId,
+  (nuevoValor) => {
+    contextID.value = Number(nuevoValor || 0);
+  }
+);
+
+/* watch(chatId, (nuevoValor, valorAnterior) => {
+  console.log('chatId cambió de', valorAnterior, 'a', nuevoValor);
+
+  // Aquí puedes realizar alguna acción cada vez que cambie
+  // Por ejemplo:
+  // cargarHistorialDeChat(nuevoValor);
+});
+ */
+
+// Función para cargar historico de chat
+async function loadExistentChat(idchat) {
+  console.log('loadExistentChat');
+  //arraySources = [];
+  //Consulta fuentes
+  const historyChat = await storeIA.getChat(idchat);
+
+  const historial_chat = historyChat['history_array'];
+
+  mensajes.value = historial_chat.map((item, index) => {
+    return {
+      id: index,
+      actor: item.role === 'user' ? 'Humano' : 'AI',
+      message: item.content,
+      reporte: false, // puedes cambiar esta lógica si necesitas condicionar
+    };
+  });
+
+  //console.log("arrayContexts: ",arrayContexts);
+
+  //catalogo.value = arrayProjects;
+  //catalogoFiltrado.value = arrayProjects;
+}
 
 function enfocarAreaTexto() {
   areaTextoRef.value.focus();
@@ -13,7 +97,7 @@ function enfocarAreaTexto() {
 
 const mensaje = ref('');
 const mensajes = ref([
-  {
+  /* {
     id: 0,
     actor: 'AI',
     message: 'Hola, ¿En qué te puedo ayudar hoy?',
@@ -34,14 +118,242 @@ const mensajes = ref([
     message:
       'Hasta ahora hemos identificado que los principales retos en el uso de tecnologías para monitoreo marino están relacionados con la baja cobertura de sensores en áreas clave de biodiversidad, como el Arrecife Alacranes y la costa norte de Quintana Roo. También se ha detectado una limitada integración de datos entre plataformas locales e internacionales, lo cual dificulta el análisis comparativo y la toma de decisiones.',
     reporte: true,
-  },
+  }, */
 ]);
 
-const submitMensaje = () => {
-  if (mensaje.value === '') return;
-  mensajes.value.push({ actor: 'Humano', message: mensaje.value });
+// Agregar nueva referencia para el contenedor del chat
+const contenedorChatRef = ref(null);
+const usuarioHizoScroll = ref(false);
+
+// Configurar marked (opcional)
+marked.setOptions({
+  breaks: true, // Convertir saltos de línea en <br>
+  gfm: true, // Habilitar GitHub Flavored Markdown
+});
+
+// Función para convertir markdown a HTML seguro
+function renderMarkdown(content) {
+  return DOMPurify.sanitize(marked.parse(content));
+}
+
+// Función para manejar el scroll del usuario
+function manejarScroll() {
+  const contenedor = contenedorChatRef.value;
+  if (contenedor) {
+    // Verificamos si el usuario está cerca del fondo (con un margen de 100px)
+    const cercaDelFondo =
+      contenedor.scrollTop + contenedor.clientHeight >= contenedor.scrollHeight - 100;
+    usuarioHizoScroll.value = !cercaDelFondo;
+  }
+}
+
+// Función para hacer scroll al final
+/* function scrollToBottom() {
+  nextTick(() => {
+    setTimeout(() => {
+      if (contenedorChatRef.value) {
+        contenedorChatRef.value.scrollTo({
+          top: contenedorChatRef.value.scrollHeight,
+          //behavior: 'smooth'
+          behavior: 'auto'
+        });
+      }
+    }, 50);
+  });
+} */
+
+// Función para hacer scroll al final solo si el usuario no ha hecho scroll manual
+function scrollToBottomIfNeeded() {
+  nextTick(() => {
+    if (contenedorChatRef.value && !usuarioHizoScroll.value) {
+      contenedorChatRef.value.scrollTo({
+        top: contenedorChatRef.value.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
+  });
+}
+
+const submitMensaje = async () => {
+  if (isSubmitting.value || mensaje.value.trim() === '') return;
+
+  const resultado = ref('');
+  const loading = ref(false);
+
+  /* if (mensaje.value === "") return; */
+
+  isSubmitting.value = true;
+
+  const body = {
+    user_id: 'c5461377-f021-402a-9700-a6d43c82e30c',
+    //type: "Preguntar",
+    type: 'RAG',
+    //context_id: parseInt(contextId),
+    context_id: contextID.value,
+    //context_id: 9,
+    model: 'deepseek-r1',
+    //model: "llama3.1",
+    messages: [
+      {
+        role: 'system',
+        content:
+          'Eres un asistente amable que puede ayudar al usuario. Responde de manera cordial. Responde siempre en español.',
+      },
+      { role: 'user', content: mensaje.value },
+    ],
+    think: false,
+    chat_id: chatID.value,
+  };
+
+  // Agregar mensaje del usuario
+  mensajes.value.push({
+    id: mensajes.value.length + 1,
+    actor: 'Humano',
+    message: mensaje.value,
+  });
   mensaje.value = '';
+
+  // Agregar mensaje vacío de la IA que se actualizará en el streaming
+  const aiMessageIndex =
+    mensajes.value.push({
+      id: mensajes.value.length + 1,
+      actor: 'AI',
+      message: '',
+    }) - 1; // Obtenemos el índice del nuevo mensaje
+
+  // Hacer scroll inicial al nuevo mensaje
+  //scrollToBottom();
+
+  // Envía la pregunta
+  const res = await fetch('http://localhost:8000/start', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+  //console.log(res)
+  if (!res.ok) {
+    //resultado.value = 'Error al iniciar solicitud.'
+    mensajes.value[aiMessageIndex].message = 'Error al iniciar solicitud.';
+    loading.value = false;
+    isSubmitting.value = false;
+    return;
+  }
+
+  const json = await res.json();
+
+  const jobId = json.job_id;
+
+  if (json['chat_id'] !== null && json['chat_id'] !== undefined) {
+    chatID.value = json['chat_id'];
+  }
+
+  if (!jobId) {
+    //resultado.value = 'No se recibió job_id.'
+    mensajes.value[aiMessageIndex].message = 'No se recibió job_id.';
+    loading.value = false;
+    isSubmitting.value = false;
+    return;
+  } else {
+    /* console.log('jobId: ', jobId); */
+  }
+
+  // Resetear el flag al enviar nuevo mensaje
+  usuarioHizoScroll.value = false;
+
+  // Hacer scroll inicial al nuevo mensaje
+  scrollToBottomIfNeeded();
+
+  let mensajeRespuesta = '';
+  // Hacer streaming de la respuesta
+  try {
+    const streamRes = await fetch(`http://localhost:8000/stream/${jobId}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    const reader = streamRes.body?.getReader();
+    const decoder = new TextDecoder('utf-8');
+
+    if (!reader) {
+      //resultado.value = 'No se pudo leer el stream.'
+      mensajes.value[aiMessageIndex].message = 'No se pudo leer el stream.';
+      loading.value = false;
+      return;
+    } else {
+      //console.log(reader)
+    }
+
+    //muestra la respuesta del modelo en streaming
+    while (true) {
+      const { done, value } = await reader.read();
+      //console.log(done)
+      if (done) break;
+      const chunk = decoder.decode(value);
+      //resultado.value += chunk
+      //console.log("chunk:",chunk)
+      resultado.value = chunk;
+      //console.log(resultado.value)
+
+      const arrayResults = resultado.value.split('\n\n');
+      //console.log(arrayResults)
+
+      arrayResults.forEach((resultElement) => {
+        //console.log(resultElement)
+
+        if (resultElement.includes('status:')) {
+          try {
+            //const statusStr = resultElement.replace('status:', '');
+            //const statusObj = JSON.parse(statusStr);
+            //console.log(statusObj["status"])
+          } catch (err) {
+            console.log('Error Leyendo status: ' + err);
+            console.log(resultElement);
+          }
+        }
+        if (resultElement.includes('event: done')) {
+          //let statusStr=resultElement.replace("status:","")
+          //let statusObj=JSON.parse(statusStr)
+          //console.log(statusObj)
+        }
+        if (resultElement.includes('data:')) {
+          if (resultElement.includes('STREAM_COMPLETED')) {
+            /* console.log('stream completado'); */
+          } else {
+            try {
+              const dataStr = resultElement.replace('data:', '');
+              //console.log(dataStr)
+              const dataObj = JSON.parse(dataStr);
+              //console.log(dataObj)
+              if (dataObj['status'] === 'started') {
+                //console.log(dataObj['message'])
+                mensajeRespuesta += dataObj['message'];
+                //console.log(mensajeRespuesta)
+                mensajes.value[aiMessageIndex].message = mensajeRespuesta;
+                // Hacer scroll después de cada actualización
+                //scrollToBottom();
+                scrollToBottomIfNeeded();
+              }
+            } catch (err) {
+              console.log('Error Leyendo data: ' + err);
+              console.log(resultElement);
+            }
+          }
+        }
+      });
+    }
+  } catch (err) {
+    //resultado.value = 'Error en el streaming: ' + err
+    //mensajes.value[aiMessageIndex].message = 'Error en el streaming: ' + err
+    console.log('Error en el streaming: ' + err);
+    console.log(mensajeRespuesta);
+    //scrollToBottom();
+    scrollToBottomIfNeeded();
+  } finally {
+    isSubmitting.value = false;
+  }
 };
+
 const generaIdAleatorio = (el) => {
   return el + Math.random().toString(36).substring(2);
 };
@@ -56,7 +368,7 @@ const idAleatorioCD = generaIdAleatorio('controldeslizante-');
     <div class="columna-12">
       <div class="contenedor-chat p-y-3">
         <div class="contenedor-chat-contenido">
-          <div class="contenedor-log">
+          <div ref="contenedorChatRef" class="contenedor-log" @scroll="manejarScroll">
             <div v-for="m in mensajes" :key="m.id">
               <div :class="m.actor == 'Humano' ? 'p-y-2 ' : ''">
                 <div
@@ -72,15 +384,27 @@ const idAleatorioCD = generaIdAleatorio('controldeslizante-');
                   </div>
                   <div>
                     <!-- Mensaje chat -->
-                    <p
-                      class="m-0"
+                    <!--                     <p
+                      class="m-0 markdown-content"
                       :class="
                         m.actor == 'Humano' ? 'fondo-color-neutro p-2 borde-redondeado-20' : ''
                       "
                       :style="m.actor == 'Humano' ? 'max-width: 592px' : ''"
                     >
                       {{ m.message }}
-                    </p>
+                      
+                    </p> -->
+
+                    <!-- Mensaje chat con markdown -->
+                    <!-- TO DO: corregir altura de contenedor de mensaje  -->
+                    <div
+                      class="m-0 markdown-content"
+                      :class="
+                        m.actor == 'Humano' ? 'fondo-color-neutro p-2 borde-redondeado-20' : ''
+                      "
+                      :style="m.actor == 'Humano' ? 'max-width: 592px' : ''"
+                      v-html="renderMarkdown(m.message)"
+                    ></div>
 
                     <!-- Reporte -->
                     <div v-if="m.actor == 'AI' && m.reporte" class="">
@@ -127,13 +451,14 @@ const idAleatorioCD = generaIdAleatorio('controldeslizante-');
                 tabindex="0"
                 rows="1"
                 placeholder="Envía un mensaje"
+                :disabled="isSubmitting"
                 @keypress.enter.exact.prevent="submitMensaje()"
               />
               <div class="formulario-boton">
                 <button
                   class="boton-pictograma boton-con-contenedor-primario"
                   aria-label="Enviar mensaje"
-                  :disabled="mensaje == ''"
+                  :disabled="mensaje == '' || isSubmitting"
                   type="button"
                   @click.prevent="submitMensaje()"
                 >
@@ -254,6 +579,84 @@ const idAleatorioCD = generaIdAleatorio('controldeslizante-');
         }
       }
     }
+  }
+}
+
+/* Estilos para el markdown */
+.markdown-content {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+    font-weight: bold;
+  }
+
+  h1 {
+    font-size: 1.5em;
+  }
+  h2 {
+    font-size: 1.4em;
+  }
+  h3 {
+    font-size: 1.3em;
+  }
+
+  p {
+    margin: 0;
+    /* line-height: 1.5; */
+  }
+
+  ul,
+  ol {
+    margin-bottom: 1em;
+    padding-left: 2em;
+  }
+
+  li {
+    margin-bottom: 0.5em;
+  }
+
+  strong {
+    font-weight: bold;
+  }
+
+  em {
+    font-style: italic;
+  }
+
+  code {
+    background-color: #f0f0f0;
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-family: monospace;
+  }
+
+  pre {
+    background-color: #f5f5f5;
+    padding: 1em;
+    border-radius: 4px;
+    overflow-x: auto;
+
+    code {
+      background-color: transparent;
+      padding: 0;
+    }
+  }
+
+  blockquote {
+    border-left: 3px solid #ccc;
+    padding-left: 1em;
+    margin-left: 0;
+    color: #666;
+  }
+
+  a {
+    color: var(--boton-primario-fondo);
+    text-decoration: underline;
   }
 }
 </style>

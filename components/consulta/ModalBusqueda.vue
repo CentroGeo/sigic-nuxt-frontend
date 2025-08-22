@@ -1,117 +1,83 @@
 <script setup>
+import { ClientOnly } from '#components';
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiCasillaVerificacion from '@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 
-const props = defineProps({
-  categories: { type: Array, default: () => [] },
-  resourceType: { type: String, required: true },
-});
-const { categories } = toRefs(props);
-const storeFetched = useFetchedResourcesStore();
-const resources = computed(() => storeFetched[props.resourceType]);
-const emit = defineEmits(['updateResults']);
+const storeFilters = useFilteredResources();
+const emit = defineEmits(['applyFilter', 'resetFilter']);
 const modalBusqueda = ref(null);
-const selectedFilter = ref({
-  selectedCategory: [],
-  institucionInput: null,
-  yearInput: null,
-  keywordsInput: null,
+const institutionInput = computed({
+  get: () => storeFilters.filters.institutions,
+  set: (value) => storeFilters.updateFilter('institutions', value),
 });
-const results = ref([]);
+const yearInput = computed({
+  get: () => storeFilters.filters.years,
+  set: (value) => storeFilters.updateFilter('years', value),
+});
+const keywordsInput = computed({
+  get: () => storeFilters.filters.keywords,
+  set: (value) => storeFilters.updateFilter('keywords', value),
+});
+const inputCategories = computed({
+  get: () => storeFilters.filters.categories,
+  set: (value) => storeFilters.updateFilter('categories', value),
+});
+
+const categoriesDict = {
+  'Imagery Base Maps Earth Cover': 'imageryBaseMapsEarthCover',
+  Society: 'society',
+  Economy: 'economy',
+  'Utilities Communication': 'utilitiesCommunication',
+  Environment: 'environment',
+  Oceans: 'oceans',
+  Biota: 'biota',
+  Health: 'health',
+  Elevation: 'elevation',
+  'Geoscientific Information': 'geoscientificInformation',
+  'Planning Cadastre': 'planningCadastre',
+  'Inland Waters': 'inlandWaters',
+  Boundaries: 'boundaries',
+  Structure: 'structure',
+  Transportation: 'transportation',
+  'Intelligence Military': 'intelligenceMilitary',
+  Location: 'location',
+  'Climatology Meteorology Atmosphere': 'climatologyMeteorologyAtmosphere',
+  Farming: 'farming',
+  Population: 'population',
+};
 function abrirModalBusqueda() {
   modalBusqueda.value?.abrirModal();
 }
 
+function cerrarModalBusqueda() {
+  modalBusqueda.value?.cerrarModal();
+}
+function resetResults() {
+  emit('resetFilter');
+  storeFilters.resetFilters();
+  modalBusqueda.value?.cerrarModal();
+}
 defineExpose({
   abrirModalBusqueda,
+  cerrarModalBusqueda,
 });
-
-// function filterByCategory(d) {
-//   if (
-//     d.category !== null &&
-//     selectedFilter.value['selectedCategory'].length > 0 &&
-//     selectedFilter.value['selectedCategory'].includes(d.category.gn_description)
-//   ) {
-//     return 1;
-//   } else {
-//     return 0;
-//   }
-// }
-
-function filterByYear(d) {
-  if (
-    d.date !== null &&
-    selectedFilter.value['yearInput'] &&
-    d.date.slice(0, 4) === selectedFilter.value['yearInput']
-  ) {
-    return 1;
-  } else {
-    return 0;
-  }
-}
-
-// Para esta función haría falta formatear el input y el título del recursp
-function filterByKeyword(d) {
-  if (selectedFilter.value['keywordsInput']) {
-    const keywordsList = selectedFilter.value['keywordsInput']
-      .split(',')
-      .map((word) => word.trim())
-      .filter((word) => word.length > 0);
-    const includesWord = keywordsList.some((keyword) => d.title.includes(keyword));
-    if (includesWord) {
-      return 1;
-    } else {
-      return 0;
-    }
-  } else {
-    return 0;
-  }
-}
-
-// La idea sería generar un filtro por categoría y, sacar el numero de filtros aplicados y
-// revisar que sumen un total
-function filterByModal() {
-  let total = 0;
-  const prevResults = [];
-  // Revisamos cuántos filtros se aplicaron
-  Object.keys(selectedFilter.value).forEach((d) => {
-    if (selectedFilter.value[d]) {
-      total += 1;
-    }
-  });
-  // Revisamos la suma por filtro
-  resources.value.forEach((d) => {
-    const i = filterByYear(d) + filterByKeyword(d);
-    if (i === total) {
-      prevResults.push(d);
-    }
-  });
-  results.value = prevResults;
-  emit('updateResults', results.value);
-  modalBusqueda.value.cerrarModal();
-}
-
-function resetResults() {
-  results.value = resources.value;
-  emit('updateResults', results.value);
-  modalBusqueda.value.cerrarModal();
-}
 </script>
 <template>
   <ClientOnly>
-    <SisdaiModal ref="modalBusqueda">
+    <SisdaiModal id="modal-busqueda" ref="modalBusqueda">
       <template #encabezado>
         <h1>Filtro avanzado</h1>
       </template>
 
       <template #cuerpo>
-        <label>Categoria</label>
+        <label for="filtro-categoria">Categoria</label>
         <div class="grupo-categoria flex">
           <SisdaiCasillaVerificacion
-            v-for="(category, index) in categories"
+            v-for="(category, index) in Object.keys(categoriesDict)"
             :key="`${index}-category`"
-            v-model="selectedFilter['selectedCategory']"
+            v-model="inputCategories"
+            name="filtro-categoria"
             :value="category"
             :etiqueta="category"
             class="opcion-checkbox"
@@ -119,31 +85,42 @@ function resetResults() {
           <button class="boton-chico opcion-checkbox">Limpiar selección</button>
         </div>
 
-        <SisdaiCampoBase
-          v-model="selectedFilter['institucionInput']"
-          class="m-y-2"
-          etiqueta="Institución"
-          ejemplo="SECIHTI, INEGI, entre otras"
-        />
+        <ClientOnly>
+          <SisdaiCampoBase
+            id="filtro-institucion"
+            v-model="institutionInput"
+            tipo='"text"'
+            class="m-y-1"
+            etiqueta="Institución"
+            ejemplo="INEGI,..."
+          />
+        </ClientOnly>
+        <ClientOnly>
+          <SisdaiCampoBase
+            id="filtro-anio"
+            v-model="yearInput"
+            tipo='"text"'
+            class="m-y-1"
+            etiqueta="Año de publicación"
+            ejemplo="1995...."
+          />
+        </ClientOnly>
 
-        <SisdaiCampoBase
-          v-model="selectedFilter['yearInput']"
-          class="m-y-2"
-          etiqueta="Año de publicación"
-          ejemplo="1995..."
-        />
-
-        <SisdaiCampoBase
-          v-model="selectedFilter['keywordsInput']"
-          class="m-y-2"
-          etiqueta="Palabras clave"
-          ejemplo="agua, casas..."
-        />
+        <ClientOnly>
+          <SisdaiCampoBase
+            id="filtro-keywords"
+            v-model="keywordsInput"
+            tipo='"text"'
+            class="m-y-1"
+            etiqueta="Palabras clave"
+            ejemplo="casa, agua..."
+          />
+        </ClientOnly>
       </template>
 
       <template #pie>
         <div class="contenedor-botones flex flex-contenido-centrado">
-          <button class="boton-chico boton-primario" @click="filterByModal">Buscar</button>
+          <button class="boton-chico boton-primario" @click="emit('applyFilter')">Buscar</button>
           <button class="boton-chico boton-secundario" @click="resetResults">
             Restablecer filtros
           </button>
@@ -153,6 +130,10 @@ function resetResults() {
   </ClientOnly>
 </template>
 <style lang="scss" scoped>
+#modal-busqueda {
+  max-width: 32%;
+}
+
 .grupo-categoria {
   border: solid var(--campo-etiqueta-color) 1px;
   border-radius: 8px;
@@ -166,7 +147,7 @@ function resetResults() {
   }
 }
 .opcion-checkbox {
-  width: 50%;
+  width: 33%;
 }
 .contenedor-botones {
   width: 100%;

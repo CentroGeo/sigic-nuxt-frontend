@@ -47,14 +47,13 @@ resource.value = await $fetch('/api/objeto', {
 // TODO: actualizar varios metadatos al mismo tiempo
 const { data } = useAuth();
 async function actualizaMetadatos() {
-  const token = ref(data.value?.accessToken);
   await $fetch('/api/metadatos', {
     method: 'POST',
     body: {
       pk: resource.value.pk,
       resource_type: resource.value.resource_type,
       abstract: campoResumen.value,
-      token: token.value,
+      token: data.value?.accessToken,
     },
   });
 }

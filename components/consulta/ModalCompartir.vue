@@ -6,13 +6,12 @@ function abrirModalCompartir() {
 }
 const route = useRoute();
 const config = useRuntimeConfig();
-const origin = config.public.domain;
-const currentPath = computed(() => origin + route.fullPath);
-
+const baseUrl = config.public.baseURL;
+const currentPath = computed(() => baseUrl + route.fullPath);
 async function copyToClipboard() {
   try {
     await navigator.clipboard.writeText(currentPath.value);
-    alert('Enlace copiado al portapapeles.');
+    alert('Enlace copiado al portapapeles: ' + currentPath.value);
   } catch (err) {
     console.error('Error al copiar: ', err);
   }
@@ -20,14 +19,22 @@ async function copyToClipboard() {
 
 useHead(() => ({
   meta: [
-    { property: 'og:url', content: currentPath.value },
     { property: 'og:type', content: 'article' },
     { property: 'og:title', content: 'SIGIC' },
-    { property: 'og:title', content: 'Esta es la descripcion' },
+    { property: 'og:description', content: 'Esta es la descripción' },
     {
       property: 'og:image',
       content: 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg',
     },
+    { property: 'og:url', content: currentPath.value },
+    { name: 'twitter:card', content: 'summary' },
+    { name: 'twitter:title', content: 'SIGIC' },
+    { name: 'twitter:description', content: 'Esta es la descripción' },
+    {
+      name: 'twitter:image',
+      content: 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg',
+    },
+    { name: 'twitter:url', content: currentPath.value },
   ],
 }));
 

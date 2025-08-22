@@ -44,31 +44,37 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
     ]),
 
     checkFilling(resourceType = storeConsulta.resourceType) {
-      // console.log('checkFilling:', resourceType);
       if (resources[resourceType].length > 0) return;
-
       this.fill(resourceType);
     },
 
     async fill(resourceType = storeConsulta.resourceType) {
-      // console.log('fill:', resourceType);
       const { data } = useAuth();
       this.isLoading = true;
 
-      const r = await $fetch('/api/catalogo', {
-        // method: 'GET',
+      if (data.value?.accessToken) {
+        console.info(new Date(data.value.expires));
+      }
+
+      const options = {
         query: {
           'filter{resource_type}': resourceTypeGeonode[resourceType],
           // agregar filtro
         },
         headers: {
-          Authorization: `${data.value?.accessToken}`,
+          token: data.value?.accessToken ? data.value?.accessToken : 'sin token',
         },
-      });
+      };
+
+      const { error, allResults } = await $fetch('/api/catalogo', options);
+
+      if (error !== undefined) {
+        alert('Vuelve a iniciar sesión');
+        return;
+      }
 
       // T E M P O R A L
-      resources[resourceType] = validacionTemporal(r, resourceType);
-
+      resources[resourceType] = validacionTemporal(allResults, resourceType);
       this.isLoading = false;
     },
 
@@ -109,12 +115,7 @@ function validacionTemporal(resources, resourceType) {
 
   if (resourceType === resourceTypeDic.dataLayer) {
     // Si son capas geográficas, excluimos aquellos que no tengan geometria
-    const noGeometryExtent = [-1, -1, 0, 0].join('');
-    return resources.filter(
-      (resource) =>
-        // !resource.extent.coords.every((value, index) => value === noGeometryExtent[index])
-        resource.extent.coords.join('') !== noGeometryExtent
-    );
+    return resources.filter((resource) => isGeometricExtension(resource.extent));
   }
 
   return resources;
