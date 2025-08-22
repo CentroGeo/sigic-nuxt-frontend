@@ -113,7 +113,7 @@ onMounted(async () => {
 
         <ClientOnly>
           <div class="flex flex-contenido-centrado m-y-3">
-            <form class="campo-busqueda" @submit.prevent>
+            <form class="campo-busqueda columna-12" @submit.prevent>
               <label for="idunicobusqueda" class="a11y-solo-lectura"> Campo de búsqueda </label>
               <input
                 id="input-busqueda-consulta"

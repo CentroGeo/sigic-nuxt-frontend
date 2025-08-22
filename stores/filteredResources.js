@@ -42,13 +42,13 @@ export const useFilteredResources = defineStore('filteredResources', () => {
       if (filters.inputSearch !== null) {
         data = data.filter((resource) => cleanInput(resource.title).includes(filters.inputSearch));
       }
-
+      // Filtramos por propietario
       if (filters.owner === 'catalogo') {
         data = data.filter((resource) => resource.owner.email !== userEmail);
       } else if (filters.owner === 'misArchivos') {
         data = data.filter((resource) => resource.owner.email === userEmail);
       }
-
+      // Filtramos por año
       if (filters.years !== null) {
         const yearList = filters.years.split(',');
         yearList.forEach(
@@ -59,7 +59,7 @@ export const useFilteredResources = defineStore('filteredResources', () => {
             }))
         );
       }
-
+      // Filtramos por institución
       if (filters.institutions !== null) {
         data = data.filter((resource) => resource.attribution);
         const institutionList = filters.institutions.split(',');
@@ -69,7 +69,9 @@ export const useFilteredResources = defineStore('filteredResources', () => {
           );
         });
       }
+      // Filtramos por keyword
 
+      // Filtramos por categoria
       if (filters.categories.length > 0) {
         data = data.filter((resource) => resource.category);
         data = data.filter((resource) =>

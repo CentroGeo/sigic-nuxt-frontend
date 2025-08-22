@@ -19,14 +19,22 @@ async function copyToClipboard() {
 
 useHead(() => ({
   meta: [
-    { property: 'og:url', content: currentPath.value },
     { property: 'og:type', content: 'article' },
     { property: 'og:title', content: 'SIGIC' },
-    { property: 'og:title', content: 'Esta es la descripcion' },
+    { property: 'og:description', content: 'Esta es la descripción' },
     {
       property: 'og:image',
       content: 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg',
     },
+    { property: 'og:url', content: currentPath.value },
+    { name: 'twitter:card', content: 'summary' },
+    { name: 'twitter:title', content: 'SIGIC' },
+    { name: 'twitter:description', content: 'Esta es la descripción' },
+    {
+      name: 'twitter:image',
+      content: 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg',
+    },
+    { name: 'twitter:url', content: currentPath.value },
   ],
 }));
 
