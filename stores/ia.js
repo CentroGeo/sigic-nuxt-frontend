@@ -278,5 +278,51 @@ export const useIAStore = defineStore('ia', {
     seleccionarContexto(contexto) {
       this.contextoSeleccionado = contexto;
     },
+    async getProjectById(project_id) {
+      const response = await fetch(
+        this.backend + `api/fileuploads/workspaces/admin/register/${project_id}`,
+        {
+          method: 'POST',
+          body: {},
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Error al consultar proyecto');
+      }
+
+      const data = await response.json();
+
+      if (data.length > 0) {
+        this.proyectoSeleccionado = data[0];
+      } else {
+        this.proyectoSeleccionado = null;
+      }
+
+      return data;
+    },
+    async getContextById(project_id) {
+      const response = await fetch(
+        this.backend + `api/fileuploads/workspaces/admin/contexts/register/${project_id}`,
+        {
+          method: 'POST',
+          body: {},
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Error al consultar proyecto');
+      }
+
+      const data = await response.json();
+
+      if (data.length > 0) {
+        this.proyectoSeleccionado = data[0];
+      } else {
+        this.proyectoSeleccionado = null;
+      }
+
+      return data;
+    },
   },
 });

@@ -76,17 +76,19 @@ const categoriaSeleccionada = ref(null);
 const route = useRoute();
 const esEdicion = ref(false);
 
-const proyecto = computed(() => storeIA.proyectoSeleccionado);
+const proyecto = ref(null);
 
 onMounted(async () => {
   if (route.params.id !== 'nuevo') {
     esEdicion.value = true;
 
-    nombreProyecto.value = proyecto.value.title;
-    descripcionProyecto.value = proyecto.value.description;
-    visibilidadProyecto.value = proyecto.value.public ? 'publico' : 'privado';
+    proyecto.value = await storeIA.getProjectById(route.params.id);
 
-    const arraySources = await storeIA.getProjectSources(proyecto.value['id']);
+    nombreProyecto.value = proyecto.value.workspace.title;
+    descripcionProyecto.value = proyecto.value.workspace.description;
+    visibilidadProyecto.value = proyecto.value.workspace.public ? 'publico' : 'privado';
+
+    const arraySources = await storeIA.getProjectSources(route.params.id);
 
     const archivosBackend = arraySources.map((archivo) => ({
       id: archivo.id,

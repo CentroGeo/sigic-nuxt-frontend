@@ -23,7 +23,7 @@ const arraySources = ref([]);
 const fuentesSeleccionadas = ref([]);
 
 const esEdicion = ref(false);
-const contexto = computed(() => storeIA.contextoSeleccionado);
+const contexto = ref(null);
 
 // Si necesitas reaccionar a cambios en el parámetro
 watch(
@@ -183,12 +183,14 @@ const loadSources = async () => {
 };
 
 //carga fuentes del proyecto inicialmente seleccionado
-onMounted(() => {
+onMounted(async () => {
   if (route.params.id !== 'nuevo') {
     esEdicion.value = true;
+    contexto.value = await storeIA.getContextById(route.params.id);
+    console.log(contexto.value);
 
-    nombreContexto.value = contexto.value.title;
-    descripcionContexto.value = contexto.value.description;
+    nombreContexto.value = contexto.value.context.title;
+    descripcionContexto.value = contexto.value.context.description;
   }
   //console.log(proyecto.value)
   loadSources();
