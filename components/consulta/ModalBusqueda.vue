@@ -1,21 +1,29 @@
 <script setup>
+import { ClientOnly } from '#components';
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiCasillaVerificacion from '@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
-import { resourceTypeGeonode } from '~/utils/consulta';
 
-const storeFetched = useFetchedResources2Store();
-const storeConsulta = useConsultaStore();
-
-const resources = computed(() => storeFetched.byResourceType(storeConsulta.resourceType));
+const storeFilters = useFilteredResources();
 const emit = defineEmits(['applyFilter', 'resetFilter']);
 const modalBusqueda = ref(null);
-const institutionInput = ref('');
-const yearInput = ref('');
-const keywordsInput = ref('');
-const inputCategories = ref([]);
+const institutionInput = computed({
+  get: () => storeFilters.filters.institutions,
+  set: (value) => storeFilters.updateFilter('institutions', value),
+});
+const yearInput = computed({
+  get: () => storeFilters.filters.years,
+  set: (value) => storeFilters.updateFilter('years', value),
+});
+const keywordsInput = computed({
+  get: () => storeFilters.filters.keywords,
+  set: (value) => storeFilters.updateFilter('keywords', value),
+});
+const inputCategories = computed({
+  get: () => storeFilters.filters.categories,
+  set: (value) => storeFilters.updateFilter('categories', value),
+});
 
-const results = ref([]);
 const categoriesDict = {
   'Imagery Base Maps Earth Cover': 'imageryBaseMapsEarthCover',
   Society: 'society',
@@ -42,47 +50,18 @@ function abrirModalBusqueda() {
   modalBusqueda.value?.abrirModal();
 }
 
+function cerrarModalBusqueda() {
+  modalBusqueda.value?.cerrarModal();
+}
+function resetResults() {
+  emit('resetFilter');
+  storeFilters.resetFilters();
+  modalBusqueda.value?.cerrarModal();
+}
 defineExpose({
   abrirModalBusqueda,
-  filterByModal,
+  cerrarModalBusqueda,
 });
-
-async function filterByModal() {
-  const { data } = useAuth();
-  const queryParams = { 'filter{resource_type}': resourceTypeGeonode[storeConsulta.resourceType] };
-
-  if (institutionInput.value) {
-    queryParams['institution'] = institutionInput.value;
-  }
-  if (yearInput.value) {
-    queryParams['year'] = yearInput.value;
-  }
-  if (keywordsInput.value) {
-    queryParams['keywords_csv'] = keywordsInput.value;
-  }
-  if (inputCategories.value.length > 0) {
-    const catParam = [];
-    inputCategories.value.forEach((d) => {
-      catParam.push(categoriesDict[d]);
-    });
-    queryParams['filter{category.identifier.in}'] = catParam;
-  }
-
-  results.value = await $fetch('/api/catalogo', {
-    method: 'GET',
-    query: queryParams,
-    headers: {
-      Authorization: `${data.value?.accessToken}`,
-    },
-  });
-  modalBusqueda.value.cerrarModal();
-  return results.value;
-}
-
-function resetResults() {
-  results.value = resources.value;
-  modalBusqueda.value.cerrarModal();
-}
 </script>
 <template>
   <ClientOnly>
@@ -92,12 +71,13 @@ function resetResults() {
       </template>
 
       <template #cuerpo>
-        <label>Categoria</label>
+        <label for="filtro-categoria">Categoria</label>
         <div class="grupo-categoria flex">
           <SisdaiCasillaVerificacion
             v-for="(category, index) in Object.keys(categoriesDict)"
             :key="`${index}-category`"
             v-model="inputCategories"
+            name="filtro-categoria"
             :value="category"
             :etiqueta="category"
             class="opcion-checkbox"
@@ -105,32 +85,37 @@ function resetResults() {
           <button class="boton-chico opcion-checkbox">Limpiar selección</button>
         </div>
 
-        <SisdaiCampoBase
-          id="filtro-institicion"
-          v-model="institutionInput"
-          tipo='"text"'
-          class="m-y-1"
-          etiqueta="Institución"
-          ejemplo="SECIHTI, INEGI, entre otras"
-        />
+        <ClientOnly>
+          <SisdaiCampoBase
+            id="filtro-institucion"
+            v-model="institutionInput"
+            tipo='"text"'
+            class="m-y-1"
+            etiqueta="Institución"
+            ejemplo="INEGI,..."
+          />
+        </ClientOnly>
+        <ClientOnly>
+          <SisdaiCampoBase
+            id="filtro-anio"
+            v-model="yearInput"
+            tipo='"text"'
+            class="m-y-1"
+            etiqueta="Año de publicación"
+            ejemplo="1995...."
+          />
+        </ClientOnly>
 
-        <SisdaiCampoBase
-          id="filtro-anio"
-          v-model="yearInput"
-          tipo='"text"'
-          class="m-y-1"
-          etiqueta="Año de publicación"
-          ejemplo="1995..."
-        />
-
-        <SisdaiCampoBase
-          id="filtro-keywords"
-          v-model="keywordsInput"
-          tipo='"text"'
-          class="m-y-1"
-          etiqueta="Palabras clave"
-          ejemplo="agua, casas..."
-        />
+        <ClientOnly>
+          <SisdaiCampoBase
+            id="filtro-keywords"
+            v-model="keywordsInput"
+            tipo='"text"'
+            class="m-y-1"
+            etiqueta="Palabras clave"
+            ejemplo="casa, agua..."
+          />
+        </ClientOnly>
       </template>
 
       <template #pie>

@@ -10,6 +10,14 @@ export const resourceTypeGeonode = {
   [resourceTypeDic.document]: 'document',
 };
 
+export function cleanInput(input) {
+  return input
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase();
+}
+
 export function tooltipContent(resource) {
   let formatedAbstract = 'Sin descripción';
   if (resource.abstract) {

@@ -1,33 +1,34 @@
 <script setup>
-import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
+import { cleanInput } from '~/utils/consulta';
 
 const config = useRuntimeConfig();
 const storeFetched = useFetchedResources2Store();
 const storeConsulta = useConsultaStore();
+const storeFilters = useFilteredResources();
 defineProps({
   titulo: { type: String, default: 'Título' },
-  //resourceType: { type: String, required: true },
   etiquetaElementos: { type: String, default: undefined },
 });
-
+const { data } = useAuth();
+const isLoggedIn = ref(data.value ? true : false);
+const apiCategorias = `${config.public.geonodeApi}/facets/category`;
 const resources = computed(() => storeFetched.byResourceType());
 const filteredResources = ref([]);
-// const asyncResources = ref([]);
-// const authoredResources = ref([]);
-// const searchInputresources = ref([]);
-const apiCategorias = `${config.public.geonodeApi}/facets/category`;
 const categoryList = ref([]);
 const categorizedResources = ref({});
 const selectedCategories = ref([]);
 const modalFiltroAvanzado = ref(null);
 const isFilterActive = ref(false);
+const selectedOwner = computed({
+  get: () => storeFilters.filters.owner,
+  set: (value) => storeFilters.updateFilter('owner', value),
+});
+const inputSearch = computed({
+  get: () => storeFilters.filters.inputSearch,
+  set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
+});
 
-const { data } = useAuth();
-const isLoggedIn = ref(data.value ? true : false);
-// const userEmail = ref(data.value?.user.email);
-
-const selectorAuthor = ref('todos');
 // Esta parte es para obtener todas las categorias
 const { data: geonodeCategories } = await useFetch(`${apiCategorias}`);
 if (!geonodeCategories.value) {
@@ -67,90 +68,25 @@ function setSelectedCategory(categoria) {
     selectedCategories.value.push(categoria);
   }
 }
-
-// function filterByInput(r) {
-//   searchInputresources.value = r;
-// }
-
-// function filterByAuthor() {
-//   if (selectorAuthor.value === 'todos') {
-//     authoredResources.value = resources.value;
-//   } else if (selectorAuthor.value === 'catalogo') {
-//     authoredResources.value = resources.value.filter(
-//       (resource) => resource.owner.email !== userEmail.value
-//     );
-//   } else {
-//     authoredResources.value = resources.value.filter(
-//       (resource) => resource.owner.email === userEmail.value
-//     );
-//   }
-// }
-
-// async function filterByModal() {
-//   isFilterActive.value = true;
-//   asyncResources.value = await modalFiltroAvanzado.value.filterByModal();
-// }
-
-// function resetAdvancedFilter(resources) {
-//   isFilterActive.value = false;
-//   asyncResources.value = resources;
-// }
-
-// function intersectObjectsByKey(key, ...arrays) {
-//   return arrays.reduce((acc, arr) => {
-//     const set = new Set(arr.map((o) => o[key]));
-//     return acc.filter((o) => set.has(o[key]));
-//   });
-// }
-
-function updateResuruces(nuevosRecursos) {
+function applyAdvancedFilter() {
+  isFilterActive.value = true;
+  modalFiltroAvanzado.value.cerrarModalBusqueda();
+}
+function updateResources(nuevosRecursos) {
   filteredResources.value = nuevosRecursos;
-  // searchInputresources.value = resources.value;
-  // authoredResources.value = resources.value;
-  // asyncResources.value = resources.value;
   groupResults();
 }
 
-// watch(searchInputresources, (nv) => {
-//   searchInputresources.value = nv;
-//   filteredResources.value = intersectObjectsByKey(
-//     'uuid',
-//     searchInputresources.value,
-//     authoredResources.value,
-//     asyncResources.value
-//   );
-//   groupResults();
-// });
-watch(resources, updateResuruces);
+watch([inputSearch, selectedOwner, isFilterActive, resources], () => {
+  updateResources(storeFilters.filter());
+});
 
 onMounted(async () => {
+  storeFilters.resetAll();
   if (resources.value.length !== 0) {
-    updateResuruces(resources.value);
+    updateResources(resources.value);
   }
 });
-// watch(selectorAuthor, () => {
-//   filterByAuthor();
-//   filteredResources.value = intersectObjectsByKey(
-//     'uuid',
-//     searchInputresources.value,
-//     authoredResources.value,
-//     asyncResources.value
-//   );
-//   groupResults();
-// });
-// watch(
-//   asyncResources,
-//   () => {
-//     filteredResources.value = intersectObjectsByKey(
-//       'uuid',
-//       searchInputresources.value,
-//       authoredResources.value,
-//       asyncResources.value
-//     );
-//     groupResults();
-//   },
-//   { deep: true }
-// );
 </script>
 
 <template>
@@ -164,7 +100,7 @@ onMounted(async () => {
         <ClientOnly>
           <SisdaiSelector
             v-if="isLoggedIn"
-            v-model="selectorAuthor"
+            v-model="selectedOwner"
             class="m-y-2"
             etiqueta="Buscar en catálogo y tus archivos:"
             instruccional="Selecciona los recursos por permisos"
@@ -177,12 +113,39 @@ onMounted(async () => {
 
         <ClientOnly>
           <div class="flex flex-contenido-centrado m-y-3">
-            <SisdaiCampoBusqueda
+            <form class="campo-busqueda" @submit.prevent>
+              <label for="idunicobusqueda" class="a11y-solo-lectura"> Campo de búsqueda </label>
+              <input
+                id="input-busqueda-consulta"
+                v-model="inputSearch"
+                type="search"
+                class="campo-busqueda-entrada"
+                placeholder="Campo de búsqueda"
+              />
+
+              <button
+                aria-label="Borrar"
+                class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
+                type="button"
+                @click="storeFilters.updateFilter('inputSearch', '')"
+              >
+                <span aria-hidden="true" class="pictograma-cerrar" />
+              </button>
+
+              <button
+                aria-label="Buscar"
+                class="boton-primario boton-pictograma campo-busqueda-buscar"
+                type="button"
+              >
+                <span class="pictograma-buscar" aria-hidden="true" />
+              </button>
+            </form>
+            <!--             <SisdaiCampoBusqueda
               class="columna-12"
               :catalogo="resources"
               :propiedad-busqueda="'title'"
               :etiqueta="'Usa palabras clave...'"
-            />
+            /> -->
             <!-- @al-filtrar="filterByInput" -->
             <button
               type="button"
@@ -228,7 +191,8 @@ onMounted(async () => {
 
   <ConsultaModalBusqueda
     ref="modalFiltroAvanzado"
-    @reset-filter="(results) => resetAdvancedFilter(results)"
+    @apply-filter="applyAdvancedFilter()"
+    @reset-filter="isFilterActive = false"
   />
   <!-- @apply-filter="filterByModal()" -->
 </template>
