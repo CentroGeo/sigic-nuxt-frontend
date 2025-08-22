@@ -28,8 +28,8 @@ export default defineEventHandler(async (event) => {
     'base_file',
     base_file[0].filepath
       ? new Blob([await fsp.readFile(base_file[0].filepath)], {
-          type: base_file[0].mimetype,
-        })
+        type: base_file[0].mimetype,
+      })
       : base_file[0],
     base_file[0].originalFilename
   );
@@ -37,14 +37,16 @@ export default defineEventHandler(async (event) => {
     'sld_file',
     base_file[0].filepath
       ? new Blob([await fsp.readFile(base_file[0].filepath)], {
-          type: base_file[0].mimetype,
-        })
+        type: base_file[0].mimetype,
+      })
       : base_file[0],
     base_file[0].originalFilename
   );
 
   formData.append('dataset_title', data.fields.dataset_title[0]);
   // formData.append("dataset_title", "geonode:coordinaciones");
+  // formData.append("dataset_title", "geonode:coordinaciones_5512c0b1ad0c84af59d3e9182b06c97c");
+
   formData.append('style_upload_form', 'true');
   formData.append('permissions', JSON.stringify({}));
   formData.append('charset', 'undefined');
@@ -60,13 +62,15 @@ export default defineEventHandler(async (event) => {
       body: formData,
     });
 
+    // console.log('response', response)
+
     if (!response.ok) {
       throw new Error(`Error POST: ${response.status}`);
     }
     // console.warn("response status:", response.status);
 
     const json = await response.json();
-    console.warn('json:', json);
+    // console.warn('json:', json);
 
     return json;
   } catch (error) {
