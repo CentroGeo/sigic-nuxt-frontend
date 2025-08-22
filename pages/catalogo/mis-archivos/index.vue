@@ -6,6 +6,14 @@ const storeFetched = useFetchedResources2Store();
 storeFetched.checkFilling(resourceTypeDic.dataTable);
 storeFetched.checkFilling(resourceTypeDic.document);
 
+function tipoRecurso(d) {
+  if (d.resource_type === 'document') {
+    return 'Documentos';
+  } else {
+    return isGeometricExtension(d.extent) ? 'Capa geográfica' : 'Datos Tabulados';
+  }
+}
+
 // // para filtar por los archivos de la usuaria
 const { data } = useAuth();
 const userEmail = data.value.user.email;
@@ -17,7 +25,7 @@ const datos = computed(() =>
       pk: d.pk,
       titulo: d.title,
       // tipo_recurso: d.resource_typed.resource_type,
-      tipo_recurso: isGeometricExtension(d.extent) ? 'Capa geográfica' : 'Dato tabulado',
+      tipo_recurso: tipoRecurso(d),
       categoria: d.category,
       actualizacion: d.last_updated,
       acciones: 'Editar, Ver, Descargar, Remover',
