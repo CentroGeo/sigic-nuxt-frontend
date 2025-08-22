@@ -52,19 +52,18 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
       const { data } = useAuth();
       this.isLoading = true;
 
-      if (data.value?.accessToken) {
-        console.info(new Date(data.value.expires));
-      }
-
       const options = {
         query: {
           'filter{resource_type}': resourceTypeGeonode[resourceType],
-          // agregar filtro
+          // agregar filtros
         },
-        headers: {
-          token: data.value?.accessToken ? data.value?.accessToken : 'sin token',
-        },
+        headers: {},
       };
+
+      if (data.value?.accessToken) {
+        options.headers.token = data.value?.accessToken;
+        console.info(new Date(data.value.expires));
+      }
 
       const { error, allResults } = await $fetch('/api/catalogo', options);
 
