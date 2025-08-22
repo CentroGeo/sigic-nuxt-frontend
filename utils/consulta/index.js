@@ -10,6 +10,14 @@ export const resourceTypeGeonode = {
   [resourceTypeDic.document]: 'document',
 };
 
+export function cleanInput(input) {
+  return input
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase();
+}
+
 export function tooltipContent(resource) {
   let formatedAbstract = 'Sin descripción';
   if (resource.abstract) {
@@ -60,7 +68,7 @@ export async function wait(miliseconds) {
   return new Promise((resolve) => setTimeout(resolve, miliseconds));
 }
 
-export function downloadPDF(resource) {
+export function downloadDocs(resource) {
   const anchor = document.createElement('a');
   anchor.href = resource.download_url;
   anchor.download = `${resource.title}.pdf`;
@@ -93,21 +101,38 @@ export async function downloadMetadata(resource) {
   URL.revokeObjectURL(blobLink);
 }
 
-export async function downloadExcel(resource, format) {
+export async function downloadWMS(resource, format) {
   const config = useRuntimeConfig();
   const formatDict = {
     xls: 'excel',
     xlsx: 'excel2007',
+    gpkg: 'application/x-gpkg',
+    geojson: 'application/json',
+    csv: 'csv',
+    kml: 'application/vnd.google-earth.kml+xml',
   };
-  const url = new URL(`${config.public.geoserverUrl}/ows`);
+  let url = new URL(`${config.public.geoserverUrl}/ows`);
   url.search = new URLSearchParams({
     service: 'WFS',
-    version: '1.0.0',
+    version: '2.0.0',
     request: 'GetFeature',
     typeName: resource.alternate,
     outputFormat: formatDict[format],
   }).toString();
-
+  // Si es un Json vamos a tener que forzar la descarga
+  if (format === 'geojson') {
+    const jsonRequest = await fetch(url);
+    if (!jsonRequest.ok) {
+      console.error('Falló el forzar la descarga del json');
+      return;
+    }
+    const jsonResponse = await jsonRequest.json();
+    const blob = new Blob([JSON.stringify(jsonResponse)], {
+      type: 'application/json',
+    });
+    const blobLink = URL.createObjectURL(blob);
+    url = blobLink;
+  }
   const anchor = document.createElement('a');
   anchor.href = url;
   anchor.target = '_blank';

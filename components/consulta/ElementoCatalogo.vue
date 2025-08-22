@@ -4,22 +4,22 @@ import { onMounted, onUnmounted, ref, toRefs } from 'vue';
 import { fetchGeometryType, tooltipContent } from '~/utils/consulta';
 
 const storeSelected = useSelectedResources2Store();
+const storeConsulta = useConsultaStore();
+
 const capasSeleccionadas = computed({
   get: () => storeSelected.uuids,
   set: (uuids) => storeSelected.updateByUuids(uuids),
 });
 const props = defineProps({
-  resourceType: {
-    type: String,
-    default: String,
-  },
   catalogueElement: {
     type: Object,
     default: Object,
   },
 });
 const { catalogueElement } = toRefs(props);
-
+const { data } = useAuth();
+const isLoggedIn = ref(data.value ? true : false);
+const userEmail = ref(data.value?.user.email);
 const subtype = ref(catalogueElement.value.subtype);
 const geomType = ref(null);
 const buttons = ref([]);
@@ -69,7 +69,6 @@ const optionsDict = {
 // Para triggerear la función de observar
 let observer;
 const rootEl = ref();
-
 onMounted(() => {
   // Esto es para observar cuando la tarjeta entra en la vista
   observer = new IntersectionObserver(
@@ -77,7 +76,7 @@ onMounted(() => {
       for (const entry of entries) {
         if (entry.isIntersecting) {
           // Primero checamos si no es dataset
-          if (props.resourceType !== 'dataLayer') {
+          if (storeConsulta.resourceType !== 'dataLayer') {
             buttons.value = [
               {
                 tooltipText: tooltipContent(catalogueElement.value),
@@ -131,6 +130,7 @@ onMounted(() => {
     observer.observe(rootEl.value);
   }
 });
+
 onUnmounted(() => {
   if (observer && rootEl.value) {
     observer.unobserve(rootEl.value);
@@ -139,7 +139,14 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div :id="`elemento-${catalogueElement.uuid}`" ref="rootEl" class="m-x-5 m-y-2">
+  <div :id="`elemento-${catalogueElement.uuid}`" ref="rootEl" class="tarjeta-catalogo">
+    <div
+      v-if="isLoggedIn && catalogueElement.owner.email === userEmail"
+      class="id-tag flex m-b-1 m-t-0"
+    >
+      <span class="pictograma-persona"></span>
+      Mis archivos
+    </div>
     <div class="tarjeta-elemento">
       <input
         :id="`checkbox-consulta-catalogo-${catalogueElement.uuid}`"
@@ -158,7 +165,7 @@ onUnmounted(() => {
         v-for="(button, i) in buttons"
         :key="i"
         v-globo-informacion:[button.position]="button.tooltipText"
-        :class="[button.class, 'pictograma-mediano']"
+        :class="[button.class, 'pictograma-mediano picto']"
         aria-hidden="true"
       />
     </div>
@@ -168,5 +175,25 @@ onUnmounted(() => {
 <style lang="scss" scoped>
 .flex {
   gap: 8px;
+}
+.tarjeta-catalogo {
+  border-bottom: 1px solid var(--color-neutro-2);
+  padding: 16px 40px;
+}
+.id-tag {
+  background-color: var(--color-secundario-2);
+  padding: 8px;
+  border: solid 1px;
+  border-radius: 8px;
+  color: var(--campo-etiqueta-color);
+  width: fit-content;
+  align-items: center;
+}
+.picto {
+  color: var(--campo-etiqueta-color);
+}
+.picto:hover {
+  background-color: var(--color-secundario-2);
+  border-radius: 8px;
 }
 </style>

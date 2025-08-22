@@ -4,9 +4,12 @@ import { resourceTypeDic } from '~/utils/consulta';
 const resourceType = resourceTypeDic.document;
 
 const storeConsulta = useConsultaStore();
-const storeFetched = useFetchedResourcesStore();
+//const storeFetched = useFetchedResourcesStore();
+const storeFetched = useFetchedResources2Store();
 const storeSelected = useSelectedResources2Store();
-storeConsulta.resourceType = resourceType;
+
+storeConsulta.resourceType = resourceTypeDic.document;
+storeFetched.checkFilling();
 
 const route = useRoute();
 const router = useRouter();
@@ -37,11 +40,7 @@ onMounted(() => {
 <template>
   <ConsultaLayoutPaneles>
     <template #catalogo>
-      <ConsultaLayoutCatalogo
-        titulo="Documentos"
-        :resource-type="resourceType"
-        etiqueta-elementos="Documentos"
-      />
+      <ConsultaLayoutCatalogo titulo="Documentos" etiqueta-elementos="Documentos" />
     </template>
 
     <template #visualizador>

@@ -1,22 +1,33 @@
 <script setup>
-import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
+import { cleanInput } from '~/utils/consulta';
 
-const storeFetched = useFetchedResourcesStore();
-const props = defineProps({
+const config = useRuntimeConfig();
+const storeFetched = useFetchedResources2Store();
+const storeConsulta = useConsultaStore();
+const storeFilters = useFilteredResources();
+defineProps({
   titulo: { type: String, default: 'Título' },
-  resourceType: { type: String, required: true },
   etiquetaElementos: { type: String, default: undefined },
 });
-const { titulo, resourceType } = toRefs(props);
-const config = useRuntimeConfig();
-const resources = computed(() => storeFetched[props.resourceType]);
-const filteredResources = ref();
+const { data } = useAuth();
+const isLoggedIn = ref(data.value ? true : false);
 const apiCategorias = `${config.public.geonodeApi}/facets/category`;
+const resources = computed(() => storeFetched.byResourceType());
+const filteredResources = ref([]);
 const categoryList = ref([]);
 const categorizedResources = ref({});
 const selectedCategories = ref([]);
 const modalFiltroAvanzado = ref(null);
+const isFilterActive = ref(false);
+const selectedOwner = computed({
+  get: () => storeFilters.filters.owner,
+  set: (value) => storeFilters.updateFilter('owner', value),
+});
+const inputSearch = computed({
+  get: () => storeFilters.filters.inputSearch,
+  set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
+});
 
 // Esta parte es para obtener todas las categorias
 const { data: geonodeCategories } = await useFetch(`${apiCategorias}`);
@@ -57,28 +68,24 @@ function setSelectedCategory(categoria) {
     selectedCategories.value.push(categoria);
   }
 }
-
-function filterByInput(r) {
-  filteredResources.value = r;
+function applyAdvancedFilter() {
+  isFilterActive.value = true;
+  modalFiltroAvanzado.value.cerrarModalBusqueda();
+}
+function updateResources(nuevosRecursos) {
+  filteredResources.value = nuevosRecursos;
   groupResults();
 }
 
-function updateByModal(resources) {
-  filteredResources.value = resources;
-  groupResults();
-}
+watch([inputSearch, selectedOwner, isFilterActive, resources], () => {
+  updateResources(storeFilters.filter());
+});
 
 onMounted(async () => {
-  if (resources.value.length === 0) {
-    storeFetched.isLoading = true;
-    const { resourcesList } = await useGeonodeResources();
-    storeFetched.updateFetchedResources(props.resourceType, resourcesList.value);
-    filteredResources.value = storeFetched[props.resourceType];
-    storeFetched.isLoading = false;
-  } else {
-    filteredResources.value = storeFetched[props.resourceType];
+  storeFilters.resetAll();
+  if (resources.value.length !== 0) {
+    updateResources(resources.value);
   }
-  groupResults();
 });
 </script>
 
@@ -88,31 +95,65 @@ onMounted(async () => {
       <p class="h4 fondo-color-acento p-3 m-0">{{ titulo }}</p>
 
       <div class="m-x-2 m-y-1">
-        <p class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
+        <p v-if="!isLoggedIn" class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
+
         <ClientOnly>
           <SisdaiSelector
+            v-if="isLoggedIn"
+            v-model="selectedOwner"
             class="m-y-2"
-            etiqueta="Permisos"
+            etiqueta="Buscar en catálogo y tus archivos:"
             instruccional="Selecciona los recursos por permisos"
           >
-            <option>Opcion 1</option>
-            <option>Opcion 2</option>
-            <option>Opcion 3</option>
+            <option value="todos">Todos los conjuntos de datos</option>
+            <option value="catalogo">Archivos del catálogo</option>
+            <option value="misArchivos">Mis Archivos</option>
           </SisdaiSelector>
         </ClientOnly>
 
         <ClientOnly>
-          <div class="flex flex-contenido-equidistante m-y-3">
-            <SisdaiCampoBusqueda
-              class="columna-13"
+          <div class="flex flex-contenido-centrado m-y-3">
+            <form class="campo-busqueda columna-12" @submit.prevent>
+              <label for="idunicobusqueda" class="a11y-solo-lectura"> Campo de búsqueda </label>
+              <input
+                id="input-busqueda-consulta"
+                v-model="inputSearch"
+                type="search"
+                class="campo-busqueda-entrada"
+                placeholder="Campo de búsqueda"
+              />
+
+              <button
+                aria-label="Borrar"
+                class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
+                type="button"
+                @click="storeFilters.updateFilter('inputSearch', '')"
+              >
+                <span aria-hidden="true" class="pictograma-cerrar" />
+              </button>
+
+              <button
+                aria-label="Buscar"
+                class="boton-primario boton-pictograma campo-busqueda-buscar"
+                type="button"
+              >
+                <span class="pictograma-buscar" aria-hidden="true" />
+              </button>
+            </form>
+            <!--             <SisdaiCampoBusqueda
+              class="columna-12"
               :catalogo="resources"
               :propiedad-busqueda="'title'"
               :etiqueta="'Usa palabras clave...'"
-              @al-filtrar="filterByInput"
-            />
+            /> -->
+            <!-- @al-filtrar="filterByInput" -->
             <button
               type="button"
-              class="boton-primario boton-pictograma boton-grande"
+              :class="
+                isFilterActive
+                  ? 'boton-primario boton-pictograma boton-grande'
+                  : 'boton-secundario boton-pictograma boton-grande'
+              "
               aria-label="Filtro Avanzado"
               @click="modalFiltroAvanzado.abrirModalBusqueda"
             >
@@ -120,19 +161,18 @@ onMounted(async () => {
             </button>
           </div>
         </ClientOnly>
-        <UiNumeroElementos :numero="resources.length" :etiqueta="etiquetaElementos" />
+        <UiNumeroElementos :numero="filteredResources.length" :etiqueta="etiquetaElementos" />
       </div>
     </div>
 
     <div v-for="category in Object.keys(categorizedResources)" :key="category" class="m-y-1">
-      <div class="">
-        <ConsultaElementoCategoria
-          :title="category"
-          :tag="etiquetaElementos"
-          :number-elements="categorizedResources[category].length"
-          @click="setSelectedCategory(category)"
-        />
-      </div>
+      <ConsultaElementoCategoria
+        :title="category"
+        :tag="etiquetaElementos"
+        :number-elements="categorizedResources[category].length"
+        @click="setSelectedCategory(category)"
+      />
+
       <div
         v-for="(resource, index) in categorizedResources[category]"
         :key="index"
@@ -143,17 +183,18 @@ onMounted(async () => {
           :key="index"
           class="elemento-catalogo"
           :catalogue-element="resource"
-          :resource-type="resourceType"
+          :resource-type="storeConsulta.resourceType"
         />
       </div>
     </div>
   </div>
+
   <ConsultaModalBusqueda
     ref="modalFiltroAvanzado"
-    :resource-type="props.resourceType"
-    :categories="categoryList"
-    @update-results="(results) => updateByModal(results)"
+    @apply-filter="applyAdvancedFilter()"
+    @reset-filter="isFilterActive = false"
   />
+  <!-- @apply-filter="filterByModal()" -->
 </template>
 
 <style lang="scss" scoped>
@@ -165,7 +206,7 @@ onMounted(async () => {
   .encabeado-catalogo {
     position: sticky;
     top: 0;
-    z-index: 1;
+    z-index: 2;
     background-color: var(--fondo);
     padding-bottom: 8px;
   }

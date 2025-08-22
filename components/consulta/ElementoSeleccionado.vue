@@ -1,7 +1,7 @@
 <script setup>
 import { resourceTypeDic, tooltipContent } from '~/utils/consulta';
 
-const storeFetched = useFetchedResourcesStore();
+const storeFetched = useFetchedResources2Store();
 const storeSelected = useSelectedResources2Store();
 const emit = defineEmits(['openOpacity', 'openDownload', 'openTabla', 'openMapa']);
 
@@ -13,9 +13,7 @@ const props = defineProps({
   resourceType: { type: String, required: true },
 });
 
-const resourceElement = computed(() =>
-  storeFetched.findResource(props.selectedElement.uuid, props.resourceType)
-);
+const resourceElement = computed(() => storeFetched.findResource(props.selectedElement.uuid));
 
 const goDown = () => storeSelected.changePosition(props.selectedElement.uuid, -1);
 const goUp = () => storeSelected.changePosition(props.selectedElement.uuid, +1);
@@ -66,7 +64,6 @@ const goUp = () => storeSelected.changePosition(props.selectedElement.uuid, +1);
 
       <ConsultaContenidoCapaSeleccionada
         v-if="resourceType === resourceTypeDic.dataLayer"
-        :resource-type="resourceType"
         :resource-element="resourceElement"
         @opacidad-clicked="emit('openOpacity', resourceElement)"
         @descarga-clicked="emit('openDownload', resourceElement)"
@@ -89,6 +86,7 @@ const goUp = () => storeSelected.changePosition(props.selectedElement.uuid, +1);
 .tarjeta-selected {
   padding: 16px;
   background-color: var(--color-secundario-2);
+  color: var(--campo-etiqueta-color);
 
   .encabezado-tarjeta {
     align-items: center;

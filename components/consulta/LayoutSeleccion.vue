@@ -133,7 +133,6 @@ function changeModal(to) {
     </div>
 
     <div class="m-x-2 m-y-1">
-      <!-- {{ JSON.stringify(storeSelected.sortedDescending()) }} -->
       <ConsultaElementoSeleccionado
         v-for="resource in storeSelected.sortedDescending()"
         :key="`seleccion-${resource.uuid}`"
@@ -147,11 +146,11 @@ function changeModal(to) {
     </div>
 
     <div id="los-modales">
-      <ConsultaModalDescargaAll
+      <!--       <ConsultaModalDescargaAll
         v-if="shownModal === 'downloadAll'"
         ref="downloadAllChild"
         :resource-type="resourceType"
-      />
+      /> -->
 
       <ConsultaModalCompartir v-if="shownModal === 'share'" ref="shareChild" />
 

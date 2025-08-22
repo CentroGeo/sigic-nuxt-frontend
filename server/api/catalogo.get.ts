@@ -3,51 +3,34 @@ const config = useRuntimeConfig();
 export default defineEventHandler(async (event) => {
   const api = `${config.public.geonodeApi}/resources`;
 
-  let page = 1;
-  let allResults = [];
-  const query = getQuery(event);
-  const token = getHeader(event, 'Authorization');
-  //console.log("token", token)
-  let header = {};
-  if (token) {
-    header = { Authorization: `Bearer ${token}` };
-  } else {
-    header = {};
+  let allResults: object[] = [];
+  const query: URLSearchParams = getQuery(event);
+  const token = getHeader(event, 'token');
+
+  const options: RequestInit = { method: 'GET' };
+  if (token !== 'sin token') {
+    options.headers = { Authorization: `Bearer ${token}` };
   }
 
-  // Función para hacer la petición recursiva y traer todos los recursos
-  const loadPage = async () => {
-    const dataParams = new URLSearchParams({
-      page: page,
-      // page_size: 15,
-      ...query,
-    });
+  const dataParams = new URLSearchParams(query);
+  let endpoint = `${api}?${dataParams.toString()}`;
 
-    const endpoint = `${api}?${dataParams.toString()}`
-    console.log(endpoint);
-    const response = await fetch(endpoint, {
-      method: 'GET',
-      headers: header,
-    });
-    //console.log("server api", response)
+  do {
+    const response = await fetch(endpoint.replace('http:', 'https:'), options);
 
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+      const error = await response.json();
+
+      // throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+      return { error, allResults };
     }
 
-    // console.log('respuesta', response.headers);
-    const { links, resources } = await response.json();
+    const { links, resources, total } = await response.json();
+    console.info('->', allResults.length, 'recuperados de', total);
+
     allResults = allResults.concat(resources);
+    endpoint = links.next;
+  } while (endpoint !== null && allResults.length < 100);
 
-    if (links.next && page < 2) {
-      // Si la hay, volvemos a solicitar datos
-      page += 1;
-      return loadPage();
-    }
-  };
-
-  await loadPage();
-  console.log('catalogo server api: ', allResults.length);
-
-  return allResults
+  return { allResults };
 });
