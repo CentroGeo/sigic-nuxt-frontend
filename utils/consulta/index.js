@@ -47,8 +47,10 @@ export async function fetchGeometryType(resource) {
   }).toString();
 
   const res = await fetch(url);
+
   if (res.ok) {
-    const data = await res.json();
+    console.log(resource.alternate, res.text());
+    /*     const data = await res.json();
     if (
       Array.isArray(data.features) &&
       data.features.length > 0 &&
@@ -57,8 +59,9 @@ export async function fetchGeometryType(resource) {
       const geomType = data.features[0].geometry.type;
       return geomType;
     } else {
-      return 'Unable to determine geometry type';
-    }
+      return 'Error';
+    } */
+    return 'Otro';
   } else {
     return 'Error';
   }
