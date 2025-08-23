@@ -13,26 +13,6 @@ const props = defineProps({
   },
 });
 
-/**
- * Devuelve el extend de acuerdo a una capa en formato: left,bootom,rigth,top
- * @param {Array} bboxPolygon arreglo de corrdenadas envolventes de la capa
- * @returns {Array} left,bootom,rigth,top
- */
-function getExtent(bboxPolygon) {
-  if (!Array.isArray(bboxPolygon)) {
-    console.error(
-      'El valor de la extensión no está definida o no es una lista de coordenadas:',
-      bboxPolygon
-    );
-
-    return '';
-  }
-
-  const x = bboxPolygon.map(([x]) => x);
-  const y = bboxPolygon.map(([, y]) => y);
-  return [Math.min(...x), Math.min(...y), Math.max(...x), Math.max(...y)].join(',');
-}
-
 // Aqui se acaba la parte nueva para la prueba
 const optionsButtons = ref([
   {
@@ -40,7 +20,7 @@ const optionsButtons = ref([
     pictogram: 'pictograma-zoom-instruccional',
     globo: 'Zoom a la capa',
     action: () => {
-      storeConsulta.mapExtent = getExtent(props.resourceElement.bbox_polygon.coordinates[0]);
+      storeConsulta.mapExtent = props.resourceElement.extent.coords.join(',');
     },
   },
   {
