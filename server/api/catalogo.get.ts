@@ -3,48 +3,34 @@ const config = useRuntimeConfig();
 export default defineEventHandler(async (event) => {
   const api = `${config.public.geonodeApi}/resources`;
 
-  // let page = 1;
-  let allResults = [];
-  const query = getQuery(event);
+  let allResults: object[] = [];
+  const query: URLSearchParams = getQuery(event);
   const token = getHeader(event, 'token');
+
+  const options: RequestInit = { method: 'GET' };
+  if (token !== 'sin token') {
+    options.headers = { Authorization: `Bearer ${token}` };
+  }
 
   const dataParams = new URLSearchParams(query);
   let endpoint = `${api}?${dataParams.toString()}`;
-  let error;
 
   do {
-    console.log(endpoint);
-
-    const options = {
-      method: 'GET',
-      headers: {
-        // Authorization:
-        //   'Bearer <>',
-      },
-    };
-
-    if (token !== undefined) {
-      console.log(token);
-      options.headers = { Authorization: `Bearer ${token}` };
-    }
-
-    const response = await fetch(endpoint, options);
+    const response = await fetch(endpoint.replace('http:', 'https:'), options);
 
     if (!response.ok) {
-      // console.log(response);
+      const error = await response.json();
 
-      error = await response.json();
-      console.log(error);
-
-      return { error };
       // throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+      return { error, allResults };
     }
 
-    const { links, resources } = await response.json();
-    allResults = allResults.concat(resources);
+    const { links, resources, total } = await response.json();
+    console.info('->', allResults.length, 'recuperados de', total);
 
+    allResults = allResults.concat(resources);
     endpoint = links.next;
-  } while (endpoint !== null);
+  } while (endpoint !== null && allResults.length < 100);
 
   return { allResults };
 });
