@@ -72,9 +72,11 @@ export async function wait(miliseconds) {
 }
 
 export function downloadDocs(resource) {
+  console.log(resource);
+  const extension = resource.links?.find((link) => link.link_type === 'uploaded').extension;
   const anchor = document.createElement('a');
   anchor.href = resource.download_url;
-  anchor.download = `${resource.title}.pdf`;
+  anchor.download = `${resource.title}.${extension}`;
   document.body.appendChild(anchor);
   anchor.click();
   document.body.removeChild(anchor);

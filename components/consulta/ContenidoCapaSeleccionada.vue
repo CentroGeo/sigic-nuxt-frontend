@@ -13,9 +13,9 @@ const props = defineProps({
   },
 });
 
-// Aqui se acaba la parte nueva para la prueba
 const optionsButtons = ref([
   {
+    for: 'all',
     label: 'Hacer zoom',
     pictogram: 'pictograma-zoom-instruccional',
     globo: 'Zoom a la capa',
@@ -24,6 +24,7 @@ const optionsButtons = ref([
     },
   },
   {
+    for: 'vector',
     label: 'Ver tablas',
     pictogram: 'pictograma-tabla',
     globo: 'Ver tabla',
@@ -32,6 +33,7 @@ const optionsButtons = ref([
     },
   },
   {
+    for: 'all',
     label: 'Mostrar',
     get pictogram() {
       return storeSelected.byUuid(props.resourceElement.uuid)?.visible
@@ -48,6 +50,7 @@ const optionsButtons = ref([
     },
   },
   {
+    for: 'all',
     label: 'Cambiar opacidad',
     pictogram: 'pictograma-editar',
     globo: 'Opacidad',
@@ -56,6 +59,7 @@ const optionsButtons = ref([
     },
   },
   {
+    for: 'all',
     label: 'Eliminar selección',
     pictogram: 'pictograma-eliminar',
     globo: 'Eliminar',
@@ -64,6 +68,7 @@ const optionsButtons = ref([
     },
   },
   {
+    for: 'all',
     label: 'Descargar archivo',
     pictogram: 'pictograma-archivo-descargar',
     globo: 'Descargar',
@@ -72,6 +77,12 @@ const optionsButtons = ref([
     },
   },
 ]);
+
+const actualButtons = computed(() =>
+  props.resourceElement.subtype === 'raster'
+    ? optionsButtons.value.filter((d) => d.for === 'all')
+    : optionsButtons.value
+);
 </script>
 
 <template>
@@ -87,9 +98,9 @@ const optionsButtons = ref([
       />
     </div>
 
-    <div class="flex flex-contenido-final">
+    <div v-if="resourceElement.title" class="flex flex-contenido-final">
       <button
-        v-for="button in optionsButtons"
+        v-for="button in actualButtons"
         :key="button.label"
         v-globo-informacion:derecha="button.globo"
         class="boton-pictograma boton-sin-contenedor-secundario"
