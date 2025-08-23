@@ -41,29 +41,29 @@ export async function fetchGeometryType(resource) {
     service: 'WFS',
     version: '1.0.0',
     request: 'GetFeature',
+    //typeName: 'sob_alim:glifo_sup_sembrada_herbicida_07_mun_a',
     typeName: resource.alternate,
     maxFeatures: 1,
     outputFormat: 'application/json',
   }).toString();
 
   const res = await fetch(url);
-
-  if (res.ok) {
-    console.log(resource.alternate, res.text());
-    /*     const data = await res.json();
+  if (!res.ok) {
+    return 'Error';
+  }
+  try {
+    const data = await res.json();
     if (
       Array.isArray(data.features) &&
       data.features.length > 0 &&
       data.features[0]?.geometry?.type
     ) {
-      const geomType = data.features[0].geometry.type;
-      return geomType;
-    } else {
-      return 'Error';
-    } */
-    return 'Otro';
-  } else {
+      return data.features[0].geometry.type;
+    }
+
     return 'Error';
+  } catch {
+    return 'Remoto';
   }
 }
 

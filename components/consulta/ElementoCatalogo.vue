@@ -60,11 +60,11 @@ const optionsDict = {
     class: 'pictograma-capas',
   },
   Otro: {
-    tooltipText: 'Ni raster ni vector',
+    tooltipText: 'Indefinido',
     class: 'pictograma-flkt',
   },
   Remoto: {
-    tooltipText: 'Ni raster ni vector',
+    tooltipText: 'Capa remota',
     class: 'pictograma-colaborar',
   },
   Error: {
@@ -95,7 +95,6 @@ onMounted(() => {
               geomType.value = 'Remoto';
             } else if (subtype.value === 'raster') {
               // Si es raster
-
               geomType.value = 'Raster';
             } else if (subtype.value === 'vector') {
               // Si es vectorial
