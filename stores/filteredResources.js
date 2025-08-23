@@ -4,6 +4,7 @@ import { cleanInput } from '~/utils/consulta';
 export const useFilteredResources = defineStore('filteredResources', () => {
   const storeFetched = useFetchedResources2Store();
   const { data } = useAuth();
+  const isLoggedIn = ref(data.value ? true : false);
   const userEmail = data.value?.user.email;
 
   const filters = reactive({
@@ -42,12 +43,15 @@ export const useFilteredResources = defineStore('filteredResources', () => {
       if (filters.inputSearch !== null) {
         data = data.filter((resource) => cleanInput(resource.title).includes(filters.inputSearch));
       }
-      // Filtramos por propietario
-      if (filters.owner === 'catalogo') {
-        data = data.filter((resource) => resource.owner.email !== userEmail);
-      } else if (filters.owner === 'misArchivos') {
-        data = data.filter((resource) => resource.owner.email === userEmail);
+      if (isLoggedIn) {
+        // Filtramos por propietario
+        if (filters.owner === 'catalogo') {
+          data = data.filter((resource) => resource.owner.email !== userEmail);
+        } else if (filters.owner === 'misArchivos') {
+          data = data.filter((resource) => resource.owner.email === userEmail);
+        }
       }
+
       // Filtramos por año
       if (filters.years !== null) {
         const yearList = filters.years.split(',');
@@ -70,7 +74,32 @@ export const useFilteredResources = defineStore('filteredResources', () => {
         });
       }
       // Filtramos por keyword
-
+      if (filters.keywords !== null) {
+        data = data.filter((resource) => resource.keywords.length > 0);
+        const keywordList = filters.keywords.split(',');
+        // Si los filtros por keywords son excluyentes
+        /*         keywordList.forEach((keyword) => {
+          data = data.filter((resource) => {
+            let resourceKeywords = resource.keywords.map((d) => cleanInput(d.name));
+            resourceKeywords = resourceKeywords.join('-');
+            if (resourceKeywords.includes(cleanInput(keyword))) {
+              return true;
+            }
+          });
+        }); */
+        // Si los filtros por keywords son incluyentes
+        const subdataUuid = [];
+        keywordList.forEach((keyword) => {
+          data.forEach((resource) => {
+            let resourceKeywords = resource.keywords.map((d) => cleanInput(d.name));
+            resourceKeywords = resourceKeywords.join('-');
+            if (resourceKeywords.includes(cleanInput(keyword))) {
+              subdataUuid.push(resource.uuid);
+            }
+          });
+        });
+        data = data.filter((resource) => subdataUuid.includes(resource.uuid));
+      }
       // Filtramos por categoria
       if (filters.categories.length > 0) {
         data = data.filter((resource) => resource.category);
@@ -78,12 +107,11 @@ export const useFilteredResources = defineStore('filteredResources', () => {
           filters.categories.includes(resource.category.gn_description)
         );
       }
-      //console.log(data);
       return data;
     },
   };
 });
-
+// Si se prefiere hacer parte del filtrado haciendo petición
 /* async function filterByModal() {
   const { data } = useAuth();
   const queryParams = { 'filter{resource_type}': resourceTypeGeonode[storeConsulta.resourceType] };
