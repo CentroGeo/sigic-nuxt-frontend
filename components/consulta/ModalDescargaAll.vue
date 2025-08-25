@@ -1,8 +1,9 @@
 <script setup>
-import { downloadMetadata, downloadPDF, downloadVectorData, wait } from '@/utils/consulta';
+import { downloadDocs, downloadMetadata, downloadWMS, wait } from '@/utils/consulta';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 
 const storeSelected = useSelectedResources2Store();
+const storeFetched = useFetchedResources2Store();
 
 const props = defineProps({
   resourceType: { type: String, required: true },
@@ -18,24 +19,41 @@ function abrirModalDescargaAll() {
 }
 
 async function downloadAllCSV() {
-  const resourceList = storeSelected.list();
+  const resourceList = storeFetched.findResources(storeSelected.uuids);
   for (let i = 0; i < resourceList.length; i++) {
-    await downloadVectorData(resourceList[i], 'csv');
+    await downloadWMS(resourceList[i], 'csv');
     await wait(1000);
   }
   modalDescargaAll.value?.cerrarModal();
 }
-async function downloadAllPDF() {
-  const resourceList = storeSelected.list();
+async function downloadAllXLS() {
+  const resourceList = storeFetched.findResources(storeSelected.uuids);
   for (let i = 0; i < resourceList.length; i++) {
-    downloadPDF(resourceList[i]);
+    await downloadWMS(resourceList[i], 'xls');
+    await wait(1000);
+  }
+  modalDescargaAll.value?.cerrarModal();
+}
+async function downloadAllXLSX() {
+  const resourceList = storeFetched.findResources(storeSelected.uuids);
+  for (let i = 0; i < resourceList.length; i++) {
+    await downloadWMS(resourceList[i], 'xlsx');
+    await wait(1000);
+  }
+  modalDescargaAll.value?.cerrarModal();
+}
+
+async function downloadAllDocs() {
+  const resourceList = storeFetched.findResources(storeSelected.uuids);
+  for (let i = 0; i < resourceList.length; i++) {
+    downloadDocs(resourceList[i]);
     await wait(1000);
   }
   modalDescargaAll.value?.cerrarModal();
 }
 
 async function downloadAllMetadata() {
-  const resourceList = storeSelected.list();
+  const resourceList = storeFetched.findResources(storeSelected.uuids);
   for (let i = 0; i < resourceList.length; i++) {
     await downloadMetadata(resourceList[i]);
     await wait(1000);
@@ -54,6 +72,18 @@ const optionsDict = {
         },
       },
       {
+        label: 'XLS',
+        action: () => {
+          downloadAllXLS();
+        },
+      },
+      {
+        label: 'XLSX',
+        action: () => {
+          downloadAllXLSX();
+        },
+      },
+      {
         label: 'Metadatos',
         action: () => {
           downloadAllMetadata();
@@ -65,9 +95,9 @@ const optionsDict = {
     title: 'documentos',
     elements: [
       {
-        label: 'PDF',
+        label: 'Archivos',
         action: () => {
-          downloadAllPDF();
+          downloadAllDocs();
         },
       },
       {

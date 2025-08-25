@@ -25,26 +25,26 @@ const inputCategories = computed({
 });
 
 const categoriesDict = {
-  'Imagery Base Maps Earth Cover': 'imageryBaseMapsEarthCover',
-  Society: 'society',
-  Economy: 'economy',
-  'Utilities Communication': 'utilitiesCommunication',
-  Environment: 'environment',
-  Oceans: 'oceans',
   Biota: 'biota',
-  Health: 'health',
-  Elevation: 'elevation',
-  'Geoscientific Information': 'geoscientificInformation',
-  'Planning Cadastre': 'planningCadastre',
-  'Inland Waters': 'inlandWaters',
   Boundaries: 'boundaries',
-  Structure: 'structure',
-  Transportation: 'transportation',
+  'Climatology Meteorology Atmosphere': 'climatologyMeteorologyAtmosphere',
+  Economy: 'economy',
+  Elevation: 'elevation',
+  Environment: 'environment',
+  Farming: 'farming',
+  'Geoscientific Information': 'geoscientificInformation',
+  Health: 'health',
+  'Imagery Base Maps Earth Cover': 'imageryBaseMapsEarthCover',
+  'Inland Waters': 'inlandWaters',
   'Intelligence Military': 'intelligenceMilitary',
   Location: 'location',
-  'Climatology Meteorology Atmosphere': 'climatologyMeteorologyAtmosphere',
-  Farming: 'farming',
+  Oceans: 'oceans',
+  'Planning Cadastre': 'planningCadastre',
   Population: 'population',
+  Society: 'society',
+  Structure: 'structure',
+  Transportation: 'transportation',
+  'Utilities Communication': 'utilitiesCommunication',
 };
 function abrirModalBusqueda() {
   modalBusqueda.value?.abrirModal();
@@ -53,11 +53,7 @@ function abrirModalBusqueda() {
 function cerrarModalBusqueda() {
   modalBusqueda.value?.cerrarModal();
 }
-function resetResults() {
-  emit('resetFilter');
-  storeFilters.resetFilters();
-  modalBusqueda.value?.cerrarModal();
-}
+
 defineExpose({
   abrirModalBusqueda,
   cerrarModalBusqueda,
@@ -82,7 +78,12 @@ defineExpose({
             :etiqueta="category"
             class="opcion-checkbox"
           />
-          <button class="boton-chico opcion-checkbox">Limpiar selección</button>
+          <button
+            class="boton-chico opcion-checkbox"
+            @click="storeFilters.updateFilter('categories', [])"
+          >
+            Limpiar selección
+          </button>
         </div>
 
         <ClientOnly>
@@ -121,7 +122,7 @@ defineExpose({
       <template #pie>
         <div class="contenedor-botones flex flex-contenido-centrado">
           <button class="boton-chico boton-primario" @click="emit('applyFilter')">Buscar</button>
-          <button class="boton-chico boton-secundario" @click="resetResults">
+          <button class="boton-chico boton-secundario" @click="emit('resetFilter')">
             Restablecer filtros
           </button>
         </div>

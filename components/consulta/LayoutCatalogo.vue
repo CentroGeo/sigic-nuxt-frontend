@@ -71,13 +71,21 @@ function setSelectedCategory(categoria) {
 function applyAdvancedFilter() {
   isFilterActive.value = true;
   modalFiltroAvanzado.value.cerrarModalBusqueda();
+  updateResources(storeFilters.filter());
+}
+
+function resetAdvancedFilter() {
+  isFilterActive.value = true;
+  storeFilters.resetFilters();
+  modalFiltroAvanzado.value.cerrarModalBusqueda();
+  updateResources(storeFilters.filter());
 }
 function updateResources(nuevosRecursos) {
   filteredResources.value = nuevosRecursos;
   groupResults();
 }
 
-watch([inputSearch, selectedOwner, isFilterActive, resources], () => {
+watch([inputSearch, selectedOwner, resources], () => {
   updateResources(storeFilters.filter());
 });
 
@@ -191,10 +199,9 @@ onMounted(async () => {
 
   <ConsultaModalBusqueda
     ref="modalFiltroAvanzado"
-    @apply-filter="applyAdvancedFilter()"
-    @reset-filter="isFilterActive = false"
+    @apply-filter="applyAdvancedFilter"
+    @reset-filter="resetAdvancedFilter"
   />
-  <!-- @apply-filter="filterByModal()" -->
 </template>
 
 <style lang="scss" scoped>

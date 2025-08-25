@@ -12,50 +12,75 @@ const { resourceType, selectedElement } = toRefs(props);
 const modalDescarga = ref(null);
 const optionsList = ref(null);
 const tagTitle = ref();
-const extension = ref(
-  selectedElement.value.links.find((link) => link.link_type === 'uploaded').extension
+const docExtension = ref(
+  resourceType.value === 'document'
+    ? selectedElement.value.links.find((link) => link.link_type === 'uploaded').extension
+    : 'No aplica'
 );
+const layerType = ref(
+  resourceType.value === 'dataLayer' ? selectedElement.value.subtype : 'No aplica'
+);
+
 function abrirModalDescarga() {
   modalDescarga.value?.abrirModal();
   optionsList.value = optionsDict[resourceType.value]['elements'];
   tagTitle.value = optionsDict[resourceType.value]['title'];
 }
 
+const layerOptions = {
+  raster: [
+    {
+      label: 'GeoTiff',
+      action: () => {
+        console.warn('descargar Geotiff');
+        console.warn(selectedElement.value);
+      },
+    },
+    {
+      label: 'Metadatos',
+      action: () => {
+        console.warn('Descarga metadatos de raster');
+      },
+    },
+  ],
+  vector: [
+    {
+      label: 'GeoJson',
+      action: () => {
+        downloadWMS(selectedElement.value, 'geojson');
+      },
+    },
+    {
+      label: 'CSV',
+      action: () => {
+        downloadWMS(selectedElement.value, 'csv');
+      },
+    },
+    {
+      label: 'GeoPackage',
+      action: () => {
+        downloadWMS(selectedElement.value, 'gpkg');
+      },
+    },
+    {
+      label: 'KML',
+      action: () => {
+        downloadWMS(selectedElement.value, 'kml');
+      },
+    },
+    {
+      label: 'Metadatos',
+      action: () => {
+        downloadMetadata(selectedElement.value);
+      },
+    },
+  ],
+  remote: [],
+};
 const optionsDict = {
   dataLayer: {
     title: 'capa',
-    elements: [
-      {
-        label: 'GeoJson',
-        action: () => {
-          downloadWMS(selectedElement.value, 'geojson');
-        },
-      },
-      {
-        label: 'CSV',
-        action: () => {
-          downloadWMS(selectedElement.value, 'csv');
-        },
-      },
-      {
-        label: 'GeoPackage',
-        action: () => {
-          downloadWMS(selectedElement.value, 'gpkg');
-        },
-      },
-      {
-        label: 'KML',
-        action: () => {
-          downloadWMS(selectedElement.value, 'kml');
-        },
-      },
-      {
-        label: 'Metadatos',
-        action: () => {
-          downloadMetadata(selectedElement.value);
-        },
-      },
-    ],
+    elements: layerOptions[layerType.value],
   },
   dataTable: {
     title: 'archivo',
@@ -90,7 +115,7 @@ const optionsDict = {
     title: 'documento',
     elements: [
       {
-        label: extension.value === 'pdf' ? 'PDF' : 'TXT',
+        label: docExtension.value === 'pdf' ? 'PDF' : 'TXT',
         action: () => {
           downloadDocs(selectedElement.value);
         },
@@ -127,6 +152,9 @@ defineExpose({
           >
             {{ option.label }}
           </button>
+        </div>
+        <div v-if="layerType === 'remote'">
+          Esta capa es remota y no se puede descargar del geoserver
         </div>
       </template>
     </SisdaiModal>
