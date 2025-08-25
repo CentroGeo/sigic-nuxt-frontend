@@ -62,7 +62,7 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
 
       if (data.value?.accessToken) {
         options.headers.token = data.value?.accessToken;
-        console.info(new Date(data.value.expires));
+        //console.info(new Date(data.value.expires));
       }
 
       const { error, allResults } = await $fetch('/api/catalogo', options);

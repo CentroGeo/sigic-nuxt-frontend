@@ -20,7 +20,6 @@ function abrirModalDescargaAll() {
 
 async function downloadAllCSV() {
   const resourceList = storeFetched.findResources(storeSelected.uuids);
-  console.log(resourceList.length);
   for (let i = 0; i < resourceList.length; i++) {
     await downloadWMS(resourceList[i], 'csv');
     await wait(1000);

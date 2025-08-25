@@ -32,14 +32,14 @@ const layerOptions = {
     {
       label: 'GeoTiff',
       action: () => {
-        console.log('descargar Geotiff');
-        console.log(selectedElement.value);
+        console.warn('descargar Geotiff');
+        console.warn(selectedElement.value);
       },
     },
     {
       label: 'Metadatos',
       action: () => {
-        console.log('Descarga metadatos de raster');
+        console.warn('Descarga metadatos de raster');
       },
     },
   ],

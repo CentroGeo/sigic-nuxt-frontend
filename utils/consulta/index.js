@@ -72,7 +72,6 @@ export async function wait(miliseconds) {
 }
 
 export function downloadDocs(resource) {
-  console.log(resource);
   const extension = resource.links?.find((link) => link.link_type === 'uploaded').extension;
   const anchor = document.createElement('a');
   anchor.href = resource.download_url;
