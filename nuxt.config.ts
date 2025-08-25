@@ -1,10 +1,10 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
-
 const isDev = process.env.NODE_ENV !== 'production';
 const baseUrl = process.env.NUXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-const metaImg = 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg'
-const metaDescription = 'Sistema Integral de Gestión de Información Científica. Integra, visualiza y aprovecha el conocimeinto científico de México.'
+const metaImg = 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg';
+const metaDescription =
+  'Sistema Integral de Gestión de Información Científica. Integra, visualiza y aprovecha el conocimeinto científico de México.';
 
 export default defineNuxtConfig({
   app: {
@@ -20,7 +20,7 @@ export default defineNuxtConfig({
         { property: 'og:title', content: 'SIGIC' },
         {
           property: 'og:description',
-          content: metaDescription
+          content: metaDescription,
         },
         {
           property: 'og:image',
@@ -30,7 +30,7 @@ export default defineNuxtConfig({
         { name: 'twitter:title', content: 'SIGIC' },
         {
           name: 'twitter:description',
-          content: metaDescription
+          content: metaDescription,
         },
         {
           name: 'twitter:image',
