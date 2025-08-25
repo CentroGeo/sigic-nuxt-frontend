@@ -17,6 +17,8 @@ const props = defineProps({
   },
 });
 const { catalogueElement } = toRefs(props);
+//console.log(catalogueElement.value);
+
 const { data } = useAuth();
 const isLoggedIn = ref(data.value ? true : false);
 const userEmail = ref(data.value?.user.email);
@@ -51,15 +53,19 @@ const optionsDict = {
   },
   GeometryCollection: {
     tooltipText: 'Colección de geometrías',
-    class: 'pictograma-capas',
+    class: 'pictograma-capa-poligono',
   },
   Raster: {
     tooltipText: 'Raster',
     class: 'pictograma-capas',
   },
   Otro: {
-    tooltipText: 'Ni raster ni vector',
+    tooltipText: 'Indefinido',
     class: 'pictograma-flkt',
+  },
+  Remoto: {
+    tooltipText: 'Capa remota',
+    class: 'pictograma-colaborar',
   },
   Error: {
     tooltipText: 'No se pudo recuperar la información',
@@ -85,8 +91,10 @@ onMounted(() => {
               },
             ];
           } else {
-            // Si es raster
-            if (subtype.value === 'raster') {
+            if (subtype.value === 'remote') {
+              geomType.value = 'Remoto';
+            } else if (subtype.value === 'raster') {
+              // Si es raster
               geomType.value = 'Raster';
             } else if (subtype.value === 'vector') {
               // Si es vectorial

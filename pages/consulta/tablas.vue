@@ -38,7 +38,7 @@ watch(paginaActual, () => {
 });
 
 watch([() => selectedUuid.value, () => storeFetched.byResourceType(resourceType)], () => {
-  selectedElement.value = storeFetched.findResources([selectedUuid.value], resourceType)[0];
+  selectedElement.value = storeFetched.findResources([selectedUuid.value])[0];
   paginaActual.value = 0;
   // console.log(selectedUuid.value);
   fetchTable({
@@ -66,7 +66,7 @@ onMounted(() => {
   if (storeSelected.uuids.length > 0) {
     updateQueryParam(storeSelected.asQueryParam());
 
-    selectedElement.value = storeFetched.findResources([selectedUuid.value], resourceType)[0];
+    selectedElement.value = storeFetched.findResources([selectedUuid.value])[0];
     fetchTable({
       paginaActual: paginaActual.value,
       tamanioPagina: tamanioPagina,
