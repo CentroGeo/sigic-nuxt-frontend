@@ -3,6 +3,17 @@ import SisdaiMenuAccesibilidad from '@centrogeomx/sisdai-componentes/src/compone
 import MainNavegacion from '~/components/base/MainNavegacion.vue';
 import { useAccesibilidadStore } from '~/stores/accesibilidad';
 const accesibilidadStore = useAccesibilidadStore();
+const config = useRuntimeConfig();
+const route = useRoute();
+const baseUrl = config.public.baseURL;
+const currentPath = computed(() => baseUrl + route.fullPath);
+
+useHead(() => ({
+  meta: [
+    { property: 'og:url', content: currentPath.value, key: 'og-url' },
+    { name: 'twitter:url', content: currentPath.value, key: 'twitter-url' },
+  ],
+}));
 </script>
 
 <template>
