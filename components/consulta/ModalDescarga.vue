@@ -1,5 +1,5 @@
 <script setup>
-import { downloadDocs, downloadMetadata, downloadWMS } from '@/utils/consulta';
+import { downloadDocs, downloadMetadata, downloadNoGeometry, downloadWMS } from '@/utils/consulta';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 const props = defineProps({
   resourceType: { type: String, required: true },
@@ -47,25 +47,25 @@ const layerOptions = {
     {
       label: 'GeoJson',
       action: () => {
-        downloadWMS(selectedElement.value, 'geojson');
+        downloadWMS(selectedElement.value, 'geojson', 'all');
       },
     },
     {
       label: 'CSV',
       action: () => {
-        downloadWMS(selectedElement.value, 'csv');
+        downloadWMS(selectedElement.value, 'csv', 'all');
       },
     },
     {
       label: 'GeoPackage',
       action: () => {
-        downloadWMS(selectedElement.value, 'gpkg');
+        downloadWMS(selectedElement.value, 'gpkg', 'all');
       },
     },
     {
       label: 'KML',
       action: () => {
-        downloadWMS(selectedElement.value, 'kml');
+        downloadWMS(selectedElement.value, 'kml', 'all');
       },
     },
     {
@@ -88,19 +88,19 @@ const optionsDict = {
       {
         label: 'CSV',
         action: () => {
-          downloadWMS(selectedElement.value, 'csv');
+          downloadNoGeometry(selectedElement.value, 'csv');
         },
       },
       {
         label: 'XLS',
         action: () => {
-          downloadWMS(selectedElement.value, 'xls');
+          downloadNoGeometry(selectedElement.value, 'xls');
         },
       },
       {
         label: 'XLSX',
         action: () => {
-          downloadWMS(selectedElement.value, 'xlsx');
+          downloadNoGeometry(selectedElement.value, 'xlsx');
         },
       },
       {

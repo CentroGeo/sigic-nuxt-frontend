@@ -1,9 +1,6 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 const modalCompartir = ref(null);
-function abrirModalCompartir() {
-  modalCompartir.value?.abrirModal();
-}
 const route = useRoute();
 const config = useRuntimeConfig();
 const baseUrl = config.public.baseURL;
@@ -17,26 +14,9 @@ async function copyToClipboard() {
   }
 }
 
-useHead(() => ({
-  meta: [
-    { property: 'og:type', content: 'article' },
-    { property: 'og:title', content: 'SIGIC' },
-    { property: 'og:description', content: 'Esta es la descripción' },
-    {
-      property: 'og:image',
-      content: 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg',
-    },
-    { property: 'og:url', content: currentPath.value },
-    { name: 'twitter:card', content: 'summary' },
-    { name: 'twitter:title', content: 'SIGIC' },
-    { name: 'twitter:description', content: 'Esta es la descripción' },
-    {
-      name: 'twitter:image',
-      content: 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg',
-    },
-    { name: 'twitter:url', content: currentPath.value },
-  ],
-}));
+function abrirModalCompartir() {
+  modalCompartir.value?.abrirModal();
+}
 
 const botonesEnlaces = computed(() => [
   {
