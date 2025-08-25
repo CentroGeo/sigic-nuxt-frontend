@@ -105,7 +105,7 @@ export async function downloadMetadata(resource) {
   URL.revokeObjectURL(blobLink);
 }
 
-export async function downloadWMS(resource, format) {
+export async function downloadWMS(resource, format, featureTypes) {
   const config = useRuntimeConfig();
   const formatDict = {
     xls: 'excel',
@@ -115,14 +115,28 @@ export async function downloadWMS(resource, format) {
     csv: 'csv',
     kml: 'application/vnd.google-earth.kml+xml',
   };
+  let params;
+  if (featureTypes !== 'all') {
+    params = {
+      service: 'WFS',
+      version: '2.0.0',
+      request: 'GetFeature',
+      typeName: resource.alternate,
+      outputFormat: formatDict[format],
+      propertyName: featureTypes,
+    };
+  } else {
+    params = {
+      service: 'WFS',
+      version: '2.0.0',
+      request: 'GetFeature',
+      typeName: resource.alternate,
+      outputFormat: formatDict[format],
+    };
+  }
+
   let url = new URL(`${config.public.geoserverUrl}/ows`);
-  url.search = new URLSearchParams({
-    service: 'WFS',
-    version: '2.0.0',
-    request: 'GetFeature',
-    typeName: resource.alternate,
-    outputFormat: formatDict[format],
-  }).toString();
+  url.search = new URLSearchParams(params).toString();
   // Si es un Json vamos a tener que forzar la descarga
   if (format === 'geojson') {
     const jsonRequest = await fetch(url);
@@ -144,6 +158,36 @@ export async function downloadWMS(resource, format) {
   document.body.appendChild(anchor);
   anchor.click();
   document.body.removeChild(anchor);
+}
+
+export async function downloadNoGeometry(resource, format) {
+  const config = useRuntimeConfig();
+  // Revisamos si la capa es remota
+  if (resource.subtype === 'remote') {
+    alert('Esta capa es remota y no se puede descargar');
+    return;
+  }
+  // Si la capa no es remota, revisamos sus columnas para excluir las de geometria
+  const describeFeatureUrl = new URL(`${config.public.geoserverUrl}/ows`);
+  describeFeatureUrl.search = new URLSearchParams({
+    service: 'WFS',
+    version: '2.0.0',
+    request: 'DescribeFeatureType',
+    typeName: resource.alternate,
+    outputFormat: 'application/json',
+  }).toString();
+
+  const res = await fetch(describeFeatureUrl);
+  if (!res.ok) {
+    return 'Error';
+  }
+  const data = await res.json();
+  const features = data.featureTypes[0]['properties'];
+  const props = features
+    .filter((prop) => prop.name.toLowerCase() !== 'geometry')
+    .map((prop) => prop.name);
+  // Llamamos la función de descarga
+  downloadWMS(resource, format, props.join());
 }
 
 export async function downloadVectorData(resource, format) {

@@ -1,5 +1,5 @@
 <script setup>
-import { downloadDocs, downloadMetadata, downloadWMS, wait } from '@/utils/consulta';
+import { downloadDocs, downloadMetadata, downloadNoGeometry, wait } from '@/utils/consulta';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 
 const storeSelected = useSelectedResources2Store();
@@ -18,26 +18,10 @@ function abrirModalDescargaAll() {
   tagTitle.value = optionsDict[props.resourceType]['title'];
 }
 
-async function downloadAllCSV() {
+async function downloadAllDataTables(format) {
   const resourceList = storeFetched.findResources(storeSelected.uuids);
   for (let i = 0; i < resourceList.length; i++) {
-    await downloadWMS(resourceList[i], 'csv');
-    await wait(1000);
-  }
-  modalDescargaAll.value?.cerrarModal();
-}
-async function downloadAllXLS() {
-  const resourceList = storeFetched.findResources(storeSelected.uuids);
-  for (let i = 0; i < resourceList.length; i++) {
-    await downloadWMS(resourceList[i], 'xls');
-    await wait(1000);
-  }
-  modalDescargaAll.value?.cerrarModal();
-}
-async function downloadAllXLSX() {
-  const resourceList = storeFetched.findResources(storeSelected.uuids);
-  for (let i = 0; i < resourceList.length; i++) {
-    await downloadWMS(resourceList[i], 'xlsx');
+    await downloadNoGeometry(resourceList[i], format);
     await wait(1000);
   }
   modalDescargaAll.value?.cerrarModal();
@@ -68,19 +52,19 @@ const optionsDict = {
       {
         label: 'CSV',
         action: () => {
-          downloadAllCSV();
+          downloadAllDataTables('csv');
         },
       },
       {
         label: 'XLS',
         action: () => {
-          downloadAllXLS();
+          downloadAllDataTables('xls');
         },
       },
       {
         label: 'XLSX',
         action: () => {
-          downloadAllXLSX();
+          downloadAllDataTables('xlsx');
         },
       },
       {

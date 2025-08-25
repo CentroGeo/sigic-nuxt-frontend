@@ -116,6 +116,10 @@ function validacionTemporal(resources, resourceType) {
     // Si son capas geográficas, excluimos aquellos que no tengan geometria
     return resources.filter((resource) => isGeometricExtension(resource.extent));
   }
+  if (resourceType === resourceTypeDic.dataTable) {
+    // Si son capas geográficas, excluimos aquellos que no tengan geometria
+    return resources.filter((resource) => resource.subtype !== 'raster');
+  }
 
   return resources;
 }
