@@ -189,7 +189,7 @@ onUnmounted(() => {
   padding: 16px 40px;
 }
 .id-tag {
-  background-color: var(--color-secundario-2);
+  background-color: var(--fondo-acento);
   padding: 8px;
   border: solid 1px;
   border-radius: 8px;

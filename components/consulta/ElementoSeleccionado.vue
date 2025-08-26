@@ -21,7 +21,7 @@ const goUp = () => storeSelected.changePosition(props.selectedElement.uuid, +1);
 
 <template>
   <div class="tarjeta m-y-1">
-    <div class="tarjeta-selected">
+    <div class="tarjeta-selected fondo-color-acento">
       <div class="flex flex-contenido-separado m-0 encabezado-tarjeta">
         <p class="tarjeta-texto-secundario m-0">Categoria</p>
 
@@ -85,7 +85,7 @@ const goUp = () => storeSelected.changePosition(props.selectedElement.uuid, +1);
 <style lang="scss" scoped>
 .tarjeta-selected {
   padding: 16px;
-  background-color: var(--color-secundario-2);
+  // background-color: var(--color-secundario-2);
   color: var(--campo-etiqueta-color);
 
   .encabezado-tarjeta {
