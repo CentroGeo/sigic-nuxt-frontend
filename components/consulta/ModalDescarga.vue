@@ -1,5 +1,11 @@
 <script setup>
-import { downloadDocs, downloadMetadata, downloadNoGeometry, downloadWMS } from '@/utils/consulta';
+import {
+  downloadDocs,
+  downloadMetadata,
+  downloadNoGeometry,
+  downloadRaster,
+  downloadWMS,
+} from '@/utils/consulta';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 const props = defineProps({
   resourceType: { type: String, required: true },
@@ -9,6 +15,8 @@ const props = defineProps({
   },
 });
 const { resourceType, selectedElement } = toRefs(props);
+const { data } = useAuth();
+const isLoggedIn = ref(data.value ? true : false);
 const modalDescarga = ref(null);
 const optionsList = ref(null);
 const tagTitle = ref();
@@ -32,14 +40,13 @@ const layerOptions = {
     {
       label: 'GeoTiff',
       action: () => {
-        console.warn('descargar Geotiff');
-        console.warn(selectedElement.value);
+        downloadRaster(selectedElement.value);
       },
     },
     {
       label: 'Metadatos',
       action: () => {
-        console.warn('Descarga metadatos de raster');
+        downloadMetadata(selectedElement.value);
       },
     },
   ],
@@ -129,6 +136,7 @@ const optionsDict = {
     ],
   },
 };
+
 defineExpose({
   abrirModalDescarga,
 });
@@ -141,20 +149,32 @@ defineExpose({
       </template>
       <template #cuerpo>
         <p>{{ selectedElement.title }}</p>
-        <p>Formato:</p>
-        <div>
-          <button
-            v-for="option in optionsList"
-            :key="option.label"
-            type="button"
-            class="boton-secundario"
-            @click="option.action"
-          >
-            {{ option.label }}
-          </button>
+        <div v-if="layerType === 'remote'" class="tarjeta m-y-3">
+          <div class="tarjeta-cuerpo">
+            <p>Esta capa es remota y no se puede descargar del geoserver</p>
+          </div>
         </div>
-        <div v-if="layerType === 'remote'">
-          Esta capa es remota y no se puede descargar del geoserver
+
+        <div v-else>
+          <p>Formato:</p>
+          <div>
+            <button
+              v-for="option in optionsList"
+              :key="option.label"
+              type="button"
+              class="boton-secundario"
+              :disabled="option.label === 'GeoTiff' && !isLoggedIn"
+              @click="option.action"
+            >
+              {{ option.label }}
+            </button>
+          </div>
+
+          <div v-if="selectedElement.subtype === 'raster' && !isLoggedIn" class="tarjeta m-y-3">
+            <div class="tarjeta-cuerpo">
+              <p>Para descargar archivos en formato GeoTiff es necesario iniciar sesión.</p>
+            </div>
+          </div>
         </div>
       </template>
     </SisdaiModal>
@@ -164,5 +184,13 @@ defineExpose({
 .boton-secundario {
   width: 90%;
   margin: 8px;
+}
+.tarjeta {
+  width: 99%;
+  background-color: var(--color-alerta-1);
+  border: 1px solid var(--color-alerta-3);
+  p {
+    color: var(--color-alerta-3);
+  }
 }
 </style>
