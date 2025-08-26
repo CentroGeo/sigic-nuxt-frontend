@@ -544,7 +544,7 @@ const guardarProyecto = async () => {
 
   th {
     border-bottom: 1px solid var(--borde);
-    color: var(--Base-Tipografa---texto-primario, #141414);
+    // color: var(--Base-Tipografa---texto-primario, #141414);
     text-align: center;
     font-size: var(--Tipos-Tamao-Prrafos-Prrafo-base, 16px);
     font-style: normal;
