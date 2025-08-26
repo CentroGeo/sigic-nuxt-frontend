@@ -1,7 +1,7 @@
 <template>
   <IaLayoutPaneles>
     <template #lista>
-      <IaListaChats texto-boton="Nuevo chat" titulo="Chats" etiqueta-busqueda="Buscar chats" />
+      <IaListaChats titulo="Chats" texto-boton="Nuevo chat" etiqueta-busqueda="Buscar chats" />
     </template>
 
     <template #vistas-ia>
@@ -11,8 +11,8 @@
 </template>
 
 <script setup>
-import { useRoute } from 'vue-router';
 import { computed } from 'vue';
+import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const contextId = computed(() => route.query.context_id);

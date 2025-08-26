@@ -6,11 +6,17 @@ import { ref } from 'vue';
 
 const storeIA = useIAStore();
 
+/**
+ * @typedef {Object} Props
+ * @property {String} [titulo='Título'] - Indica el título de la lista.
+ * @property {String} [textoBoton='Texto botón'] - Indica el texto que va en el botón.
+ * @property {String} [etiquetaBusqueda=undefined] - Indica la etiqueta que va en el buscador.
+ */
+/** @type {Props} */
 const props = defineProps({
   titulo: { type: String, default: 'Título' },
-  textoBoton: { type: String, default: 'Título' },
+  textoBoton: { type: String, default: 'Texto botón' },
   etiquetaBusqueda: { type: String, default: undefined },
-  // recursoLista: { type: Array, required: true },
 });
 const { titulo, textoBoton, recursoLista, etiquetaBusqueda } = toRefs(props);
 
@@ -18,42 +24,13 @@ const nuevoChatModal = ref(null);
 const seleccionProyecto = ref('');
 const seleccionContexto = ref('');
 
-// const fechaHoy = new Date();
-const fechaHoy = '01-07-2025';
+const fechaHoy = new Date().toLocaleDateString('es-ES', {
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+});
 
 const catalogo = ref([]);
-/* 
-const catalogo = ref([
-  {
-    fecha: '01-07-2025',
-    chat: [
-      {
-        id: 0,
-        titulo: 'Cobertura e integración de datos en el monitoreo marino',
-        proyecto: 'Biodiversidad de ecosistemas marinos',
-        contexto: 'Tecnologías para monitoreo marino',
-      },
-    ],
-  },
-  {
-    fecha: '01-06-2025',
-    chat: [
-      {
-        id: 1,
-        titulo: 'Análisis e integración de datos en el monitoreo marino',
-        proyecto: 'Biodiversidad de ecosistemas marinos',
-        contexto: 'Tecnologías para monitoreo marino',
-      },
-      {
-        id: 2,
-        titulo: 'Diseño e integración de datos en el monitoreo marino',
-        proyecto: 'Biodiversidad de ecosistemas marinos',
-        contexto: 'Tecnologías para monitoreo marino',
-      },
-    ],
-  },
-]);
- */
 const catalogoFiltrado = ref(catalogo.value);
 
 // Función para consultar lista de proyectos
@@ -65,9 +42,6 @@ const loadChatsList = async () => {
   console.log(arrayChats);
 
   transformarHistorial(arrayChats);
-
-  /*   catalogo.value = arrayProjects;
-  catalogoFiltrado.value = arrayProjects; */
 };
 
 function transformarHistorial(historiales) {
@@ -160,10 +134,8 @@ onMounted(() => {
             />
           </ClientOnly>
 
-          <h6>Selecciona un chat para empezar a interactuar con el asistente</h6>
-          <!-- <div v-for="grupos in catalogoFiltrado">
-            {{ grupos }}
-          </div> -->
+          <h6>Selecciona un chat para empezar a interactuar con el asistente.</h6>
+
           <ul class="lista-sin-estilo">
             <li v-for="grupo in catalogoFiltrado" :id="grupo.id" :key="grupo.id">
               <p class="fecha-grupo">

@@ -4,35 +4,21 @@ import { onMounted, ref } from 'vue';
 
 const storeIA = useIAStore();
 
+/**
+ * @typedef {Object} Props
+ * @property {String} [titulo='Título'] - Indica el título de la lista.
+ * @property {String} [textoBoton='Texto botón'] - Indica el texto que va en el botón.
+ * @property {String} [etiquetaBusqueda=undefined] - Indica la etiqueta que va en el buscador.
+ */
+/** @type {Props} */
 const props = defineProps({
   titulo: { type: String, default: 'Título' },
-  textoBoton: { type: String, default: 'Título' },
+  textoBoton: { type: String, default: 'Texto botón' },
   etiquetaBusqueda: { type: String, default: undefined },
-  // recursoLista: { type: Array, required: true },
 });
 const { titulo, textoBoton, recursoLista, etiquetaBusqueda } = toRefs(props);
 
-const catalogo = ref([
-  /* {
-    id: 0,
-    titulo: 'Biodiversidad de ecosistemas marinos',
-    numero_contextos: 0,
-    numero_fuentes: 9
-  },
-  {
-    id: 1,
-    titulo: "Nombre del proyecto",
-    numero_contextos: 5,
-    numero_fuentes: 5
-  },
-  {
-    id: 2,
-    titulo: "Nombre del proyecto",
-    numero_contextos: 5,
-    numero_fuentes: 5
-  } */
-]);
-
+const catalogo = ref([]);
 const catalogoFiltrado = ref(catalogo.value);
 
 // Función para consultar lista de proyectos
@@ -76,7 +62,13 @@ onMounted(() => {
           />
         </ClientOnly>
 
-        <h6>{{ titulo }}</h6>
+        <p>
+          {{
+            !storeIA.existenProyectos
+              ? 'Cuando crees un proyecto, aparecerá en esta sección.'
+              : 'Selecciona un proyecto para ver su contenido.'
+          }}
+        </p>
       </div>
 
       <div v-if="storeIA.existenProyectos">

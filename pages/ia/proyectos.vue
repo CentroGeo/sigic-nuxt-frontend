@@ -5,10 +5,9 @@ const storeIA = useIAStore();
 <template>
   <IaLayoutPaneles>
     <template #lista>
-      <!-- TODO: lista leyenda inicio? -->
       <IaLayoutListas
-        texto-boton="Crear proyecto"
         titulo="Proyectos"
+        texto-boton="Nuevo proyecto"
         etiqueta-busqueda="Buscar un proyecto"
       />
     </template>

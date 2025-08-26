@@ -15,13 +15,15 @@ const isSubmitting = ref(false);
 const chatID = ref(0);
 const contextID = ref(0);
 
-/* defineProps({
-  contextId: String  //viene de dinamica.vue
-})
+/**
+ * @typedef {Object} Props
+ * @property {String} [contextId=''] - Indica el identificador del contexto.
+ * @property {String} [chatId=''] - Indica el identificador del chat.
  */
+/** @type {Props} */
 const { contextId, chatId } = defineProps({
-  contextId: String,
-  chatId: String,
+  contextId: { type: String, default: '' },
+  chatId: { type: String, default: '' },
 });
 
 if (contextId) {
@@ -96,30 +98,7 @@ function enfocarAreaTexto() {
 }
 
 const mensaje = ref('');
-const mensajes = ref([
-  /* {
-    id: 0,
-    actor: 'AI',
-    message: 'Hola, ¿En qué te puedo ayudar hoy?',
-    reporte: false,
-  },
-  {
-    id: 1,
-    actor: 'Humano',
-    // message: "Por favor, cuéntame una historia",
-    message:
-      '¿Cuáles serían los principales retos en el uso de estas tecnologías de monitoreo, considerando tanto la cobertura espacial como la integración de datos?',
-    reporte: false,
-  },
-  {
-    id: 2,
-    actor: 'AI',
-    // message: "Era hace una vez...",
-    message:
-      'Hasta ahora hemos identificado que los principales retos en el uso de tecnologías para monitoreo marino están relacionados con la baja cobertura de sensores en áreas clave de biodiversidad, como el Arrecife Alacranes y la costa norte de Quintana Roo. También se ha detectado una limitada integración de datos entre plataformas locales e internacionales, lo cual dificulta el análisis comparativo y la toma de decisiones.',
-    reporte: true,
-  }, */
-]);
+const mensajes = ref([]);
 
 // Agregar nueva referencia para el contenedor del chat
 const contenedorChatRef = ref(null);
