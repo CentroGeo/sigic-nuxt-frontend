@@ -100,6 +100,12 @@ const obtenerTipoArchivo = (nombre) => {
             >
               Configurar proyecto
             </nuxt-link>
+            <!-- <button
+              class="boton boton-primario boton-chico"
+              @click="storeIA.eliminarProyecto(proyecto.id)"
+            >
+              Eliminar proyecto
+            </button> -->
           </div>
         </div>
       </div>
@@ -160,6 +166,14 @@ const obtenerTipoArchivo = (nombre) => {
                       Editar contexto
                       <span class="pictograma-editar" aria-hidden="true" />
                     </nuxt-link>
+                    <!-- <nuxt-link
+                      class="boton-secundario boton-chico"
+                      type="button"
+                      @click="storeIA.eliminarContexto(contexto.id)"
+                    >
+                      Eliminar contexto
+                      <span class="pictograma-eliminar" aria-hidden="true" />
+                    </nuxt-link> -->
                   </div>
                 </div>
               </div>

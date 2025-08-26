@@ -425,5 +425,49 @@ export const useIAStore = defineStore('ia', {
         throw error;
       }
     },
+    async eliminarProyecto(project_id) {
+      try {
+        const response = await fetch(
+          this.backend + `api/fileuploads/workspaces/admin/delete/${project_id}`,
+          {
+            method: 'DELETE',
+          }
+        );
+
+        console.log(response);
+
+        if (!response.ok) {
+          throw new Error('Error al eliminar el proyecto');
+        }
+
+        const data = await response.json();
+        console.log('Proyecto eliminado:', data);
+      } catch (error) {
+        console.error('Error:', error);
+        throw error;
+      }
+    },
+    async eliminarContexto(contexto_id) {
+      try {
+        const response = await fetch(
+          this.backend + `api/fileuploads/workspaces/admin/contexts/delete/${contexto_id}`,
+          {
+            method: 'DELETE',
+          }
+        );
+
+        console.log(response);
+
+        if (!response.ok) {
+          throw new Error('Error al eliminar el contexto');
+        }
+
+        const data = await response.json();
+        console.log('Contexto eliminado:', data);
+      } catch (error) {
+        console.error('Error:', error);
+        throw error;
+      }
+    },
   },
 });
