@@ -3,13 +3,14 @@ const storeIA = useIAStore();
 </script>
 <template>
   <div v-if="!storeIA.existenProyectos">
-    <div class="contenedor ancho-lectura">
+    <div class="contenedor">
       <div class="flex">
-        <div class="columna-16 flex-vertical-centrado" style="height: 85vh">
+        <div class="columna-4"></div>
+        <div class="columna-8 flex-vertical-centrado" style="height: 85vh">
           <h2 class="texto-centrado">Analiza información con Inteligencia Artificial</h2>
           <div class="fondo-color-acento p-2 borde-redondeado-8">
             <h6 class="m-t-0">Crea un proyecto para comenzar</h6>
-            <p>
+            <p class="m-b-0">
               Esta herramienta está diseñada para ayudarte a analizar información científica y
               territorial mediante chats con inteligencia artificial. Para iniciar, crea proyectos
               temáticos, agregar información del catálogo o subir tus propios archivos.
@@ -26,6 +27,7 @@ const storeIA = useIAStore();
             </NuxtLink>
           </div>
         </div>
+        <div class="columna-4"></div>
       </div>
     </div>
   </div>
