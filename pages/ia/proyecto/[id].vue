@@ -78,6 +78,8 @@ const esEdicion = ref(false);
 
 const proyecto = ref(null);
 
+const archivosEliminados = ref([]);
+
 onMounted(async () => {
   if (route.params.id !== 'nuevo') {
     esEdicion.value = true;
@@ -147,6 +149,8 @@ const obtenerTipoArchivo = (nombre) => {
 // Método para eliminar archivo de la lista
 const eliminarArchivo = (id) => {
   archivosSeleccionados.value = archivosSeleccionados.value.filter((archivo) => archivo.id !== id);
+
+  archivosEliminados.value.push(id);
 };
 
 // Función para guardar el proyecto
@@ -184,6 +188,23 @@ const guardarProyecto = async () => {
       mensaje: 'Error al guardar: ' + error.message,
       duracion: 7000,
     });
+  }
+};
+
+const editarProyecto = async () => {
+  try {
+    await storeIA.actualizarProyecto(
+      nombreProyecto.value,
+      descripcionProyecto.value,
+      visibilidadProyecto.value,
+      archivosSeleccionados.value,
+      archivosEliminados.value,
+      route.params.id
+    );
+
+    navigateTo('/ia/proyectos');
+  } catch (error) {
+    console.log('Error al actualizar: ' + error.message);
   }
 };
 </script>
@@ -334,7 +355,7 @@ const guardarProyecto = async () => {
               <NuxtLink
                 class="boton boton-chico boton-primario"
                 aria-label="Guardar proyecto"
-                @click="guardarProyecto"
+                @click.prevent="esEdicion ? editarProyecto() : guardarProyecto()"
               >
                 Guardar proyecto
               </NuxtLink>

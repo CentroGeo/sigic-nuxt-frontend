@@ -25,6 +25,8 @@ const fuentesSeleccionadas = ref([]);
 const esEdicion = ref(false);
 const contexto = ref(null);
 
+const archivosEliminados = ref([]);
+
 // Si necesitas reaccionar a cambios en el parámetro
 watch(
   () => route.query.proyecto_id,
@@ -40,8 +42,17 @@ const toggleSeleccionFuente = (fuente) => {
   const index = fuentesSeleccionadas.value.findIndex((f) => f.id === fuente.id);
   if (index === -1) {
     fuentesSeleccionadas.value.push(fuente);
+
+    const eliminadoIndex = archivosEliminados.value.indexOf(fuente.id);
+    if (eliminadoIndex !== -1) {
+      archivosEliminados.value.splice(eliminadoIndex, 1);
+    }
   } else {
     fuentesSeleccionadas.value.splice(index, 1);
+
+    if (!archivosEliminados.value.includes(fuente.id)) {
+      archivosEliminados.value.push(fuente.id);
+    }
   }
 };
 
@@ -180,6 +191,65 @@ const loadSources = async () => {
 
   //catalogo.value = arrayProjects;
   //catalogoFiltrado.value = arrayProjects;
+
+  if (contexto.value?.files) {
+    fuentesSeleccionadas.value = arraySources.value.filter((source) =>
+      contexto.value.files.some((file) => file.id === source.id)
+    );
+  }
+};
+
+const editarContexto = async () => {
+  if (!nombreContexto.value.trim()) {
+    mensajeError.value = 'El nombre del contexto es obligatorio';
+    return;
+  }
+
+  if (fuentesSeleccionadas.value.length === 0) {
+    mensajeError.value = 'Debes seleccionar al menos una fuente de información';
+    return;
+  }
+
+  // Preparar datos del formulario
+  const formData = new FormData();
+
+  formData.append('nombre', nombreContexto.value);
+  formData.append('descripcion', descripcionContexto.value);
+
+  // Agregar las fuentes seleccionadas como array JSON
+  formData.append('fuentes', JSON.stringify(fuentesSeleccionadas.value.map((f) => f.id)));
+
+  if (portadaContexto.value) {
+    formData.append('file', portadaContexto.value);
+  }
+
+  if (archivosEliminados.value.length > 0) {
+    formData.append('fuentes_elimnadas', archivosEliminados);
+  }
+
+  try {
+    estaCargando.value = true;
+    mensajeError.value = '';
+    mensajeExito.value = '';
+
+    for (const pair of formData.entries()) {
+      console.log(`${pair[0]}: ${pair[1]}`);
+    }
+
+    await storeIA.actualizarContexto(formData, route.params.id);
+
+    mensajeExito.value = 'Contexto actualizado exitosamente';
+    console.log('Contexto actualizado exitosamente');
+
+    setTimeout(() => {
+      navigateTo('/ia/proyectos');
+    }, 2000);
+  } catch (error) {
+    console.error('Error al editar contexto:', error);
+    mensajeError.value = error.message || 'Ocurrió un error al editar el contexto';
+  } finally {
+    estaCargando.value = false;
+  }
 };
 
 //carga fuentes del proyecto inicialmente seleccionado
@@ -193,7 +263,7 @@ onMounted(async () => {
     descripcionContexto.value = contexto.value.context.description;
   }
   //console.log(proyecto.value)
-  loadSources();
+  await loadSources();
 });
 
 watch(
@@ -368,7 +438,7 @@ const obtenerTipoArchivo = (nombre) => {
               <NuxtLink
                 class="boton boton-primario boton-chico"
                 aria-label="Guardar contexto"
-                @click="crearContexto()"
+                @click.prevent="esEdicion ? editarContexto() : crearContexto()"
               >
                 Guardar contexto
               </NuxtLink>

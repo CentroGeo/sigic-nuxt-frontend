@@ -324,5 +324,106 @@ export const useIAStore = defineStore('ia', {
 
       return data;
     },
+    async actualizarProyecto(
+      title,
+      description,
+      isPublic,
+      archivos,
+      archivosEliminados,
+      project_id
+    ) {
+      this.isUploading = true;
+      this.uploadProgress = 0;
+
+      try {
+        const formData = new FormData();
+
+        // Datos básicos del proyecto
+        formData.append('title', title);
+        formData.append('description', description);
+        //formData.append('visibility', visibilidadProyecto.value);
+        formData.append('public', isPublic === 'publico' ? 'True' : 'False');
+
+        console.log(archivos);
+
+        // Agregar archivos si existen
+        archivos.forEach((archivo) => {
+          formData.append('archivos', archivo.archivo);
+        });
+
+        if (archivosEliminados.length > 0) {
+          formData.append('delete_files[]', archivosEliminados);
+        }
+
+        // Log para depuración
+        /* for (const pair of formData.entries()) {
+          console.log(pair[0] + ', ' + (pair[1] instanceof File ? pair[1].name : pair[1]));
+        } */
+
+        return new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+
+          xhr.upload.addEventListener('progress', (event) => {
+            if (event.lengthComputable) {
+              const percent = Math.round((event.loaded / event.total) * 100);
+              this.uploadProgress = percent;
+            }
+          });
+
+          xhr.addEventListener('load', () => {
+            this.isUploading = false;
+            if (xhr.status >= 200 && xhr.status < 300) {
+              const data = JSON.parse(xhr.responseText);
+              console.log('Proyecto actualizado:', data);
+              this.existenProyectos = true;
+              resolve(data);
+            } else {
+              const error = JSON.parse(xhr.responseText)?.message || 'Error al guardar';
+              reject(new Error(error));
+            }
+          });
+
+          xhr.addEventListener('error', () => {
+            this.isUploading = false;
+            reject(new Error('Error de conexión'));
+          });
+
+          xhr.addEventListener('abort', () => {
+            this.isUploading = false;
+            reject(new Error('Subida cancelada'));
+          });
+
+          xhr.open('POST', this.backend + `api/fileuploads/workspaces/admin/edit/${project_id}`);
+          xhr.send(formData);
+        });
+      } catch (error) {
+        this.isUploading = false;
+        console.error('Error:', error);
+        throw error; // Re-lanzamos el error para manejarlo en el componente
+      }
+    },
+    async actualizarContexto(formData, contexto_id) {
+      try {
+        const response = await fetch(
+          this.backend + `api/fileuploads/workspaces/admin/contexts/edit/${contexto_id}`,
+          {
+            method: 'POST',
+            body: formData,
+          }
+        );
+
+        console.log(response);
+
+        if (!response.ok) {
+          throw new Error('Error al actualizar el contexto');
+        }
+
+        const data = await response.json();
+        console.log('Contexto actualizado:', data);
+      } catch (error) {
+        console.error('Error:', error);
+        throw error;
+      }
+    },
   },
 });
