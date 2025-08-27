@@ -1,7 +1,7 @@
 <script setup>
 // PENDING: Tener en cuenta que no solo tendremos archivos vectoriales
 import { onMounted, onUnmounted, ref, toRefs } from 'vue';
-import { fetchGeometryType, tooltipContent } from '~/utils/consulta';
+import { exploreWMS, fetchGeometryType, tooltipContent } from '~/utils/consulta';
 
 const storeSelected = useSelectedResources2Store();
 const storeConsulta = useConsultaStore();
@@ -92,6 +92,7 @@ onMounted(() => {
             ];
           } else {
             if (subtype.value === 'remote') {
+              exploreWMS(props.catalogueElement);
               geomType.value = 'Remoto';
             } else if (subtype.value === 'raster') {
               // Si es raster
