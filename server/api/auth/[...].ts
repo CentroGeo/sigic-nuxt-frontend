@@ -20,6 +20,7 @@ export default NuxtAuthHandler({
   //},
   callbacks: {
     async jwt({ token, account }) {
+      //console.log(token, account)
       if (account?.access_token) {
         //console.log("cuenta accestoken", token, account)
 
