@@ -3,6 +3,7 @@ import { ClientOnly } from '#components';
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiCasillaVerificacion from '@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+import { categoriesInSpanish } from '~/utils/consulta';
 
 const storeFilters = useFilteredResources();
 const emit = defineEmits(['applyFilter', 'resetFilter']);
@@ -75,7 +76,7 @@ defineExpose({
             v-model="inputCategories"
             name="filtro-categoria"
             :value="category"
-            :etiqueta="category"
+            :etiqueta="categoriesInSpanish[category]"
             class="opcion-checkbox"
           />
           <button

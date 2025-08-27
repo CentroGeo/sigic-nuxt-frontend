@@ -1,5 +1,5 @@
 <script setup>
-import { resourceTypeDic, tooltipContent } from '~/utils/consulta';
+import { categoriesInSpanish, resourceTypeDic, tooltipContent } from '~/utils/consulta';
 
 const storeFetched = useFetchedResources2Store();
 const storeSelected = useSelectedResources2Store();
@@ -14,7 +14,7 @@ const props = defineProps({
 });
 
 const resourceElement = computed(() => storeFetched.findResource(props.selectedElement.uuid));
-
+console.log(resourceElement.value);
 const goDown = () => storeSelected.changePosition(props.selectedElement.uuid, -1);
 const goUp = () => storeSelected.changePosition(props.selectedElement.uuid, +1);
 </script>
@@ -23,7 +23,9 @@ const goUp = () => storeSelected.changePosition(props.selectedElement.uuid, +1);
   <div class="tarjeta m-y-1">
     <div class="tarjeta-selected">
       <div class="flex flex-contenido-separado m-0 encabezado-tarjeta">
-        <p class="tarjeta-texto-secundario m-0">Categoria</p>
+        <p v-if="resourceElement" class="tarjeta-texto-secundario m-0">
+          {{ categoriesInSpanish[resourceElement?.category.gn_description] }}
+        </p>
 
         <div class="m-0">
           <button

@@ -6,7 +6,6 @@ export default defineEventHandler(async (event) => {
   let allResults: object[] = [];
   const query: URLSearchParams = getQuery(event);
   const token = getHeader(event, 'token');
-
   const options: RequestInit = { method: 'GET' };
   if (token !== undefined) {
     options.headers = { Authorization: `Bearer ${token}` };
@@ -28,7 +27,7 @@ export default defineEventHandler(async (event) => {
     allResults = allResults.concat(resources);
     endpoint = links.next;
     console.info('->', allResults.length, 'recuperados de', total);
-  } while (endpoint !== null && allResults.length < 100);
+  } while (endpoint !== null);
 
   return { allResults };
 });

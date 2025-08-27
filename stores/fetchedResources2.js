@@ -62,6 +62,7 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
 
       if (data.value?.accessToken) {
         options.headers.token = data.value?.accessToken;
+        console.log(data.value);
         //console.info(new Date(data.value.expires));
       }
 
@@ -116,10 +117,10 @@ function validacionTemporal(resources, resourceType) {
     // Si son capas geográficas, excluimos aquellos que no tengan geometria
     return resources.filter((resource) => isGeometricExtension(resource.extent));
   }
-  if (resourceType === resourceTypeDic.dataTable) {
+  /*   if (resourceType === resourceTypeDic.dataTable) {
     // Si son capas geográficas, excluimos aquellos que no tengan geometria
     return resources.filter((resource) => resource.subtype !== 'raster');
-  }
+  } */
 
   return resources;
 }

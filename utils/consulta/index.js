@@ -10,6 +10,28 @@ export const resourceTypeGeonode = {
   [resourceTypeDic.document]: 'document',
 };
 
+export const categoriesInSpanish = {
+  Biota: 'Biota',
+  Boundaries: 'Fronteras',
+  'Climatology Meteorology Atmosphere': 'Climatología, meteorología y atmósfera',
+  Economy: 'Economía',
+  Elevation: 'Elevación',
+  Environment: 'Medio ambiente',
+  Farming: 'Agricultura',
+  'Geoscientific Information': 'Información Geocientífica',
+  Health: 'Salud',
+  'Imagery Base Maps Earth Cover': 'Imágenes de mapas base de la superficie terrestre',
+  'Inland Waters': 'Aguas continentales',
+  'Intelligence Military': 'Inteligencia militar',
+  Location: 'Ubicación',
+  Oceans: 'Oceanos',
+  'Planning Cadastre': 'Planeación catastral',
+  Population: 'Población',
+  Society: 'Sociedad',
+  Structure: 'Estructura',
+  Transportation: 'Transporte',
+  'Utilities Communication': 'Comunicación de servicios',
+};
 export function cleanInput(input) {
   return input
     .normalize('NFD')
@@ -191,8 +213,10 @@ export async function downloadNoGeometry(resource, format) {
 }
 
 export function downloadRaster(resource) {
-  const urlArray = resource.download_urls.filter((link) => link.url.includes('/assets/'));
-  const url = urlArray[0].url;
+  //const urlArray = resource.download_urls.filter((link) => link.url.includes('/assets/'));
+  //const url = urlArray[0].url;
+  const config = useRuntimeConfig();
+  const url = `${config.public.geonodeUrl}/datasets/${resource.alternate}/dataset_download`;
   const anchor = document.createElement('a');
   anchor.href = url;
   anchor.target = '_blank';
