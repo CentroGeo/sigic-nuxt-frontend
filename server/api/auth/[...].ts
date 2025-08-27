@@ -28,7 +28,7 @@ export default NuxtAuthHandler({
         token.expires_at = (account.expires_at ?? 0) * 1000;
       }
 
-      /*if (Date.now() > ((token.expires_at as number) ?? 0)) {
+      if (Date.now() > ((token.expires_at as number) ?? 0)) {
         //console.log("ya expiró", token, account)
         try {
           const response = await fetch(
@@ -57,7 +57,7 @@ export default NuxtAuthHandler({
           console.error('Error refrescando token:', err);
           token.error = 'RefreshAccessTokenError';
         }
-      }*/
+      }
       return token;
     },
 
