@@ -115,7 +115,7 @@ onMounted(() => {
         </div>
         <div class="p-x-3 p-t-3">
           <button
-            class="boton-lista boton boton-primario"
+            class="boton-listas boton boton-primario"
             aria-label="Crear nuevo chat"
             type="button"
             @click="nuevoChatModal?.abrirModal()"

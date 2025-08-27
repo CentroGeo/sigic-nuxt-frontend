@@ -14,7 +14,7 @@ const storeIA = useIAStore();
 
       <!-- TODO: agregar prop y estilo de deshabilitado a SisdaiCampoBusqueda  -->
       <ClientOnly>
-        <SisdaiCampoBusqueda style="width: 100%" class="m-y-3" etiqueta="Buscar chats" />
+        <SisdaiCampoBusqueda class="m-y-3" etiqueta="Buscar chats" />
       </ClientOnly>
 
       <div class="nota fondo-color-neutro p-2 borde-redondeado-8">
