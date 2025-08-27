@@ -30,10 +30,9 @@ onMounted(() => (document.querySelector('body').className = ''));
     </div>
   </div>
 </template>
-<style lang="scss" scoped>
+<style lang="scss">
 .modulo-ia {
   gap: 0;
-  height: 85vh;
   .contenedor-contenido {
     flex: 1;
   }

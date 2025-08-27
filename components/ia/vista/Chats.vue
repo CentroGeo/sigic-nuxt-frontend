@@ -345,7 +345,7 @@ const idAleatorioCD = generaIdAleatorio('controldeslizante-');
     <div class="columna-2" />
 
     <div class="columna-12">
-      <div class="contenedor-chat p-y-3">
+      <div class="contenedor-chat">
         <div class="contenedor-chat-contenido">
           <div ref="contenedorChatRef" class="contenedor-log" @scroll="manejarScroll">
             <div v-for="m in mensajes" :key="m.id">
@@ -452,7 +452,7 @@ const idAleatorioCD = generaIdAleatorio('controldeslizante-');
 
     <div class="columna-2" />
   </div>
-  <!-- Modal nuevo chat -->
+  <!-- Modal reporte -->
   <ClientOnly>
     <SisdaiModal ref="reporteModal">
       <template #encabezado>

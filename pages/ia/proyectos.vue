@@ -3,8 +3,8 @@ const storeIA = useIAStore();
 </script>
 
 <template>
-  <IaLayoutPaneles>
-    <template #lista>
+  <UiLayoutPaneles>
+    <template #catalogo>
       <IaLayoutListas
         titulo="Proyectos"
         texto-boton="Nuevo proyecto"
@@ -12,10 +12,12 @@ const storeIA = useIAStore();
       />
     </template>
 
-    <template #vistas-ia>
-      <IaLeyendaInicioVistas />
+    <template #visualizador>
+      <main id="principal" class="contenedor m-b-10 p-t-3">
+        <IaLeyendaInicioVistas />
 
-      <IaVistaProyectos v-if="storeIA.existenProyectos" />
+        <IaVistaProyectos v-if="storeIA.existenProyectos" />
+      </main>
     </template>
-  </IaLayoutPaneles>
+  </UiLayoutPaneles>
 </template>

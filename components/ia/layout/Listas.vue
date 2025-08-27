@@ -41,10 +41,12 @@ onMounted(() => {
   <div>
     <!-- TODO: Colocar ListasProyectos -->
     <div v-if="titulo == 'Proyectos'">
-      <div style="max-height: 85vh; overflow-y: auto" class="p-x-3 p-t-3">
+      <div class="fondo-color-acento p-x-3 p-y-1">
+        <h5>{{ titulo }}</h5>
+      </div>
+      <div class="p-x-3 p-t-3">
         <nuxt-link
-          style="width: 100%; text-align: center; display: inline-block"
-          class="boton boton-primario"
+          class="boton-listas boton boton-primario"
           aria-label="Crear proyecto"
           to="/ia/proyecto/nuevo"
         >
@@ -54,7 +56,6 @@ onMounted(() => {
 
         <ClientOnly>
           <SisdaiCampoBusqueda
-            style="width: 100%"
             class="m-y-3"
             :catalogo="recursoLista"
             :etiqueta="etiquetaBusqueda"
@@ -98,9 +99,10 @@ onMounted(() => {
   </div>
 </template>
 <style lang="scss">
-.lista-chats {
-  max-height: 85vh;
-  overflow-y: auto;
+.boton-listas {
+  width: 100%;
+  text-align: center;
+  display: inline-block;
 }
 
 .proyecto {

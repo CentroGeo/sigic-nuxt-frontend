@@ -79,7 +79,7 @@ const obtenerTipoArchivo = (nombre) => {
 
 <template>
   <div>
-    <div v-if="proyecto" class="contenedor" style="max-height: 85vh; overflow-y: auto">
+    <div v-if="proyecto">
       <div class="grid">
         <div class="columna-16">
           <div class="flex flex-contenido-separado proyecto-encabezado">
