@@ -62,7 +62,6 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
 
       if (data.value?.accessToken) {
         options.headers.token = data.value?.accessToken;
-        console.log(data.value);
         //console.info(new Date(data.value.expires));
       }
 

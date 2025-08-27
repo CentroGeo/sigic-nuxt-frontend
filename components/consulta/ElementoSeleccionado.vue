@@ -14,7 +14,6 @@ const props = defineProps({
 });
 
 const resourceElement = computed(() => storeFetched.findResource(props.selectedElement.uuid));
-console.log(resourceElement.value);
 const goDown = () => storeSelected.changePosition(props.selectedElement.uuid, -1);
 const goUp = () => storeSelected.changePosition(props.selectedElement.uuid, +1);
 </script>
