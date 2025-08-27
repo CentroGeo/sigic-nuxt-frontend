@@ -13,14 +13,14 @@ defineProps({
 });
 // store
 const storeCatalogo = useCatalogoStore();
+const route = useRoute();
 </script>
 <template>
   <div class="contenedor-paneles grid">
     <div
       :class="`
       ${storeCatalogo.catalogoColapsado ? 'oculto' : 'columna-4'} 
-      /**TODO: revisar el fondo en ia*/
-      ${paneles === 2 ? 'menu-lateral-fondo' : ''}`"
+      ${paneles === 2 && !route.path.includes('/ia/') ? 'menu-lateral-fondo' : ''}`"
     >
       <slot name="catalogo">
         <p>Panel catálogo</p>
@@ -37,13 +37,13 @@ const storeCatalogo = useCatalogoStore();
       }`"
     >
       <slot name="visualizador">
-        <p>Panel visualización</p>
+        <!-- <p>Panel visualización</p> -->
       </slot>
     </div>
 
     <div v-if="paneles === 3" class="columna-4">
       <slot name="seleccion">
-        <p>Panel de selección</p>
+        <!-- <p>Panel de selección</p> -->
       </slot>
     </div>
   </div>
@@ -53,5 +53,10 @@ const storeCatalogo = useCatalogoStore();
 .contenedor-paneles {
   // height: 100%;
   gap: 0;
+
+  .columna-4 {
+    box-shadow: 4px 0 4px -5px var(--navegacion-primaria-sombra);
+    z-index: 1;
+  }
 }
 </style>

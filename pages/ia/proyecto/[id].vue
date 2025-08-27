@@ -210,8 +210,8 @@ const editarProyecto = async () => {
 </script>
 
 <template>
-  <IaLayoutPaneles>
-    <template #lista>
+  <UiLayoutPaneles>
+    <template #catalogo>
       <IaLeyendaInicioListas />
 
       <IaLayoutListas
@@ -222,7 +222,7 @@ const editarProyecto = async () => {
       />
     </template>
 
-    <template #vistas-ia>
+    <template #visualizador>
       <main id="principal" class="contenedor m-b-10 p-t-3">
         <h2>Configuración de proyecto</h2>
         <div class="grid">
@@ -504,7 +504,7 @@ const editarProyecto = async () => {
         </SisdaiModal>
       </ClientOnly>
     </template>
-  </IaLayoutPaneles>
+  </UiLayoutPaneles>
 </template>
 
 <style lang="scss">

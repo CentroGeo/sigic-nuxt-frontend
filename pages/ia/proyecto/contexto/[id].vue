@@ -295,8 +295,8 @@ const obtenerTipoArchivo = (nombre) => {
 </script>
 
 <template>
-  <IaLayoutPaneles>
-    <template #lista>
+  <UiLayoutPaneles>
+    <template #catalogo>
       <IaLayoutListas
         texto-boton="Crear proyecto"
         titulo="Proyectos"
@@ -304,7 +304,7 @@ const obtenerTipoArchivo = (nombre) => {
       />
     </template>
 
-    <template #vistas-ia>
+    <template #visualizador>
       <main id="principal" class="contenedor m-b-10 p-t-3">
         <!-- Mensajes de feedback -->
         <div v-if="mensajeError" class="mensaje-error">
@@ -454,7 +454,7 @@ const obtenerTipoArchivo = (nombre) => {
         </div>
       </main>
     </template>
-  </IaLayoutPaneles>
+  </UiLayoutPaneles>
 </template>
 
 <style lang="scss">

@@ -1,15 +1,15 @@
 <template>
-  <IaLayoutPaneles>
-    <template #lista>
+  <UiLayoutPaneles>
+    <template #catalogo>
       <IaListaChats titulo="Chats" texto-boton="Nuevo chat" etiqueta-busqueda="Buscar chats" />
     </template>
 
-    <template #vistas-ia>
+    <template #visualizador>
       <main id="principal" class="m-b-10 p-t-3">
         <IaVistaChats :context-id="contextId" :chat-id="chatId" />
       </main>
     </template>
-  </IaLayoutPaneles>
+  </UiLayoutPaneles>
 </template>
 
 <script setup>
