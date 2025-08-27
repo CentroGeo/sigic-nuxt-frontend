@@ -41,6 +41,9 @@ onMounted(() => {
   <div>
     <!-- TODO: Colocar ListasProyectos -->
     <div v-if="titulo == 'Proyectos'">
+      <div class="fondo-color-acento p-x-3 p-y-1">
+        <h5>{{ titulo }}</h5>
+      </div>
       <div class="p-x-3 p-t-3">
         <nuxt-link
           class="boton-listas boton boton-primario"

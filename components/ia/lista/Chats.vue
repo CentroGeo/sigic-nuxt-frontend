@@ -110,9 +110,11 @@ onMounted(() => {
   <div>
     <div v-if="storeIA.existenProyectos">
       <div v-if="titulo == 'Chats'">
+        <div class="fondo-color-acento p-x-3 p-y-1">
+          <h5>{{ titulo }}</h5>
+        </div>
         <div class="p-x-3 p-t-3">
           <button
-            style="width: 100%; text-align: center; display: inline-block"
             class="boton-lista boton boton-primario"
             aria-label="Crear nuevo chat"
             type="button"
