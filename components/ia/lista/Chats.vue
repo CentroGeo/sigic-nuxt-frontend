@@ -110,10 +110,10 @@ onMounted(() => {
   <div>
     <div v-if="storeIA.existenProyectos">
       <div v-if="titulo == 'Chats'">
-        <div style="max-height: 85vh; overflow-y: auto" class="p-x-3 p-t-3">
+        <div class="p-x-3 p-t-3">
           <button
             style="width: 100%; text-align: center; display: inline-block"
-            class="boton-primario"
+            class="boton-lista boton boton-primario"
             aria-label="Crear nuevo chat"
             type="button"
             @click="nuevoChatModal?.abrirModal()"
@@ -123,7 +123,6 @@ onMounted(() => {
 
           <ClientOnly>
             <SisdaiCampoBusqueda
-              style="width: 100%"
               class="m-y-3"
               :etiqueta="etiquetaBusqueda"
               :catalogo="recursoLista"
@@ -218,6 +217,12 @@ onMounted(() => {
   </ClientOnly>
 </template>
 <style lang="scss">
+.boton-listas {
+  width: 100%;
+  text-align: center;
+  display: inline-block;
+}
+
 .tarjeta-chat {
   background-color: var(--fondo-acento);
   border: 1px solid var(--borde-acento);

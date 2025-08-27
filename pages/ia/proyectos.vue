@@ -13,9 +13,11 @@ const storeIA = useIAStore();
     </template>
 
     <template #vistas-ia>
-      <IaLeyendaInicioVistas />
+      <main id="principal" class="contenedor m-b-10 p-t-3">
+        <IaLeyendaInicioVistas />
 
-      <IaVistaProyectos v-if="storeIA.existenProyectos" />
+        <IaVistaProyectos v-if="storeIA.existenProyectos" />
+      </main>
     </template>
   </IaLayoutPaneles>
 </template>

@@ -223,7 +223,7 @@ const editarProyecto = async () => {
     </template>
 
     <template #vistas-ia>
-      <div class="contenedor" style="max-height: 85vh; overflow-y: auto">
+      <main id="principal" class="contenedor m-b-10 p-t-3">
         <h2>Configuración de proyecto</h2>
         <div class="grid">
           <div class="columna-10">
@@ -369,8 +369,8 @@ const editarProyecto = async () => {
             </div>
           </div>
         </div>
-      </div>
-
+      </main>
+      <!-- Modal agregar catálogo -->
       <ClientOnly>
         <SisdaiModal ref="catalogoModal">
           <template #encabezado>
@@ -417,7 +417,7 @@ const editarProyecto = async () => {
             </button>
           </template>
         </SisdaiModal>
-
+        <!-- Modal agregar capas -->
         <SisdaiModal ref="capasModal" class="modal-grande">
           <template #encabezado>
             <h2>Agregar (capas/tablas/documentos) del catálogo</h2>

@@ -5,7 +5,9 @@
     </template>
 
     <template #vistas-ia>
-      <IaVistaChats :context-id="contextId" :chat-id="chatId" />
+      <main id="principal" class="m-b-10 p-t-3">
+        <IaVistaChats :context-id="contextId" :chat-id="chatId" />
+      </main>
     </template>
   </IaLayoutPaneles>
 </template>

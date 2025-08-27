@@ -305,7 +305,7 @@ const obtenerTipoArchivo = (nombre) => {
     </template>
 
     <template #vistas-ia>
-      <div class="contenedor" style="max-height: 85vh; overflow-y: auto">
+      <main id="principal" class="contenedor m-b-10 p-t-3">
         <!-- Mensajes de feedback -->
         <div v-if="mensajeError" class="mensaje-error">
           {{ mensajeError }}
@@ -452,7 +452,7 @@ const obtenerTipoArchivo = (nombre) => {
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </template>
   </IaLayoutPaneles>
 </template>

@@ -4,25 +4,20 @@ const storeIA = useIAStore();
 </script>
 <template>
   <div v-if="!storeIA.existenProyectos">
-    <div style="max-height: 85vh; overflow-y: auto" class="p-x-3 p-t-3">
-      <button
-        style="width: 100%; text-align: center; display: inline-block"
-        class="boton-primario"
-        aria-label="Crear nuevo chat"
-        disabled
-      >
+    <div class="p-x-3 p-t-3">
+      <button class="boton-listas boton boton-primario" aria-label="Crear nuevo chat" disabled>
         Nuevo chat
       </button>
 
-      <!-- TODO: agregar estilo de campo de búsqueda deshabilitado -->
+      <!-- TODO: agregar prop y estilo de deshabilitado a SisdaiCampoBusqueda  -->
       <ClientOnly>
         <SisdaiCampoBusqueda style="width: 100%" class="m-y-3" etiqueta="Buscar chats" />
       </ClientOnly>
 
-      <h6>Chats</h6>
+      <h5>Chats</h5>
       <div class="nota fondo-color-neutro p-2 borde-redondeado-8">
         <h6 class="m-t-0">Crea un contexto para iniciar un chat</h6>
-        <p>
+        <p class="m-b-0">
           Después de crear un proyecto, crea un contexto para iniciar un chat. Los nuevos chats
           aparecerán en esta sección.
         </p>
@@ -30,3 +25,11 @@ const storeIA = useIAStore();
     </div>
   </div>
 </template>
+
+<style lang="scss">
+.boton-listas {
+  width: 100%;
+  text-align: center;
+  display: inline-block;
+}
+</style>

@@ -16,7 +16,13 @@ const storeIA = useIAStore();
     </template>
 
     <template #vistas-ia>
-      <IaLeyendaInicioVistas v-if="!storeIA.existenProyectos" />
+      <main
+        id="principal"
+        class="contenedor m-b-10 p-t-3"
+        :style="storeIA.existenProyectos ? 'height: 85vh;' : ''"
+      >
+        <IaLeyendaInicioVistas v-if="!storeIA.existenProyectos" />
+      </main>
     </template>
   </IaLayoutPaneles>
 </template>
