@@ -1,6 +1,6 @@
 <script setup>
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { cleanInput } from '~/utils/consulta';
+import { categoriesInSpanish, cleanInput } from '~/utils/consulta';
 
 const config = useRuntimeConfig();
 const storeFetched = useFetchedResources2Store();
@@ -175,7 +175,7 @@ onMounted(async () => {
 
     <div v-for="category in Object.keys(categorizedResources)" :key="category" class="m-y-1">
       <ConsultaElementoCategoria
-        :title="category"
+        :title="categoriesInSpanish[category]"
         :tag="etiquetaElementos"
         :number-elements="categorizedResources[category].length"
         @click="setSelectedCategory(category)"

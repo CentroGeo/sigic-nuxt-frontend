@@ -10,6 +10,29 @@ export const resourceTypeGeonode = {
   [resourceTypeDic.document]: 'document',
 };
 
+export const categoriesInSpanish = {
+  Biota: 'Biota',
+  Boundaries: 'Fronteras',
+  'Climatology Meteorology Atmosphere': 'Climatología, meteorología y atmósfera',
+  Economy: 'Economía',
+  Elevation: 'Elevación',
+  Environment: 'Medio ambiente',
+  Farming: 'Agricultura',
+  'Geoscientific Information': 'Información Geocientífica',
+  Health: 'Salud',
+  'Imagery Base Maps Earth Cover': 'Imágenes de mapas base de la superficie terrestre',
+  'Inland Waters': 'Aguas continentales',
+  'Intelligence Military': 'Inteligencia militar',
+  Location: 'Ubicación',
+  Oceans: 'Oceanos',
+  'Planning Cadastre': 'Planeación catastral',
+  Population: 'Población',
+  Society: 'Sociedad',
+  Structure: 'Estructura',
+  Transportation: 'Transporte',
+  'Utilities Communication': 'Comunicación de servicios',
+  'Sin clasificar': 'Sin clasificar',
+};
 export function cleanInput(input) {
   return input
     .normalize('NFD')
@@ -190,133 +213,15 @@ export async function downloadNoGeometry(resource, format) {
   downloadWMS(resource, format, props.join());
 }
 
-export async function downloadVectorData(resource, format) {
-  const config = useRuntimeConfig();
-  let downloadLink = null;
-  const maxRetries = 3;
-  const delay = 1000;
-  const formatDict = {
-    gpkg: 'application/geopackage+sqlite3',
-    geojson: 'application/json',
-    csv: 'text/csv',
-    kml: 'application/vnd.google-earth.kml+xml',
-  };
-  const permissionRequestTemplate = `<?xml version="1.0" encoding="UTF-8"?><wps:Execute version="1.0.0" service="WPS" 
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-  xmlns="http://www.opengis.net/wps/1.0.0" 
-  xmlns:wfs="http://www.opengis.net/wfs" 
-  xmlns:wps="http://www.opengis.net/wps/1.0.0" 
-  xmlns:ows="http://www.opengis.net/ows/1.1" 
-  xmlns:gml="http://www.opengis.net/gml" 
-  xmlns:ogc="http://www.opengis.net/ogc" 
-  xmlns:wcs="http://www.opengis.net/wcs/1.1.1" 
-  xmlns:dwn="http://geoserver.org/wps/download" 
-  xmlns:xlink="http://www.w3.org/1999/xlink" 
-  xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsAll.xsd">
-  <ows:Identifier>gs:DownloadEstimator</ows:Identifier>
-  <wps:DataInputs><wps:Input><ows:Identifier>layerName</ows:Identifier><wps:Data>
-  <wps:LiteralData>${resource.alternate}</wps:LiteralData></wps:Data></wps:Input></wps:DataInputs></wps:Execute>`;
-
-  const request2 = `<?xml version="1.0" encoding="UTF-8"?><wps:Execute version="1.0.0" service="WPS" 
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-  xmlns="http://www.opengis.net/wps/1.0.0" 
-  xmlns:wfs="http://www.opengis.net/wfs" 
-  xmlns:wps="http://www.opengis.net/wps/1.0.0" 
-  xmlns:ows="http://www.opengis.net/ows/1.1" 
-  xmlns:gml="http://www.opengis.net/gml" 
-  xmlns:ogc="http://www.opengis.net/ogc" 
-  xmlns:wcs="http://www.opengis.net/wcs/1.1.1" 
-  xmlns:dwn="http://geoserver.org/wps/download" 
-  xmlns:xlink="http://www.w3.org/1999/xlink" 
-  xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsAll.xsd">
-  <ows:Identifier>gs:Download</ows:Identifier>
-  <wps:DataInputs><wps:Input><ows:Identifier>layerName</ows:Identifier>
-  <wps:Data><wps:LiteralData>${resource.alternate}</wps:LiteralData>
-  </wps:Data></wps:Input><wps:Input>
-  <ows:Identifier>outputFormat</ows:Identifier>
-  <wps:Data><wps:LiteralData>${formatDict[format]}</wps:LiteralData></wps:Data></wps:Input>
-  <wps:Input><ows:Identifier>cropToROI</ows:Identifier><wps:Data><wps:LiteralData>false</wps:LiteralData></wps:Data></wps:Input></wps:DataInputs>
-  <wps:ResponseForm><wps:ResponseDocument storeExecuteResponse="true" status="true">
-  <wps:Output mimeType="${formatDict[format]}" asReference="true">
-  <ows:Identifier>result</ows:Identifier></wps:Output></wps:ResponseDocument></wps:ResponseForm></wps:Execute>`;
-
-  // Pedimos permiso para hacer la descarga
-  const fetchpermissionRequest = await fetch(
-    `${config.public.geoserverUrl}/ows?service=WPS&version=1.0.0&REQUEST=Execute`,
-    {
-      method: 'POST',
-      body: permissionRequestTemplate,
-    }
-  );
-
-  // Revisamos el status de la primera peticion
-  if (!fetchpermissionRequest.ok) {
-    console.error('No se concedieron permisos');
-    return;
-  }
-  // // const permissionRestult = await fetchpermissionRequest.text();
-  //console.log("La primer respuesta, el permiso: ", permissionRestult);
-
-  // Hacemos la segunda peticion, que también regresará un xml del que nos interesa el status location
-  const statusRequest = await fetch(
-    `${config.public.geoserverUrl}/ows?service=WPS&version=1.0.0&REQUEST=Execute`,
-    {
-      method: 'POST',
-      body: request2,
-    }
-  );
-  // Revisamos el status de la segunda peticion
-  if (!statusRequest.ok) {
-    console.error('Falló la petición del link para la descarga');
-    return;
-  }
-  const statusResult = await statusRequest.text();
-  //console.log("La segunda petición, la del status: ", statusResult);
-  // Como nos regresa un xml, hay que parsearlo
-  const parser = new DOMParser();
-  const parsedStatusResult = parser.parseFromString(statusResult, 'text/xml');
-  const executeResponseHTML = parsedStatusResult.getElementsByTagName('wps:ExecuteResponse')[0];
-  const linkStatusLocation = executeResponseHTML?.getAttribute('statusLocation');
-
-  // Ahora hacemos una petición get al vínculo statusLocation.
-  // Como a veces hace timeout, lo intentamos tres veces
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
-    const downloadRequest = await fetch(linkStatusLocation);
-    const downloadResult = await downloadRequest.text();
-    if (downloadResult.includes('Process succeeded')) {
-      console.warn('succeeded on attempt number ', attempt);
-      const parser2 = new DOMParser();
-      const parsedDownloadResult = parser2.parseFromString(downloadResult, 'text/xml');
-      const downloadHTML = parsedDownloadResult.getElementsByTagName('wps:Reference')[0];
-      downloadLink = downloadHTML?.getAttribute('href');
-      attempt = maxRetries;
-    } else {
-      await new Promise((res) => setTimeout(res, delay));
-    }
-  }
-  if (!downloadLink) {
-    console.error('Falló la descarga');
-    return;
-  }
-
-  // Si es un Json vamos a tener que forzar la descarga
-  if (format === 'geojson') {
-    const jsonRequest = await fetch(downloadLink);
-    if (!jsonRequest.ok) {
-      console.error('Falló el forzar la descarga del json');
-      return;
-    }
-    const jsonResponse = await jsonRequest.json();
-    const blob = new Blob([JSON.stringify(jsonResponse)], {
-      type: 'application/json',
-    });
-    const blobLink = URL.createObjectURL(blob);
-    downloadLink = blobLink;
-  }
+export function downloadRaster(resource) {
+  const urlArray = resource.download_urls.filter((link) => link.url.includes('/assets/'));
+  const url = urlArray[0].url;
+  //const config = useRuntimeConfig();
+  //const url = `${config.public.geonodeUrl}/datasets/${resource.alternate}/dataset_download`;
   const anchor = document.createElement('a');
-  anchor.href = downloadLink;
+  anchor.href = url;
   anchor.target = '_blank';
-  anchor.download = `${resource.title}.${format}`;
+  anchor.download = `${resource.title}.tiff`;
   document.body.appendChild(anchor);
   anchor.click();
   document.body.removeChild(anchor);
