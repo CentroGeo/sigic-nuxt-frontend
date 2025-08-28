@@ -31,6 +31,7 @@ export const categoriesInSpanish = {
   Structure: 'Estructura',
   Transportation: 'Transporte',
   'Utilities Communication': 'Comunicación de servicios',
+  'Sin clasificar': 'Sin clasificar',
 };
 export function cleanInput(input) {
   return input
@@ -213,10 +214,10 @@ export async function downloadNoGeometry(resource, format) {
 }
 
 export function downloadRaster(resource) {
-  //const urlArray = resource.download_urls.filter((link) => link.url.includes('/assets/'));
-  //const url = urlArray[0].url;
-  const config = useRuntimeConfig();
-  const url = `${config.public.geonodeUrl}/datasets/${resource.alternate}/dataset_download`;
+  const urlArray = resource.download_urls.filter((link) => link.url.includes('/assets/'));
+  const url = urlArray[0].url;
+  //const config = useRuntimeConfig();
+  //const url = `${config.public.geonodeUrl}/datasets/${resource.alternate}/dataset_download`;
   const anchor = document.createElement('a');
   anchor.href = url;
   anchor.target = '_blank';

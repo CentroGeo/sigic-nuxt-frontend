@@ -23,7 +23,11 @@ const goUp = () => storeSelected.changePosition(props.selectedElement.uuid, +1);
     <div class="tarjeta-selected fondo-color-acento">
       <div class="flex flex-contenido-separado m-0 encabezado-tarjeta">
         <p v-if="resourceElement" class="tarjeta-texto-secundario m-0">
-          {{ categoriesInSpanish[resourceElement?.category.gn_description] }}
+          {{
+            resourceElement?.category
+              ? categoriesInSpanish[resourceElement?.category.gn_description]
+              : 'Sin clasificar'
+          }}
         </p>
 
         <div class="m-0">
