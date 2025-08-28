@@ -56,13 +56,13 @@ export function tooltipContent(resource) {
   return content;
 }
 
-/* export function getWMSserver(resource) {
-  const proxy = 'https://geonode.dev.geoint.mx/proxy/?url=';
+export function getWMSserver(resource) {
+  //const proxy = 'https://geonode.dev.geoint.mx/proxy/?url=';
   const wmsObject = resource.links.filter((link) => link.link_type === 'OGC:WMS');
-  const link = wmsObject[0]['url'];
-  return `${proxy}${link}`;
-} */
-export async function exploreWMS(resource) {
+  const link = wmsObject[0]['url'].replace('http', 'https');
+  return `${link}`;
+}
+export async function hasWMS(resource) {
   //const config = useRuntimeConfig();
   //const apiGeonode = config.public.geonodeUrl;
   //const proxy = `${apiGeonode}/proxy/?url=`;
@@ -74,7 +74,6 @@ export async function exploreWMS(resource) {
     version: '1.0.0',
     request: 'GetCapabilities',
   }).toString();
-  //console.log(url);
   const res = await fetch(`${url}`);
   if (!res.ok) {
     //console.log('Fracasó la petición getCapabilities');
@@ -83,14 +82,15 @@ export async function exploreWMS(resource) {
   const data = await res.text();
   if (data.includes('ExceptionReport')) {
     console.error('No se puede usar el WMS');
+    return false;
   } else {
-    console.warn('Hasta aquí todo ok con el wms');
+    return true;
   }
 }
-export async function fetchGeometryType(resource) {
+export async function fetchGeometryType(resource, server) {
   const config = useRuntimeConfig();
   const api = config.public.geoserverUrl;
-  const url = new URL(`${api}/ows`);
+  const url = server === 'sigic' ? new URL(`${api}/ows`) : new URL(server);
   url.search = new URLSearchParams({
     service: 'WFS',
     version: '1.0.0',

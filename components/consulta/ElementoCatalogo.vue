@@ -1,7 +1,7 @@
 <script setup>
 // PENDING: Todos los archivos remotos tienen en subtype = remote?
 import { onMounted, onUnmounted, ref, toRefs } from 'vue';
-import { exploreWMS, fetchGeometryType, tooltipContent } from '~/utils/consulta';
+import { fetchGeometryType, getWMSserver, hasWMS, tooltipContent } from '~/utils/consulta';
 
 const storeSelected = useSelectedResources2Store();
 const storeConsulta = useConsultaStore();
@@ -92,15 +92,19 @@ onMounted(() => {
             ];
           } else {
             if (subtype.value === 'remote') {
-              exploreWMS(props.catalogueElement);
-              geomType.value = 'Remoto';
+              if (hasWMS(props.catalogueElement)) {
+                const server = getWMSserver(props.catalogueElement);
+                geomType.value = await fetchGeometryType(props.catalogueElement, server);
+              } else {
+                geomType.value = 'Remoto';
+              }
             } else if (subtype.value === 'raster') {
               // Si es raster
               geomType.value = 'Raster';
             } else if (subtype.value === 'vector') {
               // Si es vectorial
               // Solicitamos la geometría hasta que la tarjeta va a entrar a la vista
-              geomType.value = await fetchGeometryType(catalogueElement.value);
+              geomType.value = await fetchGeometryType(catalogueElement.value, 'sigic');
               //geomType.value = "Point";
             } else {
               geomType.value = 'Otro';
