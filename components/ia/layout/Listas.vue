@@ -47,11 +47,11 @@ onMounted(() => {
       <div class="p-x-3 p-t-3">
         <nuxt-link
           class="boton-listas boton boton-primario"
-          aria-label="Crear proyecto"
+          aria-label="Nuevo proyecto"
           to="/ia/proyecto/nuevo"
         >
           {{ textoBoton }}
-          <span class="pictograma-agregar" aria-hidden="true" />
+          <!-- <span class="pictograma-agregar" aria-hidden="true" /> -->
         </nuxt-link>
 
         <ClientOnly>

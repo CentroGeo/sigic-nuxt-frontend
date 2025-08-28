@@ -18,6 +18,12 @@ export const useIAStore = defineStore('ia', {
     contextoSeleccionado: null,
     backend: useRuntimeConfig().public.iaBackendUrl,
   }),
+  getters: {
+    authToken: () => {
+      const { data } = useAuth();
+      return data.value?.accessToken || null;
+    },
+  },
   actions: {
     async crearProyecto(title, description, isPublic, archivos = []) {
       console.log('crear proyecto');
@@ -46,6 +52,10 @@ export const useIAStore = defineStore('ia', {
         for (const pair of formData.entries()) {
           console.log(pair[0] + ', ' + (pair[1] instanceof File ? pair[1].name : pair[1]));
         }
+
+        /* const token = this.authToken;
+        console.log(token);
+        formData.append('token', token); */
 
         // Usar XMLHttpRequest para monitorear progreso
         return new Promise((resolve, reject) => {

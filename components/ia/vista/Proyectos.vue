@@ -94,7 +94,7 @@ const obtenerTipoArchivo = (nombre) => {
               </p>
             </div>
             <nuxt-link
-              class="boton boton-primario boton-chico"
+              class="boton boton-secundario boton-chico"
               aria-label="Configurar proyecto"
               :to="`/ia/proyecto/${proyecto.id}`"
             >
@@ -123,8 +123,8 @@ const obtenerTipoArchivo = (nombre) => {
         <div class="flex flex-contenido-separado contexto-encabezado columna-16">
           <h4>Contextos:</h4>
           <NuxtLink
-            class="boton boton-secundario boton-chico"
-            aria-label="Crear proyecto"
+            class="boton boton-primario boton-chico"
+            aria-label="Crear contexto"
             :to="`/ia/proyecto/contexto/nuevo?proyecto_id=${proyecto.id}`"
           >
             Crear contexto

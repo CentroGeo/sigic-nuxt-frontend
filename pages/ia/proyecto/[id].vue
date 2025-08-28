@@ -216,7 +216,7 @@ const editarProyecto = async () => {
 
       <IaLayoutListas
         v-if="storeIA.existenProyectos"
-        texto-boton="Crear proyecto"
+        texto-boton="Nuevo proyecto"
         titulo="Proyectos"
         etiqueta-busqueda="Buscar un proyecto"
       />
@@ -232,7 +232,7 @@ const editarProyecto = async () => {
                 <SisdaiCampoBase
                   v-model="nombreProyecto"
                   etiqueta="Nombre del proyecto"
-                  ejemplo=""
+                  ejemplo="Escribe el nombre de tu proyecto"
                   :es_etiqueta_visible="true"
                   class="m-b-3"
                 />
@@ -240,6 +240,7 @@ const editarProyecto = async () => {
                 <SisdaiAreaTexto
                   v-model="descripcionProyecto"
                   etiqueta="Descripción del proyecto"
+                  ejemplo="Describe brevemente tu proyecto"
                   :es_etiqueta_visible="true"
                   :es_obligatorio="false"
                   class="m-b-3"

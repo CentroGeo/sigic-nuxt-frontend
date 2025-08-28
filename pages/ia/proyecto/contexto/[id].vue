@@ -298,7 +298,7 @@ const obtenerTipoArchivo = (nombre) => {
   <UiLayoutPaneles>
     <template #catalogo>
       <IaLayoutListas
-        texto-boton="Crear proyecto"
+        texto-boton="Nuevo proyecto"
         titulo="Proyectos"
         etiqueta-busqueda="Buscar un proyecto"
       />
@@ -316,7 +316,7 @@ const obtenerTipoArchivo = (nombre) => {
 
         <div class="grid">
           <div class="columna-16 flex flex-contenido-separado contexto-encabezado">
-            <h2>Configuración del contexto</h2>
+            <h2>Configuración de contexto</h2>
             <NuxtLink
               class="boton boton-secundario boton-chico"
               aria-label="Regresar a proyectos"
