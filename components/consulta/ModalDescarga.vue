@@ -149,13 +149,14 @@ defineExpose({
       </template>
       <template #cuerpo>
         <p>{{ selectedElement.title }}</p>
-        <div v-if="layerType === 'remote'" class="tarjeta m-y-3">
+        <!--         <div v-if="layerType === 'remote'" class="tarjeta m-y-3">
           <div class="tarjeta-cuerpo">
             <p>Esta capa es remota y no se puede descargar del geoserver</p>
           </div>
-        </div>
+        </div> -->
 
-        <div v-else>
+        <!--         <div v-else> -->
+        <div>
           <p>Formato:</p>
           <div>
             <button

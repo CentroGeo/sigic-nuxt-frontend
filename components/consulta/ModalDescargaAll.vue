@@ -11,6 +11,12 @@ const props = defineProps({
 const modalDescargaAll = ref(null);
 const optionsList = ref(null);
 const tagTitle = ref();
+const includesRemote = computed(() =>
+  storeFetched
+    .findResources(storeSelected.uuids)
+    .map((resource) => resource.sourcetype)
+    .includes('REMOTE')
+);
 
 function abrirModalDescargaAll() {
   modalDescargaAll.value?.abrirModal();
@@ -21,8 +27,10 @@ function abrirModalDescargaAll() {
 async function downloadAllDataTables(format) {
   const resourceList = storeFetched.findResources(storeSelected.uuids);
   for (let i = 0; i < resourceList.length; i++) {
-    await downloadNoGeometry(resourceList[i], format);
-    await wait(1000);
+    if (resourceList[i].sourcetype !== 'REMOTE') {
+      await downloadNoGeometry(resourceList[i], format);
+      await wait(1000);
+    }
   }
   modalDescargaAll.value?.cerrarModal();
 }
@@ -30,8 +38,10 @@ async function downloadAllDataTables(format) {
 async function downloadAllDocs() {
   const resourceList = storeFetched.findResources(storeSelected.uuids);
   for (let i = 0; i < resourceList.length; i++) {
-    downloadDocs(resourceList[i]);
-    await wait(1000);
+    if (resourceList[i].sourcetype !== 'REMOTE') {
+      downloadDocs(resourceList[i]);
+      await wait(1000);
+    }
   }
   modalDescargaAll.value?.cerrarModal();
 }
@@ -39,8 +49,10 @@ async function downloadAllDocs() {
 async function downloadAllMetadata() {
   const resourceList = storeFetched.findResources(storeSelected.uuids);
   for (let i = 0; i < resourceList.length; i++) {
-    await downloadMetadata(resourceList[i]);
-    await wait(1000);
+    if (resourceList[i].sourcetype !== 'REMOTE') {
+      await downloadMetadata(resourceList[i]);
+      await wait(1000);
+    }
   }
   modalDescargaAll.value?.cerrarModal();
 }
@@ -105,6 +117,11 @@ defineExpose({
         <h1>Descargar {{ tagTitle }}</h1>
       </template>
       <template #cuerpo>
+        <div v-if="includesRemote" class="tarjeta m-y-3">
+          <div class="tarjeta-cuerpo">
+            <p>Las capas remotas no se incluirán en la descarga de archivos.</p>
+          </div>
+        </div>
         <p>Formato:</p>
         <div>
           <button
@@ -126,5 +143,13 @@ defineExpose({
 .boton-secundario {
   width: 90%;
   margin: 8px;
+}
+.tarjeta {
+  width: 99%;
+  background-color: var(--color-alerta-1);
+  border: 1px solid var(--color-alerta-3);
+  p {
+    color: var(--color-alerta-3);
+  }
 }
 </style>

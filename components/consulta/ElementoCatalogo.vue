@@ -1,5 +1,5 @@
 <script setup>
-// PENDING: Tener en cuenta que no solo tendremos archivos vectoriales
+// PENDING: Todos los archivos remotos tienen en subtype = remote?
 import { onMounted, onUnmounted, ref, toRefs } from 'vue';
 import { exploreWMS, fetchGeometryType, tooltipContent } from '~/utils/consulta';
 

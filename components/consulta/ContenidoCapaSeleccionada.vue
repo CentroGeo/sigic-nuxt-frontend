@@ -12,7 +12,6 @@ const props = defineProps({
     default: () => ({}),
   },
 });
-
 const optionsButtons = ref([
   {
     for: 'all',
@@ -106,6 +105,7 @@ const actualButtons = computed(() =>
         class="boton-pictograma boton-sin-contenedor-secundario"
         :aria-label="button.label"
         type="button"
+        :disabled="button.label === 'Descargar archivo' && resourceElement.sourcetype === 'REMOTE'"
         @click="button.action"
       >
         <span :class="button.pictogram" aria-hidden="true" />

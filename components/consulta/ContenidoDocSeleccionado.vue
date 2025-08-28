@@ -18,7 +18,6 @@ const selectedResource = computed({
   get: () => storeSelected.lastVisible().uuid,
   set: (newSelectedUuid) => storeSelected.setOnlyOneVisible(newSelectedUuid),
 });
-
 const hasGeometry = computed(() => {
   if (props.resourceType !== resourceTypeDic.dataTable) return false;
 
@@ -73,6 +72,7 @@ const hasGeometry = computed(() => {
         class="boton-pictograma boton-sin-contenedor-secundario"
         aria-label="Descargar selección"
         type="button"
+        :disabled="resourceElement.sourcetype === 'REMOTE'"
         @click="emit('descargaClicked')"
       >
         <span class="pictograma-archivo-descargar" aria-hidden="true" />

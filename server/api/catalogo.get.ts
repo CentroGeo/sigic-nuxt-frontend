@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
   const query: URLSearchParams = getQuery(event);
   const token = getHeader(event, 'token');
   const options: RequestInit = { method: 'GET' };
-  if (token !== undefined) {
+  if (token !== 'sin-token') {
     options.headers = { Authorization: `Bearer ${token}` };
   }
 

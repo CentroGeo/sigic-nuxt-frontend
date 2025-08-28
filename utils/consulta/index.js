@@ -57,13 +57,35 @@ export function tooltipContent(resource) {
 }
 
 /* export function getWMSserver(resource) {
+  const proxy = 'https://geonode.dev.geoint.mx/proxy/?url=';
   const wmsObject = resource.links.filter((link) => link.link_type === 'OGC:WMS');
-  return wmsObject[0]['url'];
+  const link = wmsObject[0]['url'];
+  return `${proxy}${link}`;
 } */
 export async function exploreWMS(resource) {
+  //const config = useRuntimeConfig();
+  //const apiGeonode = config.public.geonodeUrl;
+  //const proxy = `${apiGeonode}/proxy/?url=`;
   const wmsObject = resource.links.filter((link) => link.link_type === 'OGC:WMS');
-  const wmsLink = wmsObject[0]['url'];
-  console.warn(wmsLink);
+  const wmsLink = wmsObject[0]['url'].replace('http', 'https');
+  const url = new URL(wmsLink);
+  url.search = new URLSearchParams({
+    service: 'WFS',
+    version: '1.0.0',
+    request: 'GetCapabilities',
+  }).toString();
+  //console.log(url);
+  const res = await fetch(`${url}`);
+  if (!res.ok) {
+    //console.log('Fracasó la petición getCapabilities');
+    return 'Error';
+  }
+  const data = await res.text();
+  if (data.includes('ExceptionReport')) {
+    console.error('No se puede usar el WMS');
+  } else {
+    console.warn('Hasta aquí todo ok con el wms');
+  }
 }
 export async function fetchGeometryType(resource) {
   const config = useRuntimeConfig();
@@ -195,7 +217,7 @@ export async function downloadWMS(resource, format, featureTypes) {
 export async function downloadNoGeometry(resource, format) {
   const config = useRuntimeConfig();
   // Revisamos si la capa es remota
-  if (resource.subtype === 'remote') {
+  if (resource.sourcetype === 'remote') {
     alert('Esta capa es remota y no se puede descargar');
     return;
   }
