@@ -76,8 +76,8 @@ export async function hasWMS(resource) {
   }).toString();
   const res = await fetch(`${url}`);
   if (!res.ok) {
-    //console.log('Fracasó la petición getCapabilities');
-    return 'Error';
+    console.error('Fracasó la petición getCapabilities');
+    return false;
   }
   const data = await res.text();
   if (data.includes('ExceptionReport')) {

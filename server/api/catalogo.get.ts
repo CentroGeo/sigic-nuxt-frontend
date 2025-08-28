@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
 
   const dataParams = new URLSearchParams(query);
   let endpoint = `${api}?${dataParams.toString()}`;
-
+  console.log(endpoint)
   do {
     const response = await fetch(endpoint.replace('http:', 'https:'), options);
 
@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
     allResults = allResults.concat(resources);
     endpoint = links.next;
     console.info('->', allResults.length, 'recuperados de', total);
-  } while (endpoint !== null);
+  } while (endpoint !== null && allResults.length < 50);
 
   return { allResults };
 });

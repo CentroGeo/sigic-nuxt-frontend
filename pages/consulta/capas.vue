@@ -1,7 +1,7 @@
 <script setup>
 import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
 import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
-import { resourceTypeDic } from '~/utils/consulta';
+import { getWMSserver, resourceTypeDic } from '~/utils/consulta';
 
 const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
@@ -136,6 +136,15 @@ function updateQueryParam(capas) {
 }
 watch(() => storeSelected.asQueryParam(), updateQueryParam);
 
+function findServer(resource) {
+  if (resource.sourcetype === 'REMOTE') {
+    const link = getWMSserver(resource);
+    //console.log(link);
+    return link;
+  } else {
+    return `${config.public.geoserverUrl}/wms?`;
+  }
+}
 onMounted(() => {
   updateMapFromHash(route.hash?.slice(1));
   storeSelected.addFromQueryParam(route.query.capas);
@@ -171,7 +180,7 @@ onMounted(() => {
             v-for="resource in storeFetched.findResources(storeSelected.uuids)"
             :key="`wms-${resource.uuid}`"
             :capa="resource.alternate"
-            :fuente="`${config.public.geoserverUrl}/wms?`"
+            :fuente="findServer(resource)"
             :opacidad="storeSelected.byUuid(resource.uuid).opacidad"
             :posicion="storeSelected.byUuid(resource.uuid).posicion + 1"
             :visible="storeSelected.byUuid(resource.uuid).visible"

@@ -92,7 +92,7 @@ onMounted(() => {
             ];
           } else {
             if (subtype.value === 'remote') {
-              if (hasWMS(props.catalogueElement)) {
+              if (await hasWMS(props.catalogueElement)) {
                 const server = getWMSserver(props.catalogueElement);
                 geomType.value = await fetchGeometryType(props.catalogueElement, server);
               } else {
