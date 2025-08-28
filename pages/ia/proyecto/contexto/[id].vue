@@ -292,6 +292,10 @@ const obtenerTipoArchivo = (nombre) => {
   };
   return tipos[extension] || extension.toUpperCase();
 };
+
+async function guardarArchivo(files) {
+  console.log(files);
+}
 </script>
 
 <template>
@@ -346,7 +350,7 @@ const obtenerTipoArchivo = (nombre) => {
                   :es_obligatorio="false"
                   class="m-b-3"
                 />
-                <SisdaiCampoBase
+                <!-- <SisdaiCampoBase
                   ref="fileInput"
                   etiqueta="Portada del proyecto"
                   tipo="file"
@@ -354,7 +358,17 @@ const obtenerTipoArchivo = (nombre) => {
                   accept="image/jpeg, image/png, image/gif"
                   texto_ayuda="Sube una imagen en formato JPG o PNG (máx. 5MB)."
                   @change="manejarArchivo"
-                />
+                /> -->
+                <label>Portada del contexto</label>
+                <div class="m-b-2 portada-texto">
+                  Sube una imagen en formato JPG o PNG (máx. 5MB).
+                </div>
+                <ClientOnly>
+                  <IaElementoDragNdDrop
+                    ref="dragNdDrop"
+                    @pasar-archivo="(i) => guardarArchivo(i)"
+                  />
+                </ClientOnly>
                 <!-- Preview de la imagen -->
                 <div v-if="previewImagen" class="preview-imagen-contenedor">
                   <h6 class="m-t-0 m-b-1">Vista previa:</h6>
@@ -586,5 +600,12 @@ input[type='file'] {
   border: solid white;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
+}
+
+.portada-texto {
+  font-size: var(--Tipos-Tamao-Prrafos-Prrafo-base, 16px);
+  font-style: normal;
+  font-weight: 600;
+  line-height: var(--Tipos-Interlineado-Prrafos-Prrafos, 24px);
 }
 </style>
