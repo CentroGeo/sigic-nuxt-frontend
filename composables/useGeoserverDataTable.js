@@ -12,14 +12,14 @@ export function useGeoserverDataTable({ paginaActual, tamanioPagina, resource } 
 
   const fetchTable = async ({ paginaActual, tamanioPagina, resource }) => {
     let url = '';
-    if (resource.sourcetype === 'REMOTE') {
+    if (!resource || resource.sourcetype !== 'REMOTE') {
+      url = new URL(`${config.public.geoserverUrl}/ows`);
+    } else if (resource.sourcetype === 'REMOTE') {
       const wmsStatus = await hasWMS(resource);
       if (wmsStatus) {
         const link = getWMSserver(resource);
         url = new URL(link);
       }
-    } else {
-      url = new URL(`${config.public.geoserverUrl}/ows`);
     }
     if (resource) {
       url.search = new URLSearchParams({
