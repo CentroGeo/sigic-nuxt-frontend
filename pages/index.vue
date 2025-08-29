@@ -399,6 +399,7 @@ const capasMasRecientes = obtenerMasRecientes(resourceTypeDic.dataLayer);
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-etiqueta">Capa geográfica</p>
                   <p class="tarjeta-titulo">{{ capa.title }}</p>
+                  <!-- eslint-disable-next-line vue/no-v-html -->
                   <div v-html="capa.abstract"></div>
                 </div>
                 <div class="tarjeta-pie">

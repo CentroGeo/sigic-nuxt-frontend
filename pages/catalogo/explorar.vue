@@ -93,6 +93,7 @@ const documentoMasReciente = obtenerMasReciente(resourceTypeDic.document);
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-etiqueta">Capa geográfica</p>
                   <p class="tarjeta-titulo">{{ capaMasReciente.title }}</p>
+                  <!-- eslint-disable-next-line vue/no-v-html -->
                   <div v-html="capaMasReciente.abstract"></div>
                 </div>
                 <div class="tarjeta-pie">
@@ -112,7 +113,8 @@ const documentoMasReciente = obtenerMasReciente(resourceTypeDic.document);
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-etiqueta">Datos tabulados</p>
                   <p class="tarjeta-titulo">{{ tablaMasReciente.title }}</p>
-                  <div v-htlm="tablaMasReciente.abstract"></div>
+                  <!-- eslint-disable-next-line vue/no-v-html -->
+                  <div v-html="tablaMasReciente.abstract"></div>
                 </div>
                 <div class="tarjeta-pie">
                   <nuxt-link
@@ -133,6 +135,7 @@ const documentoMasReciente = obtenerMasReciente(resourceTypeDic.document);
                   <p class="tarjeta-titulo">
                     {{ documentoMasReciente.title }}
                   </p>
+                  <!-- eslint-disable-next-line vue/no-v-html -->
                   <div v-html="documentoMasReciente.abstract"></div>
                 </div>
                 <div class="tarjeta-pie">
