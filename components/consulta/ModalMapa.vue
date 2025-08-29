@@ -1,6 +1,5 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
-import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
 import { resourceTypeDic } from '~/utils/consulta';
 import SelectedLayer from '~/utils/consulta/SelectedLayer';
@@ -47,7 +46,7 @@ defineExpose({
       </template>
 
       <template #cuerpo>
-        <SisdaiSelector
+        <!--  <SisdaiSelector
           v-model="estiloSeleccionado"
           etiqueta="Variables disponibles para visualizar"
           instruccional="Selecciona el estilo para visualizar"
@@ -56,7 +55,7 @@ defineExpose({
           <option v-for="(estilo, index) in estilosLista" :key="`estilo-${index}`" :value="estilo">
             {{ estilo }}
           </option>
-        </SisdaiSelector>
+        </SisdaiSelector>-->
 
         <SisdaiMapa class="gema" :vista="{ extension: extentMap }">
           <SisdaiCapaXyz />
