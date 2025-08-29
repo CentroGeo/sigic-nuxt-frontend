@@ -14,7 +14,7 @@ const nombreContexto = ref('');
 const descripcionContexto = ref('');
 const portadaContexto = ref(null);
 const previewImagen = ref(null);
-const fileInput = ref(null);
+/* const fileInput = ref(null); */
 const estaCargando = ref(false);
 const mensajeError = ref('');
 const mensajeExito = ref('');
@@ -53,51 +53,6 @@ const toggleSeleccionFuente = (fuente) => {
     if (!archivosEliminados.value.includes(fuente.id)) {
       archivosEliminados.value.push(fuente.id);
     }
-  }
-};
-
-// Manejar cambio de archivo y generar preview
-const manejarArchivo = (event) => {
-  const archivo = event.target.files[0];
-
-  mensajeError.value = null;
-
-  // Limpiar preview anterior si existe
-  if (previewImagen.value) {
-    URL.revokeObjectURL(previewImagen.value);
-    previewImagen.value = null;
-  }
-
-  if (archivo) {
-    // Validar tipo de archivo (ej. solo imágenes)
-    const tiposPermitidos = ['image/jpeg', 'image/png', 'image/gif'];
-    if (!tiposPermitidos.includes(archivo.type)) {
-      mensajeError.value = 'Por favor, sube una imagen válida (JPEG, PNG o GIF)';
-      return;
-    }
-
-    // Validar tamaño (ej. máximo 5MB)
-    const tamañoMaximo = 5 * 1024 * 1024; // 5MB
-    if (archivo.size > tamañoMaximo) {
-      mensajeError.value = 'La imagen no debe exceder los 5MB';
-      return;
-    }
-
-    portadaContexto.value = archivo;
-    //mensajeError.value = "";
-
-    // Generar URL para el preview
-    previewImagen.value = URL.createObjectURL(archivo);
-  }
-};
-
-const eliminarImagen = () => {
-  portadaContexto.value = null;
-  previewImagen.value = null;
-  if (fileInput.value && fileInput.value.$el) {
-    // Para componentes Sisdai, necesitamos acceder al input interno
-    const input = fileInput.value.$el.querySelector('input[type="file"]');
-    if (input) input.value = '';
   }
 };
 
@@ -293,8 +248,8 @@ const obtenerTipoArchivo = (nombre) => {
   return tipos[extension] || extension.toUpperCase();
 };
 
-async function guardarArchivo(files) {
-  console.log(files);
+async function guardarArchivo(archivo) {
+  portadaContexto.value = archivo;
 }
 </script>
 
@@ -311,12 +266,12 @@ async function guardarArchivo(files) {
     <template #visualizador>
       <main id="principal" class="contenedor m-b-10 p-t-3">
         <!-- Mensajes de feedback -->
-        <div v-if="mensajeError" class="mensaje-error">
+        <!-- <div v-if="mensajeError" class="mensaje-error">
           {{ mensajeError }}
         </div>
         <div v-if="mensajeExito" class="mensaje-exito">
           {{ mensajeExito }}
-        </div>
+        </div> -->
 
         <div class="grid">
           <div class="columna-16 flex flex-contenido-separado contexto-encabezado">
@@ -369,22 +324,6 @@ async function guardarArchivo(files) {
                     @pasar-archivo="(i) => guardarArchivo(i)"
                   />
                 </ClientOnly>
-                <!-- Preview de la imagen -->
-                <div v-if="previewImagen" class="preview-imagen-contenedor">
-                  <h6 class="m-t-0 m-b-1">Vista previa:</h6>
-                  <img
-                    :src="previewImagen"
-                    alt="Preview de la portada del proyecto"
-                    class="preview-imagen"
-                  />
-                  <button
-                    type="button"
-                    class="boton boton-secundario boton-chico m-t-1"
-                    @click="eliminarImagen"
-                  >
-                    Eliminar imagen
-                  </button>
-                </div>
               </ClientOnly>
             </form>
           </div>

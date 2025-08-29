@@ -197,7 +197,7 @@ const obtenerTipoArchivo = (nombre) => {
           <p class="separador borde-b" />
           <div class="flex flex-contenido-separado fuentes-encabezado">
             <h4>Fuentes de información:</h4>
-            <div>
+            <!-- <div>
               <button
                 class="boton-pictograma boton-secundario m-r-2"
                 aria-label="Agregar del catalogo"
@@ -209,7 +209,7 @@ const obtenerTipoArchivo = (nombre) => {
                 Subir archivos
                 <span class="pictograma-archivo-subir" aria-hidden="true" />
               </button>
-            </div>
+            </div> -->
           </div>
 
           <div v-if="arraySources.length > 0" class="tabla-archivos m-t-3">
