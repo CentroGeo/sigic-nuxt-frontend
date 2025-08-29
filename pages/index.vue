@@ -111,7 +111,6 @@ const obtenerMasRecientes = (type) => {
 };
 
 const capasMasRecientes = obtenerMasRecientes(resourceTypeDic.dataLayer);
-console.log(storeFetched.byResourceType(resourceTypeDic.dataLayer));
 </script>
 <template>
   <div>
