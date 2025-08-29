@@ -60,6 +60,14 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
         headers: {},
       };
 
+      if (resourceType === 'dataLayer') {
+        options.query['extent_ne'] = '[-1,-1,0,0]';
+        options.query['custom'] = 'true';
+      }
+      if (resourceType === 'dataTable') {
+        options.query['filter{subtype.in}'] = ['vector', 'vector_time', 'remote'];
+      }
+
       if (data.value?.accessToken) {
         options.headers.token = data.value?.accessToken;
         //console.info(new Date(data.value.expires));
@@ -111,11 +119,10 @@ function validacionTemporal(resources, resourceType) {
       )
     );
   }
-
-  if (resourceType === resourceTypeDic.dataLayer) {
+  /*   if (resourceType === resourceTypeDic.dataLayer) {
     // Si son capas geográficas, excluimos aquellos que no tengan geometria
     return resources.filter((resource) => isGeometricExtension(resource.extent));
-  }
+  } */
   /*   if (resourceType === resourceTypeDic.dataTable) {
     // Si son capas geográficas, excluimos aquellos que no tengan geometria
     return resources.filter((resource) => resource.subtype !== 'raster');
