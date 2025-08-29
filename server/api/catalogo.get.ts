@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
 
   const dataParams = new URLSearchParams(query);
   let endpoint = `${api}?${dataParams.toString()}`;
-  console.log(endpoint)
+  console.log(endpoint);
   do {
     const response = await fetch(endpoint.replace('http:', 'https:'), options);
 
