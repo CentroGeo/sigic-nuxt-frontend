@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
   console.log(endpoint);
   do {
     const response = await fetch(endpoint.replace('http:', 'https:'), options);
-
+    //const response = await fetch(endpoint, options);
     if (!response.ok) {
       const error = await response.json();
       // throw new Error(`HTTP ${response.status} - ${response.statusText}`);

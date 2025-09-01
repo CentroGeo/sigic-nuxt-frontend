@@ -13,25 +13,25 @@ export const resourceTypeGeonode = {
 export const categoriesInSpanish = {
   Biota: 'Biota',
   Boundaries: 'Fronteras',
-  'Climatology Meteorology Atmosphere': 'Climatología, meteorología y atmósfera',
+  'Climatology Meteorology Atmosphere': 'Climatología, Meteorología y Atmósfera',
   Economy: 'Economía',
   Elevation: 'Elevación',
-  Environment: 'Medio ambiente',
+  Environment: 'Medio Ambiente',
   Farming: 'Agricultura',
   'Geoscientific Information': 'Información Geocientífica',
   Health: 'Salud',
-  'Imagery Base Maps Earth Cover': 'Imágenes de mapas base de la superficie terrestre',
-  'Inland Waters': 'Aguas continentales',
-  'Intelligence Military': 'Inteligencia militar',
+  'Imagery Base Maps Earth Cover': 'Mapas Base y Cobertura Terrestre',
+  'Inland Waters': 'Aguas Continentales',
+  'Intelligence Military': 'Inteligencia Militar',
   Location: 'Ubicación',
   Oceans: 'Oceanos',
-  'Planning Cadastre': 'Planeación catastral',
+  'Planning Cadastre': 'Planeación Catastral',
   Population: 'Población',
   Society: 'Sociedad',
   Structure: 'Estructura',
   Transportation: 'Transporte',
-  'Utilities Communication': 'Comunicación de servicios',
-  'Sin clasificar': 'Sin clasificar',
+  'Utilities Communication': 'Servicios Públicos y Comunicación',
+  'Sin clasificar': 'Sin Clasificar',
 };
 export function cleanInput(input) {
   return input
@@ -55,19 +55,30 @@ export function tooltipContent(resource) {
     `<p style="max-width:250px">${resource.attribution || 'Sin fuente'}</p>`;
   return content;
 }
-
+/**
+ * Regresa el servidor en el que esta alojado un recurso
+ * @param {Object} resource
+ * @returns {String}
+ */
 export function getWMSserver(resource) {
   //const proxy = 'https://geonode.dev.geoint.mx/proxy/?url=';
   const wmsObject = resource.links.filter((link) => link.link_type === 'OGC:WMS');
   const link = wmsObject[0]['url'].replace('http', 'https');
   return `${link}`;
 }
-export async function hasWMS(resource) {
+/**
+ * Esta funcion revisa si el servidor que aloja un servicio remoto WFS
+ * tiene servicios especificos
+ * @param {Object} resource Es el recurso del que se desea obtener más informacion
+ * @param {String} service Se relaciona con el uso que se le dará a la informacion
+ * @returns {Boolean}
+ */
+export async function hasWMS(resource, service) {
   //const config = useRuntimeConfig();
   //const apiGeonode = config.public.geonodeUrl;
   //const proxy = `${apiGeonode}/proxy/?url=`;
   const wmsObject = resource.links.filter((link) => link.link_type === 'OGC:WMS');
-  const wmsLink = wmsObject[0]['url'].replace('http', 'https');
+  const wmsLink = wmsObject[0]['url'].replace('http', 'https').replace('httpss', 'https');
   const url = new URL(wmsLink);
   url.search = new URLSearchParams({
     service: 'WFS',
@@ -84,9 +95,25 @@ export async function hasWMS(resource) {
     console.error('No se puede usar el WMS');
     return false;
   } else {
-    return true;
+    if (service === 'map') {
+      return true;
+    } else if (service === 'table' || service === 'geometry') {
+      if (data.includes('GetFeature')) {
+        return true;
+      } else return false;
+    } else {
+      console.error('No se reconoce el tipo de petición que se necesita');
+      return false;
+    }
   }
 }
+/**
+ * Consulta al servidor que aloja un recurso o servicio remoto WFS para
+ * obtener el tipo de geomeria del mismo
+ * @param {Object} resource
+ * @param {String} server
+ * @returns
+ */
 export async function fetchGeometryType(resource, server) {
   const config = useRuntimeConfig();
   const api = config.public.geoserverUrl;

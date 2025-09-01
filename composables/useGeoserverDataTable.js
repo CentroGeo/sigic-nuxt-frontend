@@ -15,7 +15,7 @@ export function useGeoserverDataTable({ paginaActual, tamanioPagina, resource } 
     if (!resource || resource.sourcetype !== 'REMOTE') {
       url = new URL(`${config.public.geoserverUrl}/ows`);
     } else if (resource.sourcetype === 'REMOTE') {
-      const wmsStatus = await hasWMS(resource);
+      const wmsStatus = await hasWMS(resource, 'table');
       if (wmsStatus) {
         const link = getWMSserver(resource);
         url = new URL(link);

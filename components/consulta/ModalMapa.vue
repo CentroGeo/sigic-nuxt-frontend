@@ -12,8 +12,8 @@ const props = defineProps({
 });
 const config = useRuntimeConfig();
 const extentMap = ref(undefined);
-const estilosLista = ref(['Opcion 1', 'Opción 2', 'Opcion 3']);
-const estiloSeleccionado = ref(estilosLista.value[0]);
+//const estilosLista = ref(['Opcion 1', 'Opción 2', 'Opcion 3']);
+//const estiloSeleccionado = ref(estilosLista.value[0]);
 const modalMapa = ref(null);
 const emit = defineEmits(['notifyDownload']);
 

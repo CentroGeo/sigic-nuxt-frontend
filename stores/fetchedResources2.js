@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { resourceTypeDic, resourceTypeGeonode } from '~/utils/consulta';
+import { hasWMS, resourceTypeDic, resourceTypeGeonode } from '~/utils/consulta';
 
 export const useFetchedResources2Store = defineStore('fetchedResources2', () => {
   const storeConsulta = useConsultaStore();
@@ -63,7 +63,7 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
       if (data.value?.accessToken) {
         options.headers.token = data.value?.accessToken;
         //console.info(new Date(data.value.expires));
-        //console.log(data.value?.accessToken);
+        console.log('checando autenticacion', data.value?.accessToken);
       } else {
         options.headers.token = 'sin-token';
       }
@@ -117,12 +117,18 @@ function validacionTemporal(resources, resourceType) {
 
   if (resourceType === resourceTypeDic.dataLayer) {
     // Si son capas geográficas, excluimos aquellos que no tengan geometria
-    return resources.filter((resource) => isGeometricExtension(resource.extent));
+    let newResources = resources.filter((resource) => isGeometricExtension(resource.extent));
+    newResources = newResources.filter(
+      (resource) => resource.sourcetype === 'LOCAL' || hasWMS(resource, 'map')
+    );
+    return newResources;
   }
   if (resourceType === resourceTypeDic.dataTable) {
     // Si son capas geográficas, excluimos aquellos que no tengan geometria
-    return resources.filter((resource) => resource.subtype !== 'raster');
+    let newResources = resources.filter((resource) => resource.subtype !== 'raster');
+    newResources = newResources.filter(
+      (resource) => resource.sourcetype === 'LOCAL' || hasWMS(resource, 'table')
+    );
+    return newResources;
   }
-
-  return resources;
 }

@@ -1,5 +1,6 @@
 <script setup>
 import { SisdaiLeyendaWms } from '@centrogeomx/sisdai-mapas';
+import { hasWMS } from '~/utils/consulta';
 
 const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
@@ -77,11 +78,16 @@ const optionsButtons = ref([
   },
 ]);
 
-const actualButtons = computed(() =>
-  props.resourceElement.subtype === 'raster'
-    ? optionsButtons.value.filter((d) => d.for === 'all')
-    : optionsButtons.value
-);
+const actualButtons = computed(() => {
+  let buttons = optionsButtons.value;
+  if (props.resourceElement.subtype === 'raster') {
+    buttons = buttons.filter((d) => d.for === 'all');
+  }
+  if (props.resourceElement.sourcetype === 'REMOTE' && !hasWMS(props.resourceElement, 'table')) {
+    buttons = buttons.filter((d) => d.for !== 'vector');
+  }
+  return buttons;
+});
 </script>
 
 <template>
