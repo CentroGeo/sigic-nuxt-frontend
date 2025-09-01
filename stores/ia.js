@@ -92,7 +92,7 @@ export const useIAStore = defineStore('ia', {
             reject(new Error('Subida cancelada'));
           });
 
-          xhr.open('POST', this.backend + 'api/fileuploads/workspaces/admin/create');
+          xhr.open('POST', this.backend + 'direct/api/fileuploads/workspaces/admin/create');
           xhr.send(formData);
         });
       } catch (error) {
@@ -115,7 +115,7 @@ export const useIAStore = defineStore('ia', {
  */
 
         const response = await fetch(
-          this.backend + 'api/fileuploads/workspaces/admin/contexts/create',
+          this.backend + 'direct/api/fileuploads/workspaces/admin/contexts/create',
           {
             method: 'POST',
             body: formData,
@@ -144,7 +144,7 @@ export const useIAStore = defineStore('ia', {
     async getProjectsList() {
       //this.existeContexto = true;
 
-      const response = await fetch(this.backend + 'api/fileuploads/workspaces/admin', {
+      const response = await fetch(this.backend + 'direct/api/fileuploads/workspaces/admin', {
         method: 'POST',
         body: {},
       });
@@ -169,7 +169,7 @@ export const useIAStore = defineStore('ia', {
 
     async getProjectSources(project_id) {
       const response = await fetch(
-        this.backend + 'api/fileuploads/workspaces/admin/' + project_id + '/files',
+        this.backend + 'direct/api/fileuploads/workspaces/admin/' + project_id + '/files',
         {
           method: 'POST',
           body: {},
@@ -196,7 +196,7 @@ export const useIAStore = defineStore('ia', {
 
     async getProjectContexts(project_id) {
       const response = await fetch(
-        this.backend + 'api/fileuploads/workspaces/admin/' + project_id + '/contexts',
+        this.backend + 'direct/api/fileuploads/workspaces/admin/' + project_id + '/contexts',
         {
           method: 'POST',
           body: {},
@@ -227,7 +227,7 @@ export const useIAStore = defineStore('ia', {
       //this.existeContexto = true;
       console.log(user_id);
 
-      const response = await fetch(this.backend + 'api/chat/history/getchats', {
+      const response = await fetch(this.backend + 'direct/api/chat/history/getchats', {
         method: 'POST',
         body: {},
       });
@@ -254,7 +254,7 @@ export const useIAStore = defineStore('ia', {
       //this.existeContexto = true;
       console.log(chat_id);
 
-      const response = await fetch(this.backend + 'api/chat/history/user', {
+      const response = await fetch(this.backend + 'direct/api/chat/history/user', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -290,7 +290,7 @@ export const useIAStore = defineStore('ia', {
     },
     async getProjectById(project_id) {
       const response = await fetch(
-        this.backend + `api/fileuploads/workspaces/admin/register/${project_id}`,
+        this.backend + `direct/api/fileuploads/workspaces/admin/register/${project_id}`,
         {
           method: 'POST',
           body: {},
@@ -313,7 +313,7 @@ export const useIAStore = defineStore('ia', {
     },
     async getContextById(project_id) {
       const response = await fetch(
-        this.backend + `api/fileuploads/workspaces/admin/contexts/register/${project_id}`,
+        this.backend + `direct/api/fileuploads/workspaces/admin/contexts/register/${project_id}`,
         {
           method: 'POST',
           body: {},
@@ -403,7 +403,10 @@ export const useIAStore = defineStore('ia', {
             reject(new Error('Subida cancelada'));
           });
 
-          xhr.open('POST', this.backend + `api/fileuploads/workspaces/admin/edit/${project_id}`);
+          xhr.open(
+            'POST',
+            this.backend + `direct/api/fileuploads/workspaces/admin/edit/${project_id}`
+          );
           xhr.send(formData);
         });
       } catch (error) {
@@ -415,7 +418,7 @@ export const useIAStore = defineStore('ia', {
     async actualizarContexto(formData, contexto_id) {
       try {
         const response = await fetch(
-          this.backend + `api/fileuploads/workspaces/admin/contexts/edit/${contexto_id}`,
+          this.backend + `direct/api/fileuploads/workspaces/admin/contexts/edit/${contexto_id}`,
           {
             method: 'POST',
             body: formData,
@@ -438,7 +441,7 @@ export const useIAStore = defineStore('ia', {
     async eliminarProyecto(project_id) {
       try {
         const response = await fetch(
-          this.backend + `api/fileuploads/workspaces/admin/delete/${project_id}`,
+          this.backend + `direct/api/fileuploads/workspaces/admin/delete/${project_id}`,
           {
             method: 'DELETE',
           }
@@ -460,7 +463,7 @@ export const useIAStore = defineStore('ia', {
     async eliminarContexto(contexto_id) {
       try {
         const response = await fetch(
-          this.backend + `api/fileuploads/workspaces/admin/contexts/delete/${contexto_id}`,
+          this.backend + `direct/api/fileuploads/workspaces/admin/contexts/delete/${contexto_id}`,
           {
             method: 'DELETE',
           }

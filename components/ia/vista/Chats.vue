@@ -15,6 +15,8 @@ const isSubmitting = ref(false);
 const chatID = ref(0);
 const contextID = ref(0);
 
+const config = useRuntimeConfig();
+
 /**
  * @typedef {Object} Props
  * @property {String} [contextId=''] - Indica el identificador del contexto.
@@ -204,7 +206,7 @@ const submitMensaje = async () => {
   //scrollToBottom();
 
   // Envía la pregunta
-  const res = await fetch('http://localhost:8000/start', {
+  const res = await fetch(`${config.public.iaBackendUrl}queue/start`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -246,7 +248,7 @@ const submitMensaje = async () => {
   let mensajeRespuesta = '';
   // Hacer streaming de la respuesta
   try {
-    const streamRes = await fetch(`http://localhost:8000/stream/${jobId}`, {
+    const streamRes = await fetch(`${config.public.iaBackendUrl}queue/stream/${jobId}`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     });
