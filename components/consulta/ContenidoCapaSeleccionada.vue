@@ -1,6 +1,5 @@
 <script setup>
 import { SisdaiLeyendaWms } from '@centrogeomx/sisdai-mapas';
-import { hasWMS } from '~/utils/consulta';
 
 const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
@@ -78,16 +77,25 @@ const optionsButtons = ref([
   },
 ]);
 
-const actualButtons = computed(() => {
-  let buttons = optionsButtons.value;
-  if (props.resourceElement.subtype === 'raster') {
-    buttons = buttons.filter((d) => d.for === 'all');
+const actualButtons = computed(() =>
+  props.resourceElement.subtype === 'raster'
+    ? optionsButtons.value.filter((d) => d.for === 'all')
+    : optionsButtons.value
+);
+
+function isDisabled(resource, label) {
+  if (label === 'Descargar archivo' && resource.sourcetype === 'REMOTE') {
+    return true;
+  } else if (
+    label === 'Ver tablas' &&
+    resource.sourcetype === 'Remote' &&
+    !hasWMS(resource, 'table')
+  ) {
+    return true;
+  } else {
+    return false;
   }
-  if (props.resourceElement.sourcetype === 'REMOTE' && !hasWMS(props.resourceElement, 'table')) {
-    buttons = buttons.filter((d) => d.for !== 'vector');
-  }
-  return buttons;
-});
+}
 </script>
 
 <template>
@@ -111,7 +119,7 @@ const actualButtons = computed(() => {
         class="boton-pictograma boton-sin-contenedor-secundario"
         :aria-label="button.label"
         type="button"
-        :disabled="button.label === 'Descargar archivo' && resourceElement.sourcetype === 'REMOTE'"
+        :disabled="isDisabled(resourceElement, button.label)"
         @click="button.action"
       >
         <span :class="button.pictogram" aria-hidden="true" />
