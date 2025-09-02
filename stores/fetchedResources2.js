@@ -57,22 +57,21 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
 
       const options = {
         query: {
+          //options.query['custom'] = 'true';
           'filter{resource_type}': resourceTypeGeonode[resourceType],
           // agregar filtros
         },
         headers: {},
       };
 
-      if (resourceType === 'dataLayer') {
+      /*  if (resourceType === 'dataLayer') {
         options.query['extent_ne'] = '[-1,-1,0,0]';
-        //options.query['custom'] = 'true';
-      }
+      } */
       if (resourceType === 'dataTable') {
         options.query['filter{subtype.in}'] = ['vector', 'remote'];
       }
       if (data.value?.accessToken) {
         options.headers.token = data.value?.accessToken;
-        //console.info(new Date(data.value.expires));
       }
 
       const { error, allResults } = await $fetch('/api/catalogo', options);

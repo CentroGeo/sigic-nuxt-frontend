@@ -55,13 +55,12 @@ export const useFilteredResources = defineStore('filteredResources', () => {
       // Filtramos por año
       if (filters.years !== null) {
         const yearList = filters.years.split(',');
-        yearList.forEach(
-          (year) =>
-            (data = data.filter((resource) => {
-              const resourceYear = resource.created.slice(0, 4);
-              resourceYear === year.trim();
-            }))
-        );
+        yearList.forEach((year) => {
+          data = data.filter((resource) => {
+            const resourceYear = resource.created.slice(0, 4);
+            return resourceYear === year.trim();
+          });
+        });
       }
       // Filtramos por institución
       if (filters.institutions !== null) {

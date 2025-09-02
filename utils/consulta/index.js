@@ -43,8 +43,8 @@ export function cleanInput(input) {
 
 export function tooltipContent(resource) {
   let formatedAbstract = 'Sin descripción';
-  if (resource.abstract) {
-    formatedAbstract = resource.abstract
+  if (resource.raw_abstract) {
+    formatedAbstract = resource.raw_abstract
       .replace(/^<p>/, '')
       .replace(/<\/p>$/, '')
       .replace(/^<pre>/, '')
