@@ -2,6 +2,9 @@
 
 const isDev = process.env.NODE_ENV !== 'production';
 const baseUrl = process.env.NUXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+const metaImg = 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg';
+const metaDescription =
+  'Sistema Integral de Gestión de Información Científica. Integra, visualiza y aprovecha el conocimeinto científico de México.';
 
 export default defineNuxtConfig({
   app: {
@@ -10,6 +13,28 @@ export default defineNuxtConfig({
         {
           rel: 'shortcut icon',
           href: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/images/favicon.ico',
+        },
+      ],
+      meta: [
+        { property: 'og:type', content: 'article' },
+        { property: 'og:title', content: 'SIGIC' },
+        {
+          property: 'og:description',
+          content: metaDescription,
+        },
+        {
+          property: 'og:image',
+          content: metaImg,
+        },
+        { name: 'twitter:card', content: 'summary' },
+        { name: 'twitter:title', content: 'SIGIC' },
+        {
+          name: 'twitter:description',
+          content: metaDescription,
+        },
+        {
+          name: 'twitter:image',
+          content: metaImg,
         },
       ],
     },
@@ -59,8 +84,7 @@ export default defineNuxtConfig({
       geonodeUrl: process.env.NUXT_PUBLIC_GEONODE_URL,
       geoserverUrl: process.env.NUXT_PUBLIC_GEOSERVER_URL,
       baseURL: baseUrl,
-      domain: process.env.DOMAIN,
-      iaBackendUrl: process.env.NUXT_PUBLIC_IA_BACKEND_URL
+      iaBackendUrl: process.env.NUXT_PUBLIC_IA_BACKEND_URL,
       // geoserverApi: `${process.env.GEOSERVER_URL}/rest`,
     },
   },
@@ -82,7 +106,7 @@ export default defineNuxtConfig({
 
   vite: {
     ssr: {
-      noExternal: ['@centrogeomx/sisdai-mapas'],
+      noExternal: ['@centrogeomx/sisdai-mapas', 'ol-displaced-points', 'circle-properties'],
     },
   },
 });

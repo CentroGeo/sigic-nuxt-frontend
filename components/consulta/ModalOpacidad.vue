@@ -24,7 +24,7 @@ defineExpose({
 });
 
 watch(valorOpacidad, (nv) => {
-  storeSelected.byUuid(selectedElement.value.uuid).opacidad = nv / 100;
+  storeSelected.byUuid(selectedElement.value.uuid).updateOpacity(nv / 100);
 });
 </script>
 
@@ -45,7 +45,7 @@ watch(valorOpacidad, (nv) => {
               class="deslizante"
               :val_min="0"
               :val_max="100"
-              :val_entrada="100"
+              :val_entrada="storeSelected.byUuid(selectedElement.uuid).opacidad * 100 ?? 100"
               step="10"
               @update:val_entrada="
                 ($event) => {

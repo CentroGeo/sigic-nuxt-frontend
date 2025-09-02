@@ -1,8 +1,9 @@
 <script setup>
-import { downloadMetadata, downloadPDF, downloadVectorData, wait } from '@/utils/consulta';
+import { downloadDocs, downloadMetadata, downloadNoGeometry, wait } from '@/utils/consulta';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 
 const storeSelected = useSelectedResources2Store();
+const storeFetched = useFetchedResources2Store();
 
 const props = defineProps({
   resourceType: { type: String, required: true },
@@ -17,25 +18,26 @@ function abrirModalDescargaAll() {
   tagTitle.value = optionsDict[props.resourceType]['title'];
 }
 
-async function downloadAllCSV() {
-  const resourceList = storeSelected.list();
+async function downloadAllDataTables(format) {
+  const resourceList = storeFetched.findResources(storeSelected.uuids);
   for (let i = 0; i < resourceList.length; i++) {
-    await downloadVectorData(resourceList[i], 'csv');
+    await downloadNoGeometry(resourceList[i], format);
     await wait(1000);
   }
   modalDescargaAll.value?.cerrarModal();
 }
-async function downloadAllPDF() {
-  const resourceList = storeSelected.list();
+
+async function downloadAllDocs() {
+  const resourceList = storeFetched.findResources(storeSelected.uuids);
   for (let i = 0; i < resourceList.length; i++) {
-    downloadPDF(resourceList[i]);
+    downloadDocs(resourceList[i]);
     await wait(1000);
   }
   modalDescargaAll.value?.cerrarModal();
 }
 
 async function downloadAllMetadata() {
-  const resourceList = storeSelected.list();
+  const resourceList = storeFetched.findResources(storeSelected.uuids);
   for (let i = 0; i < resourceList.length; i++) {
     await downloadMetadata(resourceList[i]);
     await wait(1000);
@@ -50,7 +52,19 @@ const optionsDict = {
       {
         label: 'CSV',
         action: () => {
-          downloadAllCSV();
+          downloadAllDataTables('csv');
+        },
+      },
+      {
+        label: 'XLS',
+        action: () => {
+          downloadAllDataTables('xls');
+        },
+      },
+      {
+        label: 'XLSX',
+        action: () => {
+          downloadAllDataTables('xlsx');
         },
       },
       {
@@ -65,9 +79,9 @@ const optionsDict = {
     title: 'documentos',
     elements: [
       {
-        label: 'PDF',
+        label: 'Archivos',
         action: () => {
-          downloadAllPDF();
+          downloadAllDocs();
         },
       },
       {

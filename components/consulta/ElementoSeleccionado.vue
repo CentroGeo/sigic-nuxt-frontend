@@ -1,7 +1,7 @@
 <script setup>
-import { resourceTypeDic, tooltipContent } from '~/utils/consulta';
+import { categoriesInSpanish, resourceTypeDic, tooltipContent } from '~/utils/consulta';
 
-const storeFetched = useFetchedResourcesStore();
+const storeFetched = useFetchedResources2Store();
 const storeSelected = useSelectedResources2Store();
 const emit = defineEmits(['openOpacity', 'openDownload', 'openTabla', 'openMapa']);
 
@@ -13,19 +13,22 @@ const props = defineProps({
   resourceType: { type: String, required: true },
 });
 
-const resourceElement = computed(() =>
-  storeFetched.findResource(props.selectedElement.uuid, props.resourceType)
-);
-
+const resourceElement = computed(() => storeFetched.findResource(props.selectedElement.uuid));
 const goDown = () => storeSelected.changePosition(props.selectedElement.uuid, -1);
 const goUp = () => storeSelected.changePosition(props.selectedElement.uuid, +1);
 </script>
 
 <template>
   <div class="tarjeta m-y-1">
-    <div class="tarjeta-selected">
+    <div class="tarjeta-selected fondo-color-acento">
       <div class="flex flex-contenido-separado m-0 encabezado-tarjeta">
-        <p class="tarjeta-texto-secundario m-0">Categoria</p>
+        <p v-if="resourceElement" class="tarjeta-texto-secundario m-0">
+          {{
+            resourceElement?.category
+              ? categoriesInSpanish[resourceElement?.category.gn_description]
+              : 'Sin clasificar'
+          }}
+        </p>
 
         <div class="m-0">
           <button
@@ -66,7 +69,6 @@ const goUp = () => storeSelected.changePosition(props.selectedElement.uuid, +1);
 
       <ConsultaContenidoCapaSeleccionada
         v-if="resourceType === resourceTypeDic.dataLayer"
-        :resource-type="resourceType"
         :resource-element="resourceElement"
         @opacidad-clicked="emit('openOpacity', resourceElement)"
         @descarga-clicked="emit('openDownload', resourceElement)"
@@ -88,7 +90,8 @@ const goUp = () => storeSelected.changePosition(props.selectedElement.uuid, +1);
 <style lang="scss" scoped>
 .tarjeta-selected {
   padding: 16px;
-  background-color: var(--color-secundario-2);
+  // background-color: var(--color-secundario-2);
+  color: var(--campo-etiqueta-color);
 
   .encabezado-tarjeta {
     align-items: center;

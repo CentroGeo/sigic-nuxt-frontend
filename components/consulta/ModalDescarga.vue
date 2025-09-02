@@ -1,5 +1,11 @@
 <script setup>
-import { downloadMetadata, downloadPDF, downloadVectorData } from '@/utils/consulta';
+import {
+  downloadDocs,
+  downloadMetadata,
+  downloadNoGeometry,
+  downloadRaster,
+  downloadWMS,
+} from '@/utils/consulta';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 const props = defineProps({
   resourceType: { type: String, required: true },
@@ -9,9 +15,19 @@ const props = defineProps({
   },
 });
 const { resourceType, selectedElement } = toRefs(props);
+const { data } = useAuth();
+const isLoggedIn = ref(data.value ? true : false);
 const modalDescarga = ref(null);
 const optionsList = ref(null);
 const tagTitle = ref();
+const docExtension = ref(
+  resourceType.value === 'document'
+    ? selectedElement.value.links.find((link) => link.link_type === 'uploaded').extension
+    : 'No aplica'
+);
+const layerType = ref(
+  resourceType.value === 'dataLayer' ? selectedElement.value.subtype : 'No aplica'
+);
 
 function abrirModalDescarga() {
   modalDescarga.value?.abrirModal();
@@ -19,53 +35,59 @@ function abrirModalDescarga() {
   tagTitle.value = optionsDict[resourceType.value]['title'];
 }
 
+const layerOptions = {
+  raster: [
+    {
+      label: 'GeoTiff',
+      action: () => {
+        downloadRaster(selectedElement.value);
+      },
+    },
+    {
+      label: 'Metadatos',
+      action: () => {
+        downloadMetadata(selectedElement.value);
+      },
+    },
+  ],
+  vector: [
+    {
+      label: 'GeoJson',
+      action: () => {
+        downloadWMS(selectedElement.value, 'geojson', 'all');
+      },
+    },
+    {
+      label: 'CSV',
+      action: () => {
+        downloadWMS(selectedElement.value, 'csv', 'all');
+      },
+    },
+    {
+      label: 'GeoPackage',
+      action: () => {
+        downloadWMS(selectedElement.value, 'gpkg', 'all');
+      },
+    },
+    {
+      label: 'KML',
+      action: () => {
+        downloadWMS(selectedElement.value, 'kml', 'all');
+      },
+    },
+    {
+      label: 'Metadatos',
+      action: () => {
+        downloadMetadata(selectedElement.value);
+      },
+    },
+  ],
+  remote: [],
+};
 const optionsDict = {
   dataLayer: {
     title: 'capa',
-    elements: [
-      {
-        label: 'GeoJson',
-        action: () => {
-          downloadVectorData(selectedElement.value, 'geojson');
-        },
-      },
-      {
-        label: 'CSV',
-        action: () => {
-          downloadVectorData(selectedElement.value, 'csv');
-        },
-      },
-      /*       {
-        label: "XLS",
-        action: () => {
-          downloadExcel(selectedElement.value, 'xls');
-        },
-      },
-      {
-        label: 'XLSX',
-        action: () => {
-          downloadExcel(selectedElement.value, 'xlsx');
-        },
-      }, */
-      {
-        label: 'GeoPackage',
-        action: () => {
-          downloadVectorData(selectedElement.value, 'gpkg');
-        },
-      },
-      {
-        label: 'KML',
-        action: () => {
-          downloadVectorData(selectedElement.value, 'kml');
-        },
-      },
-      {
-        label: 'Metadatos',
-        action: () => {
-          downloadMetadata(selectedElement.value);
-        },
-      },
-    ],
+    elements: layerOptions[layerType.value],
   },
   dataTable: {
     title: 'archivo',
@@ -73,21 +95,21 @@ const optionsDict = {
       {
         label: 'CSV',
         action: () => {
-          downloadVectorData(selectedElement.value, 'csv');
+          downloadNoGeometry(selectedElement.value, 'csv');
         },
       },
-      /*       {
-        label: "XLS",
+      {
+        label: 'XLS',
         action: () => {
-          downloadExcel(selectedElement.value, 'xls');
+          downloadNoGeometry(selectedElement.value, 'xls');
         },
       },
       {
         label: 'XLSX',
         action: () => {
-          downloadExcel(selectedElement.value, 'xlsx');
+          downloadNoGeometry(selectedElement.value, 'xlsx');
         },
-      }, */
+      },
       {
         label: 'Metadatos',
         action: () => {
@@ -100,9 +122,9 @@ const optionsDict = {
     title: 'documento',
     elements: [
       {
-        label: 'PDF',
+        label: docExtension.value === 'pdf' ? 'PDF' : 'TXT',
         action: () => {
-          downloadPDF(selectedElement.value);
+          downloadDocs(selectedElement.value);
         },
       },
       {
@@ -114,6 +136,7 @@ const optionsDict = {
     ],
   },
 };
+
 defineExpose({
   abrirModalDescarga,
 });
@@ -126,17 +149,32 @@ defineExpose({
       </template>
       <template #cuerpo>
         <p>{{ selectedElement.title }}</p>
-        <p>Formato:</p>
-        <div>
-          <button
-            v-for="option in optionsList"
-            :key="option.label"
-            type="button"
-            class="boton-secundario"
-            @click="option.action"
-          >
-            {{ option.label }}
-          </button>
+        <div v-if="layerType === 'remote'" class="tarjeta m-y-3">
+          <div class="tarjeta-cuerpo">
+            <p>Esta capa es remota y no se puede descargar del geoserver</p>
+          </div>
+        </div>
+
+        <div v-else>
+          <p>Formato:</p>
+          <div>
+            <button
+              v-for="option in optionsList"
+              :key="option.label"
+              type="button"
+              class="boton-secundario"
+              :disabled="option.label === 'GeoTiff' && !isLoggedIn"
+              @click="option.action"
+            >
+              {{ option.label }}
+            </button>
+          </div>
+
+          <div v-if="selectedElement.subtype === 'raster' && !isLoggedIn" class="tarjeta m-y-3">
+            <div class="tarjeta-cuerpo">
+              <p>Para descargar archivos en formato GeoTiff es necesario iniciar sesión.</p>
+            </div>
+          </div>
         </div>
       </template>
     </SisdaiModal>
@@ -146,5 +184,13 @@ defineExpose({
 .boton-secundario {
   width: 90%;
   margin: 8px;
+}
+.tarjeta {
+  width: 99%;
+  background-color: var(--color-alerta-1);
+  border: 1px solid var(--color-alerta-3);
+  p {
+    color: var(--color-alerta-3);
+  }
 }
 </style>

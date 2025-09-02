@@ -1,35 +1,22 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 const modalCompartir = ref(null);
-function abrirModalCompartir() {
-  modalCompartir.value?.abrirModal();
-}
 const route = useRoute();
 const config = useRuntimeConfig();
-const origin = config.public.domain;
-const currentPath = computed(() => origin + route.fullPath);
-
+const baseUrl = config.public.baseURL;
+const currentPath = computed(() => baseUrl + route.fullPath);
 async function copyToClipboard() {
   try {
     await navigator.clipboard.writeText(currentPath.value);
-    alert('Enlace copiado al portapapeles.');
+    alert('Enlace copiado al portapapeles: ' + currentPath.value);
   } catch (err) {
     console.error('Error al copiar: ', err);
   }
 }
 
-useHead(() => ({
-  meta: [
-    { property: 'og:url', content: currentPath.value },
-    { property: 'og:type', content: 'article' },
-    { property: 'og:title', content: 'SIGIC' },
-    { property: 'og:title', content: 'Esta es la descripcion' },
-    {
-      property: 'og:image',
-      content: 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg',
-    },
-  ],
-}));
+function abrirModalCompartir() {
+  modalCompartir.value?.abrirModal();
+}
 
 const botonesEnlaces = computed(() => [
   {

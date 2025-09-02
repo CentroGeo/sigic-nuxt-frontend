@@ -28,7 +28,7 @@ const { data } = useAuth();
 const dragNdDrop = ref(null);
 
 async function guardarArchivo(files) {
-  const token = ref(data.value?.accessToken);
+  // const token = data.value?.accessToken;
 
   if (
     files[0].name.split('.')[1] === '.sld' ||
@@ -41,8 +41,9 @@ async function guardarArchivo(files) {
     // solo el primer elemento del arreglo
     formData.append('base_file', files[0]);
     // formData.append('dataset_title', resource.dataset_title);
-    formData.append('dataset_title', 'geonode:coordinaciones');
-    formData.append('token', token.value);
+    // formData.append('dataset_title', 'geonode:coordinaciones');
+    formData.append('dataset_title', 'geonode:coordinaciones_5512c0b1ad0c84af59d3e9182b06c97c');
+    formData.append('token', data.value?.accessToken);
 
     const response = await $fetch('/api/subirSLD', {
       method: 'POST',

@@ -4,6 +4,7 @@
  * @property {Array<{ pictograma: string, ruta: string }>} [subPaginas] - Lista obligatoria de subpaginas, debe contener `pictograma` y `ruta` cada objeto de la lista.
  * @property {Function} [funcionColapsar=undefined] - Función que se ejecutará al presionar el botón colapsar y alternar el estadoColpasable.
  * @property {Boolean} [estadoColapable=false] - Estado del icono colapsar, visible si se recibe la `funcionColapsar`.
+ * @property {String} [idColapsable='id-colapsable'] - Identificador del elemento que se colapsa, con fines de accesibilidad y atributos aria.
  */
 
 /** @type {Props} */
@@ -22,10 +23,11 @@ defineProps({
   },
   idColapsable: {
     type: String,
-    required: true,
+    default: 'id-colapsable',
   },
 });
 </script>
+
 <template>
   <div class="nav-lateral" aria-label="Navegación lateral">
     <div class="nav-lateral-contenido flex flex-contenido-centrado">
