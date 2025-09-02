@@ -1,8 +1,6 @@
 import { defineStore } from 'pinia';
 // TODO: intentar hacer un módulo para cada set proyectos,fuentes,contextos,chats
 
-//const backend = 'http://localhost:8181/';
-
 export const useIAStore = defineStore('ia', {
   state: () => ({
     existenProyectos: false,

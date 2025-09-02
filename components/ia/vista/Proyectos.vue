@@ -139,7 +139,7 @@ const obtenerTipoArchivo = (nombre) => {
                 <div class="tarjeta">
                   <img
                     class="tarjeta-imagen"
-                    :src="`http://localhost:8181/media/${contexto.image_type}`"
+                    :src="`/api/proxy-image/${contexto.image_type}`"
                     alt=""
                   />
                   <div class="tarjeta-cuerpo">
