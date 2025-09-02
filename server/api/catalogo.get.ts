@@ -26,7 +26,7 @@ export default defineEventHandler(async (event) => {
 
   //   let endpoint = `${api}?${dataParams.toString()}`;
   let endpoint = `${api}?${dataParams.toString().replace('extent_ne=%5B-1%2C-1%2C0%2C0%5D', 'extent_ne=[-1,-1,0,0]')}`;
-  //console.log(endpoint)
+  console.log(endpoint);
 
   do {
     const response = await fetch(endpoint.replace('http:', 'https:'), options);

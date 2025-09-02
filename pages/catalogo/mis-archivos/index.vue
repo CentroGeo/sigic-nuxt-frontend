@@ -3,6 +3,7 @@
 import { resourceTypeDic } from '~/utils/consulta';
 const storeFetched = useFetchedResources2Store();
 
+storeFetched.checkFilling(resourceTypeDic.dataLayer);
 storeFetched.checkFilling(resourceTypeDic.dataTable);
 storeFetched.checkFilling(resourceTypeDic.document);
 
@@ -16,11 +17,12 @@ function tipoRecurso(d) {
 
 // // para filtar por los archivos de la usuaria
 const { data } = useAuth();
-const userEmail = data.value.user.email;
+const userEmail = data.value?.user.email;
 // obteniendo datos por las props de la tabla
+
 const datos = computed(() =>
   storeFetched.all
-    .filter((resource) => resource.owner.email === userEmail)
+    .filter((resource) => resource.owner.email && resource.owner.email === userEmail)
     .map((d) => ({
       pk: d.pk,
       titulo: d.title,
