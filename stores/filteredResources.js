@@ -14,6 +14,7 @@ export const useFilteredResources = defineStore('filteredResources', () => {
     years: null,
     institutions: null,
     keywords: null,
+    sort: '',
   });
 
   return {
@@ -29,6 +30,7 @@ export const useFilteredResources = defineStore('filteredResources', () => {
       filters.years = null;
       filters.institutions = null;
       filters.keywords = null;
+      filters.sort = '';
     },
     resetFilters() {
       filters.categories = [];
@@ -107,6 +109,25 @@ export const useFilteredResources = defineStore('filteredResources', () => {
           filters.categories.includes(resource.category.gn_description)
         );
       }
+      return data;
+    },
+
+    sort() {
+      let data = storeFetched.byResourceType('dataLayer');
+      // Ordenamos por más reciente
+      if (filters.sort.trim().length >= 1) {
+        data = data.sort((a, b) => {
+          if (a.last_updated < b.last_updated) {
+            return 1;
+          }
+          if (a.last_updated > b.last_updated) {
+            return -1;
+          }
+          //
+          return 0;
+        });
+      }
+      // Ordenamos alfabéticamente por título
       return data;
     },
   };

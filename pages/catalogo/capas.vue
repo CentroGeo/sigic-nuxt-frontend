@@ -2,32 +2,42 @@
 // TODO: fix tabla, filtros y paginador
 import { resourceTypeDic } from '~/utils/consulta';
 const storeFetched = useFetchedResources2Store();
-
+const storeFilters = useFilteredResources();
 storeFetched.checkFilling(resourceTypeDic.dataLayer);
 const resourcesCapas = computed(() => storeFetched.byResourceType(resourceTypeDic.dataLayer));
-// const resourcesCapas = computed({
-//   get: () => storeFetched.byResourceType(resourceTypeDic.dataLayer),
-//   set: (newValue) => storeFetched.byResourceType(resourceTypeDic.dataLayer) = newValue,
-// });
+
+const filteredResources = ref([]);
+
+function updateResources(nuevosRecursos) {
+  filteredResources.value = nuevosRecursos;
+  // groupResults();
+}
+
+watch([resourcesCapas], () => {
+  // updateResources(storeFilters.filter())
+  updateResources(storeFilters.sort());
+});
+
+onMounted(async () => {
+  storeFilters.resetAll();
+  if (resourcesCapas.value.length !== 0) {
+    updateResources(resourcesCapas.value);
+  }
+});
 
 // obteniendo datos por las props de la tabla
-const datos = computed(() =>
-  resourcesCapas.value.map((d) => ({
-    pk: d.pk,
-    titulo: d.title,
-    // tipo_recurso: d.resource_type,
-    tipo_recurso: 'Capa geográfica',
-    categoria: d.category,
-    actualizacion: d.last_updated,
-    acciones: 'Ver, Descargar',
-    enlace_descarga: d.download_url,
-  }))
-);
-// const datosOrdenados = computed({
-//   get: () => datos.value,
-//   set: (newValue) => datos.value = newValue,
-// })
-
+// const datos = computed(() =>
+//   resourcesCapas.value.map((d) => ({
+//     pk: d.pk,
+//     titulo: d.title,
+//     // tipo_recurso: d.resource_type,
+//     tipo_recurso: 'Capa geográfica',
+//     categoria: d.category,
+//     actualizacion: d.last_updated,
+//     acciones: 'Ver, Descargar',
+//     enlace_descarga: d.download_url,
+//   }))
+// );
 // obteniendo las variables keys para la tabla
 // const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'acciones'];
 const variables = ['pk', 'last_updated'];
@@ -42,19 +52,19 @@ const variables = ['pk', 'last_updated'];
     <template #visualizador>
       <main id="principal" class="contenedor m-b-10 m-t-3">
         <CatalogoElementoFiltros
-          :catalogo="resourcesCapas"
-          @al-ordenar="(r) => (resourcesCapas = r)"
+          :catalogo="filteredResources"
+          @al-ordenar="(r) => updateResources(r)"
         />
 
         <div class="flex">
           <h2>Capas geográficas</h2>
-          <UiNumeroElementos :numero="datos.length" />
+          <UiNumeroElementos :numero="filteredResources.length" />
         </div>
 
         <div class="flex">
           <div class="columna-15">
             <ClientOnly>
-              <UiTablaAccesibleV2 :variables="variables" :datos="resourcesCapas" />
+              <UiTablaAccesibleV2 :variables="variables" :datos="filteredResources" />
               <UiPaginador :total-paginas="1" @cambio="1" />
             </ClientOnly>
           </div>

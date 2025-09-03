@@ -16,10 +16,10 @@ const seleccionOrden = ref('');
 function filtro(seleccion) {
   if (seleccion.trim().length >= 1) {
     return catalogo.value.sort((a, b) => {
-      if (a.actualizacion > b.actualizacion) {
+      if (a.last_updated < b.last_updated) {
         return 1;
       }
-      if (a.actualizacion < b.actualizacion) {
+      if (a.last_updated > b.last_updated) {
         return -1;
       }
       //
