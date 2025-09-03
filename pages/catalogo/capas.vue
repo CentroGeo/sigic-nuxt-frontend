@@ -4,7 +4,11 @@ import { resourceTypeDic } from '~/utils/consulta';
 const storeFetched = useFetchedResources2Store();
 
 storeFetched.checkFilling(resourceTypeDic.dataLayer);
-const resourcesCapas = computed(() => storeFetched.byResourceType(resourceTypeDic.dataLayer));
+// const resourcesCapas = computed(() => storeFetched.byResourceType(resourceTypeDic.dataLayer));
+const resourcesCapas = computed({
+  get: () => storeFetched.byResourceType(resourceTypeDic.dataLayer),
+  set: (newValue) => storeFetched.byResourceType(resourceTypeDic.dataLayer) = newValue,
+});
 
 // obteniendo datos por las props de la tabla
 const datos = computed(() =>
@@ -19,8 +23,15 @@ const datos = computed(() =>
     enlace_descarga: d.download_url,
   }))
 );
+// const datosOrdenados = computed({
+//   get: () => datos.value,
+//   set: (newValue) => datos.value = newValue,
+// })
+
+
 // obteniendo las variables keys para la tabla
-const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'acciones'];
+// const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'acciones'];
+const variables = ['pk', 'last_updated'];
 </script>
 
 <template>
@@ -31,10 +42,10 @@ const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion',
 
     <template #visualizador>
       <main id="principal" class="contenedor m-b-10 m-t-3">
-        <!-- <CatalogoElementoFiltros
-          :recursos-lista="recursosFiltrados"
-          :recursos-tipo="recursosTipo"
-        /> -->
+        <CatalogoElementoFiltros
+          :catalogo="resourcesCapas"
+          @al-ordenar="(r) => (resourcesCapas = r)"
+        />
 
         <div class="flex">
           <h2>Capas geográficas</h2>
@@ -44,7 +55,7 @@ const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion',
         <div class="flex">
           <div class="columna-15">
             <ClientOnly>
-              <UiTablaAccesibleV2 :variables="variables" :datos="datos" />
+              <UiTablaAccesibleV2 :variables="variables" :datos="resourcesCapas" />
               <UiPaginador :total-paginas="1" @cambio="1" />
             </ClientOnly>
           </div>
