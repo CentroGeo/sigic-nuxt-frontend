@@ -63,7 +63,6 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
       if (data.value?.accessToken) {
         options.headers.token = data.value?.accessToken;
         //console.info(new Date(data.value.expires));
-        console.log('checando autenticacion', data.value?.accessToken);
       } else {
         options.headers.token = 'sin-token';
       }

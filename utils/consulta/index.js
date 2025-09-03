@@ -116,8 +116,10 @@ export async function hasWMS(resource, service) {
  */
 export async function fetchGeometryType(resource, server) {
   const config = useRuntimeConfig();
-  const api = config.public.geoserverUrl;
-  const url = server === 'sigic' ? new URL(`${api}/ows`) : new URL(server);
+  const { data } = useAuth();
+  const token = data.value?.accessToken;
+  const api = config.public.geonodeUrl;
+  const url = server === 'sigic' ? new URL(`${api}/gs/ows`) : new URL(server);
   url.search = new URLSearchParams({
     service: 'WFS',
     version: '1.0.0',
@@ -128,7 +130,15 @@ export async function fetchGeometryType(resource, server) {
     outputFormat: 'application/json',
   }).toString();
 
-  const res = await fetch(url);
+  let res;
+  if (server !== 'sigic' || !token) {
+    res = await fetch(url);
+  } else if (token) {
+    res = await fetch(url, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  }
   if (!res.ok) {
     return 'Error';
   }
@@ -141,10 +151,9 @@ export async function fetchGeometryType(resource, server) {
     ) {
       return data.features[0].geometry.type;
     }
-
     return 'Error';
   } catch {
-    return 'Remoto';
+    return 'Error';
   }
 }
 
