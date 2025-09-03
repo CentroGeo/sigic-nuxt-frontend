@@ -114,18 +114,64 @@ export const useFilteredResources = defineStore('filteredResources', () => {
 
     sort() {
       let data = storeFetched.byResourceType('dataLayer');
-      // Ordenamos por más reciente
       if (filters.sort.trim().length >= 1) {
-        data = data.sort((a, b) => {
-          if (a.last_updated < b.last_updated) {
-            return 1;
-          }
-          if (a.last_updated > b.last_updated) {
-            return -1;
-          }
-          //
-          return 0;
-        });
+        // Ordenamos por más reciente
+        if (filters.sort === 'fecha_descendente') {
+          data = data.sort((a, b) => {
+            if (a.last_updated < b.last_updated) {
+              return 1;
+            }
+            if (a.last_updated > b.last_updated) {
+              return -1;
+            }
+            //
+            return 0;
+          });
+        }
+        // Ordenamos por más reciente
+        if (filters.sort === 'fecha_ascendente') {
+          data = data.sort((a, b) => {
+            if (a.last_updated > b.last_updated) {
+              return 1;
+            }
+            if (a.last_updated < b.last_updated) {
+              return -1;
+            }
+            //
+            return 0;
+          });
+        }
+        // Ordenamos por titulo
+        if (filters.sort === 'titulo') {
+          data = data.sort((a, b) => {
+            const titleA = a.title.toUpperCase();
+            const titleB = b.title.toUpperCase();
+            if (titleA > titleB) {
+              return 1;
+            }
+            if (titleA < titleB) {
+              return -1;
+            }
+            //
+            return 0;
+          });
+        }
+        // Ordenamos por categoria
+        if (filters.sort === 'categoria') {
+          let conCategoria = data.filter((r) => r.category !== null);
+          const sinCategoria = data.filter((r) => r.category === null);
+          conCategoria = conCategoria.sort((a, b) => {
+            if (a.category.gn_description > b.category.gn_description) {
+              return 1;
+            }
+            if (a.category.gn_description < b.category.gn_description) {
+              return -1;
+            }
+            //
+            return 0;
+          });
+          data = conCategoria.concat(sinCategoria);
+        }
       }
       // Ordenamos alfabéticamente por título
       return data;
