@@ -34,7 +34,7 @@ onUnmounted(() => (document.querySelector('body').className = ''));
       ]"
       :funcion-colapsar="storeConsulta.alternarCatalogoColapsable"
       :estado-colapable="storeConsulta.catalogoColapsado"
-      :id-colapsable="storeConsulta.idNavegacionLateral"
+      id-colapsable="consulta-navegacion-lateral"
     />
 
     <div class="contenedor-contenido">
