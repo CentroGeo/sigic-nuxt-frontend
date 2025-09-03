@@ -7,6 +7,8 @@ export const useFilteredResources = defineStore('filteredResources', () => {
   const isLoggedIn = ref(data.value ? true : false);
   const userEmail = data.value?.user.email;
 
+  const resourceType = ref('');
+
   const filters = reactive({
     inputSearch: null,
     owner: 'todos',
@@ -19,6 +21,8 @@ export const useFilteredResources = defineStore('filteredResources', () => {
 
   return {
     filters,
+
+    resourceType,
 
     updateFilter(filter, value) {
       filters[filter] = value;
@@ -113,7 +117,7 @@ export const useFilteredResources = defineStore('filteredResources', () => {
     },
 
     sort() {
-      let data = storeFetched.byResourceType('dataLayer');
+      let data = storeFetched.byResourceType(resourceType.value);
       // revisamos que se seleccione algo
       if (filters.sort.trim().length >= 1) {
         // Ordenamos por más reciente
