@@ -4,11 +4,11 @@ import { resourceTypeDic } from '~/utils/consulta';
 const storeFetched = useFetchedResources2Store();
 
 storeFetched.checkFilling(resourceTypeDic.dataLayer);
-// const resourcesCapas = computed(() => storeFetched.byResourceType(resourceTypeDic.dataLayer));
-const resourcesCapas = computed({
-  get: () => storeFetched.byResourceType(resourceTypeDic.dataLayer),
-  set: (newValue) => storeFetched.byResourceType(resourceTypeDic.dataLayer) = newValue,
-});
+const resourcesCapas = computed(() => storeFetched.byResourceType(resourceTypeDic.dataLayer));
+// const resourcesCapas = computed({
+//   get: () => storeFetched.byResourceType(resourceTypeDic.dataLayer),
+//   set: (newValue) => storeFetched.byResourceType(resourceTypeDic.dataLayer) = newValue,
+// });
 
 // obteniendo datos por las props de la tabla
 const datos = computed(() =>
@@ -27,7 +27,6 @@ const datos = computed(() =>
 //   get: () => datos.value,
 //   set: (newValue) => datos.value = newValue,
 // })
-
 
 // obteniendo las variables keys para la tabla
 // const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'acciones'];

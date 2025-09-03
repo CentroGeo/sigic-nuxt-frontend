@@ -30,7 +30,7 @@ function filtro(seleccion) {
   return catalogo.value;
 }
 
-watch(seleccionOrden, (nv) => emits(eventos.alOrdenar, filtro(nv)));
+watch(seleccionOrden, (nv) => emits('alOrdenar', filtro(nv)));
 
 // // Se está pensando en añadir una propiedad para colocar
 // // el selector a los filtros avanzados. comparte las mismas
@@ -214,7 +214,7 @@ function filtrarPorEntrada() {
           <SisdaiSelector
             v-model="seleccionOrden"
             etiqueta="Ordenar por"
-            @input="emits(eventos.alOrdenar, filtro($event.target.value))"
+            @input="emits('alOrdenar', filtro($event.target.value))"
           >
             <option value="1">Recién agregados</option>
             <option value="2">Título</option>
