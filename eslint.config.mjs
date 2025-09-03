@@ -1,8 +1,8 @@
 // eslint.config.mjs
 // @ts-check
-import withNuxt from './.nuxt/eslint.config.mjs';
-import prettier from 'eslint-plugin-prettier';
 import configPrettier from 'eslint-config-prettier';
+import prettier from 'eslint-plugin-prettier';
+import withNuxt from './.nuxt/eslint.config.mjs';
 
 export default withNuxt([
   configPrettier,

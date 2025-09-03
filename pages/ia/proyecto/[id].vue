@@ -1,18 +1,23 @@
 <script setup>
-import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiAreaTexto from '@centrogeomx/sisdai-componentes/src/componentes/area-texto/SisdaiAreaTexto.vue';
 import SisdaiGrupoBotonesRadio from '@centrogeomx/sisdai-componentes/src/componentes/boton-radio-grupo/SisdaiBotonesRadioGrupo.vue';
 import SisdaiBotonRadio from '@centrogeomx/sisdai-componentes/src/componentes/boton-radio/SisdaiBotonRadio.vue';
-import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
 import SisdaiCasilla from '@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue';
-
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import { ref } from 'vue';
 
 const catalogoModal = ref(null);
 const capasModal = ref(null);
+const archivosSeleccionados = ref([]);
 
 const storeIA = useIAStore();
+
+// Datos del formulario
+const nombreProyecto = ref('');
+const descripcionProyecto = ref('');
+const visibilidadProyecto = ref('publico'); // Valor por defecto
 
 const categorias = ref([
   {
@@ -55,26 +60,117 @@ const capasSeleccionadas = ref([
   {
     id: 0,
     titulo: 'Nombre de la fuente de información',
-    categoria: 'Categoría 1',
+    cateogria: 'Categoría 1',
     tipo: 'Poligonos',
   },
   {
     id: 1,
     titulo: 'Nombre de la fuente de información',
-    categoria: 'Categoría 3',
+    cateogria: 'Categoría 3',
     tipo: 'Puntos',
   },
 ]);
 
 const categoriaSeleccionada = ref(null);
 
+const route = useRoute();
+const esEdicion = ref(false);
+
+const proyecto = computed(() => storeIA.proyectoSeleccionado);
+
+onMounted(async () => {
+  if (route.params.id !== 'nuevo') {
+    esEdicion.value = true;
+
+    nombreProyecto.value = proyecto.value.title;
+    descripcionProyecto.value = proyecto.value.description;
+    visibilidadProyecto.value = proyecto.value.public ? 'publico' : 'privado';
+  }
+});
+
 const seleccionarCategoria = (categoria) => {
   categoriaSeleccionada.value = categoria;
 };
 
-const botonRadio = ref('');
+//const botonRadio = ref("");
 const botonRadioModal = ref('');
 const campoCasilla = ref(false);
+
+// Método para manejar la selección de archivos
+const manejarSeleccionArchivos = (event) => {
+  const nuevosArchivos = Array.from(event.target.files).map((file) => ({
+    id: Date.now() + Math.random().toString(36).substr(2, 9),
+    nombre: file.name,
+    tipo: obtenerTipoArchivo(file.name),
+    archivo: file, // Objeto File original
+    categoria: 'Archivo',
+    origen: 'Propio',
+  }));
+
+  archivosSeleccionados.value = [...archivosSeleccionados.value, ...nuevosArchivos];
+  event.target.value = ''; // Resetear el input para permitir seleccionar el mismo archivo otra vez
+};
+
+// Función para determinar el tipo de archivo
+const obtenerTipoArchivo = (nombre) => {
+  const extension = nombre.split('.').pop().toLowerCase();
+  const tipos = {
+    shp: 'Shapefile',
+    geojson: 'GeoJSON',
+    csv: 'CSV',
+    kml: 'KML',
+    zip: 'ZIP',
+    pdf: 'PDF',
+    doc: 'Word',
+    docx: 'Word',
+    xls: 'Excel',
+    xlsx: 'Excel',
+  };
+  return tipos[extension] || extension.toUpperCase();
+};
+
+// Método para eliminar archivo de la lista
+const eliminarArchivo = (id) => {
+  archivosSeleccionados.value = archivosSeleccionados.value.filter((archivo) => archivo.id !== id);
+};
+
+// Función para guardar el proyecto
+const guardarProyecto = async () => {
+  try {
+    // Mostrar notificación de inicio
+    /*     notificacion.mostrar({
+      tipo: 'info',
+      mensaje: 'Iniciando subida del proyecto...',
+      duracion: 3000
+    }); */
+
+    await storeIA.crearProyecto(
+      nombreProyecto.value,
+      descripcionProyecto.value,
+      visibilidadProyecto.value,
+      archivosSeleccionados.value
+    );
+
+    // Notificación de éxito
+    //alert("Proyecto guardado correctamente")
+    console.log('Proyecto guardado correctamente');
+    /*    notificacion.mostrar({
+      tipo: 'exito',
+      mensaje: 'Proyecto guardado correctamente',
+      duracion: 5000
+    }); */
+
+    navigateTo('/ia/proyectos');
+  } catch (error) {
+    alert('Error al guardar: ' + error.message);
+    console.log('Error al guardar: ' + error.message);
+    notificacion.mostrar({
+      tipo: 'error',
+      mensaje: 'Error al guardar: ' + error.message,
+      duracion: 7000,
+    });
+  }
+};
 </script>
 
 <template>
@@ -98,6 +194,7 @@ const campoCasilla = ref(false);
             <form action="">
               <ClientOnly>
                 <SisdaiCampoBase
+                  v-model="nombreProyecto"
                   etiqueta="Nombre del proyecto"
                   ejemplo=""
                   :es_etiqueta_visible="true"
@@ -105,6 +202,7 @@ const campoCasilla = ref(false);
                 />
 
                 <SisdaiAreaTexto
+                  v-model="descripcionProyecto"
                   etiqueta="Descripción del proyecto"
                   :es_etiqueta_visible="true"
                   :es_obligatorio="false"
@@ -113,13 +211,13 @@ const campoCasilla = ref(false);
 
                 <SisdaiGrupoBotonesRadio leyenda="Visibilidad">
                   <SisdaiBotonRadio
-                    v-model="botonRadio"
+                    v-model="visibilidadProyecto"
                     etiqueta="Público"
                     value="publico"
                     name="visibilidad"
                   />
                   <SisdaiBotonRadio
-                    v-model="botonRadio"
+                    v-model="visibilidadProyecto"
                     etiqueta="Privado"
                     value="privado"
                     name="visibilidad"
@@ -129,6 +227,23 @@ const campoCasilla = ref(false);
             </form>
           </div>
         </div>
+        <div class="flex flex-contenido-final">
+          <NuxtLink
+            class="boton boton-chico boton-primario"
+            aria-label="Guardar proyecto"
+            @click="guardarProyecto"
+          >
+            Guardar proyecto
+          </NuxtLink>
+          <nuxt-link
+            class="boton boton-chico boton-secundario"
+            aria-label="Cancelar"
+            to="/ia/proyectos/"
+          >
+            Cancelar
+          </nuxt-link>
+        </div>
+
         <div class="grid">
           <div class="columna-16">
             <p class="seperador borde-b" />
@@ -143,24 +258,81 @@ const campoCasilla = ref(false);
                   Agregar del catálogo
                   <span class="pictograma-agregar" aria-hidden="true" />
                 </button>
-                <button class="boton-pictograma boton-primario" aria-label="Subir archivos">
+
+                <!-- botón "Subir archivos" -->
+                <button
+                  class="boton-pictograma boton-primario"
+                  aria-label="Subir archivos"
+                  @click="$refs.fileInput.click()"
+                >
                   Subir archivos
                   <span class="pictograma-archivo-subir" aria-hidden="true" />
                 </button>
+
+                <!-- Input de archivo oculto -->
+                <input
+                  ref="fileInput"
+                  type="file"
+                  multiple
+                  accept=".shp,.geojson,.csv,.kml,.zip,.pdf,.doc,.docx,.xls,.xlsx"
+                  style="display: none"
+                  @change="manejarSeleccionArchivos"
+                />
               </div>
             </div>
-            <div class="flex flex-contenido-final">
+            <!--             <div class="flex flex-contenido-final">
               <NuxtLink
                 class="boton boton-chico boton-primario"
                 aria-label="Guardar proyecto"
-                to="/ia/proyectos"
-                @click="storeIA.crearProyecto()"
+                @click="guardarProyecto"
               >
                 Guardar proyecto
               </NuxtLink>
-              <button class="boton-chico boton-secundario" aria-label="Cancelar">Cancelar</button>
-            </div>
+              <nuxt-link
+                class="boton boton-chico boton-secundario"
+                aria-label="Cancelar"
+                to="/ia/proyectos/"
+              >
+                Cancelar
+              </nuxt-link>
+            </div> -->
           </div>
+        </div>
+
+        <div v-if="archivosSeleccionados.length > 0" class="tabla-archivos m-t-3">
+          <h3>Archivos a subir</h3>
+          <table class="tabla">
+            <thead>
+              <tr>
+                <th class="p-x-3 p-y-2">Nombre</th>
+                <th class="p-x-3 p-y-2">Tipo de archivo</th>
+                <th class="p-x-3 p-y-2">Categoría</th>
+                <th class="p-x-3 p-y-2">Origen</th>
+                <th class="p-x-3 p-y-2">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="archivo in archivosSeleccionados" :key="archivo.id">
+                <td class="p-3">{{ archivo.nombre }}</td>
+                <td class="p-3 etiqueta-tabla">
+                  <span class="p-x-1 p-y-minimo">{{ archivo.tipo }}</span>
+                </td>
+                <td class="p-3">{{ archivo.categoria }}</td>
+                <td class="p-3 etiqueta-tabla">
+                  <span class="p-x-1 p-y-minimo">{{ archivo.origen }}</span>
+                </td>
+                <td class="p-x-3 p-y-1">
+                  <button
+                    class="boton-pictograma boton-secundario boton-chico"
+                    aria-label="Eliminar archivo"
+                    @click="eliminarArchivo(archivo.id)"
+                  >
+                    <span class="pictograma-eliminar" aria-hidden="true" />
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -343,5 +515,83 @@ const campoCasilla = ref(false);
     display: flex;
     align-items: center;
   }
+}
+
+//tabla de archivos. TODO: estilo sisdai
+/* .tabla-archivos {
+  margin-top: 2rem;
+  border: 1px solid var(--borde);
+  border-radius: 4px;
+  overflow: hidden;
+
+  h3 {
+    background: var(--fondo-acento);
+    padding: 1rem;
+    margin: 0;
+    font-size: 1.1rem;
+  }
+}*/
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    /* padding: 0.75rem 1rem; */
+    text-align: center;
+  }
+
+  th {
+    border-bottom: 1px solid var(--borde);
+    // color: var(--Base-Tipografa---texto-primario, #141414);
+    text-align: center;
+    font-size: var(--Tipos-Tamao-Prrafos-Prrafo-base, 16px);
+    font-style: normal;
+    font-weight: 600;
+    line-height: var(--Tipos-Interlineado-Prrafos-Prrafos, 24px);
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  .etiqueta-tabla span {
+    border-radius: var(--Escalas-Bordes-redondeados-br-2, 8px);
+    border: 1px solid var(--Base-Borde---borde-acento, #53323c);
+    background: var(--Base-Fondo---fondo-acento, #fcf3f5);
+
+    color: var(--Base-Tipografa---texto-secundario, #5f3e47);
+    font-size: var(--Tipos-Tamao-Prrafos-Prrafo-base, 16px);
+    font-style: normal;
+    font-weight: 400;
+    line-height: var(--Tipos-Interlineado-Prrafos-Prrafos, 24px);
+  }
+}
+
+//barra ed progreso. TODO: estilo sisdai
+.upload-progress {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: var(--fondo-acento);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.upload-progress progress {
+  width: 100%;
+  height: 20px;
+}
+
+.upload-progress span {
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.boton[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>

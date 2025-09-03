@@ -1,8 +1,12 @@
+<script setup>
+const { status } = useAuth();
+const estaLogueado = computed(() => status.value === 'authenticated');
+</script>
 <template>
   <nav class="menu-lateral">
     <div class="menu-lateral-contenedor">
       <h4 class="m-0 p-4">Catálogo de información</h4>
-      <ul>
+      <ul class="lista-subpagina">
         <li>
           <nuxt-link to="/catalogo/explorar">Explorar</nuxt-link>
           <ul>
@@ -17,21 +21,27 @@
             </li>
           </ul>
         </li>
+      </ul>
+      <ul v-if="estaLogueado" class="lista-sesion">
         <li>
           <nuxt-link to="/catalogo/mis-archivos">Mis archivos</nuxt-link>
-          <ul>
-            <li>
-              <nuxt-link to="/catalogo/mis-archivos/carga-archivos">Carga de archivos</nuxt-link>
-            </li>
-          </ul>
+        </li>
+        <li>
+          <nuxt-link to="/catalogo/mis-archivos/cargar-archivos">Carga de archivos</nuxt-link>
+        </li>
+        <li>
+          <nuxt-link to="/catalogo/mis-archivos/servicios-externos">Servicios externos</nuxt-link>
         </li>
       </ul>
     </div>
   </nav>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .menu-lateral .menu-lateral-contenedor {
   padding: 0;
+  .lista-sesion {
+    margin-top: 16px;
+  }
 }
 </style>

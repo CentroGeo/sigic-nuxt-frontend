@@ -4,9 +4,11 @@ import { resourceTypeDic } from '~/utils/consulta';
 const resourceType = resourceTypeDic.dataTable;
 
 const storeConsulta = useConsultaStore();
-const storeFetched = useFetchedResourcesStore();
+const storeFetched = useFetchedResources2Store();
 const storeSelected = useSelectedResources2Store();
+
 storeConsulta.resourceType = resourceType;
+storeFetched.checkFilling();
 
 const route = useRoute();
 const router = useRouter();
@@ -35,8 +37,8 @@ watch(paginaActual, () => {
   });
 });
 
-watch([() => selectedUuid.value, () => storeFetched[resourceType]], () => {
-  selectedElement.value = storeFetched.findResources([selectedUuid.value], resourceType)[0];
+watch([() => selectedUuid.value, () => storeFetched.byResourceType(resourceType)], () => {
+  selectedElement.value = storeFetched.findResources([selectedUuid.value])[0];
   paginaActual.value = 0;
   // console.log(selectedUuid.value);
   fetchTable({
@@ -64,7 +66,7 @@ onMounted(() => {
   if (storeSelected.uuids.length > 0) {
     updateQueryParam(storeSelected.asQueryParam());
 
-    selectedElement.value = storeFetched.findResources([selectedUuid.value], resourceType)[0];
+    selectedElement.value = storeFetched.findResources([selectedUuid.value])[0];
     fetchTable({
       paginaActual: paginaActual.value,
       tamanioPagina: tamanioPagina,
@@ -77,11 +79,7 @@ onMounted(() => {
 <template>
   <ConsultaLayoutPaneles>
     <template #catalogo>
-      <ConsultaLayoutCatalogo
-        titulo="Tabulados de datos"
-        :resource-type="resourceType"
-        etiqueta-elementos="Datos tabulados"
-      />
+      <ConsultaLayoutCatalogo titulo="Tabulados de datos" etiqueta-elementos="Datos tabulados" />
     </template>
 
     <template #visualizador>

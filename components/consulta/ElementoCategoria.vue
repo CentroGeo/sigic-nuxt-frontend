@@ -20,7 +20,7 @@ const estadoAbierto = ref(false);
 
 <template>
   <button
-    class="categoria-colapsable flex-contenido-separado borde-redondeado-0 fondo-color-acento borde-l borde-grosor-4 borde-color-error"
+    class="categoria-colapsable flex-contenido-separado borde-redondeado-0 fondo-color-acento texto-color-secundario borde-l borde-grosor-4 borde-color-error"
     @click="estadoAbierto = !estadoAbierto"
   >
     <div>
@@ -44,6 +44,7 @@ const estadoAbierto = ref(false);
   // justify-content: space-between;
   width: 100%;
   align-items: flex-start;
+  // color: var(--color-secundario-11);
 
   [class^='pictograma-'] {
     font-size: 1.75rem;

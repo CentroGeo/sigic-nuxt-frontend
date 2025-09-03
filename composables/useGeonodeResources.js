@@ -6,8 +6,8 @@ import { resourceTypeDic, resourceTypeGeonode } from '~/utils/consulta';
 export async function useGeonodeResources() {
   const config = useRuntimeConfig();
   const storeConsulta = useConsultaStore();
-  //const { data: authData, status: authStatus } = useAuth();
-  //const token = ref(authData.value?.accessToken);
+  const { data: authData, status: authStatus } = useAuth();
+  const token = ref(authData.value?.accessToken);
 
   const api = `${config.public.geonodeApi}/resources`;
   const resourcesList = ref([]);
@@ -33,11 +33,11 @@ export async function useGeonodeResources() {
             });
       const response = await fetch(`${api}?${dataParams.toString()}`, {
         method: 'GET',
-        /*headers: {
-          ...(authStatus.value === "authenticated"
+        headers: {
+          ...(authStatus.value === 'authenticated'
             ? { Authorization: `Bearer ${token.value}` }
             : {}),
-        },*/
+        },
       });
 
       if (!response.ok) {

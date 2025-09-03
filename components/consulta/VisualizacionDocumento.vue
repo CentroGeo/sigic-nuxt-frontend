@@ -4,7 +4,7 @@ import { resourceTypeDic } from '~/utils/consulta';
 
 const resourceType = resourceTypeDic.document;
 
-const storeFetched = useFetchedResourcesStore();
+const storeFetched = useFetchedResources2Store();
 const storeSelected = useSelectedResources2Store();
 
 //const urlEmbebido = ref(null);

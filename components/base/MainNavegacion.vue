@@ -33,7 +33,7 @@ async function cerrarSesion() {
         <NuxtLink class="nav-hipervinculo" to="/" exact-path>Inicio</NuxtLink>
       </li>
       <!-- <li><NuxtLink class="nav-hipervinculo" to="/carga">Carga</NuxtLink></li> -->
-      <li v-if="estaLogueado">
+      <li>
         <NuxtLink class="nav-hipervinculo" to="/catalogo">Catálogo</NuxtLink>
       </li>
       <li>

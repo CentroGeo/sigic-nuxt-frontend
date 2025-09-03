@@ -13,8 +13,6 @@ const router = useRouter();
 storeConsulta.resourceType = resourceTypeDic.dataLayer;
 storeFetched.checkFilling();
 
-// const randomNum = ref(0);
-// const isFinishedLoading = ref(0);
 const linkExportaMapa = ref();
 function exportarMapa() {
   exportarHTMLComoPNG(
@@ -154,11 +152,7 @@ onMounted(() => {
 <template>
   <ConsultaLayoutPaneles>
     <template #catalogo>
-      <ConsultaLayoutCatalogo
-        :titulo="'Capas geográficas'"
-        :resource-type="storeConsulta.resourceType"
-        etiqueta-elementos="Capas"
-      />
+      <ConsultaLayoutCatalogo titulo="Capas geográficas" etiqueta-elementos="Capas" />
     </template>
 
     <template #visualizador>
@@ -183,8 +177,6 @@ onMounted(() => {
             :visible="storeSelected.byUuid(resource.uuid).visible"
           />
         </SisdaiMapa>
-
-        <!-- @alFinalizarCarga="isFinishedLoading += 1" -->
       </ClientOnly>
     </template>
 

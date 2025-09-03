@@ -1,29 +1,38 @@
 <script setup>
-import { resourceTypeDic } from '~/utils/consulta';
 // TODO: añadir selector a tipo de archivo a filtros y mejorar tabla
+import { resourceTypeDic } from '~/utils/consulta';
 const storeFetched = useFetchedResources2Store();
 
 storeFetched.checkFilling(resourceTypeDic.dataTable);
 storeFetched.checkFilling(resourceTypeDic.document);
 
+function tipoRecurso(d) {
+  if (d.resource_type === 'document') {
+    return 'Documentos';
+  } else {
+    return isGeometricExtension(d.extent) ? 'Capa geográfica' : 'Datos Tabulados';
+  }
+}
+
 // // para filtar por los archivos de la usuaria
 const { data } = useAuth();
 const userEmail = data.value.user.email;
-
+// obteniendo datos por las props de la tabla
 const datos = computed(() =>
   storeFetched.all
     .filter((resource) => resource.owner.email === userEmail)
     .map((d) => ({
       pk: d.pk,
       titulo: d.title,
-      tipo_recurso: d.resource_type,
+      // tipo_recurso: d.resource_typed.resource_type,
+      tipo_recurso: tipoRecurso(d),
       categoria: d.category,
       actualizacion: d.last_updated,
       acciones: 'Editar, Ver, Descargar, Remover',
       enlace_descarga: d.download_url,
     }))
 );
-
+// obteniendo las variables keys para la tabla
 const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'acciones'];
 </script>
 
