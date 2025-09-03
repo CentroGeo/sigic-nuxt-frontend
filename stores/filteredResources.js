@@ -114,6 +114,7 @@ export const useFilteredResources = defineStore('filteredResources', () => {
 
     sort() {
       let data = storeFetched.byResourceType('dataLayer');
+      // revisamos que se seleccione algo
       if (filters.sort.trim().length >= 1) {
         // Ordenamos por más reciente
         if (filters.sort === 'fecha_descendente') {
@@ -124,11 +125,10 @@ export const useFilteredResources = defineStore('filteredResources', () => {
             if (a.last_updated > b.last_updated) {
               return -1;
             }
-            //
             return 0;
           });
         }
-        // Ordenamos por más reciente
+        // Ordenamos por más antiguo
         if (filters.sort === 'fecha_ascendente') {
           data = data.sort((a, b) => {
             if (a.last_updated > b.last_updated) {
@@ -137,7 +137,6 @@ export const useFilteredResources = defineStore('filteredResources', () => {
             if (a.last_updated < b.last_updated) {
               return -1;
             }
-            //
             return 0;
           });
         }
@@ -152,7 +151,6 @@ export const useFilteredResources = defineStore('filteredResources', () => {
             if (titleA < titleB) {
               return -1;
             }
-            //
             return 0;
           });
         }
@@ -167,13 +165,11 @@ export const useFilteredResources = defineStore('filteredResources', () => {
             if (a.category.gn_description < b.category.gn_description) {
               return -1;
             }
-            //
             return 0;
           });
           data = conCategoria.concat(sinCategoria);
         }
       }
-      // Ordenamos alfabéticamente por título
       return data;
     },
   };
