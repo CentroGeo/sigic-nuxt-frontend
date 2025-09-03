@@ -7,9 +7,21 @@ storeFetched.checkFilling(resourceTypeDic.dataLayer);
 const resourcesCapas = computed(() => storeFetched.byResourceType(resourceTypeDic.dataLayer));
 
 const filteredResources = ref([]);
+const filteredResources2 = ref([]);
 
 function updateResources(nuevosRecursos) {
   filteredResources.value = nuevosRecursos;
+  filteredResources2.value = filteredResources.value.map((d) => ({
+    pk: d.pk,
+    titulo: d.title,
+    // tipo_recurso: d.resource_type,
+    tipo_recurso: 'Capa geográfica',
+    categoria: d.category === null ? 'Sin clasificar' : d.category.gn_description,
+    actualizacion: d.last_updated,
+    acciones: 'Ver, Descargar',
+    enlace_descarga: d.download_url,
+  }));
+  // filteredResources.value = nuevosRecursos;
   // groupResults();
 }
 
@@ -40,7 +52,7 @@ onMounted(async () => {
 // );
 // obteniendo las variables keys para la tabla
 // const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'acciones'];
-const variables = ['pk', 'last_updated'];
+const variables = ['pk', 'titulo', 'actualizacion', 'categoria'];
 </script>
 
 <template>
@@ -64,7 +76,7 @@ const variables = ['pk', 'last_updated'];
         <div class="flex">
           <div class="columna-15">
             <ClientOnly>
-              <UiTablaAccesibleV2 :variables="variables" :datos="filteredResources" />
+              <UiTablaAccesibleV2 :variables="variables" :datos="filteredResources2" />
               <UiPaginador :total-paginas="1" @cambio="1" />
             </ClientOnly>
           </div>

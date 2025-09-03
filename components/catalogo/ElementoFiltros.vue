@@ -15,16 +15,63 @@ const seleccionOrden = ref('');
 
 function filtro(seleccion) {
   if (seleccion.trim().length >= 1) {
-    return catalogo.value.sort((a, b) => {
-      if (a.last_updated < b.last_updated) {
-        return 1;
-      }
-      if (a.last_updated > b.last_updated) {
-        return -1;
-      }
-      //
-      return 0;
-    });
+    // Ordenamos por más reciente
+    if (seleccion.trim() === 'fecha_descendente') {
+      return catalogo.value.sort((a, b) => {
+        if (a.last_updated < b.last_updated) {
+          return 1;
+        }
+        if (a.last_updated > b.last_updated) {
+          return -1;
+        }
+        //
+        return 0;
+      });
+    }
+    // Ordenamos por más reciente
+    if (seleccion.trim() === 'fecha_ascendente') {
+      return catalogo.value.sort((a, b) => {
+        if (a.last_updated > b.last_updated) {
+          return 1;
+        }
+        if (a.last_updated < b.last_updated) {
+          return -1;
+        }
+        //
+        return 0;
+      });
+    }
+    // Ordenamos por titulo
+    if (seleccion.trim() === 'titulo') {
+      return catalogo.value.sort((a, b) => {
+        const titleA = a.title.toUpperCase();
+        const titleB = b.title.toUpperCase();
+        if (titleA > titleB) {
+          return 1;
+        }
+        if (titleA < titleB) {
+          return -1;
+        }
+        //
+        return 0;
+      });
+    }
+    // Ordenamos por categoria
+    if (seleccion.trim() === 'categoria') {
+      let conCategoria = catalogo.value.filter((r) => r.category !== null);
+      const sinCategoria = catalogo.value.filter((r) => r.category === null);
+      conCategoria = conCategoria.sort((a, b) => {
+        if (a.category.gn_description > b.category.gn_description) {
+          return 1;
+        }
+        if (a.category.gn_description < b.category.gn_description) {
+          return -1;
+        }
+        //
+        return 0;
+      });
+      return conCategoria.concat(sinCategoria);
+    }
   }
 
   return catalogo.value;
@@ -216,10 +263,10 @@ function filtrarPorEntrada() {
             etiqueta="Ordenar por"
             @input="emits('alOrdenar', filtro($event.target.value))"
           >
-            <option value="1">Recién agregados</option>
-            <option value="2">Título</option>
-            <option value="3">Categoría</option>
-            <option value="3">Más antiguo</option>
+            <option value="fecha_descendente">Recién agregados</option>
+            <option value="titulo">Título</option>
+            <option value="categoria">Categoría</option>
+            <option value="fecha_ascendente">Más antiguo</option>
           </SisdaiSelector>
         </ClientOnly>
       </div>
