@@ -55,6 +55,7 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
       const options = {
         query: {
           'filter{resource_type}': resourceTypeGeonode[resourceType],
+          page_size: 50,
           // agregar filtros
         },
         headers: {},

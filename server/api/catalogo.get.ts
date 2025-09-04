@@ -15,8 +15,8 @@ export default defineEventHandler(async (event) => {
   let endpoint = `${api}?${dataParams.toString()}`;
   console.log(endpoint);
   do {
-    const response = await fetch(endpoint.replace('http:', 'https:'), options);
-    //const response = await fetch(endpoint, options);
+    //const response = await fetch(endpoint.replace('http:', 'https:'), options);
+    const response = await fetch(endpoint, options);
     if (!response.ok) {
       const error = await response.json();
       // throw new Error(`HTTP ${response.status} - ${response.statusText}`);
@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
     allResults = allResults.concat(resources);
     endpoint = links.next;
     console.info('->', allResults.length, 'recuperados de', total);
-  } while (endpoint !== null && allResults.length < 50);
+  } while (endpoint !== null);
 
   return { allResults };
 });

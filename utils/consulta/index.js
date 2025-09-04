@@ -124,7 +124,6 @@ export async function fetchGeometryType(resource, server) {
     service: 'WFS',
     version: '1.0.0',
     request: 'GetFeature',
-    //typeName: 'sob_alim:glifo_sup_sembrada_herbicida_07_mun_a',
     typeName: resource.alternate,
     maxFeatures: 1,
     outputFormat: 'application/json',
@@ -134,8 +133,7 @@ export async function fetchGeometryType(resource, server) {
   if (server !== 'sigic' || !token) {
     res = await fetch(url);
   } else if (token) {
-    res = await fetch(url, {
-      method: 'GET',
+    res = await fetch(url.toString(), {
       headers: { Authorization: `Bearer ${token}` },
     });
   }
@@ -197,6 +195,8 @@ export async function downloadMetadata(resource) {
 
 export async function downloadWMS(resource, format, featureTypes) {
   const config = useRuntimeConfig();
+  const { data } = useAuth();
+  const token = data.value?.accessToken;
   const formatDict = {
     xls: 'excel',
     xlsx: 'excel2007',
@@ -224,9 +224,34 @@ export async function downloadWMS(resource, format, featureTypes) {
       outputFormat: formatDict[format],
     };
   }
-
-  let url = new URL(`${config.public.geoserverUrl}/ows`);
+  let res;
+  const url = new URL(`${config.public.geonodeUrl}/gs/ows`);
   url.search = new URLSearchParams(params).toString();
+
+  if (token) {
+    res = await fetch(url.toString(), {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } else {
+    res = await fetch(url);
+  }
+  //console.log(res);
+
+  if (!res.ok) {
+    throw new Error(`Download failed: ${res.status}`);
+  }
+
+  const blob = await res.blob();
+  //console.log(blob);
+  const anchor = document.createElement('a');
+  anchor.href = URL.createObjectURL(blob);
+  //console.log(link.href);
+  anchor.target = '_blank';
+  anchor.download = `${resource.title}.${format}`;
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+  /*   let url = new URL(`${config.public.geoserverUrl}/ows`);
   // Si es un Json vamos a tener que forzar la descarga
   if (format === 'geojson') {
     const jsonRequest = await fetch(url);
@@ -240,25 +265,27 @@ export async function downloadWMS(resource, format, featureTypes) {
     });
     const blobLink = URL.createObjectURL(blob);
     url = blobLink;
-  }
-  const anchor = document.createElement('a');
+  } */
+  /*   const anchor = document.createElement('a');
   anchor.href = url;
   anchor.target = '_blank';
   anchor.download = `${resource.title}.${format}`;
   document.body.appendChild(anchor);
   anchor.click();
-  document.body.removeChild(anchor);
+  document.body.removeChild(anchor); */
 }
 
 export async function downloadNoGeometry(resource, format) {
   const config = useRuntimeConfig();
+  const { data } = useAuth();
+  const token = data.value?.accessToken;
   // Revisamos si la capa es remota
   if (resource.sourcetype === 'remote') {
     alert('Esta capa es remota y no se puede descargar');
     return;
   }
   // Si la capa no es remota, revisamos sus columnas para excluir las de geometria
-  const describeFeatureUrl = new URL(`${config.public.geoserverUrl}/ows`);
+  const describeFeatureUrl = new URL(`${config.public.geonodeUrl}/gs/ows`);
   describeFeatureUrl.search = new URLSearchParams({
     service: 'WFS',
     version: '2.0.0',
@@ -267,12 +294,21 @@ export async function downloadNoGeometry(resource, format) {
     outputFormat: 'application/json',
   }).toString();
 
-  const res = await fetch(describeFeatureUrl);
+  //const res = await fetch(describeFeatureUrl);
+  let res;
+  if (token) {
+    res = await fetch(describeFeatureUrl, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } else {
+    res = await fetch(describeFeatureUrl);
+  }
+  //console.log(res);
   if (!res.ok) {
     return 'Error';
   }
-  const data = await res.json();
-  const features = data.featureTypes[0]['properties'];
+  const fileData = await res.json();
+  const features = fileData.featureTypes[0]['properties'];
   const props = features
     .filter((prop) => prop.name.toLowerCase() !== 'geometry')
     .map((prop) => prop.name);
