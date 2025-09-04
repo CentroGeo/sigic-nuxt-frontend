@@ -332,8 +332,13 @@ export const useIAStore = defineStore('ia', {
 
       const data = await response.json();
 
-      if (data.length > 0) {
-        this.proyectoSeleccionado = data[0];
+      if (data && data.workspace) {
+        const proyecto = {
+          ...structuredClone(data.workspace),
+          id: Number(project_id),
+        };
+
+        this.proyectoSeleccionado = proyecto;
       } else {
         this.proyectoSeleccionado = null;
       }

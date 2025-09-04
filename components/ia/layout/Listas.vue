@@ -21,6 +21,11 @@ const { titulo, textoBoton, recursoLista, etiquetaBusqueda } = toRefs(props);
 const catalogo = ref([]);
 const catalogoFiltrado = ref(catalogo.value);
 
+const router = useRouter();
+const route = useRoute();
+
+const idSeleccionado = computed(() => storeIA.proyectoSeleccionado?.id);
+
 // Función para consultar lista de proyectos
 const loadProjectList = async () => {
   let arrayProjects = [];
@@ -35,6 +40,17 @@ const loadProjectList = async () => {
 onMounted(() => {
   loadProjectList();
 });
+
+function seleccionarProyecto(proyecto) {
+  storeIA.seleccionarProyecto(proyecto);
+
+  const idRutaActual = route.params.id;
+  const idSeleccionado = proyecto.id.toString();
+
+  if (route.name === 'ia-proyecto-id' && idRutaActual !== idSeleccionado) {
+    router.push(`/ia/proyecto/${idSeleccionado}`);
+  }
+}
 </script>
 
 <template>
@@ -78,12 +94,12 @@ onMounted(() => {
             v-for="proyecto in catalogoFiltrado"
             :key="proyecto.id"
             class="m-0"
-            @click="storeIA.seleccionarProyecto(proyecto)"
+            @click="seleccionarProyecto(proyecto)"
           >
             <div
               class="proyecto p-l-4 p-r-2 p-y-1"
               :class="{
-                seleccionado: proyecto.id === storeIA.proyectoSeleccionado?.id,
+                seleccionado: proyecto.id === idSeleccionado,
               }"
             >
               <div class="proyecto-titulo m-b-1">{{ proyecto.title }}</div>

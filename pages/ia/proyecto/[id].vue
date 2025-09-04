@@ -182,7 +182,7 @@ const guardarProyecto = async () => {
     navigateTo('/ia/proyectos');
   } catch (error) {
     //alert('Error al guardar: ' + error.message);
-    console.log('Error al guardar: ' + error);
+    console.log('Error al guardar: ' + error.message);
     /* notificacion.mostrar({
       tipo: 'error',
       mensaje: 'Error al guardar: ' + error.message,
