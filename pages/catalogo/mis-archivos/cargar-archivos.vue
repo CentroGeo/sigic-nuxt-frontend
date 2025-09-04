@@ -12,20 +12,17 @@ const pending = ref(false);
 const { data } = useAuth();
 
 const dragNdDrop = ref(null);
-const base_files = ['.geojson', '', '.xls', '.xlsx', '.zip', '.csv'];
+const base_files = ['.geojson', 'gpkg', '.xls', '.xlsx', '.zip', '.csv'];
+const docs_files = ['.txt', '.pdf'];
 
 async function guardarArchivo(files) {
   const token = ref(data.value?.accessToken);
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
-    console.log(file, 'nom' + file?.name);
-
     if (base_files.map((end) => file?.name.endsWith(end)).includes(true)) {
       const formData = new FormData();
       // solo el primer elemento del arreglo
       formData.append('base_file', file);
-      formData.append('title', file?.name);
-
       formData.append('token', token.value);
 
       const response = await fetch('/api/cargar', {
@@ -40,6 +37,8 @@ async function guardarArchivo(files) {
         // statusOk.value = true;
         // TODO: recuperar recurso o recursos mediante el name y title
       }
+    } else if (docs_files.map((end) => file?.name.endsWith(end)).includes(true)) {
+      console.log('-');
     }
   }
 }
