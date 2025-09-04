@@ -154,11 +154,17 @@ onUnmounted(() => {
 <template>
   <div :id="`elemento-${catalogueElement.uuid}`" ref="rootEl" class="tarjeta-catalogo">
     <div
-      v-if="isLoggedIn && catalogueElement.owner.email === userEmail"
+      v-if="
+        isLoggedIn && catalogueElement.owner.email === userEmail && !catalogueElement.is_published
+      "
       class="id-tag flex m-b-1 m-t-0"
     >
       <span class="pictograma-persona"></span>
       Mis archivos
+    </div>
+    <div v-if="catalogueElement.sourcetype === 'REMOTE'" class="id-tag flex m-b-1 m-t-0">
+      <span class="pictograma-colaborar"></span>
+      Archivo remoto
     </div>
     <div class="tarjeta-elemento">
       <input

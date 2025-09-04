@@ -63,7 +63,7 @@ export function tooltipContent(resource) {
 export function getWMSserver(resource) {
   //const proxy = 'https://geonode.dev.geoint.mx/proxy/?url=';
   const wmsObject = resource.links.filter((link) => link.link_type === 'OGC:WMS');
-  const link = wmsObject[0]['url'].replace('http', 'https');
+  const link = wmsObject[0]['url'].replace('http', 'https').replace('httpss', 'https');
   return `${link}`;
 }
 /**
@@ -92,7 +92,7 @@ export async function hasWMS(resource, service) {
   }
   const data = await res.text();
   if (data.includes('ExceptionReport')) {
-    console.error('No se puede usar el WMS');
+    console.error('No se puede usar el WMS', resource.alternate, resource.title);
     return false;
   } else {
     if (service === 'map') {
@@ -140,17 +140,24 @@ export async function fetchGeometryType(resource, server) {
   if (!res.ok) {
     return 'Error';
   }
-  try {
-    const data = await res.json();
-    if (
-      Array.isArray(data.features) &&
-      data.features.length > 0 &&
-      data.features[0]?.geometry?.type
-    ) {
-      return data.features[0].geometry.type;
+
+  // Ahora hacemos una petición get al vínculo statusLocation.
+  // Como a veces hace timeout, lo intentamos tres veces
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const data = await res.json();
+      console.log(resource.alternate, data);
+      if (
+        Array.isArray(data.features) &&
+        data.features.length > 0 &&
+        data.features[0]?.geometry?.type
+      ) {
+        return data.features[0].geometry.type;
+      }
+    } catch {
+      console.log('Se está inyentando ua vez más');
     }
-    return 'Error';
-  } catch {
+    // Si fracasa en todos los intentos
     return 'Error';
   }
 }
