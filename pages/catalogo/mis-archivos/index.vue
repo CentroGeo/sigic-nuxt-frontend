@@ -95,8 +95,8 @@ onMounted(async () => {
           </div>
 
           <!-- <div class="columna-8 flex-vertical-final">
-            <div class="flex">
-              <div>
+            <div class="flex flex-contenido-separado">
+              <div class="columna-14">
                 <ClientOnly>
                   <label for="buscadoravanzado">Buscador</label>
                   <SisdaiCampoBusqueda
@@ -110,7 +110,7 @@ onMounted(async () => {
                   />
                 </ClientOnly>
               </div>
-              <div class="flex-vertical-final">
+              <div class="columna-2 flex-vertical-final">
                 <button
                   class="boton-secundario boton-pictograma boton-grande"
                   aria-label="Filtro Avanzado"
@@ -125,11 +125,12 @@ onMounted(async () => {
         </div>
 
         <div class="flex">
-          <h2>Todos mis archivos</h2>
+          <h2>Todos mis archivos disponibles</h2>
           <UiNumeroElementos :numero="tableResources.length" />
         </div>
+        <p>En esta tabla se muestran los archivos disponibles para su consulta y uso</p>
         <div class="flex">
-          <div class="columna-15">
+          <div class="columna-16">
             <ClientOnly>
               <UiTablaAccesibleV2 :variables="variables" :datos="tableResources" />
               <UiPaginador :total-paginas="1" @cambio="1" />

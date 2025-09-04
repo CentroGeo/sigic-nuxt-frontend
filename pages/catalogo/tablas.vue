@@ -1,6 +1,6 @@
 <script setup>
-// TODO: fix tabla, filtros y paginador
-import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
+// TODO: fix filtros avanzados y paginador
+// import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
 import { resourceTypeDic } from '~/utils/consulta';
@@ -43,12 +43,9 @@ function updateResources(nuevosRecursos) {
     acciones: 'Ver, Descargar',
     enlace_descarga: d.download_url,
   }));
-  // filteredResources.value = nuevosRecursos;
-  // groupResults();
 }
 
 watch([resourcesTablas], () => {
-  // updateResources(storeFilters.filter())
   updateResources(storeFilters.sort());
 });
 
@@ -85,9 +82,9 @@ onMounted(async () => {
             </ClientOnly>
           </div>
 
-          <div class="columna-8 flex-vertical-final">
-            <div class="flex">
-              <div>
+          <!-- <div class="columna-8 flex-vertical-final">
+            <div class="flex flex-contenido-separado">
+              <div class="columna-14">
                 <ClientOnly>
                   <label for="buscadoravanzado">Buscador</label>
                   <SisdaiCampoBusqueda
@@ -101,7 +98,7 @@ onMounted(async () => {
                   />
                 </ClientOnly>
               </div>
-              <div class="flex-vertical-final">
+              <div class="columna-2 flex-vertical-final">
                 <button
                   class="boton-secundario boton-pictograma boton-grande"
                   aria-label="Filtro Avanzado"
@@ -112,7 +109,7 @@ onMounted(async () => {
                 </button>
               </div>
             </div>
-          </div>
+          </div> -->
         </div>
 
         <div class="flex">
@@ -121,7 +118,7 @@ onMounted(async () => {
         </div>
 
         <div class="flex">
-          <div class="columna-15">
+          <div class="columna-16">
             <ClientOnly>
               <UiTablaAccesibleV2 :variables="variables" :datos="tableResources" />
               <UiPaginador :total-paginas="1" @cambio="1" />
