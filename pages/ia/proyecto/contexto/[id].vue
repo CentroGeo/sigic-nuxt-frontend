@@ -1,10 +1,11 @@
 <script setup>
 import SisdaiAreaTexto from '@centrogeomx/sisdai-componentes/src/componentes/area-texto/SisdaiAreaTexto.vue';
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const storeIA = useIAStore();
 const route = useRoute();
+const router = useRouter();
 
 // Obtener el proyecto_id de la URL
 const proyectoId = ref(route.query.proyecto_id);
@@ -251,6 +252,10 @@ const obtenerTipoArchivo = (nombre) => {
 async function guardarArchivo(archivo) {
   portadaContexto.value = archivo;
 }
+
+function irAProyectos() {
+  router.push('/ia/proyectos/');
+}
 </script>
 
 <template>
@@ -274,16 +279,20 @@ async function guardarArchivo(archivo) {
         </div> -->
 
         <div class="grid">
-          <div class="columna-16 flex flex-contenido-separado contexto-encabezado">
+          <div class="columna-16 flex crear contexto-encabezado">
+            <div class="boton-regresar">
+              <button
+                class="boton-pictograma boton-sin-contenedor-secundario m-r-2"
+                aria-label="Regresar a proyectos"
+                type="button"
+                @click="irAProyectos"
+              >
+                <span class="pictograma-flecha-izquierda" aria-hidden="true" />
+              </button>
+              Proyectos
+            </div>
+
             <h2>Configuración de contexto</h2>
-            <NuxtLink
-              class="boton boton-secundario boton-chico"
-              aria-label="Regresar a proyectos"
-              to="/ia/proyectos/"
-            >
-              Regresar a proyectos
-              <span class="pictograma-flecha-izquierda" aria-hidden="true" />
-            </NuxtLink>
           </div>
         </div>
 
@@ -411,8 +420,21 @@ async function guardarArchivo(archivo) {
 </template>
 
 <style lang="scss">
-.contexto-encabezado {
-  align-items: center;
+.crear {
+  &.contexto-encabezado {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0px;
+
+    .boton-regresar {
+      display: flex;
+      align-items: center;
+      font-size: var(--Tipos-Tamao-Prrafos-Texto-alto, 20px);
+      font-style: normal;
+      font-weight: 400;
+      line-height: var(--Tipos-Interlineado-Prrafos-Texto-alto, 30px);
+    }
+  }
 }
 
 .mensaje-error {
