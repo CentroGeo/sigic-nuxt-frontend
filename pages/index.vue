@@ -1,6 +1,7 @@
 <script setup>
 import { watch } from 'vue';
 import { useRoute } from 'vue-router';
+import { resourceTypeDic } from '~/utils/consulta';
 
 definePageMeta({ auth: false, key: 'inicio' });
 const { signIn } = useAuth();
@@ -100,6 +101,16 @@ onUnmounted(() => {
     }
   }
 });
+
+// Capas recientes
+const storeFetched = useFetchedResources2Store();
+storeFetched.checkFilling(resourceTypeDic.dataLayer);
+
+const obtenerMasRecientes = (type) => {
+  return computed(() => storeFetched.byResourceType(type).slice(0, 4) || [{}]);
+};
+
+const capasMasRecientes = obtenerMasRecientes(resourceTypeDic.dataLayer);
 </script>
 <template>
   <div>
@@ -382,98 +393,23 @@ onUnmounted(() => {
         </div>
         <div class="contenedor ancho-fijo">
           <div class="flex">
-            <div class="columna-4">
+            <div v-for="(capa, i) in capasMasRecientes" :key="i" class="columna-4">
               <div class="tarjeta">
-                <img
-                  class="tarjeta-imagen"
-                  src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/asha.jpg"
-                />
-
+                <img class="tarjeta-imagen" :src="capa.thumbnail_url" alt="" />
                 <div class="tarjeta-cuerpo">
-                  <p class="tarjeta-etiqueta">Salud</p>
-                  <p class="tarjeta-titulo">
-                    Infraestructura de salud pública en la Península de Yucatán
-                  </p>
-                  <p>Capa de puntos</p>
+                  <p class="tarjeta-etiqueta">Capa geográfica</p>
+                  <p class="tarjeta-titulo">{{ capa.title }}</p>
+                  <!-- eslint-disable-next-line vue/no-v-html -->
+                  <div v-html="capa.abstract"></div>
                 </div>
-
                 <div class="tarjeta-pie">
-                  <NuxtLink class="boton-primario boton-chico"
-                    >Abrir capa en el visualizador
-                    <span class="pictograma-visualizador pictograma-chico"></span
-                  ></NuxtLink>
-                </div>
-              </div>
-            </div>
-
-            <div class="columna-4">
-              <div class="tarjeta">
-                <img
-                  class="tarjeta-imagen"
-                  src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/asha.jpg"
-                />
-
-                <div class="tarjeta-cuerpo">
-                  <p class="tarjeta-etiqueta">Seguridad humana</p>
-                  <p class="tarjeta-titulo">
-                    Ubicación de refugios temporales activos – Temporada de lluvias 2024
-                  </p>
-                  <p>Capa de puntos</p>
-                </div>
-
-                <div class="tarjeta-pie">
-                  <NuxtLink class="boton-primario boton-chico"
-                    >Abrir capa en el visualizador
-                    <span class="pictograma-visualizador pictograma-chico"></span
-                  ></NuxtLink>
-                </div>
-              </div>
-            </div>
-
-            <div class="columna-4">
-              <div class="tarjeta">
-                <img
-                  class="tarjeta-imagen"
-                  src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/asha.jpg"
-                />
-
-                <div class="tarjeta-cuerpo">
-                  <p class="tarjeta-etiqueta">Energía y cambio climático</p>
-                  <p class="tarjeta-titulo">
-                    Áreas de riesgo por olas de calor extremas en el norte de México
-                  </p>
-                  <p>Capa de polígonos</p>
-                </div>
-
-                <div class="tarjeta-pie">
-                  <NuxtLink class="boton-primario boton-chico"
-                    >Abrir capa en el visualizador
-                    <span class="pictograma-visualizador pictograma-chico"></span
-                  ></NuxtLink>
-                </div>
-              </div>
-            </div>
-
-            <div class="columna-4">
-              <div class="tarjeta">
-                <img
-                  class="tarjeta-imagen"
-                  src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/asha.jpg"
-                />
-
-                <div class="tarjeta-cuerpo">
-                  <p class="tarjeta-etiqueta">Agua</p>
-                  <p class="tarjeta-titulo">
-                    Red de drenaje urbano – Zona metropolitana de Guadalajara
-                  </p>
-                  <p>Capa de líneas</p>
-                </div>
-
-                <div class="tarjeta-pie">
-                  <NuxtLink class="boton-primario boton-chico"
-                    >Abrir capa en el visualizador
-                    <span class="pictograma-visualizador pictograma-chico"></span
-                  ></NuxtLink>
+                  <nuxt-link
+                    class="boton boton-primario boton-chico"
+                    aria-label="Ver capa en visualizador"
+                    :to="`/consulta/capas`"
+                  >
+                    Ver Capa en visualizador
+                  </nuxt-link>
                 </div>
               </div>
             </div>

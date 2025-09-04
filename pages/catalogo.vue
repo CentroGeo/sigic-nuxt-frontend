@@ -1,6 +1,6 @@
 <script setup>
 definePageMeta({
-  middleware: ['sidebase-auth', 'redireccionar-modulo-catalogo'],
+  middleware: 'redireccionar-modulo-catalogo',
   bodyAttrs: {
     class: '',
   },
@@ -33,6 +33,23 @@ onUnmounted(() => (document.querySelector('body').className = ''));
           pictograma: 'pictograma-documento',
           ruta: `${ruta}/documentos`,
           globo: 'Documentos',
+        },
+      ]"
+      :sesion-paginas="[
+        {
+          pictograma: 'pictograma-proyectos',
+          ruta: `${ruta}/mis-archivos`,
+          globo: 'Mis archivos',
+        },
+        {
+          pictograma: 'pictograma-archivo-subir',
+          ruta: `${ruta}/mis-archivos/cargar-archivos`,
+          globo: 'Carga de archivos',
+        },
+        {
+          pictograma: 'pictograma-ayuda',
+          ruta: `${ruta}/mis-archivos/servicios-externos`,
+          globo: 'Carga de catálogos externos',
         },
       ]"
       :id-colapsable="storeCatalogo.idNavegacionLateral"
