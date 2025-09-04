@@ -71,7 +71,7 @@ async function aplicarJoin() {
       <main id="principal" class="contenedor m-b-10 m-y-4">
         <div class="alineacion-izquierda ancho-lectura">
           <div class="flex">
-            <nuxt-link to="#" aria-label="regresar a mis archivos">
+            <nuxt-link to="/catalogo/mis-archivos" aria-label="regresar a mis archivos">
               <span
                 class="pictograma-flecha-izquierda pictograma-mediano texto-color-acento"
                 aria-hidden="true"
