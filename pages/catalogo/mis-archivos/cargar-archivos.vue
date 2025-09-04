@@ -12,42 +12,35 @@ const pending = ref(false);
 const { data } = useAuth();
 
 const dragNdDrop = ref(null);
+const base_files = ['.geojson', '', '.xls', '.xlsx', '.zip', '.csv'];
 
 async function guardarArchivo(files) {
   const token = ref(data.value?.accessToken);
-  console.log('files', files);
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    console.log(file, 'nom' + file?.name);
 
-  // TODO: validación de formatos
-  // if (
-  //   files.type === 'application/vnd.geo+json' ||
-  //   files.type === 'application/json' ||
-  //   files.type === 'application/geo+json' ||
-  //   files.type === 'application/geopackage+sqlite3' ||
-  //   files.type === 'text/csv' ||
-  //   files.type === 'application/xml' ||
-  //   files.type === 'application/pdf' ||
-  //   files.type === 'image/jpeg' ||
-  //   files.type === 'image/png'
-  // ) {
-  // } else {
-  //   dragNdDrop.value?.archivoNoValido();
-  // }
-  const formData = new FormData();
-  // solo el primer elemento del arreglo
-  formData.append('base_file', files[0]);
-  formData.append('token', token.value);
+    if (base_files.map((end) => file?.name.endsWith(end)).includes(true)) {
+      const formData = new FormData();
+      // solo el primer elemento del arreglo
+      formData.append('base_file', file);
+      formData.append('title', file?.name);
 
-  const response = await fetch('/api/cargar', {
-    method: 'POST',
-    body: formData,
-  });
+      formData.append('token', token.value);
 
-  if (!response.ok) {
-    throw new Error(`Error al cargar archivos: ${response.status}`);
-  } else {
-    // pending.value = false;
-    // statusOk.value = true;
-    // TODO: recuperar recurso o recursos mediante el name y title
+      const response = await fetch('/api/cargar', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error al cargar archivos: ${response.status}`);
+      } else {
+        // pending.value = false;
+        // statusOk.value = true;
+        // TODO: recuperar recurso o recursos mediante el name y title
+      }
+    }
   }
 }
 </script>
