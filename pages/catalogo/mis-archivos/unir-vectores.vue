@@ -1,5 +1,5 @@
 <script setup>
-import SisdaiCasillaVerificacion from '@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue';
+// import SisdaiCasillaVerificacion from '@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
 const route = useRoute();
@@ -27,16 +27,16 @@ const route = useRoute();
 // const objetoId = ref(getUserData());
 
 const seleccionEjemplo = ref('');
-const seleccionEjemplo2 = ref('');
-const seleccionEjemplo3 = ref('');
-const campoEjemplo = ref(false);
-const campoEjemplo2 = ref(false);
-const campoEjemplo3 = ref(false);
-const campoEjemplo4 = ref(false);
-const campoEjemplo5 = ref(false);
-const campoEjemplo6 = ref(false);
-const campoEjemplo7 = ref(false);
-const campoEjemplo8 = ref(false);
+// const seleccionEjemplo2 = ref('');
+// const seleccionEjemplo3 = ref('');
+// const campoEjemplo = ref(false);
+// const campoEjemplo2 = ref(false);
+// const campoEjemplo3 = ref(false);
+// const campoEjemplo4 = ref(false);
+// const campoEjemplo5 = ref(false);
+// const campoEjemplo6 = ref(false);
+// const campoEjemplo7 = ref(false);
+// const campoEjemplo8 = ref(false);
 const unionExitosa = ref(false);
 
 // // obtener el resource completo a partir del id
@@ -68,7 +68,7 @@ async function aplicarJoin() {
     </template>
 
     <template #visualizador>
-      <main id="principal" class="contenedor m-b-10 m-y-3">
+      <main id="principal" class="contenedor m-b-10 m-y-4">
         <div class="alineacion-izquierda ancho-lectura">
           <div class="flex">
             <nuxt-link to="#" aria-label="regresar a mis archivos">
@@ -76,11 +76,11 @@ async function aplicarJoin() {
                 class="pictograma-flecha-izquierda pictograma-mediano texto-color-acento"
                 aria-hidden="true"
               />
-              <span class="h2 texto-color-primario p-l-2">Regresar</span>
+              <span class="h5 texto-color-primario p-l-2">Editar</span>
             </nuxt-link>
           </div>
-          <h2>Unión vectorial (espacialización)</h2>
-          <div class="flex">
+
+          <div class="flex m-t-3">
             <nuxt-link
               :class="`${route.path === '/catalogo/mis-archivos/editar-metadatos/' ? 'borde-enlace-activo' : ''}`"
               to="/catalogo/mis-archivos/editar-metadatos/"
@@ -95,10 +95,26 @@ async function aplicarJoin() {
             <nuxt-link
               :class="`${route.path === '/catalogo/mis-archivos/unir-vectores/' ? 'borde-enlace-activo' : ''}`"
               to="/catalogo/mis-archivos/unir-vectores/"
-              >Unión vectorial</nuxt-link
+              >Clave Geoestadística</nuxt-link
             >
           </div>
           <div class="borde-b borde-color-secundario"></div>
+
+          <p>
+            Agrega a tus datos tabulados un campo geoespacial. Esto permitirá convertirlo en un
+            archivo de capa geográfica (.shp, .geojson, entre otros), haciéndolo compatible con el
+            visor de mapas y otras herramientas de análisis espacial dentro de SIGIC.
+          </p>
+
+          <div
+            v-if="unionExitosa"
+            class="fondo-color-confirmacion texto-color-confirmacion borde borde-color-confirmacion borde-redondeado-16 p-x-2 m-t-2"
+          >
+            <p>
+              <span class="pictograma-aprobado" />
+              Se ha agregado el campo con éxito, ya puedes visualizar tu archivo como capa.
+            </p>
+          </div>
 
           <!-- Formulario -->
           <div class="m-t-3">
@@ -108,6 +124,15 @@ async function aplicarJoin() {
                 <ClientOnly>
                   <SisdaiSelector
                     v-model="seleccionEjemplo"
+                    etiqueta="Tipo de Clave Geoestadística"
+                  >
+                    <option value="1">ClaveGeo</option>
+                    <option value="2">Nombre de identidad</option>
+                    <option value="3">CLAVE INEGI</option>
+                    <option value="4">Coordenadas</option>
+                  </SisdaiSelector>
+                  <!-- <SisdaiSelector
+                    v-model="seleccionEjemplo"
                     etiqueta="Campo a vincular"
                     texto_ayuda="El campo o columna del archivo tabulado CSV sin geometría que se va a unir."
                   >
@@ -116,10 +141,10 @@ async function aplicarJoin() {
                     <option value="3">MUN</option>
                     <option value="4">...otro campo</option>
                     <option value="5">...otro campo</option>
-                  </SisdaiSelector>
+                  </SisdaiSelector> -->
                 </ClientOnly>
               </div>
-              <div class="columna-16">
+              <!-- <div class="columna-16">
                 <ClientOnly>
                   <SisdaiSelector
                     v-model="seleccionEjemplo2"
@@ -192,25 +217,24 @@ async function aplicarJoin() {
                     </li>
                   </ul>
                 </div>
-              </div>
+              </div> -->
               <div class="columna-16">
                 <div class="flex">
-                  <button class="boton-primario boton-chico" :disabled="false" @click="aplicarJoin">
-                    Aplicar
+                  <nuxt-link
+                    class="boton-secundario boton-chico"
+                    type="button"
+                    to="/catalogo/mis-archivos"
+                    >Ir a mis archivos
+                  </nuxt-link>
+                  <button
+                    class="boton-primario boton-chico"
+                    :disabled="!seleccionEjemplo.trim() >= 1"
+                    @click="aplicarJoin"
+                  >
+                    Unir campo
                   </button>
                 </div>
               </div>
-            </div>
-            <div
-              v-if="unionExitosa"
-              class="fondo-color-confirmacion texto-color-confirmacion borde borde-color-confirmacion borde-redondeado-16 p-x-2 m-t-2"
-            >
-              <p>
-                <span class="pictograma-aprobado" />
-                El archivo se unió con éxito.
-              </p>
-
-              <p><nuxt-link to="/catalogo/mis-archivos">Ver en mis archivos</nuxt-link></p>
             </div>
           </div>
         </div>
