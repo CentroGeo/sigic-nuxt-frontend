@@ -33,6 +33,12 @@ export const categoriesInSpanish = {
   'Utilities Communication': 'Servicios Públicos y Comunicación',
   'Sin clasificar': 'Sin Clasificar',
 };
+
+/**
+ * Formatea el input
+ * @param {String} input
+ * @returns {String} El input formateado
+ */
 export function cleanInput(input) {
   return input
     .normalize('NFD')
@@ -41,6 +47,11 @@ export function cleanInput(input) {
     .toLowerCase();
 }
 
+/**
+ * Formatea texto
+ * @param {Object} resource El recurso del cual se obtendrá el texto a formatear
+ * @returns {String} HTML formateado
+ */
 export function tooltipContent(resource) {
   let formatedAbstract = 'Sin descripción';
   if (resource.raw_abstract) {
@@ -55,6 +66,7 @@ export function tooltipContent(resource) {
     `<p style="max-width:250px">${resource.attribution || 'Sin fuente'}</p>`;
   return content;
 }
+
 /**
  * Regresa el servidor en el que esta alojado un recurso
  * @param {Object} resource
@@ -66,6 +78,7 @@ export function getWMSserver(resource) {
   const link = wmsObject[0]['url'].replace('http', 'https').replace('httpss', 'https');
   return `${link}`;
 }
+
 /**
  * Esta funcion revisa si el servidor que aloja un servicio remoto WFS
  * tiene servicios especificos
@@ -116,12 +129,13 @@ export async function hasWMS(resource, service) {
     return false;
   }
 }
+
 /**
  * Consulta al servidor que aloja un recurso o servicio remoto WFS para
  * obtener el tipo de geomeria del mismo
  * @param {Object} resource
  * @param {String} server
- * @returns
+ * @returns {String}
  */
 export async function fetchGeometryType(resource, server) {
   const maxAttempts = 4;
@@ -172,10 +186,19 @@ export async function fetchGeometryType(resource, server) {
   }
 }
 
+/**
+ * Espera el tiempo indicado para ejecutar la siguiente linea
+ * @param {Number} miliseconds
+ * @returns
+ */
 export async function wait(miliseconds) {
   return new Promise((resolve) => setTimeout(resolve, miliseconds));
 }
 
+/**
+ * Identifica el link indicado y descarga un archivo pdf o txt
+ * @param {Object} resource
+ */
 export function downloadDocs(resource) {
   const extension = resource.links?.find((link) => link.link_type === 'uploaded').extension;
   const anchor = document.createElement('a');
@@ -214,16 +237,17 @@ export async function fetchDoc(url) {
   //const extensionDict = { pdf: 'application/pdf', txt: 'text/plain' };
   //console.log(extensionDict[extension]);
   //console.log('la url de fetchdocs', url);
-  const { data } = useAuth();
-  const token = data.value?.accessToken;
-  let res;
-  if (token) {
+  //const { data } = useAuth();
+  //const token = data.value?.accessToken;
+  const res = await fetch(url);
+  //let res;
+  /*   if (token) {
     res = await fetch(url.toString(), {
       headers: { Authorization: `Bearer ${token}` },
     });
   } else {
     res = await fetch(url);
-  }
+  } */
   //console.log('el fetch de docs', res);
 
   if (!res.ok) {
@@ -234,7 +258,15 @@ export async function fetchDoc(url) {
   const newUrl = URL.createObjectURL(blob);
   return newUrl;
 }
-
+/**
+ * Descarga archivos por medio de peticiones (autenticadas o no) de servicios WMS.
+ * La descarga puede ser en los formatos: xls, xlsx, gpkg, geojson, csv y kml).
+ * Tambien permite especificar si se quiere que el archivo descargado incluya o no
+ * la geometria
+ * @param {Object} resource
+ * @param {String} format
+ * @param {Stringy} featureTypes
+ */
 export async function downloadWMS(resource, format, featureTypes) {
   const config = useRuntimeConfig();
   const { data } = useAuth();
@@ -277,46 +309,26 @@ export async function downloadWMS(resource, format, featureTypes) {
   } else {
     res = await fetch(url);
   }
-  //console.log(res);
-
   if (!res.ok) {
     throw new Error(`Download failed: ${res.status}`);
   }
 
   const blob = await res.blob();
-  //console.log(blob);
   const anchor = document.createElement('a');
   anchor.href = URL.createObjectURL(blob);
-  //console.log(link.href);
   anchor.target = '_blank';
   anchor.download = `${resource.title}.${format}`;
   document.body.appendChild(anchor);
   anchor.click();
   document.body.removeChild(anchor);
-  /*   let url = new URL(`${config.public.geoserverUrl}/ows`);
-  // Si es un Json vamos a tener que forzar la descarga
-  if (format === 'geojson') {
-    const jsonRequest = await fetch(url);
-    if (!jsonRequest.ok) {
-      console.error('Falló el forzar la descarga del json');
-      return;
-    }
-    const jsonResponse = await jsonRequest.json();
-    const blob = new Blob([JSON.stringify(jsonResponse)], {
-      type: 'application/json',
-    });
-    const blobLink = URL.createObjectURL(blob);
-    url = blobLink;
-  } */
-  /*   const anchor = document.createElement('a');
-  anchor.href = url;
-  anchor.target = '_blank';
-  anchor.download = `${resource.title}.${format}`;
-  document.body.appendChild(anchor);
-  anchor.click();
-  document.body.removeChild(anchor); */
 }
-
+/**
+ * Hace una petición WFS para obtener la lista de Features y la geometría.
+ * Las peticiones pueden ser autenticadas o no.
+ * @param {Object} resource
+ * @param {String} format
+ * @returns
+ */
 export async function downloadNoGeometry(resource, format) {
   const config = useRuntimeConfig();
   const { data } = useAuth();
@@ -359,10 +371,35 @@ export async function downloadNoGeometry(resource, format) {
 }
 
 export function downloadRaster(resource) {
-  const urlArray = resource.download_urls.filter((link) => link.url.includes('/assets/'));
-  const url = urlArray[0].url;
+  //const urlArray = resource.download_urls.filter((link) => link.url.includes('/assets/'));
+  //const url = urlArray[0].url;
   //const config = useRuntimeConfig();
   //const url = `${config.public.geonodeUrl}/datasets/${resource.alternate}/dataset_download`;
+  const config = useRuntimeConfig();
+  const pngObject = resource.links.filter((link) => link.name === 'PNG');
+  const pngLink = pngObject[0].url;
+  const paramsDict = {};
+  const paramsList = pngLink.replace(`${config.public.geoserverUrl}/ows?`, '').split('&');
+  paramsList.forEach((param) => {
+    const entry = param.split('=');
+    paramsDict[entry[0]] = entry[1];
+  });
+  const coords = resource.extent.coords;
+  const bboxRatio = (coords[3] - coords[1]) / (coords[2] - coords[0]);
+  const url = new URL(`${config.public.geoserverUrl}/geonode/wms`);
+  url.search = new URLSearchParams({
+    service: 'WMS',
+    version: '1.1.0',
+    request: 'GetMap',
+    layers: resource.alternate,
+    bbox: resource.extent.coords.join(','),
+    width: Math.round(paramsDict.width * 1.5),
+    height: Math.round(paramsDict.height * bboxRatio * 1.5),
+    srs: resource.extent.srid,
+    styles: '',
+    format: 'image/geotiff',
+  });
+
   const anchor = document.createElement('a');
   anchor.href = url;
   anchor.target = '_blank';
