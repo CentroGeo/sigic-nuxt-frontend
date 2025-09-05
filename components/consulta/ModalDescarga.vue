@@ -15,8 +15,6 @@ const props = defineProps({
   },
 });
 const { resourceType, selectedElement } = toRefs(props);
-const { data } = useAuth();
-const isLoggedIn = ref(data.value ? true : false);
 const modalDescarga = ref(null);
 const optionsList = ref(null);
 const tagTitle = ref();
@@ -149,13 +147,6 @@ defineExpose({
       </template>
       <template #cuerpo>
         <p>{{ selectedElement.title }}</p>
-        <!--         <div v-if="layerType === 'remote'" class="tarjeta m-y-3">
-          <div class="tarjeta-cuerpo">
-            <p>Esta capa es remota y no se puede descargar del geoserver</p>
-          </div>
-        </div> -->
-
-        <!--         <div v-else> -->
         <div>
           <p>Formato:</p>
           <div>
@@ -164,17 +155,10 @@ defineExpose({
               :key="option.label"
               type="button"
               class="boton-secundario"
-              :disabled="option.label === 'GeoTiff' && !isLoggedIn"
               @click="option.action"
             >
               {{ option.label }}
             </button>
-          </div>
-
-          <div v-if="selectedElement.subtype === 'raster' && !isLoggedIn" class="tarjeta m-y-3">
-            <div class="tarjeta-cuerpo">
-              <p>Para descargar archivos en formato GeoTiff es necesario iniciar sesión.</p>
-            </div>
           </div>
         </div>
       </template>

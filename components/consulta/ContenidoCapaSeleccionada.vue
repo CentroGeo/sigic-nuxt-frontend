@@ -66,7 +66,7 @@ const optionsButtons = ref([
     pictogram: 'pictograma-enlace-externo',
     globo: 'WMS',
     action: async () => {
-      console.log(resourceElement.value.links);
+      //console.log(resourceElement.value.links);
       const objectLink = resourceElement.value.links.filter((link) => link.name === 'PNG');
       const wmsLink = objectLink[0].url;
       try {
@@ -115,27 +115,6 @@ updateFunctions();
 watch(resourceElement, () => {
   updateFunctions();
 });
-/* const actualButtons = computed(() => {
-
-  return buttons;
-}); */
-
-/*async function isDisabled(resource, label) {
-  console.log(resource, label);
-  return true;
-  //console.log('se trigereó la funcion isDisabled', await hasWMS(resource, 'table'));
-  if (label === 'Descargar archivo' && resource.sourcetype === 'REMOTE') {
-    return true;
-  }  else if (
-    label === 'Ver tablas' &&
-    resource.sourcetype === 'Remote' &&
-    (await !hasWMS(resource, 'table'))
-  ) {
-    return true;
-  } else {
-    return false;
-  }
-}*/
 </script>
 
 <template>
