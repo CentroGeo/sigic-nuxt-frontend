@@ -43,6 +43,7 @@ resource.value = await $fetch('/api/objeto', {
   method: 'POST',
   body: { id: objetoId.value.pk },
 });
+console.log(resource.value);
 
 // TODO: actualizar varios metadatos al mismo tiempo
 const { data } = useAuth();
@@ -76,6 +77,49 @@ async function guardarImagen(files) {
     dragNdDrop.value?.archivoNoValido();
   }
 }
+
+const bordeEnlaceActivo = (ruta) => {
+  if (route.path === ruta) {
+    return 'borde-enlace-activo';
+  }
+  return '';
+};
+
+function irAMetadatosConQuery() {
+  // Función para codificar un objeto que se va a pasar al navegar a otra vista.
+  // evitar problemas con espacios con JSON.stingify
+  const pk = encodeURIComponent(JSON.stringify({ pk: resource.value.pk }));
+  navigateTo({
+    path: '/catalogo/mis-archivos/editar-metadatos',
+    query: { data: pk },
+  });
+}
+function irAEstiloConQuery() {
+  // Función para codificar un objeto que se va a pasar al navegar a otra vista.
+  // evitar problemas con espacios con JSON.stingify
+  const pk = encodeURIComponent(JSON.stringify({ pk: resource.value.pk }));
+  navigateTo({
+    path: '/catalogo/mis-archivos/editar-estilo',
+    query: { data: pk },
+  });
+}
+// function irAClaveConQuery() {
+//   // Función para codificar un objeto que se va a pasar al navegar a otra vista.
+//   // evitar problemas con espacios con JSON.stingify
+//   const pk = encodeURIComponent(JSON.stringify({ pk: resource.value.pk }));
+//   navigateTo({
+//     path: '/catalogo/mis-archivos/unir-vectores',
+//     query: { data: pk },
+//   });
+// }
+
+function tipoRecurso() {
+  if (resource.value.resource_type === 'document') {
+    return false;
+  } else {
+    return isGeometricExtension(resource.value.extent) ? true : false;
+  }
+}
 </script>
 
 <template>
@@ -99,16 +143,22 @@ async function guardarImagen(files) {
           <h2>{{ resource.title }}</h2>
           <div class="flex">
             <nuxt-link
-              :class="`${route.path === '/catalogo/mis-archivos/editar-metadatos' ? 'borde-enlace-activo' : ''}`"
-              to="/catalogo/mis-archivos/editar-metadatos"
-              >Metadatos</nuxt-link
-            >
+              :class="bordeEnlaceActivo('/catalogo/mis-archivos/editar-metadatos')"
+              @click="irAMetadatosConQuery"
+              >Metadatos
+            </nuxt-link>
             <nuxt-link
-              :class="`${route.path === '/catalogo/mis-archivos/editar-estilo' ? 'borde-enlace-activo' : ''}`"
-              to="/catalogo/mis-archivos/editar-estilo"
-              style=""
-              >Estilo</nuxt-link
-            >
+              v-if="tipoRecurso()"
+              :class="bordeEnlaceActivo('/catalogo/mis-archivos/editar-estilo')"
+              @click="irAEstiloConQuery"
+              >Estilo
+            </nuxt-link>
+            <!-- TODO: validar sin es archivo sin geometría para mostrar opción de Clave Geoestadística -->
+            <!-- <nuxt-link
+              :class="bordeEnlaceActivo('/catalogo/mis-archivos/unir-vectores')"
+              @click="irAClaveConQuery"
+              >Clave Geoestadística
+            </nuxt-link> -->
           </div>
           <div class="borde-b borde-color-secundario"></div>
           <h2>Metadatos</h2>

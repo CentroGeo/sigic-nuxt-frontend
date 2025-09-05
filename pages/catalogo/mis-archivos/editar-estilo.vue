@@ -10,18 +10,34 @@ const statusOk = ref(false);
 const pending = ref(false);
 
 const route = useRoute();
-const resource = ref({});
+// const resource = ref({});
 function getUserData() {
-  if (route.query.userObject) {
+  // if (route.query.userObject) {
+  //   try {
+  //     return JSON.parse(route.query.userObject);
+  //   } catch (e) {
+  //     console.error('Error parsing user object', e);
+  //     return null;
+  //   }
+  // }
+  if (route.query.data) {
     try {
-      return JSON.parse(route.query.userObject);
+      const dataStr = decodeURIComponent(route.query.data);
+      return computed(() => JSON.parse(dataStr));
     } catch (e) {
-      console.error('Error parsing user object', e);
+      console.error('Error al parsear el objeto', e);
       return null;
     }
   }
 }
-resource.value = getUserData();
+const objetoId = ref(getUserData());
+// obtener el resource completo a partir del id
+const resource = ref({});
+resource.value = await $fetch('/api/objeto', {
+  method: 'POST',
+  body: { id: objetoId.value.pk },
+});
+console.log(resource.value);
 
 const { data } = useAuth();
 
@@ -70,6 +86,31 @@ async function guardarArchivo(files) {
   //   }
   // }, '2500');
 }
+const bordeEnlaceActivo = (ruta) => {
+  if (route.path === ruta) {
+    return 'borde-enlace-activo';
+  }
+  return '';
+};
+
+function irAMetadatosConQuery() {
+  // Función para codificar un objeto que se va a pasar al navegar a otra vista.
+  // evitar problemas con espacios con JSON.stingify
+  const pk = encodeURIComponent(JSON.stringify({ pk: resource.value.pk }));
+  navigateTo({
+    path: '/catalogo/mis-archivos/editar-metadatos',
+    query: { data: pk },
+  });
+}
+function irAEstiloConQuery() {
+  // Función para codificar un objeto que se va a pasar al navegar a otra vista.
+  // evitar problemas con espacios con JSON.stingify
+  const pk = encodeURIComponent(JSON.stringify({ pk: resource.value.pk }));
+  navigateTo({
+    path: '/catalogo/mis-archivos/editar-estilo',
+    query: { data: pk },
+  });
+}
 </script>
 <template>
   <UiLayoutPaneles>
@@ -92,17 +133,16 @@ async function guardarArchivo(files) {
 
           <div class="flex">
             <div class="columna-16">
-              <h2>resource.title</h2>
+              <h2>{{ resource.title }}</h2>
               <div class="flex">
                 <nuxt-link
-                  :class="`${route.path === '/catalogo/mis-archivos/editar-metadatos' ? 'borde-enlace-activo' : ''}`"
-                  to="/catalogo/mis-archivos/editar-metadatos"
-                  >Metadatos</nuxt-link
-                >
+                  :class="bordeEnlaceActivo('/catalogo/mis-archivos/editar-metadatos')"
+                  @click="irAMetadatosConQuery"
+                  >Metadatos
+                </nuxt-link>
                 <nuxt-link
-                  :class="`${route.path === '/catalogo/mis-archivos/editar-estilo' ? 'borde-enlace-activo' : ''}`"
-                  to="/catalogo/mis-archivos/editar-estilo"
-                  style=""
+                  :class="bordeEnlaceActivo('/catalogo/mis-archivos/editar-estilo')"
+                  @click="irAEstiloConQuery"
                   >Estilo</nuxt-link
                 >
               </div>

@@ -21,10 +21,9 @@ function generaIdAleatorio() {
 }
 const idAleatorio = generaIdAleatorio();
 
-function IrARuta(objeto) {
-  // Función para codificar un objeto que se va a pasar
-  // al navegar a otra vista
-
+// TODO: esto tiene que enviar a metadatos solamente
+function irARutaConQuery(objeto) {
+  // Función para codificar un objeto que se va a pasar al navegar a otra vista
   // evitar problemas con espacios con JSON.stingify
   const pk = encodeURIComponent(JSON.stringify({ pk: objeto.pk }));
 
@@ -109,7 +108,7 @@ function IrARuta(objeto) {
                   class="boton-pictograma boton-secundario"
                   aria-label="Editar metadatos"
                   type="button"
-                  @click="IrARuta(datum)"
+                  @click="irARutaConQuery(datum)"
                 >
                   <span class="pictograma-editar"></span>
                 </button>

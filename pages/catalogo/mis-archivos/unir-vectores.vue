@@ -3,48 +3,39 @@
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
 const route = useRoute();
-// function getUserData() {
-//   // Función que devuelve el objeto decodificado
-//   // de la vista de donde viene
-//   // if (route.query.userObject) {
-//   //   try {
-//   //     return JSON.parse(route.query.userObject);
-//   //   } catch (e) {
-//   //     console.error('Error parsing user object', e);
-//   //     return null;
-//   //   }
-//   // }
-//   if (route.query.data) {
-//     try {
-//       const dataStr = decodeURIComponent(route.query.data);
-//       return computed(() => JSON.parse(dataStr));
-//     } catch (e) {
-//       console.error('Error al parsear el objeto', e);
-//       return null;
-//     }
-//   }
-// }
-// const objetoId = ref(getUserData());
+function getUserData() {
+  // Función que devuelve el objeto decodificado
+  // de la vista de donde viene
+  // if (route.query.userObject) {
+  //   try {
+  //     return JSON.parse(route.query.userObject);
+  //   } catch (e) {
+  //     console.error('Error parsing user object', e);
+  //     return null;
+  //   }
+  // }
+  if (route.query.data) {
+    try {
+      const dataStr = decodeURIComponent(route.query.data);
+      return computed(() => JSON.parse(dataStr));
+    } catch (e) {
+      console.error('Error al parsear el objeto', e);
+      return null;
+    }
+  }
+}
+const objetoId = ref(getUserData());
 
 const seleccionEjemplo = ref('');
-// const seleccionEjemplo2 = ref('');
-// const seleccionEjemplo3 = ref('');
-// const campoEjemplo = ref(false);
-// const campoEjemplo2 = ref(false);
-// const campoEjemplo3 = ref(false);
-// const campoEjemplo4 = ref(false);
-// const campoEjemplo5 = ref(false);
-// const campoEjemplo6 = ref(false);
-// const campoEjemplo7 = ref(false);
-// const campoEjemplo8 = ref(false);
 const unionExitosa = ref(false);
 
-// // obtener el resource completo a partir del id
-// const resource = ref({});
-// resource.value = await $fetch('/api/objeto', {
-//   method: 'POST',
-//   body: { id: objetoId.value.pk },
-// });
+// obtener el resource completo a partir del id
+const resource = ref({});
+resource.value = await $fetch('/api/objeto', {
+  method: 'POST',
+  body: { id: objetoId.value.pk },
+});
+console.log(resource.value);
 
 // const { data } = useAuth();
 async function aplicarJoin() {
@@ -58,6 +49,32 @@ async function aplicarJoin() {
   //   },
   // });
   unionExitosa.value = true;
+}
+
+const bordeEnlaceActivo = (ruta) => {
+  if (route.path === ruta) {
+    return 'borde-enlace-activo';
+  }
+  return '';
+};
+
+function irAMetadatosConQuery() {
+  // Función para codificar un objeto que se va a pasar al navegar a otra vista.
+  // evitar problemas con espacios con JSON.stingify
+  const pk = encodeURIComponent(JSON.stringify({ pk: resource.value.pk }));
+  navigateTo({
+    path: '/catalogo/mis-archivos/editar-metadatos',
+    query: { data: pk },
+  });
+}
+function irAClaveConQuery() {
+  // Función para codificar un objeto que se va a pasar al navegar a otra vista.
+  // evitar problemas con espacios con JSON.stingify
+  const pk = encodeURIComponent(JSON.stringify({ pk: resource.value.pk }));
+  navigateTo({
+    path: '/catalogo/mis-archivos/unir-vectores',
+    query: { data: pk },
+  });
 }
 </script>
 
@@ -82,21 +99,15 @@ async function aplicarJoin() {
 
           <div class="flex m-t-3">
             <nuxt-link
-              :class="`${route.path === '/catalogo/mis-archivos/editar-metadatos/' ? 'borde-enlace-activo' : ''}`"
-              to="/catalogo/mis-archivos/editar-metadatos/"
-              >Metadatos</nuxt-link
-            >
+              :class="bordeEnlaceActivo('/catalogo/mis-archivos/editar-metadatos')"
+              @click="irAMetadatosConQuery"
+              >Metadatos
+            </nuxt-link>
             <nuxt-link
-              :class="`${route.path === '/catalogo/mis-archivos/editar-estilo/' ? 'borde-enlace-activo' : ''}`"
-              to="/catalogo/mis-archivos/editar-estilo/"
-              style=""
-              >Estilo</nuxt-link
-            >
-            <nuxt-link
-              :class="`${route.path === '/catalogo/mis-archivos/unir-vectores/' ? 'borde-enlace-activo' : ''}`"
-              to="/catalogo/mis-archivos/unir-vectores/"
-              >Clave Geoestadística</nuxt-link
-            >
+              :class="bordeEnlaceActivo('/catalogo/mis-archivos/unir-vectores')"
+              @click="irAClaveConQuery"
+              >Clave Geoestadística
+            </nuxt-link>
           </div>
           <div class="borde-b borde-color-secundario"></div>
 
@@ -120,7 +131,7 @@ async function aplicarJoin() {
           <div class="m-t-3">
             <div class="flex">
               <div class="columna-16">
-                <h3>{ { Archivo CSV sin geometría } }</h3>
+                <h3>{{ resource.title }}</h3>
                 <ClientOnly>
                   <SisdaiSelector
                     v-model="seleccionEjemplo"

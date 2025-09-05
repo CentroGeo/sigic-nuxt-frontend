@@ -128,7 +128,7 @@ onMounted(async () => {
           <h2>Todos mis archivos disponibles</h2>
           <UiNumeroElementos :numero="tableResources.length" />
         </div>
-        <p>En esta tabla se muestran los archivos disponibles para su consulta y uso</p>
+        <p>En esta tabla se muestran los archivos disponibles para su consulta y uso.</p>
         <div class="flex">
           <div class="columna-16">
             <ClientOnly>
