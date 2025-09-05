@@ -150,6 +150,7 @@ defineExpose({
         <div>
           <p>Formato:</p>
           <div>
+            <!--:disabled="option.label === 'GeoTiff' && !isLoggedIn"-->
             <button
               v-for="option in optionsList"
               :key="option.label"
