@@ -116,8 +116,12 @@ export const useFilteredResources = defineStore('filteredResources', () => {
       return data;
     },
 
-    sort() {
-      let data = storeFetched.byResourceType(resourceType.value);
+    sort(type) {
+      let data = [];
+      // para saber si es por tipo de recurso o no
+      type === 'all'
+        ? (data = storeFetched.all)
+        : (data = storeFetched.byResourceType(resourceType.value));
       // revisamos que se seleccione algo
       if (filters.sort.trim().length >= 1) {
         // Ordenamos por más reciente
