@@ -17,6 +17,8 @@ const contextID = ref(0);
 
 const config = useRuntimeConfig();
 
+const { data } = useAuth();
+
 /**
  * @typedef {Object} Props
  * @property {String} [contextId=''] - Indica el identificador del contexto.
@@ -206,9 +208,11 @@ const submitMensaje = async () => {
   //scrollToBottom();
 
   // Envía la pregunta
+  const token = data.value?.accessToken;
+
   const res = await fetch(`${config.public.iaBackendUrl}queue/start`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
 
@@ -248,9 +252,11 @@ const submitMensaje = async () => {
   let mensajeRespuesta = '';
   // Hacer streaming de la respuesta
   try {
+    const token = data.value?.accessToken;
+
     const streamRes = await fetch(`${config.public.iaBackendUrl}queue/stream/${jobId}`, {
       method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     });
 
     const reader = streamRes.body?.getReader();
