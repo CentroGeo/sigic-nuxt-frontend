@@ -21,7 +21,7 @@ function generaIdAleatorio() {
 }
 const idAleatorio = generaIdAleatorio();
 
-// TODO: esto tiene que enviar a metadatos solamente
+// TODO: esto tiene que enviar a /editar-metadatos solamente
 function irARutaConQuery(objeto) {
   // Función para codificar un objeto que se va a pasar al navegar a otra vista
   // evitar problemas con espacios con JSON.stingify

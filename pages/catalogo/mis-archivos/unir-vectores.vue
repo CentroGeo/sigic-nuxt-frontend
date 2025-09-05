@@ -3,17 +3,23 @@
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
 const route = useRoute();
+
+const seleccionEjemplo = ref('');
+const unionExitosa = ref(false);
+
+/**
+ * Obtiene la data del query route de la vista de donde viene.
+ * @returns {Object} objeto decodificado con la propiedad de pk
+ */
 function getUserData() {
-  // Función que devuelve el objeto decodificado
-  // de la vista de donde viene
-  // if (route.query.userObject) {
-  //   try {
-  //     return JSON.parse(route.query.userObject);
-  //   } catch (e) {
-  //     console.error('Error parsing user object', e);
-  //     return null;
-  //   }
-  // }
+  /* if (route.query.userObject) {
+    try {
+      return JSON.parse(route.query.userObject);
+    } catch (e) {
+      console.error('Error parsing user object', e);
+      return null;
+    }
+  } */
   if (route.query.data) {
     try {
       const dataStr = decodeURIComponent(route.query.data);
@@ -26,17 +32,29 @@ function getUserData() {
 }
 const objetoId = ref(getUserData());
 
-const seleccionEjemplo = ref('');
-const unionExitosa = ref(false);
-
 // obtener el resource completo a partir del id
 const resource = ref({});
 resource.value = await $fetch('/api/objeto', {
   method: 'POST',
   body: { id: objetoId.value.pk },
 });
-console.log(resource.value);
 
+// evitar problemas con espacios con JSON.stingify
+const pk = ref(encodeURIComponent(JSON.stringify({ pk: resource.value.pk })));
+function irAMetadatosConQuery() {
+  navigateTo({
+    path: '/catalogo/mis-archivos/editar-metadatos',
+    query: { data: pk.value },
+  });
+}
+function irAClaveConQuery() {
+  navigateTo({
+    path: '/catalogo/mis-archivos/unir-vectores',
+    query: { data: pk.value },
+  });
+}
+
+// TODO: unir vectores con el backend
 // const { data } = useAuth();
 async function aplicarJoin() {
   // await $fetch('/api/metadatos', {
@@ -57,25 +75,6 @@ const bordeEnlaceActivo = (ruta) => {
   }
   return '';
 };
-
-function irAMetadatosConQuery() {
-  // Función para codificar un objeto que se va a pasar al navegar a otra vista.
-  // evitar problemas con espacios con JSON.stingify
-  const pk = encodeURIComponent(JSON.stringify({ pk: resource.value.pk }));
-  navigateTo({
-    path: '/catalogo/mis-archivos/editar-metadatos',
-    query: { data: pk },
-  });
-}
-function irAClaveConQuery() {
-  // Función para codificar un objeto que se va a pasar al navegar a otra vista.
-  // evitar problemas con espacios con JSON.stingify
-  const pk = encodeURIComponent(JSON.stringify({ pk: resource.value.pk }));
-  navigateTo({
-    path: '/catalogo/mis-archivos/unir-vectores',
-    query: { data: pk },
-  });
-}
 </script>
 
 <template>
@@ -142,93 +141,8 @@ function irAClaveConQuery() {
                     <option value="3">CLAVE INEGI</option>
                     <option value="4">Coordenadas</option>
                   </SisdaiSelector>
-                  <!-- <SisdaiSelector
-                    v-model="seleccionEjemplo"
-                    etiqueta="Campo a vincular"
-                    texto_ayuda="El campo o columna del archivo tabulado CSV sin geometría que se va a unir."
-                  >
-                    <option value="1">CVE_GEO</option>
-                    <option value="2">ENTIDAD</option>
-                    <option value="3">MUN</option>
-                    <option value="4">...otro campo</option>
-                    <option value="5">...otro campo</option>
-                  </SisdaiSelector> -->
                 </ClientOnly>
               </div>
-              <!-- <div class="columna-16">
-                <ClientOnly>
-                  <SisdaiSelector
-                    v-model="seleccionEjemplo2"
-                    etiqueta="Capa objetivo"
-                    texto_ayuda="Selecciona la capa con la que se quiere vincular."
-                  >
-                    <option value="1">Qro_mun_pob2020</option>
-                    <option value="2">...otra capa</option>
-                    <option value="3">...otra capa</option>
-                  </SisdaiSelector>
-                  <SisdaiSelector
-                    v-model="seleccionEjemplo3"
-                    etiqueta="Campo objetivo"
-                    texto_ayuda="El nombre de la columna de la capa objetivo."
-                  >
-                    <option value="1">CVEGEO</option>
-                    <option value="2">CVE_ENT</option>
-                    <option value="3">CVE_MUN</option>
-                    <option value="4">...otro campo</option>
-                  </SisdaiSelector>
-                </ClientOnly>
-              </div>
-              <div class="columna-16">
-                <ClientOnly>
-                  <SisdaiCasillaVerificacion
-                    v-model="campoEjemplo"
-                    etiqueta="Campos unidos"
-                    texto_ayuda="Todas las opciones de campos unidos o a unir."
-                  />
-                </ClientOnly>
-                <div v-if="campoEjemplo" class="borde m-t-2 p-1">
-                  <ul class="lista-sin-estilo">
-                    <li>
-                      <ClientOnly>
-                        <SisdaiCasillaVerificacion v-model="campoEjemplo2" etiqueta="ENTIDAD" />
-                      </ClientOnly>
-                    </li>
-                    <li>
-                      <ClientOnly>
-                        <SisdaiCasillaVerificacion v-model="campoEjemplo3" etiqueta="MUN" />
-                      </ClientOnly>
-                    </li>
-                    <li>
-                      <ClientOnly>
-                        <SisdaiCasillaVerificacion v-model="campoEjemplo4" etiqueta="CVE_GEO" />
-                      </ClientOnly>
-                    </li>
-                    <li>
-                      <ClientOnly>
-                        <SisdaiCasillaVerificacion v-model="campoEjemplo5" etiqueta="NOM_MUN" />
-                      </ClientOnly>
-                    </li>
-                    <li>
-                      <ClientOnly>
-                        <SisdaiCasillaVerificacion v-model="campoEjemplo6" etiqueta="POBTOT" />
-                      </ClientOnly>
-                    </li>
-                    <li>
-                      <ClientOnly>
-                        <SisdaiCasillaVerificacion v-model="campoEjemplo7" etiqueta="POBFEM" />
-                      </ClientOnly>
-                    </li>
-                    <li>
-                      <ClientOnly>
-                        <SisdaiCasillaVerificacion
-                          v-model="campoEjemplo8"
-                          etiqueta="...otro campo"
-                        />
-                      </ClientOnly>
-                    </li>
-                  </ul>
-                </div>
-              </div> -->
               <div class="columna-16">
                 <div class="flex">
                   <nuxt-link

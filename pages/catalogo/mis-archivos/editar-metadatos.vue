@@ -3,28 +3,6 @@ import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/cam
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
 const route = useRoute();
-function getUserData() {
-  // Función que devuelve el objeto decodificado
-  // de la vista de donde viene
-  // if (route.query.userObject) {
-  //   try {
-  //     return JSON.parse(route.query.userObject);
-  //   } catch (e) {
-  //     console.error('Error parsing user object', e);
-  //     return null;
-  //   }
-  // }
-  if (route.query.data) {
-    try {
-      const dataStr = decodeURIComponent(route.query.data);
-      return computed(() => JSON.parse(dataStr));
-    } catch (e) {
-      console.error('Error al parsear el objeto', e);
-      return null;
-    }
-  }
-}
-const objetoId = ref(getUserData());
 
 const imagen = ref();
 const campoResumen = ref('Resumen desde sigic');
@@ -37,18 +15,42 @@ const seleccionFecha = ref('');
 const seleccionCategoria = ref('');
 const seleccionGrupo = ref('');
 
+/**
+ * Obtiene la data del query route de la vista de donde viene.
+ * @returns {Object} objeto decodificado con la propiedad de pk
+ */
+function getUserData() {
+  /* if (route.query.userObject) {
+    try {
+      return JSON.parse(route.query.userObject);
+    } catch (e) {
+      console.error('Error parsing user object', e);
+      return null;
+    }
+  } */
+  if (route.query.data) {
+    try {
+      const dataStr = decodeURIComponent(route.query.data);
+      return computed(() => JSON.parse(dataStr));
+    } catch (e) {
+      console.error('Error al parsear el objeto', e);
+      return null;
+    }
+  }
+}
+const objetoId = ref(getUserData());
+
 // obtener el resource completo a partir del id
 const resource = ref({});
 resource.value = await $fetch('/api/objeto', {
   method: 'POST',
   body: { id: objetoId.value.pk },
 });
-console.log(resource.value);
 
 // TODO: actualizar varios metadatos al mismo tiempo
 const { data } = useAuth();
 async function actualizaMetadatos() {
-  await $fetch('/api/metadatos', {
+  const response = await $fetch('/api/metadatos', {
     method: 'POST',
     body: {
       pk: resource.value.pk,
@@ -57,10 +59,44 @@ async function actualizaMetadatos() {
       token: data.value?.accessToken,
     },
   });
+  console.warn('response', response);
 }
 
-const dragNdDrop = ref(null);
+/**
+ * Valida si el tipo de recurso es documento o dataset con geometría o no
+ * @returns {Boolean} ya sea true si tiene geometría o no false
+ */
+function tipoRecurso() {
+  if (resource.value.resource_type === 'document') {
+    return false;
+  } else {
+    return isGeometricExtension(resource.value.extent) ? true : false;
+  }
+}
 
+// evitar problemas con espacios con JSON.stingify
+const pk = ref(encodeURIComponent(JSON.stringify({ pk: resource.value.pk })));
+function irAMetadatosConQuery() {
+  navigateTo({
+    path: '/catalogo/mis-archivos/editar-metadatos',
+    query: { data: pk.value },
+  });
+}
+function irAEstiloConQuery() {
+  navigateTo({
+    path: '/catalogo/mis-archivos/editar-estilo',
+    query: { data: pk.value },
+  });
+}
+// function irAClaveConQuery() {
+//   navigateTo({
+//     path: '/catalogo/mis-archivos/unir-vectores',
+//     query: { data: pk.value },
+//   });
+// }
+
+//
+const dragNdDrop = ref(null);
 async function guardarImagen(files) {
   if (
     files[0].name.split('.')[1] === '.jpg' ||
@@ -84,42 +120,6 @@ const bordeEnlaceActivo = (ruta) => {
   }
   return '';
 };
-
-function irAMetadatosConQuery() {
-  // Función para codificar un objeto que se va a pasar al navegar a otra vista.
-  // evitar problemas con espacios con JSON.stingify
-  const pk = encodeURIComponent(JSON.stringify({ pk: resource.value.pk }));
-  navigateTo({
-    path: '/catalogo/mis-archivos/editar-metadatos',
-    query: { data: pk },
-  });
-}
-function irAEstiloConQuery() {
-  // Función para codificar un objeto que se va a pasar al navegar a otra vista.
-  // evitar problemas con espacios con JSON.stingify
-  const pk = encodeURIComponent(JSON.stringify({ pk: resource.value.pk }));
-  navigateTo({
-    path: '/catalogo/mis-archivos/editar-estilo',
-    query: { data: pk },
-  });
-}
-// function irAClaveConQuery() {
-//   // Función para codificar un objeto que se va a pasar al navegar a otra vista.
-//   // evitar problemas con espacios con JSON.stingify
-//   const pk = encodeURIComponent(JSON.stringify({ pk: resource.value.pk }));
-//   navigateTo({
-//     path: '/catalogo/mis-archivos/unir-vectores',
-//     query: { data: pk },
-//   });
-// }
-
-function tipoRecurso() {
-  if (resource.value.resource_type === 'document') {
-    return false;
-  } else {
-    return isGeometricExtension(resource.value.extent) ? true : false;
-  }
-}
 </script>
 
 <template>
@@ -137,10 +137,12 @@ function tipoRecurso() {
                 class="pictograma-flecha-izquierda pictograma-mediano texto-color-acento"
                 aria-hidden="true"
               />
-              <span class="h2 texto-color-primario p-l-2">Editar</span>
+              <span class="h5 texto-color-primario p-l-2">Editar</span>
             </nuxt-link>
           </div>
+
           <h2>{{ resource.title }}</h2>
+
           <div class="flex">
             <nuxt-link
               :class="bordeEnlaceActivo('/catalogo/mis-archivos/editar-metadatos')"
@@ -161,7 +163,9 @@ function tipoRecurso() {
             </nuxt-link> -->
           </div>
           <div class="borde-b borde-color-secundario"></div>
+
           <h2>Metadatos</h2>
+          <!-- TODO: componetizarlo -->
           <div style="display: flex; gap: 4px">
             <div
               class="borde borde-grosor-2"
@@ -183,6 +187,7 @@ function tipoRecurso() {
           <ol>
             <li>Metadatos básicos</li>
           </ol>
+
           <p>
             <b>Miniatura imagen no mayor a 9kb tamaño 120x120px. Archivos Png o JPG</b>
           </p>

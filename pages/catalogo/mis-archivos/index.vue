@@ -21,6 +21,15 @@ const seleccionOrden = ref('');
 // obteniendo las variables keys para la tabla
 const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'acciones'];
 
+// para filtar por los archivos de la usuaria
+const { data } = useAuth();
+const userEmail = data.value.user.email;
+
+/**
+ * Formatea la fecha del recurso a esta forma: dd/mm/aaaa
+ * @param fecha de actualización del recurso
+ * @returns {Date} objeto con la fecha
+ */
 function formatearFecha(fecha) {
   return new Date(fecha).toLocaleDateString('es-ES', {
     day: '2-digit',
@@ -29,17 +38,18 @@ function formatearFecha(fecha) {
   });
 }
 
-function tipoRecurso(d) {
-  if (d.resource_type === 'document') {
+/**
+ * Valida si el tipo de recurso es documento o dataset con geometría o no
+ * @param recurso del catálogo
+ * @returns {String} ya sea Documentos, Capa geográfica o Datos tabulados
+ */
+function tipoRecurso(recurso) {
+  if (recurso.resource_type === 'document') {
     return 'Documentos';
   } else {
-    return isGeometricExtension(d.extent) ? 'Capa geográfica' : 'Datos tabulados';
+    return isGeometricExtension(recurso.extent) ? 'Capa geográfica' : 'Datos tabulados';
   }
 }
-
-// para filtar por los archivos de la usuaria
-const { data } = useAuth();
-const userEmail = data.value.user.email;
 
 function updateResources(nuevosRecursos) {
   filteredResources.value = nuevosRecursos;
