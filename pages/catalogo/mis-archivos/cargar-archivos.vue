@@ -19,26 +19,35 @@ async function guardarArchivo(files) {
   const token = ref(data.value?.accessToken);
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
+    // Si el archivo pertenece a bases de datos o capas:
     if (base_files.map((end) => file?.name.endsWith(end)).includes(true)) {
       const formData = new FormData();
-      // solo el primer elemento del arreglo
       formData.append('base_file', file);
       formData.append('token', token.value);
 
-      const response = await fetch('/api/cargar', {
+      const response = await fetch('/api/cargar-base-file', {
         method: 'POST',
         body: formData,
       });
 
       if (!response.ok) {
         throw new Error(`Error al cargar archivos: ${response.status}`);
-      } else {
-        // pending.value = false;
-        // statusOk.value = true;
-        // TODO: recuperar recurso o recursos mediante el name y title
       }
-    } else if (docs_files.map((end) => file?.name.endsWith(end)).includes(true)) {
-      console.log('-');
+    }
+    // Si el archivo pertenece a documentos
+    else if (docs_files.map((end) => file?.name.endsWith(end)).includes(true)) {
+      const formData = new FormData();
+      formData.append('doc_file', file);
+      formData.append('token', token.value);
+
+      const response = await fetch('/api/cargar-doc-file', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error al cargar archivos: ${response.status}`);
+      }
     }
   }
 }
