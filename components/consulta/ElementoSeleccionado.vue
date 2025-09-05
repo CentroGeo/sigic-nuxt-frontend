@@ -14,6 +14,9 @@ const props = defineProps({
 });
 
 const resourceElement = computed(() => storeFetched.findResource(props.selectedElement.uuid));
+const { data } = useAuth();
+const isLoggedIn = ref(data.value ? true : false);
+const userEmail = ref(data.value?.user.email);
 const goDown = () => storeSelected.changePosition(props.selectedElement.uuid, -1);
 const goUp = () => storeSelected.changePosition(props.selectedElement.uuid, +1);
 </script>
@@ -26,7 +29,7 @@ const goUp = () => storeSelected.changePosition(props.selectedElement.uuid, +1);
           {{
             resourceElement?.category
               ? categoriesInSpanish[resourceElement?.category.gn_description]
-              : 'Sin clasificar'
+              : 'Sin Clasificar'
           }}
         </p>
 
@@ -66,6 +69,21 @@ const goUp = () => storeSelected.changePosition(props.selectedElement.uuid, +1);
           </button>
         </div>
       </div>
+      <div v-if="resourceElement">
+        <div
+          v-if="
+            isLoggedIn && resourceElement.owner.email === userEmail && !resourceElement.is_published
+          "
+          class="id-tag flex m-b-1 m-t-0"
+        >
+          <span class="pictograma-persona"></span>
+          Mis archivos
+        </div>
+        <div v-if="resourceElement.sourcetype === 'REMOTE'" class="id-tag flex m-b-1 m-t-0">
+          <span class="pictograma-colaborar"></span>
+          Archivo remoto
+        </div>
+      </div>
 
       <ConsultaContenidoCapaSeleccionada
         v-if="resourceType === resourceTypeDic.dataLayer"
@@ -100,5 +118,15 @@ const goUp = () => storeSelected.changePosition(props.selectedElement.uuid, +1);
 .selected-unselected {
   padding: 16px;
   background-color: var(--color-neutro-1);
+}
+.id-tag {
+  background-color: var(--fondo-acento);
+  padding: 8px;
+  border: solid 1px;
+  border-radius: 8px;
+  color: var(--campo-etiqueta-color);
+  width: fit-content;
+  align-items: left;
+  gap: 8px;
 }
 </style>

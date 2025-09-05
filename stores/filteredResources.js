@@ -52,9 +52,13 @@ export const useFilteredResources = defineStore('filteredResources', () => {
       if (isLoggedIn) {
         // Filtramos por propietario
         if (filters.owner === 'catalogo') {
-          data = data.filter((resource) => resource.owner.email !== userEmail);
+          data = data.filter(
+            (resource) => resource.owner.email !== userEmail || resource.is_published === true
+          );
         } else if (filters.owner === 'misArchivos') {
-          data = data.filter((resource) => resource.owner.email === userEmail);
+          data = data.filter(
+            (resource) => resource.owner.email === userEmail && resource.is_published === false
+          );
         }
       }
 

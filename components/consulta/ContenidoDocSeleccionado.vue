@@ -68,11 +68,11 @@ const hasGeometry = computed(() => {
       </button>
 
       <button
+        v-if="resourceElement.sourcetype !== 'REMOTE'"
         v-globo-informacion:derecha="'Descargar'"
         class="boton-pictograma boton-sin-contenedor-secundario"
         aria-label="Descargar selección"
         type="button"
-        :disabled="resourceElement.sourcetype === 'REMOTE'"
         @click="emit('descargaClicked')"
       >
         <span class="pictograma-archivo-descargar" aria-hidden="true" />

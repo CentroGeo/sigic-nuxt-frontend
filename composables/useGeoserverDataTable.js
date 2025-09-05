@@ -41,7 +41,7 @@ export function useGeoserverDataTable({ paginaActual, tamanioPagina, resource } 
         res = await fetch(url.toString(), {
           headers: { Authorization: `Bearer ${token}` },
         });
-        console.log(res);
+        //console.log(res);
       }
       const data = await res.json();
       if (data.totalFeatures !== undefined) {

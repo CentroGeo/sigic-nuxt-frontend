@@ -119,7 +119,10 @@ defineExpose({
       <template #cuerpo>
         <div v-if="includesRemote" class="tarjeta m-y-3">
           <div class="tarjeta-cuerpo">
-            <p>Las capas remotas no se incluirán en la descarga de archivos.</p>
+            <p>
+              Solo se descargarán las capas públicas y las de Mis Archivos. Las capas de catálogos
+              externos no pueden descargarse por restricciones de derechos de autor.
+            </p>
           </div>
         </div>
         <p>Formato:</p>

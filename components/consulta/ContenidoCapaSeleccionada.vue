@@ -1,5 +1,6 @@
 <script setup>
 import { SisdaiLeyendaWms } from '@centrogeomx/sisdai-mapas';
+import { hasWMS } from '~/utils/consulta';
 
 const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
@@ -12,18 +13,20 @@ const props = defineProps({
     default: () => ({}),
   },
 });
+const { resourceElement } = toRefs(props);
+const actualButtons = ref({});
 const optionsButtons = ref([
   {
-    for: 'all',
+    excludeFor: 'none',
     label: 'Hacer zoom',
     pictogram: 'pictograma-zoom-instruccional',
     globo: 'Zoom a la capa',
     action: () => {
-      storeConsulta.mapExtent = props.resourceElement.extent.coords.join(',');
+      storeConsulta.mapExtent = resourceElement.value.extent.coords.join(',');
     },
   },
   {
-    for: 'vector',
+    excludeFor: 'noTables',
     label: 'Ver tablas',
     pictogram: 'pictograma-tabla',
     globo: 'Ver tabla',
@@ -32,24 +35,24 @@ const optionsButtons = ref([
     },
   },
   {
-    for: 'all',
+    excludeFor: 'none',
     label: 'Mostrar',
     get pictogram() {
-      return storeSelected.byUuid(props.resourceElement.uuid)?.visible
+      return storeSelected.byUuid(resourceElement.value.uuid)?.visible
         ? 'pictograma-ojo-ver'
         : 'pictograma-ojo-ocultar';
     },
     get globo() {
-      return storeSelected.byUuid(props.resourceElement.uuid)?.visible
+      return storeSelected.byUuid(resourceElement.value.uuid)?.visible
         ? 'Ocultar capa'
         : 'Mostrar capa';
     },
     action: () => {
-      storeSelected.byUuid(props.resourceElement.uuid).toggleVisibility();
+      storeSelected.byUuid(resourceElement.value.uuid).toggleVisibility();
     },
   },
   {
-    for: 'all',
+    excludeFor: 'none',
     label: 'Cambiar opacidad',
     pictogram: 'pictograma-editar',
     globo: 'Opacidad',
@@ -58,16 +61,33 @@ const optionsButtons = ref([
     },
   },
   {
-    for: 'all',
+    excludeFor: 'none',
+    label: 'Vínculo WMS',
+    pictogram: 'pictograma-enlace-externo',
+    globo: 'WMS',
+    action: async () => {
+      console.log(resourceElement.value.links);
+      const objectLink = resourceElement.value.links.filter((link) => link.name === 'PNG');
+      const wmsLink = objectLink[0].url;
+      try {
+        await navigator.clipboard.writeText(wmsLink);
+        alert('Enlace copiado al portapapeles: ' + wmsLink);
+      } catch (err) {
+        console.error('Error al copiar: ', err);
+      }
+    },
+  },
+  {
+    excludeFor: 'none',
     label: 'Eliminar selección',
     pictogram: 'pictograma-eliminar',
     globo: 'Eliminar',
     action: () => {
-      storeSelected.removeByUuid(props.resourceElement.uuid);
+      storeSelected.removeByUuid(resourceElement.value.uuid);
     },
   },
   {
-    for: 'all',
+    excludeFor: 'remotes',
     label: 'Descargar archivo',
     pictogram: 'pictograma-archivo-descargar',
     globo: 'Descargar',
@@ -77,25 +97,45 @@ const optionsButtons = ref([
   },
 ]);
 
-const actualButtons = computed(() =>
-  props.resourceElement.subtype === 'raster'
-    ? optionsButtons.value.filter((d) => d.for === 'all')
-    : optionsButtons.value
-);
+async function updateFunctions() {
+  let buttons = optionsButtons.value;
+  if (resourceElement.value.subtype === 'raster') {
+    buttons = buttons.filter((d) => d.excludeFor !== 'noTables');
+  }
+  if (resourceElement.value.sourcetype === 'REMOTE') {
+    buttons = buttons.filter((d) => d.excludeFor !== 'remotes');
+    const resourceHasWMS = await hasWMS(resourceElement.value, 'table');
+    if (resourceHasWMS === false) {
+      buttons = buttons.filter((d) => d.excludeFor !== 'noTables');
+    }
+  }
+  actualButtons.value = buttons;
+}
+updateFunctions();
+watch(resourceElement, () => {
+  updateFunctions();
+});
+/* const actualButtons = computed(() => {
 
-function isDisabled(resource, label) {
+  return buttons;
+}); */
+
+/*async function isDisabled(resource, label) {
+  console.log(resource, label);
+  return true;
+  //console.log('se trigereó la funcion isDisabled', await hasWMS(resource, 'table'));
   if (label === 'Descargar archivo' && resource.sourcetype === 'REMOTE') {
     return true;
-  } else if (
+  }  else if (
     label === 'Ver tablas' &&
     resource.sourcetype === 'Remote' &&
-    !hasWMS(resource, 'table')
+    (await !hasWMS(resource, 'table'))
   ) {
     return true;
   } else {
     return false;
   }
-}
+}*/
 </script>
 
 <template>
@@ -119,7 +159,6 @@ function isDisabled(resource, label) {
         class="boton-pictograma boton-sin-contenedor-secundario"
         :aria-label="button.label"
         type="button"
-        :disabled="isDisabled(resourceElement, button.label)"
         @click="button.action"
       >
         <span :class="button.pictogram" aria-hidden="true" />

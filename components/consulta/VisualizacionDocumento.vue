@@ -1,6 +1,6 @@
 <script setup>
 import { onBeforeUnmount, ref } from 'vue';
-import { resourceTypeDic } from '~/utils/consulta';
+import { fetchDoc, resourceTypeDic } from '~/utils/consulta';
 
 const resourceType = resourceTypeDic.document;
 
@@ -15,28 +15,42 @@ const selectedElement = computed(() => {
   return storeFetched.findResources([selectedUuid.value], resourceType)[0] ?? null;
 });
 let resizeObserver;
-const extensionDocumento = computed(() => {
+/* const extensionDocumento = computed(() => {
   const linkCargado = selectedElement.value.links.find((link) => link.link_type === 'uploaded');
-  if (linkCargado) {
+  if (linkCargado.url) {
     return linkCargado.extension;
   } else return '';
-});
-const urlEmbebido = ref(
+}); */
+
+/* const urlEmbebido = ref(
   extensionDocumento.value === 'pdf'
     ? selectedElement.value.embed_url
     : selectedElement.value.embed_url.replace('/embed', '/link')
-);
-
+); */
+const urlEmbebido = ref();
+const extensionDocumento = ref();
+const blobedUrl = ref();
+async function updateValues() {
+  const linkCargado = selectedElement.value.links.find((link) => link.link_type === 'uploaded');
+  extensionDocumento.value = linkCargado.extension;
+  //urlEmbebido.value = selectedElement.value.embed_url.replace('/embed', '/link');
+  urlEmbebido.value = selectedElement.value.embed_url.replace('/embed', '/link');
+  blobedUrl.value = await fetchDoc(urlEmbebido.value);
+}
+updateValues();
 watch(selectedElement, (nv) => {
   (async () => {
     // console.log('cambio el uuid');
     if (nv) {
       urlEmbebido.value = null; // limpiar antes de volver a asignar
+      blobedUrl.value = null;
+      extensionDocumento.value = null;
       await nextTick(); // esperar a que el DOM reaccione
 
-      urlEmbebido.value =
+      /*       urlEmbebido.value =
         extensionDocumento.value === 'pdf' ? nv.embed_url : nv.embed_url.replace('/embed', '/link');
-
+      blobedUrl.value = await fetchDoc(urlEmbebido.value, extensionDocumento.value); */
+      updateValues();
       await nextTick(); // esperar a que el <embed> esté en DOM
 
       if (resizeObserver) {
@@ -66,7 +80,7 @@ onBeforeUnmount(() => {
     <embed
       v-if="urlEmbebido"
       ref="embedRef"
-      :src="urlEmbebido"
+      :src="blobedUrl"
       :type="extensionDocumento === 'pdf' ? 'application/pdf' : 'text/plain'"
       class="documento-embebido"
     />

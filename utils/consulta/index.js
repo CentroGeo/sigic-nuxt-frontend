@@ -43,8 +43,8 @@ export function cleanInput(input) {
 
 export function tooltipContent(resource) {
   let formatedAbstract = 'Sin descripción';
-  if (resource.abstract) {
-    formatedAbstract = resource.abstract
+  if (resource.raw_abstract) {
+    formatedAbstract = resource.raw_abstract
       .replace(/^<p>/, '')
       .replace(/<\/p>$/, '')
       .replace(/^<pre>/, '')
@@ -74,6 +74,7 @@ export function getWMSserver(resource) {
  * @returns {Boolean}
  */
 export async function hasWMS(resource, service) {
+  const maxAttempts = 3;
   //const config = useRuntimeConfig();
   //const apiGeonode = config.public.geonodeUrl;
   //const proxy = `${apiGeonode}/proxy/?url=`;
@@ -85,26 +86,34 @@ export async function hasWMS(resource, service) {
     version: '1.0.0',
     request: 'GetCapabilities',
   }).toString();
-  const res = await fetch(`${url}`);
-  if (!res.ok) {
-    console.error('Fracasó la petición getCapabilities');
-    return false;
-  }
-  const data = await res.text();
-  if (data.includes('ExceptionReport')) {
-    console.error('No se puede usar el WMS', resource.alternate, resource.title);
-    return false;
-  } else {
-    if (service === 'map') {
-      return true;
-    } else if (service === 'table' || service === 'geometry') {
-      if (data.includes('GetFeature')) {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const res = await fetch(`${url}`);
+      if (!res.ok) {
+        console.error('Fracasó la petición getCapabilities');
+        continue;
+      }
+
+      const data = await res.text();
+      if (data.includes('ExceptionReport')) {
+        console.error('No se puede usar el WMS', url, resource.alternate, resource.title);
+        return false;
+      }
+
+      if (service === 'map') {
         return true;
-      } else return false;
-    } else {
-      console.error('No se reconoce el tipo de petición que se necesita');
-      return false;
+      } else if (service === 'table' || service === 'geometry') {
+        if (data.includes('GetFeature')) {
+          return true;
+        } else return false;
+      } else {
+        console.error('No se reconoce el tipo de petición que se necesita', url);
+        return false;
+      }
+    } catch {
+      console.error(`fracaso la peticion para ${resource.alternate}`);
     }
+    return false;
   }
 }
 /**
@@ -115,6 +124,7 @@ export async function hasWMS(resource, service) {
  * @returns
  */
 export async function fetchGeometryType(resource, server) {
+  const maxAttempts = 4;
   const config = useRuntimeConfig();
   const { data } = useAuth();
   const token = data.value?.accessToken;
@@ -128,7 +138,7 @@ export async function fetchGeometryType(resource, server) {
     maxFeatures: 1,
     outputFormat: 'application/json',
   }).toString();
-
+  console.log(resource.alternate, url);
   let res;
   if (server !== 'sigic' || !token) {
     res = await fetch(url);
@@ -143,7 +153,7 @@ export async function fetchGeometryType(resource, server) {
 
   // Ahora hacemos una petición get al vínculo statusLocation.
   // Como a veces hace timeout, lo intentamos tres veces
-  for (let attempt = 0; attempt < 3; attempt++) {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
       const data = await res.json();
       console.log(resource.alternate, data);
@@ -155,7 +165,7 @@ export async function fetchGeometryType(resource, server) {
         return data.features[0].geometry.type;
       }
     } catch {
-      console.log('Se está inyentando ua vez más');
+      console.log('Se está intentando una vez más');
     }
     // Si fracasa en todos los intentos
     return 'Error';
@@ -198,6 +208,31 @@ export async function downloadMetadata(resource) {
   anchor.click();
   document.body.removeChild(anchor);
   URL.revokeObjectURL(blobLink);
+}
+
+export async function fetchDoc(url) {
+  //const extensionDict = { pdf: 'application/pdf', txt: 'text/plain' };
+  //console.log(extensionDict[extension]);
+  //console.log('la url de fetchdocs', url);
+  const { data } = useAuth();
+  const token = data.value?.accessToken;
+  let res;
+  if (token) {
+    res = await fetch(url.toString(), {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } else {
+    res = await fetch(url);
+  }
+  //console.log('el fetch de docs', res);
+
+  if (!res.ok) {
+    throw new Error(`Fetchfailed: ${res.status}`);
+  }
+  const blob = await res.blob();
+  console.log(blob);
+  const newUrl = URL.createObjectURL(blob);
+  return newUrl;
 }
 
 export async function downloadWMS(resource, format, featureTypes) {
