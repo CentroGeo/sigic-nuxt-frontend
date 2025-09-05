@@ -373,12 +373,14 @@ export async function downloadNoGeometry(resource, format) {
  * Hace una peticióon WMS para descargar una capa tipo raster en formato geotiff
  * @param {Object} resource
  */
-export function downloadRaster(resource) {
+export async function downloadRaster(resource) {
   //const urlArray = resource.download_urls.filter((link) => link.url.includes('/assets/'));
   //const url = urlArray[0].url;
   //const config = useRuntimeConfig();
   //const url = `${config.public.geonodeUrl}/datasets/${resource.alternate}/dataset_download`;
   const config = useRuntimeConfig();
+  const { data } = useAuth();
+  const token = data.value?.accessToken;
   const pngObject = resource.links.filter((link) => link.name === 'PNG');
   const pngLink = pngObject[0].url;
   const paramsDict = {};
@@ -389,7 +391,8 @@ export function downloadRaster(resource) {
   });
   const coords = resource.extent.coords;
   const bboxRatio = (coords[3] - coords[1]) / (coords[2] - coords[0]);
-  const url = new URL(`${config.public.geoserverUrl}/geonode/wms`);
+  //const url = new URL(`${config.public.geoserverUrl}/geonode/wms`);
+  const url = new URL(`${config.public.geonodeUrl}/gs/wms`);
   url.search = new URLSearchParams({
     service: 'WMS',
     version: '1.1.0',
@@ -402,9 +405,17 @@ export function downloadRaster(resource) {
     styles: '',
     format: 'image/geotiff',
   });
-
+  let res;
+  if (token) {
+    res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } else {
+    res = await fetch(url);
+  }
+  const blob = await res.blob();
   const anchor = document.createElement('a');
-  anchor.href = url;
+  anchor.href = URL.createObjectURL(blob);
   anchor.target = '_blank';
   anchor.download = `${resource.title}.tiff`;
   document.body.appendChild(anchor);
