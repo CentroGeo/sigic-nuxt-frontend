@@ -6,6 +6,7 @@ import { ref } from 'vue';
 
 export function useGeoserverDataTable({ paginaActual, tamanioPagina, resource } = {}) {
   const config = useRuntimeConfig();
+  const proxy = `${config.public.geonodeUrl}/proxy/?url=`;
   const variables = ref([]);
   const datos = ref([]);
   const totalFeatures = ref(0);
@@ -35,7 +36,9 @@ export function useGeoserverDataTable({ paginaActual, tamanioPagina, resource } 
       }).toString();
       //const res = await fetch(url);
       let res;
-      if (resource.sourcetype === 'REMOTE' || !token) {
+      if (resource.sourcetype === 'REMOTE') {
+        res = await fetch(proxy + `${encodeURIComponent(url)}`);
+      } else if (!token) {
         res = await fetch(url);
       } else if (token) {
         res = await fetch(url.toString(), {

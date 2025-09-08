@@ -11,12 +11,12 @@ const props = defineProps({
 const modalDescargaAll = ref(null);
 const optionsList = ref(null);
 const tagTitle = ref();
-const includesRemote = computed(() =>
+/* const includesRemote = computed(() =>
   storeFetched
     .findResources(storeSelected.uuids)
     .map((resource) => resource.sourcetype)
     .includes('REMOTE')
-);
+); */
 
 function abrirModalDescargaAll() {
   modalDescargaAll.value?.abrirModal();
@@ -117,7 +117,8 @@ defineExpose({
         <h1>Descargar {{ tagTitle }}</h1>
       </template>
       <template #cuerpo>
-        <div v-if="includesRemote" class="tarjeta m-y-3">
+        <!-- <div v-if="includesRemote" class="tarjeta m-y-3">  -->
+        <div class="tarjeta m-y-3">
           <div class="tarjeta-cuerpo">
             <p>
               Solo se descargarán las capas públicas y las de Mis Archivos. Las capas de catálogos

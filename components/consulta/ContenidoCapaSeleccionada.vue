@@ -1,6 +1,6 @@
 <script setup>
 import { SisdaiLeyendaWms } from '@centrogeomx/sisdai-mapas';
-import { hasWMS } from '~/utils/consulta';
+import { getWMSserver, hasWMS } from '~/utils/consulta';
 
 const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
@@ -96,7 +96,15 @@ const optionsButtons = ref([
     },
   },
 ]);
-
+function findServer(resource) {
+  if (resource.sourcetype === 'REMOTE') {
+    const link = getWMSserver(resource);
+    //console.log(link);
+    return link;
+  } else {
+    return `${config.public.geonodeUrl}/gs/wms?`;
+  }
+}
 async function updateFunctions() {
   let buttons = optionsButtons.value;
   if (resourceElement.value.subtype === 'raster') {
@@ -123,7 +131,7 @@ watch(resourceElement, () => {
     <div class="m-y-2">
       <SisdaiLeyendaWms
         :nombre="resourceElement.alternate"
-        :fuente="`${config.public.geoserverUrl}/wms?`"
+        :fuente="findServer(resourceElement)"
         :titulo="resourceElement.title || 'cargando...'"
         :sin-control="true"
         :sin-control-clases="true"

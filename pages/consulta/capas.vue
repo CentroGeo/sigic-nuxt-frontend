@@ -9,7 +9,7 @@ const storeFetched = useFetchedResources2Store();
 const storeSelected = useSelectedResources2Store();
 const route = useRoute();
 const router = useRouter();
-
+//const proxy = `${config.public.geonodeUrl}/proxy/?url=`;
 storeConsulta.resourceType = resourceTypeDic.dataLayer;
 storeFetched.checkFilling();
 
@@ -140,9 +140,10 @@ function findServer(resource) {
   if (resource.sourcetype === 'REMOTE') {
     const link = getWMSserver(resource);
     //console.log(link);
+    //return proxy + link;
     return link;
   } else {
-    return `${config.public.geoserverUrl}/wms?`;
+    return `${config.public.geonodeUrl}/gs/wms?`;
   }
 }
 onMounted(() => {

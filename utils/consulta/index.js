@@ -75,7 +75,7 @@ export function tooltipContent(resource) {
 export function getWMSserver(resource) {
   //const proxy = 'https://geonode.dev.geoint.mx/proxy/?url=';
   const wmsObject = resource.links.filter((link) => link.link_type === 'OGC:WMS');
-  const link = wmsObject[0]['url'].replace('http', 'https').replace('httpss', 'https');
+  const link = wmsObject[0]['url'];
   return `${link}`;
 }
 
@@ -88,12 +88,12 @@ export function getWMSserver(resource) {
  */
 export async function hasWMS(resource, service) {
   const maxAttempts = 3;
-  //const config = useRuntimeConfig();
-  //const apiGeonode = config.public.geonodeUrl;
-  //const proxy = `${apiGeonode}/proxy/?url=`;
-  const wmsObject = resource.links.filter((link) => link.link_type === 'OGC:WMS');
-  const wmsLink = wmsObject[0]['url'].replace('http', 'https').replace('httpss', 'https');
-  const url = new URL(wmsLink);
+  const config = useRuntimeConfig();
+  const proxy = `${config.public.geonodeUrl}/proxy/?url=`;
+  //const wmsObject = resource.links.filter((link) => link.link_type === 'OGC:WMS');
+  //const wmsLink = wmsObject[0]['url'];
+  //const url = new URL(wmsLink);
+  const url = new URL(getWMSserver(resource));
   url.search = new URLSearchParams({
     service: 'WFS',
     version: '1.0.0',
@@ -101,7 +101,7 @@ export async function hasWMS(resource, service) {
   }).toString();
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
-      const res = await fetch(`${url}`);
+      const res = await fetch(proxy + `${encodeURIComponent(url)}`);
       if (!res.ok) {
         console.error('Fracasó la petición getCapabilities');
         continue;
@@ -140,6 +140,7 @@ export async function hasWMS(resource, service) {
 export async function fetchGeometryType(resource, server) {
   const maxAttempts = 4;
   const config = useRuntimeConfig();
+  const proxy = `${config.public.geonodeUrl}/proxy/?url=`;
   const { data } = useAuth();
   const token = data.value?.accessToken;
   const api = config.public.geonodeUrl;
@@ -154,7 +155,9 @@ export async function fetchGeometryType(resource, server) {
   }).toString();
   //console.log(resource.alternate, url);
   let res;
-  if (server !== 'sigic' || !token) {
+  if (server !== 'sigic') {
+    res = await fetch(proxy + `${encodeURIComponent(url)}`);
+  } else if (!token) {
     res = await fetch(url);
   } else if (token) {
     res = await fetch(url.toString(), {
