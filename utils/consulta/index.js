@@ -24,7 +24,7 @@ export const categoriesInSpanish = {
   'Inland Waters': 'Aguas Continentales',
   'Intelligence Military': 'Inteligencia Militar',
   Location: 'Ubicación',
-  Oceans: 'Oceanos',
+  Oceans: 'Océanos',
   'Planning Cadastre': 'Planeación Catastral',
   Population: 'Población',
   Society: 'Sociedad',
@@ -194,22 +194,65 @@ export async function fetchGeometryType(resource, server) {
 export async function wait(miliseconds) {
   return new Promise((resolve) => setTimeout(resolve, miliseconds));
 }
+/**
+ * Crea una url autenticada que permite visualizar documentos
+ * @param {String} url
+ * @returns
+ */
+export async function fetchDoc(url) {
+  //const extensionDict = { pdf: 'application/pdf', txt: 'text/plain' };
+  const { data } = useAuth();
+  const token = data.value?.accessToken;
+  let res;
+  if (token) {
+    res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } else {
+    res = await fetch(url);
+  }
+  if (!res.ok) {
+    throw new Error(`Fetchfailed: ${res.status}`);
+  }
+  const blob = await res.blob();
+  const newUrl = URL.createObjectURL(blob);
+  return newUrl;
+}
 
 /**
- * Identifica el link indicado y descarga un archivo pdf o txt
+ * Identifica el link indicado, hace una petición autenticada y genera un nuevo link
+ * para descargar un archivo pdf o txt
  * @param {Object} resource
  */
-export function downloadDocs(resource) {
+export async function downloadDocs(resource) {
+  const { data } = useAuth();
+  const token = data.value?.accessToken;
   const extension = resource.links?.find((link) => link.link_type === 'uploaded').extension;
+
+  let res;
+  if (token) {
+    res = await fetch(resource.download_url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } else {
+    res = await fetch(resource.download_url);
+  }
+  if (!res.ok) {
+    throw new Error(`Fetchfailed: ${res.status}`);
+  }
+  const blob = await res.blob();
+  const newUrl = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
-  anchor.href = resource.download_url;
-  anchor.download = `${resource.title}.${extension}`;
+  anchor.href = newUrl;
+  anchor.download = `${resource.title.replace('.pdf', '').replace('.txt', '')}.${extension}`;
   document.body.appendChild(anchor);
   anchor.click();
   document.body.removeChild(anchor);
 }
 
 export async function downloadMetadata(resource) {
+  const { data } = useAuth();
+  const token = data.value?.accessToken;
   const config = useRuntimeConfig();
   const api = new URL(`${config.public.geonodeUrl}/catalogue/csw`);
   api.search = new URLSearchParams({
@@ -221,7 +264,19 @@ export async function downloadMetadata(resource) {
     elementsetname: 'full',
   }).toString();
 
-  const res = await fetch(api);
+  //const res = await fetch(api);
+  let res;
+  if (token) {
+    res = await fetch(api, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } else {
+    res = await fetch(api);
+  }
+  if (!res.ok) {
+    throw new Error(`Fetchfailed: ${res.status}`);
+  }
+  //console.log(res);
   const dataBlob = await res.blob();
   const blobLink = URL.createObjectURL(dataBlob);
   const anchor = document.createElement('a');
@@ -233,30 +288,6 @@ export async function downloadMetadata(resource) {
   URL.revokeObjectURL(blobLink);
 }
 
-export async function fetchDoc(url) {
-  //const extensionDict = { pdf: 'application/pdf', txt: 'text/plain' };
-  //console.log(extensionDict[extension]);
-  //console.log('la url de fetchdocs', url);
-  //const { data } = useAuth();
-  //const token = data.value?.accessToken;
-  const res = await fetch(url);
-  //let res;
-  /*   if (token) {
-    res = await fetch(url.toString(), {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-  } else {
-    res = await fetch(url);
-  } */
-  //console.log('el fetch de docs', res);
-
-  if (!res.ok) {
-    throw new Error(`Fetchfailed: ${res.status}`);
-  }
-  const blob = await res.blob();
-  const newUrl = URL.createObjectURL(blob);
-  return newUrl;
-}
 /**
  * Descarga archivos por medio de peticiones (autenticadas o no) de servicios WMS.
  * La descarga puede ser en los formatos: xls, xlsx, gpkg, geojson, csv y kml).
