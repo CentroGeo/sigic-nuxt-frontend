@@ -7,16 +7,16 @@ export default defineEventHandler(async (event) => {
   const query: URLSearchParams = getQuery(event);
   const token = getHeader(event, 'token');
   const options: RequestInit = { method: 'GET' };
-  if (token !== undefined) {
+  if (token !== 'sin-token') {
     options.headers = { Authorization: `Bearer ${token}` };
   }
 
   const dataParams = new URLSearchParams(query);
   let endpoint = `${api}?${dataParams.toString()}`;
-
+  console.log(endpoint);
   do {
-    const response = await fetch(endpoint.replace('http:', 'https:'), options);
-
+    //const response = await fetch(endpoint.replace('http:', 'https:'), options);
+    const response = await fetch(endpoint, options);
     if (!response.ok) {
       const error = await response.json();
       // throw new Error(`HTTP ${response.status} - ${response.statusText}`);

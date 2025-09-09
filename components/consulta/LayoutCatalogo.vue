@@ -75,7 +75,7 @@ function applyAdvancedFilter() {
 }
 
 function resetAdvancedFilter() {
-  isFilterActive.value = true;
+  isFilterActive.value = false;
   storeFilters.resetFilters();
   modalFiltroAvanzado.value.cerrarModalBusqueda();
   updateResources(storeFilters.filter());

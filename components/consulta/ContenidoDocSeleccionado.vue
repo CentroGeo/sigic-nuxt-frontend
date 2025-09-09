@@ -18,7 +18,6 @@ const selectedResource = computed({
   get: () => storeSelected.lastVisible().uuid,
   set: (newSelectedUuid) => storeSelected.setOnlyOneVisible(newSelectedUuid),
 });
-
 const hasGeometry = computed(() => {
   if (props.resourceType !== resourceTypeDic.dataTable) return false;
 
@@ -69,6 +68,7 @@ const hasGeometry = computed(() => {
       </button>
 
       <button
+        v-if="resourceElement.sourcetype !== 'REMOTE'"
         v-globo-informacion:derecha="'Descargar'"
         class="boton-pictograma boton-sin-contenedor-secundario"
         aria-label="Descargar selección"
