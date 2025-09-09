@@ -46,7 +46,6 @@ const config = useRuntimeConfig();
 
 const obtenerVariables = async (resource) => {
   const url = new URL(`${config.public.geoserverUrl}/ows`);
-  console.log('resource.alternate', resource);
   url.search = new URLSearchParams({
     service: 'WFS',
     version: '1.0.0',
@@ -54,15 +53,12 @@ const obtenerVariables = async (resource) => {
     typeName: resource.alternate,
     outputFormat: 'application/json',
   }).toString();
-
   const res = await fetch(url);
   const datas = await res.json();
   const atributos = datas.features.map((f) => f.properties);
-  // variables.value = Object.keys(atributos[0] || {});
   return Object.keys(atributos[0] || {});
 };
 variables.value = await obtenerVariables(resourceLayer.value);
-console.log('variables', variables.value);
 
 // evitar problemas con espacios con JSON.stingify
 const pk = ref(encodeURIComponent(JSON.stringify({ pk: resourceLayer.value.pk })));
@@ -81,37 +77,24 @@ function irAClaveConQuery() {
 
 watch(seleccionCapaGeo, (nv) => {
   (async () => {
-    // console.log('nv', nv);
-    // console.log('resourceLayer', resourceLayer.value);
-    // console.log('resourcesCapas', resourcesCapas.value.filter((resource) => resource.pk === nv)[0]);
     const filterPkResourcesCapas = resourcesCapas.value.filter((resource) => resource.pk === nv)[0];
-    // console.log('filterPkResourcesCapas', filterPkResourcesCapas.alternate);
     // Tiene que estar publicada la capa geográfica
     varGeoLayer.value = await obtenerVariables(filterPkResourcesCapas);
-    // console.log('varGeoLayer', varGeoLayer.value);
 
     dict.value = Object.fromEntries(variables.value.map((d) => [d, false]));
-    // console.log(dict.value);
   })();
 });
 
-watch(
-  () => dict.value,
-  (nv) => {
-    console.log(nv);
-  }
-);
-const columns = ref([]);
 // TODO: unir vectores con el backend
 async function unirCampos() {
   // const { data } = useAuth();
-
+  const columns = ref([]);
   Object.keys(dict.value).forEach((key) => {
     if (dict.value[key] === true) {
-      console.log(key);
       columns.value.push(key);
     }
   });
+  // body: validar que esos campos se puedan unir
   console.log('body', {
     columns: columns.value,
     geo_layer: seleccionCapaGeo.value,
@@ -136,9 +119,7 @@ async function unirCampos() {
 
 const validarCampos = ref(true);
 watch([seleccionCampoCapa, seleccionCapaGeo, seleccionCampoObjetivo], ([n1, n2, n3]) => {
-  // console.log(!n1.trim() <= 0);
-  // console.log(n2.trim() >= 1);
-  // console.log(!n3.trim() <= 0);
+  // Si en los tres se ha seleccionado algo, habilita el botón
   if (!n1.trim() <= 0 && n2.trim() >= 1 && !n3.trim() <= 0) {
     validarCampos.value = false;
   } else {
@@ -209,6 +190,7 @@ const bordeEnlaceActivo = (ruta) => {
               <div class="columna-16">
                 <h3>{{ resourceLayer.title }}</h3>
                 <ClientOnly>
+                  <!-- Selector de campo capa base -->
                   <SisdaiSelector
                     v-model="seleccionCampoCapa"
                     etiqueta="Tipo de Clave Geoestadística"
@@ -217,12 +199,23 @@ const bordeEnlaceActivo = (ruta) => {
                       {{ value }}
                     </option>
                   </SisdaiSelector>
-                  <SisdaiSelector v-model="seleccionCapaGeo" etiqueta="Capa objetivo">
+
+                  <!-- Selector de Capa geo -->
+                  <p v-if="resourcesCapas.length === 0">...cargando capas</p>
+                  <SisdaiSelector
+                    v-if="resourcesCapas.length > 0"
+                    v-model="seleccionCapaGeo"
+                    etiqueta="Capa objetivo"
+                  >
                     <option v-for="value in resourcesCapas" :key="value.pk" :value="value.pk">
                       {{ value.title }}
                     </option>
                   </SisdaiSelector>
-                  <p v-if="seleccionCapaGeo.trim() >= 1 && varGeoLayer.length === 0">...cargando</p>
+
+                  <!-- Selector de campo Capa objetivo -->
+                  <p v-if="seleccionCapaGeo.trim() >= 1 && varGeoLayer.length === 0">
+                    ...cargando campos
+                  </p>
                   <SisdaiSelector
                     v-if="varGeoLayer.length > 0"
                     v-model="seleccionCampoObjetivo"
@@ -268,6 +261,7 @@ const bordeEnlaceActivo = (ruta) => {
                     Unir campo
                   </button>
                 </div>
+
                 <div v-if="unionExitosa" class="flex">
                   <nuxt-link
                     class="boton-secundario boton-chico"
@@ -275,9 +269,9 @@ const bordeEnlaceActivo = (ruta) => {
                     to="/catalogo/mis-archivos"
                     >Ver en mis archivos
                   </nuxt-link>
-                  <button class="boton-primario boton-chico" :disabled="false" @click="unirCampos">
-                    Ver capa en Visualizador
-                  </button>
+                  <nuxt-link class="boton-primario boton-chico" to="/consulta/capas"
+                    >Ver capa en Visualizador
+                  </nuxt-link>
                 </div>
               </div>
             </div>
