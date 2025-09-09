@@ -12,7 +12,7 @@ storeFetched.checkFilling(resourceTypeDic.document);
  * @returns {Number} número de recursos.
  */
 const obtenerLength = (type) => {
-  return computed(() => storeFetched.byResourceType(type).length);
+  return computed(() => storeFetched.byResourceType(type).length || false);
 };
 
 const resourcesCapasLength = obtenerLength(resourceTypeDic.dataLayer);
@@ -25,7 +25,7 @@ const resourcesDocumentosLength = obtenerLength(resourceTypeDic.document);
  * @returns {Object} objeto de recursos más reciente.
  */
 const obtenerMasReciente = (type) => {
-  return computed(() => storeFetched.byResourceType(type)[0] || {});
+  return computed(() => storeFetched.byResourceType(type)[0] || false);
 };
 
 const capaMasReciente = obtenerMasReciente(resourceTypeDic.dataLayer);
@@ -46,40 +46,42 @@ const documentoMasReciente = obtenerMasReciente(resourceTypeDic.document);
           <div class="flex">
             <div class="columna-5">
               <nuxt-link class="tarjeta tarjeta-hipervinculo-interno" to="/catalogo/capas">
-                <img
-                  class="tarjeta-imagen"
-                  src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/asha.jpg"
-                  alt=""
-                />
+                <img class="tarjeta-imagen" src="/img/thumbnail-capas.png" alt="" />
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-titulo">Capas geográficas</p>
-                  <p class="tarjeta-etiqueta">{{ resourcesCapasLength }} capas</p>
+                  <p class="tarjeta-etiqueta">
+                    {{ !resourcesCapasLength ? '...cargando' : resourcesCapasLength + ' capas' }}
+                  </p>
                 </div>
               </nuxt-link>
             </div>
             <div class="columna-5">
               <nuxt-link class="tarjeta tarjeta-hipervinculo-interno" to="/catalogo/tablas">
-                <img
-                  class="tarjeta-imagen"
-                  src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/becka.jpg"
-                  alt=""
-                />
+                <img class="tarjeta-imagen" src="/img/thumbnail-tablas.png" alt="" />
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-titulo">Datos tabulados</p>
-                  <p>{{ resourcesTablasLength }} datos tabulados</p>
+                  <p class="tarjeta-etiqueta">
+                    {{
+                      !resourcesTablasLength
+                        ? '...cargando'
+                        : resourcesTablasLength + ' datos tabulados'
+                    }}
+                  </p>
                 </div>
               </nuxt-link>
             </div>
             <div class="columna-5">
               <nuxt-link class="tarjeta tarjeta-hipervinculo-interno" to="/catalogo/documentos">
-                <img
-                  class="tarjeta-imagen"
-                  src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/baghira.jpg"
-                  alt=""
-                />
+                <img class="tarjeta-imagen" src="/img/thumbnail-docs.png" alt="" />
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-titulo">Documentos</p>
-                  <p>{{ resourcesDocumentosLength }} documentos</p>
+                  <p class="tarjeta-etiqueta">
+                    {{
+                      !resourcesDocumentosLength
+                        ? '...cargando'
+                        : resourcesDocumentosLength + ' documentos'
+                    }}
+                  </p>
                 </div>
               </nuxt-link>
             </div>
@@ -92,8 +94,11 @@ const documentoMasReciente = obtenerMasReciente(resourceTypeDic.document);
                 <img class="tarjeta-imagen" :src="capaMasReciente.thumbnail_url" alt="" />
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-etiqueta">Capa geográfica</p>
-                  <p class="tarjeta-titulo">{{ capaMasReciente.title }}</p>
-                  <p>{{ capaMasReciente.raw_abstract }}</p>
+                  <p class="tarjeta-titulo">
+                    {{ !capaMasReciente ? '...cargando' : capaMasReciente.title }}
+                  </p>
+                  <!-- eslint-disable-next-line vue/no-v-html -->
+                  <div v-html="capaMasReciente.abstract"></div>
                 </div>
                 <div class="tarjeta-pie">
                   <nuxt-link
@@ -111,8 +116,11 @@ const documentoMasReciente = obtenerMasReciente(resourceTypeDic.document);
                 <img class="tarjeta-imagen" :src="tablaMasReciente.thumbnail_url" alt="" />
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-etiqueta">Datos tabulados</p>
-                  <p class="tarjeta-titulo">{{ tablaMasReciente.title }}</p>
-                  <p>{{ tablaMasReciente.raw_abstract }}</p>
+                  <p class="tarjeta-titulo">
+                    {{ !tablaMasReciente ? '...cargando' : tablaMasReciente.title }}
+                  </p>
+                  <!-- eslint-disable-next-line vue/no-v-html -->
+                  <div v-html="tablaMasReciente.abstract"></div>
                 </div>
                 <div class="tarjeta-pie">
                   <nuxt-link
@@ -131,11 +139,10 @@ const documentoMasReciente = obtenerMasReciente(resourceTypeDic.document);
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-etiqueta">Documento</p>
                   <p class="tarjeta-titulo">
-                    {{ documentoMasReciente.title }}
+                    {{ !documentoMasReciente ? '...cargando' : documentoMasReciente.title }}
                   </p>
-                  <p>
-                    {{ documentoMasReciente.raw_abstract }}
-                  </p>
+                  <!-- eslint-disable-next-line vue/no-v-html -->
+                  <div v-html="documentoMasReciente.abstract"></div>
                 </div>
                 <div class="tarjeta-pie">
                   <nuxt-link

@@ -138,6 +138,5 @@ jobs:
           NUXT_AUTH_SECRET: ${{ secrets.NUXT_AUTH_SECRET }}
           VIRTUAL_PORT: '3000'
 
-      - name: Clean old Docker images
-        run: |
-          docker image prune -f
+      - name: Docker Cleanup
+        run: docker system prune -af

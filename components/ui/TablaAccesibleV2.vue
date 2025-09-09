@@ -21,17 +21,32 @@ function generaIdAleatorio() {
 }
 const idAleatorio = generaIdAleatorio();
 
-function IrARuta(objeto) {
-  // Función para codificar un objeto que se va a pasar
-  // al navegar a otra vista
-
+// TODO: esto tiene que enviar a /editar-metadatos solamente
+function irARutaConQuery(objeto) {
+  // Función para codificar un objeto que se va a pasar al navegar a otra vista
   // evitar problemas con espacios con JSON.stingify
-  const dataStr = encodeURIComponent(JSON.stringify({ pk: objeto.pk }));
+  const pk = encodeURIComponent(JSON.stringify({ pk: objeto.pk }));
 
-  navigateTo({
-    path: '/catalogo/mis-archivos/editar-metadatos',
-    query: { data: dataStr },
-  });
+  if (objeto.tipo_recurso === 'Capa geográfica') {
+    navigateTo({
+      path: '/catalogo/mis-archivos/editar-estilo',
+      query: { data: pk },
+    });
+  }
+
+  if (objeto.tipo_recurso === 'Datos tabulados') {
+    navigateTo({
+      path: '/catalogo/mis-archivos/unir-vectores',
+      query: { data: pk },
+    });
+  }
+
+  if (objeto.tipo_recurso === 'Documentos') {
+    navigateTo({
+      path: '/catalogo/mis-archivos/editar-metadatos',
+      query: { data: pk },
+    });
+  }
 }
 </script>
 <template>
@@ -93,13 +108,20 @@ function IrARuta(objeto) {
                   class="boton-pictograma boton-secundario"
                   aria-label="Editar metadatos"
                   type="button"
-                  @click="IrARuta(datum)"
+                  @click="irARutaConQuery(datum)"
                 >
                   <span class="pictograma-editar"></span>
                 </button>
                 <button
                   class="boton-pictograma boton-secundario"
                   aria-label="Ver en visualizador"
+                  type="button"
+                >
+                  <span class="pictograma-previsualizar"></span>
+                </button>
+                <button
+                  class="boton-pictograma boton-secundario"
+                  aria-label="Publicar en catálogo"
                   type="button"
                 >
                   <span class="pictograma-ayuda"></span>
@@ -154,7 +176,7 @@ table {
   .flex-width {
     display: flex;
     gap: 16px;
-    max-width: 168px;
+    max-width: 224px;
   }
 }
 </style>

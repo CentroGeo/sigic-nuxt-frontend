@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
   const query = getQuery(event);
   const token = getHeader(event, 'token');
   const options: RequestInit = { method: 'GET' };
-  if (token !== undefined) {
+  if (token !== 'sin-token') {
     options.headers = { Authorization: `Bearer ${token}` };
   }
 
@@ -29,8 +29,8 @@ export default defineEventHandler(async (event) => {
   console.log(endpoint);
 
   do {
-    const response = await fetch(endpoint.replace('http:', 'https:'), options);
-
+    //const response = await fetch(endpoint.replace('http:', 'https:'), options);
+    const response = await fetch(endpoint, options);
     if (!response.ok) {
       const error = await response.json();
       // throw new Error(`HTTP ${response.status} - ${response.statusText}`);
@@ -42,8 +42,52 @@ export default defineEventHandler(async (event) => {
     endpoint = links.next;
     console.info('->', allResults.length, 'recuperados de', total);
   } while (endpoint !== null && allResults.length < 120);
-  allResults = allResults.map(({ abstract, attribution, alternate, category, created, download_url, download_urls, embed_url, extent, keywords, last_updated, links, owner, pk, raw_abstract, resource_type, sourcetype, subtype, title, thumbnail_url, uuid }) => ({
-    abstract, attribution, alternate, category, created, download_url, download_urls, embed_url, extent, keywords, last_updated, links, owner, pk, resource_type, raw_abstract, sourcetype, subtype, title, thumbnail_url, uuid
-  }));
+  allResults = allResults.map(
+    ({
+      abstract,
+      attribution,
+      alternate,
+      category,
+      created,
+      download_url,
+      download_urls,
+      embed_url,
+      extent,
+      keywords,
+      last_updated,
+      links,
+      owner,
+      pk,
+      raw_abstract,
+      resource_type,
+      sourcetype,
+      subtype,
+      title,
+      thumbnail_url,
+      uuid,
+    }) => ({
+      abstract,
+      attribution,
+      alternate,
+      category,
+      created,
+      download_url,
+      download_urls,
+      embed_url,
+      extent,
+      keywords,
+      last_updated,
+      links,
+      owner,
+      pk,
+      resource_type,
+      raw_abstract,
+      sourcetype,
+      subtype,
+      title,
+      thumbnail_url,
+      uuid,
+    })
+  );
   return { allResults };
 });
