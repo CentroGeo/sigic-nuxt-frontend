@@ -57,7 +57,7 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
 
       const options = {
         query: {
-          //options.query['custom'] = 'true';
+          custom: 'true',
           'filter{resource_type}': resourceTypeGeonode[resourceType],
           page_size: 50,
           // agregar filtros
@@ -65,11 +65,14 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
         headers: {},
       };
 
-      /*  if (resourceType === 'dataLayer') {
+      if (resourceType === 'dataLayer') {
         options.query['extent_ne'] = '[-1,-1,0,0]';
-      } */
+      }
       if (resourceType === 'dataTable') {
         options.query['filter{subtype.in}'] = ['vector', 'remote'];
+      }
+      if (resourceType === 'document') {
+        options.query['file_extension'] = ['pdf', 'txt'];
       }
       if (data.value?.accessToken) {
         options.headers.token = data.value?.accessToken;
@@ -113,22 +116,12 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
 
 async function validacionTemporal(resources, resourceType) {
   if (resourceType === resourceTypeDic.document) {
-    //Si ya no hay paginas siguientes, filtramos los datos
-    // Si son documentos, filtramos únicamente los pdfs
-    return resources.filter((resource) =>
-      resource.links.some(
-        (link) =>
-          link.link_type === 'uploaded' &&
-          (link.name.endsWith('.pdf') || link.name.endsWith('.txt'))
-      )
-    );
+    return resources;
   }
   if (resourceType === resourceTypeDic.dataLayer) {
-    // Si son capas geográficas, excluimos aquellos que no tengan geometria
-    const newResources = resources.filter((resource) => isGeometricExtension(resource.extent));
-    const locals = newResources.filter((resource) => resource.sourcetype === 'LOCAL');
     // Revisamos si los servicios remotos tienen tabla
-    let remotes = newResources.filter((resource) => resource.sourcetype === 'REMOTE');
+    const locals = resources.filter((resource) => resource.sourcetype === 'LOCAL');
+    let remotes = resources.filter((resource) => resource.sourcetype === 'REMOTE');
     const filterRemotes = await Promise.all(
       remotes.map(async (resource) => {
         return { resourceValue: resource, resourceHasWms: await hasWMS(resource, 'map') };
@@ -138,11 +131,9 @@ async function validacionTemporal(resources, resourceType) {
     return locals.concat(remotes);
   }
   if (resourceType === resourceTypeDic.dataTable) {
-    // Si son capas geográficas, excluimos aquellos que no tengan geometria
-    const newResources = resources.filter((resource) => resource.subtype !== 'raster');
-    const locals = newResources.filter((resource) => resource.sourcetype === 'LOCAL');
     // Revisamos si los servicios remotos tienen tabla
-    let remotes = newResources.filter((resource) => resource.sourcetype === 'REMOTE');
+    const locals = resources.filter((resource) => resource.sourcetype === 'LOCAL');
+    let remotes = resources.filter((resource) => resource.sourcetype === 'REMOTE');
     const filterRemotes = await Promise.all(
       remotes.map(async (resource) => {
         return { resourceValue: resource, resourceHasWms: await hasWMS(resource, 'table') };

@@ -42,52 +42,5 @@ export default defineEventHandler(async (event) => {
     endpoint = links.next;
     console.info('->', allResults.length, 'recuperados de', total);
   } while (endpoint !== null && allResults.length < 120);
-  allResults = allResults.map(
-    ({
-      abstract,
-      attribution,
-      alternate,
-      category,
-      created,
-      download_url,
-      download_urls,
-      embed_url,
-      extent,
-      keywords,
-      last_updated,
-      links,
-      owner,
-      pk,
-      raw_abstract,
-      resource_type,
-      sourcetype,
-      subtype,
-      title,
-      thumbnail_url,
-      uuid,
-    }) => ({
-      abstract,
-      attribution,
-      alternate,
-      category,
-      created,
-      download_url,
-      download_urls,
-      embed_url,
-      extent,
-      keywords,
-      last_updated,
-      links,
-      owner,
-      pk,
-      resource_type,
-      raw_abstract,
-      sourcetype,
-      subtype,
-      title,
-      thumbnail_url,
-      uuid,
-    })
-  );
   return { allResults };
 });
