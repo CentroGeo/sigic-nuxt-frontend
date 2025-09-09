@@ -27,6 +27,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'Archivo faltante' });
   }
   const formData = new FormData();
+  formData.append('title', doc_file[0].originalFilename);
 
   formData.append(
     'doc_file',
