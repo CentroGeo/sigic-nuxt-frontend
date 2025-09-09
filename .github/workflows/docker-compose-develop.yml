@@ -81,7 +81,6 @@ jobs:
           docker push ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.branch }}
           docker push ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.sha }}
 
-
   deploy:
     name: Deploy SIGIC Nuxt frontend to dev server
     needs: build
@@ -139,5 +138,5 @@ jobs:
           NUXT_AUTH_SECRET: ${{ secrets.NUXT_AUTH_SECRET }}
           VIRTUAL_PORT: '3000'
 
-      - name : Docker Cleanup
+      - name: Docker Cleanup
         run: docker system prune -af
