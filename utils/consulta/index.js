@@ -83,7 +83,8 @@ export function getWMSserver(resource) {
  * Esta funcion revisa si el servidor que aloja un servicio remoto WFS
  * tiene servicios especificos
  * @param {Object} resource Es el recurso del que se desea obtener más informacion
- * @param {String} service Se relaciona con el uso que se le dará a la informacion
+ * @param {String} service Se relaciona con el uso que se le dará a la informacion.
+ * Puede ser map, table o geometry
  * @returns {Boolean}
  */
 export async function hasWMS(resource, service) {
