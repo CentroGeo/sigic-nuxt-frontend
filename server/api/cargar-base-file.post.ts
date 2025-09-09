@@ -36,12 +36,12 @@ export default defineEventHandler(async (event) => {
       : base_file[0],
     base_file[0].originalFilename
   );
-  console.warn(formData, data.fields.token[0]);
+  console.warn(formData, data?.fields?.token?.[0]);
   try {
     const res = await fetch(`${configEnv.public.geonodeApi}/uploads/upload/`, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${data.fields.token[0]}`,
+        Authorization: `Bearer ${data?.fields?.token?.[0]}`,
       },
       body: formData as unknown as BodyInit,
     });
