@@ -30,7 +30,7 @@ export default NuxtAuthHandler({
       }
 
       if (Date.now() > ((token.expires_at as number) ?? 0)) {
-        //console.log("ya expiró", token, account)
+        console.log('ya expiró', token, account);
         try {
           const response = await fetch(
             `${process.env.KEYCLOAK_ISSUER}/protocol/openid-connect/token`,
@@ -58,6 +58,7 @@ export default NuxtAuthHandler({
           console.error('Error refrescando token:', err);
           token.error = 'RefreshAccessTokenError';
         }
+        console.log('Nuevo tkn: ', token.refresh_token);
       }
       return token;
     },
