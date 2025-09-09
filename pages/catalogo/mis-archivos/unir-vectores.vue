@@ -1,10 +1,20 @@
 <script setup>
-// import SisdaiCasillaVerificacion from '@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue';
+import SisdaiCasillaVerificacion from '@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
+
+import { resourceTypeDic } from '~/utils/consulta';
+const storeFetched = useFetchedResources2Store();
+storeFetched.checkFilling(resourceTypeDic.dataLayer);
+const resourcesCapas = computed(() => storeFetched.byResourceType(resourceTypeDic.dataLayer));
 
 const route = useRoute();
 
-const seleccionEjemplo = ref('');
+const resourceLayer = ref({});
+const seleccionCampoCapa = ref('');
+const seleccionCapaGeo = ref('');
+const seleccionCampoObjetivo = ref('');
+const campoUnidos = ref(false);
+const dict = ref({});
 const unionExitosa = ref(false);
 
 /**
@@ -12,14 +22,6 @@ const unionExitosa = ref(false);
  * @returns {Object} objeto decodificado con la propiedad de pk
  */
 function getUserData() {
-  /* if (route.query.userObject) {
-    try {
-      return JSON.parse(route.query.userObject);
-    } catch (e) {
-      console.error('Error parsing user object', e);
-      return null;
-    }
-  } */
   if (route.query.data) {
     try {
       const dataStr = decodeURIComponent(route.query.data);
@@ -33,14 +35,33 @@ function getUserData() {
 const objetoId = ref(getUserData());
 
 // obtener el resource completo a partir del id
-const resource = ref({});
-resource.value = await $fetch('/api/objeto', {
+resourceLayer.value = await $fetch('/api/objeto', {
   method: 'POST',
   body: { id: objetoId.value.pk },
 });
 
+const variables = ref([]);
+const varGeoLayer = ref([]);
+const config = useRuntimeConfig();
+
+const obtenerVariables = async (resource) => {
+  const url = new URL(`${config.public.geoserverUrl}/ows`);
+  url.search = new URLSearchParams({
+    service: 'WFS',
+    version: '1.0.0',
+    request: 'GetFeature',
+    typeName: resource.alternate,
+    outputFormat: 'application/json',
+  }).toString();
+  const res = await fetch(url);
+  const datas = await res.json();
+  const atributos = datas.features.map((f) => f.properties);
+  return Object.keys(atributos[0] || {});
+};
+variables.value = await obtenerVariables(resourceLayer.value);
+
 // evitar problemas con espacios con JSON.stingify
-const pk = ref(encodeURIComponent(JSON.stringify({ pk: resource.value.pk })));
+const pk = ref(encodeURIComponent(JSON.stringify({ pk: resourceLayer.value.pk })));
 function irAMetadatosConQuery() {
   navigateTo({
     path: '/catalogo/mis-archivos/editar-metadatos',
@@ -54,20 +75,57 @@ function irAClaveConQuery() {
   });
 }
 
+watch(seleccionCapaGeo, (nv) => {
+  (async () => {
+    const filterPkResourcesCapas = resourcesCapas.value.filter((resource) => resource.pk === nv)[0];
+    // Tiene que estar publicada la capa geográfica
+    varGeoLayer.value = await obtenerVariables(filterPkResourcesCapas);
+
+    dict.value = Object.fromEntries(variables.value.map((d) => [d, false]));
+  })();
+});
+
 // TODO: unir vectores con el backend
-// const { data } = useAuth();
-async function aplicarJoin() {
-  // await $fetch('/api/metadatos', {
+async function unirCampos() {
+  // const { data } = useAuth();
+  const columns = ref([]);
+  Object.keys(dict.value).forEach((key) => {
+    if (dict.value[key] === true) {
+      columns.value.push(key);
+    }
+  });
+  // body: validar que esos campos se puedan unir
+  console.log('body', {
+    columns: columns.value,
+    geo_layer: seleccionCapaGeo.value,
+    geo_pivot: seleccionCampoObjetivo.value,
+    layer: resourceLayer.value.pk,
+    layer_pivot: seleccionCampoCapa.value,
+    // token: data.value?.accessToken,
+  });
+  // await $fetch('/api/join', {
   //   method: 'POST',
   //   body: {
-  //     pk: resource.value.pk,
-  //     resource_type: resource.value.resource_type,
-  //     abstract: campoResumen.value,
+  //     layer: resourceLayer.value.pk,
+  //     geo_layer: resourceGeo.value.pk,
+  //     layer_pivot: seleccionCapa.value,
+  //     geo_pivot: seleccionCapaGeo.value,
+  //     columns: columns.value,
   //     token: data.value?.accessToken,
   //   },
   // });
   unionExitosa.value = true;
 }
+
+const validarCampos = ref(true);
+watch([seleccionCampoCapa, seleccionCapaGeo, seleccionCampoObjetivo], ([n1, n2, n3]) => {
+  // Si en los tres se ha seleccionado algo, habilita el botón
+  if (!n1.trim() <= 0 && n2.trim() >= 1 && !n3.trim() <= 0) {
+    validarCampos.value = false;
+  } else {
+    validarCampos.value = true;
+  }
+});
 
 const bordeEnlaceActivo = (ruta) => {
   if (route.path === ruta) {
@@ -130,21 +188,65 @@ const bordeEnlaceActivo = (ruta) => {
           <div class="m-t-3">
             <div class="flex">
               <div class="columna-16">
-                <h3>{{ resource.title }}</h3>
+                <h3>{{ resourceLayer.title }}</h3>
                 <ClientOnly>
+                  <!-- Selector de campo capa base -->
                   <SisdaiSelector
-                    v-model="seleccionEjemplo"
+                    v-model="seleccionCampoCapa"
                     etiqueta="Tipo de Clave Geoestadística"
                   >
-                    <option value="1">ClaveGeo</option>
-                    <option value="2">Nombre de identidad</option>
-                    <option value="3">CLAVE INEGI</option>
-                    <option value="4">Coordenadas</option>
+                    <option v-for="value in variables" :key="value" :value="value">
+                      {{ value }}
+                    </option>
+                  </SisdaiSelector>
+
+                  <!-- Selector de Capa geo -->
+                  <p v-if="resourcesCapas.length === 0">...cargando capas</p>
+                  <SisdaiSelector
+                    v-if="resourcesCapas.length > 0"
+                    v-model="seleccionCapaGeo"
+                    etiqueta="Capa objetivo"
+                  >
+                    <option v-for="value in resourcesCapas" :key="value.pk" :value="value.pk">
+                      {{ value.title }}
+                    </option>
+                  </SisdaiSelector>
+
+                  <!-- Selector de campo Capa objetivo -->
+                  <p v-if="seleccionCapaGeo.trim() >= 1 && varGeoLayer.length === 0">
+                    ...cargando campos
+                  </p>
+                  <SisdaiSelector
+                    v-if="varGeoLayer.length > 0"
+                    v-model="seleccionCampoObjetivo"
+                    etiqueta="Campo objetivo"
+                  >
+                    <option v-for="value in varGeoLayer" :key="value" :value="value">
+                      {{ value }}
+                    </option>
                   </SisdaiSelector>
                 </ClientOnly>
+                <ul class="lista-sin-estilo">
+                  <li>
+                    <ClientOnly>
+                      <SisdaiCasillaVerificacion
+                        v-if="varGeoLayer.length > 0"
+                        v-model="campoUnidos"
+                        etiqueta="Campos unidos"
+                      />
+                    </ClientOnly>
+                  </li>
+                  <ul v-if="campoUnidos" class="lista-sin-estilo borde">
+                    <li v-for="(value, key, index) in dict" :key="index" class="p-l-2">
+                      <ClientOnly>
+                        <SisdaiCasillaVerificacion v-model="dict[key]" :etiqueta="key" />
+                      </ClientOnly>
+                    </li>
+                  </ul>
+                </ul>
               </div>
               <div class="columna-16">
-                <div class="flex">
+                <div v-if="!unionExitosa" class="flex">
                   <nuxt-link
                     class="boton-secundario boton-chico"
                     type="button"
@@ -153,11 +255,23 @@ const bordeEnlaceActivo = (ruta) => {
                   </nuxt-link>
                   <button
                     class="boton-primario boton-chico"
-                    :disabled="!seleccionEjemplo.trim() >= 1"
-                    @click="aplicarJoin"
+                    :disabled="validarCampos"
+                    @click="unirCampos"
                   >
                     Unir campo
                   </button>
+                </div>
+
+                <div v-if="unionExitosa" class="flex">
+                  <nuxt-link
+                    class="boton-secundario boton-chico"
+                    type="button"
+                    to="/catalogo/mis-archivos"
+                    >Ver en mis archivos
+                  </nuxt-link>
+                  <nuxt-link class="boton-primario boton-chico" to="/consulta/capas"
+                    >Ver capa en Visualizador
+                  </nuxt-link>
                 </div>
               </div>
             </div>
