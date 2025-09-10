@@ -102,8 +102,8 @@ function findServer(resource) {
     //console.log(link);
     return link;
   } else {
-    // return `${config.public.geonodeUrl}/gs/wms?`;
-    return `${config.public.geonodeUrl}/gs`;
+    return `${config.public.geonodeUrl}/gs/wms?`;
+    // return `${config.public.geonodeUrl}/gs`;
   }
 }
 async function updateFunctions() {
