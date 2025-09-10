@@ -32,7 +32,7 @@ const inputSearch = computed({
 // Esta parte es para obtener todas las categorias
 const { data: geonodeCategories } = await useFetch(`${apiCategorias}`);
 if (!geonodeCategories.value) {
-  categoryList.value = ['Sin clasificar'];
+  categoryList.value = ['Sin Clasificar'];
 } else {
   geonodeCategories.value.topics.items.map((d) => {
     categoryList.value.push(d.label);
@@ -51,11 +51,11 @@ function groupResults() {
         categorizedResources.value[title].push(r);
       }
     } else {
-      if (Object.keys(categorizedResources.value).includes('Sin clasificar')) {
-        categorizedResources.value['Sin clasificar'].push(r);
+      if (Object.keys(categorizedResources.value).includes('Sin Clasificar')) {
+        categorizedResources.value['Sin Clasificar'].push(r);
       } else {
-        categorizedResources.value['Sin clasificar'] = [];
-        categorizedResources.value['Sin clasificar'].push(r);
+        categorizedResources.value['Sin Clasificar'] = [];
+        categorizedResources.value['Sin Clasificar'].push(r);
       }
     }
   });

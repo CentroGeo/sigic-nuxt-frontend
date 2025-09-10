@@ -61,7 +61,7 @@ function updateResources(nuevosRecursos) {
       pk: d.pk,
       titulo: d.title,
       tipo_recurso: tipoRecurso(d),
-      categoria: d.category === null ? 'Sin clasificar' : d.category.gn_description,
+      categoria: d.category === null ? 'Sin Clasificar' : d.category.gn_description,
       actualizacion: formatearFecha(d.last_updated),
       acciones: 'Editar, Ver, Descargar, Remover',
       enlace_descarga: d.download_url,
