@@ -3,7 +3,7 @@
 // import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
-import { categoriesInSpanish, resourceTypeDic } from '~/utils/consulta';
+import { resourceTypeDic } from '~/utils/consulta';
 
 const storeFetched = useFetchedResources2Store();
 const storeFilters = useFilteredResources();
@@ -13,10 +13,8 @@ storeFetched.checkFilling(resourceTypeDic.dataTable);
 storeFetched.checkFilling(resourceTypeDic.document);
 
 const recursos = computed(() => storeFetched.all);
-
 const filteredResources = ref([]);
 const tableResources = ref([]);
-
 const seleccionOrden = ref('');
 
 // obteniendo las variables keys para la tabla
@@ -25,19 +23,6 @@ const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion',
 // para filtar por los archivos de la usuaria
 const { data } = useAuth();
 const userEmail = data.value.user.email;
-
-/**
- * Formatea la fecha del recurso a esta forma: dd/mm/aaaa
- * @param fecha de actualización del recurso
- * @returns {Date} objeto con la fecha
- */
-function formatearFecha(fecha) {
-  return new Date(fecha).toLocaleDateString('es-ES', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  });
-}
 
 /**
  * Valida si el tipo de recurso es documento o dataset con geometría o no
@@ -61,10 +46,11 @@ function updateResources(nuevosRecursos) {
       pk: d.pk,
       titulo: d.title,
       tipo_recurso: tipoRecurso(d),
-      categoria: d?.category ? categoriesInSpanish[d?.category.gn_description] : 'Sin Clasificar',
-      actualizacion: formatearFecha(d.last_updated),
+      categoria: d.category,
+      actualizacion: d.last_updated,
       acciones: 'Editar, Ver, Descargar, Remover',
       enlace_descarga: d.download_url,
+      uuid: d.uuid,
     }));
 }
 
@@ -105,6 +91,7 @@ onMounted(async () => {
             </ClientOnly>
           </div>
 
+          <!-- TODO: implementar filtro avanzado -->
           <!-- <div class="columna-8 flex-vertical-final">
             <div class="flex flex-contenido-separado">
               <div class="columna-14">
@@ -142,6 +129,7 @@ onMounted(async () => {
         <p>En esta tabla se muestran los archivos disponibles para su consulta y uso.</p>
         <div class="flex">
           <div class="columna-16">
+            <!-- TODO: implementar paginador -->
             <ClientOnly>
               <UiTablaAccesibleV2 :variables="variables" :datos="tableResources" />
               <UiPaginador :total-paginas="1" @cambio="1" />
