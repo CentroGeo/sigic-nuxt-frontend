@@ -30,32 +30,14 @@ function generaIdAleatorio() {
 }
 const idAleatorio = generaIdAleatorio();
 
-// TODO: esto tiene que enviar a /editar-metadatos solamente
 function irARutaConQuery(objeto) {
   // Función para codificar un objeto que se va a pasar al navegar a otra vista
   // evitar problemas con espacios con JSON.stingify
   const pk = encodeURIComponent(JSON.stringify({ pk: objeto.pk }));
-
-  if (objeto.tipo_recurso === 'Capa geográfica') {
-    navigateTo({
-      path: '/catalogo/mis-archivos/editar-estilo',
-      query: { data: pk },
-    });
-  }
-
-  if (objeto.tipo_recurso === 'Datos tabulados') {
-    navigateTo({
-      path: '/catalogo/mis-archivos/unir-vectores',
-      query: { data: pk },
-    });
-  }
-
-  if (objeto.tipo_recurso === 'Documentos') {
-    navigateTo({
-      path: '/catalogo/mis-archivos/editar-metadatos',
-      query: { data: pk },
-    });
-  }
+  navigateTo({
+    path: '/catalogo/mis-archivos/editar-metadatos',
+    query: { data: pk },
+  });
 }
 </script>
 <template>
