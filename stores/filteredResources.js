@@ -79,6 +79,7 @@ export const useFilteredResources = defineStore('filteredResources', () => {
         const datumYears = [];
         const yearList = filters.years.split(',').map((year) => year.trim());
         data.forEach((resource) => {
+          // TODO: Aquí eventualmente habrá que cambiar el created22 por date
           const resourceYear = resource.created22.slice(0, 4);
           if (yearList.includes(resourceYear)) {
             datumYears.push(resource);
