@@ -1,6 +1,11 @@
 import { NuxtAuthHandler } from '#auth';
 import KeycloakProvider from 'next-auth/providers/keycloak';
 
+// Función para comprobar si el token ha expirado
+function isTokenExpired(expiresAt: number): boolean {
+  return Date.now() >= expiresAt * 1000;
+}
+
 export default NuxtAuthHandler({
   secret: process.env.NUXT_AUTH_SECRET,
 
@@ -29,7 +34,7 @@ export default NuxtAuthHandler({
         token.expires_at = (account.expires_at ?? 0) * 1000;
       }
 
-      if (Date.now() > ((token.expires_at as number) ?? 0)) {
+      if (isTokenExpired(token.expires_at as number)) {
         console.log('ya expiró', token, account);
         try {
           const response = await fetch(
@@ -51,8 +56,8 @@ export default NuxtAuthHandler({
           if (!response.ok) throw refreshed;
 
           token.access_token = refreshed.access_token;
-          token.expires_at = Date.now() + refreshed.expires_in * 1000;
-          token.refresh_token = refreshed.refresh_token ?? token.refresh_token;
+          token.expires_at = new Date(Date.now() + refreshed.expires_in * 1000);
+          token.refresh_token = refreshed.refresh_token || token.refresh_token;
           //console.log('Refrescando token:', response, "token.expires_at:", token.expires_at)
         } catch (err) {
           console.error('Error refrescando token:', err);
@@ -64,7 +69,10 @@ export default NuxtAuthHandler({
     },
 
     async session({ session, token }) {
-      session.accessToken = token.accessToken as string;
+      if (token && token.user) {
+        session.user = token.user;
+        // session.accessToken = token.accessToken as string;
+      }
       return session;
     },
   },
