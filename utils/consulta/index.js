@@ -74,9 +74,9 @@ export function tooltipContent(resource) {
  */
 export function getWMSserver(resource) {
   //const proxy = 'https://geonode.dev.geoint.mx/proxy/?url=';
-  const wmsObject = resource.links.filter((link) => link.link_type === 'OGC:WMS');
-  const link = wmsObject[0]['url'];
-  return `${link}`;
+  const wmsObject = resource.links.find((link) => link.link_type === 'OGC:WMS');
+  const link = wmsObject['url'];
+  return `${link.split('?')[0]}`;
 }
 
 /**
@@ -89,8 +89,10 @@ export function getWMSserver(resource) {
  */
 export async function hasWMS(resource, service) {
   const maxAttempts = 3;
-  const config = useRuntimeConfig();
-  const proxy = `${config.public.geonodeUrl}/proxy/?url=`;
+  //const config = useRuntimeConfig();
+  //const proxy = `${config.public.geonodeUrl}/proxy/?url=`;
+  const proxy = 'https://geonode.dev.geoint.mx/proxy/?url=';
+
   //const wmsObject = resource.links.filter((link) => link.link_type === 'OGC:WMS');
   //const wmsLink = wmsObject[0]['url'];
   //const url = new URL(wmsLink);
