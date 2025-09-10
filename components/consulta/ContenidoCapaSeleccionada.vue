@@ -117,7 +117,7 @@ async function updateFunctions() {
   }
   if (resourceElement.value.sourcetype === 'REMOTE') {
     buttons = buttons.filter((d) => d.excludeFor !== 'remotes');
-    const resourceHasWMS = await hasWMS(resourceElement.value, 'table');
+    const resourceHasWMS = await hasWMS(resourceElement.value, 'table', config.public.geonodeUrl);
     if (resourceHasWMS === false) {
       buttons = buttons.filter((d) => d.excludeFor !== 'noTables');
     }

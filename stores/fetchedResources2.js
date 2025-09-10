@@ -2,8 +2,8 @@ import { defineStore } from 'pinia';
 import { hasWMS, resourceTypeDic, resourceTypeGeonode } from '~/utils/consulta';
 
 export const useFetchedResources2Store = defineStore('fetchedResources2', () => {
+  const config = useRuntimeConfig();
   const storeConsulta = useConsultaStore();
-
   /**
    * Almacenamiento reactivo de los recursos seleccionados.
    */
@@ -89,7 +89,11 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
       }
 
       // T E M P O R A L
-      resources[resourceType] = await validacionTemporal(allResults, resourceType);
+      resources[resourceType] = await validacionTemporal(
+        allResults,
+        resourceType,
+        config.public.geonodeUrl
+      );
       this.isLoading = false;
     },
 
@@ -115,7 +119,7 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
   };
 });
 
-async function validacionTemporal(resources, resourceType) {
+async function validacionTemporal(resources, resourceType, proxyURL) {
   if (resourceType === resourceTypeDic.document) {
     return resources;
   }
@@ -125,7 +129,7 @@ async function validacionTemporal(resources, resourceType) {
     let remotes = resources.filter((resource) => resource.sourcetype === 'REMOTE');
     const filterRemotes = await Promise.all(
       remotes.map(async (resource) => {
-        return { resourceValue: resource, resourceHasWms: await hasWMS(resource, 'map') };
+        return { resourceValue: resource, resourceHasWms: await hasWMS(resource, 'map', proxyURL) };
       })
     );
     remotes = filterRemotes.filter((d) => d.resourceHasWms).map((d) => d.resourceValue);
@@ -137,7 +141,10 @@ async function validacionTemporal(resources, resourceType) {
     let remotes = resources.filter((resource) => resource.sourcetype === 'REMOTE');
     const filterRemotes = await Promise.all(
       remotes.map(async (resource) => {
-        return { resourceValue: resource, resourceHasWms: await hasWMS(resource, 'table') };
+        return {
+          resourceValue: resource,
+          resourceHasWms: await hasWMS(resource, 'table', proxyURL),
+        };
       })
     );
     remotes = filterRemotes.filter((d) => d.resourceHasWms).map((d) => d.resourceValue);

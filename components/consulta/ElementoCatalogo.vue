@@ -2,7 +2,7 @@
 // PENDING: Todos los archivos remotos tienen en subtype = remote?
 import { onMounted, onUnmounted, ref, toRefs } from 'vue';
 import { fetchGeometryType, getWMSserver, hasWMS, tooltipContent } from '~/utils/consulta';
-
+const config = useRuntimeConfig();
 const storeSelected = useSelectedResources2Store();
 const storeConsulta = useConsultaStore();
 
@@ -92,7 +92,11 @@ onMounted(() => {
             ];
           } else {
             if (subtype.value === 'remote') {
-              const resourceHasWMS = await hasWMS(props.catalogueElement, 'geometry');
+              const resourceHasWMS = await hasWMS(
+                props.catalogueElement,
+                'geometry',
+                config.public.geonodeUrl
+              );
               if (resourceHasWMS) {
                 const server = getWMSserver(props.catalogueElement);
                 geomType.value = await fetchGeometryType(props.catalogueElement, server);

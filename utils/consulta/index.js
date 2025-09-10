@@ -87,12 +87,11 @@ export function getWMSserver(resource) {
  * Puede ser map, table o geometry
  * @returns {Boolean}
  */
-export async function hasWMS(resource, service) {
+export async function hasWMS(resource, service, proxyURL) {
   const maxAttempts = 3;
   //const config = useRuntimeConfig();
-  //const proxy = `${config.public.geonodeUrl}/proxy/?url=`;
-  const proxy = 'https://geonode.dev.geoint.mx/proxy/?url=';
-
+  const proxy = `${proxyURL}/proxy/?url=`;
+  //const proxy = 'https://geonode.dev.geoint.mx/proxy/?url=';
   //const wmsObject = resource.links.filter((link) => link.link_type === 'OGC:WMS');
   //const wmsLink = wmsObject[0]['url'];
   //const url = new URL(wmsLink);
