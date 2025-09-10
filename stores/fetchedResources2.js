@@ -44,7 +44,8 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
     ]),
 
     checkFilling(resourceType = storeConsulta.resourceType) {
-      if (resources[resourceType].length > 0) return;
+      // if (resources[resourceType].length > 0) return;
+      // comenté la anterior para forzar la recarga cada vez, pues no se refleja los recursos nuevos
       this.fill(resourceType);
     },
 
