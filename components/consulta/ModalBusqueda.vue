@@ -46,7 +46,7 @@ const categoriesDict = {
   Structure: 'structure',
   Transportation: 'transportation',
   'Utilities Communication': 'utilitiesCommunication',
-  'Sin clasificar': 'Sin clasificar',
+  'Sin Clasificar': 'Sin clasificar',
 };
 function abrirModalBusqueda() {
   modalBusqueda.value?.abrirModal();
