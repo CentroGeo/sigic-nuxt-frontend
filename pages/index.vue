@@ -111,6 +111,7 @@ const obtenerMasRecientes = (type) => {
 };
 
 const capasMasRecientes = obtenerMasRecientes(resourceTypeDic.dataLayer);
+console.log(capasMasRecientes.value);
 </script>
 <template>
   <div>
@@ -406,7 +407,7 @@ const capasMasRecientes = obtenerMasRecientes(resourceTypeDic.dataLayer);
                   <nuxt-link
                     class="boton boton-primario boton-chico"
                     aria-label="Ver capa en visualizador"
-                    :to="`/consulta/capas`"
+                    :to="`/consulta/capas?capas=${capa.uuid}`"
                   >
                     Ver Capa en visualizador
                   </nuxt-link>
