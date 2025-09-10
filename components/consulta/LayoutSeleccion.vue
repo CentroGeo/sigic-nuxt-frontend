@@ -27,6 +27,7 @@ const opacityChild = ref(null);
 const tablaChild = ref(null);
 const shareChild = ref(null);
 const mapChild = ref(null);
+const borrarChild = ref(null);
 
 function notifyDownloadAllChild() {
   shownModal.value = 'downloadAll';
@@ -64,6 +65,12 @@ function notifyMapaChild(resource) {
     mapChild.value?.abrirModalMapa();
   });
   // console.log(resource);
+}
+function notifyBorrarChild() {
+  shownModal.value = 'borrarModal';
+  nextTick(() => {
+    borrarChild.value.abrirModalBorrarTodo();
+  });
 }
 function notifyShareChild() {
   shareChild.value?.abrirModalCompartir();
@@ -122,7 +129,7 @@ function changeModal(to) {
             type="button"
             class="boton-pictograma boton-con-contenedor-secundario"
             aria-label="Eliminar"
-            @click="storeSelected.reset()"
+            @click="notifyBorrarChild()"
           >
             <span class="pictograma-eliminar" aria-hidden="true" />
           </button>
@@ -146,6 +153,8 @@ function changeModal(to) {
     </div>
 
     <div id="los-modales">
+      <ConsultaModalBorrarTodo v-if="shownModal === 'borrarModal'" ref="borrarChild" />
+
       <ConsultaModalDescargaAll
         v-if="shownModal === 'downloadAll'"
         ref="downloadAllChild"
