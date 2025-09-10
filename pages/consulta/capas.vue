@@ -143,7 +143,8 @@ function findServer(resource) {
     //return proxy + link;
     return link;
   } else {
-    return `${config.public.geonodeUrl}/gs/wms?`;
+    // return `${config.public.geonodeUrl}/gs/wms?`;
+    return `${config.public.geonodeUrl}/gs`;
   }
 }
 onMounted(() => {
