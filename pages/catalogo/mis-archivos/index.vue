@@ -8,6 +8,7 @@ import { resourceTypeDic } from '~/utils/consulta';
 const storeFetched = useFetchedResources2Store();
 const storeFilters = useFilteredResources();
 
+storeFetched.checkFilling(resourceTypeDic.dataLayer);
 storeFetched.checkFilling(resourceTypeDic.dataTable);
 storeFetched.checkFilling(resourceTypeDic.document);
 
