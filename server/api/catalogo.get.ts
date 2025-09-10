@@ -42,5 +42,6 @@ export default defineEventHandler(async (event) => {
     endpoint = links.next;
     console.info('->', allResults.length, 'recuperados de', total);
   } while (endpoint !== null && allResults.length < 120);
+
   return { allResults };
 });
