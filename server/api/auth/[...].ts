@@ -30,7 +30,7 @@ export default NuxtAuthHandler({
         //console.log("cuenta accestoken", token, account)
 
         token.accessToken = account.access_token;
-        token.refresh_token = account.refresh_token;
+        token.refreshToken = account.refresh_token;
         token.expires_at = (account.expires_at ?? 0) * 1000;
       }
 
@@ -46,7 +46,7 @@ export default NuxtAuthHandler({
                 client_id: process.env.KEYCLOAK_CLIENT_ID ?? '',
                 client_secret: process.env.KEYCLOAK_CLIENT_SECRET ?? '',
                 grant_type: 'refresh_token',
-                refresh_token: token.refresh_token as string,
+                refresh_token: token.refreshToken as string,
               }),
             }
           );
@@ -55,23 +55,27 @@ export default NuxtAuthHandler({
 
           if (!response.ok) throw refreshed;
 
-          token.access_token = refreshed.access_token;
+          token.accessToken = refreshed.access_token;
+          token.refreshToken = refreshed.refresh_token || token.refreshToken;
           token.expires_at = new Date(Date.now() + refreshed.expires_in * 1000);
-          token.refresh_token = refreshed.refresh_token || token.refresh_token;
           //console.log('Refrescando token:', response, "token.expires_at:", token.expires_at)
         } catch (err) {
           console.error('Error refrescando token:', err);
           token.error = 'RefreshAccessTokenError';
         }
-        console.log('Nuevo tkn: ', token.refresh_token);
+        console.log('Nuevo tkn: ', token.refreshToken);
       }
+
       return token;
     },
 
     async session({ session, token }) {
-      if (token && token.user) {
+      if (token?.user) {
         session.user = token.user;
-        // session.accessToken = token.accessToken as string;
+      }
+      if (token?.accessToken) {
+        /* eslint-disable @typescript-eslint/no-explicit-any */
+        (session as any).accessToken = token.accessToken as string;
       }
       return session;
     },
