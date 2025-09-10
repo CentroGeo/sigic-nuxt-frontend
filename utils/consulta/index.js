@@ -31,7 +31,7 @@ export const categoriesInSpanish = {
   Structure: 'Estructura',
   Transportation: 'Transporte',
   'Utilities Communication': 'Servicios Públicos y Comunicación',
-  'Sin clasificar': 'Sin Clasificar',
+  'Sin Clasificar': 'Sin Clasificar',
 };
 
 /**

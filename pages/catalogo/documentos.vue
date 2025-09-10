@@ -38,7 +38,7 @@ function updateResources(nuevosRecursos) {
     titulo: d.title,
     // tipo_recurso: d.resource_type,
     tipo_recurso: 'Documentos',
-    categoria: d.category === null ? 'Sin clasificar' : d.category.gn_description,
+    categoria: d.category === null ? 'Sin Clasificar' : d.category.gn_description,
     actualizacion: formatearFecha(d.last_updated),
     acciones: 'Ver, Descargar',
     enlace_descarga: d.download_url,

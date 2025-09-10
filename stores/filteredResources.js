@@ -65,7 +65,7 @@ export const useFilteredResources = defineStore('filteredResources', () => {
       // Filtramos por categoria
       if (filters.categories.length > 0) {
         let datumCat = [];
-        if (filters.categories.includes('Sin clasificar')) {
+        if (filters.categories.includes('Sin Clasificar')) {
           datumCat = data.filter((resource) => !resource.category);
         }
         //data = data.filter((resource) => resource.category);
@@ -79,6 +79,7 @@ export const useFilteredResources = defineStore('filteredResources', () => {
         const datumYears = [];
         const yearList = filters.years.split(',').map((year) => year.trim());
         data.forEach((resource) => {
+          // TODO: Aquí eventualmente habrá que cambiar el created22 por date
           const resourceYear = resource.created22.slice(0, 4);
           if (yearList.includes(resourceYear)) {
             datumYears.push(resource);
@@ -95,9 +96,16 @@ export const useFilteredResources = defineStore('filteredResources', () => {
         data = data.filter((resource) => resource.attribution);
         data.forEach((resource) => {
           const resourceInst = cleanInput(resource.attribution);
+          // Primero revisamos si resource.attribution coincide con alguna de las palabras de las lista
           if (institutionList.includes(resourceInst)) {
             datumInst.push(resource);
           }
+          // Luego revisamos si resource.attribution incluye alguna de las palabras de la lista
+          institutionList.forEach((word) => {
+            if (resourceInst.includes(word)) {
+              datumInst.push(resource);
+            }
+          });
         });
         data = datumInst;
       }
