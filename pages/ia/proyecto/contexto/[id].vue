@@ -28,6 +28,10 @@ const contexto = ref(null);
 
 const archivosEliminados = ref([]);
 
+const config = useRuntimeConfig();
+const { data } = useAuth();
+const imagenPreview = ref(null);
+
 // Si necesitas reaccionar a cambios en el parámetro
 watch(
   () => route.query.proyecto_id,
@@ -217,6 +221,8 @@ onMounted(async () => {
 
     nombreContexto.value = contexto.value.context.title;
     descripcionContexto.value = contexto.value.context.description;
+
+    cargarImagenDelContexto();
   }
   //console.log(proyecto.value)
   await loadSources();
@@ -256,6 +262,36 @@ async function guardarArchivo(archivo) {
 function irAProyectos() {
   router.push('/ia/proyectos/');
 }
+
+async function cargarImagenDelContexto() {
+  const token = data.value?.accessToken;
+  const formData = new FormData();
+  formData.append('filename', contexto.value.context.image_type);
+
+  const response = await fetch(`${config.public.geonodeUrl}/sigic/ia/mediauploads/register`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    console.error(`Error cargando imagen para contexto ${route.params.id}`);
+    return;
+  }
+
+  const blob = await response.blob();
+  const imageUrl = URL.createObjectURL(blob);
+
+  imagenPreview.value = imageUrl;
+}
+
+onBeforeUnmount(() => {
+  if (imagenPreview.value) {
+    URL.revokeObjectURL(imagenPreview.value);
+  }
+});
 </script>
 
 <template>
@@ -330,6 +366,7 @@ function irAProyectos() {
                 <ClientOnly>
                   <IaElementoDragNdDrop
                     ref="dragNdDrop"
+                    :imagen-inicial="imagenPreview"
                     @pasar-archivo="(i) => guardarArchivo(i)"
                   />
                 </ClientOnly>

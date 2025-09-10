@@ -12,6 +12,8 @@ const TAMANO_MAXIMO_MB = 5;
 const TIPOS_PERMITIDOS = ['image/jpeg', 'image/png'];
 const mensajeExito = ref('');
 
+const imagenCargadaPorUsuario = ref(false);
+
 const { files } = useDropZone(onDropZone, {
   accept: 'image/jpeg, image/png',
   multiple: false,
@@ -39,6 +41,7 @@ function validarArchivo(file) {
     previewUrl.value = URL.createObjectURL(file);
     archivosArriba.value = true;
     archivoValido.value = false;
+    imagenCargadaPorUsuario.value = true;
     mensajeExito.value = 'Imagen cargada correctamente';
     emit('pasarArchivo', file);
   } else {
@@ -47,6 +50,7 @@ function validarArchivo(file) {
     archivosArriba.value = false;
     archivoValido.value = true;
     mensajeExito.value = '';
+    imagenCargadaPorUsuario.value = false;
   }
 }
 
@@ -61,12 +65,40 @@ const removerArchivo = () => {
 defineExpose({
   archivoValido,
 });
+
+const props = defineProps({
+  imagenInicial: {
+    type: String,
+    default: null,
+  },
+});
+
+onMounted(() => {
+  if (props.imagenInicial) {
+    previewUrl.value = props.imagenInicial;
+    archivosArriba.value = true;
+    imagenCargadaPorUsuario.value = false;
+    mensajeExito.value = '';
+  }
+});
+
+watch(
+  () => props.imagenInicial,
+  (nuevaImagen) => {
+    if (nuevaImagen) {
+      previewUrl.value = nuevaImagen;
+      archivosArriba.value = true;
+      imagenCargadaPorUsuario.value = false;
+      mensajeExito.value = '';
+    }
+  }
+);
 </script>
 
 <template>
   <div>
     <!-- Mensaje de éxito -->
-    <p v-if="mensajeExito" class="imagen-exito p-3 m-b-2">
+    <p v-if="mensajeExito && imagenCargadaPorUsuario" class="imagen-exito p-3 m-b-2">
       <span class="texto">
         <span class="pictograma-aprobado m-r-2" aria-hidden="true" />
         {{ mensajeExito }}
