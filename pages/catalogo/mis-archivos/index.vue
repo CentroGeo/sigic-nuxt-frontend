@@ -3,7 +3,7 @@
 // import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
-import { resourceTypeDic } from '~/utils/consulta';
+import { categoriesInSpanish, resourceTypeDic } from '~/utils/consulta';
 
 const storeFetched = useFetchedResources2Store();
 const storeFilters = useFilteredResources();
@@ -60,7 +60,7 @@ function updateResources(nuevosRecursos) {
       pk: d.pk,
       titulo: d.title,
       tipo_recurso: tipoRecurso(d),
-      categoria: d.category === null ? 'Sin clasificar' : d.category.gn_description,
+      categoria: d?.category ? categoriesInSpanish[d?.category.gn_description] : 'Sin Clasificar',
       actualizacion: formatearFecha(d.last_updated),
       acciones: 'Editar, Ver, Descargar, Remover',
       enlace_descarga: d.download_url,

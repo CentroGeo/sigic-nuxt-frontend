@@ -16,6 +16,15 @@ const props = defineProps({
   },
 });
 
+const dictTable = ref({
+  pk: 'pk',
+  titulo: 'Título',
+  tipo_recurso: 'Tipo de archivo',
+  categoria: 'Categoría',
+  actualizacion: 'Actualización',
+  acciones: 'Acciones',
+});
+
 function generaIdAleatorio() {
   return 'id-' + Math.random().toString(36).substring(2);
 }
@@ -65,7 +74,8 @@ function irARutaConQuery(objeto) {
             :key="v"
             scope="col"
           >
-            {{ variable.replaceAll('_', ' ') }}
+            <!-- {{ variable.replaceAll('_', ' ') }} -->
+            {{ dictTable[variable] }}
           </th>
         </tr>
       </thead>

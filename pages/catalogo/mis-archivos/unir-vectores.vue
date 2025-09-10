@@ -95,7 +95,7 @@ async function unirCampos() {
     }
   });
   // body: validar que esos campos se puedan unir
-  console.log('body', {
+  console.warn('body', {
     columns: columns.value,
     geo_layer: seleccionCapaGeo.value,
     geo_pivot: seleccionCampoObjetivo.value,
@@ -269,7 +269,7 @@ const bordeEnlaceActivo = (ruta) => {
                     to="/catalogo/mis-archivos"
                     >Ver en mis archivos
                   </nuxt-link>
-                  <nuxt-link class="boton-primario boton-chico" to="/consulta/capas"
+                  <nuxt-link class="boton boton-primario boton-chico" to="/consulta/capas"
                     >Ver capa en Visualizador
                   </nuxt-link>
                 </div>
