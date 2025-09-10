@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { resourceTypeDic, resourceTypeGeonode } from '~/utils/consulta';
+import { hasWMS, resourceTypeDic, resourceTypeGeonode } from '~/utils/consulta';
 
 export const useFetchedResources2Store = defineStore('fetchedResources2', () => {
   const storeConsulta = useConsultaStore();
@@ -34,17 +34,21 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
 
   return {
     isLoading: ref(false),
-
+    resources,
     byResourceType,
 
     // all: computed(() => Object.values(resources).flat()),
     all: computed(() => [
-      ...resources[resourceTypeDic.dataTable],
+      ...resources[resourceTypeDic.dataLayer],
+      ...resources[resourceTypeDic.dataTable].filter(
+        (resource) => !isGeometricExtension(resource.extent)
+      ),
       ...resources[resourceTypeDic.document],
     ]),
 
     checkFilling(resourceType = storeConsulta.resourceType) {
-      if (resources[resourceType].length > 0) return;
+      // if (resources[resourceType].length > 0) return;
+      // comenté la anterior para forzar la recarga cada vez, pues no se refleja los recursos nuevos
       this.fill(resourceType);
     },
 
@@ -54,15 +58,27 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
 
       const options = {
         query: {
+          custom: 'true',
           'filter{resource_type}': resourceTypeGeonode[resourceType],
+          page_size: 50,
           // agregar filtros
         },
         headers: {},
       };
 
+      if (resourceType === 'dataLayer') {
+        options.query['extent_ne'] = '[-1,-1,0,0]';
+      }
+      if (resourceType === 'dataTable') {
+        options.query['filter{subtype.in}'] = ['vector', 'remote'];
+      }
+      if (resourceType === 'document') {
+        options.query['file_extension'] = ['pdf', 'txt'];
+      }
       if (data.value?.accessToken) {
         options.headers.token = data.value?.accessToken;
-        //console.info(new Date(data.value.expires));
+      } else {
+        options.headers.token = 'sin-token';
       }
 
       const { error, allResults } = await $fetch('/api/catalogo', options);
@@ -73,7 +89,7 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
       }
 
       // T E M P O R A L
-      resources[resourceType] = validacionTemporal(allResults, resourceType);
+      resources[resourceType] = await validacionTemporal(allResults, resourceType);
       this.isLoading = false;
     },
 
@@ -99,27 +115,32 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
   };
 });
 
-function validacionTemporal(resources, resourceType) {
+async function validacionTemporal(resources, resourceType) {
   if (resourceType === resourceTypeDic.document) {
-    //Si ya no hay paginas siguientes, filtramos los datos
-    // Si son documentos, filtramos únicamente los pdfs
-    return resources.filter((resource) =>
-      resource.links.some(
-        (link) =>
-          link.link_type === 'uploaded' &&
-          (link.name.endsWith('.pdf') || link.name.endsWith('.txt'))
-      )
-    );
+    return resources;
   }
-
   if (resourceType === resourceTypeDic.dataLayer) {
-    // Si son capas geográficas, excluimos aquellos que no tengan geometria
-    return resources.filter((resource) => isGeometricExtension(resource.extent));
+    // Revisamos si los servicios remotos tienen tabla
+    const locals = resources.filter((resource) => resource.sourcetype === 'LOCAL');
+    let remotes = resources.filter((resource) => resource.sourcetype === 'REMOTE');
+    const filterRemotes = await Promise.all(
+      remotes.map(async (resource) => {
+        return { resourceValue: resource, resourceHasWms: await hasWMS(resource, 'map') };
+      })
+    );
+    remotes = filterRemotes.filter((d) => d.resourceHasWms).map((d) => d.resourceValue);
+    return locals.concat(remotes);
   }
-  /*   if (resourceType === resourceTypeDic.dataTable) {
-    // Si son capas geográficas, excluimos aquellos que no tengan geometria
-    return resources.filter((resource) => resource.subtype !== 'raster');
-  } */
-
-  return resources;
+  if (resourceType === resourceTypeDic.dataTable) {
+    // Revisamos si los servicios remotos tienen tabla
+    const locals = resources.filter((resource) => resource.sourcetype === 'LOCAL');
+    let remotes = resources.filter((resource) => resource.sourcetype === 'REMOTE');
+    const filterRemotes = await Promise.all(
+      remotes.map(async (resource) => {
+        return { resourceValue: resource, resourceHasWms: await hasWMS(resource, 'table') };
+      })
+    );
+    remotes = filterRemotes.filter((d) => d.resourceHasWms).map((d) => d.resourceValue);
+    return locals.concat(remotes);
+  }
 }

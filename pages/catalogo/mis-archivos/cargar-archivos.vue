@@ -12,41 +12,43 @@ const pending = ref(false);
 const { data } = useAuth();
 
 const dragNdDrop = ref(null);
+const base_files = ['.geojson', 'gpkg', '.xls', '.xlsx', '.zip', '.csv'];
+const docs_files = ['.txt', '.pdf'];
 
 async function guardarArchivo(files) {
   const token = ref(data.value?.accessToken);
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    // Si el archivo pertenece a bases de datos o capas:
+    if (base_files.map((end) => file?.name.endsWith(end)).includes(true)) {
+      const formData = new FormData();
+      formData.append('base_file', file);
+      formData.append('token', token.value);
 
-  // TODO: validación de formatos
-  // if (
-  //   files.type === 'application/vnd.geo+json' ||
-  //   files.type === 'application/json' ||
-  //   files.type === 'application/geo+json' ||
-  //   files.type === 'application/geopackage+sqlite3' ||
-  //   files.type === 'text/csv' ||
-  //   files.type === 'application/xml' ||
-  //   files.type === 'application/pdf' ||
-  //   files.type === 'image/jpeg' ||
-  //   files.type === 'image/png'
-  // ) {
-  // } else {
-  //   dragNdDrop.value?.archivoNoValido();
-  // }
-  const formData = new FormData();
-  // solo el primer elemento del arreglo
-  formData.append('base_file', files[0]);
-  formData.append('token', token.value);
+      const response = await fetch('/api/cargar-base-file', {
+        method: 'POST',
+        body: formData,
+      });
 
-  const response = await $fetch('/api/cargar', {
-    method: 'POST',
-    body: formData,
-  });
+      if (!response.ok) {
+        throw new Error(`Error al cargar archivos: ${response.status}`);
+      }
+    }
+    // Si el archivo pertenece a documentos
+    else if (docs_files.map((end) => file?.name.endsWith(end)).includes(true)) {
+      const formData = new FormData();
+      formData.append('doc_file', file);
+      formData.append('token', token.value);
 
-  if (!response.ok) {
-    throw new Error(`Error al cargar archivos: ${response.status}`);
-  } else {
-    // pending.value = false;
-    // statusOk.value = true;
-    // TODO: recuperar recurso o recursos mediante el name y title
+      const response = await fetch('/api/cargar-doc-file', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error al cargar archivos: ${response.status}`);
+      }
+    }
   }
 }
 </script>

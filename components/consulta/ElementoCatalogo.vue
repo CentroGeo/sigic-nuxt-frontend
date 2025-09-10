@@ -1,7 +1,7 @@
 <script setup>
-// PENDING: Tener en cuenta que no solo tendremos archivos vectoriales
+// PENDING: Todos los archivos remotos tienen en subtype = remote?
 import { onMounted, onUnmounted, ref, toRefs } from 'vue';
-import { fetchGeometryType, tooltipContent } from '~/utils/consulta';
+import { fetchGeometryType, getWMSserver, hasWMS, tooltipContent } from '~/utils/consulta';
 
 const storeSelected = useSelectedResources2Store();
 const storeConsulta = useConsultaStore();
@@ -92,14 +92,20 @@ onMounted(() => {
             ];
           } else {
             if (subtype.value === 'remote') {
-              geomType.value = 'Remoto';
+              const resourceHasWMS = await hasWMS(props.catalogueElement, 'geometry');
+              if (resourceHasWMS) {
+                const server = getWMSserver(props.catalogueElement);
+                geomType.value = await fetchGeometryType(props.catalogueElement, server);
+              } else {
+                geomType.value = 'Remoto';
+              }
             } else if (subtype.value === 'raster') {
               // Si es raster
               geomType.value = 'Raster';
             } else if (subtype.value === 'vector') {
               // Si es vectorial
               // Solicitamos la geometría hasta que la tarjeta va a entrar a la vista
-              geomType.value = await fetchGeometryType(catalogueElement.value);
+              geomType.value = await fetchGeometryType(catalogueElement.value, 'sigic');
               //geomType.value = "Point";
             } else {
               geomType.value = 'Otro';
@@ -149,11 +155,17 @@ onUnmounted(() => {
 <template>
   <div :id="`elemento-${catalogueElement.uuid}`" ref="rootEl" class="tarjeta-catalogo">
     <div
-      v-if="isLoggedIn && catalogueElement.owner.email === userEmail"
+      v-if="
+        isLoggedIn && catalogueElement.owner.email === userEmail && !catalogueElement.is_published
+      "
       class="id-tag flex m-b-1 m-t-0"
     >
       <span class="pictograma-persona"></span>
       Mis archivos
+    </div>
+    <div v-if="catalogueElement.sourcetype === 'REMOTE'" class="id-tag flex m-b-1 m-t-0">
+      <span class="pictograma-colaborar"></span>
+      Archivo remoto
     </div>
     <div class="tarjeta-elemento">
       <input

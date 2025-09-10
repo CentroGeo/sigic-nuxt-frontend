@@ -52,37 +52,71 @@ export const useFilteredResources = defineStore('filteredResources', () => {
       if (isLoggedIn) {
         // Filtramos por propietario
         if (filters.owner === 'catalogo') {
-          data = data.filter((resource) => resource.owner.email !== userEmail);
+          data = data.filter(
+            (resource) => resource.owner.email !== userEmail || resource.is_published === true
+          );
         } else if (filters.owner === 'misArchivos') {
-          data = data.filter((resource) => resource.owner.email === userEmail);
+          data = data.filter(
+            (resource) => resource.owner.email === userEmail && resource.is_published === false
+          );
         }
       }
 
-      // Filtramos por año
-      if (filters.years !== null) {
-        const yearList = filters.years.split(',');
-        yearList.forEach(
-          (year) =>
-            (data = data.filter((resource) => {
-              const resourceYear = resource.created.slice(0, 4);
-              resourceYear === year.trim();
-            }))
+      // Filtramos por categoria
+      if (filters.categories.length > 0) {
+        let datumCat = [];
+        if (filters.categories.includes('Sin clasificar')) {
+          datumCat = data.filter((resource) => !resource.category);
+        }
+        //data = data.filter((resource) => resource.category);
+        data = data.filter((resource) =>
+          filters.categories.includes(resource.category?.gn_description)
         );
+        data = data.concat(datumCat);
+      }
+      // Filtramos por año
+      if (filters.years !== null && filters.years !== '') {
+        const datumYears = [];
+        const yearList = filters.years.split(',').map((year) => year.trim());
+        data.forEach((resource) => {
+          const resourceYear = resource.created22.slice(0, 4);
+          if (yearList.includes(resourceYear)) {
+            datumYears.push(resource);
+          }
+        });
+        data = datumYears;
       }
       // Filtramos por institución
-      if (filters.institutions !== null) {
+      if (filters.institutions !== null && filters.institutions !== '') {
+        const datumInst = [];
+        const institutionList = filters.institutions
+          .split(',')
+          .map((institution) => cleanInput(institution));
         data = data.filter((resource) => resource.attribution);
-        const institutionList = filters.institutions.split(',');
-        institutionList.forEach((institution) => {
-          data = data.filter(
-            (resource) => cleanInput(resource.attribution) === cleanInput(institution)
-          );
+        data.forEach((resource) => {
+          const resourceInst = cleanInput(resource.attribution);
+          if (institutionList.includes(resourceInst)) {
+            datumInst.push(resource);
+          }
         });
+        data = datumInst;
       }
       // Filtramos por keyword
       if (filters.keywords !== null) {
         data = data.filter((resource) => resource.keywords.length > 0);
-        const keywordList = filters.keywords.split(',');
+        const keywordList = filters.keywords.split(',').map((word) => cleanInput(word));
+        // Si los filtros por keywords son incluyentes
+        const subdataUuid = [];
+        keywordList.forEach((keyword) => {
+          data.forEach((resource) => {
+            let resourceKeywords = resource.keywords.map((d) => cleanInput(d.name));
+            resourceKeywords = resourceKeywords.join('-');
+            if (resourceKeywords.includes(keyword)) {
+              subdataUuid.push(resource.uuid);
+            }
+          });
+        });
+        data = data.filter((resource) => subdataUuid.includes(resource.uuid));
         // Si los filtros por keywords son excluyentes
         /*         keywordList.forEach((keyword) => {
           data = data.filter((resource) => {
@@ -93,25 +127,6 @@ export const useFilteredResources = defineStore('filteredResources', () => {
             }
           });
         }); */
-        // Si los filtros por keywords son incluyentes
-        const subdataUuid = [];
-        keywordList.forEach((keyword) => {
-          data.forEach((resource) => {
-            let resourceKeywords = resource.keywords.map((d) => cleanInput(d.name));
-            resourceKeywords = resourceKeywords.join('-');
-            if (resourceKeywords.includes(cleanInput(keyword))) {
-              subdataUuid.push(resource.uuid);
-            }
-          });
-        });
-        data = data.filter((resource) => subdataUuid.includes(resource.uuid));
-      }
-      // Filtramos por categoria
-      if (filters.categories.length > 0) {
-        data = data.filter((resource) => resource.category);
-        data = data.filter((resource) =>
-          filters.categories.includes(resource.category.gn_description)
-        );
       }
       return data;
     },
