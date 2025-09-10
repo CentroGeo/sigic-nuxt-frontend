@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
     Object.keys(query).length ? '?' + new URLSearchParams(query as any).toString() : ''
   }`;
 
-  // 🔑 Obtiene la sesión activa de sidebase/auth
+  // Obtiene la sesión activa de sidebase/auth
   const session = await getServerSession(event);
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const token = (session as any)?.accessToken;
