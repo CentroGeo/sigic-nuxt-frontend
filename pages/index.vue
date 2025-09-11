@@ -228,7 +228,7 @@ const capasMasRecientes = obtenerMasRecientes(resourceTypeDic.dataLayer);
                   </p>
                 </div>
                 <div class="tarjeta-pie">
-                  <NuxtLink class="boton-primario boton-chico" to="/catalogo"
+                  <NuxtLink class="boton-primario boton-chico" to="/catalogo/cargar-archivos"
                     >Ir a subir archivo</NuxtLink
                   >
                 </div>
