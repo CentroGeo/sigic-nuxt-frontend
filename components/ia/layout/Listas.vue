@@ -4,36 +4,27 @@ import { onMounted, ref } from 'vue';
 
 const storeIA = useIAStore();
 
+/**
+ * @typedef {Object} Props
+ * @property {String} [titulo='Título'] - Indica el título de la lista.
+ * @property {String} [textoBoton='Texto botón'] - Indica el texto que va en el botón.
+ * @property {String} [etiquetaBusqueda=undefined] - Indica la etiqueta que va en el buscador.
+ */
+/** @type {Props} */
 const props = defineProps({
   titulo: { type: String, default: 'Título' },
-  textoBoton: { type: String, default: 'Título' },
+  textoBoton: { type: String, default: 'Texto botón' },
   etiquetaBusqueda: { type: String, default: undefined },
-  // recursoLista: { type: Array, required: true },
 });
 const { titulo, textoBoton, recursoLista, etiquetaBusqueda } = toRefs(props);
 
-const catalogo = ref([
-  /* {
-    id: 0,
-    titulo: 'Biodiversidad de ecosistemas marinos',
-    numero_contextos: 0,
-    numero_fuentes: 9
-  },
-  {
-    id: 1,
-    titulo: "Nombre del proyecto",
-    numero_contextos: 5,
-    numero_fuentes: 5
-  },
-  {
-    id: 2,
-    titulo: "Nombre del proyecto",
-    numero_contextos: 5,
-    numero_fuentes: 5
-  } */
-]);
-
+const catalogo = ref([]);
 const catalogoFiltrado = ref(catalogo.value);
+
+const router = useRouter();
+const route = useRoute();
+
+const idSeleccionado = computed(() => storeIA.proyectoSeleccionado?.id);
 
 // Función para consultar lista de proyectos
 const loadProjectList = async () => {
@@ -49,26 +40,38 @@ const loadProjectList = async () => {
 onMounted(() => {
   loadProjectList();
 });
+
+function seleccionarProyecto(proyecto) {
+  storeIA.seleccionarProyecto(proyecto);
+
+  const idRutaActual = route.params.id;
+  const idSeleccionado = proyecto.id.toString();
+
+  if (route.name === 'ia-proyecto-id' && idRutaActual !== idSeleccionado) {
+    router.push(`/ia/proyecto/${idSeleccionado}`);
+  }
+}
 </script>
 
 <template>
   <div>
     <!-- TODO: Colocar ListasProyectos -->
     <div v-if="titulo == 'Proyectos'">
-      <div style="max-height: 85vh; overflow-y: auto" class="p-x-3 p-t-3">
+      <div class="fondo-color-acento p-x-3 p-y-1">
+        <h5>{{ titulo }}</h5>
+      </div>
+      <div class="p-x-3 p-t-3">
         <nuxt-link
-          style="width: 100%; text-align: center; display: inline-block"
-          class="boton boton-primario"
-          aria-label="Crear proyecto"
+          class="boton-listas boton boton-primario"
+          aria-label="Nuevo proyecto"
           to="/ia/proyecto/nuevo"
         >
           {{ textoBoton }}
-          <span class="pictograma-agregar" aria-hidden="true" />
+          <!-- <span class="pictograma-agregar" aria-hidden="true" /> -->
         </nuxt-link>
 
         <ClientOnly>
           <SisdaiCampoBusqueda
-            style="width: 100%"
             class="m-y-3"
             :catalogo="recursoLista"
             :etiqueta="etiquetaBusqueda"
@@ -76,7 +79,13 @@ onMounted(() => {
           />
         </ClientOnly>
 
-        <h6>{{ titulo }}</h6>
+        <p>
+          {{
+            !storeIA.existenProyectos
+              ? 'Cuando crees un proyecto, aparecerá en esta sección.'
+              : 'Selecciona un proyecto para ver su contenido.'
+          }}
+        </p>
       </div>
 
       <div v-if="storeIA.existenProyectos">
@@ -85,12 +94,12 @@ onMounted(() => {
             v-for="proyecto in catalogoFiltrado"
             :key="proyecto.id"
             class="m-0"
-            @click="storeIA.seleccionarProyecto(proyecto)"
+            @click="seleccionarProyecto(proyecto)"
           >
             <div
               class="proyecto p-l-4 p-r-2 p-y-1"
               :class="{
-                seleccionado: proyecto.id === storeIA.proyectoSeleccionado?.id,
+                seleccionado: proyecto.id === idSeleccionado,
               }"
             >
               <div class="proyecto-titulo m-b-1">{{ proyecto.title }}</div>
@@ -106,9 +115,10 @@ onMounted(() => {
   </div>
 </template>
 <style lang="scss">
-.lista-chats {
-  max-height: 85vh;
-  overflow-y: auto;
+.boton-listas {
+  width: 100%;
+  text-align: center;
+  display: inline-block;
 }
 
 .proyecto {

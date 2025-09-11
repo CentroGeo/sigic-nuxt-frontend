@@ -27,7 +27,7 @@ const listaProyectosFiltrada = ref(proyectos.value);
         class="boton-primario boton-pictorgrama flex-contenido-centrado boton-nuevo-proyecto"
         type="button"
       >
-        Crear proyecto
+        Nuevo proyecto
         <span class="pictograma-agregar" aria-hidden="true" />
       </button>
 
