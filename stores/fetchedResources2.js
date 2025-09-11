@@ -106,7 +106,6 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
     findResource(uuidToFind, resourceType = storeConsulta.resourceType) {
       return resources[resourceType].find(({ uuid }) => uuid === uuidToFind);
     },
-
     /**
      * Devuelve una lista de recursos que coincidan con una lista de uuids.
      * @param {Array<String>} uuids del catalogo a buscar.

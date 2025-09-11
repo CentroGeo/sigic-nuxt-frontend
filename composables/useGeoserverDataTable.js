@@ -53,6 +53,7 @@ export function useGeoserverDataTable({ paginaActual, tamanioPagina, resource } 
       const atributos = data.features.map((f) => f.properties);
       variables.value = Object.keys(atributos[0] || {});
       datos.value = atributos;
+      console.log(datos.value);
     }
   };
 
