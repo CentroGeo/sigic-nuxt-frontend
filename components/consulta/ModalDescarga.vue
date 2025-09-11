@@ -32,7 +32,6 @@ function abrirModalDescarga() {
   optionsList.value = optionsDict[resourceType.value]['elements'];
   tagTitle.value = optionsDict[resourceType.value]['title'];
   selectedOption.value = optionsList.value.map((d) => d.label)[0];
-  console.log(selectedOption.value);
 }
 
 const layerOptions = {
