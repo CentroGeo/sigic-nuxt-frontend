@@ -1,6 +1,8 @@
 <script setup>
 import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
+import { cleanInput } from '~/utils/consulta';
+
 const emits = defineEmits(['alOrdenar']);
 
 const props = defineProps({
@@ -44,8 +46,8 @@ function filtro(seleccion) {
     // Ordenamos por titulo
     if (seleccion.trim() === 'titulo') {
       return catalogo.value.sort((a, b) => {
-        const titleA = a.title.toUpperCase();
-        const titleB = b.title.toUpperCase();
+        const titleA = cleanInput(a.title.toUpperCase());
+        const titleB = cleanInput(b.title.toUpperCase());
         if (titleA > titleB) {
           return 1;
         }
