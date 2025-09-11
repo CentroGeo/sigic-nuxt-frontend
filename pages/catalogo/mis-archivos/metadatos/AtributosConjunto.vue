@@ -1,9 +1,10 @@
 <script setup>
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
+
 import { getFeatures } from '~/utils/consulta';
 
-const storeFetched = useFetchedResources2Store();
+// Recuperamos información a partir de la url
 const route = useRoute();
 const selectedPk = route.query.data;
 const type = route.query.type;
@@ -12,11 +13,14 @@ const typeDict = {
   'Capa geográfica': 'dataLayer',
   'Datos tabulados': 'dataTable',
 };
+// Recuperamos la información completa del recurso
+const storeFetched = useFetchedResources2Store();
 storeFetched.checkFilling(typeDict[type]);
 const resources = computed(() => storeFetched.byResourceType(typeDict[type]));
 const editedResource = computed(() => resources.value.find(({ pk }) => pk === selectedPk));
+
+// A partir del recurso, hacemos una petición para traer sus features
 const features = ref([]);
-//const datos = ref([]);
 const variables = [
   'Atributo',
   'Etiqueta',
@@ -25,33 +29,23 @@ const variables = [
   'Display type',
   'Visible',
 ];
+const datos = ref([]);
+const checkedAttrs = ref([]);
 
-const datos = [
-  {
-    Atributo: 'fid',
-    Etiqueta: '',
-    Descripción: '',
-    'Mostrar Orden': '',
-    'Display type': '',
-    Visible: '',
-  },
-  {
-    Atributo: 'g_id',
-    Etiqueta: '',
-    Descripción: '',
-    'Mostrar Orden': '',
-    'Display type': '',
-    Visible: '',
-  },
-];
-
-watch(editedResource, () => {
-  //console.log(nv);
-  features.value = getFeatures(editedResource.value);
-  console.log('aqui: ', features.value[0]);
-  /*   for (let i = 0; i < features.value.length; i++) {
-    console.log(features.value[i]);
-  } */
+watch(editedResource, async () => {
+  features.value = await getFeatures(editedResource.value);
+  datos.value = [];
+  for (let i = 0; i < features.value.length; i++) {
+    datos.value.push({
+      Atributo: features.value[i],
+      Etiqueta: '',
+      Descripción: '',
+      'Mostrar Orden': `${i + 1}`,
+      'Display type': '',
+      Visible: '',
+    });
+  }
+  checkedAttrs.value = features.value;
 });
 </script>
 <template>
@@ -61,7 +55,7 @@ watch(editedResource, () => {
     </template>
 
     <template #visualizador>
-      <main id="principal" class="contenedor m-b-10">
+      <main v-if="editedResource" id="principal" class="contenedor m-b-10">
         <div class="flex m-0 contenedor-botones">
           <button
             class="boton-pictograma boton-sin-contenedor-secundario"
@@ -75,7 +69,7 @@ watch(editedResource, () => {
         <p class="h1 m-t-3">{{ editedResource.title }}</p>
         <p class="h2 m-0">Metadatos</p>
         <div class="contenedor-tabla p-2">
-          <table>
+          <table v-if="datos.length > 0">
             <caption>
               4. Atributos del conjunto de datos
             </caption>
@@ -140,17 +134,20 @@ watch(editedResource, () => {
                 </td>
                 <td>
                   <input
-                    id="cbox2"
-                    v-model="datum['Visible']"
+                    :id="`${datum['Atributo']}-checkbox`"
+                    v-model="checkedAttrs"
                     type="checkbox"
-                    value="second_checkbox"
+                    :value="datum['Atributo']"
                   />
-                  <label for="cbox2">Visible</label>
+                  <label :for="`${datum['Atributo']}-checkbox`">Visible</label>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
+      </main>
+      <main v-else>
+        <p>...cargando</p>
       </main>
     </template>
   </UiLayoutPaneles>

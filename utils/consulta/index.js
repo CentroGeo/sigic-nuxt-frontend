@@ -395,7 +395,8 @@ export async function getFeatures(resource) {
   const props = features
     .filter((prop) => prop.name.toLowerCase() !== 'geometry')
     .map((prop) => prop.name);
-  console.log(props);
+  //console.log(Array.isArray(props), props);
+  return props;
 }
 
 /**
