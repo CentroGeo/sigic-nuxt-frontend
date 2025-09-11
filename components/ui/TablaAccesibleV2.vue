@@ -38,13 +38,19 @@ const dictTable = ref({
  * Codifica la propiedad pk de un objeto y se pasa como query al ir a otra vista
  * @param objeto que se va a codificar
  */
+
 function irARutaConQuery(objeto) {
-  // evitar problemas con espacios con JSON.stingify
-  const pk = encodeURIComponent(JSON.stringify({ pk: objeto.pk }));
   navigateTo({
-    path: '/catalogo/mis-archivos/editar/metadatos',
-    query: { data: pk },
+    path: '/catalogo/mis-archivos/editar/MetadatosBasicos',
+    query: { data: objeto.pk, type: objeto.tipo_recurso },
   });
+  // evitar problemas con espacios con JSON.stingify
+  //const pk = encodeURIComponent(JSON.stringify({ pk: objeto.pk }));
+  /*   if (objeto.tipo_recurso === 'Capa geográfica') {
+    navigateTo({
+      path: '/catalogo/mis-archivos/editar-estilo',
+      query: { data: pk },
+    });*/
 }
 
 /**
@@ -66,6 +72,12 @@ async function openResourceView(resource) {
     );
     await navigateTo('/consulta/tablas');
   }
+  /* (objeto.tipo_recurso === 'Documentos') {
+    navigateTo({
+      path: '/catalogo/mis-archivos/editar-metadatos',
+      query: { data: pk },
+    });
+  } */
   if (resource.tipo_recurso === 'Documentos') {
     useSelectedResources2Store().add(
       new SelectedLayer({ uuid: resource.uuid }),

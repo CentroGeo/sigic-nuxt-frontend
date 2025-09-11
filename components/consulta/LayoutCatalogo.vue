@@ -71,14 +71,14 @@ function setSelectedCategory(categoria) {
 function applyAdvancedFilter() {
   isFilterActive.value = true;
   modalFiltroAvanzado.value.cerrarModalBusqueda();
-  updateResources(storeFilters.filter());
+  updateResources(storeFilters.filter(storeConsulta.resourceType));
 }
 
 function resetAdvancedFilter() {
   isFilterActive.value = false;
   storeFilters.resetFilters();
   modalFiltroAvanzado.value.cerrarModalBusqueda();
-  updateResources(storeFilters.filter());
+  updateResources(storeFilters.filter(storeConsulta.resourceType));
 }
 function updateResources(nuevosRecursos) {
   filteredResources.value = nuevosRecursos;
@@ -86,7 +86,7 @@ function updateResources(nuevosRecursos) {
 }
 
 watch([inputSearch, selectedOwner, resources], () => {
-  updateResources(storeFilters.filter());
+  updateResources(storeFilters.filter(storeConsulta.resourceType));
 });
 
 onMounted(async () => {

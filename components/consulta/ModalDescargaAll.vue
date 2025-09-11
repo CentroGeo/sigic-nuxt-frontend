@@ -10,6 +10,7 @@ const props = defineProps({
 });
 const modalDescargaAll = ref(null);
 const optionsList = ref(null);
+const selectedOption = ref();
 const tagTitle = ref();
 /* const includesRemote = computed(() =>
   storeFetched
@@ -22,6 +23,8 @@ function abrirModalDescargaAll() {
   modalDescargaAll.value?.abrirModal();
   optionsList.value = optionsDict[props.resourceType]['elements'];
   tagTitle.value = optionsDict[props.resourceType]['title'];
+  selectedOption.value = optionsList.value.map((d) => d.label)[0];
+  console.log(selectedOption.value);
 }
 
 async function downloadAllDataTables(format) {
@@ -105,6 +108,14 @@ const optionsDict = {
     ],
   },
 };
+
+function descargarAllClicked() {
+  optionsList.value.map((d) => {
+    if (d.label === selectedOption.value) {
+      d.action();
+    }
+  });
+}
 defineExpose({
   abrirModalDescargaAll,
 });
@@ -126,8 +137,23 @@ defineExpose({
             </p>
           </div>
         </div>
-        <p>Formato:</p>
-        <div>
+        <div v-for="option in optionsList" :key="option.label">
+          <input
+            :id="`download-option-${option.label}`"
+            v-model="selectedOption"
+            :name="'opciones-descarga'"
+            type="radio"
+            :value="option.label"
+          />
+
+          <label :for="`download-option-${option.label}`">{{ option.label }} </label>
+        </div>
+        <div class="flex flex-contenido-final">
+          <button type="button" class="boton-primario m-t-2" @click="descargarAllClicked">
+            Descargar
+          </button>
+        </div>
+        <!--         <div>
           <button
             v-for="option in optionsList"
             :key="option.label"
@@ -137,7 +163,7 @@ defineExpose({
           >
             {{ option.label }}
           </button>
-        </div>
+        </div> -->
       </template>
     </SisdaiModal>
   </ClientOnly>

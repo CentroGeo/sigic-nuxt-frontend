@@ -74,9 +74,9 @@ export function tooltipContent(resource) {
  */
 export function getWMSserver(resource) {
   //const proxy = 'https://geonode.dev.geoint.mx/proxy/?url=';
-  const wmsObject = resource.links.filter((link) => link.link_type === 'OGC:WMS');
-  const link = wmsObject[0]['url'];
-  return `${link}`;
+  const wmsObject = resource.links.find((link) => link.link_type === 'OGC:WMS');
+  const link = wmsObject['url'];
+  return `${link.split('?')[0]}`;
 }
 
 /**
@@ -87,10 +87,11 @@ export function getWMSserver(resource) {
  * Puede ser map, table o geometry
  * @returns {Boolean}
  */
-export async function hasWMS(resource, service) {
+export async function hasWMS(resource, service, proxyURL) {
   const maxAttempts = 3;
-  const config = useRuntimeConfig();
-  const proxy = `${config.public.geonodeUrl}/proxy/?url=`;
+  //const config = useRuntimeConfig();
+  const proxy = `${proxyURL}/proxy/?url=`;
+  //const proxy = 'https://geonode.dev.geoint.mx/proxy/?url=';
   //const wmsObject = resource.links.filter((link) => link.link_type === 'OGC:WMS');
   //const wmsLink = wmsObject[0]['url'];
   //const url = new URL(wmsLink);
@@ -356,13 +357,64 @@ export async function downloadWMS(resource, format, featureTypes) {
   anchor.click();
   document.body.removeChild(anchor);
 }
+
 /**
- * Hace una petición WFS para obtener la lista de Features y la geometría.
+ * Hace una petición WFS para obtener la lista de Features.
  * Las peticiones pueden ser autenticadas o no.
  * @param {Object} resource
  * @param {String} format
  * @returns
  */
+export async function getFeatures(resource) {
+  const config = useRuntimeConfig();
+  const { data } = useAuth();
+  const token = data.value?.accessToken;
+  // Revisamos si la capa es remota
+  if (resource.sourcetype === 'remote') {
+    alert('Esta capa es remota y no se puede descargar');
+    return;
+  }
+  // Si la capa no es remota, revisamos sus columnas para excluir las de geometria
+  const describeFeatureUrl = new URL(`${config.public.geonodeUrl}/gs/ows`);
+  describeFeatureUrl.search = new URLSearchParams({
+    service: 'WFS',
+    version: '2.0.0',
+    request: 'DescribeFeatureType',
+    typeName: resource.alternate,
+    outputFormat: 'application/json',
+  }).toString();
+
+  //const res = await fetch(describeFeatureUrl);
+  let res;
+  if (token) {
+    res = await fetch(describeFeatureUrl, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } else {
+    res = await fetch(describeFeatureUrl);
+  }
+  //console.log(res);
+  if (!res.ok) {
+    return 'Error';
+  }
+  const fileData = await res.json();
+  const features = fileData.featureTypes[0]['properties'];
+  const props = features
+    .filter((prop) => prop.name.toLowerCase() !== 'geometry')
+    .map((prop) => prop.name);
+  //console.log(Array.isArray(props), props);
+  return props;
+}
+
+/**
+ * Hace una petición WFS para obtener la lista de Features y la geometría.
+ * Hace la descarga de los archivos sin geometría.
+ * Las peticiones pueden ser autenticadas o no.
+ * @param {Object} resource
+ * @param {String} format
+ * @returns
+ */
+
 export async function downloadNoGeometry(resource, format) {
   const config = useRuntimeConfig();
   const { data } = useAuth();

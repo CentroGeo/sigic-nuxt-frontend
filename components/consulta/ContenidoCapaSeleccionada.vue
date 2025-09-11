@@ -65,13 +65,17 @@ const optionsButtons = ref([
     label: 'Vínculo WMS',
     pictogram: 'pictograma-enlace-externo',
     globo: 'WMS',
+    globo: 'WFS',
     action: async () => {
       //console.log(resourceElement.value.links);
-      const objectLink = resourceElement.value.links.filter((link) => link.name === 'PNG');
-      const wmsLink = objectLink[0].url;
+      //const objectWMSLink = resourceElement.value.links.find((link) => link.name === 'PNG');
+      //const wmsLink = objectWMSLink.url;
+      const objectWFSLink = resourceElement.value.links.find((link) => link.name === 'GeoJSON');
+      const wfsLink = objectWFSLink.url;
+
       try {
-        await navigator.clipboard.writeText(wmsLink);
-        alert('Enlace copiado al portapapeles: ' + wmsLink);
+        await navigator.clipboard.writeText(wfsLink);
+        alert('Enlace copiado al portapapeles: ' + wfsLink);
       } catch (err) {
         console.error('Error al copiar: ', err);
       }
@@ -113,7 +117,7 @@ async function updateFunctions() {
   }
   if (resourceElement.value.sourcetype === 'REMOTE') {
     buttons = buttons.filter((d) => d.excludeFor !== 'remotes');
-    const resourceHasWMS = await hasWMS(resourceElement.value, 'table');
+    const resourceHasWMS = await hasWMS(resourceElement.value, 'table', config.public.geonodeUrl);
     if (resourceHasWMS === false) {
       buttons = buttons.filter((d) => d.excludeFor !== 'noTables');
     }

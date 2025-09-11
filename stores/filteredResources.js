@@ -7,7 +7,7 @@ export const useFilteredResources = defineStore('filteredResources', () => {
   const isLoggedIn = ref(data.value ? true : false);
   const userEmail = data.value?.user.email;
 
-  const resourceType = ref('');
+  //const resourceType = ref('');
 
   const filters = reactive({
     inputSearch: null,
@@ -16,13 +16,13 @@ export const useFilteredResources = defineStore('filteredResources', () => {
     years: null,
     institutions: null,
     keywords: null,
-    sort: '',
+    sort: null,
   });
 
   return {
     filters,
 
-    resourceType,
+    //resourceType,
 
     updateFilter(filter, value) {
       filters[filter] = value;
@@ -34,7 +34,7 @@ export const useFilteredResources = defineStore('filteredResources', () => {
       filters.years = null;
       filters.institutions = null;
       filters.keywords = null;
-      filters.sort = '';
+      filters.sort = null;
     },
     resetFilters() {
       filters.categories = [];
@@ -105,10 +105,8 @@ export const useFilteredResources = defineStore('filteredResources', () => {
     },
 
     filter(type) {
-      let data = [];
-      type === 'all'
-        ? (data = storeFetched.all)
-        : (data = storeFetched.byResourceType(resourceType.value));
+      let data;
+      type === 'all' ? (data = storeFetched.all) : (data = storeFetched.byResourceType());
       // Aplicamos el filtro del input
       if (filters.inputSearch !== null) {
         data = data.filter((resource) => cleanInput(resource.title).includes(filters.inputSearch));
@@ -201,7 +199,9 @@ export const useFilteredResources = defineStore('filteredResources', () => {
         }); */
       }
       // si hay opciones asignadas para ordenar
-      data = this.sort(data);
+      if (filters.sort !== null) {
+        data = this.sort(data);
+      }
       return data;
     },
   };
