@@ -2,13 +2,23 @@
 import SisdaiCasillaVerificacion from '@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
-import { resourceTypeDic } from '~/utils/consulta';
+import { getWMSserver, hasWMS, resourceTypeDic } from '~/utils/consulta';
+
 const storeFetched = useFetchedResources2Store();
 storeFetched.checkFilling(resourceTypeDic.dataLayer);
-const resourcesCapas = computed(() => storeFetched.byResourceType(resourceTypeDic.dataLayer));
 
 const route = useRoute();
 
+const { data } = useAuth();
+const token = data.value?.accessToken;
+const userEmail = data.value?.user.email;
+
+const resourcesCapas = computed(
+  () =>
+    storeFetched
+      .byResourceType(resourceTypeDic.dataLayer)
+      .filter((resource) => resource.owner.email === userEmail) || {}
+);
 const resourceLayer = ref({});
 const seleccionCampoCapa = ref('');
 const seleccionCapaGeo = ref('');
@@ -43,9 +53,20 @@ resourceLayer.value = await $fetch('/api/objeto', {
 const variables = ref([]);
 const varGeoLayer = ref([]);
 const config = useRuntimeConfig();
+const proxy = `${config.public.geonodeUrl}/proxy/?url=`;
 
 const obtenerVariables = async (resource) => {
-  const url = new URL(`${config.public.geoserverUrl}/ows`);
+  // const url = new URL(`${config.public.geoserverUrl}/ows`);
+  let url = '';
+  if (!resource || resource.sourcetype !== 'REMOTE') {
+    url = new URL(`${config.public.geonodeUrl}/gs/ows`);
+  } else if (resource.sourcetype === 'REMOTE') {
+    const wmsStatus = await hasWMS(resource, 'table');
+    if (wmsStatus) {
+      const link = getWMSserver(resource);
+      url = new URL(link);
+    }
+  }
   url.search = new URLSearchParams({
     service: 'WFS',
     version: '1.0.0',
@@ -53,7 +74,20 @@ const obtenerVariables = async (resource) => {
     typeName: resource.alternate,
     outputFormat: 'application/json',
   }).toString();
-  const res = await fetch(url);
+
+  // const res = await fetch(url);
+  let res;
+  if (resource.sourcetype === 'REMOTE') {
+    res = await fetch(proxy + `${encodeURIComponent(url)}`);
+  } else if (!token) {
+    res = await fetch(url);
+  } else if (token) {
+    res = await fetch(url.toString(), {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    //console.log(res);
+  }
+
   const datas = await res.json();
   const atributos = datas.features.map((f) => f.properties);
   return Object.keys(atributos[0] || {});
@@ -87,15 +121,16 @@ watch(seleccionCapaGeo, (nv) => {
 
 // TODO: unir vectores con el backend
 async function unirCampos() {
-  // const { data } = useAuth();
+  // armar columnas
   const columns = ref([]);
   Object.keys(dict.value).forEach((key) => {
     if (dict.value[key] === true) {
       columns.value.push(key);
     }
   });
+
   // body: validar que esos campos se puedan unir
-  console.log('body', {
+  console.warn('body', {
     columns: columns.value,
     geo_layer: seleccionCapaGeo.value,
     geo_pivot: seleccionCampoObjetivo.value,
@@ -117,6 +152,7 @@ async function unirCampos() {
   unionExitosa.value = true;
 }
 
+// para habilitar o deshabilitar el botón de unir campos
 const validarCampos = ref(true);
 watch([seleccionCampoCapa, seleccionCapaGeo, seleccionCampoObjetivo], ([n1, n2, n3]) => {
   // Si en los tres se ha seleccionado algo, habilita el botón
@@ -189,6 +225,7 @@ const bordeEnlaceActivo = (ruta) => {
             <div class="flex">
               <div class="columna-16">
                 <h3>{{ resourceLayer.title }}</h3>
+
                 <ClientOnly>
                   <!-- Selector de campo capa base -->
                   <SisdaiSelector
@@ -226,6 +263,7 @@ const bordeEnlaceActivo = (ruta) => {
                     </option>
                   </SisdaiSelector>
                 </ClientOnly>
+
                 <ul class="lista-sin-estilo">
                   <li>
                     <ClientOnly>
@@ -245,6 +283,7 @@ const bordeEnlaceActivo = (ruta) => {
                   </ul>
                 </ul>
               </div>
+
               <div class="columna-16">
                 <div v-if="!unionExitosa" class="flex">
                   <nuxt-link
@@ -269,7 +308,7 @@ const bordeEnlaceActivo = (ruta) => {
                     to="/catalogo/mis-archivos"
                     >Ver en mis archivos
                   </nuxt-link>
-                  <nuxt-link class="boton-primario boton-chico" to="/consulta/capas"
+                  <nuxt-link class="boton boton-primario boton-chico" to="/consulta/capas"
                     >Ver capa en Visualizador
                   </nuxt-link>
                 </div>

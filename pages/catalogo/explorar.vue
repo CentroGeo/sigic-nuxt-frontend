@@ -31,6 +31,22 @@ const obtenerMasReciente = (type) => {
 const capaMasReciente = obtenerMasReciente(resourceTypeDic.dataLayer);
 const tablaMasReciente = obtenerMasReciente(resourceTypeDic.dataTable);
 const documentoMasReciente = obtenerMasReciente(resourceTypeDic.document);
+
+const formatearAbstract = (resource) => {
+  let formatedAbstract = 'Sin descripción';
+  if (resource?.raw_abstract) {
+    formatedAbstract = resource?.raw_abstract
+      .replace(/^<p>/, '')
+      .replace(/<\/p>$/, '')
+      .replace(/^<pre>/, '')
+      .replace(/<\/pre>$/, '');
+  }
+  const content = `
+    <p style="text-overflow: ellipsis; overflow: hidden; height: 1.2em; white-space: nowrap; "
+      >${formatedAbstract}
+    </p>`;
+  return content;
+};
 </script>
 
 <template>
@@ -94,11 +110,14 @@ const documentoMasReciente = obtenerMasReciente(resourceTypeDic.document);
                 <img class="tarjeta-imagen" :src="capaMasReciente.thumbnail_url" alt="" />
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-etiqueta">Capa geográfica</p>
-                  <p class="tarjeta-titulo">
-                    {{ !capaMasReciente ? '...cargando' : capaMasReciente.title }}
+                  <p v-if="!capaMasReciente">...cargando</p>
+                  <p v-if="capaMasReciente" class="tarjeta-titulo">
+                    {{ capaMasReciente.title }}
                   </p>
-                  <!-- eslint-disable-next-line vue/no-v-html -->
-                  <div v-html="capaMasReciente.abstract"></div>
+                  <span v-if="capaMasReciente">
+                    <!-- eslint-disable-next-line vue/no-v-html -->
+                    <div v-html="formatearAbstract(capaMasReciente)"></div>
+                  </span>
                 </div>
                 <div class="tarjeta-pie">
                   <nuxt-link
@@ -116,11 +135,14 @@ const documentoMasReciente = obtenerMasReciente(resourceTypeDic.document);
                 <img class="tarjeta-imagen" :src="tablaMasReciente.thumbnail_url" alt="" />
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-etiqueta">Datos tabulados</p>
-                  <p class="tarjeta-titulo">
-                    {{ !tablaMasReciente ? '...cargando' : tablaMasReciente.title }}
+                  <p v-if="!tablaMasReciente">...cargando</p>
+                  <p v-if="tablaMasReciente" class="tarjeta-titulo">
+                    {{ tablaMasReciente.title }}
                   </p>
-                  <!-- eslint-disable-next-line vue/no-v-html -->
-                  <div v-html="tablaMasReciente.abstract"></div>
+                  <span v-if="tablaMasReciente">
+                    <!-- eslint-disable-next-line vue/no-v-html -->
+                    <div v-html="formatearAbstract(tablaMasReciente)"></div>
+                  </span>
                 </div>
                 <div class="tarjeta-pie">
                   <nuxt-link
@@ -138,11 +160,14 @@ const documentoMasReciente = obtenerMasReciente(resourceTypeDic.document);
                 <img class="tarjeta-imagen" :src="documentoMasReciente.thumbnail_url" alt="" />
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-etiqueta">Documento</p>
-                  <p class="tarjeta-titulo">
-                    {{ !documentoMasReciente ? '...cargando' : documentoMasReciente.title }}
+                  <p v-if="!documentoMasReciente">...cargando</p>
+                  <p v-if="documentoMasReciente" class="tarjeta-titulo">
+                    {{ documentoMasReciente.title }}
                   </p>
-                  <!-- eslint-disable-next-line vue/no-v-html -->
-                  <div v-html="documentoMasReciente.abstract"></div>
+                  <span v-if="documentoMasReciente">
+                    <!-- eslint-disable-next-line vue/no-v-html -->
+                    <span v-html="formatearAbstract(documentoMasReciente)"></span>
+                  </span>
                 </div>
                 <div class="tarjeta-pie">
                   <nuxt-link

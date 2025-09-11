@@ -4,7 +4,7 @@ const isDev = process.env.NODE_ENV !== 'production';
 const baseUrl = process.env.NUXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 const metaImg = 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg';
 const metaDescription =
-  'Sistema Integral de Gestión de Información Científica. Integra, visualiza y aprovecha el conocimeinto científico de México.';
+  'Sistema Integral de Gestión de Información Científica. Integra, visualiza y aprovecha el conocimiento científico de México.';
 
 export default defineNuxtConfig({
   app: {
@@ -70,7 +70,7 @@ export default defineNuxtConfig({
       defaultProvider: 'keycloak',
     },
     sessionRefresh: {
-      enablePeriodically: true,
+      enablePeriodically: 300000,
       enableOnWindowFocus: true,
     },
   },

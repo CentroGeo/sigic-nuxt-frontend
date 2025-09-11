@@ -1,9 +1,8 @@
 <script setup>
-// TODO: fix filtros avanzados y paginador
-// import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
+// TODO: fix paginador
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
-import { resourceTypeDic } from '~/utils/consulta';
+import { cleanInput, resourceTypeDic } from '~/utils/consulta';
 
 const storeFetched = useFetchedResources2Store();
 const storeFilters = useFilteredResources();
@@ -13,22 +12,19 @@ storeFilters.resourceType = 'dataLayer';
 storeFetched.checkFilling(resourceTypeDic.dataLayer);
 
 const resourcesCapas = computed(() => storeFetched.byResourceType(resourceTypeDic.dataLayer));
-
 const filteredResources = ref([]);
 const tableResources = ref([]);
-
 const seleccionOrden = ref('');
+
+const inputSearch = computed({
+  get: () => storeFilters.filters.inputSearch,
+  set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
+});
+const modalFiltroAvanzado = ref(null);
+const isFilterActive = ref(false);
 
 // obteniendo las variables keys para la tabla
 const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'acciones'];
-
-function formatearFecha(fecha) {
-  return new Date(fecha).toLocaleDateString('es-ES', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  });
-}
 
 function updateResources(nuevosRecursos) {
   filteredResources.value = nuevosRecursos;
@@ -36,22 +32,35 @@ function updateResources(nuevosRecursos) {
   tableResources.value = filteredResources.value.map((d) => ({
     pk: d.pk,
     titulo: d.title,
-    // tipo_recurso: d.resource_type,
     tipo_recurso: 'Capa geográfica',
-    categoria: d.category === null ? 'Sin Clasificar' : d.category.gn_description,
-    actualizacion: formatearFecha(d.last_updated),
+    categoria: d.category,
+    actualizacion: d.last_updated,
     acciones: 'Ver, Descargar',
-    enlace_descarga: d.download_url,
+    uuid: d.uuid,
+    recurso_completo: d,
   }));
 }
 
-watch([resourcesCapas], () => {
-  updateResources(storeFilters.sort());
+function applyAdvancedFilter() {
+  isFilterActive.value = true;
+  modalFiltroAvanzado.value.cerrarModalBusqueda();
+  updateResources(storeFilters.filter());
+}
+
+function resetAdvancedFilter() {
+  isFilterActive.value = false;
+  storeFilters.resetFilters();
+  modalFiltroAvanzado.value.cerrarModalBusqueda();
+  updateResources(storeFilters.filter());
+}
+
+watch([resourcesCapas, inputSearch], () => {
+  updateResources(storeFilters.filter());
 });
 
 watch(seleccionOrden, (nv) => {
   storeFilters.updateFilter('sort', nv);
-  updateResources(storeFilters.sort());
+  updateResources(storeFilters.filter());
 });
 
 onMounted(async () => {
@@ -71,6 +80,7 @@ onMounted(async () => {
     <template #visualizador>
       <main id="principal" class="contenedor m-b-10 m-t-3">
         <div class="flex">
+          <!-- Selector Orden -->
           <div class="columna-8">
             <ClientOnly>
               <SisdaiSelector v-model="seleccionOrden" etiqueta="Ordenar por">
@@ -81,35 +91,57 @@ onMounted(async () => {
               </SisdaiSelector>
             </ClientOnly>
           </div>
-
-          <!-- <div class="columna-8 flex-vertical-final">
+          <!-- Campo de búsqueda avanzada -->
+          <div class="columna-8">
             <div class="flex flex-contenido-separado">
               <div class="columna-14">
                 <ClientOnly>
-                  <label for="buscadoravanzado">Buscador</label>
-                  <SisdaiCampoBusqueda
-                    id="buscadoravanzado"
-                    class="columna-13"
-                    style="height: 40px"
-                    :catalogo="filteredResources"
-                    :propiedad-busqueda="'title'"
-                    :etiqueta="'Usa palabras clave como: agua'"
-                    @al-filtrar="(r) => updateResources(r)"
-                  />
+                  <label for="idunicobusqueda"> Campo de búsqueda </label>
+                  <form class="campo-busqueda" style="height: 40px" @submit.prevent>
+                    <input
+                      id="idunicobusqueda"
+                      v-model="inputSearch"
+                      type="search"
+                      class="campo-busqueda-entrada"
+                      placeholder="Campo de búsqueda"
+                    />
+
+                    <button
+                      style="margin: 0; margin-right: 4px"
+                      class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
+                      aria-label="Borrar"
+                      type="button"
+                      @click="storeFilters.updateFilter('inputSearch', '')"
+                    >
+                      <span aria-hidden="true" class="pictograma-cerrar" />
+                    </button>
+
+                    <button
+                      class="boton-primario boton-pictograma campo-busqueda-buscar"
+                      aria-label="Buscar"
+                      type="button"
+                    >
+                      <span class="pictograma-buscar" aria-hidden="true" />
+                    </button>
+                  </form>
                 </ClientOnly>
               </div>
               <div class="columna-2 flex-vertical-final">
                 <button
-                  class="boton-secundario boton-pictograma boton-grande"
+                  :class="
+                    isFilterActive
+                      ? 'boton-primario boton-pictograma boton-grande'
+                      : 'boton-secundario boton-pictograma boton-grande'
+                  "
                   aria-label="Filtro Avanzado"
                   type="button"
-                  @click="modalFiltros?.abrirModal()"
+                  @click="modalFiltroAvanzado.abrirModalBusqueda"
                 >
                   <span class="pictograma-filtro" aria-hidden="true" />
                 </button>
               </div>
             </div>
-          </div> -->
+          </div>
         </div>
 
         <div class="flex">
@@ -119,6 +151,7 @@ onMounted(async () => {
 
         <div class="flex">
           <div class="columna-16">
+            <!-- TODO: implementar paginador -->
             <ClientOnly>
               <UiTablaAccesibleV2 :variables="variables" :datos="tableResources" />
               <UiPaginador :total-paginas="1" @cambio="1" />
@@ -126,6 +159,13 @@ onMounted(async () => {
           </div>
         </div>
       </main>
+
+      <!-- Modal Búsqueda avanzada -->
+      <ConsultaModalBusqueda
+        ref="modalFiltroAvanzado"
+        @apply-filter="applyAdvancedFilter"
+        @reset-filter="resetAdvancedFilter"
+      />
     </template>
   </UiLayoutPaneles>
 </template>

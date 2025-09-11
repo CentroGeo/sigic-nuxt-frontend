@@ -20,14 +20,6 @@ const seleccionGrupo = ref('');
  * @returns {Object} objeto decodificado con la propiedad de pk
  */
 function getUserData() {
-  /* if (route.query.userObject) {
-    try {
-      return JSON.parse(route.query.userObject);
-    } catch (e) {
-      console.error('Error parsing user object', e);
-      return null;
-    }
-  } */
   if (route.query.data) {
     try {
       const dataStr = decodeURIComponent(route.query.data);
@@ -62,14 +54,21 @@ async function actualizaMetadatos() {
   console.warn('response', response);
 }
 
+const tablaSinGeometria = ref(false);
 /**
- * Valida si el tipo de recurso es documento o dataset con geometría o no
+ * Valida si el tipo de recurso es documento o dataset con geometría o no.
+ * Además si es dataset y no tiene geometría asigna una tabla sin geometría a true
  * @returns {Boolean} ya sea true si tiene geometría o no false
  */
 function tipoRecurso() {
   if (resource.value.resource_type === 'document') {
     return false;
   } else {
+    if (resource.value.resource_type === 'dataset') {
+      if (!isGeometricExtension(resource.value.extent)) {
+        tablaSinGeometria.value = true;
+      }
+    }
     return isGeometricExtension(resource.value.extent) ? true : false;
   }
 }
@@ -88,26 +87,19 @@ function irAEstiloConQuery() {
     query: { data: pk.value },
   });
 }
-// function irAClaveConQuery() {
-//   navigateTo({
-//     path: '/catalogo/mis-archivos/unir-vectores',
-//     query: { data: pk.value },
-//   });
-// }
+function irAClaveConQuery() {
+  navigateTo({
+    path: '/catalogo/mis-archivos/unir-vectores',
+    query: { data: pk.value },
+  });
+}
 
 //
 const dragNdDrop = ref(null);
+const img_files = ['.jpg', '.jpeg', '.png', '.webp'];
 async function guardarImagen(files) {
-  if (
-    files[0].name.split('.')[1] === '.jpg' ||
-    files[0].name.endsWith('.jpg') ||
-    files[0].name.split('.')[1] === '.jpeg' ||
-    files[0].name.endsWith('.jpeg') ||
-    files[0].type === 'image/jpeg' ||
-    files[0].name.split('.')[1] === '.png' ||
-    files[0].name.endsWith('.png') ||
-    files[0].type === 'image/png'
-  ) {
+  // solo una o la primera archivo de imagen
+  if (img_files.map((end) => files[0]?.name.endsWith(end)).includes(true)) {
     imagen.value = files;
   } else {
     dragNdDrop.value?.archivoNoValido();
@@ -155,12 +147,12 @@ const bordeEnlaceActivo = (ruta) => {
               @click="irAEstiloConQuery"
               >Estilo
             </nuxt-link>
-            <!-- TODO: validar sin es archivo sin geometría para mostrar opción de Clave Geoestadística -->
-            <!-- <nuxt-link
+            <nuxt-link
+              v-if="tablaSinGeometria"
               :class="bordeEnlaceActivo('/catalogo/mis-archivos/unir-vectores')"
               @click="irAClaveConQuery"
               >Clave Geoestadística
-            </nuxt-link> -->
+            </nuxt-link>
           </div>
           <div class="borde-b borde-color-secundario"></div>
 
