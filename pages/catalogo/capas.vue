@@ -8,9 +8,7 @@ const storeFetched = useFetchedResources2Store();
 const storeFilters = useFilteredResources();
 const storeConsulta = useConsultaStore();
 storeConsulta.resourceType = resourceTypeDic.dataLayer;
-
 //storeFilters.resourceType = 'dataLayer';
-
 storeFetched.checkFilling(resourceTypeDic.dataLayer);
 
 const resourcesCapas = computed(() => storeFetched.byResourceType(resourceTypeDic.dataLayer));
