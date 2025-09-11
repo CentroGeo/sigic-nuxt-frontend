@@ -357,6 +357,47 @@ export async function downloadWMS(resource, format, featureTypes) {
   anchor.click();
   document.body.removeChild(anchor);
 }
+
+export async function getFeatures(resource) {
+  const config = useRuntimeConfig();
+  const { data } = useAuth();
+  const token = data.value?.accessToken;
+  // Revisamos si la capa es remota
+  if (resource.sourcetype === 'remote') {
+    alert('Esta capa es remota y no se puede descargar');
+    return;
+  }
+  // Si la capa no es remota, revisamos sus columnas para excluir las de geometria
+  const describeFeatureUrl = new URL(`${config.public.geonodeUrl}/gs/ows`);
+  describeFeatureUrl.search = new URLSearchParams({
+    service: 'WFS',
+    version: '2.0.0',
+    request: 'DescribeFeatureType',
+    typeName: resource.alternate,
+    outputFormat: 'application/json',
+  }).toString();
+
+  //const res = await fetch(describeFeatureUrl);
+  let res;
+  if (token) {
+    res = await fetch(describeFeatureUrl, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } else {
+    res = await fetch(describeFeatureUrl);
+  }
+  //console.log(res);
+  if (!res.ok) {
+    return 'Error';
+  }
+  const fileData = await res.json();
+  const features = fileData.featureTypes[0]['properties'];
+  const props = features
+    .filter((prop) => prop.name.toLowerCase() !== 'geometry')
+    .map((prop) => prop.name);
+  console.log(props);
+}
+
 /**
  * Hace una petición WFS para obtener la lista de Features y la geometría.
  * Las peticiones pueden ser autenticadas o no.
@@ -364,6 +405,7 @@ export async function downloadWMS(resource, format, featureTypes) {
  * @param {String} format
  * @returns
  */
+
 export async function downloadNoGeometry(resource, format) {
   const config = useRuntimeConfig();
   const { data } = useAuth();

@@ -1,6 +1,7 @@
 <script setup>
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
+import { getFeatures } from '~/utils/consulta';
 
 const storeFetched = useFetchedResources2Store();
 const route = useRoute();
@@ -14,6 +15,8 @@ const typeDict = {
 storeFetched.checkFilling(typeDict[type]);
 const resources = computed(() => storeFetched.byResourceType(typeDict[type]));
 const editedResource = computed(() => resources.value.find(({ pk }) => pk === selectedPk));
+const features = ref([]);
+//const datos = ref([]);
 const variables = [
   'Atributo',
   'Etiqueta',
@@ -41,6 +44,15 @@ const datos = [
     Visible: '',
   },
 ];
+
+watch(editedResource, () => {
+  //console.log(nv);
+  features.value = getFeatures(editedResource.value);
+  console.log('aqui: ', features.value[0]);
+  /*   for (let i = 0; i < features.value.length; i++) {
+    console.log(features.value[i]);
+  } */
+});
 </script>
 <template>
   <UiLayoutPaneles>
@@ -71,7 +83,7 @@ const datos = [
               <tr>
                 <th
                   v-for="(variable, v) in variables"
-                  :id="`${idAleatorio}-col-${v}`"
+                  :id="`${variable}-col-${v}`"
                   :key="v"
                   scope="col"
                 >
@@ -80,13 +92,14 @@ const datos = [
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(datum, d) in datos" :id="`${idAleatorio}-ren-${d}`" :key="d">
+              <tr v-for="(datum, d) in datos" :id="`${datum}-ren-${d}`" :key="d">
                 <td>{{ datum['Atributo'] }}</td>
                 <td>
                   <ClientOnly>
                     <SisdaiCampoBase
                       :id="datum['Etiqueta']"
                       v-model="datum['Etiqueta']"
+                      etiqueta=""
                       tipo='"text"'
                       class="m-y-1"
                       :ejemplo="datum['Etiqueta']"
@@ -98,6 +111,7 @@ const datos = [
                     <SisdaiCampoBase
                       :id="datum['Descripción']"
                       v-model="datum['Descripción']"
+                      etiqueta=""
                       tipo='"text"'
                       class="m-y-1"
                       :ejemplo="datum['Descripción']"
@@ -109,6 +123,7 @@ const datos = [
                     <SisdaiCampoBase
                       :id="datum['Mostrar Orden']"
                       v-model="datum['Mostrar Orden']"
+                      etiqueta=""
                       tipo='"text"'
                       class="m-y-1"
                       :ejemplo="datum['Mostrar Orden']"
@@ -117,7 +132,7 @@ const datos = [
                 </td>
                 <td>
                   <ClientOnly>
-                    <SisdaiSelector v-model="datum['Display type']">
+                    <SisdaiSelector v-model="datum['Display type']" etiqueta="">
                       <option value="todos">Opcion 1</option>
                       <option value="catalogo">Opcion 2</option>
                     </SisdaiSelector>
