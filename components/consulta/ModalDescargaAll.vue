@@ -113,7 +113,6 @@ function descargarAllClicked() {
   optionsList.value.map((d) => {
     if (d.label === selectedOption.value) {
       d.action();
-      //console.(d);
     }
   });
 }
