@@ -43,8 +43,72 @@ export const useFilteredResources = defineStore('filteredResources', () => {
       filters.keywords = null;
     },
 
-    filter() {
-      let data = storeFetched.byResourceType();
+    sort(datum) {
+      let data = datum;
+      // si algo está seleccionado
+      if (filters.sort.trim().length >= 1) {
+        // Ordenamos por más reciente
+        if (filters.sort === 'fecha_descendente') {
+          data = data.sort((a, b) => {
+            if (a.last_updated < b.last_updated) {
+              return 1;
+            }
+            if (a.last_updated > b.last_updated) {
+              return -1;
+            }
+            return 0;
+          });
+        }
+        // Ordenamos por más antiguo
+        if (filters.sort === 'fecha_ascendente') {
+          data = data.sort((a, b) => {
+            if (a.last_updated > b.last_updated) {
+              return 1;
+            }
+            if (a.last_updated < b.last_updated) {
+              return -1;
+            }
+            return 0;
+          });
+        }
+        // Ordenamos por titulo
+        if (filters.sort === 'titulo') {
+          data = data.sort((a, b) => {
+            const titleA = a.title.toUpperCase();
+            const titleB = b.title.toUpperCase();
+            if (titleA > titleB) {
+              return 1;
+            }
+            if (titleA < titleB) {
+              return -1;
+            }
+            return 0;
+          });
+        }
+        // Ordenamos por categoria
+        if (filters.sort === 'categoria') {
+          let conCategoria = data.filter((r) => r.category !== null);
+          const sinCategoria = data.filter((r) => r.category === null);
+          conCategoria = conCategoria.sort((a, b) => {
+            if (a.category.gn_description > b.category.gn_description) {
+              return 1;
+            }
+            if (a.category.gn_description < b.category.gn_description) {
+              return -1;
+            }
+            return 0;
+          });
+          data = conCategoria.concat(sinCategoria);
+        }
+      }
+      return data;
+    },
+
+    filter(type) {
+      let data = [];
+      type === 'all'
+        ? (data = storeFetched.all)
+        : (data = storeFetched.byResourceType(resourceType.value));
       // Aplicamos el filtro del input
       if (filters.inputSearch !== null) {
         data = data.filter((resource) => cleanInput(resource.title).includes(filters.inputSearch));
@@ -136,71 +200,8 @@ export const useFilteredResources = defineStore('filteredResources', () => {
           });
         }); */
       }
-      return data;
-    },
-
-    sort(type) {
-      let data = [];
-      // para saber si es por tipo de recurso o no
-      type === 'all'
-        ? (data = storeFetched.all)
-        : (data = storeFetched.byResourceType(resourceType.value));
-      // revisamos que se seleccione algo
-      if (filters.sort.trim().length >= 1) {
-        // Ordenamos por más reciente
-        if (filters.sort === 'fecha_descendente') {
-          data = data.sort((a, b) => {
-            if (a.last_updated < b.last_updated) {
-              return 1;
-            }
-            if (a.last_updated > b.last_updated) {
-              return -1;
-            }
-            return 0;
-          });
-        }
-        // Ordenamos por más antiguo
-        if (filters.sort === 'fecha_ascendente') {
-          data = data.sort((a, b) => {
-            if (a.last_updated > b.last_updated) {
-              return 1;
-            }
-            if (a.last_updated < b.last_updated) {
-              return -1;
-            }
-            return 0;
-          });
-        }
-        // Ordenamos por titulo
-        if (filters.sort === 'titulo') {
-          data = data.sort((a, b) => {
-            const titleA = a.title.toUpperCase();
-            const titleB = b.title.toUpperCase();
-            if (titleA > titleB) {
-              return 1;
-            }
-            if (titleA < titleB) {
-              return -1;
-            }
-            return 0;
-          });
-        }
-        // Ordenamos por categoria
-        if (filters.sort === 'categoria') {
-          let conCategoria = data.filter((r) => r.category !== null);
-          const sinCategoria = data.filter((r) => r.category === null);
-          conCategoria = conCategoria.sort((a, b) => {
-            if (a.category.gn_description > b.category.gn_description) {
-              return 1;
-            }
-            if (a.category.gn_description < b.category.gn_description) {
-              return -1;
-            }
-            return 0;
-          });
-          data = conCategoria.concat(sinCategoria);
-        }
-      }
+      // si hay opciones asignadas para ordenar
+      data = this.sort(data);
       return data;
     },
   };
