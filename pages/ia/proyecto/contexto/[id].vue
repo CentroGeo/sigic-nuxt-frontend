@@ -1,10 +1,11 @@
 <script setup>
 import SisdaiAreaTexto from '@centrogeomx/sisdai-componentes/src/componentes/area-texto/SisdaiAreaTexto.vue';
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const storeIA = useIAStore();
 const route = useRoute();
+const router = useRouter();
 
 // Obtener el proyecto_id de la URL
 const proyectoId = ref(route.query.proyecto_id);
@@ -14,13 +15,22 @@ const nombreContexto = ref('');
 const descripcionContexto = ref('');
 const portadaContexto = ref(null);
 const previewImagen = ref(null);
-const fileInput = ref(null);
+/* const fileInput = ref(null); */
 const estaCargando = ref(false);
 const mensajeError = ref('');
 const mensajeExito = ref('');
 
 const arraySources = ref([]);
 const fuentesSeleccionadas = ref([]);
+
+const esEdicion = ref(false);
+const contexto = ref(null);
+
+const archivosEliminados = ref([]);
+
+const config = useRuntimeConfig();
+const { data } = useAuth();
+const imagenPreview = ref(null);
 
 // Si necesitas reaccionar a cambios en el parámetro
 watch(
@@ -37,53 +47,17 @@ const toggleSeleccionFuente = (fuente) => {
   const index = fuentesSeleccionadas.value.findIndex((f) => f.id === fuente.id);
   if (index === -1) {
     fuentesSeleccionadas.value.push(fuente);
+
+    const eliminadoIndex = archivosEliminados.value.indexOf(fuente.id);
+    if (eliminadoIndex !== -1) {
+      archivosEliminados.value.splice(eliminadoIndex, 1);
+    }
   } else {
     fuentesSeleccionadas.value.splice(index, 1);
-  }
-};
 
-// Manejar cambio de archivo y generar preview
-const manejarArchivo = (event) => {
-  const archivo = event.target.files[0];
-
-  mensajeError.value = null;
-
-  // Limpiar preview anterior si existe
-  if (previewImagen.value) {
-    URL.revokeObjectURL(previewImagen.value);
-    previewImagen.value = null;
-  }
-
-  if (archivo) {
-    // Validar tipo de archivo (ej. solo imágenes)
-    const tiposPermitidos = ['image/jpeg', 'image/png', 'image/gif'];
-    if (!tiposPermitidos.includes(archivo.type)) {
-      mensajeError.value = 'Por favor, sube una imagen válida (JPEG, PNG o GIF)';
-      return;
+    if (!archivosEliminados.value.includes(fuente.id)) {
+      archivosEliminados.value.push(fuente.id);
     }
-
-    // Validar tamaño (ej. máximo 5MB)
-    const tamañoMaximo = 5 * 1024 * 1024; // 5MB
-    if (archivo.size > tamañoMaximo) {
-      mensajeError.value = 'La imagen no debe exceder los 5MB';
-      return;
-    }
-
-    portadaContexto.value = archivo;
-    //mensajeError.value = "";
-
-    // Generar URL para el preview
-    previewImagen.value = URL.createObjectURL(archivo);
-  }
-};
-
-const eliminarImagen = () => {
-  portadaContexto.value = null;
-  previewImagen.value = null;
-  if (fileInput.value && fileInput.value.$el) {
-    // Para componentes Sisdai, necesitamos acceder al input interno
-    const input = fileInput.value.$el.querySelector('input[type="file"]');
-    if (input) input.value = '';
   }
 };
 
@@ -177,12 +151,81 @@ const loadSources = async () => {
 
   //catalogo.value = arrayProjects;
   //catalogoFiltrado.value = arrayProjects;
+
+  if (contexto.value?.files) {
+    fuentesSeleccionadas.value = arraySources.value.filter((source) =>
+      contexto.value.files.some((file) => file.id === source.id)
+    );
+  }
+};
+
+const editarContexto = async () => {
+  if (!nombreContexto.value.trim()) {
+    mensajeError.value = 'El nombre del contexto es obligatorio';
+    return;
+  }
+
+  if (fuentesSeleccionadas.value.length === 0) {
+    mensajeError.value = 'Debes seleccionar al menos una fuente de información';
+    return;
+  }
+
+  // Preparar datos del formulario
+  const formData = new FormData();
+
+  formData.append('nombre', nombreContexto.value);
+  formData.append('descripcion', descripcionContexto.value);
+
+  // Agregar las fuentes seleccionadas como array JSON
+  formData.append('fuentes', JSON.stringify(fuentesSeleccionadas.value.map((f) => f.id)));
+
+  if (portadaContexto.value) {
+    formData.append('file', portadaContexto.value);
+  }
+
+  if (archivosEliminados.value.length > 0) {
+    formData.append('fuentes_elimnadas', archivosEliminados);
+  }
+
+  try {
+    estaCargando.value = true;
+    mensajeError.value = '';
+    mensajeExito.value = '';
+
+    for (const pair of formData.entries()) {
+      console.log(`${pair[0]}: ${pair[1]}`);
+    }
+
+    await storeIA.actualizarContexto(formData, route.params.id);
+
+    mensajeExito.value = 'Contexto actualizado exitosamente';
+    console.log('Contexto actualizado exitosamente');
+
+    setTimeout(() => {
+      navigateTo('/ia/proyectos');
+    }, 2000);
+  } catch (error) {
+    console.error('Error al editar contexto:', error);
+    mensajeError.value = error.message || 'Ocurrió un error al editar el contexto';
+  } finally {
+    estaCargando.value = false;
+  }
 };
 
 //carga fuentes del proyecto inicialmente seleccionado
-onMounted(() => {
+onMounted(async () => {
+  if (route.params.id !== 'nuevo') {
+    esEdicion.value = true;
+    contexto.value = await storeIA.getContextById(route.params.id);
+    console.log(contexto.value);
+
+    nombreContexto.value = contexto.value.context.title;
+    descripcionContexto.value = contexto.value.context.description;
+
+    cargarImagenDelContexto();
+  }
   //console.log(proyecto.value)
-  loadSources();
+  await loadSources();
 });
 
 watch(
@@ -194,39 +237,98 @@ watch(
   },
   { immediate: true }
 ); // Esto lo ejecuta también en el primer render
+
+const obtenerTipoArchivo = (nombre) => {
+  const extension = nombre.split('.').pop().toLowerCase();
+  const tipos = {
+    shp: 'Shapefile',
+    geojson: 'GeoJSON',
+    csv: 'CSV',
+    kml: 'KML',
+    zip: 'ZIP',
+    pdf: 'PDF',
+    doc: 'Word',
+    docx: 'Word',
+    xls: 'Excel',
+    xlsx: 'Excel',
+  };
+  return tipos[extension] || extension.toUpperCase();
+};
+
+async function guardarArchivo(archivo) {
+  portadaContexto.value = archivo;
+}
+
+function irAProyectos() {
+  router.push('/ia/proyectos/');
+}
+
+async function cargarImagenDelContexto() {
+  const token = data.value?.accessToken;
+  const formData = new FormData();
+  formData.append('filename', contexto.value.context.image_type);
+
+  const response = await fetch(`${config.public.geonodeUrl}/sigic/ia/mediauploads/register`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    console.error(`Error cargando imagen para contexto ${route.params.id}`);
+    return;
+  }
+
+  const blob = await response.blob();
+  const imageUrl = URL.createObjectURL(blob);
+
+  imagenPreview.value = imageUrl;
+}
+
+onBeforeUnmount(() => {
+  if (imagenPreview.value) {
+    URL.revokeObjectURL(imagenPreview.value);
+  }
+});
 </script>
 
 <template>
-  <IaLayoutPaneles>
-    <template #lista>
+  <UiLayoutPaneles>
+    <template #catalogo>
       <IaLayoutListas
-        texto-boton="Crear proyecto"
+        texto-boton="Nuevo proyecto"
         titulo="Proyectos"
         etiqueta-busqueda="Buscar un proyecto"
       />
     </template>
 
-    <template #vistas-ia>
-      <div class="contenedor">
+    <template #visualizador>
+      <main id="principal" class="contenedor m-b-10 p-t-3">
         <!-- Mensajes de feedback -->
-        <div v-if="mensajeError" class="mensaje-error">
+        <!-- <div v-if="mensajeError" class="mensaje-error">
           {{ mensajeError }}
         </div>
         <div v-if="mensajeExito" class="mensaje-exito">
           {{ mensajeExito }}
-        </div>
+        </div> -->
 
         <div class="grid">
-          <div class="columna-16 flex flex-contenido-separado contexto-encabezado">
-            <h2>Configuración del contexto</h2>
-            <NuxtLink
-              class="boton boton-secundario boton-chico"
-              aria-label="Regresar a proyectos"
-              to="/ia/proyectos/"
-            >
-              Regresar a proyectos
-              <span class="pictograma-flecha-izquierda" aria-hidden="true" />
-            </NuxtLink>
+          <div class="columna-16 flex crear contexto-encabezado">
+            <div class="boton-regresar">
+              <button
+                class="boton-pictograma boton-sin-contenedor-secundario m-r-2"
+                aria-label="Regresar a proyectos"
+                type="button"
+                @click="irAProyectos"
+              >
+                <span class="pictograma-flecha-izquierda" aria-hidden="true" />
+              </button>
+              Proyectos
+            </div>
+
+            <h2>Configuración de contexto</h2>
           </div>
         </div>
 
@@ -248,30 +350,26 @@ watch(
                   :es_obligatorio="false"
                   class="m-b-3"
                 />
-                <SisdaiCampoBase
+                <!-- <SisdaiCampoBase
                   ref="fileInput"
                   etiqueta="Portada del proyecto"
                   tipo="file"
                   class="m-b-3"
                   accept="image/jpeg, image/png, image/gif"
+                  texto_ayuda="Sube una imagen en formato JPG o PNG (máx. 5MB)."
                   @change="manejarArchivo"
-                />
-                <!-- Preview de la imagen -->
-                <div v-if="previewImagen" class="preview-imagen-contenedor">
-                  <h6 class="m-t-0 m-b-1">Vista previa:</h6>
-                  <img
-                    :src="previewImagen"
-                    alt="Preview de la portada del proyecto"
-                    class="preview-imagen"
-                  />
-                  <button
-                    type="button"
-                    class="boton boton-secundario boton-chico m-t-1"
-                    @click="eliminarImagen"
-                  >
-                    Eliminar imagen
-                  </button>
+                /> -->
+                <label>Portada del contexto</label>
+                <div class="m-b-2 portada-texto">
+                  Sube una imagen en formato JPG o PNG (máx. 5MB).
                 </div>
+                <ClientOnly>
+                  <IaElementoDragNdDrop
+                    ref="dragNdDrop"
+                    :imagen-inicial="imagenPreview"
+                    @pasar-archivo="(i) => guardarArchivo(i)"
+                  />
+                </ClientOnly>
               </ClientOnly>
             </form>
           </div>
@@ -308,14 +406,14 @@ watch(
               <table class="tabla">
                 <thead>
                   <tr>
-                    <th class="checkbox-header">Selección</th>
-                    <th>Nombre</th>
-                    <th>Tipo</th>
+                    <th class="checkbox-header p-x-3 p-y-2">Selección</th>
+                    <th class="p-x-3 p-y-2">Nombre</th>
+                    <th class="p-x-3 p-y-2">Tipo</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="fuente in arraySources" :key="fuente.id">
-                    <td class="checkbox-cell">
+                    <td class="checkbox-cell p-3">
                       <label class="checkbox-wrapper">
                         <input
                           type="checkbox"
@@ -325,8 +423,12 @@ watch(
                         <span class="checkmark"></span>
                       </label>
                     </td>
-                    <td>{{ fuente.filename }}</td>
-                    <td>{{ fuente.document_type }}</td>
+                    <td class="p-3">{{ fuente.filename }}</td>
+                    <td class="p-3 etiqueta-tabla">
+                      <span class="p-x-1 p-y-minimo">{{
+                        obtenerTipoArchivo(fuente.filename)
+                      }}</span>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -335,7 +437,7 @@ watch(
               <NuxtLink
                 class="boton boton-primario boton-chico"
                 aria-label="Guardar contexto"
-                @click="crearContexto()"
+                @click.prevent="esEdicion ? editarContexto() : crearContexto()"
               >
                 Guardar contexto
               </NuxtLink>
@@ -349,14 +451,27 @@ watch(
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </template>
-  </IaLayoutPaneles>
+  </UiLayoutPaneles>
 </template>
 
 <style lang="scss">
-.contexto-encabezado {
-  align-items: center;
+.crear {
+  &.contexto-encabezado {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0px;
+
+    .boton-regresar {
+      display: flex;
+      align-items: center;
+      font-size: var(--Tipos-Tamao-Prrafos-Texto-alto, 20px);
+      font-style: normal;
+      font-weight: 400;
+      line-height: var(--Tipos-Interlineado-Prrafos-Texto-alto, 30px);
+    }
+  }
 }
 
 .mensaje-error {
@@ -483,5 +598,12 @@ input[type='file'] {
   border: solid white;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
+}
+
+.portada-texto {
+  font-size: var(--Tipos-Tamao-Prrafos-Prrafo-base, 16px);
+  font-style: normal;
+  font-weight: 600;
+  line-height: var(--Tipos-Interlineado-Prrafos-Prrafos, 24px);
 }
 </style>

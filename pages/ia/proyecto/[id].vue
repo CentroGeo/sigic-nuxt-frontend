@@ -76,15 +76,32 @@ const categoriaSeleccionada = ref(null);
 const route = useRoute();
 const esEdicion = ref(false);
 
-const proyecto = computed(() => storeIA.proyectoSeleccionado);
+const proyecto = ref(null);
+
+const archivosEliminados = ref([]);
 
 onMounted(async () => {
   if (route.params.id !== 'nuevo') {
     esEdicion.value = true;
 
-    nombreProyecto.value = proyecto.value.title;
-    descripcionProyecto.value = proyecto.value.description;
-    visibilidadProyecto.value = proyecto.value.public ? 'publico' : 'privado';
+    proyecto.value = await storeIA.getProjectById(route.params.id);
+
+    nombreProyecto.value = proyecto.value.workspace.title;
+    descripcionProyecto.value = proyecto.value.workspace.description;
+    visibilidadProyecto.value = proyecto.value.workspace.public ? 'publico' : 'privado';
+
+    const arraySources = await storeIA.getProjectSources(route.params.id);
+
+    const archivosBackend = arraySources.map((archivo) => ({
+      id: archivo.id,
+      nombre: archivo.filename,
+      tipo: obtenerTipoArchivo(archivo.filename),
+      archivo: null,
+      categoria: 'Archivo',
+      origen: 'Propio',
+    }));
+
+    archivosSeleccionados.value = [...archivosSeleccionados.value, ...archivosBackend];
   }
 });
 
@@ -132,6 +149,8 @@ const obtenerTipoArchivo = (nombre) => {
 // Método para eliminar archivo de la lista
 const eliminarArchivo = (id) => {
   archivosSeleccionados.value = archivosSeleccionados.value.filter((archivo) => archivo.id !== id);
+
+  archivosEliminados.value.push(id);
 };
 
 // Función para guardar el proyecto
@@ -162,32 +181,49 @@ const guardarProyecto = async () => {
 
     navigateTo('/ia/proyectos');
   } catch (error) {
-    alert('Error al guardar: ' + error.message);
+    //alert('Error al guardar: ' + error.message);
     console.log('Error al guardar: ' + error.message);
-    notificacion.mostrar({
+    /* notificacion.mostrar({
       tipo: 'error',
       mensaje: 'Error al guardar: ' + error.message,
       duracion: 7000,
-    });
+    }); */
+  }
+};
+
+const editarProyecto = async () => {
+  try {
+    await storeIA.actualizarProyecto(
+      nombreProyecto.value,
+      descripcionProyecto.value,
+      visibilidadProyecto.value,
+      archivosSeleccionados.value,
+      archivosEliminados.value,
+      route.params.id
+    );
+
+    navigateTo('/ia/proyectos');
+  } catch (error) {
+    console.log('Error al actualizar: ' + error.message);
   }
 };
 </script>
 
 <template>
-  <IaLayoutPaneles>
-    <template #lista>
+  <UiLayoutPaneles>
+    <template #catalogo>
       <IaLeyendaInicioListas />
 
       <IaLayoutListas
         v-if="storeIA.existenProyectos"
-        texto-boton="Crear proyecto"
+        texto-boton="Nuevo proyecto"
         titulo="Proyectos"
         etiqueta-busqueda="Buscar un proyecto"
       />
     </template>
 
-    <template #vistas-ia>
-      <div class="contenedor">
+    <template #visualizador>
+      <main id="principal" class="contenedor m-b-10 p-t-3">
         <h2>Configuración de proyecto</h2>
         <div class="grid">
           <div class="columna-10">
@@ -196,7 +232,7 @@ const guardarProyecto = async () => {
                 <SisdaiCampoBase
                   v-model="nombreProyecto"
                   etiqueta="Nombre del proyecto"
-                  ejemplo=""
+                  ejemplo="Escribe el nombre de tu proyecto"
                   :es_etiqueta_visible="true"
                   class="m-b-3"
                 />
@@ -204,6 +240,7 @@ const guardarProyecto = async () => {
                 <SisdaiAreaTexto
                   v-model="descripcionProyecto"
                   etiqueta="Descripción del proyecto"
+                  ejemplo="Describe brevemente tu proyecto"
                   :es_etiqueta_visible="true"
                   :es_obligatorio="false"
                   class="m-b-3"
@@ -227,7 +264,7 @@ const guardarProyecto = async () => {
             </form>
           </div>
         </div>
-        <div class="flex flex-contenido-final">
+        <!-- <div class="flex flex-contenido-final">
           <NuxtLink
             class="boton boton-chico boton-primario"
             aria-label="Guardar proyecto"
@@ -242,7 +279,7 @@ const guardarProyecto = async () => {
           >
             Cancelar
           </nuxt-link>
-        </div>
+        </div> -->
 
         <div class="grid">
           <div class="columna-16">
@@ -280,11 +317,46 @@ const guardarProyecto = async () => {
                 />
               </div>
             </div>
-            <!--             <div class="flex flex-contenido-final">
+            <div v-if="archivosSeleccionados.length > 0" class="tabla-archivos m-y-3">
+              <h3>Archivos a subir</h3>
+              <table class="tabla">
+                <thead>
+                  <tr>
+                    <th class="p-x-3 p-y-2">Nombre</th>
+                    <th class="p-x-3 p-y-2">Tipo de archivo</th>
+                    <th class="p-x-3 p-y-2">Categoría</th>
+                    <th class="p-x-3 p-y-2">Origen</th>
+                    <th class="p-x-3 p-y-2">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="archivo in archivosSeleccionados" :key="archivo.id">
+                    <td class="p-3">{{ archivo.nombre }}</td>
+                    <td class="p-3 etiqueta-tabla">
+                      <span class="p-x-1 p-y-minimo">{{ archivo.tipo }}</span>
+                    </td>
+                    <td class="p-3">{{ archivo.categoria }}</td>
+                    <td class="p-3 etiqueta-tabla">
+                      <span class="p-x-1 p-y-minimo">{{ archivo.origen }}</span>
+                    </td>
+                    <td class="p-x-3 p-y-1">
+                      <button
+                        class="boton-pictograma boton-secundario boton-chico"
+                        aria-label="Eliminar archivo"
+                        @click="eliminarArchivo(archivo.id)"
+                      >
+                        <span class="pictograma-eliminar" aria-hidden="true" />
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="flex flex-contenido-final">
               <NuxtLink
                 class="boton boton-chico boton-primario"
                 aria-label="Guardar proyecto"
-                @click="guardarProyecto"
+                @click.prevent="esEdicion ? editarProyecto() : guardarProyecto()"
               >
                 Guardar proyecto
               </NuxtLink>
@@ -295,47 +367,11 @@ const guardarProyecto = async () => {
               >
                 Cancelar
               </nuxt-link>
-            </div> -->
+            </div>
           </div>
         </div>
-
-        <div v-if="archivosSeleccionados.length > 0" class="tabla-archivos m-t-3">
-          <h3>Archivos a subir</h3>
-          <table class="tabla">
-            <thead>
-              <tr>
-                <th class="p-x-3 p-y-2">Nombre</th>
-                <th class="p-x-3 p-y-2">Tipo de archivo</th>
-                <th class="p-x-3 p-y-2">Categoría</th>
-                <th class="p-x-3 p-y-2">Origen</th>
-                <th class="p-x-3 p-y-2">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="archivo in archivosSeleccionados" :key="archivo.id">
-                <td class="p-3">{{ archivo.nombre }}</td>
-                <td class="p-3 etiqueta-tabla">
-                  <span class="p-x-1 p-y-minimo">{{ archivo.tipo }}</span>
-                </td>
-                <td class="p-3">{{ archivo.categoria }}</td>
-                <td class="p-3 etiqueta-tabla">
-                  <span class="p-x-1 p-y-minimo">{{ archivo.origen }}</span>
-                </td>
-                <td class="p-x-3 p-y-1">
-                  <button
-                    class="boton-pictograma boton-secundario boton-chico"
-                    aria-label="Eliminar archivo"
-                    @click="eliminarArchivo(archivo.id)"
-                  >
-                    <span class="pictograma-eliminar" aria-hidden="true" />
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
+      </main>
+      <!-- Modal agregar catálogo -->
       <ClientOnly>
         <SisdaiModal ref="catalogoModal">
           <template #encabezado>
@@ -382,7 +418,7 @@ const guardarProyecto = async () => {
             </button>
           </template>
         </SisdaiModal>
-
+        <!-- Modal agregar capas -->
         <SisdaiModal ref="capasModal" class="modal-grande">
           <template #encabezado>
             <h2>Agregar (capas/tablas/documentos) del catálogo</h2>
@@ -469,7 +505,7 @@ const guardarProyecto = async () => {
         </SisdaiModal>
       </ClientOnly>
     </template>
-  </IaLayoutPaneles>
+  </UiLayoutPaneles>
 </template>
 
 <style lang="scss">
@@ -544,7 +580,6 @@ const guardarProyecto = async () => {
 
   th {
     border-bottom: 1px solid var(--borde);
-    // color: var(--Base-Tipografa---texto-primario, #141414);
     text-align: center;
     font-size: var(--Tipos-Tamao-Prrafos-Prrafo-base, 16px);
     font-style: normal;

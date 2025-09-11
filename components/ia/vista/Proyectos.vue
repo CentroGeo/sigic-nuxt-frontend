@@ -8,6 +8,8 @@ const arraySources = ref([]);
 
 const contextos = ref([]);
 
+const config = useRuntimeConfig();
+
 // Función para cargar las fuentesl proyecto
 const loadSources = async () => {
   //arraySources = [];
@@ -58,11 +60,28 @@ watch(proyecto, () => {
   loadSources();
   loadContexts();
 });
+
+const obtenerTipoArchivo = (nombre) => {
+  const extension = nombre.split('.').pop().toLowerCase();
+  const tipos = {
+    shp: 'Shapefile',
+    geojson: 'GeoJSON',
+    csv: 'CSV',
+    kml: 'KML',
+    zip: 'ZIP',
+    pdf: 'PDF',
+    doc: 'Word',
+    docx: 'Word',
+    xls: 'Excel',
+    xlsx: 'Excel',
+  };
+  return tipos[extension] || extension.toUpperCase();
+};
 </script>
 
 <template>
   <div>
-    <div v-if="proyecto" class="contenedor" style="max-height: 85vh; overflow-y: auto">
+    <div v-if="proyecto">
       <div class="grid">
         <div class="columna-16">
           <div class="flex flex-contenido-separado proyecto-encabezado">
@@ -77,12 +96,18 @@ watch(proyecto, () => {
               </p>
             </div>
             <nuxt-link
-              class="boton boton-primario boton-chico"
+              class="boton boton-secundario boton-chico"
               aria-label="Configurar proyecto"
               :to="`/ia/proyecto/${proyecto.id}`"
             >
               Configurar proyecto
             </nuxt-link>
+            <!-- <button
+              class="boton boton-primario boton-chico"
+              @click="storeIA.eliminarProyecto(proyecto.id)"
+            >
+              Eliminar proyecto
+            </button> -->
           </div>
         </div>
       </div>
@@ -100,9 +125,9 @@ watch(proyecto, () => {
         <div class="flex flex-contenido-separado contexto-encabezado columna-16">
           <h4>Contextos:</h4>
           <NuxtLink
-            class="boton boton-secundario boton-chico"
-            aria-label="Crear proyecto"
-            :to="`/ia/proyecto/crea-contexto?proyecto_id=${proyecto.id}`"
+            class="boton boton-primario boton-chico"
+            aria-label="Crear contexto"
+            :to="`/ia/proyecto/contexto/nuevo?proyecto_id=${proyecto.id}`"
           >
             Crear contexto
           </NuxtLink>
@@ -115,9 +140,9 @@ watch(proyecto, () => {
               <div v-for="contexto in contextos" :key="contexto.id" class="columna-4">
                 <div class="tarjeta">
                   <img
+                    :src="`${config.public.geonodeUrl}/uploaded/ia/uploads/contexts/${contexto.image_type}`"
                     class="tarjeta-imagen"
-                    :src="`http://localhost:8181/media/${contexto.image_type}`"
-                    alt=""
+                    alt="Imagen contexto"
                   />
                   <div class="tarjeta-cuerpo">
                     <p class="tarjeta-titulo">
@@ -134,10 +159,23 @@ watch(proyecto, () => {
                       Iniciar chat
                       <span class="pictograma-chat" aria-hidden="true" />
                     </nuxt-link>
-                    <nuxt-link class="boton-secundario boton-chico" type="button" to="#">
+                    <nuxt-link
+                      class="boton-secundario boton-chico"
+                      type="button"
+                      :to="`/ia/proyecto/contexto/${contexto.id}?proyecto_id=${proyecto.id}`"
+                      @click="storeIA.seleccionarContexto(contexto)"
+                    >
                       Editar contexto
                       <span class="pictograma-editar" aria-hidden="true" />
                     </nuxt-link>
+                    <!-- <nuxt-link
+                      class="boton-secundario boton-chico"
+                      type="button"
+                      @click="storeIA.eliminarContexto(contexto.id)"
+                    >
+                      Eliminar contexto
+                      <span class="pictograma-eliminar" aria-hidden="true" />
+                    </nuxt-link> -->
                   </div>
                 </div>
               </div>
@@ -161,7 +199,7 @@ watch(proyecto, () => {
           <p class="separador borde-b" />
           <div class="flex flex-contenido-separado fuentes-encabezado">
             <h4>Fuentes de información:</h4>
-            <div>
+            <!-- <div>
               <button
                 class="boton-pictograma boton-secundario m-r-2"
                 aria-label="Agregar del catalogo"
@@ -173,7 +211,7 @@ watch(proyecto, () => {
                 Subir archivos
                 <span class="pictograma-archivo-subir" aria-hidden="true" />
               </button>
-            </div>
+            </div> -->
           </div>
 
           <div v-if="arraySources.length > 0" class="tabla-archivos m-t-3">
@@ -190,7 +228,9 @@ watch(proyecto, () => {
               <tbody>
                 <tr v-for="archivo in arraySources" :key="archivo.id">
                   <td class="p-3">{{ archivo.filename }}</td>
-                  <td class="p-3">{{ archivo.document_type }}</td>
+                  <td class="p-3 etiqueta-tabla">
+                    <span class="p-x-1 p-y-minimo">{{ obtenerTipoArchivo(archivo.filename) }}</span>
+                  </td>
                   <!--         <td>{{ archivo.categoria }}</td>
         <td>{{ archivo.origen }}</td> -->
                   <!--         <td>

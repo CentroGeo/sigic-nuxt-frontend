@@ -3,22 +3,26 @@ const storeIA = useIAStore();
 </script>
 
 <template>
-  <IaLayoutPaneles>
-    <template #lista>
+  <UiLayoutPaneles>
+    <template #catalogo>
       <IaLeyendaInicioListas />
 
       <IaListaChats
         v-if="storeIA.existenProyectos"
-        texto-boton="Nuevo chat"
         titulo="Chats"
+        texto-boton="Nuevo chat"
         etiqueta-busqueda="Buscar chats"
       />
     </template>
 
-    <template #vistas-ia>
-      <IaLeyendaInicioVistas v-if="!storeIA.existenProyectos" />
-
-      <!-- <div v-else>Da click en un chat para iniciar o crea un nuevo chat</div> -->
+    <template #visualizador>
+      <main
+        id="principal"
+        class="contenedor m-b-10 p-t-3"
+        :style="storeIA.existenProyectos ? 'height: 85vh;' : ''"
+      >
+        <IaLeyendaInicioVistas v-if="!storeIA.existenProyectos" />
+      </main>
     </template>
-  </IaLayoutPaneles>
+  </UiLayoutPaneles>
 </template>

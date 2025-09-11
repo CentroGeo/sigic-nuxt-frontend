@@ -1,18 +1,20 @@
 <template>
-  <IaLayoutPaneles>
-    <template #lista>
-      <IaListaChats texto-boton="Nuevo chat" titulo="Chats" etiqueta-busqueda="Buscar chats" />
+  <UiLayoutPaneles>
+    <template #catalogo>
+      <IaListaChats titulo="Chats" texto-boton="Nuevo chat" etiqueta-busqueda="Buscar chats" />
     </template>
 
-    <template #vistas-ia>
-      <IaVistaChats :context-id="contextId" :chat-id="chatId" />
+    <template #visualizador>
+      <main id="principal" class="m-b-10 p-t-3">
+        <IaVistaChats :context-id="contextId" :chat-id="chatId" />
+      </main>
     </template>
-  </IaLayoutPaneles>
+  </UiLayoutPaneles>
 </template>
 
 <script setup>
-import { useRoute } from 'vue-router';
 import { computed } from 'vue';
+import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const contextId = computed(() => route.query.context_id);
