@@ -68,7 +68,8 @@ export default NuxtAuthHandler({
       return token;
     },
 
-    async session({ session }) {
+    async session({ session, token }) {
+      session.accessToken = token.accessToken;
       return session;
     },
   },
