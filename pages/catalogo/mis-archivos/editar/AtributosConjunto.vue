@@ -66,13 +66,14 @@ watch(editedResource, async () => {
           </button>
           <p>Editar</p>
         </div>
-        <p class="h1 m-t-3">{{ editedResource.title }}</p>
-        <p class="h2 m-0">Metadatos</p>
+        <CatalogoHeaderMetadatos
+          :resource="editedResource"
+          :title="'Atributos del Conjunto de Datos'"
+        ></CatalogoHeaderMetadatos>
+
         <div class="contenedor-tabla p-2">
           <table v-if="datos.length > 0">
-            <caption>
-              4. Atributos del conjunto de datos
-            </caption>
+            >
             <thead>
               <tr>
                 <th
@@ -144,7 +145,14 @@ watch(editedResource, async () => {
               </tr>
             </tbody>
           </table>
+
           <p v-else>...Cargando</p>
+          <CatalogoBotonesMetadatos
+            :title="'UbicacionLicencias'"
+            :pk="selectedPk"
+            :tipo="type"
+            :resource="editedResource"
+          ></CatalogoBotonesMetadatos>
         </div>
       </main>
       <main v-else>
