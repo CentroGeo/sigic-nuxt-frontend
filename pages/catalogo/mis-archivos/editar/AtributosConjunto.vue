@@ -73,7 +73,6 @@ watch(editedResource, async () => {
 
         <div class="contenedor-tabla p-2">
           <table v-if="datos.length > 0">
-            >
             <thead>
               <tr>
                 <th

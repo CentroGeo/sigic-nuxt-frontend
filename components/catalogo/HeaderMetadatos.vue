@@ -9,14 +9,42 @@ const props = defineProps({
     default: '',
   },
 });
+const route = useRoute();
+const bordeEnlaceActivo = (ruta) => {
+  if (route.path === ruta) {
+    return 'borde-enlace-activo';
+  }
+  return '';
+};
+
+function tieneEstilo() {
+  if (props.resource.resource_type === 'document') {
+    return false;
+  } else {
+    if (props.resource.resource_type === 'dataset') {
+      if (!isGeometricExtension(props.resource.extent)) {
+        tablaSinGeometria.value = true;
+      }
+    }
+    return isGeometricExtension(props.resource.extent) ? true : false;
+  }
+}
 </script>
 <template>
   <h2>{{ props.resource.title }}</h2>
 
   <div class="flex">
-    <nuxt-link>Metadatos </nuxt-link>
-    <nuxt-link>Estilo </nuxt-link>
-    <nuxt-link>Clave Geoestadística </nuxt-link>
+    <nuxt-link :class="bordeEnlaceActivo('/catalogo/mis-archivos/editar/MetadatosBasicos')"
+      >Metadatos
+    </nuxt-link>
+    <nuxt-link
+      v-if="tieneEstilo()"
+      :class="bordeEnlaceActivo('/catalogo/mis-archivos/editar/estilo')"
+      >Estilo
+    </nuxt-link>
+    <nuxt-link :class="bordeEnlaceActivo('/catalogo/mis-archivos/unir-vectores')"
+      >Clave Geoestadística
+    </nuxt-link>
   </div>
   <div class="borde-b borde-color-secundario"></div>
 
