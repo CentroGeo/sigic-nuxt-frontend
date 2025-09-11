@@ -71,6 +71,7 @@ export default defineNuxtConfig({
     },
     sessionRefresh: {
       enablePeriodically: true,
+      period: 4, // minutos
       enableOnWindowFocus: true,
     },
   },
