@@ -9,9 +9,6 @@ const arraySources = ref([]);
 const contextos = ref([]);
 
 const config = useRuntimeConfig();
-const { data } = useAuth();
-
-const imageSources = ref({});
 
 // Función para cargar las fuentesl proyecto
 const loadSources = async () => {
@@ -62,49 +59,6 @@ watch(proyecto, () => {
   //console.log("Proyecto cambió:", nuevoProyecto);
   loadSources();
   loadContexts();
-});
-
-watch(
-  contextos,
-  async (nuevosContextos) => {
-    for (const contexto of nuevosContextos) {
-      if (imageSources.value[contexto.id]) continue;
-
-      const formData = new FormData();
-      formData.append('filename', contexto.image_type);
-
-      const token = data.value?.accessToken;
-
-      try {
-        const response = await fetch(`${config.public.geonodeUrl}/sigic/ia/mediauploads/register`, {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        });
-
-        if (!response.ok) {
-          console.error(`Error cargando imagen para contexto ${contexto.id}`);
-          continue;
-        }
-
-        const blob = await response.blob();
-        const imageUrl = URL.createObjectURL(blob);
-
-        imageSources.value[contexto.id] = imageUrl;
-      } catch (err) {
-        console.error(`Error cargando imagen para contexto ${contexto.id}:`, err);
-      }
-    }
-  },
-  { immediate: true }
-);
-
-onBeforeUnmount(() => {
-  Object.values(imageSources.value).forEach((url) => {
-    URL.revokeObjectURL(url);
-  });
 });
 
 const obtenerTipoArchivo = (nombre) => {
@@ -186,10 +140,9 @@ const obtenerTipoArchivo = (nombre) => {
               <div v-for="contexto in contextos" :key="contexto.id" class="columna-4">
                 <div class="tarjeta">
                   <img
-                    v-if="imageSources[contexto.id]"
-                    :src="imageSources[contexto.id]"
+                    :src="`${config.public.geonodeUrl}/uploaded/ia/uploads/contexts/${contexto.image_type}`"
                     class="tarjeta-imagen"
-                    alt="Imagen cargada"
+                    alt="Imagen contexto"
                   />
                   <div class="tarjeta-cuerpo">
                     <p class="tarjeta-titulo">
