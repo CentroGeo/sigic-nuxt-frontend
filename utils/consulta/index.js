@@ -358,6 +358,13 @@ export async function downloadWMS(resource, format, featureTypes) {
   document.body.removeChild(anchor);
 }
 
+/**
+ * Hace una petición WFS para obtener la lista de Features.
+ * Las peticiones pueden ser autenticadas o no.
+ * @param {Object} resource
+ * @param {String} format
+ * @returns
+ */
 export async function getFeatures(resource) {
   const config = useRuntimeConfig();
   const { data } = useAuth();
@@ -401,6 +408,7 @@ export async function getFeatures(resource) {
 
 /**
  * Hace una petición WFS para obtener la lista de Features y la geometría.
+ * Hace la descarga de los archivos sin geometría.
  * Las peticiones pueden ser autenticadas o no.
  * @param {Object} resource
  * @param {String} format

@@ -144,6 +144,7 @@ watch(editedResource, async () => {
               </tr>
             </tbody>
           </table>
+          <p v-else>...Cargando</p>
         </div>
       </main>
       <main v-else>

@@ -6,8 +6,10 @@ import { cleanInput, resourceTypeDic } from '~/utils/consulta';
 
 const storeFetched = useFetchedResources2Store();
 const storeFilters = useFilteredResources();
+const storeConsulta = useConsultaStore();
+storeConsulta.resourceType = resourceTypeDic.dataLayer;
 
-storeFilters.resourceType = 'dataLayer';
+//storeFilters.resourceType = 'dataLayer';
 
 storeFetched.checkFilling(resourceTypeDic.dataLayer);
 

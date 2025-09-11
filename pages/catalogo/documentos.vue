@@ -6,9 +6,9 @@ import { cleanInput, resourceTypeDic } from '~/utils/consulta';
 
 const storeFetched = useFetchedResources2Store();
 const storeFilters = useFilteredResources();
-
-storeFilters.resourceType = 'document';
-
+const storeConsulta = useConsultaStore();
+storeConsulta.resourceType = resourceTypeDic.document;
+//storeFilters.resourceType = 'document';
 storeFetched.checkFilling(resourceTypeDic.document);
 
 const resourcesTablas = computed(() => storeFetched.byResourceType(resourceTypeDic.document));
