@@ -156,10 +156,11 @@ const seleccionGrupo = ref('');
               </div>
             </div>
             <CatalogoBotonesMetadatos
+              :key="`1-${selectedPk}-buttons`"
+              :resource="editedResource"
               :title="'MetadatosBasicos'"
               :pk="selectedPk"
               :tipo="type"
-              :resource="editedResource"
             ></CatalogoBotonesMetadatos>
           </div>
         </div>

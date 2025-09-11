@@ -42,6 +42,7 @@ const editedResource = computed(() => resources.value.find(({ pk }) => pk === se
         <h3>Un placeholder</h3>
 
         <CatalogoBotonesMetadatos
+          :key="`2-${selectedPk}-buttons`"
           :title="'UbicacionLicencias'"
           :pk="selectedPk"
           :tipo="type"

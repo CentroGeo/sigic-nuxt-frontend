@@ -148,6 +148,7 @@ watch(editedResource, async () => {
 
           <p v-else>...Cargando</p>
           <CatalogoBotonesMetadatos
+            :key="`4-${selectedPk}-buttons`"
             :title="'UbicacionLicencias'"
             :pk="selectedPk"
             :tipo="type"
