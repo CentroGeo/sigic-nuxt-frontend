@@ -43,13 +43,42 @@ async function cerrarSesion() {
         <NuxtLink class="nav-hipervinculo" to="/ia"> Análisis Inteligencia Artificial </NuxtLink>
       </li>
       <li>
-        <button v-if="estaLogueado" aria-label="Cerrar sesión" type="button" @click="cerrarSesion">
+        <button
+          v-if="estaLogueado"
+          aria-label="Cerrar sesión"
+          type="button"
+          class="boton-secundario btn-inicio-sesion"
+          @click="cerrarSesion"
+        >
           Cerrar sesión
         </button>
-        <button v-else aria-label="Iniciar sesión" type="button" @click="iniciarSesion">
+        <button
+          v-else
+          aria-label="Iniciar sesión"
+          type="button"
+          class="boton-secundario btn-inicio-sesion"
+          @click="iniciarSesion"
+        >
           Iniciar sesión
         </button>
       </li>
     </ul>
   </SisdaiNavegacionPrincipal>
 </template>
+
+<style lang="scss">
+button.boton-secundario.btn-inicio-sesion {
+  box-shadow: none;
+  color: var(--navegacion-primaria-color);
+  font-weight: 400;
+  font-size: 0.875rem;
+
+  border-radius: 0;
+  &:hover {
+    background-color: var(--navegacion-primaria-cursor-fondo);
+  }
+  &:active {
+    box-shadow: inset 0 -4px 0 0 var(--navegacion-primaria-activo-borde);
+  }
+}
+</style>
