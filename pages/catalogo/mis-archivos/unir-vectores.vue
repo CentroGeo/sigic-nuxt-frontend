@@ -98,7 +98,7 @@ variables.value = await obtenerVariables(resourceLayer.value);
 const pk = ref(encodeURIComponent(JSON.stringify({ pk: resourceLayer.value.pk })));
 function irAMetadatosConQuery() {
   navigateTo({
-    path: '/catalogo/mis-archivos/editar-metadatos',
+    path: '/catalogo/mis-archivos/editar/metadatos',
     query: { data: pk.value },
   });
 }
@@ -192,7 +192,7 @@ const bordeEnlaceActivo = (ruta) => {
 
           <div class="flex m-t-3">
             <nuxt-link
-              :class="bordeEnlaceActivo('/catalogo/mis-archivos/editar-metadatos')"
+              :class="bordeEnlaceActivo('/catalogo/mis-archivos/editar/metadatos')"
               @click="irAMetadatosConQuery"
               >Metadatos
             </nuxt-link>
