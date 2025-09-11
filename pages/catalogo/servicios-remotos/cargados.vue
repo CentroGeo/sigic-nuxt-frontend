@@ -43,7 +43,7 @@
               <nuxt-link
                 class="boton boton-secundario"
                 aria-label="Agregar servicio remoto"
-                to="/catalogo/mis-archivos/servicios-externos"
+                to="/catalogo/servicios-remotos"
                 >Agregar servicio remoto</nuxt-link
               >
             </div>
