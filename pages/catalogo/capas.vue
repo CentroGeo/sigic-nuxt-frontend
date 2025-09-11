@@ -13,22 +13,12 @@ storeFilters.resourceType = 'dataLayer';
 storeFetched.checkFilling(resourceTypeDic.dataLayer);
 
 const resourcesCapas = computed(() => storeFetched.byResourceType(resourceTypeDic.dataLayer));
-
 const filteredResources = ref([]);
 const tableResources = ref([]);
-
 const seleccionOrden = ref('');
 
 // obteniendo las variables keys para la tabla
 const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'acciones'];
-
-function formatearFecha(fecha) {
-  return new Date(fecha).toLocaleDateString('es-ES', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  });
-}
 
 function updateResources(nuevosRecursos) {
   filteredResources.value = nuevosRecursos;
@@ -36,12 +26,12 @@ function updateResources(nuevosRecursos) {
   tableResources.value = filteredResources.value.map((d) => ({
     pk: d.pk,
     titulo: d.title,
-    // tipo_recurso: d.resource_type,
     tipo_recurso: 'Capa geográfica',
-    categoria: d.category === null ? 'Sin Clasificar' : d.category.gn_description,
-    actualizacion: formatearFecha(d.last_updated),
+    categoria: d.category,
+    actualizacion: d.last_updated,
     acciones: 'Ver, Descargar',
     enlace_descarga: d.download_url,
+    uuid: d.uuid,
   }));
 }
 
@@ -82,6 +72,7 @@ onMounted(async () => {
             </ClientOnly>
           </div>
 
+          <!-- TODO: implementar filtro avanzado -->
           <!-- <div class="columna-8 flex-vertical-final">
             <div class="flex flex-contenido-separado">
               <div class="columna-14">
@@ -119,6 +110,7 @@ onMounted(async () => {
 
         <div class="flex">
           <div class="columna-16">
+            <!-- TODO: implementar paginador -->
             <ClientOnly>
               <UiTablaAccesibleV2 :variables="variables" :datos="tableResources" />
               <UiPaginador :total-paginas="1" @cambio="1" />
