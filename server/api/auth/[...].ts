@@ -3,9 +3,9 @@ import KeycloakProvider from 'next-auth/providers/keycloak';
 
 // Función para comprobar si el token ha expirado
 function isTokenExpired(expiresAt?: number): boolean {
-  console.log('expira en:', expiresAt, 'ahora:', Date.now());
+  // console.log('expira en:', expiresAt, 'ahora:', Date.now());
   if (!expiresAt) return true;
-  return Date.now() >= expiresAt - 30;
+  return Date.now() >= expiresAt - 40;
 }
 
 export default NuxtAuthHandler({
@@ -27,14 +27,14 @@ export default NuxtAuthHandler({
   callbacks: {
     async jwt({ token, account }) {
       if (account?.access_token) {
-        console.log('cuenta accestoken', token);
+        // console.log('cuenta accestoken', token);
         token.accessToken = account.access_token;
         token.refreshToken = account.refresh_token;
         token.expires_at = Date.now() + ((account.expires_in as number) ?? 0) * 1000;
       }
 
       if (isTokenExpired(token.expires_at as number)) {
-        console.log('ya expiró', token, account);
+        // console.log('ya expiró', token, account);
         try {
           const response = await fetch(
             `${process.env.KEYCLOAK_ISSUER}/protocol/openid-connect/token`,
@@ -69,7 +69,6 @@ export default NuxtAuthHandler({
     },
 
     async session({ session }) {
-      console.log('session y token', session);
       return session;
     },
   },
