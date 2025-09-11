@@ -17,6 +17,7 @@ const props = defineProps({
 const { resourceType, selectedElement } = toRefs(props);
 const modalDescarga = ref(null);
 const optionsList = ref(null);
+const selectedOption = ref();
 const tagTitle = ref();
 const docExtension = ref(
   resourceType.value === 'document'
@@ -26,11 +27,12 @@ const docExtension = ref(
 const layerType = ref(
   resourceType.value === 'dataLayer' ? selectedElement.value.subtype : 'No aplica'
 );
-
 function abrirModalDescarga() {
   modalDescarga.value?.abrirModal();
   optionsList.value = optionsDict[resourceType.value]['elements'];
   tagTitle.value = optionsDict[resourceType.value]['title'];
+  selectedOption.value = optionsList.value.map((d) => d.label)[0];
+  console.log(selectedOption.value);
 }
 
 const layerOptions = {
@@ -134,7 +136,14 @@ const optionsDict = {
     ],
   },
 };
-
+function descargarClicked() {
+  optionsList.value.map((d) => {
+    if (d.label === selectedOption.value) {
+      d.action();
+      //console.(d);
+    }
+  });
+}
 defineExpose({
   abrirModalDescarga,
 });
@@ -146,21 +155,36 @@ defineExpose({
         <h1>Descargar {{ tagTitle }}</h1>
       </template>
       <template #cuerpo>
-        <p>{{ selectedElement.title }}</p>
+        <p class="h5">{{ selectedElement.title }}</p>
         <div>
-          <p>Formato:</p>
-          <div>
-            <!--:disabled="option.label === 'GeoTiff' && !isLoggedIn"-->
-            <button
+          <div v-for="option in optionsList" :key="option.label">
+            <input
+              :id="`download-option-${option.label}`"
+              v-model="selectedOption"
+              :name="'opciones-descarga'"
+              type="radio"
+              :value="option.label"
+            />
+
+            <label :for="`download-option-${option.label}`">{{ option.label }} </label>
+          </div>
+          <div class="flex flex-contenido-final">
+            <button type="button" class="boton-primario m-t-2" @click="descargarClicked">
+              Descargar
+            </button>
+          </div>
+          <!--           <div>
+                      <button
               v-for="option in optionsList"
               :key="option.label"
               type="button"
               class="boton-secundario"
               @click="option.action"
+              :disabled="option.label === 'GeoTiff' && !isLoggedIn"
             >
               {{ option.label }}
-            </button>
-          </div>
+            </button> 
+          </div> -->
         </div>
       </template>
     </SisdaiModal>
