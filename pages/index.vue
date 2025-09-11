@@ -111,6 +111,7 @@ const obtenerMasRecientes = (type) => {
 };
 
 const capasMasRecientes = obtenerMasRecientes(resourceTypeDic.dataLayer);
+console.log(capasMasRecientes.value);
 </script>
 <template>
   <div>
@@ -406,7 +407,7 @@ const capasMasRecientes = obtenerMasRecientes(resourceTypeDic.dataLayer);
                   <nuxt-link
                     class="boton boton-primario boton-chico"
                     aria-label="Ver capa en visualizador"
-                    :to="`/consulta/capas`"
+                    :to="`/consulta/capas?capas=${capa.uuid}`"
                   >
                     Ver Capa en visualizador
                   </nuxt-link>
@@ -430,18 +431,30 @@ const capasMasRecientes = obtenerMasRecientes(resourceTypeDic.dataLayer);
           <h3>o también puedes ir a:</h3>
         </div>
         <div class="contenedor ancho-lectura texto-centrado flex">
-          <a class="boton-secundario boton-chico texto-centrado init-sesion columna-8">
+          <nuxt-link
+            class="boton-secundario boton-chico texto-centrado init-sesion columna-8"
+            to="consulta/capas"
+          >
             Visualizador de contenido
-          </a>
-          <a class="boton-secundario boton-chico texto-centrado init-sesion columna-8">
+          </nuxt-link>
+          <nuxt-link
+            class="boton-secundario boton-chico texto-centrado init-sesion columna-8"
+            to="/ia/chats"
+          >
             Análisis mediante IA
-          </a>
-          <a class="boton-secundario boton-chico texto-centrado init-sesion columna-8">
+          </nuxt-link>
+          <nuxt-link
+            class="boton-secundario boton-chico texto-centrado init-sesion columna-8"
+            to="/catalogo/explorar"
+          >
             Catálogo de información
-          </a>
-          <a class="boton-secundario boton-chico texto-centrado init-sesion columna-8">
+          </nuxt-link>
+          <nuxt-link
+            class="boton-secundario boton-chico texto-centrado init-sesion columna-8"
+            to="/catalogo/mis-archivos/cargar-archivos"
+          >
             Subir mis propios archivos
-          </a>
+          </nuxt-link>
         </div>
       </section>
     </main>
@@ -503,5 +516,44 @@ a.navbar-brand {
   display: inline-block;
   width: calc(var(--escala-rem-gob-sisdai) * 1.5em);
   height: calc(var(--escala-rem-gob-sisdai) * 1.5em);
+}
+footer {
+  .accordion {
+    input {
+      display: none !important;
+      &:hover {
+        background: transparent;
+        label {
+          background: transparent;
+        }
+      }
+    }
+    [type='checkbox']:not(:disabled):hover + label,
+    [type='radio']:not(:disabled):hover + label {
+      background-color: transparent;
+      border-color: transparent;
+    }
+  }
+  [type='checkbox'] + label::before,
+  [type='radio'] + label::before {
+    display: none;
+  }
+  [type='checkbox'] + label,
+  [type='radio'] + label {
+    line-height: 1.25em;
+    background-color: none;
+    border: none;
+    box-shadow: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    position: relative;
+    margin: 0;
+    padding: 8px 8px 8px 0;
+    color: #fff;
+    &:hover {
+      background: transparent;
+    }
+  }
 }
 </style>

@@ -19,6 +19,11 @@ const props = defineProps({
 
 const idAleatorio = 'id-' + Math.random().toString(36).substring(2);
 
+const shownModal = ref('ninguno');
+const modalResource = ref(null);
+const downloadOneChild = ref(null);
+const resourceType = ref('');
+
 // diccionario para colocar acentos
 const dictTable = ref({
   pk: 'pk',
@@ -93,6 +98,31 @@ function formatearFecha(fecha) {
     // month: '2-digit',
     month: 'short',
     year: 'numeric',
+  });
+}
+
+/**
+ * Valida si el tipo de recurso es documento o capa geométrica o no.
+ * @returns {String} ya sea dataLayer, dataTable o document
+ */
+function tipoRecurso(recurso) {
+  if (recurso.tipo_recurso === 'Documentos') {
+    return 'document';
+  } else {
+    return recurso.tipo_recurso === 'Capa geográfica' ? 'dataLayer' : 'dataTable';
+  }
+}
+
+async function notifyDownloadOneChild(resource) {
+  shownModal.value = 'downloadOne';
+  modalResource.value = resource.recurso_completo;
+  // modalResource.value = await $fetch('/api/objeto', {
+  //   method: 'POST',
+  //   body: { id: resource.pk },
+  // });
+  resourceType.value = tipoRecurso(resource);
+  nextTick(() => {
+    downloadOneChild.value?.abrirModalDescarga();
   });
 }
 </script>
@@ -196,15 +226,15 @@ function formatearFecha(fecha) {
                 >
                   <span class="pictograma-ayuda"></span>
                 </button>
-                <a
+                <button
                   v-globo-informacion:izquierda="'Descargar'"
                   class="boton-pictograma boton-secundario"
                   aria-label="Descargar archivo"
                   type="button"
-                  :href="datum['enlace_descarga']"
+                  @click="notifyDownloadOneChild(datum)"
                 >
                   <span class="pictograma-archivo-descargar"></span>
-                </a>
+                </button>
                 <button
                   v-globo-informacion:izquierda="'Remover'"
                   class="boton-pictograma boton-secundario"
@@ -224,21 +254,30 @@ function formatearFecha(fecha) {
                 >
                   <span class="pictograma-previsualizar"></span>
                 </button>
-                <a
+                <button
                   v-globo-informacion:izquierda="'Descargar'"
                   class="boton-pictograma boton-secundario"
                   aria-label="Descargar archivo"
                   type="button"
-                  :href="datum['enlace_descarga']"
+                  @click="notifyDownloadOneChild(datum)"
                 >
                   <span class="pictograma-archivo-descargar"></span>
-                </a>
+                </button>
               </div>
             </div>
           </td>
         </tr>
       </tbody>
     </table>
+
+    <!-- Modal para descargar datos -->
+    <ConsultaModalDescarga
+      v-if="shownModal === 'downloadOne'"
+      ref="downloadOneChild"
+      :key="`${modalResource.uuid}_${resourceType}`"
+      :resource-type="resourceType"
+      :selected-element="modalResource"
+    />
   </div>
 </template>
 
