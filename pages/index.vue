@@ -111,7 +111,6 @@ const obtenerMasRecientes = (type) => {
 };
 
 const capasMasRecientes = obtenerMasRecientes(resourceTypeDic.dataLayer);
-console.log(capasMasRecientes.value);
 </script>
 <template>
   <div>
@@ -154,6 +153,7 @@ console.log(capasMasRecientes.value);
             <div class="columna-8">
               <div class="tarjeta tarjeta-horizontal">
                 <img
+                  alt=""
                   class="tarjeta-imagen"
                   src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/pekibb.jpg"
                 />
@@ -174,6 +174,7 @@ console.log(capasMasRecientes.value);
             <div class="columna-8">
               <div class="tarjeta tarjeta-horizontal">
                 <img
+                  alt=""
                   class="tarjeta-imagen"
                   src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/pekibb.jpg"
                 />
@@ -194,6 +195,7 @@ console.log(capasMasRecientes.value);
             <div class="columna-8">
               <div class="tarjeta tarjeta-horizontal">
                 <img
+                  alt=""
                   class="tarjeta-imagen"
                   src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/pekibb.jpg"
                 />
@@ -215,6 +217,7 @@ console.log(capasMasRecientes.value);
               <div class="tarjeta tarjeta-horizontal">
                 <img
                   class="tarjeta-imagen"
+                  alt=""
                   src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/pekibb.jpg"
                 />
                 <div class="tarjeta-cuerpo">
@@ -451,7 +454,7 @@ console.log(capasMasRecientes.value);
           </nuxt-link>
           <nuxt-link
             class="boton-secundario boton-chico texto-centrado init-sesion columna-8"
-            to="/catalogo/mis-archivos/cargar-archivos"
+            to="/catalogo/cargar-archivos"
           >
             Subir mis propios archivos
           </nuxt-link>

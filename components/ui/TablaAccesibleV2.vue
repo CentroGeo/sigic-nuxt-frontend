@@ -42,7 +42,7 @@ function irARutaConQuery(objeto) {
   // evitar problemas con espacios con JSON.stingify
   const pk = encodeURIComponent(JSON.stringify({ pk: objeto.pk }));
   navigateTo({
-    path: '/catalogo/mis-archivos/editar-metadatos',
+    path: '/catalogo/mis-archivos/editar/metadatos',
     query: { data: pk },
   });
 }

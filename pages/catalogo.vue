@@ -21,17 +21,17 @@ onUnmounted(() => (document.querySelector('body').className = ''));
         },
         {
           pictograma: 'pictograma-capas',
-          ruta: `${ruta}/capas`,
+          ruta: `${ruta}/explorar/capas`,
           globo: 'Capas',
         },
         {
           pictograma: 'pictograma-tabla',
-          ruta: `${ruta}/tablas`,
+          ruta: `${ruta}/explorar/tablas`,
           globo: 'Datos tabulados',
         },
         {
           pictograma: 'pictograma-documento',
-          ruta: `${ruta}/documentos`,
+          ruta: `${ruta}/explorar/documentos`,
           globo: 'Documentos',
         },
       ]"
@@ -43,12 +43,12 @@ onUnmounted(() => (document.querySelector('body').className = ''));
         },
         {
           pictograma: 'pictograma-archivo-subir',
-          ruta: `${ruta}/mis-archivos/cargar-archivos`,
+          ruta: `${ruta}/cargar-archivos`,
           globo: 'Carga de archivos',
         },
         {
           pictograma: 'pictograma-ayuda',
-          ruta: `${ruta}/mis-archivos/servicios-externos`,
+          ruta: `${ruta}/servicios-remotos`,
           globo: 'Carga de catálogos externos',
         },
       ]"

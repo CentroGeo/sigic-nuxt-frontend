@@ -48,13 +48,13 @@ resource.value = await $fetch('/api/objeto', {
 const pk = ref(encodeURIComponent(JSON.stringify({ pk: resource.value.pk })));
 function irAMetadatosConQuery() {
   navigateTo({
-    path: '/catalogo/mis-archivos/editar-metadatos',
+    path: '/catalogo/mis-archivos/editar/metadatos',
     query: { data: pk.value },
   });
 }
 function irAEstiloConQuery() {
   navigateTo({
-    path: '/catalogo/mis-archivos/editar-estilo',
+    path: '/catalogo/mis-archivos/editar/estilo',
     query: { data: pk.value },
   });
 }
@@ -126,12 +126,12 @@ const bordeEnlaceActivo = (ruta) => {
               <h2>{{ resource.title }}</h2>
               <div class="flex">
                 <nuxt-link
-                  :class="bordeEnlaceActivo('/catalogo/mis-archivos/editar-metadatos')"
+                  :class="bordeEnlaceActivo('/catalogo/mis-archivos/editar/metadatos')"
                   @click="irAMetadatosConQuery"
                   >Metadatos
                 </nuxt-link>
                 <nuxt-link
-                  :class="bordeEnlaceActivo('/catalogo/mis-archivos/editar-estilo')"
+                  :class="bordeEnlaceActivo('/catalogo/mis-archivos/editar/estilo')"
                   @click="irAEstiloConQuery"
                   >Estilo
                 </nuxt-link>

@@ -90,12 +90,12 @@ async function guardarArchivo(files) {
 
               <div class="flex flex-contenido-separado">
                 <div>
-                  <nuxt-link to="/catalogo/mis-archivos/editar-metadatos"
+                  <nuxt-link to="/catalogo/mis-archivos/editar/metadatos"
                     >Editar metadatos</nuxt-link
                   >
                 </div>
                 <div>
-                  <nuxt-link to="/catalogo/mis-archivos/editar-estilo">Editar estilo</nuxt-link>
+                  <nuxt-link to="/catalogo/mis-archivos/editar/estilo">Editar estilo</nuxt-link>
                 </div>
                 <div>
                   <nuxt-link to="/catalogo/mis-archivos">Ver en mis archivos</nuxt-link>
