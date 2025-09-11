@@ -61,7 +61,7 @@ const formatearAbstract = (resource) => {
           <h2>Explora</h2>
           <div class="flex">
             <div class="columna-5">
-              <nuxt-link class="tarjeta tarjeta-hipervinculo-interno" to="/catalogo/capas">
+              <nuxt-link class="tarjeta tarjeta-hipervinculo-interno" to="/catalogo/explorar/capas">
                 <img class="tarjeta-imagen" src="/img/thumbnail-capas.png" alt="" />
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-titulo">Capas geográficas</p>
@@ -72,7 +72,10 @@ const formatearAbstract = (resource) => {
               </nuxt-link>
             </div>
             <div class="columna-5">
-              <nuxt-link class="tarjeta tarjeta-hipervinculo-interno" to="/catalogo/tablas">
+              <nuxt-link
+                class="tarjeta tarjeta-hipervinculo-interno"
+                to="/catalogo/explorar/tablas"
+              >
                 <img class="tarjeta-imagen" src="/img/thumbnail-tablas.png" alt="" />
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-titulo">Datos tabulados</p>
@@ -87,7 +90,10 @@ const formatearAbstract = (resource) => {
               </nuxt-link>
             </div>
             <div class="columna-5">
-              <nuxt-link class="tarjeta tarjeta-hipervinculo-interno" to="/catalogo/documentos">
+              <nuxt-link
+                class="tarjeta tarjeta-hipervinculo-interno"
+                to="/catalogo/explorar/documentos"
+              >
                 <img class="tarjeta-imagen" src="/img/thumbnail-docs.png" alt="" />
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-titulo">Documentos</p>

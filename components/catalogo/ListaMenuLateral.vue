@@ -11,13 +11,13 @@ const estaLogueado = computed(() => status.value === 'authenticated');
           <nuxt-link to="/catalogo/explorar">Explorar</nuxt-link>
           <ul>
             <li>
-              <nuxt-link to="/catalogo/capas">Capas geográficas</nuxt-link>
+              <nuxt-link to="/catalogo/explorar/capas">Capas geográficas</nuxt-link>
             </li>
             <li>
-              <nuxt-link to="/catalogo/tablas">Datos tabulados</nuxt-link>
+              <nuxt-link to="/catalogo/explorar/tablas">Datos tabulados</nuxt-link>
             </li>
             <li>
-              <nuxt-link to="/catalogo/documentos">Documentos</nuxt-link>
+              <nuxt-link to="/catalogo/explorar/documentos">Documentos</nuxt-link>
             </li>
           </ul>
         </li>
@@ -27,12 +27,10 @@ const estaLogueado = computed(() => status.value === 'authenticated');
           <nuxt-link to="/catalogo/mis-archivos">Mis archivos</nuxt-link>
         </li>
         <li>
-          <nuxt-link to="/catalogo/mis-archivos/cargar-archivos">Carga de archivos</nuxt-link>
+          <nuxt-link to="/catalogo/cargar-archivos">Carga de archivos</nuxt-link>
         </li>
         <li>
-          <nuxt-link to="/catalogo/mis-archivos/servicios-externos"
-            >Carga de catálogos externos</nuxt-link
-          >
+          <nuxt-link to="/catalogo/servicios-remotos">Carga de catálogos externos</nuxt-link>
         </li>
       </ul>
     </div>

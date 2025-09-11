@@ -43,7 +43,7 @@ function irARutaConQuery(objeto) {
   // evitar problemas con espacios con JSON.stingify
   //const pk = encodeURIComponent(JSON.stringify({ pk: objeto.pk }));
   navigateTo({
-    path: '/catalogo/mis-archivos/metadatos/AtributosConjunto',
+    path: '/catalogo/mis-archivos/editar/AtributosConjunto',
     query: { data: objeto.pk, type: objeto.tipo_recurso },
   });
   /*   if (objeto.tipo_recurso === 'Capa geográfica') {

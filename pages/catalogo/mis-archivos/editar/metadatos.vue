@@ -77,13 +77,13 @@ function tipoRecurso() {
 const pk = ref(encodeURIComponent(JSON.stringify({ pk: resource.value.pk })));
 function irAMetadatosConQuery() {
   navigateTo({
-    path: '/catalogo/mis-archivos/editar-metadatos',
+    path: '/catalogo/mis-archivos/editar/metadatos',
     query: { data: pk.value },
   });
 }
 function irAEstiloConQuery() {
   navigateTo({
-    path: '/catalogo/mis-archivos/editar-estilo',
+    path: '/catalogo/mis-archivos/editar/estilo',
     query: { data: pk.value },
   });
 }
@@ -137,13 +137,13 @@ const bordeEnlaceActivo = (ruta) => {
 
           <div class="flex">
             <nuxt-link
-              :class="bordeEnlaceActivo('/catalogo/mis-archivos/editar-metadatos')"
+              :class="bordeEnlaceActivo('/catalogo/mis-archivos/editar/metadatos')"
               @click="irAMetadatosConQuery"
               >Metadatos
             </nuxt-link>
             <nuxt-link
               v-if="tipoRecurso()"
-              :class="bordeEnlaceActivo('/catalogo/mis-archivos/editar-estilo')"
+              :class="bordeEnlaceActivo('/catalogo/mis-archivos/editar/estilo')"
               @click="irAEstiloConQuery"
               >Estilo
             </nuxt-link>
