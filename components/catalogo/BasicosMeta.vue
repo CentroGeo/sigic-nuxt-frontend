@@ -15,6 +15,10 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  isModal: {
+    type: Boolean,
+    default: false,
+  },
 });
 //const imagen = ref();
 const campoResumen = ref('Resumen desde sigic');
@@ -43,16 +47,18 @@ async function guardarImagen(files) {
     <CatalogoHeaderMetadatos
       :resource="props.recurso"
       :title="'Metadatos básicos'"
+      :exclude-links="props.isModal"
     ></CatalogoHeaderMetadatos>
+    <div v-if="!props.isModal">
+      <p>
+        <b>Miniatura imagen no mayor a 9kb tamaño 120x120px. Archivos Png o JPG</b>
+      </p>
 
-    <p>
-      <b>Miniatura imagen no mayor a 9kb tamaño 120x120px. Archivos Png o JPG</b>
-    </p>
-
-    <!-- Drag & Drop -->
-    <ClientOnly>
-      <CatalogoElementoDragNdDrop ref="dragNdDrop" @pasar-archivo="(i) => guardarImagen(i)" />
-    </ClientOnly>
+      <!-- Drag & Drop -->
+      <ClientOnly>
+        <CatalogoElementoDragNdDrop ref="dragNdDrop" @pasar-archivo="(i) => guardarImagen(i)" />
+      </ClientOnly>
+    </div>
 
     <!-- Formulario -->
     <div class="m-t-3">

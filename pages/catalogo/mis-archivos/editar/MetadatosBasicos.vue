@@ -32,10 +32,12 @@ const editedResource = computed(() => resources.value.find(({ pk }) => pk === se
               <span class="h5 texto-color-primario p-l-2">Editar</span>
             </nuxt-link>
           </div>
+
           <CatalogoBasicosMeta
             :recurso="editedResource"
             :resource-pk="selectedPk"
             :resource-type="type"
+            :is-modal="false"
           ></CatalogoBasicosMeta>
         </div>
       </main>

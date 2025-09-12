@@ -8,6 +8,10 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  excludeLinks: {
+    type: Boolean,
+    default: false,
+  },
 });
 const route = useRoute();
 const titleOptions = {
@@ -42,7 +46,7 @@ const bordeEnlaceActivo = (ruta) => {
 <template>
   <h2>{{ props.resource.title }}</h2>
 
-  <div class="flex">
+  <div v-if="!props.excludeLinks" class="flex">
     <nuxt-link
       :class="
         bordeEnlaceActivo(`/catalogo/mis-archivos/editar/${titleOptions[props.title]['nombre']}`)
