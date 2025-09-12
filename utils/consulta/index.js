@@ -87,7 +87,7 @@ export function getWMSserver(resource) {
  * Puede ser map, table o geometry
  * @returns {Boolean}
  */
-export async function hasWMS(resource, service, proxyURL) {
+export async function hasWMS(resource, service, proxyURL, requestType) {
   const maxAttempts = 3;
   const proxy = `${proxyURL}/proxy/?url=`;
   const url = new URL(getWMSserver(resource));
@@ -110,15 +110,23 @@ export async function hasWMS(resource, service, proxyURL) {
         return false;
       }
 
-      if (service === 'map') {
-        return true;
-      } else if (service === 'table' || service === 'geometry') {
-        if (data.includes('GetFeature')) {
+      if (requestType === 'GetFeatureInfo') {
+        if (data.includes('GetFeatureInfo')) {
           return true;
-        } else return false;
+        } else {
+          return false;
+        }
       } else {
-        console.error('No se reconoce el tipo de petición que se necesita', url);
-        return false;
+        if (service === 'map') {
+          return true;
+        } else if (service === 'table' || service === 'geometry') {
+          if (data.includes('GetFeature')) {
+            return true;
+          } else return false;
+        } else {
+          console.error('No se reconoce el tipo de petición que se necesita', url);
+          return false;
+        }
       }
     } catch {
       console.error(`fracaso la peticion para ${resource.alternate}`);

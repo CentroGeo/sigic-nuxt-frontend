@@ -19,7 +19,8 @@ const props = defineProps({
   },
 });
 const { resourceElement } = toRefs(props);
-function getWFS(resource) {
+
+/* function getWFS(resource) {
   let url;
   if (resource.sourcetype === 'REMOTE') {
     url = new URL(getWMSserver(resource));
@@ -36,6 +37,31 @@ function getWFS(resource) {
     url = objectWFSLink.url;
   }
   return url;
+} */
+function getWMSFeatureInfo(resource) {
+  const url = new URL(getWMSserver(resource));
+  const pngObject = resource.links.find((link) => link.name === 'PNG');
+  const pngLink = pngObject.url;
+  const paramsDict = {};
+  const paramsList = pngLink.replace(`${config.public.geoserverUrl}/ows?`, '').split('&');
+  paramsList.forEach((param) => {
+    const entry = param.split('=');
+    paramsDict[entry[0]] = entry[1];
+  });
+  url.search = new URLSearchParams({
+    service: 'WMS',
+    version: '1.1.0',
+    request: 'GetFeatureInfo',
+    layers: resource.alternate,
+    query_layers: resource.alternate,
+    bbox: resource.extent.coords.join(','),
+    width: paramsDict.width,
+    height: paramsDict.height,
+    srs: resource.extent.srid,
+    styles: '',
+    info_format: 'application/json',
+  });
+  console.log(gnoxyUrl(url.href));
 }
 const actualButtons = ref({});
 const optionsButtons = ref([
@@ -94,13 +120,14 @@ const optionsButtons = ref([
     action: async () => {
       //const objectWMSLink = resourceElement.value.links.find((link) => link.name === 'PNG');
       //const wmsLink = objectWMSLink.url;
-      const wfsLink = getWFS(resourceElement.value);
-      try {
+      //const wfsLink = getWFS(resourceElement.value);
+      getWMSFeatureInfo(resourceElement.value);
+      /*       try {
         await navigator.clipboard.writeText(wfsLink);
         alert('Enlace copiado al portapapeles: ' + wfsLink);
       } catch (err) {
         console.error('Error al copiar: ', err);
-      }
+      } */
     },
   },
   {
@@ -142,7 +169,17 @@ async function updateFunctions() {
   }
   if (resourceElement.value.sourcetype === 'REMOTE') {
     buttons = buttons.filter((d) => d.excludeFor !== 'remotes');
-    const resourceHasWMS = await hasWMS(resourceElement.value, 'table', config.public.geonodeUrl);
+    /*         const resourceHasWMS = await hasWMS(
+      resourceElement.value,
+      'table',
+      config.public.geonodeUrl,
+    ); // Esta se llamaría para el WFS*/
+    const resourceHasWMS = await hasWMS(
+      resourceElement.value,
+      'table',
+      config.public.geonodeUrl,
+      'GetFeatureInfo'
+    );
     if (resourceHasWMS === false) {
       buttons = buttons.filter((d) => d.excludeFor !== 'noTables');
     }
