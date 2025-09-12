@@ -1,9 +1,9 @@
 <script setup>
 import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
 import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
-import { getWMSserver, resourceTypeDic } from '~/utils/consulta';
+import { resourceTypeDic } from '~/utils/consulta';
 
-const config = useRuntimeConfig();
+// const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
 const storeFetched = useFetchedResources2Store();
 const storeSelected = useSelectedResources2Store();
@@ -136,17 +136,6 @@ function updateQueryParam(capas) {
 }
 watch(() => storeSelected.asQueryParam(), updateQueryParam);
 
-function findServer(resource) {
-  if (resource.sourcetype === 'REMOTE') {
-    const link = getWMSserver(resource);
-    //console.log(link);
-    //return proxy + link;
-    return link;
-  } else {
-    return `${config.public.geonodeUrl}/gs/wms?`;
-    // return `${config.public.geonodeUrl}/gs`;
-  }
-}
 onMounted(() => {
   updateMapFromHash(route.hash?.slice(1));
   storeSelected.addFromQueryParam(route.query.capas);
@@ -158,6 +147,8 @@ onMounted(() => {
 });
 
 // api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
+
+const { findServer } = useGnoxyUrl();
 </script>
 
 <template>
