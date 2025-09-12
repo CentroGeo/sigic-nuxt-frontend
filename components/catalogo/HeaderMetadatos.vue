@@ -46,6 +46,22 @@ const bordeEnlaceActivo = (ruta) => {
 <template>
   <h2>{{ props.resource.title }}</h2>
 
+  <CatalogoMenuMisArchivos
+    v-if="!props.excludeLinks"
+    :recurso="props.resource"
+    :opciones="[
+      // { texto: 'Metadatos', ruta: '/catalogo/mis-archivos/editar/metadatos' },
+      { texto: 'Metadatos', ruta: '/catalogo/mis-archivos/editar/MetadatosBasicos' },
+      {
+        texto: 'Estilo',
+        ruta: '/catalogo/mis-archivos/editar/estilo',
+      },
+      {
+        texto: 'Clave Geoestadística',
+        ruta: '/catalogo/mis-archivos/unir-vectores',
+      },
+    ]"
+  />
   <div v-if="!props.excludeLinks" class="flex">
     <nuxt-link
       :class="
