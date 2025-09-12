@@ -1,6 +1,5 @@
 <script setup>
-// TODO: fix filtros avanzados y paginador
-// import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
+// TODO: fix paginador
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
 import { cleanInput, resourceTypeDic } from '~/utils/consulta';
@@ -16,6 +15,7 @@ const recursos = computed(() => storeFetched.all);
 const filteredResources = ref([]);
 const tableResources = ref([]);
 const seleccionOrden = ref('');
+const seleccionTipoArchivo = ref('');
 
 const inputSearch = computed({
   get: () => storeFilters.filters.inputSearch,
@@ -44,11 +44,24 @@ function tipoRecurso(recurso) {
   }
 }
 
+const hayMetaPendiente = ref(false);
 function updateResources(nuevosRecursos) {
   filteredResources.value = nuevosRecursos;
+
+  // filtro por logged in con email
+  filteredResources.value = filteredResources.value.filter(
+    (resource) => resource.owner.email === userEmail
+  );
+
+  // TODO: preguntar por cuáles serán los mínimos requeridos
+  hayMetaPendiente.value =
+    filteredResources.value.filter((resource) => resource.raw_abstract === '').length > 0
+      ? true
+      : false;
+
   // obteniendo datos por las props de la tabla
   tableResources.value = filteredResources.value
-    .filter((resource) => resource.owner.email === userEmail)
+    .filter((resource) => resource.raw_abstract !== '')
     .map((d) => ({
       pk: d.pk,
       titulo: d.title,
@@ -83,6 +96,11 @@ watch(seleccionOrden, (nv) => {
   storeFilters.updateFilter('sort', nv);
   updateResources(storeFilters.filter('all'));
 });
+watch(seleccionTipoArchivo, (nv) => {
+  storeFilters.updateFilter('sort', nv);
+  // TODO: crear filtros y condiciones en storeFilter
+  // updateResources(storeFilters.filter('all'));
+});
 
 onMounted(async () => {
   storeFilters.resetAll();
@@ -101,8 +119,20 @@ onMounted(async () => {
     <template #visualizador>
       <main class="contenedor m-b-10 m-t-3">
         <div class="flex">
+          <!-- Selector Tipo de archivo -->
+          <div class="columna-4">
+            <ClientOnly>
+              <SisdaiSelector v-model="seleccionTipoArchivo" etiqueta="Tipo de archivo">
+                <option value="todos_los_archivos">Todos los archivos</option>
+                <option value="capas_geograficas">Capas geográficas</option>
+                <option value="datos_tabulados">Datos tabulados</option>
+                <option value="documentos">Documentos</option>
+                <option value="remotas">Remotas</option>
+              </SisdaiSelector>
+            </ClientOnly>
+          </div>
           <!-- Selector Orden -->
-          <div class="columna-8">
+          <div class="columna-4">
             <ClientOnly>
               <SisdaiSelector v-model="seleccionOrden" etiqueta="Ordenar por">
                 <option value="fecha_descendente">Recién agregados</option>
@@ -165,8 +195,30 @@ onMounted(async () => {
           </div>
         </div>
 
+        <CatalogoMenuMisArchivos
+          :opciones="[
+            { texto: 'Disponibles', ruta: '/catalogo/mis-archivos' },
+            {
+              texto: 'Metadatos pendientes',
+              ruta: '/catalogo/mis-archivos/metadatos-pendientes',
+              notificacion: hayMetaPendiente,
+            },
+            {
+              texto: 'Solicitudes de publicación',
+              ruta: '/catalogo/mis-archivos/solicitudes-publicacion',
+              notificacion: false,
+            },
+          ]"
+        />
+
         <!-- TODO: nivel anidado de nuxt-link -->
         <div class="flex">
+          <p
+            class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-2 p-2 m-0"
+          >
+            Si no encuentras tus archivos aquí, es porque aún tienen <i>Metadatos pendientes</i>. Ve
+            a la pestaña Pendientes y complétarlos para que se muestren en esta sección.
+          </p>
           <h2>Todos mis archivos disponibles</h2>
           <UiNumeroElementos :numero="tableResources.length" />
         </div>
