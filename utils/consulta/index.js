@@ -75,7 +75,7 @@ export function tooltipContent(resource) {
 export function getWMSserver(resource) {
   //const proxy = 'https://geonode.dev.geoint.mx/proxy/?url=';
   const wmsObject = resource.links.find((link) => link.link_type === 'OGC:WMS');
-  const link = wmsObject['url'].replace('http', 'https').replace('httpss', 'https');
+  const link = wmsObject['url']; //.replace('http', 'https').replace('httpss', 'https');
   return `${link.split('?')[0]}?`;
 }
 
