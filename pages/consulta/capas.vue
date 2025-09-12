@@ -140,8 +140,9 @@ watch(() => storeSelected.asQueryParam(), updateQueryParam);
 function findServer(resource) {
   if (resource.sourcetype === 'REMOTE') {
     const url = getWMSserver(resource);
-    const urlCurada = gnoxyUrl(url);
-    return urlCurada;
+    //const urlCurada = gnoxyUrl(url);
+    //return urlCurada;
+    return url;
   } else {
     const url = `${config.public.geonodeUrl}/gs/wms?`;
     const urlCurada = gnoxyUrl(url);

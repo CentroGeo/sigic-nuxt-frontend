@@ -16,6 +16,24 @@ const props = defineProps({
   },
 });
 const { resourceElement } = toRefs(props);
+function getWFS(resource) {
+  let url;
+  if (resource.sourcetype === 'REMOTE') {
+    url = new URL(getWMSserver(resource));
+    url.search = new URLSearchParams({
+      service: 'WFS',
+      version: '1.0.0',
+      request: 'GetFeature',
+      typeName: resource.alternate,
+      outputFormat: 'application/json',
+    }).toString();
+    url = url.href;
+  } else {
+    const objectWFSLink = resourceElement.value.links.find((link) => link.name === 'GeoJSON');
+    url = objectWFSLink.url;
+  }
+  return url;
+}
 const actualButtons = ref({});
 const optionsButtons = ref([
   {
@@ -66,15 +84,12 @@ const optionsButtons = ref([
     excludeFor: 'none',
     label: 'Vínculo WMS',
     pictogram: 'pictograma-enlace-externo',
-    globo: 'WMS',
+    //globo: 'WMS',
     globo: 'WFS',
     action: async () => {
-      //console.log(resourceElement.value.links);
       //const objectWMSLink = resourceElement.value.links.find((link) => link.name === 'PNG');
       //const wmsLink = objectWMSLink.url;
-      const objectWFSLink = resourceElement.value.links.find((link) => link.name === 'GeoJSON');
-      const wfsLink = objectWFSLink.url;
-
+      const wfsLink = getWFS(resourceElement.value);
       try {
         await navigator.clipboard.writeText(wfsLink);
         alert('Enlace copiado al portapapeles: ' + wfsLink);
@@ -106,8 +121,9 @@ const optionsButtons = ref([
 function findServer(resource) {
   if (resource.sourcetype === 'REMOTE') {
     const url = getWMSserver(resource);
-    const urlCurada = gnoxyUrl(url);
-    return urlCurada;
+    return url;
+    //const urlCurada = gnoxyUrl(url);
+    //return urlCurada;
   } else {
     const url = `${config.public.geonodeUrl}/gs/wms?`;
     const urlCurada = gnoxyUrl(url);
