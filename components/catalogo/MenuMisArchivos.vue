@@ -41,6 +41,35 @@ const conEstiloOSinGeometria = (value) => {
     return true;
   }
 };
+function irARutaConQuery(value) {
+  if (
+    value.texto === 'Metadatos' ||
+    value.texto === 'Estilo' ||
+    value.texto === 'Clave Geoestadística'
+  ) {
+    if (value.texto === 'Metadatos') {
+      const tipoRecurso =
+        props.recurso.resource_type === 'document'
+          ? 'Documentos'
+          : isGeometricExtension(props.recurso.extent)
+            ? 'Capa geográfica'
+            : 'Datos tabulados';
+      navigateTo({
+        path: value.ruta,
+        query: { data: props.recurso.pk, type: tipoRecurso },
+      });
+    } else {
+      navigateTo({
+        path: value.ruta,
+        query: { data: props.recurso.pk },
+      });
+    }
+  } else {
+    navigateTo({
+      path: value.ruta,
+    });
+  }
+}
 </script>
 <template>
   <div class="menu-mis-archivos p-t-5 p-b-3">
@@ -50,7 +79,7 @@ const conEstiloOSinGeometria = (value) => {
           <div v-if="value.notificacion" class="notificacion">
             <div class="circulo"></div>
           </div>
-          <nuxt-link :to="value.ruta">{{ value.texto }} </nuxt-link>
+          <nuxt-link @click="irARutaConQuery(value)">{{ value.texto }} </nuxt-link>
           <div :class="route.path === value.ruta ? 'borde-enlace-activo' : ''"></div>
         </div>
       </template>

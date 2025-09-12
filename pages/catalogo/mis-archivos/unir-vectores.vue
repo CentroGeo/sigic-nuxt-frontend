@@ -47,7 +47,7 @@ const objetoId = ref(getUserData());
 // obtener el resource completo a partir del id
 resourceLayer.value = await $fetch('/api/objeto', {
   method: 'POST',
-  body: { id: objetoId.value.pk },
+  body: { id: objetoId.value },
 });
 
 const variables = ref([]);
@@ -93,21 +93,6 @@ const obtenerVariables = async (resource) => {
   return Object.keys(atributos[0] || {});
 };
 variables.value = await obtenerVariables(resourceLayer.value);
-
-// evitar problemas con espacios con JSON.stingify
-const pk = ref(encodeURIComponent(JSON.stringify({ pk: resourceLayer.value.pk })));
-function irAMetadatosConQuery() {
-  navigateTo({
-    path: '/catalogo/mis-archivos/editar/metadatos',
-    query: { data: pk.value },
-  });
-}
-function irAClaveConQuery() {
-  navigateTo({
-    path: '/catalogo/mis-archivos/unir-vectores',
-    query: { data: pk.value },
-  });
-}
 
 watch(seleccionCapaGeo, (nv) => {
   (async () => {
@@ -162,13 +147,6 @@ watch([seleccionCampoCapa, seleccionCapaGeo, seleccionCampoObjetivo], ([n1, n2, 
     validarCampos.value = true;
   }
 });
-
-const bordeEnlaceActivo = (ruta) => {
-  if (route.path === ruta) {
-    return 'borde-enlace-activo';
-  }
-  return '';
-};
 </script>
 
 <template>
@@ -190,19 +168,20 @@ const bordeEnlaceActivo = (ruta) => {
             </nuxt-link>
           </div>
 
-          <div class="flex m-t-3">
-            <nuxt-link
-              :class="bordeEnlaceActivo('/catalogo/mis-archivos/editar/metadatos')"
-              @click="irAMetadatosConQuery"
-              >Metadatos
-            </nuxt-link>
-            <nuxt-link
-              :class="bordeEnlaceActivo('/catalogo/mis-archivos/unir-vectores')"
-              @click="irAClaveConQuery"
-              >Clave Geoestadística
-            </nuxt-link>
-          </div>
-          <div class="borde-b borde-color-secundario"></div>
+          <CatalogoMenuMisArchivos
+            :recurso="resourceLayer"
+            :opciones="[
+              { texto: 'Metadatos', ruta: '/catalogo/mis-archivos/editar/MetadatosBasicos' },
+              {
+                texto: 'Estilo',
+                ruta: '/catalogo/mis-archivos/editar/estilo',
+              },
+              {
+                texto: 'Clave Geoestadística',
+                ruta: '/catalogo/mis-archivos/unir-vectores',
+              },
+            ]"
+          />
 
           <p>
             Agrega a tus datos tabulados un campo geoespacial. Esto permitirá convertirlo en un

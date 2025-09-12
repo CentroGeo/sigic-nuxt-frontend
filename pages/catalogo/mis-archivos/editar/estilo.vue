@@ -17,14 +17,6 @@ const pending = ref(false);
  * @returns {Object} objeto decodificado con la propiedad de pk
  */
 function getUserData() {
-  /* if (route.query.userObject) {
-    try {
-      return JSON.parse(route.query.userObject);
-    } catch (e) {
-      console.error('Error parsing user object', e);
-      return null;
-    }
-  } */
   if (route.query.data) {
     try {
       const dataStr = decodeURIComponent(route.query.data);
@@ -41,23 +33,8 @@ const objetoId = ref(getUserData());
 const resource = ref({});
 resource.value = await $fetch('/api/objeto', {
   method: 'POST',
-  body: { id: objetoId.value.pk },
+  body: { id: objetoId.value },
 });
-
-// evitar problemas con espacios con JSON.stingify
-const pk = ref(encodeURIComponent(JSON.stringify({ pk: resource.value.pk })));
-function irAMetadatosConQuery() {
-  navigateTo({
-    path: '/catalogo/mis-archivos/editar/metadatos',
-    query: { data: pk.value },
-  });
-}
-function irAEstiloConQuery() {
-  navigateTo({
-    path: '/catalogo/mis-archivos/editar/estilo',
-    query: { data: pk.value },
-  });
-}
 
 //
 const dragNdDrop = ref(null);
@@ -93,13 +70,6 @@ async function guardarArchivo(files) {
     dragNdDrop.value?.archivoNoValido();
   }
 }
-
-const bordeEnlaceActivo = (ruta) => {
-  if (route.path === ruta) {
-    return 'borde-enlace-activo';
-  }
-  return '';
-};
 </script>
 
 <template>
@@ -124,19 +94,22 @@ const bordeEnlaceActivo = (ruta) => {
           <div class="flex">
             <div class="columna-16">
               <h2>{{ resource.title }}</h2>
-              <div class="flex">
-                <nuxt-link
-                  :class="bordeEnlaceActivo('/catalogo/mis-archivos/editar/metadatos')"
-                  @click="irAMetadatosConQuery"
-                  >Metadatos
-                </nuxt-link>
-                <nuxt-link
-                  :class="bordeEnlaceActivo('/catalogo/mis-archivos/editar/estilo')"
-                  @click="irAEstiloConQuery"
-                  >Estilo
-                </nuxt-link>
-              </div>
-              <div class="borde-b borde-color-secundario"></div>
+
+              <CatalogoMenuMisArchivos
+                :recurso="resource"
+                :opciones="[
+                  { texto: 'Metadatos', ruta: '/catalogo/mis-archivos/editar/MetadatosBasicos' },
+                  {
+                    texto: 'Estilo',
+                    ruta: '/catalogo/mis-archivos/editar/estilo',
+                  },
+                  {
+                    texto: 'Clave Geoestadística',
+                    ruta: '/catalogo/mis-archivos/unir-vectores',
+                  },
+                ]"
+              />
+
               <h2>Estilo</h2>
               <p><b>Estilo, solo archivos .sld</b></p>
 
