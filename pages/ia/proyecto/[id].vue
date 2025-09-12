@@ -425,69 +425,71 @@ const editarProyecto = async () => {
           </template>
 
           <template #cuerpo>
-            <p>Explora el catálogo y selecciona fuentes de información para el proyecto</p>
-            <SisdaiCampoBusqueda class="m-y-3" etiqueta="Buscar del catálogo" />
-            <div class="flex flex-contenido-separado">
-              <div class="columna-5">
-                <div>
-                  <UiNumeroElementos :numero="12" etiqueta="Categorías" class="m-b-3" />
-                  <ul class="lista-sin-estilo" style="overflow-y: auto">
-                    <li v-for="categoria in categorias" :key="categoria.titulo" class="m-y-0">
-                      <div
-                        class="categoria p-l-6 p-r-2 p-y-1"
-                        :class="{
-                          seleccionada: categoria === categoriaSeleccionada,
-                        }"
-                        @click="seleccionarCategoria(categoria)"
-                      >
-                        {{ categoria.titulo }}
-                      </div>
-                    </li>
-                  </ul>
+            <div class="p-r-2">
+              <p>Explora el catálogo y selecciona fuentes de información para el proyecto</p>
+              <SisdaiCampoBusqueda class="m-y-3" etiqueta="Buscar del catálogo" />
+              <div class="flex flex-contenido-separado">
+                <div class="columna-5">
+                  <div>
+                    <UiNumeroElementos :numero="12" etiqueta="Categorías" class="m-b-3" />
+                    <ul class="lista-sin-estilo" style="overflow-y: auto">
+                      <li v-for="categoria in categorias" :key="categoria.titulo" class="m-y-0">
+                        <div
+                          class="categoria p-l-6 p-r-2 p-y-1"
+                          :class="{
+                            seleccionada: categoria === categoriaSeleccionada,
+                          }"
+                          @click="seleccionarCategoria(categoria)"
+                        >
+                          {{ categoria.titulo }}
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
-              </div>
-              <div class="columna-5">
-                <div>
-                  <UiNumeroElementos :numero="7" etiqueta="Capas geográficas" class="m-b-3" />
-                  <ul class="lista-sin-estilo" style="overflow-y: auto">
-                    <li v-for="capa in capasGeograficas" :key="capa.id" class="m-y-0">
-                      <div class="capa p-2 m-b-2 borde-redondeado-20">
-                        <SisdaiCasilla v-model="campoCasilla" :etiqueta="capa.titulo" />
-                        <div class="icono">
-                          <span class="pictograma-capa-poligono m-r-1" aria-hidden="true" />
-                          <span>{{ capa.tipo }}</span>
+                <div class="columna-5">
+                  <div>
+                    <UiNumeroElementos :numero="7" etiqueta="Capas geográficas" class="m-b-3" />
+                    <ul class="lista-sin-estilo" style="overflow-y: auto">
+                      <li v-for="capa in capasGeograficas" :key="capa.id" class="m-y-0">
+                        <div class="capa p-2 m-b-2 borde-redondeado-20">
+                          <SisdaiCasilla v-model="campoCasilla" :etiqueta="capa.titulo" />
+                          <div class="icono">
+                            <span class="pictograma-capa-poligono m-r-1" aria-hidden="true" />
+                            <span>{{ capa.tipo }}</span>
+                          </div>
                         </div>
-                      </div>
-                    </li>
-                  </ul>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
-              </div>
-              <div class="columna-5">
-                <div>
-                  <UiNumeroElementos :numero="4" etiqueta="Capas seleccionadas" class="m-b-3" />
-                  <ul class="lista-sin-estilo" style="overflow-y: auto">
-                    <li v-for="capa in capasSeleccionadas" :key="capa.id" class="m-y-0">
-                      <div class="capa p-2 m-b-2 borde-redondeado-20">
-                        <h6 class="m-t-0 m-b-1">{{ capa.titulo }}</h6>
-                        <div class="m-b-1">
-                          {{ capa.categoria }}
+                <div class="columna-5">
+                  <div>
+                    <UiNumeroElementos :numero="4" etiqueta="Capas seleccionadas" class="m-b-3" />
+                    <ul class="lista-sin-estilo" style="overflow-y: auto">
+                      <li v-for="capa in capasSeleccionadas" :key="capa.id" class="m-y-0">
+                        <div class="capa p-2 m-b-2 borde-redondeado-20">
+                          <h6 class="m-t-0 m-b-1">{{ capa.titulo }}</h6>
+                          <div class="m-b-1">
+                            {{ capa.categoria }}
+                          </div>
+                          <div class="icono m-b-1">
+                            <span class="pictograma-capa-poligono m-r-1" aria-hidden="true" />
+                            <span>{{ capa.tipo }}</span>
+                          </div>
+                          <div class="flex flex-contenido-final">
+                            <button
+                              class="boton-pictograma boton-sin-contenedor-secundario boton-chico"
+                              aria-label="Remover"
+                              type="button"
+                            >
+                              <span class="pictograma-eliminar" aria-hidden="true" />
+                            </button>
+                          </div>
                         </div>
-                        <div class="icono m-b-1">
-                          <span class="pictograma-capa-poligono m-r-1" aria-hidden="true" />
-                          <span>{{ capa.tipo }}</span>
-                        </div>
-                        <div class="flex flex-contenido-final">
-                          <button
-                            class="boton-pictograma boton-sin-contenedor-secundario boton-chico"
-                            aria-label="Remover"
-                            type="button"
-                          >
-                            <span class="pictograma-eliminar" aria-hidden="true" />
-                          </button>
-                        </div>
-                      </div>
-                    </li>
-                  </ul>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
