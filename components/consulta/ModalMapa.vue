@@ -11,6 +11,7 @@ const props = defineProps({
   },
 });
 const config = useRuntimeConfig();
+const { gnoxyUrl } = useGnoxyUrl();
 const extentMap = ref(undefined);
 //const estilosLista = ref(['Opcion 1', 'Opción 2', 'Opcion 3']);
 //const estiloSeleccionado = ref(estilosLista.value[0]);
@@ -33,7 +34,16 @@ function downloadClicked() {
 function abrirModalMapa() {
   modalMapa.value?.abrirModal();
 }
-
+function findServer(resource) {
+  if (resource.sourcetype === 'REMOTE') {
+    const url = getWMSserver(resource);
+    return url;
+  } else {
+    const url = `${config.public.geonodeUrl}/gs/wms?`;
+    const urlCurada = gnoxyUrl(url);
+    return urlCurada;
+  }
+}
 defineExpose({
   abrirModalMapa,
 });
@@ -62,7 +72,7 @@ defineExpose({
 
           <SisdaiCapaWms
             :capa="selectedElement.alternate"
-            :fuente="`${config.public.geoserverUrl}/wms?`"
+            :fuente="findServer(selectedElement)"
             @al-finalizar-carga="extentMap = selectedElement.extent.coords"
           />
         </SisdaiMapa>
