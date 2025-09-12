@@ -47,23 +47,17 @@ function irARutaConQuery(value) {
     value.texto === 'Estilo' ||
     value.texto === 'Clave Geoestadística'
   ) {
-    if (value.texto === 'Metadatos') {
-      const tipoRecurso =
-        props.recurso.resource_type === 'document'
-          ? 'Documentos'
-          : isGeometricExtension(props.recurso.extent)
-            ? 'Capa geográfica'
-            : 'Datos tabulados';
-      navigateTo({
-        path: value.ruta,
-        query: { data: props.recurso.pk, type: tipoRecurso },
-      });
-    } else {
-      navigateTo({
-        path: value.ruta,
-        query: { data: props.recurso.pk },
-      });
-    }
+    const tipoRecurso =
+      props.recurso.resource_type === 'document'
+        ? 'document'
+        : isGeometricExtension(props.recurso.extent)
+          ? 'dataLayer'
+          : 'dataTable';
+
+    navigateTo({
+      path: value.ruta,
+      query: { data: props.recurso.pk, type: tipoRecurso },
+    });
   } else {
     navigateTo({
       path: value.ruta,
@@ -105,7 +99,7 @@ function irARutaConQuery(value) {
     }
     .borde-enlace-activo {
       position: relative;
-      width: 40px;
+      width: 32px;
       height: 4px;
       padding-bottom: 4px;
       border-radius: 2px 2px 0px 0px;

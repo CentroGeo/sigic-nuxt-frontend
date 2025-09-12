@@ -71,6 +71,7 @@ function updateResources(nuevosRecursos) {
       acciones: 'Editar, Ver, Descargar, Remover',
       uuid: d.uuid,
       resource_type: d.resource_type,
+      extent: d.extent,
       recurso_completo: d,
     }));
 }

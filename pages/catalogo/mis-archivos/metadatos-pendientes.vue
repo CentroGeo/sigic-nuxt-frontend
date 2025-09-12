@@ -58,6 +58,7 @@ function updateResources(nuevosRecursos) {
       acciones: 'Editar, Remover',
       uuid: d.uuid,
       resource_type: d.resource_type,
+      extent: d.extent,
       recurso_completo: d,
     }));
 }

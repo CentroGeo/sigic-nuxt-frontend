@@ -4,14 +4,19 @@ import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/sele
 
 import { getWMSserver, hasWMS, resourceTypeDic } from '~/utils/consulta';
 
-const storeFetched = useFetchedResources2Store();
-storeFetched.checkFilling(resourceTypeDic.dataLayer);
-
-const route = useRoute();
-
 const { data } = useAuth();
 const token = data.value?.accessToken;
 const userEmail = data.value?.user.email;
+const route = useRoute();
+
+const selectedPk = route.query.data;
+const resourceType = route.query.type;
+// Recuperamos la información completa del recurso
+const storeFetched = useFetchedResources2Store();
+storeFetched.checkFilling(resourceType);
+const resourceToEdit = computed(() =>
+  storeFetched.byResourceType(resourceType).find(({ pk }) => pk === selectedPk)
+);
 
 const resourcesCapas = computed(
   () =>
@@ -19,36 +24,13 @@ const resourcesCapas = computed(
       .byResourceType(resourceTypeDic.dataLayer)
       .filter((resource) => resource.owner.email === userEmail) || {}
 );
-const resourceLayer = ref({});
+
 const seleccionCampoCapa = ref('');
 const seleccionCapaGeo = ref('');
 const seleccionCampoObjetivo = ref('');
 const campoUnidos = ref(false);
 const dict = ref({});
 const unionExitosa = ref(false);
-
-/**
- * Obtiene la data del query route de la vista de donde viene.
- * @returns {Object} objeto decodificado con la propiedad de pk
- */
-function getUserData() {
-  if (route.query.data) {
-    try {
-      const dataStr = decodeURIComponent(route.query.data);
-      return computed(() => JSON.parse(dataStr));
-    } catch (e) {
-      console.error('Error al parsear el objeto', e);
-      return null;
-    }
-  }
-}
-const objetoId = ref(getUserData());
-
-// obtener el resource completo a partir del id
-resourceLayer.value = await $fetch('/api/objeto', {
-  method: 'POST',
-  body: { id: objetoId.value },
-});
 
 const variables = ref([]);
 const varGeoLayer = ref([]);
@@ -92,7 +74,7 @@ const obtenerVariables = async (resource) => {
   const atributos = datas.features.map((f) => f.properties);
   return Object.keys(atributos[0] || {});
 };
-variables.value = await obtenerVariables(resourceLayer.value);
+variables.value = await obtenerVariables(resourceToEdit.value);
 
 watch(seleccionCapaGeo, (nv) => {
   (async () => {
@@ -119,14 +101,14 @@ async function unirCampos() {
     columns: columns.value,
     geo_layer: seleccionCapaGeo.value,
     geo_pivot: seleccionCampoObjetivo.value,
-    layer: resourceLayer.value.pk,
+    layer: resourceToEdit.value.pk,
     layer_pivot: seleccionCampoCapa.value,
     // token: data.value?.accessToken,
   });
   // await $fetch('/api/join', {
   //   method: 'POST',
   //   body: {
-  //     layer: resourceLayer.value.pk,
+  //     layer: resourceToEdit.value.pk,
   //     geo_layer: resourceGeo.value.pk,
   //     layer_pivot: seleccionCapa.value,
   //     geo_pivot: seleccionCapaGeo.value,
@@ -169,7 +151,7 @@ watch([seleccionCampoCapa, seleccionCapaGeo, seleccionCampoObjetivo], ([n1, n2, 
           </div>
 
           <CatalogoMenuMisArchivos
-            :recurso="resourceLayer"
+            :recurso="resourceToEdit"
             :opciones="[
               { texto: 'Metadatos', ruta: '/catalogo/mis-archivos/editar/MetadatosBasicos' },
               {
@@ -203,7 +185,7 @@ watch([seleccionCampoCapa, seleccionCapaGeo, seleccionCampoObjetivo], ([n1, n2, 
           <div class="m-t-3">
             <div class="flex">
               <div class="columna-16">
-                <h3>{{ resourceLayer.title }}</h3>
+                <h3>{{ resourceToEdit.title }}</h3>
 
                 <ClientOnly>
                   <!-- Selector de campo capa base -->
@@ -299,10 +281,3 @@ watch([seleccionCampoCapa, seleccionCapaGeo, seleccionCampoObjetivo], ([n1, n2, 
     </template>
   </UiLayoutPaneles>
 </template>
-
-<style lang="scss" scoped>
-.borde-enlace-activo {
-  border-bottom: 4px solid var(--boton-primario-borde);
-  border-radius: 0px;
-}
-</style>

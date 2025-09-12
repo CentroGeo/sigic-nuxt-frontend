@@ -1,57 +1,30 @@
 <script setup>
-import SisdaiControlDeslizante from '@centrogeomx/sisdai-componentes/src/componentes/control-deslizante/SisdaiControlDeslizante.vue';
-
+const { data } = useAuth();
 const route = useRoute();
 
-// TODO: arreglar cargas éxitosas o fallidas
-const controlDeslizante = ref(null);
-const generaIdAleatorio = (el) => {
-  return el + Math.random().toString(36).substring(2);
-};
-const idAleatorioControlDes = generaIdAleatorio('controldeslizante-');
-const statusOk = ref(false);
-const pending = ref(false);
+const subidaExitosa = ref(false);
+const nombreSLD = ref('');
 
-/**
- * Obtiene la data del query route de la vista de donde viene.
- * @returns {Object} objeto decodificado con la propiedad de pk
- */
-function getUserData() {
-  if (route.query.data) {
-    try {
-      const dataStr = decodeURIComponent(route.query.data);
-      return computed(() => JSON.parse(dataStr));
-    } catch (e) {
-      console.error('Error al parsear el objeto', e);
-      return null;
-    }
-  }
-}
-const objetoId = ref(getUserData());
-
-// obtener el resource completo a partir del id
-const resource = ref({});
-resource.value = await $fetch('/api/objeto', {
-  method: 'POST',
-  body: { id: objetoId.value },
-});
+const selectedPk = route.query.data;
+const resourceType = route.query.type;
+// Recuperamos la información completa del recurso
+const storeFetched = useFetchedResources2Store();
+storeFetched.checkFilling(resourceType);
+const resourceToEdit = computed(() =>
+  storeFetched.byResourceType(resourceType).find(({ pk }) => pk === selectedPk)
+);
 
 //
 const dragNdDrop = ref(null);
-const { data } = useAuth();
+const style_files = ['.sld'];
 async function guardarArchivo(files) {
-  if (
-    files[0].name.split('.')[1] === '.sld' ||
-    files[0].name.endsWith('.sld') ||
-    files[0].type === '.sld' ||
-    files[0].type === 'application/vnd.sld+xml' ||
-    files[0].type === 'application/vnd.sld+xml,.sld'
-  ) {
+  // solo uno o el primer archivo
+  if (style_files.map((end) => files[0]?.name.endsWith(end)).includes(true)) {
     const formData = new FormData();
     // solo el primer elemento del arreglo
+    nombreSLD.value = files[0].name;
     formData.append('base_file', files[0]);
-    formData.append('dataset_title', resource.value.alternate);
-    // formData.append('dataset_title', 'geonode:coordinaciones_5512c0b1ad0c84af59d3e9182b06c97c');
+    formData.append('dataset_title', resourceToEdit.value.alternate);
     formData.append('token', data.value?.accessToken);
 
     const response = await $fetch('/api/subirSLD', {
@@ -59,13 +32,7 @@ async function guardarArchivo(files) {
       body: formData,
     });
     console.warn('response', response);
-    // if (!response.ok) {
-    //   // throw new Error(`Error al cargar archivos: ${response.status}`);
-    // } else {
-    //   // pending.value = false;
-    //   // statusOk.value = true;
-    //   // TODO: recuperar recurso o recursos mediante el name y title
-    // }
+    subidaExitosa.value = true;
   } else {
     dragNdDrop.value?.archivoNoValido();
   }
@@ -93,10 +60,10 @@ async function guardarArchivo(files) {
 
           <div class="flex">
             <div class="columna-16">
-              <h2>{{ resource.title }}</h2>
+              <h2 class="m-b-0">{{ resourceToEdit.title }}</h2>
 
               <CatalogoMenuMisArchivos
-                :recurso="resource"
+                :recurso="resourceToEdit"
                 :opciones="[
                   { texto: 'Metadatos', ruta: '/catalogo/mis-archivos/editar/MetadatosBasicos' },
                   {
@@ -110,7 +77,7 @@ async function guardarArchivo(files) {
                 ]"
               />
 
-              <h2>Estilo</h2>
+              <h2 class="m-t-0">Estilo</h2>
               <p><b>Estilo, solo archivos .sld</b></p>
 
               <!-- Drag & Drop -->
@@ -123,8 +90,7 @@ async function guardarArchivo(files) {
             </div>
 
             <div class="columna-16">
-              <div v-if="statusOk">
-                <!-- <div v-if="true"> -->
+              <div v-if="subidaExitosa">
                 <h2>Cargas recientes</h2>
                 <div class="fondo-color-confirmacion p-3 borde-redondeado-16">
                   <div class="flex texto-color-confirmacion">
@@ -132,44 +98,10 @@ async function guardarArchivo(files) {
                     <b> Archivo cargado correctamente </b>
                   </div>
 
-                  <p>Capas_lago_texcoco.json</p>
+                  <p>{{ nombreSLD }}</p>
 
                   <div>
                     <nuxt-link to="/catalogo/mis-archivos">Ver en mis archivos</nuxt-link>
-                  </div>
-                </div>
-              </div>
-              <div v-if="pending">
-                <h2>Cargas pendientes</h2>
-                <div class="fondo-color-neutro p-3 borde-redondeado-16">
-                  <div class="flex flex-contenido-separado">
-                    <p class="flex-vertical-centrado">nombre de la capa.json</p>
-                    <div class="flex">
-                      <p class="borde borde-redondeado-8" style="padding: 4px">.sld</p>
-                      <p class="flex-vertical-centrado">1MB</p>
-                    </div>
-                  </div>
-                  <ClientOnly>
-                    <SisdaiControlDeslizante
-                      :id="idAleatorioControlDes"
-                      ref="controlDeslizante"
-                      :val_min="0"
-                      :val_max="100"
-                      :val_entrada="90"
-                      step="10"
-                      @blur="false"
-                      @update:val_entrada="
-                        ($event) => (controlDeslizante.valor_seleccionado = $event)
-                      "
-                    />
-                  </ClientOnly>
-                  <div class="flex flex-contenido-inicio">
-                    <label :for="idAleatorioControlDes"
-                      >{{
-                        controlDeslizante?.valor_seleccionado < 100 ? 'Progreso' : 'Completado'
-                      }}
-                      {{ controlDeslizante?.valor_seleccionado }}%</label
-                    >
                   </div>
                 </div>
               </div>
@@ -180,10 +112,3 @@ async function guardarArchivo(files) {
     </template>
   </UiLayoutPaneles>
 </template>
-
-<style lang="scss" scoped>
-.borde-enlace-activo {
-  border-bottom: 4px solid var(--boton-primario-borde);
-  border-radius: 0px;
-}
-</style>
