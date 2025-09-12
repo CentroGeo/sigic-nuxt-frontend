@@ -2,18 +2,20 @@
 import SisdaiNavegacionPrincipal from '@centrogeomx/sisdai-componentes/src/componentes/navegacion-principal/SisdaiNavegacionPrincipal.vue';
 
 const { status, signIn, signOut } = useAuth();
-
-const estaLogueado = computed(() => status.value === 'authenticated');
+const route = useRoute();
 
 async function iniciarSesion() {
   await signIn('keycloak', {
-    callbackUrl: '/', // A dónde volver después del login
+    // A dónde volver después del login
+    callbackUrl: route.fullPath,
   });
 }
+
 async function cerrarSesion() {
-  await signOut({ callbackUrl: '/' });
+  await signOut({ callbackUrl: route.fullPath });
 }
 </script>
+
 <template>
   <SisdaiNavegacionPrincipal>
     <!--Definiendo el logo del sitio-->
@@ -28,6 +30,7 @@ async function cerrarSesion() {
         /> -->
       </a>
     </template>
+
     <ul class="nav-menu">
       <li>
         <NuxtLink class="nav-hipervinculo" to="/" exact-path>Inicio</NuxtLink>
@@ -44,7 +47,7 @@ async function cerrarSesion() {
       </li>
       <li>
         <button
-          v-if="estaLogueado"
+          v-if="status === 'authenticated'"
           aria-label="Cerrar sesión"
           type="button"
           class="boton-secundario btn-inicio-sesion"
@@ -52,6 +55,7 @@ async function cerrarSesion() {
         >
           Cerrar sesión
         </button>
+
         <button
           v-else
           aria-label="Iniciar sesión"
