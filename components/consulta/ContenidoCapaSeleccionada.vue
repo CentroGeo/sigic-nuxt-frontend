@@ -81,8 +81,10 @@ const optionsButtons = ref([
     },
   },
   {
-    excludeFor: 'none',
-    label: 'Vínculo WMS',
+    //excludeFor: 'none'
+    excludeFor: 'noTables',
+    //label: 'Vínculo WMS',
+    label: 'Vínculo WFS',
     pictogram: 'pictograma-enlace-externo',
     //globo: 'WMS',
     globo: 'WFS',
@@ -152,7 +154,6 @@ watch(resourceElement, () => {
 
 <template>
   <div>
-    <!-- El contenido de la tarjeta de capas -->
     <div class="m-y-2">
       <SisdaiLeyendaWms
         :nombre="resourceElement.alternate"
