@@ -141,7 +141,6 @@ function findServer(resource) {
   if (resource.sourcetype === 'REMOTE') {
     const url = getWMSserver(resource);
     const urlCurada = gnoxyUrl(url);
-    console.log('La url remota:', urlCurada);
     return urlCurada;
   } else {
     const url = `${config.public.geonodeUrl}/gs/wms?`;
