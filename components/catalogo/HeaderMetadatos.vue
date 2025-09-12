@@ -8,6 +8,10 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  excludeLinks: {
+    type: Boolean,
+    default: false,
+  },
 });
 const route = useRoute();
 const titleOptions = {
@@ -17,13 +21,7 @@ const titleOptions = {
   'Atributos del Conjunto de Datos': { nombre: 'AtributosConjunto', valor: 4 },
 };
 const titleValue = computed(() => titleOptions[props.title]['valor']);
-
-const bordeEnlaceActivo = (ruta) => {
-  if (route.path === ruta) {
-    return 'borde-enlace-activo';
-  }
-  return '';
-};
+const tablaSinGeometria = ref(false);
 
 function tieneEstilo() {
   if (props.resource.resource_type === 'document') {
@@ -37,11 +35,18 @@ function tieneEstilo() {
     return isGeometricExtension(props.resource.extent) ? true : false;
   }
 }
+
+const bordeEnlaceActivo = (ruta) => {
+  if (route.path === ruta) {
+    return 'borde-enlace-activo';
+  }
+  return '';
+};
 </script>
 <template>
   <h2>{{ props.resource.title }}</h2>
 
-  <div class="flex">
+  <div v-if="!props.excludeLinks" class="flex">
     <nuxt-link
       :class="
         bordeEnlaceActivo(`/catalogo/mis-archivos/editar/${titleOptions[props.title]['nombre']}`)
@@ -53,7 +58,9 @@ function tieneEstilo() {
       :class="bordeEnlaceActivo('/catalogo/mis-archivos/editar/estilo')"
       >Estilo
     </nuxt-link>
-    <nuxt-link :class="bordeEnlaceActivo('/catalogo/mis-archivos/unir-vectores')"
+    <nuxt-link
+      v-if="tablaSinGeometria"
+      :class="bordeEnlaceActivo('/catalogo/mis-archivos/unir-vectores')"
       >Clave Geoestadística
     </nuxt-link>
   </div>

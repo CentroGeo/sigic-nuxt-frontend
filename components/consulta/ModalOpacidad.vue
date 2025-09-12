@@ -46,7 +46,7 @@ watch(valorOpacidad, (nv) => {
               :val_min="0"
               :val_max="100"
               :val_entrada="storeSelected.byUuid(selectedElement.uuid)?.opacidad * 100 ?? 100"
-              step="10"
+              step="1"
               @update:val_entrada="
                 ($event) => {
                   controlOpacidad.valor_seleccionado = $event;
@@ -56,8 +56,19 @@ watch(valorOpacidad, (nv) => {
             />
           </div>
 
-          <div class="tarjeta columna-5">
-            <p class="m-x-2 m-y-1">{{ controlOpacidad?.valor_seleccionado }}%</p>
+          <div class="columna-5">
+            <input
+              type="number"
+              :value="controlOpacidad?.valor_seleccionado"
+              min="0"
+              max="100"
+              step="1"
+              @change="
+                (e) => {
+                  valorOpacidad = e.target.value;
+                }
+              "
+            />
           </div>
         </div>
       </template>

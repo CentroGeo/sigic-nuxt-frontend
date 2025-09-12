@@ -1,6 +1,5 @@
 <script setup>
-// TODO: fix filtros avanzados y paginador
-// import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
+// TODO: fix paginador
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
 import { cleanInput, resourceTypeDic } from '~/utils/consulta';
@@ -16,6 +15,7 @@ const recursos = computed(() => storeFetched.all);
 const filteredResources = ref([]);
 const tableResources = ref([]);
 const seleccionOrden = ref('');
+const seleccionTipoArchivo = ref('');
 
 const inputSearch = computed({
   get: () => storeFilters.filters.inputSearch,
@@ -49,13 +49,14 @@ function updateResources(nuevosRecursos) {
   // obteniendo datos por las props de la tabla
   tableResources.value = filteredResources.value
     .filter((resource) => resource.owner.email === userEmail)
+    .filter((resource) => resource.raw_abstract === '')
     .map((d) => ({
       pk: d.pk,
       titulo: d.title,
       tipo_recurso: tipoRecurso(d),
       categoria: d.category,
       actualizacion: d.last_updated,
-      acciones: 'Editar, Ver, Descargar, Remover',
+      acciones: 'Editar, Remover',
       uuid: d.uuid,
       resource_type: d.resource_type,
       recurso_completo: d,
@@ -83,6 +84,11 @@ watch(seleccionOrden, (nv) => {
   storeFilters.updateFilter('sort', nv);
   updateResources(storeFilters.filter('all'));
 });
+watch(seleccionTipoArchivo, (nv) => {
+  storeFilters.updateFilter('sort', nv);
+  // TODO: crear filtros y condiciones en storeFilter
+  // updateResources(storeFilters.filter('all'));
+});
 
 onMounted(async () => {
   storeFilters.resetAll();
@@ -101,8 +107,20 @@ onMounted(async () => {
     <template #visualizador>
       <main class="contenedor m-b-10 m-t-3">
         <div class="flex">
+          <!-- Selector Tipo de archivo -->
+          <div class="columna-4">
+            <ClientOnly>
+              <SisdaiSelector v-model="seleccionTipoArchivo" etiqueta="Tipo de archivo">
+                <option value="todos_los_archivos">Todos los archivos</option>
+                <option value="capas_geograficas">Capas geográficas</option>
+                <option value="datos_tabulados">Datos tabulados</option>
+                <option value="documentos">Documentos</option>
+                <option value="remotas">Remotas</option>
+              </SisdaiSelector>
+            </ClientOnly>
+          </div>
           <!-- Selector Orden -->
-          <div class="columna-8">
+          <div class="columna-4">
             <ClientOnly>
               <SisdaiSelector v-model="seleccionOrden" etiqueta="Ordenar por">
                 <option value="fecha_descendente">Recién agregados</option>
@@ -165,12 +183,30 @@ onMounted(async () => {
           </div>
         </div>
 
-        <!-- TODO: nivel anidado de nuxt-link -->
+        <CatalogoMenuMisArchivos
+          :opciones="[
+            { texto: 'Disponibles', ruta: '/catalogo/mis-archivos' },
+            {
+              texto: 'Metadatos pendientes',
+              ruta: '/catalogo/mis-archivos/metadatos-pendientes',
+              notificacion: true,
+            },
+            {
+              texto: 'Solicitudes de publicación',
+              ruta: '/catalogo/mis-archivos/solicitudes-publicacion',
+              notificacion: true,
+            },
+          ]"
+        />
+
         <div class="flex">
-          <h2>Todos mis archivos disponibles</h2>
+          <h2>Todos los archivos pendientes</h2>
           <UiNumeroElementos :numero="tableResources.length" />
         </div>
-        <p>En esta tabla se muestran los archivos disponibles para su consulta y uso.</p>
+        <p>
+          Aquí se listan los archivos pendientes de metadatos. Complétalos para poder usuarlos; al
+          hacerlo se moverán a la sección de disponibles.
+        </p>
         <div class="flex">
           <div class="columna-16">
             <!-- TODO: implementar paginador -->
