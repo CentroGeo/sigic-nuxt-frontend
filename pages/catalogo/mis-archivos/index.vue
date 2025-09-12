@@ -123,9 +123,9 @@ onMounted(async () => {
           <div class="columna-4">
             <ClientOnly>
               <SisdaiSelector v-model="seleccionTipoArchivo" etiqueta="Tipo de archivo">
-                <option value="todos_los_archivos">Todos los archivos</option>
-                <option value="capas_geograficas">Capas geográficas</option>
-                <option value="datos_tabulados">Datos tabulados</option>
+                <option value="todos">Todos los archivos</option>
+                <option value="capas">Capas geográficas</option>
+                <option value="tablas">Datos tabulados</option>
                 <option value="documentos">Documentos</option>
                 <option value="remotas">Remotas</option>
               </SisdaiSelector>
