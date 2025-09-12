@@ -37,6 +37,7 @@ const editedResource = computed(() => resources.value.find(({ pk }) => pk === se
         <CatalogoHeaderMetadatos
           :resource="editedResource"
           :title="'Metadatos Opcionales'"
+          :exclude-links="false"
         ></CatalogoHeaderMetadatos>
 
         <h3>Un placeholder</h3>

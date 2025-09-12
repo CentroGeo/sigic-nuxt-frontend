@@ -69,6 +69,7 @@ watch(editedResource, async () => {
         <CatalogoHeaderMetadatos
           :resource="editedResource"
           :title="'Atributos del Conjunto de Datos'"
+          :exclude-links="false"
         ></CatalogoHeaderMetadatos>
 
         <div class="contenedor-tabla p-2">
