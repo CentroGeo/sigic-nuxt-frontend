@@ -49,6 +49,7 @@ function irARutaConQuery() {
     <nuxt-link class="boton-secundario boton-chico" type="button" to="/catalogo/mis-archivos"
       >Ir a mis archivos</nuxt-link
     >
+    <button class="boton-secundario boton-chico" :disabled="false">Regresar</button>
     <button class="boton-primario boton-chico" :disabled="false">Actualizar</button>
     <button
       class="boton-primario boton-chico"
