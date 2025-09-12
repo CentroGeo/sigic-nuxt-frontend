@@ -1,8 +1,11 @@
 <script setup>
 // TODO: fix paginador
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-
 import { cleanInput, resourceTypeDic } from '~/utils/consulta';
+
+// para filtar por los archivos de la usuaria
+const { data } = useAuth();
+const userEmail = data.value.user.email;
 
 const storeFetched = useFetchedResources2Store();
 const storeFilters = useFilteredResources();
@@ -16,6 +19,7 @@ const filteredResources = ref([]);
 const tableResources = ref([]);
 const seleccionOrden = ref('');
 const seleccionTipoArchivo = ref('');
+const hayMetaPendiente = ref(false);
 
 const inputSearch = computed({
   get: () => storeFilters.filters.inputSearch,
@@ -26,10 +30,6 @@ const isFilterActive = ref(false);
 
 // obteniendo las variables keys para la tabla
 const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'acciones'];
-
-// para filtar por los archivos de la usuaria
-const { data } = useAuth();
-const userEmail = data.value.user.email;
 
 /**
  * Valida si el tipo de recurso es documento o dataset con geometría o no
@@ -44,7 +44,6 @@ function tipoRecurso(recurso) {
   }
 }
 
-const hayMetaPendiente = ref(false);
 function updateResources(nuevosRecursos) {
   filteredResources.value = nuevosRecursos;
 
@@ -53,7 +52,8 @@ function updateResources(nuevosRecursos) {
     (resource) => resource.owner.email === userEmail
   );
 
-  // TODO: preguntar por cuáles serán los mínimos requeridos
+  // TODO: estándar oficial de metadatos mínimos requeridos
+  // abstract, title, keywords, category, año, institución
   hayMetaPendiente.value =
     filteredResources.value.filter((resource) => resource.raw_abstract === '').length > 0
       ? true
@@ -80,7 +80,6 @@ function applyAdvancedFilter() {
   modalFiltroAvanzado.value.cerrarModalBusqueda();
   updateResources(storeFilters.filter('all'));
 }
-
 function resetAdvancedFilter() {
   isFilterActive.value = false;
   storeFilters.resetFilters();
@@ -97,9 +96,8 @@ watch(seleccionOrden, (nv) => {
   updateResources(storeFilters.filter('all'));
 });
 watch(seleccionTipoArchivo, (nv) => {
-  storeFilters.updateFilter('sort', nv);
-  // TODO: crear filtros y condiciones en storeFilter
-  // updateResources(storeFilters.filter('all'));
+  storeFilters.filters.resourceType = nv;
+  updateResources(storeFilters.filter('all'));
 });
 
 onMounted(async () => {
@@ -119,11 +117,10 @@ onMounted(async () => {
     <template #visualizador>
       <main class="contenedor m-b-10 m-t-3">
         <div class="flex">
-          <!-- Selector Tipo de archivo -->
           <div class="columna-4">
             <ClientOnly>
               <SisdaiSelector v-model="seleccionTipoArchivo" etiqueta="Tipo de archivo">
-                <option value="todos">Todos los archivos</option>
+                <option value="todes">Todos los archivos</option>
                 <option value="capas">Capas geográficas</option>
                 <option value="tablas">Datos tabulados</option>
                 <option value="documentos">Documentos</option>
@@ -131,7 +128,6 @@ onMounted(async () => {
               </SisdaiSelector>
             </ClientOnly>
           </div>
-          <!-- Selector Orden -->
           <div class="columna-4">
             <ClientOnly>
               <SisdaiSelector v-model="seleccionOrden" etiqueta="Ordenar por">
@@ -142,7 +138,6 @@ onMounted(async () => {
               </SisdaiSelector>
             </ClientOnly>
           </div>
-          <!-- Campo de búsqueda avanzada -->
           <div class="columna-8">
             <div class="flex flex-contenido-separado">
               <div class="columna-14">
@@ -211,13 +206,12 @@ onMounted(async () => {
           ]"
         />
 
-        <!-- TODO: nivel anidado de nuxt-link -->
         <div class="flex">
           <p
             class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-2 p-2 m-0"
           >
             Si no encuentras tus archivos aquí, es porque aún tienen <i>Metadatos pendientes</i>. Ve
-            a la pestaña Pendientes y complétarlos para que se muestren en esta sección.
+            a la pestaña Pendientes y complétalos para que se muestren en esta sección.
           </p>
           <h2>Todos mis archivos disponibles</h2>
           <UiNumeroElementos :numero="tableResources.length" />

@@ -36,7 +36,7 @@ const route = useRoute();
         position: absolute;
         width: 8px;
         height: 8px;
-        background-color: aqua;
+        background-color: var(--color-informativo-2);
         border-radius: 50%;
         right: -16px;
       }
