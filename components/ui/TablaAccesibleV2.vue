@@ -22,6 +22,7 @@ const idAleatorio = 'id-' + Math.random().toString(36).substring(2);
 const shownModal = ref('ninguno');
 const modalResource = ref(null);
 const downloadOneChild = ref(null);
+const releaseRequest = ref(null);
 const resourceType = ref('');
 
 // diccionario para colocar acentos
@@ -113,13 +114,18 @@ function tipoRecurso(recurso) {
   }
 }
 
-async function notifyDownloadOneChild(resource) {
+function notifyReleaseRequest(resource) {
+  shownModal.value = 'releaseOne';
+  modalResource.value = resource.recurso_completo;
+  resourceType.value = tipoRecurso(resource);
+  nextTick(() => {
+    releaseRequest.value?.abrirModalDescarga();
+  });
+}
+
+function notifyDownloadOneChild(resource) {
   shownModal.value = 'downloadOne';
   modalResource.value = resource.recurso_completo;
-  // modalResource.value = await $fetch('/api/objeto', {
-  //   method: 'POST',
-  //   body: { id: resource.pk },
-  // });
   resourceType.value = tipoRecurso(resource);
   nextTick(() => {
     downloadOneChild.value?.abrirModalDescarga();
@@ -223,6 +229,7 @@ async function notifyDownloadOneChild(resource) {
                   class="boton-pictograma boton-secundario"
                   aria-label="Publicar en catálogo"
                   type="button"
+                  @click="notifyReleaseRequest(datum)"
                 >
                   <span class="pictograma-ayuda"></span>
                 </button>
@@ -264,12 +271,39 @@ async function notifyDownloadOneChild(resource) {
                   <span class="pictograma-archivo-descargar"></span>
                 </button>
               </div>
+              <div v-if="datum[variable] === 'Editar, Remover'" class="flex-width">
+                <button
+                  v-globo-informacion:izquierda="'Editar'"
+                  class="boton-pictograma boton-secundario"
+                  aria-label="Editar metadatos"
+                  type="button"
+                  @click="irARutaConQuery(datum)"
+                >
+                  <span class="pictograma-editar"></span>
+                </button>
+                <button
+                  v-globo-informacion:izquierda="'Remover'"
+                  class="boton-pictograma boton-secundario"
+                  aria-label="Remover archivo"
+                  type="button"
+                >
+                  <span class="pictograma-eliminar"></span>
+                </button>
+              </div>
             </div>
           </td>
         </tr>
       </tbody>
     </table>
 
+    <!-- Modal para publicar recurso -->
+    <CatalogoModalPublicacion
+      v-if="shownModal === 'releaseOne'"
+      ref="releaseRequest"
+      :key="`${modalResource.uuid}_${resourceType}`"
+      :resource-type="resourceType"
+      :selected-element="modalResource"
+    />
     <!-- Modal para descargar datos -->
     <ConsultaModalDescarga
       v-if="shownModal === 'downloadOne'"
@@ -291,7 +325,7 @@ table {
   .flex-width {
     display: flex;
     gap: 16px;
-    max-width: 224px;
+    min-width: 224px;
   }
 }
 </style>

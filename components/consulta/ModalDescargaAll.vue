@@ -24,7 +24,6 @@ function abrirModalDescargaAll() {
   optionsList.value = optionsDict[props.resourceType]['elements'];
   tagTitle.value = optionsDict[props.resourceType]['title'];
   selectedOption.value = optionsList.value.map((d) => d.label)[0];
-  console.log(selectedOption.value);
 }
 
 async function downloadAllDataTables(format) {

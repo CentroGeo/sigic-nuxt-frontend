@@ -1,6 +1,5 @@
 <script setup>
-// TODO: fix filtros avanzados y paginador
-// import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
+// TODO: fix paginador
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
 import { cleanInput, resourceTypeDic } from '~/utils/consulta';
@@ -16,6 +15,7 @@ const recursos = computed(() => storeFetched.all);
 const filteredResources = ref([]);
 const tableResources = ref([]);
 const seleccionOrden = ref('');
+const seleccionTipoArchivo = ref('');
 
 const inputSearch = computed({
   get: () => storeFilters.filters.inputSearch,
@@ -83,6 +83,11 @@ watch(seleccionOrden, (nv) => {
   storeFilters.updateFilter('sort', nv);
   updateResources(storeFilters.filter('all'));
 });
+watch(seleccionTipoArchivo, (nv) => {
+  storeFilters.updateFilter('sort', nv);
+  // TODO: crear filtros y condiciones en storeFilter
+  // updateResources(storeFilters.filter('all'));
+});
 
 onMounted(async () => {
   storeFilters.resetAll();
@@ -101,8 +106,20 @@ onMounted(async () => {
     <template #visualizador>
       <main class="contenedor m-b-10 m-t-3">
         <div class="flex">
+          <!-- Selector Tipo de archivo -->
+          <div class="columna-4">
+            <ClientOnly>
+              <SisdaiSelector v-model="seleccionTipoArchivo" etiqueta="Tipo de archivo">
+                <option value="todos_los_archivos">Todos los archivos</option>
+                <option value="capas_geograficas">Capas geográficas</option>
+                <option value="datos_tabulados">Datos tabulados</option>
+                <option value="documentos">Documentos</option>
+                <option value="remotas">Remotas</option>
+              </SisdaiSelector>
+            </ClientOnly>
+          </div>
           <!-- Selector Orden -->
-          <div class="columna-8">
+          <div class="columna-4">
             <ClientOnly>
               <SisdaiSelector v-model="seleccionOrden" etiqueta="Ordenar por">
                 <option value="fecha_descendente">Recién agregados</option>
@@ -165,13 +182,49 @@ onMounted(async () => {
           </div>
         </div>
 
-        <!-- TODO: nivel anidado de nuxt-link -->
+        <CatalogoMenuMisArchivos
+          :opciones="[
+            { texto: 'Disponibles', ruta: '/catalogo/mis-archivos' },
+            {
+              texto: 'Metadatos pendientes',
+              ruta: '/catalogo/mis-archivos/metadatos-pendientes',
+              notificacion: true,
+            },
+            {
+              texto: 'Solicitudes de publicación',
+              ruta: '/catalogo/mis-archivos/solicitudes-publicacion',
+              notificacion: true,
+            },
+          ]"
+        />
+
         <div class="flex">
-          <h2>Todos mis archivos disponibles</h2>
-          <UiNumeroElementos :numero="tableResources.length" />
+          <h2>Solicitudes de publicación</h2>
+          <UiNumeroElementos :numero="0" />
         </div>
-        <p>En esta tabla se muestran los archivos disponibles para su consulta y uso.</p>
-        <div class="flex">
+        <p>
+          En esta tabla se muestran los archivos enviados para revisión antes de publicarse en el
+          catálogo público de SIGIC. También puedes consultar el estatus de su aprobación.
+        </p>
+        <div v-if="true">
+          <div class="flex flex-contenido-centrado">
+            <div class="columna-7">
+              <div class="fondo-color-acento borde-redondeado-8 p-x-3 p-y-1 m-b-3">
+                <p>Aún no hay archivos en esta sección.</p>
+                <p>
+                  No tienes solicitudes de publicación activas. Para iniciar, dirígete a Mis
+                  archivos > Disponibles y selecciona uno para enviar a publicación.
+                </p>
+              </div>
+              <div class="flex flex-contenido-centrado">
+                <NuxtLink class="boton boton-primario" to="/catalogo/mis-archivos"
+                  >Disponibles
+                </NuxtLink>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div v-else class="flex">
           <div class="columna-16">
             <!-- TODO: implementar paginador -->
             <ClientOnly>
