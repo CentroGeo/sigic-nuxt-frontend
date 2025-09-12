@@ -70,7 +70,7 @@ defineExpose({
 
       <template #cuerpo>
         <label for="filtro-categoria">Categoria</label>
-        <div class="grupo-categoria flex">
+        <div class="grupo-categoria flex p-1">
           <SisdaiCasillaVerificacion
             v-for="(category, index) in Object.keys(categoriesDict)"
             :key="`${index}-category`"
@@ -81,7 +81,7 @@ defineExpose({
             class="opcion-checkbox"
           />
           <button
-            class="boton-chico opcion-checkbox"
+            class="boton-chico opcion-checkbox boton-secundario"
             @click="storeFilters.updateFilter('categories', [])"
           >
             Limpiar selección
@@ -141,13 +141,6 @@ defineExpose({
   border: solid var(--campo-etiqueta-color) 1px;
   border-radius: 8px;
   gap: 0px;
-
-  button {
-    font-size: 1rem;
-    color: var(--color-interactivo-1);
-    background-color: var(--color-neutro-0);
-    border-radius: 8px;
-  }
 }
 .opcion-checkbox {
   width: 33%;
