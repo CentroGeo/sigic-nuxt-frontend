@@ -223,9 +223,16 @@ defineExpose({
             para ser publicado en el Catálogo de SIGIC público.
           </p>
         </div>
-        <h1 class="m-t-3">Metadatos</h1>
+        <!--         <h1 class="m-t-3">Metadatos</h1>
+ -->
       </template>
       <template #cuerpo>
+        <CatalogoBasicosMeta
+          :recurso="selectedElement"
+          :resource-pk="selectedElement.pk"
+          :resource-type="resourceType"
+          :is-modal="true"
+        ></CatalogoBasicosMeta>
         <div class="flex flex-contenido-separado m-t-3">
           <div class="columna-8 texto-centrado">
             <button
