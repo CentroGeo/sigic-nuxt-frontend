@@ -6,6 +6,9 @@ const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
 const storeSelected = useSelectedResources2Store();
 const { gnoxyUrl } = useGnoxyUrl();
+const { data } = useAuth();
+const isLoggedIn = ref(data.value ? true : false);
+const userEmail = ref(data.value?.user.email);
 
 const emit = defineEmits(['opacidadClicked', 'descargaClicked', 'tablaClicked']);
 
@@ -143,6 +146,13 @@ async function updateFunctions() {
     if (resourceHasWMS === false) {
       buttons = buttons.filter((d) => d.excludeFor !== 'noTables');
     }
+  }
+  if (
+    isLoggedIn.value &&
+    resourceElement.value.owner.email === userEmail.value &&
+    !resourceElement.value.is_published
+  ) {
+    buttons = buttons.filter((d) => d.label !== 'Vínculo WFS');
   }
   actualButtons.value = buttons;
 }
