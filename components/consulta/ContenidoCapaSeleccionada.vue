@@ -5,6 +5,8 @@ import { getWMSserver, hasWMS } from '~/utils/consulta';
 const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
 const storeSelected = useSelectedResources2Store();
+const { gnoxyUrl } = useGnoxyUrl();
+
 const emit = defineEmits(['opacidadClicked', 'descargaClicked', 'tablaClicked']);
 
 const props = defineProps({
@@ -100,14 +102,17 @@ const optionsButtons = ref([
     },
   },
 ]);
+
 function findServer(resource) {
   if (resource.sourcetype === 'REMOTE') {
-    const link = getWMSserver(resource);
-    //console.log(link);
-    return link;
+    const url = getWMSserver(resource);
+    const urlCurada = gnoxyUrl(url);
+    console.log(urlCurada);
+    return urlCurada;
   } else {
-    return `${config.public.geonodeUrl}/gs/wms?`;
-    // return `${config.public.geonodeUrl}/gs`;
+    const url = `${config.public.geonodeUrl}/gs/wms?`;
+    const urlCurada = gnoxyUrl(url);
+    return urlCurada;
   }
 }
 async function updateFunctions() {

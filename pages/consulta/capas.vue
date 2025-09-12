@@ -12,6 +12,7 @@ const router = useRouter();
 //const proxy = `${config.public.geonodeUrl}/proxy/?url=`;
 storeConsulta.resourceType = resourceTypeDic.dataLayer;
 storeFetched.checkFilling();
+const { gnoxyUrl } = useGnoxyUrl();
 
 const linkExportaMapa = ref();
 function exportarMapa() {
@@ -138,12 +139,14 @@ watch(() => storeSelected.asQueryParam(), updateQueryParam);
 
 function findServer(resource) {
   if (resource.sourcetype === 'REMOTE') {
-    const link = getWMSserver(resource);
-    //console.log(link);
-    //return proxy + link;
-    return link;
+    const url = getWMSserver(resource);
+    const urlCurada = gnoxyUrl(url);
+    console.log('La url remota:', urlCurada);
+    return urlCurada;
   } else {
-    return `${config.public.geonodeUrl}/gs/wms?`;
+    const url = `${config.public.geonodeUrl}/gs/wms?`;
+    const urlCurada = gnoxyUrl(url);
+    return urlCurada;
     // return `${config.public.geonodeUrl}/gs`;
   }
 }

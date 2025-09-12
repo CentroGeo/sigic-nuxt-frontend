@@ -54,6 +54,7 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
 
     async fill(resourceType = storeConsulta.resourceType) {
       const { data } = useAuth();
+      //console.log('la data', data.value);
       this.isLoading = true;
 
       const options = {
