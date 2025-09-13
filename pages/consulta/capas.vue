@@ -1,9 +1,9 @@
 <script setup>
 import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
 import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
-import { getWMSserver, resourceTypeDic } from '~/utils/consulta';
+import { resourceTypeDic } from '~/utils/consulta';
 
-const config = useRuntimeConfig();
+// const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
 const storeFetched = useFetchedResources2Store();
 const storeSelected = useSelectedResources2Store();
@@ -12,7 +12,7 @@ const router = useRouter();
 //const proxy = `${config.public.geonodeUrl}/proxy/?url=`;
 storeConsulta.resourceType = resourceTypeDic.dataLayer;
 storeFetched.checkFilling();
-const { gnoxyUrl } = useGnoxyUrl();
+//const { gnoxyUrl } = useGnoxyUrl();
 
 const linkExportaMapa = ref();
 function exportarMapa() {
@@ -137,7 +137,7 @@ function updateQueryParam(capas) {
 }
 watch(() => storeSelected.asQueryParam(), updateQueryParam);
 
-function findServer(resource) {
+/* function findServer(resource) {
   if (resource.sourcetype === 'REMOTE') {
     const url = getWMSserver(resource);
     //const urlCurada = gnoxyUrl(url);
@@ -149,7 +149,7 @@ function findServer(resource) {
     return urlCurada;
     // return `${config.public.geonodeUrl}/gs`;
   }
-}
+} */
 onMounted(() => {
   updateMapFromHash(route.hash?.slice(1));
   storeSelected.addFromQueryParam(route.query.capas);
@@ -161,6 +161,8 @@ onMounted(() => {
 });
 
 // api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
+
+const { findServer } = useGnoxyUrl();
 </script>
 
 <template>

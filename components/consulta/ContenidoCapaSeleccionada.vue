@@ -5,7 +5,7 @@ import { getWMSserver, hasWMS } from '~/utils/consulta';
 const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
 const storeSelected = useSelectedResources2Store();
-const { gnoxyUrl } = useGnoxyUrl();
+//const { gnoxyUrl } = useGnoxyUrl();
 const { data } = useAuth();
 const isLoggedIn = ref(data.value ? true : false);
 const userEmail = ref(data.value?.user.email);
@@ -53,15 +53,18 @@ function getWMSFeatureInfo(resource) {
     version: '1.1.0',
     request: 'GetFeatureInfo',
     layers: resource.alternate,
-    query_layers: resource.alternate,
+    styles: '',
+    srs: resource.extent.srid,
     bbox: resource.extent.coords.join(','),
     width: paramsDict.width,
     height: paramsDict.height,
-    srs: resource.extent.srid,
-    styles: '',
+    query_layers: resource.alternate,
+    x: 1,
+    y: 1,
     info_format: 'application/json',
   });
-  console.log(gnoxyUrl(url.href));
+  //  console.log(url.href);
+  return url.href;
 }
 const actualButtons = ref({});
 const optionsButtons = ref([
@@ -150,18 +153,6 @@ const optionsButtons = ref([
   },
 ]);
 
-function findServer(resource) {
-  if (resource.sourcetype === 'REMOTE') {
-    const url = getWMSserver(resource);
-    return url;
-    //const urlCurada = gnoxyUrl(url);
-    //return urlCurada;
-  } else {
-    const url = `${config.public.geonodeUrl}/gs/wms?`;
-    const urlCurada = gnoxyUrl(url);
-    return urlCurada;
-  }
-}
 async function updateFunctions() {
   let buttons = optionsButtons.value;
   if (resourceElement.value.subtype === 'raster') {
@@ -197,6 +188,8 @@ updateFunctions();
 watch(resourceElement, () => {
   updateFunctions();
 });
+
+const { findServer } = useGnoxyUrl();
 </script>
 
 <template>
