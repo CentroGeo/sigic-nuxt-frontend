@@ -10,9 +10,9 @@ const props = defineProps({
     default: () => ({}),
   },
 });
-const config = useRuntimeConfig();
-const { findServer } = useGnoxyUrl();
+//const config = useRuntimeConfig();
 //const { gnoxyUrl } = useGnoxyUrl();
+const { findServer } = useGnoxyUrl();
 const extentMap = ref(undefined);
 //const estilosLista = ref(['Opcion 1', 'Opción 2', 'Opcion 3']);
 //const estiloSeleccionado = ref(estilosLista.value[0]);
@@ -35,7 +35,7 @@ function downloadClicked() {
 function abrirModalMapa() {
   modalMapa.value?.abrirModal();
 }
-function findServer(resource) {
+/* function findServer(resource) {
   if (resource.sourcetype === 'REMOTE') {
     const url = getWMSserver(resource);
     return url;
@@ -44,7 +44,7 @@ function findServer(resource) {
     const urlCurada = gnoxyUrl(url);
     return urlCurada;
   }
-}
+} */
 defineExpose({
   abrirModalMapa,
 });
