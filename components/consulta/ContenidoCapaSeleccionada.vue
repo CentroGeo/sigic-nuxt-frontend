@@ -49,6 +49,10 @@ function getWMSFeatureInfo(resource) {
     const entry = param.split('=');
     paramsDict[entry[0]] = entry[1];
   });
+  const coords = resource.extent.coords;
+  const bboxRatio = (coords[3] - coords[1]) / (coords[2] - coords[0]);
+  const mapWidth = Math.round(paramsDict.width);
+  const mapHeight = Math.round(paramsDict.height * bboxRatio);
   url.search = new URLSearchParams({
     service: 'WMS',
     version: '1.1.0',
@@ -57,14 +61,13 @@ function getWMSFeatureInfo(resource) {
     styles: '',
     srs: resource.extent.srid,
     bbox: resource.extent.coords.join(','),
-    width: paramsDict.width,
-    height: paramsDict.height,
+    width: mapWidth,
+    height: mapHeight,
     query_layers: resource.alternate,
-    x: 1,
-    y: 1,
+    x: Math.round(mapWidth / 2),
+    y: Math.round(mapHeight / 2),
     info_format: 'application/json',
   });
-  //  console.log(url.href);
   return url.href;
 }
 const actualButtons = ref({});
