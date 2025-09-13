@@ -5,6 +5,7 @@ import { getWMSserver, hasWMS } from '~/utils/consulta';
 const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
 const storeSelected = useSelectedResources2Store();
+const { findServer } = useGnoxyUrl();
 //const { gnoxyUrl } = useGnoxyUrl();
 const { data } = useAuth();
 const isLoggedIn = ref(data.value ? true : false);
@@ -115,22 +116,25 @@ const optionsButtons = ref([
   {
     //excludeFor: 'none'
     excludeFor: 'noTables',
-    //label: 'Vínculo WMS',
-    label: 'Vínculo WFS',
+    label: 'Vínculo WMS',
+    //label: 'Vínculo WFS',
     pictogram: 'pictograma-enlace-externo',
-    //globo: 'WMS',
-    globo: 'WFS',
+    globo: 'WMS',
+    //globo: 'WFS',
     action: async () => {
+      // Este primer link es una petición GetMap
       //const objectWMSLink = resourceElement.value.links.find((link) => link.name === 'PNG');
       //const wmsLink = objectWMSLink.url;
+      // Esta es la petición WFS
       //const wfsLink = getWFS(resourceElement.value);
-      getWMSFeatureInfo(resourceElement.value);
-      /*       try {
-        await navigator.clipboard.writeText(wfsLink);
-        alert('Enlace copiado al portapapeles: ' + wfsLink);
+      // Esta es la petición GetFeatureInfo
+      const wmsLink = getWMSFeatureInfo(resourceElement.value);
+      try {
+        await navigator.clipboard.writeText(wmsLink);
+        alert('Enlace copiado al portapapeles: ' + wmsLink);
       } catch (err) {
         console.error('Error al copiar: ', err);
-      } */
+      }
     },
   },
   {
@@ -188,8 +192,6 @@ updateFunctions();
 watch(resourceElement, () => {
   updateFunctions();
 });
-
-const { findServer } = useGnoxyUrl();
 </script>
 
 <template>

@@ -11,7 +11,8 @@ const props = defineProps({
   },
 });
 const config = useRuntimeConfig();
-const { gnoxyUrl } = useGnoxyUrl();
+const { findServer } = useGnoxyUrl();
+//const { gnoxyUrl } = useGnoxyUrl();
 const extentMap = ref(undefined);
 //const estilosLista = ref(['Opcion 1', 'Opción 2', 'Opcion 3']);
 //const estiloSeleccionado = ref(estilosLista.value[0]);
