@@ -6,6 +6,7 @@ const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
 const storeSelected = useSelectedResources2Store();
 const emit = defineEmits(['opacidadClicked', 'descargaClicked', 'tablaClicked']);
+const { findServer } = useGnoxyUrl();
 
 const props = defineProps({
   resourceElement: {
@@ -119,8 +120,6 @@ updateFunctions();
 watch(resourceElement, () => {
   updateFunctions();
 });
-
-const { findServer } = useGnoxyUrl();
 </script>
 
 <template>
