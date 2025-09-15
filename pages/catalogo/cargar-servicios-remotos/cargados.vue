@@ -1,4 +1,34 @@
-<script setup></script>
+<script setup>
+import { resourceTypeDic } from '~/utils/consulta';
+
+const storeFilters = useFilteredResources();
+const storeFetched = useFetchedResources2Store();
+storeFetched.checkFilling(resourceTypeDic.dataLayer);
+storeFetched.checkFilling(resourceTypeDic.dataTable);
+storeFetched.checkFilling(resourceTypeDic.document);
+
+const recursos = computed(() => storeFetched.all);
+const filteredRemoteResources = ref([]);
+
+function updateResources(nuevosRecursos) {
+  filteredRemoteResources.value = nuevosRecursos;
+  filteredRemoteResources.value = filteredRemoteResources.value.filter(
+    (resource) => resource.sourcetype === 'REMOTE'
+  );
+  // console.log('filteredRemoteResources', filteredRemoteResources.value);
+}
+
+watch([recursos], () => {
+  updateResources(storeFilters.filter('all'));
+});
+
+onMounted(() => {
+  storeFilters.resetAll();
+  if (recursos.value.length !== 0) {
+    updateResources(recursos.value);
+  }
+});
+</script>
 
 <template>
   <UiLayoutPaneles>
@@ -24,12 +54,13 @@
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>Nombre de servicio externo</td>
-                  <td><a href="#">1</a></td>
-                  <td><a href="#">3</a></td>
+                <tr v-for="value in filteredRemoteResources" :key="value.pk">
+                  <td>{{ value.title }}</td>
+                  <td><a href="#">''</a></td>
+                  <td><a href="#">''</a></td>
                   <td>https://</td>
-                  <td>ArcGIS REST MapServer</td>
+                  <!-- <td>ArcGIS REST MapServer</td> -->
+                  <td>Servcio de Mapas</td>
                 </tr>
               </tbody>
             </table>
@@ -43,7 +74,7 @@
               <nuxt-link
                 class="boton boton-secundario"
                 aria-label="Agregar servicio remoto"
-                to="/catalogo/servicios-remotos"
+                to="/catalogo/cargar-servicios-remotos"
                 >Agregar servicio remoto</nuxt-link
               >
             </div>
