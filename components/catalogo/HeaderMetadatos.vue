@@ -14,26 +14,36 @@ const props = defineProps({
   },
 });
 const route = useRoute();
-const titleOptions = {
+const titleOptions = ref({
   'Metadatos básicos': { nombre: ' MetadatosBasicos', valor: 1 },
   'Ubicación y Licencias': { nombre: 'UbicacionLicencias', valor: 2 },
   'Metadatos Opcionales': { nombre: 'MetadatosOpcionales', valor: 3 },
-  'Atributos del Conjunto de Datos': { nombre: 'AtributosConjunto', valor: 4 },
-};
-const titleValue = computed(() => titleOptions[props.title]['valor']);
+});
+const titleValue = ref();
 const tablaSinGeometria = ref(false);
+const hasSLD = ref(false);
 
-function tieneEstilo() {
+//**Esta función lo que hace es determinar los valores de hasSLD, tabla sin geometría
+// y agregar la vista de edición de Atributos del conjunto para capas vectoriales*/
+function updateValues() {
   if (props.resource.resource_type === 'document') {
-    return false;
+    hasSLD.value = false;
   } else {
     if (props.resource.resource_type === 'dataset') {
+      // Si es un dataset sin geometría
       if (!isGeometricExtension(props.resource.extent)) {
         tablaSinGeometria.value = true;
       }
+      if (props.resource.subtype !== 'raster' && isGeometricExtension(props.resource.extent)) {
+        titleOptions.value['Atributos del Conjunto de Datos'] = {
+          nombre: 'AtributosConjunto',
+          valor: 4,
+        };
+      }
     }
-    return isGeometricExtension(props.resource.extent) ? true : false;
+    hasSLD.value = isGeometricExtension(props.resource.extent) ? true : false;
   }
+  titleValue.value = titleOptions.value[props.title]['valor'];
 }
 
 const bordeEnlaceActivo = (ruta) => {
@@ -42,6 +52,8 @@ const bordeEnlaceActivo = (ruta) => {
   }
   return '';
 };
+
+updateValues();
 </script>
 <template>
   <h2>{{ props.resource.title }}</h2>
@@ -53,9 +65,7 @@ const bordeEnlaceActivo = (ruta) => {
       "
       >Metadatos
     </nuxt-link>
-    <nuxt-link
-      v-if="tieneEstilo()"
-      :class="bordeEnlaceActivo('/catalogo/mis-archivos/editar/estilo')"
+    <nuxt-link v-if="hasSLD" :class="bordeEnlaceActivo('/catalogo/mis-archivos/editar/estilo')"
       >Estilo
     </nuxt-link>
     <nuxt-link
@@ -80,13 +90,6 @@ const bordeEnlaceActivo = (ruta) => {
             : 'var(--color-neutro-2)',
       }"
     ></div>
-    <!--     <div
-      class="borde borde-grosor-2"
-      style="width: 25%; border-color: var(--color-primario-1)"
-    ></div>
-    <div class="borde borde-grosor-2" style="width: 25%; border-color: var(--color-neutro-2)"></div>
-    <div class="borde borde-grosor-2" style="width: 25%; border-color: var(--color-neutro-2)"></div>
-    <div class="borde borde-grosor-2" style="width: 25%; border-color: var(--color-neutro-2)"></div> -->
   </div>
   <ol>
     <li>{{ props.title }}</li>
