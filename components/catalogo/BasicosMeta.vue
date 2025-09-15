@@ -153,7 +153,7 @@ async function guardarImagen(files) {
       <CatalogoBotonesMetadatos
         :key="`1-${resourcePk}-buttons`"
         :resource="props.recurso"
-        :title="'Metadatos Básicos'"
+        :title="'MetadatosBasicos'"
         :pk="props.resourcePk"
         :tipo="props.resourceType"
       ></CatalogoBotonesMetadatos>

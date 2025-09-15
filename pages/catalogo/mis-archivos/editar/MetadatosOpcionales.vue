@@ -32,23 +32,23 @@ const editedResource = computed(() => resources.value.find(({ pk }) => pk === se
               <span class="h5 texto-color-primario p-l-2">Editar</span>
             </nuxt-link>
           </div>
+
+          <CatalogoHeaderMetadatos
+            :resource="editedResource"
+            :title="'Metadatos Opcionales'"
+            :exclude-links="false"
+          ></CatalogoHeaderMetadatos>
+
+          <h3>Un placeholder</h3>
+
+          <CatalogoBotonesMetadatos
+            :key="`3-${selectedPk}-buttons`"
+            :title="'MetadatosOpcionales'"
+            :pk="selectedPk"
+            :tipo="type"
+            :resource="editedResource"
+          ></CatalogoBotonesMetadatos>
         </div>
-
-        <CatalogoHeaderMetadatos
-          :resource="editedResource"
-          :title="'Metadatos Opcionales'"
-          :exclude-links="false"
-        ></CatalogoHeaderMetadatos>
-
-        <h3>Un placeholder</h3>
-
-        <CatalogoBotonesMetadatos
-          :key="`3-${selectedPk}-buttons`"
-          :title="'MetadatosOpcionales'"
-          :pk="selectedPk"
-          :tipo="type"
-          :resource="editedResource"
-        ></CatalogoBotonesMetadatos>
       </main>
 
       <main v-else>

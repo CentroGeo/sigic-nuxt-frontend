@@ -91,11 +91,14 @@ updateValues();
       }"
     ></div>
   </div>
-  <ol>
+  <ol :start="titleOptions[props.title]['valor']">
     <li>{{ props.title }}</li>
   </ol>
 </template>
 <style lang="scss" scoped>
+.contenedor {
+  background-color: pink;
+}
 .borde-enlace-activo {
   border-bottom: 4px solid var(--boton-primario-borde);
   border-radius: 0px;

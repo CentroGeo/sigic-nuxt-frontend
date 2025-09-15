@@ -55,7 +55,7 @@ watch(editedResource, async () => {
     </template>
 
     <template #visualizador>
-      <main v-if="editedResource" id="principal" class="contenedor m-b-10">
+      <main v-if="editedResource" id="atributos-conjunto" class="contenedor m-b-10 m-y-3">
         <div class="flex m-0 contenedor-botones">
           <button
             class="boton-pictograma boton-sin-contenedor-secundario"
@@ -66,11 +66,13 @@ watch(editedResource, async () => {
           </button>
           <p>Editar</p>
         </div>
-        <CatalogoHeaderMetadatos
-          :resource="editedResource"
-          :title="'Atributos del Conjunto de Datos'"
-          :exclude-links="false"
-        ></CatalogoHeaderMetadatos>
+        <div class="alineacion-izquierda ancho-lectura">
+          <CatalogoHeaderMetadatos
+            :resource="editedResource"
+            :title="'Atributos del Conjunto de Datos'"
+            :exclude-links="false"
+          ></CatalogoHeaderMetadatos>
+        </div>
 
         <div class="contenedor-tabla p-2">
           <table v-if="datos.length > 0">
@@ -149,7 +151,7 @@ watch(editedResource, async () => {
           <p v-else>...Cargando</p>
           <CatalogoBotonesMetadatos
             :key="`4-${selectedPk}-buttons`"
-            :title="'UbicacionLicencias'"
+            :title="'AtributosConjunto'"
             :pk="selectedPk"
             :tipo="type"
             :resource="editedResource"

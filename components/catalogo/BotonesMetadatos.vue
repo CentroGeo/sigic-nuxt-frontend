@@ -19,6 +19,7 @@ const props = defineProps({
 });
 const rutas = ref({});
 const lastButton = ref('');
+const firstButton = 'MetadatosBasicos';
 const rutasConAtributos = {
   MetadatosBasicos: { siguiente: 'UbicacionLicencias', anterior: undefined },
   UbicacionLicencias: { siguiente: 'MetadatosOpcionales', anterior: 'MetadatosBasicos' },
@@ -37,9 +38,9 @@ if (props.resource.subtype === 'vector' && props.resource.resource_type === 'dat
   rutas.value = rutasSinAtributos;
   lastButton.value = 'MetadatosOpcionales';
 }
-function irARutaConQuery() {
+function irARutaConQuery(direccion) {
   navigateTo({
-    path: `/catalogo/mis-archivos/editar/${rutas.value[props.title]['siguiente']}`,
+    path: `/catalogo/mis-archivos/editar/${rutas.value[props.title][direccion]}`,
     query: { data: props.pk, type: props.tipo },
   });
 }
@@ -49,12 +50,18 @@ function irARutaConQuery() {
     <nuxt-link class="boton-secundario boton-chico" type="button" to="/catalogo/mis-archivos"
       >Ir a mis archivos</nuxt-link
     >
-    <button class="boton-secundario boton-chico" :disabled="false">Regresar</button>
+    <button
+      class="boton-secundario boton-chico"
+      :disabled="props.title === firstButton ? true : false"
+      @click="irARutaConQuery('anterior')"
+    >
+      Regresar
+    </button>
     <button class="boton-primario boton-chico" :disabled="false">Actualizar</button>
     <button
       class="boton-primario boton-chico"
-      :disabled="title === lastButton ? true : false"
-      @click="irARutaConQuery"
+      :disabled="props.title === lastButton ? true : false"
+      @click="irARutaConQuery('siguiente')"
     >
       Siguiente
     </button>
