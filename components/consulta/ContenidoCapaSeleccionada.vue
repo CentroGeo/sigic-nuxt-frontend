@@ -120,7 +120,7 @@ watch(resourceElement, () => {
   updateFunctions();
 });
 
-const { findServer } = useGnoxyUrl();
+const { findServerGnoxyUrl } = useGnoxyUrl();
 </script>
 
 <template>
@@ -129,7 +129,7 @@ const { findServer } = useGnoxyUrl();
     <div class="m-y-2">
       <SisdaiLeyendaWms
         :nombre="resourceElement.alternate"
-        :fuente="findServer(resourceElement)"
+        :fuente="findServerGnoxyUrl(resourceElement)"
         :titulo="resourceElement.title || 'cargando...'"
         :sin-control="true"
         :sin-control-clases="true"

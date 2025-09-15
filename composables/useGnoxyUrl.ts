@@ -18,15 +18,15 @@ export function useGnoxyUrl() {
 
   function findServer(resource: object): string {
     if (resource.sourcetype === 'REMOTE') {
-      const link = getWMSserver(resource);
-      return gnoxyUrl(link);
+      return getWMSserver(resource);
     } else {
-      return gnoxyUrl(`${config.public.geonodeUrl}/gs/wms?`);
+      return `${config.public.geonodeUrl}/gs/wms?`;
     }
   }
 
   return {
     gnoxyUrl,
     findServer,
+    findServerGnoxyUrl: (resource: object) => gnoxyUrl(findServer(resource)),
   };
 }
