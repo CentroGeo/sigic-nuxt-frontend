@@ -20,6 +20,7 @@ const props = defineProps({
     default: false,
   },
 });
+// Desde aquí ir subiendo al store catalogo?
 //const imagen = ref();
 const campoResumen = ref('Resumen desde sigic');
 const campoTitulo = ref('');
