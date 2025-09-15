@@ -1,6 +1,6 @@
 <script setup>
 import { SisdaiLeyendaWms } from '@centrogeomx/sisdai-mapas';
-import { getWMSserver, hasWMS } from '~/utils/consulta';
+import { hasWMS } from '~/utils/consulta';
 
 const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
@@ -100,16 +100,7 @@ const optionsButtons = ref([
     },
   },
 ]);
-function findServer(resource) {
-  if (resource.sourcetype === 'REMOTE') {
-    const link = getWMSserver(resource);
-    //console.log(link);
-    return link;
-  } else {
-    return `${config.public.geonodeUrl}/gs/wms?`;
-    // return `${config.public.geonodeUrl}/gs`;
-  }
-}
+
 async function updateFunctions() {
   let buttons = optionsButtons.value;
   if (resourceElement.value.subtype === 'raster') {
@@ -128,6 +119,8 @@ updateFunctions();
 watch(resourceElement, () => {
   updateFunctions();
 });
+
+const { findServer } = useGnoxyUrl();
 </script>
 
 <template>

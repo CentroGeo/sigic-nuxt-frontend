@@ -209,6 +209,7 @@ onMounted(async () => {
   height: var(--altura-consulta-esc);
   overflow-y: auto;
   overflow-x: hidden;
+  position: relative;
 
   .encabeado-catalogo {
     position: sticky;
