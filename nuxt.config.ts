@@ -70,7 +70,7 @@ export default defineNuxtConfig({
       defaultProvider: 'keycloak',
     },
     sessionRefresh: {
-      enablePeriodically: 30000,
+      enablePeriodically: 120000,
       enableOnWindowFocus: true,
     },
   },
