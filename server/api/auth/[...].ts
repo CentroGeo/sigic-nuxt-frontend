@@ -26,10 +26,16 @@ export default NuxtAuthHandler({
 
   callbacks: {
     async jwt({ token, account }) {
+      if (token?.access_token) {
+        token.accessToken = token.access_token;
+        token.refreshToken = token.refresh_token;
+        token.idToken = token.id_token;
+      }
+
       if (account?.access_token) {
-        // console.log('cuenta accestoken', token);
         token.accessToken = account.access_token;
         token.refreshToken = account.refresh_token;
+        token.idToken = account.id_token;
         token.expires_at = Date.now() + ((account.expires_in as number) ?? 0) * 1000;
       }
 
@@ -68,7 +74,8 @@ export default NuxtAuthHandler({
       return token;
     },
 
-    async session({ session }) {
+    async session({ session, token }) {
+      session.accessToken = token.accessToken;
       return session;
     },
   },
