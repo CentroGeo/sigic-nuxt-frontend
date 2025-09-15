@@ -17,6 +17,10 @@ const props = defineProps({
     default: () => ({}),
   },
 });
+const storeCatalogo = useCatalogoStore();
+const { data } = useAuth();
+const cargaExitosa = ref(false);
+
 const rutas = ref({});
 const lastButton = ref('');
 const rutasConAtributos = {
@@ -43,20 +47,48 @@ function irARutaConQuery() {
     query: { data: props.pk, type: props.tipo },
   });
 }
+
+/**
+ * Actualiza los metadatos con los valores del store
+ */
+async function actualizaMetadatos() {
+  const response = await $fetch('/api/metadatos', {
+    method: 'POST',
+    body: {
+      pk: props.resource.pk,
+      resource_type: props.resource.resource_type,
+      token: data.value?.accessToken,
+      // TODO: faltan los demás valores
+      abstract: storeCatalogo.metadatos.abstract,
+    },
+  });
+  console.warn('response', response);
+  cargaExitosa.value = true;
+}
 </script>
 <template>
-  <div class="flex p-t-3">
-    <nuxt-link class="boton-secundario boton-chico" type="button" to="/catalogo/mis-archivos"
-      >Ir a mis archivos</nuxt-link
+  <div>
+    <div class="flex p-t-3">
+      <nuxt-link class="boton-secundario boton-chico" type="button" to="/catalogo/mis-archivos"
+        >Ir a mis archivos</nuxt-link
+      >
+      <button class="boton-secundario boton-chico" :disabled="false">Regresar</button>
+      <button class="boton-primario boton-chico" :disabled="false" @click="actualizaMetadatos()">
+        Actualizar
+      </button>
+      <button
+        class="boton-primario boton-chico"
+        :disabled="title === lastButton ? true : false"
+        @click="irARutaConQuery"
+      >
+        Siguiente
+      </button>
+    </div>
+    <p
+      v-if="cargaExitosa"
+      class="texto-color-confirmacion fondo-color-confirmacion borde borde-color-confirmacion borde-redondeado-4 p-3"
     >
-    <button class="boton-secundario boton-chico" :disabled="false">Regresar</button>
-    <button class="boton-primario boton-chico" :disabled="false">Actualizar</button>
-    <button
-      class="boton-primario boton-chico"
-      :disabled="title === lastButton ? true : false"
-      @click="irARutaConQuery"
-    >
-      Siguiente
-    </button>
+      <span class="pictograma-aprobado" /> cargados con éxito
+    </p>
   </div>
 </template>

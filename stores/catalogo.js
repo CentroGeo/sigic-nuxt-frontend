@@ -5,6 +5,10 @@ export const useCatalogoStore = defineStore('catalogo', () => {
     files: [],
     catalogoColapsado: false,
     idNavegacionLateral: 'navegacionlateral-' + Math.random().toString(36).substring(2),
+    metadatos: {
+      title: '',
+      abstract: '',
+    },
 
     alternarCatalogoColapsable() {
       this.catalogoColapsado = !this.catalogoColapsado;

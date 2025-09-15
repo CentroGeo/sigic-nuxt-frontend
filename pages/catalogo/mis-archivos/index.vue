@@ -3,6 +3,13 @@
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { cleanInput, resourceTypeDic } from '~/utils/consulta';
 
+definePageMeta({
+  middleware: 'sidebase-auth',
+  bodyAttrs: {
+    class: '',
+  },
+});
+
 // para filtar por los archivos de la usuaria
 const { data } = useAuth();
 const userEmail = data.value.user.email;

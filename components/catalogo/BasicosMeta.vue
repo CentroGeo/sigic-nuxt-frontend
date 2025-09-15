@@ -1,7 +1,14 @@
 <script setup>
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-
+/**
+ * @typedef {Object} Props
+ * @property {Object} [recurso={}] - Indica el recurso al que se le va a modificar los metadatos básicos.
+ * @property {String} [resourcePk=''] - Indica la propiedad pk del recurso.
+ * @property {String} [resourceType=''] - Indica el tipo de recurso.
+ * @property {Boolean} [isModal=false] - Indica si el formulario va a ir en un modal o no
+ */
+/** @type {Props} */
 const props = defineProps({
   recurso: {
     type: Object,
@@ -21,16 +28,29 @@ const props = defineProps({
   },
 });
 // Desde aquí ir subiendo al store catalogo?
+const storeCatalogo = useCatalogoStore();
+
 //const imagen = ref();
-const campoResumen = ref('Resumen desde sigic');
-const campoTitulo = ref('');
-const campoPalabrasClave = ref('');
-const campoAutor = ref('');
-const campoAnioPublicacion = ref('');
-const seleccionEjemplo = ref('');
+const campoTitulo = ref(props.recurso.title);
+const campoResumen = ref(props.recurso.raw_abstract);
+const seleccionTipoFecha = ref('');
 const seleccionFecha = ref('');
 const seleccionCategoria = ref('');
 const seleccionGrupo = ref('');
+const campoPalabrasClave = ref('');
+const campoAutor = ref('');
+const campoAnioPublicacion = ref('');
+
+function editarMetadatos(dato, valor) {
+  storeCatalogo.metadatos[dato] = valor;
+  // console.log(storeCatalogo.metadatos[dato]);
+}
+
+watch([campoTitulo, campoResumen], (nv) => {
+  // console.log('nv', nv);
+  editarMetadatos('title', nv[0]);
+  editarMetadatos('abstract', nv[1]);
+});
 
 const dragNdDrop = ref(null);
 const img_files = ['.jpg', '.jpeg', '.png', '.webp'];
@@ -81,7 +101,7 @@ async function guardarImagen(files) {
         <div class="columna-8">
           <ClientOnly>
             <SisdaiSelector
-              v-model="seleccionEjemplo"
+              v-model="seleccionTipoFecha"
               etiqueta="Tipo de fecha"
               texto_ayuda="Creación, publicación o revisión."
             >
@@ -152,6 +172,7 @@ async function guardarImagen(files) {
         </div>
       </div>
       <CatalogoBotonesMetadatos
+        v-if="!props.isModal"
         :key="`1-${props.resourcePk}-buttons`"
         :resource="props.recurso"
         :title="'MetadatosBasicos'"
