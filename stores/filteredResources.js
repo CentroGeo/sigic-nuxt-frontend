@@ -16,6 +16,7 @@ export const useFilteredResources = defineStore('filteredResources', () => {
     years: null,
     institutions: null,
     keywords: null,
+    resourceType: null,
     sort: null,
   });
 
@@ -34,6 +35,7 @@ export const useFilteredResources = defineStore('filteredResources', () => {
       filters.years = null;
       filters.institutions = null;
       filters.keywords = null;
+      filters.resourceType = null;
       filters.sort = null;
     },
     resetFilters() {
@@ -198,6 +200,26 @@ export const useFilteredResources = defineStore('filteredResources', () => {
           });
         }); */
       }
+
+      // Filtramos por capas
+      if (filters.resourceType === 'capas') {
+        data = data.filter((d) => d.resource_type !== 'document' && isGeometricExtension(d.extent));
+      }
+      // Filtramos por tablas
+      if (filters.resourceType === 'tablas') {
+        data = data.filter(
+          (d) => d.resource_type !== 'document' && !isGeometricExtension(d.extent)
+        );
+      }
+      // Filtramos por documentos
+      if (filters.resourceType === 'documentos') {
+        data = data.filter((d) => d.resource_type === 'document');
+      }
+      // Filtramos por archivos remotas
+      if (filters.resourceType === 'remotas') {
+        data = data.filter((resource) => resource.sourcetype === 'REMOTE');
+      }
+
       // si hay opciones asignadas para ordenar
       if (filters.sort !== null) {
         data = this.sort(data);

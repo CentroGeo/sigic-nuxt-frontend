@@ -13,7 +13,6 @@ const props = defineProps({
     default: false,
   },
 });
-const route = useRoute();
 const titleOptions = {
   'Metadatos básicos': { nombre: ' MetadatosBasicos', valor: 1 },
   'Ubicación y Licencias': { nombre: 'UbicacionLicencias', valor: 2 },
@@ -21,50 +20,25 @@ const titleOptions = {
   'Atributos del Conjunto de Datos': { nombre: 'AtributosConjunto', valor: 4 },
 };
 const titleValue = computed(() => titleOptions[props.title]['valor']);
-const tablaSinGeometria = ref(false);
-
-function tieneEstilo() {
-  if (props.resource.resource_type === 'document') {
-    return false;
-  } else {
-    if (props.resource.resource_type === 'dataset') {
-      if (!isGeometricExtension(props.resource.extent)) {
-        tablaSinGeometria.value = true;
-      }
-    }
-    return isGeometricExtension(props.resource.extent) ? true : false;
-  }
-}
-
-const bordeEnlaceActivo = (ruta) => {
-  if (route.path === ruta) {
-    return 'borde-enlace-activo';
-  }
-  return '';
-};
 </script>
 <template>
   <h2>{{ props.resource.title }}</h2>
 
-  <div v-if="!props.excludeLinks" class="flex">
-    <nuxt-link
-      :class="
-        bordeEnlaceActivo(`/catalogo/mis-archivos/editar/${titleOptions[props.title]['nombre']}`)
-      "
-      >Metadatos
-    </nuxt-link>
-    <nuxt-link
-      v-if="tieneEstilo()"
-      :class="bordeEnlaceActivo('/catalogo/mis-archivos/editar/estilo')"
-      >Estilo
-    </nuxt-link>
-    <nuxt-link
-      v-if="tablaSinGeometria"
-      :class="bordeEnlaceActivo('/catalogo/mis-archivos/unir-vectores')"
-      >Clave Geoestadística
-    </nuxt-link>
-  </div>
-  <div class="borde-b borde-color-secundario"></div>
+  <CatalogoMenuMisArchivos
+    v-if="!props.excludeLinks"
+    :recurso="props.resource"
+    :opciones="[
+      { texto: 'Metadatos', ruta: '/catalogo/mis-archivos/editar/MetadatosBasicos' },
+      {
+        texto: 'Estilo',
+        ruta: '/catalogo/mis-archivos/editar/estilo',
+      },
+      {
+        texto: 'Clave Geoestadística',
+        ruta: '/catalogo/mis-archivos/unir-vectores',
+      },
+    ]"
+  />
 
   <h2>Metadatos</h2>
   <div style="display: flex; gap: 4px">
