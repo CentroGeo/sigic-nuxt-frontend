@@ -122,6 +122,7 @@ watch(resourceElement, () => {
 
 const { findServer, gnoxyUrl } = useGnoxyUrl();
 const fetchFunction = (url) => fetch(gnoxyUrl(url));
+
 </script>
 
 <template>
