@@ -15,5 +15,8 @@ export function useGnoxyUrl() {
     return `${baseURL}/api/gnoxy/proxy/?url=${encodeURIComponent(inputUrl)}`;
   }
 
-  return { gnoxyUrl };
+  return {
+    gnoxyUrl,
+    gnoxyFetch: (url: string) => fetch(gnoxyUrl(url)),
+  };
 }
