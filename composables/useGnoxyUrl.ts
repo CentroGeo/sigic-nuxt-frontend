@@ -5,6 +5,7 @@ export function useGnoxyUrl() {
 
   function gnoxyUrl(inputUrl: string): string {
     if (!inputUrl) return '';
+
     const { geonodeUrl, baseURL } = config.public;
 
     // Caso 1: URL empieza con geonodeUrl → traducir a gnoxy normal
@@ -18,15 +19,15 @@ export function useGnoxyUrl() {
 
   function findServer(resource: object): string {
     if (resource.sourcetype === 'REMOTE') {
-      const link = getWMSserver(resource);
-      return gnoxyUrl(link);
+      return getWMSserver(resource);
     } else {
-      return gnoxyUrl(`${config.public.geonodeUrl}/gs/wms?`);
+      return `${config.public.geonodeUrl}/gs/wms`;
     }
   }
 
   return {
     gnoxyUrl,
     findServer,
+    findServerGnoxyUrl: (resource: object) => gnoxyUrl(findServer(resource)),
   };
 }

@@ -6,7 +6,6 @@ const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
 const storeSelected = useSelectedResources2Store();
 const emit = defineEmits(['opacidadClicked', 'descargaClicked', 'tablaClicked']);
-const { findServer } = useGnoxyUrl();
 
 const props = defineProps({
   resourceElement: {
@@ -120,6 +119,10 @@ updateFunctions();
 watch(resourceElement, () => {
   updateFunctions();
 });
+
+const { findServer, gnoxyUrl } = useGnoxyUrl();
+const fetchFunction = (url) => fetch(gnoxyUrl(url));
+
 </script>
 
 <template>
@@ -127,8 +130,9 @@ watch(resourceElement, () => {
     <!-- El contenido de la tarjeta de capas -->
     <div class="m-y-2">
       <SisdaiLeyendaWms
-        :nombre="resourceElement.alternate"
+        :consulta="fetchFunction"
         :fuente="findServer(resourceElement)"
+        :nombre="resourceElement.alternate"
         :titulo="resourceElement.title || 'cargando...'"
         :sin-control="true"
         :sin-control-clases="true"
