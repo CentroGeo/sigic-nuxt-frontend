@@ -1,5 +1,3 @@
-import { getWMSserver } from '~/utils/consulta';
-
 export function useGnoxyUrl() {
   const config = useRuntimeConfig();
 
@@ -17,17 +15,5 @@ export function useGnoxyUrl() {
     return `${baseURL}/api/gnoxy/proxy/?url=${encodeURIComponent(inputUrl)}`;
   }
 
-  function findServer(resource: object): string {
-    if (resource.sourcetype === 'REMOTE') {
-      return getWMSserver(resource);
-    } else {
-      return `${config.public.geonodeUrl}/gs/wms`;
-    }
-  }
-
-  return {
-    gnoxyUrl,
-    findServer,
-    findServerGnoxyUrl: (resource: object) => gnoxyUrl(findServer(resource)),
-  };
+  return { gnoxyUrl };
 }

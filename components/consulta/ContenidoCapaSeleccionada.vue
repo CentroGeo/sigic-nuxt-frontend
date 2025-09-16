@@ -1,6 +1,6 @@
 <script setup>
 import { SisdaiLeyendaWms } from '@centrogeomx/sisdai-mapas';
-import { hasWMS } from '~/utils/consulta';
+import { findServer, hasWMS } from '~/utils/consulta';
 
 const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
@@ -120,7 +120,7 @@ watch(resourceElement, () => {
   updateFunctions();
 });
 
-const { findServer, gnoxyUrl } = useGnoxyUrl();
+const { gnoxyUrl } = useGnoxyUrl();
 const fetchFunction = (url) => fetch(gnoxyUrl(url));
 </script>
 

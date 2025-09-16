@@ -1,7 +1,7 @@
 <script setup>
 import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
 import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
-import { resourceTypeDic } from '~/utils/consulta';
+import { findServer, resourceTypeDic } from '~/utils/consulta';
 
 // const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
@@ -148,7 +148,7 @@ onMounted(() => {
 
 // api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
 
-const { findServer, gnoxyUrl } = useGnoxyUrl();
+const { gnoxyUrl } = useGnoxyUrl();
 const fetchFunction = (url) => fetch(gnoxyUrl(url));
 </script>
 
