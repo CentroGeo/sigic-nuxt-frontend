@@ -14,12 +14,11 @@ const props = defineProps({
   },
 });
 const titleOptions = ref({
-  'Metadatos básicos': { nombre: ' MetadatosBasicos', valor: 1 },
+  'Metadatos básicos': { nombre: 'MetadatosBasicos', valor: 1 },
   'Ubicación y Licencias': { nombre: 'UbicacionLicencias', valor: 2 },
   'Metadatos Opcionales': { nombre: 'MetadatosOpcionales', valor: 3 },
 });
 const titleValue = ref();
-
 //**Esta función lo que hace es determinar los valores de hasSLD, tabla sin geometría
 // y agregar la vista de edición de Atributos del conjunto para capas vectoriales*/
 function updateValues() {
@@ -44,7 +43,10 @@ updateValues();
     v-if="!props.excludeLinks"
     :recurso="props.resource"
     :opciones="[
-      { texto: 'Metadatos', ruta: '/catalogo/mis-archivos/editar/MetadatosBasicos' },
+      {
+        texto: 'Metadatos',
+        ruta: `/catalogo/mis-archivos/editar/${titleOptions[props.title]['nombre']}`,
+      },
       {
         texto: 'Estilo',
         ruta: '/catalogo/mis-archivos/editar/estilo',
