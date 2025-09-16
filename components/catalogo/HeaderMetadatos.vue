@@ -13,17 +13,33 @@ const props = defineProps({
     default: false,
   },
 });
-const titleOptions = {
+const titleOptions = ref({
   'Metadatos básicos': { nombre: ' MetadatosBasicos', valor: 1 },
   'Ubicación y Licencias': { nombre: 'UbicacionLicencias', valor: 2 },
   'Metadatos Opcionales': { nombre: 'MetadatosOpcionales', valor: 3 },
-  'Atributos del Conjunto de Datos': { nombre: 'AtributosConjunto', valor: 4 },
-};
-const titleValue = computed(() => titleOptions[props.title]['valor']);
+});
+const titleValue = ref();
+
+//**Esta función lo que hace es determinar los valores de hasSLD, tabla sin geometría
+// y agregar la vista de edición de Atributos del conjunto para capas vectoriales*/
+function updateValues() {
+  if (
+    props.resource.subtype !== 'raster' &&
+    isGeometricExtension(props.resource.extent) &&
+    props.resource.resource_type !== 'document'
+  ) {
+    titleOptions.value['Atributos del Conjunto de Datos'] = {
+      nombre: 'AtributosConjunto',
+      valor: 4,
+    };
+  }
+  titleValue.value = titleOptions.value[props.title]['valor'];
+}
+
+updateValues();
 </script>
 <template>
   <h2>{{ props.resource.title }}</h2>
-
   <CatalogoMenuMisArchivos
     v-if="!props.excludeLinks"
     :recurso="props.resource"
@@ -54,19 +70,15 @@ const titleValue = computed(() => titleOptions[props.title]['valor']);
             : 'var(--color-neutro-2)',
       }"
     ></div>
-    <!--     <div
-      class="borde borde-grosor-2"
-      style="width: 25%; border-color: var(--color-primario-1)"
-    ></div>
-    <div class="borde borde-grosor-2" style="width: 25%; border-color: var(--color-neutro-2)"></div>
-    <div class="borde borde-grosor-2" style="width: 25%; border-color: var(--color-neutro-2)"></div>
-    <div class="borde borde-grosor-2" style="width: 25%; border-color: var(--color-neutro-2)"></div> -->
   </div>
-  <ol>
+  <ol :start="titleOptions[props.title]['valor']">
     <li>{{ props.title }}</li>
   </ol>
 </template>
 <style lang="scss" scoped>
+.contenedor {
+  background-color: pink;
+}
 .borde-enlace-activo {
   border-bottom: 4px solid var(--boton-primario-borde);
   border-radius: 0px;
