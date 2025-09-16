@@ -120,7 +120,8 @@ watch(resourceElement, () => {
   updateFunctions();
 });
 
-const { findServerGnoxyUrl } = useGnoxyUrl();
+const { findServer, gnoxyUrl } = useGnoxyUrl();
+const fetchFunction = (url) => fetch(gnoxyUrl(url));
 </script>
 
 <template>
@@ -128,8 +129,9 @@ const { findServerGnoxyUrl } = useGnoxyUrl();
     <!-- El contenido de la tarjeta de capas -->
     <div class="m-y-2">
       <SisdaiLeyendaWms
+        :consulta="fetchFunction"
+        :fuente="findServer(resourceElement)"
         :nombre="resourceElement.alternate"
-        :fuente="findServerGnoxyUrl(resourceElement)"
         :titulo="resourceElement.title || 'cargando...'"
         :sin-control="true"
         :sin-control-clases="true"
