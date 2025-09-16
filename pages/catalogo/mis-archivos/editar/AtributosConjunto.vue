@@ -1,23 +1,23 @@
 <script setup>
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-
+import { fetchByPk } from '~/utils/catalogo';
 import { getFeatures } from '~/utils/consulta';
 
 // Recuperamos información a partir de la url
 const route = useRoute();
 const selectedPk = route.query.data;
 const type = route.query.type;
-const typeDict = {
+/* const typeDict = {
   Documentos: 'document',
   'Capa geográfica': 'dataLayer',
   'Datos tabulados': 'dataTable',
-};
+}; */
 // Recuperamos la información completa del recurso
-const storeFetched = useFetchedResources2Store();
+/* const storeFetched = useFetchedResources2Store();
 storeFetched.checkFilling(typeDict[type]);
 const resources = computed(() => storeFetched.byResourceType(typeDict[type]));
-const editedResource = computed(() => resources.value.find(({ pk }) => pk === selectedPk));
+const editedResource = computed(() => resources.value.find(({ pk }) => pk === selectedPk)); */
 
 // A partir del recurso, hacemos una petición para traer sus features
 const features = ref([]);
@@ -31,6 +31,8 @@ const variables = [
 ];
 const datos = ref([]);
 const checkedAttrs = ref([]);
+
+const editedResource = ref(undefined);
 
 watch(editedResource, async () => {
   features.value = await getFeatures(editedResource.value);
@@ -47,6 +49,9 @@ watch(editedResource, async () => {
   }
   checkedAttrs.value = features.value;
 });
+onMounted(async () => {
+  editedResource.value = await fetchByPk(selectedPk);
+});
 </script>
 <template>
   <UiLayoutPaneles>
@@ -55,7 +60,7 @@ watch(editedResource, async () => {
     </template>
 
     <template #visualizador>
-      <main v-if="editedResource" id="principal" class="contenedor m-b-10">
+      <main v-if="editedResource" id="atributos-conjunto" class="contenedor m-b-10 m-y-3">
         <div class="flex m-0 contenedor-botones">
           <button
             class="boton-pictograma boton-sin-contenedor-secundario"
@@ -66,10 +71,13 @@ watch(editedResource, async () => {
           </button>
           <p>Editar</p>
         </div>
-        <CatalogoHeaderMetadatos
-          :resource="editedResource"
-          :title="'Atributos del Conjunto de Datos'"
-        ></CatalogoHeaderMetadatos>
+        <div class="alineacion-izquierda ancho-lectura">
+          <CatalogoHeaderMetadatos
+            :resource="editedResource"
+            :title="'Atributos del Conjunto de Datos'"
+            :exclude-links="false"
+          ></CatalogoHeaderMetadatos>
+        </div>
 
         <div class="contenedor-tabla p-2">
           <table v-if="datos.length > 0">
@@ -148,7 +156,7 @@ watch(editedResource, async () => {
           <p v-else>...Cargando</p>
           <CatalogoBotonesMetadatos
             :key="`4-${selectedPk}-buttons`"
-            :title="'UbicacionLicencias'"
+            :title="'AtributosConjunto'"
             :pk="selectedPk"
             :tipo="type"
             :resource="editedResource"

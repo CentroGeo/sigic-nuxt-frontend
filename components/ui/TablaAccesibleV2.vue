@@ -40,10 +40,16 @@ const dictTable = ref({
  * @param objeto que se va a codificar
  */
 
-function irARutaConQuery(objeto) {
+function irARutaConQuery(recurso) {
+  const tipoRecurso =
+    recurso.resource_type === 'document'
+      ? 'document'
+      : isGeometricExtension(recurso.extent)
+        ? 'dataLayer'
+        : 'dataTable';
   navigateTo({
     path: '/catalogo/mis-archivos/editar/MetadatosBasicos',
-    query: { data: objeto.pk, type: objeto.tipo_recurso },
+    query: { data: recurso.pk, type: tipoRecurso },
   });
   // evitar problemas con espacios con JSON.stingify
   //const pk = encodeURIComponent(JSON.stringify({ pk: objeto.pk }));

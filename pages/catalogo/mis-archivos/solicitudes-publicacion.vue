@@ -1,8 +1,11 @@
 <script setup>
 // TODO: fix paginador
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-
 import { cleanInput, resourceTypeDic } from '~/utils/consulta';
+
+// para filtar por los archivos de la usuaria
+const { data } = useAuth();
+const userEmail = data.value.user.email;
 
 const storeFetched = useFetchedResources2Store();
 const storeFilters = useFilteredResources();
@@ -27,10 +30,6 @@ const isFilterActive = ref(false);
 // obteniendo las variables keys para la tabla
 const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'acciones'];
 
-// para filtar por los archivos de la usuaria
-const { data } = useAuth();
-const userEmail = data.value.user.email;
-
 /**
  * Valida si el tipo de recurso es documento o dataset con geometría o no
  * @param recurso del catálogo
@@ -47,6 +46,7 @@ function tipoRecurso(recurso) {
 function updateResources(nuevosRecursos) {
   filteredResources.value = nuevosRecursos;
   // obteniendo datos por las props de la tabla
+  // TODO: enviar solo los recursos que son candidatos a publicarse
   tableResources.value = filteredResources.value
     .filter((resource) => resource.owner.email === userEmail)
     .map((d) => ({
@@ -67,7 +67,6 @@ function applyAdvancedFilter() {
   modalFiltroAvanzado.value.cerrarModalBusqueda();
   updateResources(storeFilters.filter('all'));
 }
-
 function resetAdvancedFilter() {
   isFilterActive.value = false;
   storeFilters.resetFilters();
@@ -84,9 +83,8 @@ watch(seleccionOrden, (nv) => {
   updateResources(storeFilters.filter('all'));
 });
 watch(seleccionTipoArchivo, (nv) => {
-  storeFilters.updateFilter('sort', nv);
-  // TODO: crear filtros y condiciones en storeFilter
-  // updateResources(storeFilters.filter('all'));
+  storeFilters.filters.resourceType = nv;
+  updateResources(storeFilters.filter('all'));
 });
 
 onMounted(async () => {
@@ -106,19 +104,17 @@ onMounted(async () => {
     <template #visualizador>
       <main class="contenedor m-b-10 m-t-3">
         <div class="flex">
-          <!-- Selector Tipo de archivo -->
           <div class="columna-4">
             <ClientOnly>
               <SisdaiSelector v-model="seleccionTipoArchivo" etiqueta="Tipo de archivo">
-                <option value="todos_los_archivos">Todos los archivos</option>
-                <option value="capas_geograficas">Capas geográficas</option>
-                <option value="datos_tabulados">Datos tabulados</option>
+                <option value="todes">Todos los archivos</option>
+                <option value="capas">Capas geográficas</option>
+                <option value="tablas">Datos tabulados</option>
                 <option value="documentos">Documentos</option>
                 <option value="remotas">Remotas</option>
               </SisdaiSelector>
             </ClientOnly>
           </div>
-          <!-- Selector Orden -->
           <div class="columna-4">
             <ClientOnly>
               <SisdaiSelector v-model="seleccionOrden" etiqueta="Ordenar por">
@@ -129,7 +125,6 @@ onMounted(async () => {
               </SisdaiSelector>
             </ClientOnly>
           </div>
-          <!-- Campo de búsqueda avanzada -->
           <div class="columna-8">
             <div class="flex flex-contenido-separado">
               <div class="columna-14">
