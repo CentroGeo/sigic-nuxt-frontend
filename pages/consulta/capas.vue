@@ -1,7 +1,7 @@
 <script setup>
 import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
 import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
-import { resourceTypeDic } from '~/utils/consulta';
+import { findServer, resourceTypeDic } from '~/utils/consulta';
 
 // const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
@@ -148,8 +148,7 @@ onMounted(() => {
 
 // api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
 
-const { findServer, gnoxyUrl } = useGnoxyUrl();
-const fetchFunction = (url) => fetch(gnoxyUrl(url));
+const { gnoxyFetch } = useGnoxyUrl();
 </script>
 
 <template>
@@ -174,7 +173,7 @@ const fetchFunction = (url) => fetch(gnoxyUrl(url));
             v-for="resource in storeFetched.findResources(storeSelected.uuids)"
             :key="`wms-${resource.uuid}`"
             :capa="resource.alternate"
-            :consulta="fetchFunction"
+            :consulta="gnoxyFetch"
             :fuente="findServer(resource)"
             :opacidad="storeSelected.byUuid(resource.uuid).opacidad"
             :posicion="storeSelected.byUuid(resource.uuid).posicion + 1"

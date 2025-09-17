@@ -1,6 +1,6 @@
 <script setup>
 import { SisdaiLeyendaWms } from '@centrogeomx/sisdai-mapas';
-import { hasWMS } from '~/utils/consulta';
+import { findServer, hasWMS } from '~/utils/consulta';
 
 const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
@@ -120,9 +120,7 @@ watch(resourceElement, () => {
   updateFunctions();
 });
 
-const { findServer, gnoxyUrl } = useGnoxyUrl();
-const fetchFunction = (url) => fetch(gnoxyUrl(url));
-
+const { gnoxyFetch } = useGnoxyUrl();
 </script>
 
 <template>
@@ -130,7 +128,7 @@ const fetchFunction = (url) => fetch(gnoxyUrl(url));
     <!-- El contenido de la tarjeta de capas -->
     <div class="m-y-2">
       <SisdaiLeyendaWms
-        :consulta="fetchFunction"
+        :consulta="gnoxyFetch"
         :fuente="findServer(resourceElement)"
         :nombre="resourceElement.alternate"
         :titulo="resourceElement.title || 'cargando...'"
