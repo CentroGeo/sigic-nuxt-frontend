@@ -79,6 +79,15 @@ export function getWMSserver(resource) {
   return `${link.split('?')[0]}`;
 }
 
+export function findServer(resource) {
+  if (resource.sourcetype === 'REMOTE') {
+    return getWMSserver(resource);
+  } else {
+    const config = useRuntimeConfig();
+    return `${config.public.geonodeUrl}/gs/wms`;
+  }
+}
+
 /**
  * Esta funcion revisa si el servidor que aloja un servicio remoto WFS
  * tiene servicios especificos
