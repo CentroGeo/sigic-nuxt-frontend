@@ -75,6 +75,7 @@ const optionsDict = {
 // Para triggerear la función de observar
 let observer;
 const rootEl = ref();
+
 onMounted(() => {
   // Esto es para observar cuando la tarjeta entra en la vista
   observer = new IntersectionObserver(
