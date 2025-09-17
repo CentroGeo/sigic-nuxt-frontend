@@ -51,7 +51,7 @@ onMounted(() => {
   }
 });
 
-onUnmounted(() => {
+onUnmount(() => {
   document.body.classList.remove('solo-en-index');
 
   const agregadasPorFrameworkGogHead = [...document.head.children].filter(
@@ -70,6 +70,17 @@ onUnmounted(() => {
   agregadasPorFrameworkGogBody.forEach((el) => el.remove());
   document.querySelector('body').className = '';
   document.querySelectorAll('div.pace').forEach((el) => el.remove());
+
+  if (window.jQuery) {
+    $(window).off('resize');
+    try {
+      delete window.$;
+      delete window.jQuery;
+    } catch {
+      window.$ = undefined;
+      window.jQuery = undefined;
+    }
+  }
 
   const vars_window = [
     'Pace',
