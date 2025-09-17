@@ -64,7 +64,6 @@ function irARutaConQuery(value) {
     });
   }
 }
-console.log(props.opciones);
 </script>
 <template>
   <div class="menu-mis-archivos p-t-5 p-b-3">

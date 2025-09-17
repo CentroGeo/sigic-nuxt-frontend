@@ -78,7 +78,7 @@ export function buildUrl(endpoint, query) {
   const filtersDict = Object.keys(query);
   filtersDict.forEach((filter) => {
     const value = query[filter];
-    if (typeof value === 'string') {
+    if (typeof value === 'string' || typeof value === 'number') {
       dataParams.append(filter, value);
     } else if (Array.isArray(value)) {
       value.forEach((option) => dataParams.append(filter, option));

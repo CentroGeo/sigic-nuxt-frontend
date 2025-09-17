@@ -1,6 +1,6 @@
 <script setup>
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { categoriesInSpanish, cleanInput } from '~/utils/consulta';
+import { buildUrl, categoriesInSpanish } from '~/utils/consulta';
 
 const config = useRuntimeConfig();
 const storeFetched = useFetchedResources2Store();
@@ -95,33 +95,23 @@ onMounted(async () => {
     updateResources(resources.value);
   }
 });
-
-// Prueba de consumo de recursos paginado
-/* const { gnoxyFetch } = useGnoxyUrl();
-const query = {
-  custom: 'true',
-  'filter{resource_type}': 'dataset',
-  extent_ne: '[-1,-1,0,0]',
-  page: 1,
-  // agregar filtros
-};
 // Prueba de consumo de recursos paginado y usando gnoxy
-const pruebaApi = `${config.public.geonodeApi}/resources`;
+const { gnoxyFetch } = useGnoxyUrl();
+async function fetchNewData() {
+  const query = {
+    custom: 'true',
+    'filter{resource_type}': 'dataset',
+    extent_ne: '[-1,-1,0,0]',
+    page: 2,
+    // agregar filtros
+  };
+  const pruebaApi = `${config.public.geonodeApi}/resources`;
 
-const pruebaUrl = buildUrl(pruebaApi, query);
-console.log(pruebaUrl);
-//const res = await gnoxyFetch(pruebaUrl);
-//const { resources: pruebaData } = await res.json();
-//console.log(res, pruebaData);
-const indexDict = ref();
-// Vamos a hacer un diccionario tipo index : uuid
-watch(resources, () => {
-  const uuuidList = resources.value.map((d) => d.uuid);
-  for (let i = 0; i < uuuidList.length; i++) {
-    indexDict[i] = uuuidList[i];
-  }
-  console.log(indexDict);
-}); */
+  const pruebaUrl = buildUrl(pruebaApi, query);
+  const res = await gnoxyFetch(pruebaUrl);
+  const { resources: pruebaData } = await res.json();
+  storeFetched.concatResources(storeConsulta.resourceType, pruebaData);
+}
 </script>
 
 <template>
@@ -219,6 +209,7 @@ watch(resources, () => {
           class="elemento-catalogo"
           :catalogue-element="resource"
           :resource-type="storeConsulta.resourceType"
+          @trigger-fetch="fetchNewData()"
         />
       </div>
     </div>

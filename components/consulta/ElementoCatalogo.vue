@@ -5,6 +5,7 @@ import { fetchGeometryType, getWMSserver, hasWMS, tooltipContent } from '~/utils
 const config = useRuntimeConfig();
 const storeSelected = useSelectedResources2Store();
 const storeConsulta = useConsultaStore();
+const storeFetched = useFetchedResources2Store();
 
 const capasSeleccionadas = computed({
   get: () => storeSelected.uuids,
@@ -76,6 +77,13 @@ const optionsDict = {
 let observer;
 const rootEl = ref();
 
+// Para hacer algo si es el enésimo elemento e incorporar el consumo de recursos paginados.
+const indexElement = computed(() => storeFetched.byResourceType().length - 5);
+const nthElementUuid = computed(() =>
+  storeFetched.nthElement(storeConsulta.resourceType, indexElement.value)
+);
+const emit = defineEmits(['triggerFetch']);
+
 onMounted(() => {
   // Esto es para observar cuando la tarjeta entra en la vista
   observer = new IntersectionObserver(
@@ -83,6 +91,9 @@ onMounted(() => {
       for (const entry of entries) {
         if (entry.isIntersecting) {
           // Primero checamos si no es dataset
+          if (props.catalogueElement.uuid === nthElementUuid.value) {
+            emit('triggerFetch');
+          }
           if (storeConsulta.resourceType !== 'dataLayer') {
             buttons.value = [
               {
