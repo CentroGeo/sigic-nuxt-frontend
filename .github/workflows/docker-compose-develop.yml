@@ -25,8 +25,11 @@ jobs:
           node-version: 22
           cache: 'npm'
 
+      - name: Clean package-lock.json
+        run: rm -f package-lock.json
+
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Run ESLint
         run: npm run lint
