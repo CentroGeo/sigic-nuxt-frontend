@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY package.json ./
 
-RUN npm install --ignore-scripts  \
+RUN npm install --include=optional \
     && npx nuxt prepare  \
     && rm -rf package-lock.json node_modules
 
