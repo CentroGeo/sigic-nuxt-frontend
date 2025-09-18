@@ -27,8 +27,8 @@ const props = defineProps({
     default: false,
   },
 });
-// Desde aquí ir subiendo al store catalogo?
 const storeCatalogo = useCatalogoStore();
+// console.log('props.recurso', props.recurso);
 
 //const imagen = ref();
 const campoTitulo = ref(props.recurso.title);
@@ -63,18 +63,19 @@ async function guardarImagen(files) {
   }
 }
 </script>
+
 <template>
   <div>
     <CatalogoHeaderMetadatos
       :resource="props.recurso"
       :title="'Metadatos básicos'"
       :exclude-links="props.isModal"
-    ></CatalogoHeaderMetadatos>
+    />
+
     <div v-if="!props.isModal">
       <p>
         <b>Miniatura imagen no mayor a 9kb tamaño 120x120px. Archivos Png o JPG</b>
       </p>
-
       <!-- Drag & Drop -->
       <ClientOnly>
         <CatalogoElementoDragNdDrop ref="dragNdDrop" @pasar-archivo="(i) => guardarImagen(i)" />
@@ -83,18 +84,24 @@ async function guardarImagen(files) {
 
     <!-- Formulario -->
     <div class="m-t-3">
-      <div class="flex">
+      <div class="flex" style="gap: 0 24px">
         <div class="columna-16">
           <ClientOnly>
-            <SisdaiCampoBase v-model="campoTitulo" etiqueta="Título" ejemplo="Añade un nombre" />
-          </ClientOnly>
-        </div>
-        <div class="columna-16">
-          <ClientOnly>
+            <SisdaiCampoBase
+              v-model="campoTitulo"
+              etiqueta="Título"
+              ejemplo="Añade un nombre"
+              tipo="text"
+              :es_etiqueta_visible="true"
+              :es_obligatorio="true"
+            />
             <SisdaiCampoBase
               v-model="campoResumen"
               etiqueta="Resumen"
               ejemplo="El texto descriptivo es conciso y significativo. Debe ayudar a la persona usuaria a..."
+              tipo="text"
+              :es_etiqueta_visible="true"
+              :es_obligatorio="true"
             />
           </ClientOnly>
         </div>
@@ -105,9 +112,9 @@ async function guardarImagen(files) {
               etiqueta="Tipo de fecha"
               texto_ayuda="Creación, publicación o revisión."
             >
-              <option value="1">Creación</option>
-              <option value="2">Publicación</option>
-              <option value="3">Revisón</option>
+              <option value="creacion">Creación</option>
+              <option value="publicacion">Publicación</option>
+              <option value="revison">Revisón</option>
             </SisdaiSelector>
           </ClientOnly>
         </div>
@@ -124,31 +131,48 @@ async function guardarImagen(files) {
         </div>
         <div class="columna-16">
           <ClientOnly>
-            <SisdaiSelector v-model="seleccionCategoria" etiqueta="Categoría">
-              <option value="1">Opcion Uno</option>
-              <option value="2">Opcion Dos</option>
-              <option value="3">Opcion Tres</option>
+            <SisdaiSelector
+              v-model="seleccionCategoria"
+              etiqueta="Categoría"
+              :es_obligatorio="true"
+            >
+              <option value="imagery_base_maps_earth_cover">
+                Mapas Base y Cobertura Terrestre
+              </option>
+              <option value="society">Sociedad</option>
+              <option value="economy">Economía</option>
+              <option value="utilities_communication">Servicios Públicos y Comunicación</option>
+              <option value="environment">Medio Ambiente</option>
+              <option value="oceans">Océanos</option>
+              <option value="biota">Biota</option>
+              <option value="health">Salud</option>
+              <option value="elevation">Elevación</option>
+              <option value="geoscientific_information">Información Geocientífica</option>
+              <option value="planning_cadastre">Planeación Catastral</option>
+              <option value="Inland Waters">Aguas Continentales</option>
+              <option value="boundaries">Fronteras</option>
+              <option value="structure">Estructura</option>
+              <option value="transportation">Transporte</option>
+              <option value="intelligence_military">Inteligencia Militar</option>
+              <option value="location">Ubicación</option>
+              <option value="climatology_meteorology_atmosphere">
+                Climatología, Meteorología y Atmósfera
+              </option>
+              <option value="farming">Agricultura</option>
+              <option value="population">Población</option>
             </SisdaiSelector>
-          </ClientOnly>
-        </div>
-        <div class="columna-16">
-          <ClientOnly>
             <SisdaiSelector
               v-model="seleccionGrupo"
               etiqueta="Selecciona al grupo con el que compartirás tu archivo"
+              texto_ayuda=" "
             >
-              <option value="1">Opcion Uno</option>
-              <option value="2">Opcion Dos</option>
-              <option value="3">Opcion Tres</option>
+              <option value="1">grupo uno publico</option>
             </SisdaiSelector>
-          </ClientOnly>
-        </div>
-        <div class="columna-16">
-          <ClientOnly>
             <SisdaiCampoBase
               v-model="campoPalabrasClave"
               etiqueta="Palabras clave"
               ejemplo="Agua, educación, conservación..."
+              :es_obligatorio="true"
             />
           </ClientOnly>
         </div>
@@ -171,6 +195,7 @@ async function guardarImagen(files) {
           </ClientOnly>
         </div>
       </div>
+
       <CatalogoBotonesMetadatos
         v-if="!props.isModal"
         :key="`1-${props.resourcePk}-buttons`"
@@ -178,7 +203,7 @@ async function guardarImagen(files) {
         :title="'MetadatosBasicos'"
         :pk="props.resourcePk"
         :tipo="props.resourceType"
-      ></CatalogoBotonesMetadatos>
+      />
     </div>
   </div>
 </template>

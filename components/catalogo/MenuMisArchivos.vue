@@ -112,7 +112,7 @@ function irARutaConQuery(value) {
   }
 }
 .header-link {
-  color: var(--color-secundario-8);
+  color: var(--texto-secundario);
   font-weight: 600;
 }
 </style>
