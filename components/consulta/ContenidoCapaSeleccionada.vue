@@ -1,11 +1,13 @@
 <script setup>
 import { SisdaiLeyendaWms } from '@centrogeomx/sisdai-mapas';
-import { getWMSserver, hasWMS } from '~/utils/consulta';
+import { findServer, hasWMS } from '~/utils/consulta';
 
 const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
 const storeSelected = useSelectedResources2Store();
-const { findServer } = useGnoxyUrl();
+const { gnoxyFetch } = useGnoxyUrl();
+
+//const { findServer } = useGnoxyUrl();
 //const { gnoxyUrl } = useGnoxyUrl();
 const { data } = useAuth();
 const isLoggedIn = ref(data.value ? true : false);
@@ -201,8 +203,9 @@ watch(resourceElement, () => {
   <div>
     <div class="m-y-2">
       <SisdaiLeyendaWms
-        :nombre="resourceElement.alternate"
+        :consulta="gnoxyFetch"
         :fuente="findServer(resourceElement)"
+        :nombre="resourceElement.alternate"
         :titulo="resourceElement.title || 'cargando...'"
         :sin-control="true"
         :sin-control-clases="true"

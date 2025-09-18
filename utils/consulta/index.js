@@ -66,7 +66,28 @@ export function tooltipContent(resource) {
     `<p style="max-width:250px">${resource.attribution || 'Sin fuente'}</p>`;
   return content;
 }
+/**
+ * Esta función construye urls con queryparams
+ * @param {String} server
+ * @param {Object} query
+ * @returns {String}
+ */
+export function buildUrl(endpoint, query) {
+  const pruebaApi = endpoint;
+  const dataParams = new URLSearchParams();
+  const filtersDict = Object.keys(query);
+  filtersDict.forEach((filter) => {
+    const value = query[filter];
+    if (typeof value === 'string' || typeof value === 'number') {
+      dataParams.append(filter, value);
+    } else if (Array.isArray(value)) {
+      value.forEach((option) => dataParams.append(filter, option));
+    }
+  });
 
+  const pruebaUrl = `${pruebaApi}?${dataParams.toString().replace('extent_ne=%5B-1%2C-1%2C0%2C0%5D', 'extent_ne=[-1,-1,0,0]')}`;
+  return pruebaUrl;
+}
 /**
  * Regresa el servidor en el que esta alojado un recurso
  * @param {Object} resource
@@ -77,6 +98,15 @@ export function getWMSserver(resource) {
   const wmsObject = resource.links.find((link) => link.link_type === 'OGC:WMS');
   const link = wmsObject['url']; //.replace('http', 'https').replace('httpss', 'https');
   return `${link.split('?')[0]}?`;
+}
+
+export function findServer(resource) {
+  if (resource.sourcetype === 'REMOTE') {
+    return getWMSserver(resource);
+  } else {
+    const config = useRuntimeConfig();
+    return `${config.public.geonodeUrl}/gs/wms`;
+  }
 }
 
 /**

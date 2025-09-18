@@ -48,7 +48,7 @@ onUnmounted(() => (document.querySelector('body').className = ''));
         },
         {
           pictograma: 'pictograma-ayuda',
-          ruta: `${ruta}/servicios-remotos`,
+          ruta: `${ruta}/cargar-servicios-remotos`,
           globo: 'Carga de catálogos externos',
         },
       ]"

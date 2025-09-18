@@ -95,6 +95,28 @@ onMounted(async () => {
     updateResources(resources.value);
   }
 });
+// Prueba de consumo de recursos paginado y usando gnoxy
+async function fetchNewData() {
+  console.warn('se encontró el enésimo elemento');
+}
+/* const { gnoxyUrl } = useGnoxyUrl();
+const query = {
+  custom: 'true',
+  'filter{resource_type}': 'dataset',
+  page_size: 50,
+  //extent_ne: '[-1,-1,0,0]',
+  //page: 2,
+  // agregar filtros
+};
+const pruebaApi = `${config.public.geonodeApi}/resources`;
+const pruebaUrl = buildUrl(pruebaApi, query);
+const urlNuevo = gnoxyUrl(pruebaUrl);
+console.log('La url generada sin gnoxy:', pruebaUrl);
+console.log('La url con gnoxy', urlNuevo);
+const res = await fetch(urlNuevo);
+console.log('La respuesta de la petición:', res);
+const pruebaData = await res.json();
+console.log('La respuesta con los datos:', pruebaData); */
 </script>
 
 <template>
@@ -192,6 +214,7 @@ onMounted(async () => {
           class="elemento-catalogo"
           :catalogue-element="resource"
           :resource-type="storeConsulta.resourceType"
+          @trigger-fetch="fetchNewData()"
         />
       </div>
     </div>

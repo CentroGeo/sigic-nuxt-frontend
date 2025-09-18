@@ -1,5 +1,13 @@
 <script setup>
 import SisdaiControlDeslizante from '@centrogeomx/sisdai-componentes/src/componentes/control-deslizante/SisdaiControlDeslizante.vue';
+
+definePageMeta({
+  middleware: 'sidebase-auth',
+  bodyAttrs: {
+    class: '',
+  },
+});
+
 const controlDeslizante = ref(null);
 const generaIdAleatorio = (el) => {
   return el + Math.random().toString(36).substring(2);

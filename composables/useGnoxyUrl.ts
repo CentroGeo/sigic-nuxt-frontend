@@ -1,10 +1,9 @@
-import { getWMSserver } from '~/utils/consulta';
-
 export function useGnoxyUrl() {
   const config = useRuntimeConfig();
 
   function gnoxyUrl(inputUrl: string): string {
     if (!inputUrl) return '';
+
     const { geonodeUrl, baseURL } = config.public;
 
     // Caso 1: URL empieza con geonodeUrl → traducir a gnoxy normal
@@ -16,17 +15,8 @@ export function useGnoxyUrl() {
     return `${baseURL}/api/gnoxy/proxy/?url=${encodeURIComponent(inputUrl)}`;
   }
 
-  function findServer(resource: object): string {
-    if (resource.sourcetype === 'REMOTE') {
-      const link = getWMSserver(resource);
-      return gnoxyUrl(link);
-    } else {
-      return gnoxyUrl(`${config.public.geonodeUrl}/gs/wms?`);
-    }
-  }
-
   return {
     gnoxyUrl,
-    findServer,
+    gnoxyFetch: (url: string) => fetch(gnoxyUrl(url)),
   };
 }

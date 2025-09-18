@@ -17,7 +17,7 @@ const servicioExternoCreado = ref(true);
 
 async function importarCatalogoExterno() {
   mensajeImportarCatalogo.value = 'Los recursos seleccionados han sido importados';
-  await navigateTo('/catalogo/servicios-remotos/cargados');
+  await navigateTo('/catalogo/cargar-servicios-remotos/cargados');
 }
 
 const opTipoFuente = [

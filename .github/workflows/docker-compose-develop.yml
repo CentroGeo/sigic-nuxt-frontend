@@ -25,8 +25,11 @@ jobs:
           node-version: 22
           cache: 'npm'
 
+      - name: Clean package-lock.json
+        run: rm -f package-lock.json
+
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Run ESLint
         run: npm run lint
@@ -113,6 +116,7 @@ jobs:
           echo "NUXT_PUBLIC_GEONODE_API=${{ vars.NUXT_PUBLIC_GEONODE_API }}" >> .env
           echo "NUXT_PUBLIC_GEONODE_URL=${{ vars.NUXT_PUBLIC_GEONODE_URL }}" >> .env
           echo "NUXT_PUBLIC_GEOSERVER_URL=${{ vars.NUXT_PUBLIC_GEOSERVER_URL }}" >> .env
+          echo "NUXT_PUBLIC_IA_BACKEND_URL=${{ vars.NUXT_PUBLIC_IA_BACKEND_URL }}" >> .env
           echo "NUXT_PUBLIC_BASE_URL=${{ vars.NUXT_PUBLIC_BASE_URL }}" >> .env
           echo "NUXT_AUTH_ORIGIN=${{ vars.NUXT_AUTH_ORIGIN }}" >> .env
           echo "KEYCLOAK_ISSUER=${{ vars.KEYCLOAK_ISSUER }}" >> .env
@@ -130,8 +134,9 @@ jobs:
           NUXT_PUBLIC_GEONODE_API: ${{ vars.NUXT_PUBLIC_GEONODE_API }}
           NUXT_PUBLIC_GEONODE_URL: ${{ vars.NUXT_PUBLIC_GEONODE_URL }}
           NUXT_PUBLIC_GEOSERVER_URL: ${{ vars.NUXT_PUBLIC_GEOSERVER_URL }}
-          NUXT_AUTH_ORIGIN: ${{ vars.NUXT_AUTH_ORIGIN }}
+          NUXT_PUBLIC_IA_BACKEND_URL: ${{ vars.NUXT_PUBLIC_IA_BACKEND_URL }}
           NUXT_PUBLIC_BASE_URL: ${{ vars.NUXT_PUBLIC_BASE_URL }}
+          NUXT_AUTH_ORIGIN: ${{ vars.NUXT_AUTH_ORIGIN }}
           KEYCLOAK_ISSUER: ${{ vars.KEYCLOAK_ISSUER }}
           KEYCLOAK_CLIENT_ID: ${{ secrets.KEYCLOAK_CLIENT_ID }}
           KEYCLOAK_CLIENT_SECRET: ${{ secrets.KEYCLOAK_CLIENT_SECRET }}

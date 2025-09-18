@@ -3,16 +3,12 @@
 const route = useRoute();
 const selectedPk = route.query.data;
 const type = route.query.type;
-const typeDict = {
-  Documentos: 'document',
-  'Capa geográfica': 'dataLayer',
-  'Datos tabulados': 'dataTable',
-};
 // Recuperamos la información completa del recurso
 const storeFetched = useFetchedResources2Store();
-storeFetched.checkFilling(typeDict[type]);
-const resources = computed(() => storeFetched.byResourceType(typeDict[type]));
-const editedResource = computed(() => resources.value.find(({ pk }) => pk === selectedPk));
+storeFetched.checkFilling(type);
+const editedResource = computed(() =>
+  storeFetched.byResourceType(type).find(({ pk }) => pk === selectedPk)
+);
 </script>
 <template>
   <UiLayoutPaneles>

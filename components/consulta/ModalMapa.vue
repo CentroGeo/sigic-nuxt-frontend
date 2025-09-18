@@ -1,7 +1,7 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
-import { resourceTypeDic } from '~/utils/consulta';
+import { findServer, resourceTypeDic } from '~/utils/consulta';
 import SelectedLayer from '~/utils/consulta/SelectedLayer';
 
 const props = defineProps({
@@ -10,9 +10,7 @@ const props = defineProps({
     default: () => ({}),
   },
 });
-//const config = useRuntimeConfig();
-//const { gnoxyUrl } = useGnoxyUrl();
-const { findServer } = useGnoxyUrl();
+const { gnoxyFetch } = useGnoxyUrl();
 const extentMap = ref(undefined);
 //const estilosLista = ref(['Opcion 1', 'Opción 2', 'Opcion 3']);
 //const estiloSeleccionado = ref(estilosLista.value[0]);
@@ -49,6 +47,7 @@ defineExpose({
   abrirModalMapa,
 });
 </script>
+
 <template>
   <ClientOnly>
     <SisdaiModal id="modal-mapa" ref="modalMapa">
@@ -73,6 +72,7 @@ defineExpose({
 
           <SisdaiCapaWms
             :capa="selectedElement.alternate"
+            :consulta="gnoxyFetch"
             :fuente="findServer(selectedElement)"
             @al-finalizar-carga="extentMap = selectedElement.extent.coords"
           />
@@ -86,16 +86,17 @@ defineExpose({
           @click="openLayerView"
         >
           Ver Capa en Visualizador
-          <span aria-hidden="true" class="pictograma-previsualizar"></span>
+          <span aria-hidden="true" class="pictograma-previsualizar" />
         </button>
         <button type="button" class="boton-primario boton-grande ancho" @click="downloadClicked()">
           Descarga Archivo
-          <span aria-hidden="true" class="pictograma-archivo-descargar pictograma-grande"></span>
+          <span aria-hidden="true" class="pictograma-archivo-descargar pictograma-grande" />
         </button>
       </template>
     </SisdaiModal>
   </ClientOnly>
 </template>
+
 <style lang="scss" scoped>
 #modal-mapa {
   max-width: 40%;

@@ -5,8 +5,6 @@ const configEnv = useRuntimeConfig();
 export default defineEventHandler(async (event) => {
   const baseUrl = configEnv.public.geonodeApi;
   const url = `${baseUrl}/upload/uploads/upload`;
-  // esta es la máquina con la que se probó
-  // const url = "http://10.2.102.239/upload/uploads/upload";
 
   const form = formidable({ multiples: false });
 
@@ -44,9 +42,6 @@ export default defineEventHandler(async (event) => {
   );
 
   formData.append('dataset_title', data.fields.dataset_title[0]);
-  // formData.append("dataset_title", "geonode:coordinaciones");
-  // formData.append("dataset_title", "geonode:coordinaciones_5512c0b1ad0c84af59d3e9182b06c97c");
-
   formData.append('style_upload_form', 'true');
   formData.append('permissions', JSON.stringify({}));
   formData.append('charset', 'undefined');
