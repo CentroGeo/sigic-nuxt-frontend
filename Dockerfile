@@ -19,11 +19,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libsqlite3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-COPY package.json package-lock.json ./
-
-RUN npm ci
-
 COPY . .
+
+RUN touch package-lock.json && rm -rf package-lock.json
+
+RUN npm install
 
 RUN npm run build
 
