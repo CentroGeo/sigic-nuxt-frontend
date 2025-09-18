@@ -96,22 +96,24 @@ onMounted(async () => {
   }
 });
 // Prueba de consumo de recursos paginado y usando gnoxy
-/* const { gnoxyFetch } = useGnoxyUrl();
 async function fetchNewData() {
-  const query = {
-    custom: 'true',
-    'filter{resource_type}': 'dataset',
-    extent_ne: '[-1,-1,0,0]',
-    page: 2,
-    // agregar filtros
-  };
-  const pruebaApi = `${config.public.geonodeApi}/resources`;
-
-  const pruebaUrl = buildUrl(pruebaApi, query);
-  const res = await gnoxyFetch(pruebaUrl);
-  const { resources: pruebaData } = await res.json();
-  storeFetched.concatResources(storeConsulta.resourceType, pruebaData);
-} */
+  console.warn('se encontró el enésimo elemento');
+}
+/* const { gnoxyFetch } = useGnoxyUrl();
+const query = {
+  custom: 'true',
+  'filter{resource_type}': 'dataset',
+  page_size: 50,
+  //extent_ne: '[-1,-1,0,0]',
+  //page: 2,
+  // agregar filtros
+};
+const pruebaApi = `${config.public.geonodeApi}/resources`;
+const pruebaUrl = buildUrl(pruebaApi, query);
+const res = await gnoxyFetch(pruebaUrl);
+console.log('La respuesta de prueba:', res);
+const pruebaData = await res.json();
+console.log('La respuesta real de prueba:', pruebaData); */
 </script>
 
 <template>
