@@ -1,10 +1,18 @@
 <script setup>
 import { SisdaiLeyendaWms } from '@centrogeomx/sisdai-mapas';
-import { findServer, hasWMS } from '~/utils/consulta';
+import { findServer, getWMSserver, hasWMS } from '~/utils/consulta';
 
 const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
 const storeSelected = useSelectedResources2Store();
+const { gnoxyFetch } = useGnoxyUrl();
+
+//const { findServer } = useGnoxyUrl();
+//const { gnoxyUrl } = useGnoxyUrl();
+const { data } = useAuth();
+const isLoggedIn = ref(data.value ? true : false);
+const userEmail = ref(data.value?.user.email);
+
 const emit = defineEmits(['opacidadClicked', 'descargaClicked', 'tablaClicked']);
 
 const props = defineProps({
@@ -14,6 +22,56 @@ const props = defineProps({
   },
 });
 const { resourceElement } = toRefs(props);
+
+/* function getWFS(resource) {
+  let url;
+  if (resource.sourcetype === 'REMOTE') {
+    url = new URL(getWMSserver(resource));
+    url.search = new URLSearchParams({
+      service: 'WFS',
+      version: '1.0.0',
+      request: 'GetFeature',
+      typeName: resource.alternate,
+      outputFormat: 'application/json',
+    }).toString();
+    url = url.href;
+  } else {
+    const objectWFSLink = resourceElement.value.links.find((link) => link.name === 'GeoJSON');
+    url = objectWFSLink.url;
+  }
+  return url;
+} */
+function getWMSFeatureInfo(resource) {
+  const url = new URL(getWMSserver(resource));
+  const pngObject = resource.links.find((link) => link.name === 'PNG');
+  const pngLink = pngObject.url;
+  const paramsDict = {};
+  const paramsList = pngLink.replace(`${config.public.geoserverUrl}/ows?`, '').split('&');
+  paramsList.forEach((param) => {
+    const entry = param.split('=');
+    paramsDict[entry[0]] = entry[1];
+  });
+  const coords = resource.extent.coords;
+  const bboxRatio = (coords[3] - coords[1]) / (coords[2] - coords[0]);
+  const mapWidth = Math.round(paramsDict.width);
+  const mapHeight = Math.round(paramsDict.height * bboxRatio);
+  url.search = new URLSearchParams({
+    service: 'WMS',
+    version: '1.1.0',
+    request: 'GetFeatureInfo',
+    layers: resource.alternate,
+    styles: '',
+    srs: resource.extent.srid,
+    bbox: resource.extent.coords.join(','),
+    width: mapWidth,
+    height: mapHeight,
+    query_layers: resource.alternate,
+    x: Math.round(mapWidth / 2),
+    y: Math.round(mapHeight / 2),
+    info_format: 'application/json',
+  });
+  return url.href;
+}
 const actualButtons = ref({});
 const optionsButtons = ref([
   {
@@ -61,21 +119,24 @@ const optionsButtons = ref([
     },
   },
   {
-    excludeFor: 'none',
+    //excludeFor: 'none'
+    excludeFor: 'noTables',
     label: 'Vínculo WMS',
+    //label: 'Vínculo WFS',
     pictogram: 'pictograma-enlace-externo',
     globo: 'WMS',
-    globo: 'WFS',
+    //globo: 'WFS',
     action: async () => {
-      //console.log(resourceElement.value.links);
+      // Este primer link es una petición GetMap
       //const objectWMSLink = resourceElement.value.links.find((link) => link.name === 'PNG');
       //const wmsLink = objectWMSLink.url;
-      const objectWFSLink = resourceElement.value.links.find((link) => link.name === 'GeoJSON');
-      const wfsLink = objectWFSLink.url;
-
+      // Esta es la petición WFS
+      //const wfsLink = getWFS(resourceElement.value);
+      // Esta es la petición GetFeatureInfo
+      const wmsLink = getWMSFeatureInfo(resourceElement.value);
       try {
-        await navigator.clipboard.writeText(wfsLink);
-        alert('Enlace copiado al portapapeles: ' + wfsLink);
+        await navigator.clipboard.writeText(wmsLink);
+        alert('Enlace copiado al portapapeles: ' + wmsLink);
       } catch (err) {
         console.error('Error al copiar: ', err);
       }
@@ -108,10 +169,27 @@ async function updateFunctions() {
   }
   if (resourceElement.value.sourcetype === 'REMOTE') {
     buttons = buttons.filter((d) => d.excludeFor !== 'remotes');
-    const resourceHasWMS = await hasWMS(resourceElement.value, 'table', config.public.geonodeUrl);
+    /*         const resourceHasWMS = await hasWMS(
+      resourceElement.value,
+      'table',
+      config.public.geonodeUrl,
+    ); // Esta se llamaría para el WFS*/
+    const resourceHasWMS = await hasWMS(
+      resourceElement.value,
+      'table',
+      config.public.geonodeUrl,
+      'GetFeatureInfo'
+    );
     if (resourceHasWMS === false) {
       buttons = buttons.filter((d) => d.excludeFor !== 'noTables');
     }
+  }
+  if (
+    isLoggedIn.value &&
+    resourceElement.value.owner.email === userEmail.value &&
+    !resourceElement.value.is_published
+  ) {
+    buttons = buttons.filter((d) => d.label !== 'Vínculo WFS');
   }
   actualButtons.value = buttons;
 }
@@ -119,13 +197,10 @@ updateFunctions();
 watch(resourceElement, () => {
   updateFunctions();
 });
-
-const { gnoxyFetch } = useGnoxyUrl();
 </script>
 
 <template>
   <div>
-    <!-- El contenido de la tarjeta de capas -->
     <div class="m-y-2">
       <SisdaiLeyendaWms
         :consulta="gnoxyFetch"
