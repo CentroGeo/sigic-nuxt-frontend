@@ -147,7 +147,6 @@ onMounted(() => {
 });
 
 // api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
-
 const { gnoxyFetch } = useGnoxyUrl();
 </script>
 

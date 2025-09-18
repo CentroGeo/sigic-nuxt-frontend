@@ -73,7 +73,9 @@ function irARutaConQuery(value) {
           <div v-if="value.notificacion" class="notificacion">
             <div class="circulo"></div>
           </div>
-          <nuxt-link @click="irARutaConQuery(value)">{{ value.texto }} </nuxt-link>
+          <nuxt-link class="header-link" @click="irARutaConQuery(value)"
+            >{{ value.texto }}
+          </nuxt-link>
           <div :class="route.path === value.ruta ? 'borde-enlace-activo' : ''"></div>
         </div>
       </template>
@@ -108,5 +110,9 @@ function irARutaConQuery(value) {
       margin: 8px auto 0;
     }
   }
+}
+.header-link {
+  color: var(--color-secundario-8);
+  font-weight: 600;
 }
 </style>
