@@ -19,13 +19,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libsqlite3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-COPY package.json ./
-
-RUN npm install --include=optional \
-    && npx nuxt prepare  \
-    && rm -rf package-lock.json node_modules
-
 COPY . .
+
+RUN rm -rf package-lock.json node_modules
+
+RUN npm install
 
 RUN npm run build
 
