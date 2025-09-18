@@ -18,12 +18,15 @@ const props = defineProps({
 });
 const { resourceType, selectedElement } = toRefs(props);
 
-const seleccionVarDisponibles = ref('');
+const seleccionVarDisponibles = ref(selectedElement.value.alternate);
 const config = useRuntimeConfig();
 const extentMap = ref(undefined);
 
 const modalDescarga = ref(null);
 const modalPublica1 = ref(null);
+const modalPublica2 = ref(null);
+const modalPublica3 = ref(null);
+const modalPublica4 = ref(null);
 
 const optionsList = ref(null);
 const selectedOption = ref();
@@ -174,7 +177,7 @@ defineExpose({
                 class="m-b-1"
                 etiqueta="Variables disponibles para visualizar"
               >
-                <option value="variable1">variable1</option>
+                <option :value="selectedElement.alternate">{{ selectedElement.alternate }}</option>
               </SisdaiSelector>
             </ClientOnly>
 
@@ -211,6 +214,7 @@ defineExpose({
         </div>
       </template>
     </SisdaiModal>
+
     <SisdaiModal ref="modalPublica1">
       <template #encabezado>
         <p class="m-t-0 m-b-1" style="color: transparent">a</p>
@@ -223,8 +227,6 @@ defineExpose({
             para ser publicado en el Catálogo de SIGIC público.
           </p>
         </div>
-        <!--         <h1 class="m-t-3">Metadatos</h1>
- -->
       </template>
       <template #cuerpo>
         <CatalogoBasicosMeta
@@ -232,7 +234,7 @@ defineExpose({
           :resource-pk="selectedElement.pk"
           :resource-type="resourceType"
           :is-modal="true"
-        ></CatalogoBasicosMeta>
+        />
         <div class="flex flex-contenido-separado m-t-3">
           <div class="columna-8 texto-centrado">
             <button
@@ -247,7 +249,146 @@ defineExpose({
             </button>
           </div>
           <div class="columna-8">
-            <button type="button" class="boton-primario texto-centrado">Siguiente</button>
+            <button
+              type="button"
+              class="boton-primario texto-centrado"
+              @click="
+                modalPublica1.cerrarModal();
+                modalPublica2.abrirModal();
+              "
+            >
+              Siguiente
+            </button>
+          </div>
+        </div>
+      </template>
+    </SisdaiModal>
+
+    <SisdaiModal ref="modalPublica2">
+      <template #encabezado>
+        <p class="m-t-0 m-b-1" style="color: transparent">a</p>
+        <div
+          class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-4 p-1"
+        >
+          <strong class="m-0" style="font-weight: 600">Verifica antes de publicar</strong>
+          <p class="m-0">
+            Revisa que el documento y sus metadatos sean correctos antes de enviarlo a aprobación
+            para ser publicado en el Catálogo de SIGIC público.
+          </p>
+        </div>
+      </template>
+      <template #cuerpo>
+        <CatalogoUbicacionMeta
+          :recurso="selectedElement"
+          :resource-pk="selectedElement.pk"
+          :resource-type="resourceType"
+          :is-modal="true"
+        />
+        <div class="flex flex-contenido-separado m-t-3">
+          <div class="columna-8 texto-centrado">
+            <button
+              type="button"
+              class="boton-secundario"
+              @click="
+                modalPublica2.cerrarModal();
+                modalPublica1.abrirModal();
+              "
+            >
+              Regresar
+            </button>
+          </div>
+          <div class="columna-8">
+            <button
+              type="button"
+              class="boton-primario texto-centrado"
+              @click="
+                modalPublica2.cerrarModal();
+                modalPublica3.abrirModal();
+              "
+            >
+              Siguiente
+            </button>
+          </div>
+        </div>
+      </template>
+    </SisdaiModal>
+
+    <SisdaiModal ref="modalPublica3">
+      <template #encabezado>
+        <p class="m-t-0 m-b-1" style="color: transparent">a</p>
+        <div
+          class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-4 p-1"
+        >
+          <strong class="m-0" style="font-weight: 600">Verifica antes de publicar</strong>
+          <p class="m-0">
+            Revisa que el documento y sus metadatos sean correctos antes de enviarlo a aprobación
+            para ser publicado en el Catálogo de SIGIC público.
+          </p>
+        </div>
+      </template>
+      <template #cuerpo>
+        <p>Metadatos opcionales</p>
+        <div class="flex flex-contenido-separado m-t-3">
+          <div class="columna-8 texto-centrado">
+            <button
+              type="button"
+              class="boton-secundario"
+              @click="
+                modalPublica3.cerrarModal();
+                modalPublica2.abrirModal();
+              "
+            >
+              Regresar
+            </button>
+          </div>
+          <div class="columna-8">
+            <button type="button" class="boton-primario texto-centrado">Confirmar</button>
+            <!-- TODO: revisar la parte de capa con geometría y subtipo con vector -->
+            <!-- <button
+              type="button"
+              class="boton-primario texto-centrado"
+              @click="
+                modalPublica3.cerrarModal();
+                modalPublica4.abrirModal();
+              "
+            >
+              Siguiente
+            </button> -->
+          </div>
+        </div>
+      </template>
+    </SisdaiModal>
+
+    <SisdaiModal ref="modalPublica4">
+      <template #encabezado>
+        <p class="m-t-0 m-b-1" style="color: transparent">a</p>
+        <div
+          class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-4 p-1"
+        >
+          <strong class="m-0" style="font-weight: 600">Verifica antes de publicar</strong>
+          <p class="m-0">
+            Revisa que el documento y sus metadatos sean correctos antes de enviarlo a aprobación
+            para ser publicado en el Catálogo de SIGIC público.
+          </p>
+        </div>
+      </template>
+      <template #cuerpo>
+        <p>Ubicación Licencias</p>
+        <div class="flex flex-contenido-separado m-t-3">
+          <div class="columna-8 texto-centrado">
+            <button
+              type="button"
+              class="boton-secundario"
+              @click="
+                modalPublica4.cerrarModal();
+                modalPublica3.abrirModal();
+              "
+            >
+              Regresar
+            </button>
+          </div>
+          <div class="columna-8">
+            <button type="button" class="boton-primario texto-centrado">Confirmar</button>
           </div>
         </div>
       </template>

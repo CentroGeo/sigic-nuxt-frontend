@@ -34,7 +34,7 @@ const editedResource = computed(() =>
             :resource-pk="selectedPk"
             :resource-type="type"
             :is-modal="false"
-          ></CatalogoBasicosMeta>
+          />
         </div>
       </main>
 

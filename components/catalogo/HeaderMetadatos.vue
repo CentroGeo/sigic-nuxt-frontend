@@ -38,7 +38,8 @@ function updateValues() {
 updateValues();
 </script>
 <template>
-  <h2>{{ props.resource.title }}</h2>
+  <h2 class="m-b-0">{{ props.resource.title }}</h2>
+
   <CatalogoMenuMisArchivos
     v-if="!props.excludeLinks"
     :recurso="props.resource"
