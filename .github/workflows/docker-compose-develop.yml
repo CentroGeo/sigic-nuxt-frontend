@@ -26,7 +26,10 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm i --omit=optional
+        run: npm install --ignore-scripts
+
+      - name: Run Nuxt prepare
+        run: npx nuxt prepare
 
       - name: Run ESLint
         run: npm run lint
