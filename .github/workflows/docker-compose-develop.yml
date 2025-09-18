@@ -25,11 +25,11 @@ jobs:
           node-version: 22
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm install --ignore-scripts
+      - name: Clean package-lock.json
+        run: rm -f package-lock.json
 
-      - name: Run Nuxt prepare
-        run: npx nuxt prepare
+      - name: Install dependencies
+        run: npm install
 
       - name: Run ESLint
         run: npm run lint
