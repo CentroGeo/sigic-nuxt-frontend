@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY . .
 
-RUN rm -rf package-lock.json
+RUN touch package-lock.json && rm -rf package-lock.json
 
 RUN npm install
 
