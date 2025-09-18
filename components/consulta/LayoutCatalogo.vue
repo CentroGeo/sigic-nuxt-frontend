@@ -1,6 +1,6 @@
 <script setup>
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { buildUrl, categoriesInSpanish } from '~/utils/consulta';
+import { categoriesInSpanish, cleanInput } from '~/utils/consulta';
 
 const config = useRuntimeConfig();
 const storeFetched = useFetchedResources2Store();
@@ -96,7 +96,7 @@ onMounted(async () => {
   }
 });
 // Prueba de consumo de recursos paginado y usando gnoxy
-const { gnoxyFetch } = useGnoxyUrl();
+/* const { gnoxyFetch } = useGnoxyUrl();
 async function fetchNewData() {
   const query = {
     custom: 'true',
@@ -111,7 +111,7 @@ async function fetchNewData() {
   const res = await gnoxyFetch(pruebaUrl);
   const { resources: pruebaData } = await res.json();
   storeFetched.concatResources(storeConsulta.resourceType, pruebaData);
-}
+} */
 </script>
 
 <template>
