@@ -51,7 +51,7 @@ onMounted(() => {
   }
 });
 
-onUnmount(() => {
+onUnmounted(() => {
   document.body.classList.remove('solo-en-index');
 
   const agregadasPorFrameworkGogHead = [...document.head.children].filter(
