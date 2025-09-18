@@ -1,6 +1,6 @@
 <script setup>
 import { SisdaiLeyendaWms } from '@centrogeomx/sisdai-mapas';
-import { findServer, hasWMS } from '~/utils/consulta';
+import { findServer, getWMSserver, hasWMS } from '~/utils/consulta';
 
 const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
