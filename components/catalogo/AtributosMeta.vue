@@ -37,6 +37,7 @@ async function updateValues() {
   datos.value = [];
   for (let i = 0; i < features.value.length; i++) {
     datos.value.push({
+      id: `${i}-${props.resourcePk}`,
       Atributo: features.value[i],
       Etiqueta: '',
       Descripción: '',
@@ -48,6 +49,14 @@ async function updateValues() {
   checkedAttrs.value = features.value;
 }
 updateValues();
+const { gnoxyUrl } = useGnoxyUrl();
+const url = `https://geonode.dev.geoint.mx/datasets/${props.resource.alternate}/metadata`;
+const gnoxiedUrl = gnoxyUrl(url);
+console.log(url);
+console.log(gnoxiedUrl);
+const prueba = await fetch(gnoxiedUrl);
+const pruebaRes = await prueba.text();
+console.log(pruebaRes);
 /* watch(
   () => props.resource,
   async () => {
