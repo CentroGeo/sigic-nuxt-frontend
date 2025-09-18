@@ -99,7 +99,7 @@ onMounted(async () => {
 async function fetchNewData() {
   console.warn('se encontró el enésimo elemento');
 }
-/* const { gnoxyFetch } = useGnoxyUrl();
+/* const { gnoxyUrl } = useGnoxyUrl();
 const query = {
   custom: 'true',
   'filter{resource_type}': 'dataset',
@@ -110,10 +110,13 @@ const query = {
 };
 const pruebaApi = `${config.public.geonodeApi}/resources`;
 const pruebaUrl = buildUrl(pruebaApi, query);
-const res = await gnoxyFetch(pruebaUrl);
-console.log('La respuesta de prueba:', res);
+const urlNuevo = gnoxyUrl(pruebaUrl);
+console.log('La url generada sin gnoxy:', pruebaUrl);
+console.log('La url con gnoxy', urlNuevo);
+const res = await fetch(urlNuevo);
+console.log('La respuesta de la petición:', res);
 const pruebaData = await res.json();
-console.log('La respuesta real de prueba:', pruebaData); */
+console.log('La respuesta con los datos:', pruebaData); */
 </script>
 
 <template>
