@@ -33,6 +33,7 @@ const dictTable = ref({
   categoria: 'Categoría',
   actualizacion: 'Actualización',
   acciones: 'Acciones',
+  estatus: 'Estatus',
 });
 
 /**
@@ -141,7 +142,7 @@ function notifyDownloadOneChild(resource) {
 
 <template>
   <div class="contenedor-tabla p-2">
-    <table>
+    <table class="tabla-expandida">
       <caption>
         {{
           props.caption
@@ -177,7 +178,7 @@ function notifyDownloadOneChild(resource) {
             }}
 
             <!-- Tipo de recurso -->
-            <p
+            <div
               v-if="variable === 'tipo_recurso'"
               class="texto-centrado fondo-color-acento p-1 texto-color-acento borde borde-redondeado-12"
               style="width: max-content"
@@ -196,7 +197,7 @@ function notifyDownloadOneChild(resource) {
                 <span class="pictograma-capas" />
                 {{ datum[variable] }}
               </span>
-            </p>
+            </div>
 
             <!-- Categoría -->
             <div v-if="variable === 'categoria'">
@@ -300,28 +301,28 @@ function notifyDownloadOneChild(resource) {
             </div>
 
             <!-- Estatus -->
-            <div v-if="variable === 'estatus'">
+            <div v-if="variable === 'estatus'" class="flex">
               <div
                 v-if="datum[variable] === 'Pendiente'"
-                class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-8 p-1"
+                class="texto-color-alerta texto-centrado fondo-color-alerta borde borde-color-alerta borde-redondeado-8 p-1"
               >
                 {{ datum[variable] }}
               </div>
               <div
                 v-if="datum[variable] === 'En revisión'"
-                class="texto-color-informacion fondo-color-informacion borde borde-color-informacion borde-redondeado-8 p-1"
+                class="texto-color-informacion texto-centrado fondo-color-informacion borde borde-color-informacion borde-redondeado-8 p-1"
               >
                 {{ datum[variable] }}
               </div>
               <div
                 v-if="datum[variable] === 'Publicado'"
-                class="texto-color-confirmacion fondo-color-confirmacion borde borde-color-confirmacion borde-redondeado-8 p-1"
+                class="texto-color-confirmacion texto-centrado fondo-color-confirmacion borde borde-color-confirmacion borde-redondeado-8 p-1"
               >
                 {{ datum[variable] }}
               </div>
               <div
                 v-if="datum[variable] === 'No aceptado'"
-                class="texto-color-error fondo-color-error borde borde-color-error borde-redondeado-8 p-1"
+                class="texto-color-error texto-centrado fondo-color-error borde borde-color-error borde-redondeado-8 p-1"
               >
                 {{ datum[variable] }}
               </div>
@@ -352,6 +353,7 @@ function notifyDownloadOneChild(resource) {
 
 <style lang="scss" scoped>
 .contenedor-tabla {
+  width: 100%;
   overflow: auto;
   display: inline-grid;
 }
@@ -360,7 +362,8 @@ table {
   .flex-width {
     display: flex;
     gap: 16px;
-    min-width: 224px;
+    // min-width: 224px;
+    width: fit-content;
   }
 }
 </style>

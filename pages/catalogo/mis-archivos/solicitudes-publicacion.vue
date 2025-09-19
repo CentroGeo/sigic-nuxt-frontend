@@ -231,8 +231,15 @@ onMounted(async () => {
         />
 
         <div class="flex">
+          <p
+            class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-2 p-2 m-0"
+          >
+            Si el estatus de tu publicación aparece como <i>No aceptada</i>, revisa tu correo
+            electrónico donde encontrarás los motivos del rechazo y las indicaciones para realizar
+            las correciones necesarias.
+          </p>
           <h2>Solicitudes de publicación</h2>
-          <UiNumeroElementos :numero="0" />
+          <UiNumeroElementos :numero="tableResources2.length" />
         </div>
         <p>
           En esta tabla se muestran los archivos enviados para revisión antes de publicarse en el
