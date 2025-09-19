@@ -23,7 +23,7 @@ const props = defineProps({
 const storeMetadatos = useEditedMetadataStore();
 storeMetadatos.checkFilling(props.resourcePk, props.resourceType);
 const attrSet = computed(() => storeMetadatos.metadata.attribute_set);
-const sortedAttrs = attrSet.value.sort((a, b) => a.display_order - b.display_order);
+const sortedAttrs = ref(attrSet.value.sort((a, b) => a.display_order - b.display_order));
 
 const variables = {
   attribute: 'Atributo',
@@ -50,9 +50,7 @@ const typeOptions = {
 watch(
   attrSet,
   (newVal) => {
-    console.log(newVal);
     sortedAttrs.value = newVal.sort((a, b) => a.display_order - b.display_order);
-    console.log(sortedAttrs.value);
   },
   { deep: true }
 );
