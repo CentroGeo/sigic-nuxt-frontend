@@ -1,7 +1,6 @@
 <script setup>
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { getFeatures } from '~/utils/consulta';
 
 const props = defineProps({
   resource: {
@@ -21,42 +20,57 @@ const props = defineProps({
     default: false,
   },
 });
-const features = ref([]);
-const variables = [
+/* const variables = [
   'Atributo',
   'Etiqueta',
   'Descripción',
   'Mostrar Orden',
   'Display type',
   'Visible',
+]; */
+const variables = [
+  'attribute',
+  'attribute_label',
+  'description',
+  'display_order',
+  'featureinfo_type',
+  'visible',
 ];
-const datos = ref([]);
-const checkedAttrs = ref([]);
-async function updateValues() {
-  features.value = await getFeatures(props.resource);
-  datos.value = [];
-  for (let i = 0; i < features.value.length; i++) {
-    datos.value.push({
-      id: `${i}-${props.resourcePk}`,
-      Atributo: features.value[i],
-      Etiqueta: '',
-      Descripción: '',
-      'Mostrar Orden': `${i + 1}`,
-      'Display type': '',
-      Visible: '',
-    });
-  }
-  checkedAttrs.value = features.value;
-}
-updateValues();
-const { gnoxyUrl } = useGnoxyUrl();
+const typeOptions = {
+  Label: 'type_property',
+  URL: 'type_href',
+  Image: 'type_image',
+  'Video (mp4)': 'type_video_mp4',
+  'Video (ogg)': 'type_video_ogg',
+  'Video (webm)': 'type_video_webm',
+  'Video (3gp)': 'type_video_3gp',
+  'Video (flv)': 'type_video_flv',
+  'Video (YouTube/VIMEO)': 'type_video_youtube',
+  Audio: 'type_audio',
+  IFRAME: 'type_iframe',
+};
+const storeMetadatos = useEditedMetadataStore();
+storeMetadatos.fill(props.resourcePk);
+const attrSet = computed(() => storeMetadatos.metadata.attribute_set);
+const sortedAttrs = ref({});
+watch(
+  attrSet,
+  (newVal) => {
+    //console.log(newVal);
+    sortedAttrs.value = newVal.sort((a, b) => a.display_order - b.display_order);
+  },
+  { deep: true }
+);
+/* const { gnoxyUrl } = useGnoxyUrl();
 const url = `https://geonode.dev.geoint.mx/datasets/${props.resource.alternate}/metadata`;
 const gnoxiedUrl = gnoxyUrl(url);
 console.log(url);
 console.log(gnoxiedUrl);
 const prueba = await fetch(gnoxiedUrl);
 const pruebaRes = await prueba.text();
-console.log(pruebaRes);
+const parser = new DOMParser();
+const doc = parser.parseFromString(pruebaRes, 'text/html');
+console.log(doc); */
 /* watch(
   () => props.resource,
   async () => {
@@ -76,7 +90,7 @@ console.log(pruebaRes);
     </div>
 
     <div class="contenedor-tabla p-2">
-      <table v-if="datos.length > 0">
+      <table v-if="sortedAttrs.length > 0">
         <thead>
           <tr>
             <th
@@ -90,58 +104,64 @@ console.log(pruebaRes);
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(datum, d) in datos" :id="`${datum}-ren-${d}`" :key="d">
-            <td>{{ datum['Atributo'] }}</td>
+          <tr v-for="(datum, d) in sortedAttrs" :id="`${datum}-ren-${d}`" :key="d">
+            <td>{{ datum['attribute'] }}</td>
             <td>
               <ClientOnly>
                 <SisdaiCampoBase
-                  :id="datum['Etiqueta']"
-                  v-model="datum['Etiqueta']"
+                  :id="datum['attribute_label']"
+                  v-model="datum['attribute_label']"
                   etiqueta=""
                   tipo='"text"'
                   class="m-y-1"
-                  :ejemplo="datum['Etiqueta']"
+                  :ejemplo="datum['attribute_label']"
                 />
               </ClientOnly>
             </td>
             <td>
               <ClientOnly>
                 <SisdaiCampoBase
-                  :id="datum['Descripción']"
-                  v-model="datum['Descripción']"
+                  :id="datum['description']"
+                  v-model="datum['description']"
                   etiqueta=""
                   tipo='"text"'
                   class="m-y-1"
-                  :ejemplo="datum['Descripción']"
+                  :ejemplo="datum['description']"
                 />
               </ClientOnly>
             </td>
             <td>
               <ClientOnly>
                 <SisdaiCampoBase
-                  :id="datum['Mostrar Orden']"
-                  v-model="datum['Mostrar Orden']"
+                  :id="datum['display_order'].toString()"
+                  v-model="datum['display_order']"
                   etiqueta=""
-                  tipo='"text"'
+                  tipo='"number"'
                   class="m-y-1"
-                  :ejemplo="datum['Mostrar Orden']"
+                  :ejemplo="datum['display_order']"
                 />
               </ClientOnly>
             </td>
             <td>
               <ClientOnly>
-                <SisdaiSelector v-model="datum['Display type']" etiqueta="">
-                  <option value="todos">Opcion 1</option>
+                <SisdaiSelector v-model="datum['featureinfo_type']" etiqueta="">
+                  <option
+                    v-for="type in Object.keys(typeOptions)"
+                    :key="`${type}-tipo-opcion`"
+                    :value="typeOptions[type]"
+                  >
+                    {{ type }}
+                  </option>
                   <option value="catalogo">Opcion 2</option>
                 </SisdaiSelector>
               </ClientOnly>
             </td>
             <td>
               <input
-                :id="`${datum['Atributo']}-checkbox`"
-                v-model="checkedAttrs"
+                :id="`${datum['attr']}-checkbox`"
+                v-model="datum['visible']"
                 type="checkbox"
-                :value="datum['Atributo']"
+                :value="datum['visible']"
               />
               <label :for="`${datum['Atributo']}-checkbox`">Visible</label>
             </td>
