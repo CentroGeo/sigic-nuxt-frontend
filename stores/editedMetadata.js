@@ -33,11 +33,6 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
     isLoading: ref(false),
     metadata,
 
-    checkFilling(pk, resource_type) {
-      if (!metadata.pk || metadata.pk !== pk) {
-        this.fill(pk, resource_type);
-      }
-    },
     async fill(pk, resource_type) {
       const { gnoxyUrl } = useGnoxyUrl();
       const resourceTypeDict = {
@@ -68,7 +63,11 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
         }
       });
     },
-
+    async checkFilling(pk, resource_type) {
+      if (!metadata.pk || metadata.pk !== pk) {
+        await this.fill(pk, resource_type);
+      }
+    },
     updateAttr(attr, value) {
       metadata[attr] = value;
     },

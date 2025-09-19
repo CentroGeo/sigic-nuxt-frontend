@@ -23,8 +23,8 @@ const props = defineProps({
 const storeMetadatos = useEditedMetadataStore();
 storeMetadatos.checkFilling(props.resourcePk, props.resourceType);
 const attrSet = computed(() => storeMetadatos.metadata.attribute_set);
+const sortedAttrs = attrSet.value.sort((a, b) => a.display_order - b.display_order);
 
-const sortedAttrs = ref({});
 const variables = {
   attribute: 'Atributo',
   attribute_label: 'Etiqueta',
@@ -50,8 +50,9 @@ const typeOptions = {
 watch(
   attrSet,
   (newVal) => {
-    //console.log(newVal);
+    console.log(newVal);
     sortedAttrs.value = newVal.sort((a, b) => a.display_order - b.display_order);
+    console.log(sortedAttrs.value);
   },
   { deep: true }
 );
@@ -110,7 +111,7 @@ watch(
             <td>
               <ClientOnly>
                 <SisdaiCampoBase
-                  :id="datum['display_order'].toString()"
+                  :id="`${datum['display_order']}`"
                   v-model="datum['display_order']"
                   etiqueta=""
                   tipo="number"
