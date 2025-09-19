@@ -84,6 +84,7 @@ async function actualizaMetadatos() {
         Actualizar
       </button>
       <button
+        v-if="props.title !== lastButton"
         class="boton-primario boton-chico"
         :disabled="props.title === lastButton ? true : false"
         @click="irARutaConQuery('siguiente')"

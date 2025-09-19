@@ -73,8 +73,8 @@ async function guardarImagen(files) {
     />
 
     <div v-if="!props.isModal">
-      <p>
-        <b>Miniatura imagen no mayor a 9kb tamaño 120x120px. Archivos Png o JPG</b>
+      <p class="texto-peso-600">
+        Miniatura imagen no mayor a 9kb tamaño 120x120px. Archivos Png o JPG
       </p>
       <!-- Drag & Drop -->
       <ClientOnly>

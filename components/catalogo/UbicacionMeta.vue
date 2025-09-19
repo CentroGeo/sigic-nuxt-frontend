@@ -54,8 +54,7 @@ const campoOtrasRestricciones = ref('');
 //   ],
 //   (nv) => {
 //     // console.log('nv', nv);
-//     // editarMetadatos('title', nv[0]);
-//     // editarMetadatos('abstract', nv[1]);
+//     // actualizar datos en el store
 //   }
 // );
 </script>
@@ -226,6 +225,13 @@ const campoOtrasRestricciones = ref('');
               <option value="3">3</option>
             </SisdaiSelector>
           </ClientOnly>
+          <div class="texto-color-informacion fondo-color-informacion borde-redondeado-8 p-2 m-t-2">
+            <p class="m-t-0 m-b-1 texto-peso-600">
+              <span class="pictograma-informacion" /> Declaración de calidad de datos y los paneles
+              de Restricciones
+            </p>
+            <p class="m-0">Permiten insetar código HTML a través de un editor de texto wysiwyg</p>
+          </div>
         </div>
         <div class="columna-16">
           <ClientOnly>

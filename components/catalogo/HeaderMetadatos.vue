@@ -59,14 +59,14 @@ updateValues();
     ]"
   />
 
-  <h2>Metadatos</h2>
+  <h2 class="m-t-0">Metadatos</h2>
   <div style="display: flex; gap: 4px">
     <div
       v-for="option in Object.keys(titleOptions)"
       :key="`boton-${option}-${titleOptions[option]}`"
       class="borde borde-grosor-2"
       :style="{
-        width: '25%',
+        width: Object.keys(titleOptions).length > 2 ? '33.33%' : '25%',
         borderColor:
           titleValue >= titleOptions[option]['valor']
             ? 'var(--color-primario-1)'

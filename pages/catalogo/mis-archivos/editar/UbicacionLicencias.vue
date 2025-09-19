@@ -1,11 +1,10 @@
 <script setup>
 import { fetchByPk } from '~/utils/catalogo';
-
 // Recuperamos información a partir de la url
 const route = useRoute();
 const selectedPk = route.query.data;
 const type = route.query.type;
-
+// Recuperamos la información completa del recurso
 const editedResource = ref(undefined);
 onMounted(async () => {
   editedResource.value = await fetchByPk(selectedPk);
@@ -29,6 +28,7 @@ onMounted(async () => {
               <span class="h5 texto-color-primario p-l-2">Editar</span>
             </nuxt-link>
           </div>
+
           <CatalogoUbicacionMeta
             :recurso="editedResource"
             :resource-pk="selectedPk"
