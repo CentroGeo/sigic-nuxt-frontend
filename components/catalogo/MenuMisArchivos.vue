@@ -73,9 +73,15 @@ function irARutaConQuery(value) {
           <div v-if="value.notificacion" class="notificacion">
             <div class="circulo"></div>
           </div>
-          <nuxt-link class="header-link" @click="irARutaConQuery(value)"
-            >{{ value.texto }}
-          </nuxt-link>
+          <button
+            class="boton-secundario header-link"
+            type="button"
+            @click="irARutaConQuery(value)"
+          >
+            {{ value.texto }}
+            <div class="borde-enlace-hover"></div>
+          </button>
+
           <div :class="route.path === value.ruta ? 'borde-enlace-activo' : ''"></div>
         </div>
       </template>
@@ -87,7 +93,7 @@ function irARutaConQuery(value) {
 <style lang="scss" scoped>
 .menu-mis-archivos {
   .flex {
-    gap: 32px;
+    gap: 0px;
     .notificacion {
       position: relative;
       .circulo {
@@ -96,7 +102,9 @@ function irARutaConQuery(value) {
         height: 8px;
         background-color: var(--color-informativo-2);
         border-radius: 50%;
-        right: -16px;
+        right: 8px;
+        top: 8px;
+        z-index: 1;
       }
     }
     .borde-enlace-activo {
@@ -107,12 +115,33 @@ function irARutaConQuery(value) {
       border-radius: 2px 2px 0px 0px;
       background-color: var(--boton-primario-borde);
       text-align: center;
-      margin: 8px auto 0;
+      margin: -4px auto 0;
     }
   }
 }
 .header-link {
+  box-shadow: inherit;
+  padding: inherit;
+  padding: 16px 24px 16px 16px;
+  position: relative;
   color: var(--texto-secundario);
   font-weight: 600;
+  &:hover,
+  &:focus {
+    background-color: var(--boton-secundario-cursor-fondo);
+    // background-color: transparent;
+    .borde-enlace-hover {
+      position: absolute;
+      bottom: 0px;
+      right: 0;
+      left: 0;
+      width: 32px;
+      height: 4px;
+      padding-bottom: 4px;
+      margin: -4px auto 0;
+      border-radius: 2px 2px 0px 0px;
+      background-color: var(--boton-primario-borde);
+    }
+  }
 }
 </style>
