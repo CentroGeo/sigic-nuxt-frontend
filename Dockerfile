@@ -46,7 +46,16 @@ COPY --from=builder /app/package-lock.json .
 RUN apt-get update && \
     apt-get install -y --no-install-recommends git openssh-client && \
     rm -rf /var/lib/apt/lists/* && \
-    npm ci --omit=dev
+    npm ci --omit=dev \
+
+RUN if [ "$NODE_ENV" = "development" ]; then \
+        rm /app/package-lock.json; \
+        npm i; \
+    elif [ "$NODE_ENV" = "production" ]; then \
+        npm ci --omit=dev; \
+    else \
+        echo "NODE_ENV must be either 'development' or 'production'" && exit 1 \
+    fi
 
 EXPOSE 3000
 
