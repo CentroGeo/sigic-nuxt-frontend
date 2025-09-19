@@ -20,22 +20,19 @@ const props = defineProps({
     default: false,
   },
 });
-/* const variables = [
-  'Atributo',
-  'Etiqueta',
-  'Descripción',
-  'Mostrar Orden',
-  'Display type',
-  'Visible',
-]; */
-const variables = [
-  'attribute',
-  'attribute_label',
-  'description',
-  'display_order',
-  'featureinfo_type',
-  'visible',
-];
+const storeMetadatos = useEditedMetadataStore();
+storeMetadatos.checkFilling(props.resourcePk, props.resourceType);
+const attrSet = computed(() => storeMetadatos.metadata.attribute_set);
+
+const sortedAttrs = ref({});
+const variables = {
+  attribute: 'Atributo',
+  attribute_label: 'Etiqueta',
+  description: 'Descripción',
+  display_order: 'Mostrar Orden',
+  featureinfo_type: 'Display type',
+  visible: 'Visible',
+};
 const typeOptions = {
   Label: 'type_property',
   URL: 'type_href',
@@ -49,10 +46,7 @@ const typeOptions = {
   Audio: 'type_audio',
   IFRAME: 'type_iframe',
 };
-const storeMetadatos = useEditedMetadataStore();
-storeMetadatos.fill(props.resourcePk);
-const attrSet = computed(() => storeMetadatos.metadata.attribute_set);
-const sortedAttrs = ref({});
+
 watch(
   attrSet,
   (newVal) => {
@@ -61,23 +55,6 @@ watch(
   },
   { deep: true }
 );
-/* const { gnoxyUrl } = useGnoxyUrl();
-const url = `https://geonode.dev.geoint.mx/datasets/${props.resource.alternate}/metadata`;
-const gnoxiedUrl = gnoxyUrl(url);
-console.log(url);
-console.log(gnoxiedUrl);
-const prueba = await fetch(gnoxiedUrl);
-const pruebaRes = await prueba.text();
-const parser = new DOMParser();
-const doc = parser.parseFromString(pruebaRes, 'text/html');
-console.log(doc); */
-/* watch(
-  () => props.resource,
-  async () => {
-    console.log('se triggereó el watcher');
-    updateValues();
-  }
-); */
 </script>
 <template>
   <div>
@@ -94,12 +71,12 @@ console.log(doc); */
         <thead>
           <tr>
             <th
-              v-for="(variable, v) in variables"
+              v-for="(variable, v) in Object.keys(variables)"
               :id="`${variable}-col-${v}`"
               :key="v"
               scope="col"
             >
-              {{ variable }}
+              {{ variables[variable] }}
             </th>
           </tr>
         </thead>
@@ -112,7 +89,7 @@ console.log(doc); */
                   :id="datum['attribute_label']"
                   v-model="datum['attribute_label']"
                   etiqueta=""
-                  tipo='"text"'
+                  tipo="text"
                   class="m-y-1"
                   :ejemplo="datum['attribute_label']"
                 />
@@ -124,7 +101,7 @@ console.log(doc); */
                   :id="datum['description']"
                   v-model="datum['description']"
                   etiqueta=""
-                  tipo='"text"'
+                  tipo="text"
                   class="m-y-1"
                   :ejemplo="datum['description']"
                 />
@@ -136,7 +113,7 @@ console.log(doc); */
                   :id="datum['display_order'].toString()"
                   v-model="datum['display_order']"
                   etiqueta=""
-                  tipo='"number"'
+                  tipo="number"
                   class="m-y-1"
                   :ejemplo="datum['display_order']"
                 />

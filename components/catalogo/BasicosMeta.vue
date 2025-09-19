@@ -28,10 +28,14 @@ const props = defineProps({
   },
 });
 const storeCatalogo = useCatalogoStore();
-// console.log('props.recurso', props.recurso);
-
+const storeMetadatos = useEditedMetadataStore();
+storeMetadatos.checkFilling(props.resourcePk, props.resourceType);
 //const imagen = ref();
-const campoTitulo = ref(props.recurso.title);
+const campoTitulo = computed({
+  get: () => storeMetadatos.metadata.title,
+  set: (value) => storeMetadatos.updateAttr('title', value),
+});
+//const campoTitulo = ref(props.recurso.title);
 const campoResumen = ref(props.recurso.raw_abstract);
 const seleccionTipoFecha = ref('');
 const seleccionFecha = ref('');
@@ -47,7 +51,7 @@ function editarMetadatos(dato, valor) {
 }
 
 watch([campoTitulo, campoResumen], (nv) => {
-  // console.log('nv', nv);
+  //console.log('nv', nv);
   editarMetadatos('title', nv[0]);
   editarMetadatos('abstract', nv[1]);
 });

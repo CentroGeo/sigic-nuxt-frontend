@@ -33,21 +33,44 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
     isLoading: ref(false),
     metadata,
 
-    async fill(pk) {
+    checkFilling(pk, resource_type) {
+      if (!metadata.pk || metadata.pk !== pk) {
+        this.fill(pk, resource_type);
+      }
+    },
+    async fill(pk, resource_type) {
       const { gnoxyUrl } = useGnoxyUrl();
-      const url = gnoxyUrl(`${config.public.geonodeApi}/datasets/${pk}`);
+      const resourceTypeDict = {
+        dataLayer: 'datasets',
+        dataTable: 'datasets',
+        document: 'documents',
+      };
+      const url = gnoxyUrl(`${config.public.geonodeApi}/${resourceTypeDict[resource_type]}/${pk}`);
       const request = await fetch(url);
-      const { dataset: metadataResponse } = await request.json();
-
+      if (!request.ok) {
+        console.warn('Algo falló en la petición para metadatos:', request);
+      }
+      const res = await request.json();
+      let metadataResponse;
+      if (resource_type === 'document') {
+        metadataResponse = res.document;
+      } else {
+        metadataResponse = res.dataset;
+      }
       const attrs = Object.keys(metadata);
       attrs.forEach((key) => {
-        if (key in metadataResponse) {
+        if (key === 'attribute_set' && resource_type === 'document') {
+          metadata.attribute_set = [];
+        } else if (key in metadataResponse) {
           metadata[key] = metadataResponse[key];
         } else {
           metadata[key] = undefined;
         }
       });
-      console.log(metadata);
+    },
+
+    updateAttr(attr, value) {
+      metadata[attr] = value;
     },
   };
 });

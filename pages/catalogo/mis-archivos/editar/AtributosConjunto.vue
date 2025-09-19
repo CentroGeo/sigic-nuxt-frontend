@@ -5,6 +5,10 @@ import { fetchByPk } from '~/utils/catalogo';
 const route = useRoute();
 const selectedPk = route.query.data;
 const type = route.query.type;
+const editedResource = ref(undefined);
+onMounted(async () => {
+  editedResource.value = await fetchByPk(selectedPk);
+});
 /* const typeDict = {
   Documentos: 'document',
   'Capa geográfica': 'dataLayer',
@@ -15,11 +19,6 @@ const type = route.query.type;
 storeFetched.checkFilling(typeDict[type]);
 const resources = computed(() => storeFetched.byResourceType(typeDict[type]));
 const editedResource = computed(() => resources.value.find(({ pk }) => pk === selectedPk)); */
-const editedResource = ref(undefined);
-
-onMounted(async () => {
-  editedResource.value = await fetchByPk(selectedPk);
-});
 </script>
 <template>
   <UiLayoutPaneles>
