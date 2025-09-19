@@ -27,7 +27,7 @@ const props = defineProps({
     default: false,
   },
 });
-const storeCatalogo = useCatalogoStore();
+//const storeCatalogo = useCatalogoStore();
 const storeMetadatos = useEditedMetadataStore();
 storeMetadatos.checkFilling(props.resourcePk, props.resourceType);
 //const imagen = ref();
@@ -35,26 +35,44 @@ const campoTitulo = computed({
   get: () => storeMetadatos.metadata.title,
   set: (value) => storeMetadatos.updateAttr('title', value),
 });
-//const campoTitulo = ref(props.recurso.title);
-const campoResumen = ref(props.recurso.raw_abstract);
-const seleccionTipoFecha = ref('');
-const seleccionFecha = ref('');
-const seleccionCategoria = ref('');
-const seleccionGrupo = ref('');
-const campoPalabrasClave = ref('');
+const campoResumen = computed({
+  get: () => storeMetadatos.metadata.abstract,
+  set: (value) => storeMetadatos.updateAttr('abstract', value),
+});
+const seleccionTipoFecha = computed({
+  get: () => storeMetadatos.metadata.date_type,
+  set: (value) => storeMetadatos.updateAttr('date_type', value),
+});
+const seleccionFecha = computed({
+  get: () => storeMetadatos.metadata.date,
+  set: (value) => storeMetadatos.updateAttr('date', value),
+});
+const seleccionCategoria = computed({
+  get: () => storeMetadatos.metadata.category?.identifier,
+  set: (value) => storeMetadatos.updateAttr('category', value),
+});
+//const seleccionGrupo = ref('');
+const campoPalabrasClave = computed({
+  get: () => storeMetadatos.metadata.keywords,
+  set: (value) => storeMetadatos.updateAttr('keywords', value),
+});
 const campoAutor = ref('');
 const campoAnioPublicacion = ref('');
 
-function editarMetadatos(dato, valor) {
+/* function editarMetadatos(dato, valor) {
   storeCatalogo.metadatos[dato] = valor;
   // console.log(storeCatalogo.metadatos[dato]);
-}
+} */
 
-watch([campoTitulo, campoResumen], (nv) => {
-  //console.log('nv', nv);
-  editarMetadatos('title', nv[0]);
-  editarMetadatos('abstract', nv[1]);
-});
+watch(
+  () => storeMetadatos.metadata,
+  (nv) => {
+    console.warn('nv', nv);
+    //editarMetadatos('title', nv[0]);
+    //editarMetadatos('abstract', nv[1]);
+  },
+  { deep: true }
+);
 
 const dragNdDrop = ref(null);
 const img_files = ['.jpg', '.jpeg', '.png', '.webp'];
@@ -116,8 +134,8 @@ async function guardarImagen(files) {
               etiqueta="Tipo de fecha"
               texto_ayuda="Creación, publicación o revisión."
             >
-              <option value="creacion">Creación</option>
-              <option value="publicacion">Publicación</option>
+              <option value="creation">Creación</option>
+              <option value="publication">Publicación</option>
               <option value="revison">Revisón</option>
             </SisdaiSelector>
           </ClientOnly>
@@ -153,7 +171,7 @@ async function guardarImagen(files) {
               <option value="elevation">Elevación</option>
               <option value="geoscientific_information">Información Geocientífica</option>
               <option value="planning_cadastre">Planeación Catastral</option>
-              <option value="Inland Waters">Aguas Continentales</option>
+              <option value="inland_waters">Aguas Continentales</option>
               <option value="boundaries">Fronteras</option>
               <option value="structure">Estructura</option>
               <option value="transportation">Transporte</option>
@@ -165,13 +183,13 @@ async function guardarImagen(files) {
               <option value="farming">Agricultura</option>
               <option value="population">Población</option>
             </SisdaiSelector>
-            <SisdaiSelector
+            <!--             <SisdaiSelector
               v-model="seleccionGrupo"
               etiqueta="Selecciona al grupo con el que compartirás tu archivo"
               texto_ayuda=" "
             >
               <option value="1">grupo uno publico</option>
-            </SisdaiSelector>
+            </SisdaiSelector> -->
             <SisdaiCampoBase
               v-model="campoPalabrasClave"
               etiqueta="Palabras clave"

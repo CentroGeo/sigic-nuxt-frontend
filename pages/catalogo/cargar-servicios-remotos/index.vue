@@ -24,7 +24,7 @@ function updateResources(nuevosRecursos) {
     filteredResources.value = filteredResources.value.filter(
       (resource) => resource.sourcetype === 'REMOTE'
     );
-    console.log('filteredResources.value.length', filteredResources.value.length);
+    //console.log('filteredResources.value.length', filteredResources.value.length);
     // si hay recursos remotos
     if (filteredResources.value.length !== 0) {
       navigateTo({

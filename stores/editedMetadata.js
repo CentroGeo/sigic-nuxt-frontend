@@ -6,25 +6,25 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
    * Almacenamiento reactivo de la información del recurso seleccionado
    */
   const metadata = reactive({
-    pk: undefined,
     uuid: undefined,
+    pk: undefined,
     resource_type: undefined,
+    title: undefined,
+    abstract: undefined,
+    date_type: undefined,
+    date: undefined,
+    category: undefined,
+    //group: undefined,
     owner: undefined,
     metadata_author: undefined,
     keywords: undefined,
     regions: undefined,
-    category: undefined,
-    title: undefined,
-    abstract: undefined,
     attribution: undefined,
     alternate: undefined,
-    date: undefined,
-    date_type: undefined,
     constraints_other: undefined,
     license: undefined,
     language: undefined,
     data_quality_statement: undefined,
-    group: undefined,
     thumbnail_url: undefined,
     attribute_set: [],
   });
@@ -56,7 +56,20 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
       attrs.forEach((key) => {
         if (key === 'attribute_set' && resource_type === 'document') {
           metadata.attribute_set = [];
+        } else if (key === 'abstract') {
+          metadata.abstract = metadataResponse[key]
+            .replace(/^<p>/, '')
+            .replace(/<\/p>$/, '')
+            .replace(/^<pre>/, '')
+            .replace(/<\/pre>$/, '');
+        } else if (key === 'date') {
+          const formatedDate = new Date(metadataResponse[key]).toISOString();
+          metadata[key] = formatedDate.slice(0, 10);
+        } else if (key === 'keywords') {
+          const keywords = metadataResponse[key].map((d) => d.name);
+          metadata[key] = keywords.join(', ');
         } else if (key in metadataResponse) {
+          //console.log(key, metadataResponse[key]);
           metadata[key] = metadataResponse[key];
         } else {
           metadata[key] = undefined;
