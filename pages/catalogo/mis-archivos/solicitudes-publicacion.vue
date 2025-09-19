@@ -3,6 +3,13 @@
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { cleanInput, resourceTypeDic } from '~/utils/consulta';
 
+definePageMeta({
+  middleware: 'sidebase-auth',
+  bodyAttrs: {
+    class: '',
+  },
+});
+
 // para filtar por los archivos de la usuaria
 const { data } = useAuth();
 const userEmail = data.value.user.email;
@@ -17,6 +24,36 @@ storeFetched.checkFilling(resourceTypeDic.document);
 const recursos = computed(() => storeFetched.all);
 const filteredResources = ref([]);
 const tableResources = ref([]);
+const tableResources2 = ref([
+  {
+    titulo: 'Capas lago texcoco',
+    tipo_recurso: 'Capa geográfica',
+    categoria: { gn_description: 'Environment' },
+    actualizacion: '22 sep 2025',
+    estatus: 'Pendiente',
+  },
+  {
+    titulo: 'Flora_fauna_texcoco',
+    tipo_recurso: 'Datos tabulados',
+    categoria: { gn_description: 'Environment' },
+    actualizacion: '22 sep 2025',
+    estatus: 'En revisión',
+  },
+  {
+    titulo: 'Pueblos originarios Texcoco',
+    tipo_recurso: 'Documentos',
+    categoria: { gn_description: 'Environment' },
+    actualizacion: '22 sep 2025',
+    estatus: 'Publicado',
+  },
+  {
+    titulo: 'Agua balance hídrico',
+    tipo_recurso: 'Capa geográfica',
+    categoria: { gn_description: 'Environment' },
+    actualizacion: '22 sep 2025',
+    estatus: 'No aceptado',
+  },
+]);
 const seleccionOrden = ref('');
 const seleccionTipoArchivo = ref('');
 
@@ -28,7 +65,7 @@ const modalFiltroAvanzado = ref(null);
 const isFilterActive = ref(false);
 
 // obteniendo las variables keys para la tabla
-const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'acciones'];
+const variables = ['titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'estatus'];
 
 /**
  * Valida si el tipo de recurso es documento o dataset con geometría o no
@@ -201,7 +238,8 @@ onMounted(async () => {
           En esta tabla se muestran los archivos enviados para revisión antes de publicarse en el
           catálogo público de SIGIC. También puedes consultar el estatus de su aprobación.
         </p>
-        <div v-if="true">
+
+        <div v-if="tableResources2.length === 0">
           <div class="flex flex-contenido-centrado">
             <div class="columna-7">
               <div class="fondo-color-acento borde-redondeado-8 p-x-3 p-y-1 m-b-3">
@@ -219,11 +257,12 @@ onMounted(async () => {
             </div>
           </div>
         </div>
+
         <div v-else class="flex">
           <div class="columna-16">
             <!-- TODO: implementar paginador -->
             <ClientOnly>
-              <UiTablaAccesibleV2 :variables="variables" :datos="tableResources" />
+              <UiTablaAccesibleV2 :variables="variables" :datos="tableResources2" />
               <UiPaginador :total-paginas="1" @cambio="1" />
             </ClientOnly>
           </div>

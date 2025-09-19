@@ -170,7 +170,8 @@ function notifyDownloadOneChild(resource) {
               variable !== 'tipo_recurso' &&
               variable !== 'acciones' &&
               variable !== 'actualizacion' &&
-              variable !== 'categoria'
+              variable !== 'categoria' &&
+              variable !== 'estatus'
                 ? datum[variable]?.toLocaleString('en')
                 : ''
             }}
@@ -295,6 +296,34 @@ function notifyDownloadOneChild(resource) {
                 >
                   <span class="pictograma-eliminar"></span>
                 </button>
+              </div>
+            </div>
+
+            <!-- Estatus -->
+            <div v-if="variable === 'estatus'">
+              <div
+                v-if="datum[variable] === 'Pendiente'"
+                class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-8 p-1"
+              >
+                {{ datum[variable] }}
+              </div>
+              <div
+                v-if="datum[variable] === 'En revisión'"
+                class="texto-color-informacion fondo-color-informacion borde borde-color-informacion borde-redondeado-8 p-1"
+              >
+                {{ datum[variable] }}
+              </div>
+              <div
+                v-if="datum[variable] === 'Publicado'"
+                class="texto-color-confirmacion fondo-color-confirmacion borde borde-color-confirmacion borde-redondeado-8 p-1"
+              >
+                {{ datum[variable] }}
+              </div>
+              <div
+                v-if="datum[variable] === 'No aceptado'"
+                class="texto-color-error fondo-color-error borde borde-color-error borde-redondeado-8 p-1"
+              >
+                {{ datum[variable] }}
               </div>
             </div>
           </td>
