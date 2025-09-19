@@ -3,6 +3,13 @@ import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/cam
 import SisdaiCasillaVerificacion from '@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
+definePageMeta({
+  middleware: 'sidebase-auth',
+  bodyAttrs: {
+    class: '',
+  },
+});
+
 const selecTipoFuente = ref('');
 const campoURL = ref('');
 const casillaUnicaAutenticacion0 = ref(false);

@@ -1,6 +1,5 @@
 <script setup>
 import { fetchByPk } from '~/utils/catalogo';
-
 // Recuperamos información a partir de la url
 const route = useRoute();
 const selectedPk = route.query.data;

@@ -160,7 +160,7 @@ defineExpose({
         <div
           class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-4 p-1"
         >
-          <strong class="m-0" style="font-weight: 600">Verifica antes de publicar</strong>
+          <strong class="m-0 texto-peso-600">Verifica antes de publicar</strong>
           <p class="m-0">
             Revisa que el documento y sus metadatos sean correctos antes de enviarlo a aprobación
             para ser publicado en el Catálogo de SIGIC público.
@@ -168,6 +168,7 @@ defineExpose({
         </div>
         <h1 class="m-t-3">{{ selectedElement.title }}</h1>
       </template>
+
       <template #cuerpo>
         <div class="modal-alto-cuerpo">
           <div v-if="tagTitle === 'capa'">
@@ -177,7 +178,7 @@ defineExpose({
                 class="m-b-1"
                 etiqueta="Variables disponibles para visualizar"
               >
-                <option :value="selectedElement.alternate">{{ selectedElement.alternate }}</option>
+                <option value="1">variable</option>
               </SisdaiSelector>
             </ClientOnly>
 
@@ -221,13 +222,14 @@ defineExpose({
         <div
           class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-4 p-1"
         >
-          <strong class="m-0" style="font-weight: 600">Verifica antes de publicar</strong>
+          <strong class="m-0 texto-peso-600">Verifica antes de publicar</strong>
           <p class="m-0">
             Revisa que el documento y sus metadatos sean correctos antes de enviarlo a aprobación
             para ser publicado en el Catálogo de SIGIC público.
           </p>
         </div>
       </template>
+
       <template #cuerpo>
         <CatalogoBasicosMeta
           :recurso="selectedElement"
@@ -235,6 +237,7 @@ defineExpose({
           :resource-type="resourceType"
           :is-modal="true"
         />
+
         <div class="flex flex-contenido-separado m-t-3">
           <div class="columna-8 texto-centrado">
             <button
@@ -270,13 +273,14 @@ defineExpose({
         <div
           class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-4 p-1"
         >
-          <strong class="m-0" style="font-weight: 600">Verifica antes de publicar</strong>
+          <strong class="m-0 texto-peso-600">Verifica antes de publicar</strong>
           <p class="m-0">
             Revisa que el documento y sus metadatos sean correctos antes de enviarlo a aprobación
             para ser publicado en el Catálogo de SIGIC público.
           </p>
         </div>
       </template>
+
       <template #cuerpo>
         <CatalogoUbicacionMeta
           :recurso="selectedElement"
@@ -284,6 +288,7 @@ defineExpose({
           :resource-type="resourceType"
           :is-modal="true"
         />
+
         <div class="flex flex-contenido-separado m-t-3">
           <div class="columna-8 texto-centrado">
             <button
@@ -319,15 +324,22 @@ defineExpose({
         <div
           class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-4 p-1"
         >
-          <strong class="m-0" style="font-weight: 600">Verifica antes de publicar</strong>
+          <strong class="m-0 texto-peso-600">Verifica antes de publicar</strong>
           <p class="m-0">
             Revisa que el documento y sus metadatos sean correctos antes de enviarlo a aprobación
             para ser publicado en el Catálogo de SIGIC público.
           </p>
         </div>
       </template>
+
       <template #cuerpo>
-        <p>Metadatos opcionales</p>
+        <CatalogoOpcionalesMeta
+          :recurso="selectedElement"
+          :resource-pk="selectedElement.pk"
+          :resource-type="resourceType"
+          :is-modal="true"
+        />
+
         <div class="flex flex-contenido-separado m-t-3">
           <div class="columna-8 texto-centrado">
             <button
@@ -342,9 +354,12 @@ defineExpose({
             </button>
           </div>
           <div class="columna-8">
-            <button type="button" class="boton-primario texto-centrado">Confirmar</button>
+            <button v-if="tagTitle !== 'capa'" type="button" class="boton-primario texto-centrado">
+              Confirmar
+            </button>
             <!-- TODO: revisar la parte de capa con geometría y subtipo con vector -->
-            <!-- <button
+            <button
+              v-if="tagTitle === 'capa'"
               type="button"
               class="boton-primario texto-centrado"
               @click="
@@ -353,7 +368,7 @@ defineExpose({
               "
             >
               Siguiente
-            </button> -->
+            </button>
           </div>
         </div>
       </template>
@@ -365,7 +380,7 @@ defineExpose({
         <div
           class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-4 p-1"
         >
-          <strong class="m-0" style="font-weight: 600">Verifica antes de publicar</strong>
+          <strong class="m-0 texto-peso-600">Verifica antes de publicar</strong>
           <p class="m-0">
             Revisa que el documento y sus metadatos sean correctos antes de enviarlo a aprobación
             para ser publicado en el Catálogo de SIGIC público.
@@ -373,7 +388,7 @@ defineExpose({
         </div>
       </template>
       <template #cuerpo>
-        <p>Ubicación Licencias</p>
+        <p>Atributos</p>
         <div class="flex flex-contenido-separado m-t-3">
           <div class="columna-8 texto-centrado">
             <button

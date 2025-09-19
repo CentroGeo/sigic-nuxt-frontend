@@ -1,6 +1,13 @@
 <script setup>
 import { resourceTypeDic } from '~/utils/consulta';
 
+definePageMeta({
+  middleware: 'sidebase-auth',
+  bodyAttrs: {
+    class: '',
+  },
+});
+
 const storeFilters = useFilteredResources();
 const storeFetched = useFetchedResources2Store();
 storeFetched.checkFilling(resourceTypeDic.dataLayer);
@@ -17,6 +24,7 @@ function updateResources(nuevosRecursos) {
     filteredResources.value = filteredResources.value.filter(
       (resource) => resource.sourcetype === 'REMOTE'
     );
+    console.log('filteredResources.value.length', filteredResources.value.length);
     // si hay recursos remotos
     if (filteredResources.value.length !== 0) {
       navigateTo({
