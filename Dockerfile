@@ -42,13 +42,13 @@ WORKDIR /app
 COPY --from=builder /app/.output/ .output/
 COPY --from=builder /app/package.json .
 COPY --from=builder /app/package-lock.json .
-COPY --from=builder /app/.npmrc .
+COPY --from=builder /app/.npmrc .npmrc
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends git openssh-client && \
     rm -rf /var/lib/apt/lists/* && \
     if [ "$NODE_ENV" = "development" ]; then \
-        rm /app/package-lock.json && npm i; \
+        npm ci --omit=dev; \
     elif [ "$NODE_ENV" = "production" ]; then \
         npm ci --omit=dev; \
     else \
