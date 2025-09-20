@@ -48,8 +48,10 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends git openssh-client && \
     rm -rf /var/lib/apt/lists/* && \
     if [ "$NODE_ENV" = "development" ]; then \
+        echo "NODE_ENV is development"; \
         npm ci --omit=dev; \
     elif [ "$NODE_ENV" = "production" ]; then \
+        echo "NODE_ENV is production"; \
         npm ci --omit=dev; \
     else \
         echo "NODE_ENV must be either 'development' or 'production'" && exit 1; \
