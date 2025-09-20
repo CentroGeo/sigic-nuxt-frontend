@@ -42,6 +42,7 @@ WORKDIR /app
 COPY --from=builder /app/.output/ .output/
 COPY --from=builder /app/package.json .
 COPY --from=builder /app/package-lock.json .
+COPY --from=builder /app/.npmrc .
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends git openssh-client && \
