@@ -41,6 +41,29 @@ const campoPalabrasClave = ref('');
 const campoAutor = ref('');
 const campoAnioPublicacion = ref('');
 
+const dictCategoria = [
+  { imagery_base_maps_earth_cover: 'Mapas Base y Cobertura Terrestre' },
+  { society: 'Sociedad' },
+  { economy: 'Economía' },
+  { utilities_communication: 'Servicios Públicos y Comunicación' },
+  { environment: 'Medio Ambiente' },
+  { oceans: 'Océanos' },
+  { biota: 'Biota' },
+  { health: 'Salud' },
+  { elevation: 'Elevación' },
+  { geoscientific_information: 'Información Geocientífica' },
+  { planning_cadastre: 'Planeación Catastral' },
+  { inland_waters: 'Aguas Continentales' },
+  { boundaries: 'Fronteras' },
+  { structure: 'Estructura' },
+  { transportation: 'Transporte' },
+  { intelligence_military: 'Inteligencia Militar' },
+  { location: 'Ubicación' },
+  { climatology_meteorology_atmosphere: 'Climatología, Meteorología y Atmósfera' },
+  { farming: 'Agricultura' },
+  { population: 'Población' },
+];
+
 function editarMetadatos(dato, valor) {
   storeCatalogo.metadatos[dato] = valor;
   // console.log(storeCatalogo.metadatos[dato]);
@@ -136,30 +159,13 @@ async function guardarImagen(files) {
               etiqueta="Categoría"
               :es_obligatorio="true"
             >
-              <option value="imagery_base_maps_earth_cover">
-                Mapas Base y Cobertura Terrestre
+              <option
+                v-for="value in dictCategoria"
+                :key="Object.keys(value)"
+                :value="Object.keys(value)"
+              >
+                {{ value[Object.keys(value)] }}
               </option>
-              <option value="society">Sociedad</option>
-              <option value="economy">Economía</option>
-              <option value="utilities_communication">Servicios Públicos y Comunicación</option>
-              <option value="environment">Medio Ambiente</option>
-              <option value="oceans">Océanos</option>
-              <option value="biota">Biota</option>
-              <option value="health">Salud</option>
-              <option value="elevation">Elevación</option>
-              <option value="geoscientific_information">Información Geocientífica</option>
-              <option value="planning_cadastre">Planeación Catastral</option>
-              <option value="Inland Waters">Aguas Continentales</option>
-              <option value="boundaries">Fronteras</option>
-              <option value="structure">Estructura</option>
-              <option value="transportation">Transporte</option>
-              <option value="intelligence_military">Inteligencia Militar</option>
-              <option value="location">Ubicación</option>
-              <option value="climatology_meteorology_atmosphere">
-                Climatología, Meteorología y Atmósfera
-              </option>
-              <option value="farming">Agricultura</option>
-              <option value="population">Población</option>
             </SisdaiSelector>
             <SisdaiSelector
               v-model="seleccionGrupo"

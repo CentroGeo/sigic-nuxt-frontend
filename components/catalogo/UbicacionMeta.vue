@@ -38,6 +38,31 @@ const campoEstadoCalidadDatos = ref('');
 const seleccionRestricciones = ref('');
 const campoOtrasRestricciones = ref('');
 
+const dictRestricciones = [
+  {
+    1: 'exclusive right to the publication, production, or sale of the rights to a literary, dramatic, musical, or artistic work, or to the use of a commercial print or label, granted by law for a specified period of time to an author, composer, artist, distributor',
+  },
+  {
+    2: 'government has granted exclusive right to make, sell, use or license an invention or discovery',
+  },
+  {
+    3: 'produced or sold information awaiting a patent',
+  },
+  {
+    4: 'a name, symbol, or other device identifying a product, officially registered and legally restricted to the use of the owner or manufacturer',
+  },
+  { 5: 'formal permission to do something' },
+  {
+    6: 'rights to financial benefit from and control of distribution of non-tangible property that is a result of creativity',
+  },
+  {
+    7: 'withheld from general circulation or disclosure',
+  },
+  {
+    8: 'otherRestrictions',
+  },
+];
+
 // function editarMetadatos(dato, valor) {
 //   storeCatalogo.metadatos[dato] = valor;
 //   // console.log(storeCatalogo.metadatos[dato]);
@@ -248,27 +273,12 @@ const campoOtrasRestricciones = ref('');
           <ClientOnly>
             <SisdaiSelector v-model="seleccionRestricciones" etiqueta="Restricciones">
               <option value="" selected="">---------</option>
-              <option value="1">
-                exclusive right to the publication, production, or sale of the rights to a literary,
-                dramatic, musical, or artistic work, or to the use of a commercial print or label,
-                granted by law for a specified period of time to an author, composer, artist,
-                distributor
-              </option>
-              <option value="6">
-                rights to financial benefit from and control of distribution of non-tangible
-                property that is a result of creativity
-              </option>
-              <option value="5">formal permission to do something</option>
-              <option value="8">otherRestrictions</option>
-              <option value="2">
-                government has granted exclusive right to make, sell, use or license an invention or
-                discovery
-              </option>
-              <option value="3">produced or sold information awaiting a patent</option>
-              <option value="7">withheld from general circulation or disclosure</option>
-              <option value="4">
-                a name, symbol, or other device identifying a product, officially registered and
-                legally restricted to the use of the owner or manufacturer
+              <option
+                v-for="value in dictRestricciones"
+                :key="Object.keys(value)"
+                :value="Object.keys(value)"
+              >
+                {{ value[Object.keys(value)] }}
               </option>
             </SisdaiSelector>
           </ClientOnly>
