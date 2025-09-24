@@ -66,7 +66,28 @@ export function tooltipContent(resource) {
     `<p style="max-width:250px">${resource.attribution || 'Sin fuente'}</p>`;
   return content;
 }
+/**
+ * Esta función construye urls con queryparams
+ * @param {String} server
+ * @param {Object} query
+ * @returns {String}
+ */
+export function buildUrl(endpoint, query) {
+  const pruebaApi = endpoint;
+  const dataParams = new URLSearchParams();
+  const filtersDict = Object.keys(query);
+  filtersDict.forEach((filter) => {
+    const value = query[filter];
+    if (typeof value === 'string' || typeof value === 'number') {
+      dataParams.append(filter, value);
+    } else if (Array.isArray(value)) {
+      value.forEach((option) => dataParams.append(filter, option));
+    }
+  });
 
+  const pruebaUrl = `${pruebaApi}?${dataParams.toString().replace('extent_ne=%5B-1%2C-1%2C0%2C0%5D', 'extent_ne=[-1,-1,0,0]')}`;
+  return pruebaUrl;
+}
 /**
  * Regresa el servidor en el que esta alojado un recurso
  * @param {Object} resource
@@ -75,8 +96,8 @@ export function tooltipContent(resource) {
 export function getWMSserver(resource) {
   //const proxy = 'https://geonode.dev.geoint.mx/proxy/?url=';
   const wmsObject = resource.links.find((link) => link.link_type === 'OGC:WMS');
-  const link = wmsObject['url'];
-  return `${link.split('?')[0]}`;
+  const link = wmsObject['url']; //.replace('http', 'https').replace('httpss', 'https');
+  return `${link.split('?')[0]}?`;
 }
 
 export function findServer(resource) {
@@ -96,14 +117,9 @@ export function findServer(resource) {
  * Puede ser map, table o geometry
  * @returns {Boolean}
  */
-export async function hasWMS(resource, service, proxyURL) {
+export async function hasWMS(resource, service, proxyURL, requestType) {
   const maxAttempts = 3;
-  //const config = useRuntimeConfig();
   const proxy = `${proxyURL}/proxy/?url=`;
-  //const proxy = 'https://geonode.dev.geoint.mx/proxy/?url=';
-  //const wmsObject = resource.links.filter((link) => link.link_type === 'OGC:WMS');
-  //const wmsLink = wmsObject[0]['url'];
-  //const url = new URL(wmsLink);
   const url = new URL(getWMSserver(resource));
   url.search = new URLSearchParams({
     service: 'WFS',
@@ -124,15 +140,23 @@ export async function hasWMS(resource, service, proxyURL) {
         return false;
       }
 
-      if (service === 'map') {
-        return true;
-      } else if (service === 'table' || service === 'geometry') {
-        if (data.includes('GetFeature')) {
+      if (requestType === 'GetFeatureInfo') {
+        if (data.includes('GetFeatureInfo')) {
           return true;
-        } else return false;
+        } else {
+          return false;
+        }
       } else {
-        console.error('No se reconoce el tipo de petición que se necesita', url);
-        return false;
+        if (service === 'map') {
+          return true;
+        } else if (service === 'table' || service === 'geometry') {
+          if (data.includes('GetFeature')) {
+            return true;
+          } else return false;
+        } else {
+          console.error('No se reconoce el tipo de petición que se necesita', url);
+          return false;
+        }
       }
     } catch {
       console.error(`fracaso la peticion para ${resource.alternate}`);
@@ -368,7 +392,7 @@ export async function downloadWMS(resource, format, featureTypes) {
 }
 
 /**
- * Hace una petición WFS para obtener la lista de Features.
+ * Hace una petición WFS para obtener la lista de Features y excluir la geometría.
  * Las peticiones pueden ser autenticadas o no.
  * @param {Object} resource
  * @param {String} format
@@ -378,13 +402,17 @@ export async function getFeatures(resource) {
   const config = useRuntimeConfig();
   const { data } = useAuth();
   const token = data.value?.accessToken;
-  // Revisamos si la capa es remota
-  if (resource.sourcetype === 'remote') {
-    alert('Esta capa es remota y no se puede descargar');
-    return;
+  const proxy = `${config.public.geonodeUrl}/proxy/?url=`;
+
+  // Revisamos si el recurso es remoto o no para generar obtener la url
+  let describeFeatureUrl;
+  if (resource.sourcetype !== 'REMOTE') {
+    describeFeatureUrl = new URL(`${config.public.geonodeUrl}/gs/ows`);
+  } else if (resource.sourcetype === 'REMOTE') {
+    const link = getWMSserver(resource);
+    describeFeatureUrl = new URL(link);
   }
-  // Si la capa no es remota, revisamos sus columnas para excluir las de geometria
-  const describeFeatureUrl = new URL(`${config.public.geonodeUrl}/gs/ows`);
+  // Revisamos sus columnas para excluir las de geometria
   describeFeatureUrl.search = new URLSearchParams({
     service: 'WFS',
     version: '2.0.0',
@@ -393,16 +421,16 @@ export async function getFeatures(resource) {
     outputFormat: 'application/json',
   }).toString();
 
-  //const res = await fetch(describeFeatureUrl);
   let res;
-  if (token) {
-    res = await fetch(describeFeatureUrl, {
+  if (resource.sourcetype === 'REMOTE') {
+    res = await fetch(proxy + `${encodeURIComponent(describeFeatureUrl)}`);
+  } else if (!token) {
+    res = await fetch(describeFeatureUrl);
+  } else if (token) {
+    res = await fetch(describeFeatureUrl.toString(), {
       headers: { Authorization: `Bearer ${token}` },
     });
-  } else {
-    res = await fetch(describeFeatureUrl);
   }
-  //console.log(res);
   if (!res.ok) {
     return 'Error';
   }
@@ -416,7 +444,6 @@ export async function getFeatures(resource) {
 }
 
 /**
- * Hace una petición WFS para obtener la lista de Features y la geometría.
  * Hace la descarga de los archivos sin geometría.
  * Las peticiones pueden ser autenticadas o no.
  * @param {Object} resource
@@ -425,43 +452,7 @@ export async function getFeatures(resource) {
  */
 
 export async function downloadNoGeometry(resource, format) {
-  const config = useRuntimeConfig();
-  const { data } = useAuth();
-  const token = data.value?.accessToken;
-  // Revisamos si la capa es remota
-  if (resource.sourcetype === 'remote') {
-    alert('Esta capa es remota y no se puede descargar');
-    return;
-  }
-  // Si la capa no es remota, revisamos sus columnas para excluir las de geometria
-  const describeFeatureUrl = new URL(`${config.public.geonodeUrl}/gs/ows`);
-  describeFeatureUrl.search = new URLSearchParams({
-    service: 'WFS',
-    version: '2.0.0',
-    request: 'DescribeFeatureType',
-    typeName: resource.alternate,
-    outputFormat: 'application/json',
-  }).toString();
-
-  //const res = await fetch(describeFeatureUrl);
-  let res;
-  if (token) {
-    res = await fetch(describeFeatureUrl, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-  } else {
-    res = await fetch(describeFeatureUrl);
-  }
-  //console.log(res);
-  if (!res.ok) {
-    return 'Error';
-  }
-  const fileData = await res.json();
-  const features = fileData.featureTypes[0]['properties'];
-  const props = features
-    .filter((prop) => prop.name.toLowerCase() !== 'geometry')
-    .map((prop) => prop.name);
-  // Llamamos la función de descarga
+  const props = await getFeatures(resource);
   downloadWMS(resource, format, props.join());
 }
 

@@ -85,7 +85,6 @@ export default defineNuxtConfig({
       geoserverUrl: process.env.NUXT_PUBLIC_GEOSERVER_URL,
       baseURL: baseUrl,
       iaBackendUrl: process.env.NUXT_PUBLIC_IA_BACKEND_URL,
-      // geoserverApi: `${process.env.GEOSERVER_URL}/rest`,
     },
   },
 

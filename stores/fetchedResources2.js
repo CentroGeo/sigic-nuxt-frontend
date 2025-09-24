@@ -54,13 +54,14 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
 
     async fill(resourceType = storeConsulta.resourceType) {
       const { data } = useAuth();
+      //console.log('la data', data.value);
       this.isLoading = true;
 
       const options = {
         query: {
           custom: 'true',
           'filter{resource_type}': resourceTypeGeonode[resourceType],
-          page_size: 50,
+          //page_size: 50,
           // agregar filtros
         },
         headers: {},
@@ -75,6 +76,7 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
       if (resourceType === 'document') {
         options.query['file_extension'] = ['pdf', 'txt'];
       }
+
       if (data.value?.accessToken) {
         options.headers.token = data.value?.accessToken;
       } else {
@@ -95,6 +97,15 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
         config.public.geonodeUrl
       );
       this.isLoading = false;
+
+      // Prueba de consumo de recursos paginado y usando gnoxy
+      /*       
+      const api = `${config.public.geonodeApi}/resources`;
+      const { gnoxyFetch } = useGnoxyUrl();const url = buildUrl(api, options.query);
+      const res = await gnoxyFetch(url);
+      const { resources: allResults } = await res.json();
+      const datum = await validacionTemporal(allResults, resourceType, config.public.geonodeUrl);
+      resources[resourceType] = [...resources[resourceType], ...datum]; */
     },
 
     /**
@@ -114,6 +125,19 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
      */
     findResources(uuidsToFind, resourceType = storeConsulta.resourceType) {
       return resources[resourceType].filter(({ uuid }) => uuidsToFind.includes(uuid));
+    },
+
+    nthElement(resourceType = storeConsulta.resourceType, index) {
+      const indexDict = {};
+      const uuuidList = resources[resourceType].map((d) => d.uuid);
+      for (let i = 0; i < uuuidList.length; i++) {
+        indexDict[i] = uuuidList[i];
+      }
+      return indexDict[index];
+    },
+
+    concatResources(resourceType = storeConsulta.resourceType, newResources) {
+      resources[resourceType] = [...resources[resourceType], ...newResources];
     },
   };
 });

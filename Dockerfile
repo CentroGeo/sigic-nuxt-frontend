@@ -40,19 +40,6 @@ ENV NUXT_PUBLIC_BASE_URL=${NUXT_PUBLIC_BASE_URL:-http://localhost:3000}
 WORKDIR /app
 
 COPY --from=builder /app/.output/ .output/
-COPY --from=builder /app/package.json .
-COPY --from=builder /app/package-lock.json .
-
-RUN if [ "$NODE_ENV" = "development" ]; then \
-      apt-get update && \
-      apt-get install -y --no-install-recommends \
-        git \
-        openssh-client && \
-      rm -rf /var/lib/apt/lists/*; \
-      npm ci; \
-    else \
-      npm ci --omit=dev --omit=optional; \
-    fi
 
 EXPOSE 3000
 
