@@ -8,7 +8,56 @@ import SisdaiCasilla from '@centrogeomx/sisdai-componentes/src/componentes/casil
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import { ref } from 'vue';
 
-const catalogoModal = ref(null);
+import { categoriesInSpanish, resourceTypeDic } from '~/utils/consulta';
+const storeFetched = useFetchedResources2Store();
+const storeFilters = useFilteredResources();
+
+storeFetched.checkFilling(resourceTypeDic.dataLayer);
+storeFetched.checkFilling(resourceTypeDic.dataTable);
+storeFetched.checkFilling(resourceTypeDic.document);
+
+const resources = computed(() => storeFetched.all);
+const filteredResources = ref([]);
+const categorizedResources = ref({});
+
+const botonRadio = ref('capas');
+
+function groupResults() {
+  categorizedResources.value = {};
+  filteredResources.value.map((r) => {
+    if (r.category) {
+      const title = r.category.gn_description;
+      if (Object.keys(categorizedResources.value).includes(title)) {
+        categorizedResources.value[title].push(r);
+      } else {
+        categorizedResources.value[title] = [];
+        categorizedResources.value[title].push(r);
+      }
+    } else {
+      if (Object.keys(categorizedResources.value).includes('Sin Clasificar')) {
+        categorizedResources.value['Sin Clasificar'].push(r);
+      } else {
+        categorizedResources.value['Sin Clasificar'] = [];
+        categorizedResources.value['Sin Clasificar'].push(r);
+      }
+    }
+  });
+}
+function updateResources(nuevosRecursos) {
+  filteredResources.value = nuevosRecursos;
+  groupResults();
+}
+watch([resources], () => {
+  updateResources(storeFilters.filter('all'));
+});
+watch(botonRadio, (nv) => {
+  categoriaSeleccionada.value = null;
+  storeFilters.filters.resourceType = nv;
+  updateResources(storeFilters.filter('all'));
+});
+
+const campoCasilla = ref(false);
+const agregaInfoCatModal = ref(null);
 const capasModal = ref(null);
 const archivosSeleccionados = ref([]);
 
@@ -19,42 +68,41 @@ const nombreProyecto = ref('');
 const descripcionProyecto = ref('');
 const visibilidadProyecto = ref('publico'); // Valor por defecto
 
-const categorias = ref([
-  {
-    id: 0,
-    titulo: 'Nombre de categoría 1',
-  },
-  {
-    id: 1,
-    titulo: 'Nombre de categoría 2',
-  },
-  {
-    id: 2,
-    titulo: 'Nombre de categoría 3',
-  },
-  {
-    id: 3,
-    titulo: 'Nombre de categoría 4',
-  },
-]);
-
-const capasGeograficas = ref([
-  {
-    id: 0,
-    titulo: 'Nombre de la fuente de información',
-    tipo: 'Poligonos',
-  },
-  {
-    id: 1,
-    titulo: 'Nombre de la fuente de información',
-    tipo: 'Puntos',
-  },
-  {
-    id: 2,
-    titulo: 'Nombre de la fuente de información',
-    tipo: 'Líneas',
-  },
-]);
+// const categorias = ref([
+//   {
+//     id: 0,
+//     titulo: 'Nombre de categoría 1',
+//   },
+//   {
+//     id: 1,
+//     titulo: 'Nombre de categoría 2',
+//   },
+//   {
+//     id: 2,
+//     titulo: 'Nombre de categoría 3',
+//   },
+//   {
+//     id: 3,
+//     titulo: 'Nombre de categoría 4',
+//   },
+// ]);
+// const capasGeograficas = ref([
+//   {
+//     id: 0,
+//     titulo: 'Nombre de la fuente de información',
+//     tipo: 'Poligonos',
+//   },
+//   {
+//     id: 1,
+//     titulo: 'Nombre de la fuente de información',
+//     tipo: 'Puntos',
+//   },
+//   {
+//     id: 2,
+//     titulo: 'Nombre de la fuente de información',
+//     tipo: 'Líneas',
+//   },
+// ]);
 
 const capasSeleccionadas = ref([
   {
@@ -81,6 +129,11 @@ const proyecto = ref(null);
 const archivosEliminados = ref([]);
 
 onMounted(async () => {
+  storeFilters.resetAll();
+  if (resources.value.length !== 0) {
+    updateResources(resources.value);
+  }
+
   if (route.params.id !== 'nuevo') {
     esEdicion.value = true;
 
@@ -105,13 +158,12 @@ onMounted(async () => {
   }
 });
 
+const catSeleccLength = ref(0);
+
 const seleccionarCategoria = (categoria) => {
   categoriaSeleccionada.value = categoria;
+  catSeleccLength.value = categorizedResources.value[categoriaSeleccionada.value].length || 0;
 };
-
-//const botonRadio = ref("");
-const botonRadioModal = ref('');
-const campoCasilla = ref(false);
 
 // Método para manejar la selección de archivos
 const manejarSeleccionArchivos = (event) => {
@@ -207,17 +259,19 @@ const editarProyecto = async () => {
     console.log('Error al actualizar: ' + error.message);
   }
 };
+function siguiente() {
+  agregaInfoCatModal.value?.cerrarModal();
+  catSeleccLength.value = 0;
+  capasModal.value?.abrirModal();
+}
 </script>
 
 <template>
   <UiLayoutPaneles>
     <template #catalogo>
-      <IaLeyendaInicioListas />
-
       <IaLayoutListas
-        v-if="storeIA.existenProyectos"
-        texto-boton="Nuevo proyecto"
         titulo="Proyectos"
+        texto-boton="Nuevo proyecto"
         etiqueta-busqueda="Buscar un proyecto"
       />
     </template>
@@ -264,22 +318,6 @@ const editarProyecto = async () => {
             </form>
           </div>
         </div>
-        <!-- <div class="flex flex-contenido-final">
-          <NuxtLink
-            class="boton boton-chico boton-primario"
-            aria-label="Guardar proyecto"
-            @click="guardarProyecto"
-          >
-            Guardar proyecto
-          </NuxtLink>
-          <nuxt-link
-            class="boton boton-chico boton-secundario"
-            aria-label="Cancelar"
-            to="/ia/proyectos/"
-          >
-            Cancelar
-          </nuxt-link>
-        </div> -->
 
         <div class="grid">
           <div class="columna-16">
@@ -290,7 +328,7 @@ const editarProyecto = async () => {
                 <button
                   class="boton-pictograma boton-primario m-r-2"
                   aria-label="Agregar del catalogo"
-                  @click="catalogoModal?.abrirModal()"
+                  @click="agregaInfoCatModal?.abrirModal()"
                 >
                   Agregar del catálogo
                   <span class="pictograma-agregar" aria-hidden="true" />
@@ -371,70 +409,76 @@ const editarProyecto = async () => {
           </div>
         </div>
       </main>
-      <!-- Modal agregar catálogo -->
+
       <ClientOnly>
-        <SisdaiModal ref="catalogoModal">
+        <!-- Modal agregar catálogo -->
+        <SisdaiModal ref="agregaInfoCatModal">
           <template #encabezado>
             <h2>Agregar información del catálogo</h2>
           </template>
-
           <template #cuerpo>
             <p>Selecciona el tipo de fuente de información que deseas agregar a tu proyecto</p>
-            <SisdaiGrupoBotonesRadio leyenda="" :es_obligatorio="false" class="radio-catalogo">
-              <SisdaiBotonRadio
-                v-model="botonRadioModal"
-                etiqueta="Capas geográficas"
-                value="Uno"
-                name="nombredelgrupo"
-                :es_obligatorio="false"
-              />
-              <SisdaiBotonRadio
-                v-model="botonRadioModal"
-                etiqueta="Tabulados de datos"
-                value="Dos"
-                name="nombredelgrupo"
-                :es_obligatorio="false"
-              />
-              <SisdaiBotonRadio
-                v-model="botonRadioModal"
-                etiqueta="Documentos"
-                value="Tres"
-                name="nombredelgrupo"
-                :es_obligatorio="false"
-              />
-            </SisdaiGrupoBotonesRadio>
+            <form @keydown.enter.prevent="siguiente">
+              <SisdaiGrupoBotonesRadio class="radio-catalogo" leyenda="" :es_vertical="true">
+                <SisdaiBotonRadio
+                  v-model="botonRadio"
+                  etiqueta="Capas geográficas"
+                  value="capas"
+                  name="tipodefuente"
+                  :es_obligatorio="true"
+                />
+                <SisdaiBotonRadio
+                  v-model="botonRadio"
+                  etiqueta="Tabulados de datos"
+                  value="tablas"
+                  name="tipodefuente"
+                  :es_obligatorio="true"
+                />
+                <SisdaiBotonRadio
+                  v-model="botonRadio"
+                  etiqueta="Documentos"
+                  value="documentos"
+                  name="tipodefuente"
+                  :es_obligatorio="true"
+                />
+              </SisdaiGrupoBotonesRadio>
+            </form>
           </template>
 
           <template #pie>
-            <button
-              type="button"
-              class="boton-primario boton-chico"
-              @click="
-                catalogoModal?.cerrarModal();
-                capasModal?.abrirModal();
-              "
-            >
+            <button type="button" class="boton-primario boton-chico" @click="siguiente">
               Siguiente
             </button>
           </template>
         </SisdaiModal>
+
         <!-- Modal agregar capas -->
         <SisdaiModal ref="capasModal" class="modal-grande">
           <template #encabezado>
-            <h2>Agregar (capas/tablas/documentos) del catálogo</h2>
+            <h2>Agregar {{ botonRadio }} del catálogo</h2>
           </template>
 
           <template #cuerpo>
             <div class="p-r-2">
               <p>Explora el catálogo y selecciona fuentes de información para el proyecto</p>
               <SisdaiCampoBusqueda class="m-y-3" etiqueta="Buscar del catálogo" />
+
               <div class="flex flex-contenido-separado">
                 <div class="columna-5">
                   <div>
-                    <UiNumeroElementos :numero="12" etiqueta="Categorías" class="m-b-3" />
+                    <UiNumeroElementos
+                      :numero="Object.keys(categorizedResources).length"
+                      etiqueta="Categorías"
+                      class="m-b-3"
+                    />
                     <ul class="lista-sin-estilo" style="overflow-y: auto">
-                      <li v-for="categoria in categorias" :key="categoria.titulo" class="m-y-0">
-                        <div
+                      <li
+                        v-for="categoria in Object.keys(categorizedResources)"
+                        :key="categoria + '-key'"
+                        class="m-y-0"
+                      >
+                        <!-- <div
+                          v-if="ixd = 1 && categoria === 'Population'"
                           class="categoria p-l-6 p-r-2 p-y-1"
                           :class="{
                             seleccionada: categoria === categoriaSeleccionada,
@@ -442,21 +486,39 @@ const editarProyecto = async () => {
                           @click="seleccionarCategoria(categoria)"
                         >
                           {{ categoria.titulo }}
-                        </div>
+                        </div> -->
+                        <button
+                          class="categoria p-l-6 p-r-2 p-y-1"
+                          :class="{
+                            seleccionada: categoria === categoriaSeleccionada,
+                          }"
+                          @click="seleccionarCategoria(categoria)"
+                        >
+                          {{ categoriesInSpanish[categoria] }}
+                        </button>
                       </li>
                     </ul>
                   </div>
                 </div>
                 <div class="columna-5">
                   <div>
-                    <UiNumeroElementos :numero="7" etiqueta="Capas geográficas" class="m-b-3" />
+                    <UiNumeroElementos
+                      :numero="catSeleccLength"
+                      etiqueta="etiqueta"
+                      class="m-b-3"
+                    />
                     <ul class="lista-sin-estilo" style="overflow-y: auto">
-                      <li v-for="capa in capasGeograficas" :key="capa.id" class="m-y-0">
+                      <li
+                        v-for="capa in categorizedResources[categoriaSeleccionada]"
+                        :key="capa.pk"
+                        class="m-y-0"
+                      >
                         <div class="capa p-2 m-b-2 borde-redondeado-20">
-                          <SisdaiCasilla v-model="campoCasilla" :etiqueta="capa.titulo" />
+                          <SisdaiCasilla v-model="campoCasilla" :etiqueta="capa.title" />
                           <div class="icono">
                             <span class="pictograma-capa-poligono m-r-1" aria-hidden="true" />
-                            <span>{{ capa.tipo }}</span>
+                            <!-- TODO: saber si es de puntos, polígonos o lineas -->
+                            <span>{{ capa.resource_type }}</span>
                           </div>
                         </div>
                       </li>
@@ -465,7 +527,7 @@ const editarProyecto = async () => {
                 </div>
                 <div class="columna-5">
                   <div>
-                    <UiNumeroElementos :numero="4" etiqueta="Capas seleccionadas" class="m-b-3" />
+                    <UiNumeroElementos :numero="2" etiqueta="Capas seleccionadas" class="m-b-3" />
                     <ul class="lista-sin-estilo" style="overflow-y: auto">
                       <li v-for="capa in capasSeleccionadas" :key="capa.id" class="m-y-0">
                         <div class="capa p-2 m-b-2 borde-redondeado-20">
@@ -528,6 +590,8 @@ const editarProyecto = async () => {
 }
 
 .categoria {
+  border-radius: inherit;
+  width: 100%;
   background: var(--navegacion-secundaria-fondo);
   color: var(--navegacion-secundaria-activo-borde);
   font-size: 16px;
@@ -535,7 +599,8 @@ const editarProyecto = async () => {
   font-weight: 400;
   cursor: pointer;
 
-  &.seleccionada {
+  &.seleccionada,
+  &:focus {
     border-left: 8px solid var(--navegacion-secundaria-activo-borde);
     background: var(--navegacion-secundaria-activo-fondo);
   }
@@ -554,21 +619,6 @@ const editarProyecto = async () => {
     align-items: center;
   }
 }
-
-//tabla de archivos. TODO: estilo sisdai
-/* .tabla-archivos {
-  margin-top: 2rem;
-  border: 1px solid var(--borde);
-  border-radius: 4px;
-  overflow: hidden;
-
-  h3 {
-    background: var(--fondo-acento);
-    padding: 1rem;
-    margin: 0;
-    font-size: 1.1rem;
-  }
-}*/
 
 .tabla {
   width: 100%;
