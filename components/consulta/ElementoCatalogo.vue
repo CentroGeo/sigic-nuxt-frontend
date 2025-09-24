@@ -4,7 +4,9 @@ import { tooltipContent } from '~/utils/consulta';
 
 const storeSelected = useSelectedResources2Store();
 const storeConsulta = useConsultaStore();
-const storeFetched = useFetchedResources2Store();
+const storeResources = useResourcesConsultaStore();
+
+//const storeFetched = useFetchedResources2Store();
 
 const capasSeleccionadas = computed({
   get: () => storeSelected.uuids,
@@ -17,10 +19,10 @@ const props = defineProps({
   },
 });
 const { catalogueElement } = toRefs(props);
-
 const { data } = useAuth();
 const isLoggedIn = ref(data.value ? true : false);
 const userEmail = ref(data.value?.user.email);
+const nthElementsUuids = computed(() => storeResources.nthElementsByType());
 const geomType = ref(catalogueElement.value.geomType);
 const geomDict = {
   Point: { tooltipText: 'Capa de puntos', class: 'pictograma-capa-puntos' },
@@ -109,10 +111,6 @@ let observer;
 const rootEl = ref();
 
 // Para hacer algo si es el enésimo elemento e incorporar el consumo de recursos paginados.
-const indexElement = computed(() => storeFetched.byResourceType().length - 5);
-const nthElementUuid = computed(() =>
-  storeFetched.nthElement(storeConsulta.resourceType, indexElement.value)
-);
 const emit = defineEmits(['triggerFetch']);
 
 onMounted(() => {
@@ -121,8 +119,8 @@ onMounted(() => {
     async (entries) => {
       for (const entry of entries) {
         if (entry.isIntersecting) {
-          if (props.catalogueElement.uuid === nthElementUuid.value) {
-            emit('triggerFetch');
+          if (nthElementsUuids.value.includes(props.catalogueElement.uuid)) {
+            emit('triggerFetch', props.catalogueElement.category.gn_description);
           }
           observer.unobserve(entry.target);
         }

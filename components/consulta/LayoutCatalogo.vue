@@ -8,7 +8,7 @@ const { gnoxyFetch } = useGnoxyUrl();
 const config = useRuntimeConfig();
 const storeResources = useResourcesConsultaStore();
 const storeConsulta = useConsultaStore();
-const totalResources = computed(() => storeResources.totals[storeConsulta.resourceType]);
+const totalResources = computed(() => storeResources.totalByType());
 const isLoading = computed(() => storeResources.isLoading);
 const nthElement = 1;
 //const storeFetched = useFetchedResources2Store();
@@ -20,12 +20,11 @@ defineProps({
 //const { data } = useAuth();
 //const isLoggedIn = ref(data.value ? true : false);
 const apiCategorias = `${config.public.geonodeApi}/facets/category`;
-const resources = computed(() => storeResources.byResourceType());
+const resources = computed(() => storeResources.resourcesByType());
 const filteredResources = ref([]);
 const categoriesDict = ref({});
 const categorizedResources = ref({});
 const selectedCategories = ref([]);
-const nthElementsUuids = ref([]);
 //const modalFiltroAvanzado = ref(null);
 /* const isFilterActive = ref(false);
 const selectedOwner = computed({
@@ -111,16 +110,24 @@ async function callResources(categoria) {
   if (total > count) {
     await storeResources.fillByCategory(
       storeConsulta.resourceType,
-      categoriesDict.value[categoria],
+      categoriesDict.value[categoria].page,
       categoriesDict.value[categoria].name
     );
     categoriesDict.value[categoria].page += 1;
   }
   categoriesDict.value[categoria].isLoading = false;
 }
+function getNthElements() {
+  const nthElementsUuids = [];
+  const categoriesList = Object.keys(categorizedResources.value);
+  categoriesList.forEach((category) => {
+    const nthIndex = categorizedResources.value[category].length - nthElement;
+    nthElementsUuids.push(categorizedResources.value[category][nthIndex]['uuid']);
+  });
+  return nthElementsUuids;
+}
 
 function groupResults() {
-  nthElementsUuids.value = [];
   categorizedResources.value = {};
   filteredResources.value.map((r) => {
     if (r.category) {
@@ -140,12 +147,8 @@ function groupResults() {
       }
     }
   });
-  const lista = Object.keys(categorizedResources.value);
-  console.log('Recursos categorizados', lista);
-  lista.forEach((category) => {
-    const nthIndex = categorizedResources.value[category].length - nthElement;
-    console.log(categorizedResources.value[category][nthIndex]);
-  });
+
+  storeResources.setNthElements(storeConsulta.resourceType, getNthElements());
 }
 
 function updateResources(nuevosRecursos) {
@@ -164,6 +167,12 @@ async function setSelectedCategory(categoria) {
     await callResources(categoria);
     updateResources(resources.value);
   }
+}
+
+// Prueba de consumo de recursos paginado y usando gnoxy
+async function fetchNewData(category) {
+  await callResources(category);
+  updateResources(resources.value);
 }
 // Eventualmente quitar la siguiente línea
 buildCategoriesDict();
@@ -202,10 +211,7 @@ onMounted(async () => {
     updateResources(resources.value);
   }
 });
-// Prueba de consumo de recursos paginado y usando gnoxy
-async function fetchNewData() {
-  console.warn('se encontró el enésimo elemento');
-} */
+ */
 </script>
 
 <template>
@@ -298,7 +304,7 @@ async function fetchNewData() {
             class="elemento-catalogo"
             :catalogue-element="resource"
             :resource-type="storeConsulta.resourceType"
-            @trigger-fetch="console.log('Se triguereó un nuevo fetch')"
+            @trigger-fetch="fetchNewData"
           />
         </div>
         <div v-if="categoriesDict[category].isLoading">....Cargando</div>

@@ -18,15 +18,26 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
     [resourceTypeDic.document]: [],
   });
 
-  function byResourceType(resourceType = storeConsulta.resourceType) {
-    return resources[resourceType];
-  }
+  const nthElementsUuids = reactive({
+    [resourceTypeDic.dataLayer]: [],
+    [resourceTypeDic.dataTable]: [],
+    [resourceTypeDic.document]: [],
+  });
 
   return {
     isLoading: ref(false),
     totals,
     resources,
-    byResourceType,
+
+    resourcesByType(resourceType = storeConsulta.resourceType) {
+      return resources[resourceType];
+    },
+    totalByType(resourceType = storeConsulta.resourceType) {
+      return totals[resourceType];
+    },
+    nthElementsByType(resourceType = storeConsulta.resourceType) {
+      return nthElementsUuids[resourceType];
+    },
 
     resetByType(resourceType = storeConsulta.resourceType) {
       resources[resourceType] = [];
@@ -66,7 +77,7 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
         'filter{resource_type}': resourceTypeGeonode[resourceType],
         'filter{category.identifier}': category,
         page: pageNum,
-        page_size: 10,
+        page_size: 2,
       };
       if (resourceType === 'dataLayer') {
         queryParams['extent_ne'] = '[-1,-1,0,0]';
@@ -94,6 +105,10 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
       resources[resourceType] = [...resources[resourceType], ...data];
     },
 
+    setNthElements(resourceType = storeConsulta.resourceType, uuidsList) {
+      nthElementsUuids[resourceType] = uuidsList;
+    },
+
     /**
      * Devuelve un recursos que coincida con un uuid.
      * @param {String} uuid del catalogo a buscar.
@@ -111,15 +126,6 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
      */
     findResources(uuidsToFind, resourceType = storeConsulta.resourceType) {
       return resources[resourceType].filter(({ uuid }) => uuidsToFind.includes(uuid));
-    },
-
-    nthElement(resourceType = storeConsulta.resourceType, index) {
-      const indexDict = {};
-      const uuuidList = resources[resourceType].map((d) => d.uuid);
-      for (let i = 0; i < uuuidList.length; i++) {
-        indexDict[i] = uuuidList[i];
-      }
-      return indexDict[index];
     },
   };
 });
