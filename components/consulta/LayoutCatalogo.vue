@@ -1,25 +1,31 @@
 <script setup>
-import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { categoriesInSpanish, cleanInput } from '~/utils/consulta';
+//import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
+//import { categoriesInSpanish } from '~/utils/consulta';
+import { buildUrl, categoriesInSpanish, resourceTypeGeonode } from '~/utils/consulta';
 
+const { gnoxyFetch } = useGnoxyUrl();
 const config = useRuntimeConfig();
-const storeFetched = useFetchedResources2Store();
+const storeResources = useResourcesConsultaStore();
+//const storeFetched = useFetchedResources2Store();
 const storeConsulta = useConsultaStore();
-const storeFilters = useFilteredResources();
+const totalResources = computed(() => storeResources.totals[storeConsulta.resourceType]);
+
+//watch(totalResources, (nv) => console.log('Total de recursos', nv));
+//const storeFilters = useFilteredResources();
 defineProps({
   titulo: { type: String, default: 'Título' },
   etiquetaElementos: { type: String, default: undefined },
 });
-const { data } = useAuth();
-const isLoggedIn = ref(data.value ? true : false);
+//const { data } = useAuth();
+//const isLoggedIn = ref(data.value ? true : false);
 const apiCategorias = `${config.public.geonodeApi}/facets/category`;
-const resources = computed(() => storeFetched.byResourceType());
-const filteredResources = ref([]);
-const categoryList = ref([]);
-const categorizedResources = ref({});
-const selectedCategories = ref([]);
-const modalFiltroAvanzado = ref(null);
-const isFilterActive = ref(false);
+//const resources = computed(() => storeFetched.byResourceType());
+//const filteredResources = ref([]);
+const categoriesDict = ref({});
+//const categorizedResources = ref({});
+//const selectedCategories = ref([]);
+//const modalFiltroAvanzado = ref(null);
+/* const isFilterActive = ref(false);
 const selectedOwner = computed({
   get: () => storeFilters.filters.owner,
   set: (value) => storeFilters.updateFilter('owner', value),
@@ -27,19 +33,74 @@ const selectedOwner = computed({
 const inputSearch = computed({
   get: () => storeFilters.filters.inputSearch,
   set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
-});
+}); */
 
-// Esta parte es para obtener todas las categorias
-const { data: geonodeCategories } = await useFetch(`${apiCategorias}`);
-if (!geonodeCategories.value) {
-  categoryList.value = ['Sin Clasificar'];
-} else {
-  geonodeCategories.value.topics.items.map((d) => {
-    categoryList.value.push(d.label);
-  });
+// TODO: Llevar esta fución a los utils
+async function fetchTotalByCategory(category) {
+  const queryParams = {
+    custom: 'true',
+    'filter{resource_type}': resourceTypeGeonode[storeConsulta.resourceType],
+    'filter{category.identifier}': category,
+  };
+  if (storeConsulta.resourceType === 'dataLayer') {
+    queryParams['extent_ne'] = '[-1,-1,0,0]';
+  }
+  if (storeConsulta.resourceType === 'dataTable') {
+    queryParams['filter{subtype.in}'] = ['vector', 'remote'];
+  }
+  if (storeConsulta.resourceType === 'document') {
+    queryParams['file_extension'] = ['pdf', 'txt'];
+  }
+  const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
+  const request = await gnoxyFetch(url);
+  const res = await request.json();
+  return res.total;
 }
 
-function groupResults() {
+async function buildCategoriesDict() {
+  // Esta parte es para obtener todas las categorias
+  const request = await gnoxyFetch(apiCategorias);
+  const geonodeCategories = await request.json();
+  // Aquí creamos el diccionario de categorías
+
+  categoriesDict.value = {};
+  if (!geonodeCategories) {
+    categoriesDict.value['Sin Clasificar'] = {
+      label: 'Sin Clasificar',
+      name: 'sinClasificar',
+      inSpanish: categoriesInSpanish['Sin Clasificar'],
+      total: totalResources.value,
+    };
+  } else {
+    const results = await Promise.all(
+      geonodeCategories.topics.items.map(async (d) => {
+        const totalByCat = await fetchTotalByCategory(d.key);
+        categoriesDict.value[d.label] = {
+          label: d.label,
+          name: d.key,
+          inSpanish: categoriesInSpanish[d.label],
+          total: totalByCat,
+        };
+        return totalByCat;
+      })
+    );
+    const totalWithCategory = results.reduce((a, b) => a + b, 0);
+    categoriesDict.value['Sin Clasificar'] = {
+      label: 'Sin Clasificar',
+      name: 'sinClasificar',
+      inSpanish: categoriesInSpanish['Sin Clasificar'],
+      total: totalResources.value - totalWithCategory,
+    };
+  }
+}
+buildCategoriesDict();
+
+watch(totalResources, () => {
+  buildCategoriesDict();
+});
+//const { data: geonodeCategories } = await gno
+
+/* function groupResults() {
   categorizedResources.value = {};
   filteredResources.value.map((r) => {
     if (r.category) {
@@ -98,25 +159,7 @@ onMounted(async () => {
 // Prueba de consumo de recursos paginado y usando gnoxy
 async function fetchNewData() {
   console.warn('se encontró el enésimo elemento');
-}
-/* const { gnoxyUrl } = useGnoxyUrl();
-const query = {
-  custom: 'true',
-  'filter{resource_type}': 'dataset',
-  page_size: 50,
-  //extent_ne: '[-1,-1,0,0]',
-  //page: 2,
-  // agregar filtros
-};
-const pruebaApi = `${config.public.geonodeApi}/resources`;
-const pruebaUrl = buildUrl(pruebaApi, query);
-const urlNuevo = gnoxyUrl(pruebaUrl);
-console.log('La url generada sin gnoxy:', pruebaUrl);
-console.log('La url con gnoxy', urlNuevo);
-const res = await fetch(urlNuevo);
-console.log('La respuesta de la petición:', res);
-const pruebaData = await res.json();
-console.log('La respuesta con los datos:', pruebaData); */
+} */
 </script>
 
 <template>
@@ -125,7 +168,7 @@ console.log('La respuesta con los datos:', pruebaData); */
       <p class="h4 fondo-color-acento p-3 m-0">{{ titulo }}</p>
 
       <div class="m-x-2 m-y-1">
-        <p v-if="!isLoggedIn" class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
+        <!--         <p v-if="!isLoggedIn" class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
 
         <ClientOnly>
           <SisdaiSelector
@@ -170,13 +213,7 @@ console.log('La respuesta con los datos:', pruebaData); */
                 <span class="pictograma-buscar" aria-hidden="true" />
               </button>
             </form>
-            <!--             <SisdaiCampoBusqueda
-              class="columna-12"
-              :catalogo="resources"
-              :propiedad-busqueda="'title'"
-              :etiqueta="'Usa palabras clave...'"
-            /> -->
-            <!-- @al-filtrar="filterByInput" -->
+
             <button
               type="button"
               :class="
@@ -190,19 +227,21 @@ console.log('La respuesta con los datos:', pruebaData); */
               <span class="pictograma-filtro" aria-hidden="true" />
             </button>
           </div>
-        </ClientOnly>
-        <UiNumeroElementos :numero="filteredResources.length" :etiqueta="etiquetaElementos" />
+        </ClientOnly> -->
+        <UiNumeroElementos :numero="totalResources" :etiqueta="etiquetaElementos" />
       </div>
     </div>
 
-    <div v-for="category in Object.keys(categorizedResources)" :key="category" class="m-y-1">
+    <div v-for="category in Object.keys(categoriesDict)" :key="category" class="m-y-1">
       <ConsultaElementoCategoria
-        :title="categoriesInSpanish[category]"
+        :title="categoriesDict[category].inSpanish"
         :tag="etiquetaElementos"
-        :number-elements="categorizedResources[category].length"
+        :number-elements="categoriesDict[category].total"
         @click="setSelectedCategory(category)"
       />
+    </div>
 
+    <!--
       <div
         v-for="(resource, index) in categorizedResources[category]"
         :key="index"
@@ -216,15 +255,14 @@ console.log('La respuesta con los datos:', pruebaData); */
           :resource-type="storeConsulta.resourceType"
           @trigger-fetch="fetchNewData()"
         />
-      </div>
-    </div>
+      </div>-->
   </div>
 
-  <ConsultaModalBusqueda
+  <!--   <ConsultaModalBusqueda
     ref="modalFiltroAvanzado"
     @apply-filter="applyAdvancedFilter"
     @reset-filter="resetAdvancedFilter"
-  />
+  /> -->
 </template>
 
 <style lang="scss" scoped>

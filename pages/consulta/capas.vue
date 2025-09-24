@@ -1,26 +1,29 @@
 <script setup>
-import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
-import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
-import { findServer, resourceTypeDic } from '~/utils/consulta';
+//import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
+//import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
+//import { findServer, resourceTypeDic } from '~/utils/consulta';
+import { resourceTypeDic } from '~/utils/consulta';
 
 // const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
-const storeFetched = useFetchedResources2Store();
+storeConsulta.resourceType = resourceTypeDic.dataLayer;
+const consultaResources = useResourcesConsultaStore();
+consultaResources.getTotalResources(storeConsulta.resourceType);
+/*const storeFetched = useFetchedResources2Store();
 const storeSelected = useSelectedResources2Store();
 const route = useRoute();
-const router = useRouter();
+const router = useRouter(); */
 //const proxy = `${config.public.geonodeUrl}/proxy/?url=`;
-storeConsulta.resourceType = resourceTypeDic.dataLayer;
-storeFetched.checkFilling();
+//storeFetched.checkFilling(); */
 //const { gnoxyUrl } = useGnoxyUrl();
 
-const linkExportaMapa = ref();
+/* const linkExportaMapa = ref();
 function exportarMapa() {
   exportarHTMLComoPNG(
     document.querySelectorAll('.mapa .ol-viewport').item(0),
     linkExportaMapa.value
   );
-}
+} */
 
 // const attributos = reactive({});
 // async function addAttribute(pk) {
@@ -93,50 +96,50 @@ function exportarMapa() {
 //   { deep: true }
 // );
 
-const vistaDelMapa = ref({ extension: storeConsulta.mapExtent });
+/* const vistaDelMapa = ref({ extension: storeConsulta.mapExtent });
 watch(
   () => storeConsulta.mapExtent,
   (extension) => {
     if (extension === undefined) return;
     vistaDelMapa.value = { extension };
   }
-);
+); */
 
 /**
  * Agrega en un parametro hash los valores de la vista del mapa
  * @param param vista del mapa
  */
-function actualizarHashDesdeVista({ acercamiento, centro }) {
+/* function actualizarHashDesdeVista({ acercamiento, centro }) {
   const hash = `#vista=${acercamiento.toFixed(0)}/${centro[1].toFixed(4)}/${centro[0].toFixed(4)}`;
 
   if (hash !== route.hash) {
     router.replace({ query: route.query, hash });
   }
-}
+} */
 
 /**
  * Actualiza la vista del mapa dependiendo del hash.
  * @param hashVista texto hash sin el carácter #.
  */
-function updateMapFromHash(hashVista) {
+/* function updateMapFromHash(hashVista) {
   if (hashVista === '') return;
 
   const [acercamiento, latitud, longitud] = hashVista.split('=')[1].split('/');
   storeConsulta.mapExtent = undefined;
   vistaDelMapa.value = { acercamiento, centro: [longitud, latitud] };
-}
+} */
 
 /**
  * Actualiza el queryParam.
  * @param newQueryParam para asignar.
  */
-function updateQueryParam(capas) {
+/* function updateQueryParam(capas) {
   if (capas !== route.query.capas) {
     router.replace({ query: { capas }, hash: route.hash });
   }
 }
 watch(() => storeSelected.asQueryParam(), updateQueryParam);
-
+ */
 /* function findServer(resource) {
   if (resource.sourcetype === 'REMOTE') {
     const url = getWMSserver(resource);
@@ -150,7 +153,7 @@ watch(() => storeSelected.asQueryParam(), updateQueryParam);
     // return `${config.public.geonodeUrl}/gs`;
   }
 } */
-onMounted(() => {
+/* onMounted(() => {
   updateMapFromHash(route.hash?.slice(1));
   storeSelected.addFromQueryParam(route.query.capas);
 
@@ -158,10 +161,10 @@ onMounted(() => {
   if (storeSelected.uuids.length > 0) {
     updateQueryParam(storeSelected.asQueryParam());
   }
-});
+}); */
 
 // api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
-const { gnoxyFetch } = useGnoxyUrl();
+//const { gnoxyFetch } = useGnoxyUrl();
 </script>
 
 <template>
@@ -171,7 +174,8 @@ const { gnoxyFetch } = useGnoxyUrl();
     </template>
 
     <template #visualizador>
-      <template v-if="storeFetched.isLoading">Cargando...</template>
+      <p>Panel central</p>
+      <!-- <template v-if="storeFetched.isLoading">Cargando...</template>
 
       <ClientOnly>
         <SisdaiMapa
@@ -193,17 +197,18 @@ const { gnoxyFetch } = useGnoxyUrl();
             :visible="storeSelected.byUuid(resource.uuid).visible"
           />
         </SisdaiMapa>
-      </ClientOnly>
+      </ClientOnly>-->
     </template>
 
     <template #seleccion>
-      <ConsultaLayoutSeleccion
+      <p>Panel selector</p>
+      <!--       <ConsultaLayoutSeleccion
         titulo="Capas seleccionadas"
         :resource-type="storeConsulta.resourceType"
         etiqueta-elementos="Capas"
         :funcion-descarga="exportarMapa"
       />
-      <a ref="linkExportaMapa" class="oculto" download="sigic.png" />
+      <a ref="linkExportaMapa" class="oculto" download="sigic.png" /> -->
     </template>
   </ConsultaLayoutPaneles>
 </template>

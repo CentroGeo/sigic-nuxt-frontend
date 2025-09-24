@@ -17,7 +17,7 @@ const props = defineProps({
     default: () => ({}),
   },
 });
-const storeCatalogo = useCatalogoStore();
+//const storeCatalogo = useCatalogoStore();
 const { data } = useAuth();
 const cargaExitosa = ref(false);
 
@@ -53,7 +53,8 @@ function irARutaConQuery(direccion) {
  * Actualiza los metadatos con los valores del store
  */
 async function actualizaMetadatos() {
-  const response = await $fetch('/api/metadatos', {
+  console.warn(data.value?.accessToken);
+  /*   const response = await $fetch('/api/metadatos', {
     method: 'POST',
     body: {
       pk: props.resource.pk,
@@ -64,7 +65,7 @@ async function actualizaMetadatos() {
     },
   });
   console.warn('response', response);
-  cargaExitosa.value = true;
+  cargaExitosa.value = true; */
 }
 </script>
 <template>
