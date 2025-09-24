@@ -31,7 +31,14 @@ const fechaHoy = new Date().toLocaleDateString('es-ES', {
 });
 
 const catalogo = ref([]);
-const catalogoFiltrado = ref(catalogo.value);
+// const catalogoFiltrado = ref(catalogo.value);
+const catalogoFiltrado = ref([
+  {
+    id: 0,
+    fecha: '23/09/2025',
+    chat: [{ id: 0, id_contexto: 0, titulo: 'titulo', proyecto: 'proyecto', contexto: 'contexto' }],
+  },
+]);
 
 // Función para consultar lista de proyectos
 const loadChatsList = async () => {
@@ -40,22 +47,33 @@ const loadChatsList = async () => {
   // Consulta proyectos
   arrayChats = await storeIA.getChatList(1);
   console.log(arrayChats);
+  console.log('storeIA.chats', storeIA.chats);
 
   transformarHistorial(arrayChats);
 };
 
+/**
+ * Agrupa la lista del historial de chat por fecha y ordena de forma
+ * descendente, así como por id. Asignando el resultado al catálogo.
+ * @param {Array} historiales con la lista de chats
+ */
 function transformarHistorial(historiales) {
   const agrupadoPorFecha = {};
+  console.log('historiales', historiales);
 
+  // agrupamos por fecha
   historiales.forEach((historial) => {
     const fechaISO = historial.credate_date;
+    // formatea a String la fecha de creación a la forma dd/mm/yyyy
     const fecha = new Date(fechaISO).toLocaleDateString('es-ES', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
     });
+    // console.log('fecha', fecha);
 
     historial.context.forEach((contexto) => {
+      // obtenemos los items del chat
       const chatItem = {
         id: historial.id,
         titulo: historial.title || 'Chat ' + historial.id,
@@ -63,11 +81,11 @@ function transformarHistorial(historiales) {
         contexto: contexto.title || '',
         id_contexto: contexto.id || '',
       };
+      // console.log('chatItem', chatItem);
 
       if (!agrupadoPorFecha[fecha]) {
         agrupadoPorFecha[fecha] = [];
       }
-
       agrupadoPorFecha[fecha].push(chatItem);
     });
   });
@@ -187,6 +205,7 @@ onMounted(() => {
       </div>
     </div>
   </div>
+
   <ClientOnly>
     <SisdaiModal ref="nuevoChatModal">
       <template #encabezado> <h2>Nuevo chat</h2> </template>
@@ -218,6 +237,7 @@ onMounted(() => {
     </SisdaiModal>
   </ClientOnly>
 </template>
+
 <style lang="scss">
 .boton-listas {
   width: 100%;

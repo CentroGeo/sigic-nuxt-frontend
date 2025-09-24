@@ -164,11 +164,11 @@ export const useIAStore = defineStore('ia', {
 
       if (data.length > 0) {
         this.proyectoSeleccionado = data[0];
+        this.existenProyectos = true;
       } else {
         this.proyectoSeleccionado = null;
       }
 
-      this.existenProyectos = true;
       //console.log('Proyectos:', data);
       return data;
     },
@@ -240,11 +240,16 @@ export const useIAStore = defineStore('ia', {
       return data;
     },
 
+    /**
+     * Devuelve la lista de chats con fetch al backend
+     * @param {Number} user_id
+     * @returns {Array} data con los chats
+     */
     async getChatList(user_id) {
       const token = this.authToken;
       //this.existeContexto = true;
       console.log(user_id);
-
+      console.log(token);
       const response = await fetch(this.backend + 'direct/api/chat/history/getchats', {
         method: 'POST',
         headers: {
@@ -266,7 +271,6 @@ export const useIAStore = defineStore('ia', {
       } else {
         this.proyectoSeleccionado = null;
       } */
-
       //this.existenProyectos = true;
       //console.log('Proyectos:', data);
       return data;
