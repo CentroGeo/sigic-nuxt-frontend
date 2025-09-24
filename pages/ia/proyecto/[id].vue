@@ -3,25 +3,106 @@ import SisdaiAreaTexto from '@centrogeomx/sisdai-componentes/src/componentes/are
 import SisdaiGrupoBotonesRadio from '@centrogeomx/sisdai-componentes/src/componentes/boton-radio-grupo/SisdaiBotonesRadioGrupo.vue';
 import SisdaiBotonRadio from '@centrogeomx/sisdai-componentes/src/componentes/boton-radio/SisdaiBotonRadio.vue';
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
-import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
+// import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
 import SisdaiCasilla from '@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import { ref } from 'vue';
 
-import { categoriesInSpanish, resourceTypeDic } from '~/utils/consulta';
+import {
+  categoriesInSpanish,
+  cleanInput,
+  fetchGeometryType,
+  getWMSserver,
+  hasWMS,
+  resourceTypeDic,
+  tooltipContent,
+} from '~/utils/consulta';
+const config = useRuntimeConfig();
 const storeFetched = useFetchedResources2Store();
 const storeFilters = useFilteredResources();
-
 storeFetched.checkFilling(resourceTypeDic.dataLayer);
 storeFetched.checkFilling(resourceTypeDic.dataTable);
 storeFetched.checkFilling(resourceTypeDic.document);
-
 const resources = computed(() => storeFetched.all);
 const filteredResources = ref([]);
 const categorizedResources = ref({});
-
 const botonRadio = ref('capas');
-
+const catSeleccLength = ref(0);
+const etiquetaRecursos = ref(botonRadio.value);
+const inputSearch = computed({
+  get: () => storeFilters.filters.inputSearch,
+  set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
+});
+const geomType = ref(null);
+const optionsDict = {
+  Point: { tooltipText: 'Capa de puntos', class: 'pictograma-capa-puntos' },
+  MultiPoint: {
+    tooltipText: 'Capa de puntos',
+    class: 'pictograma-capa-puntos',
+  },
+  Polygon: {
+    tooltipText: 'Capa de poligonos',
+    class: 'pictograma-capa-poligono',
+  },
+  MultiPolygon: {
+    tooltipText: 'Capa de poligonos',
+    class: 'pictograma-capa-poligono',
+  },
+  LineString: {
+    tooltipText: 'Capa de lineas',
+    class: 'pictograma-capa-lineas',
+  },
+  LinearRing: {
+    tooltipText: 'Capa de lineas',
+    class: 'pictograma-capa-lineas',
+  },
+  MultiLineString: {
+    tooltipText: 'Capa de lineas',
+    class: 'pictograma-capa-lineas',
+  },
+  GeometryCollection: {
+    tooltipText: 'Colección de geometrías',
+    class: 'pictograma-capa-poligono',
+  },
+  Raster: {
+    tooltipText: 'Raster',
+    class: 'pictograma-capas',
+  },
+  Otro: {
+    tooltipText: 'Indefinido',
+    class: 'pictograma-flkt',
+  },
+  Remoto: {
+    tooltipText: 'Capa remota',
+    class: 'pictograma-colaborar',
+  },
+  Error: {
+    tooltipText: 'No se pudo recuperar la información',
+    class: 'pictograma-alerta',
+  },
+};
+const buttons = ref([]);
+function asignarEtiquetaRecursos() {
+  if (botonRadio.value === 'capas') {
+    if (catSeleccLength.value === 1) {
+      etiquetaRecursos.value = 'capa';
+    } else {
+      etiquetaRecursos.value = 'capas';
+    }
+  } else if (botonRadio.value === 'tablas') {
+    if (catSeleccLength.value === 1) {
+      etiquetaRecursos.value = 'tabla';
+    } else {
+      etiquetaRecursos.value = 'tablas';
+    }
+  } else if (botonRadio.value === 'documentos') {
+    if (catSeleccLength.value === 1) {
+      etiquetaRecursos.value = 'documento';
+    } else {
+      etiquetaRecursos.value = 'documentos';
+    }
+  }
+}
 function groupResults() {
   categorizedResources.value = {};
   filteredResources.value.map((r) => {
@@ -47,7 +128,7 @@ function updateResources(nuevosRecursos) {
   filteredResources.value = nuevosRecursos;
   groupResults();
 }
-watch([resources], () => {
+watch([resources, inputSearch], () => {
   updateResources(storeFilters.filter('all'));
 });
 watch(botonRadio, (nv) => {
@@ -56,6 +137,7 @@ watch(botonRadio, (nv) => {
   updateResources(storeFilters.filter('all'));
 });
 
+//
 const campoCasilla = ref(false);
 const agregaInfoCatModal = ref(null);
 const capasModal = ref(null);
@@ -158,11 +240,46 @@ onMounted(async () => {
   }
 });
 
-const catSeleccLength = ref(0);
-
 const seleccionarCategoria = (categoria) => {
   categoriaSeleccionada.value = categoria;
   catSeleccLength.value = categorizedResources.value[categoriaSeleccionada.value].length || 0;
+
+  asignarEtiquetaRecursos();
+
+  // revisamos el tipo de geometría que tiene el recurso
+  buttons.value = [];
+  categorizedResources.value[categoriaSeleccionada.value].map(async (e) => {
+    if (e.subtype === 'remote') {
+      const resourceHasWMS = await hasWMS(e, 'geometry', config.public.geonodeUrl);
+      if (resourceHasWMS) {
+        const server = getWMSserver(e);
+        geomType.value = await fetchGeometryType(e, server);
+      } else {
+        geomType.value = 'Remoto';
+      }
+      // geomType.value = 'Remoto';
+    } else if (e.subtype === 'raster') {
+      // Si es raster
+      geomType.value = 'Raster';
+    } else if (e.subtype === 'vector') {
+      // Si es vectorial
+      // Solicitamos la geometría hasta que la tarjeta va a entrar a la vista
+      geomType.value = await fetchGeometryType(e, 'sigic');
+    } else {
+      geomType.value = 'Otro';
+    }
+    if (botonRadio.value === 'capas') {
+      buttons.value.push({
+        class: optionsDict[geomType.value].class,
+        tooltipText: optionsDict[geomType.value].tooltipText,
+      });
+    } else {
+      buttons.value.push({
+        class: 'pictograma-informacion',
+        tooltipText: tooltipContent(e),
+      });
+    }
+  });
 };
 
 // Método para manejar la selección de archivos
@@ -259,9 +376,11 @@ const editarProyecto = async () => {
     console.log('Error al actualizar: ' + error.message);
   }
 };
+
 function siguiente() {
   agregaInfoCatModal.value?.cerrarModal();
   catSeleccLength.value = 0;
+  etiquetaRecursos.value = botonRadio.value;
   capasModal.value?.abrirModal();
 }
 </script>
@@ -444,7 +563,6 @@ function siguiente() {
               </SisdaiGrupoBotonesRadio>
             </form>
           </template>
-
           <template #pie>
             <button type="button" class="boton-primario boton-chico" @click="siguiente">
               Siguiente
@@ -461,7 +579,31 @@ function siguiente() {
           <template #cuerpo>
             <div class="p-r-2">
               <p>Explora el catálogo y selecciona fuentes de información para el proyecto</p>
-              <SisdaiCampoBusqueda class="m-y-3" etiqueta="Buscar del catálogo" />
+              <ClientOnly>
+                <!-- <SisdaiCampoBusqueda class="m-y-3" etiqueta="Buscar del catálogo" /> -->
+                <form class="campo-busqueda m-y-3" @submit.prevent>
+                  <input
+                    id="idcampobusquedaialistas"
+                    v-model="inputSearch"
+                    class="campo-busqueda-entrada"
+                    type="search"
+                    placeholder="Buscar del catálogo"
+                  />
+                  <button
+                    class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
+                    aria-label="Borrar"
+                    type="button"
+                  >
+                    <span aria-hidden="true" class="pictograma-cerrar" />
+                  </button>
+                  <button
+                    class="boton-primario boton-pictograma campo-busqueda-buscar"
+                    aria-label="Buscar"
+                    type="button"
+                  >
+                    <span class="pictograma-buscar" aria-hidden="true" />
+                  </button></form
+              ></ClientOnly>
 
               <div class="flex flex-contenido-separado">
                 <div class="columna-5">
@@ -504,21 +646,32 @@ function siguiente() {
                   <div>
                     <UiNumeroElementos
                       :numero="catSeleccLength"
-                      etiqueta="etiqueta"
+                      :etiqueta="etiquetaRecursos"
                       class="m-b-3"
                     />
                     <ul class="lista-sin-estilo" style="overflow-y: auto">
                       <li
-                        v-for="capa in categorizedResources[categoriaSeleccionada]"
+                        v-for="(capa, i) in categorizedResources[categoriaSeleccionada]"
                         :key="capa.pk"
                         class="m-y-0"
                       >
                         <div class="capa p-2 m-b-2 borde-redondeado-20">
                           <SisdaiCasilla v-model="campoCasilla" :etiqueta="capa.title" />
-                          <div class="icono">
-                            <span class="pictograma-capa-poligono m-r-1" aria-hidden="true" />
-                            <!-- TODO: saber si es de puntos, polígonos o lineas -->
-                            <span>{{ capa.resource_type }}</span>
+                          <div v-if="botonRadio === 'capas'" class="icono">
+                            <span
+                              class="m-r-1"
+                              :class="[buttons[i]?.class, 'pictograma-mediano picto']"
+                              aria-hidden="true"
+                            />
+                            <span>{{ buttons[i]?.tooltipText }}</span>
+                          </div>
+                          <div v-else class="icono">
+                            <span
+                              v-globo-informacion:derecha="buttons[i]?.tooltipText"
+                              class="m-r-1"
+                              :class="[buttons[i]?.class, 'pictograma-mediano picto']"
+                              aria-hidden="true"
+                            />
                           </div>
                         </div>
                       </li>
