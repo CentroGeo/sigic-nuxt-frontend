@@ -33,6 +33,7 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
     },
 
     async getTotalResources(resourceType = storeConsulta.resourceType) {
+      this.isLoading = true;
       const { gnoxyFetch } = useGnoxyUrl();
 
       const queryParams = {
@@ -55,11 +56,11 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
       const request = await gnoxyFetch(url);
       const res = await request.json();
       totals[resourceType] = res.total;
+      this.isLoading = false;
     },
 
     async fillByCategory(resourceType = storeConsulta.resourceType, pageNum, category) {
       const { gnoxyFetch } = useGnoxyUrl();
-      this.isLoading = true;
       const queryParams = {
         custom: 'true',
         'filter{resource_type}': resourceTypeGeonode[resourceType],
@@ -91,7 +92,6 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
 
       const data = res.resources;
       resources[resourceType] = [...resources[resourceType], ...data];
-      this.isLoading = false;
     },
 
     /**

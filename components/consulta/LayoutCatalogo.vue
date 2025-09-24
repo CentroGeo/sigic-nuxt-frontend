@@ -1,4 +1,5 @@
 <script setup>
+// TODO: Quitar toda la logica para elementos sin categoria
 //import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 //import { categoriesInSpanish } from '~/utils/consulta';
 import { buildUrl, categoriesInSpanish, resourceTypeGeonode } from '~/utils/consulta';
@@ -8,6 +9,8 @@ const config = useRuntimeConfig();
 const storeResources = useResourcesConsultaStore();
 const storeConsulta = useConsultaStore();
 const totalResources = computed(() => storeResources.totals[storeConsulta.resourceType]);
+const isLoading = computed(() => storeResources.isLoading);
+const nthElement = 1;
 //const storeFetched = useFetchedResources2Store();
 //const storeFilters = useFilteredResources();
 defineProps({
@@ -22,6 +25,7 @@ const filteredResources = ref([]);
 const categoriesDict = ref({});
 const categorizedResources = ref({});
 const selectedCategories = ref([]);
+const nthElementsUuids = ref([]);
 //const modalFiltroAvanzado = ref(null);
 /* const isFilterActive = ref(false);
 const selectedOwner = computed({
@@ -97,6 +101,7 @@ async function buildCategoriesDict() {
     };
   }
 }
+
 async function callResources(categoria) {
   categoriesDict.value[categoria].isLoading = true;
   const total = categoriesDict.value[categoria].total;
@@ -115,6 +120,7 @@ async function callResources(categoria) {
 }
 
 function groupResults() {
+  nthElementsUuids.value = [];
   categorizedResources.value = {};
   filteredResources.value.map((r) => {
     if (r.category) {
@@ -133,6 +139,12 @@ function groupResults() {
         categorizedResources.value['Sin Clasificar'].push(r);
       }
     }
+  });
+  const lista = Object.keys(categorizedResources.value);
+  console.log('Recursos categorizados', lista);
+  lista.forEach((category) => {
+    const nthIndex = categorizedResources.value[category].length - nthElement;
+    console.log(categorizedResources.value[category][nthIndex]);
   });
 }
 
@@ -153,6 +165,7 @@ async function setSelectedCategory(categoria) {
     updateResources(resources.value);
   }
 }
+// Eventualmente quitar la siguiente línea
 buildCategoriesDict();
 watch(totalResources, () => {
   buildCategoriesDict();
@@ -264,7 +277,8 @@ async function fetchNewData() {
         <UiNumeroElementos :numero="totalResources" :etiqueta="etiquetaElementos" />
       </div>
     </div>
-    <div v-if="totalResources !== 0">
+    <div v-if="isLoading">....Cargando</div>
+    <div v-else>
       <div v-for="category in Object.keys(categoriesDict)" :key="category" class="m-y-1">
         <ConsultaElementoCategoria
           :title="categoriesDict[category].inSpanish"
