@@ -224,6 +224,26 @@ export async function fetchGeometryType(resource, server) {
   }
 }
 
+export async function defineGeomType(resource) {
+  const config = useRuntimeConfig();
+  let geomType;
+  if (resource.sourcetype === 'REMOTE') {
+    const resourceHasWMS = await hasWMS(resource, 'geometry', config.public.geonodeUrl);
+    if (resourceHasWMS) {
+      const server = getWMSserver(resource);
+      geomType = await fetchGeometryType(resource, server);
+    } else {
+      geomType = 'Remoto';
+    }
+  } else if (resource.subtype === 'raster') {
+    geomType = 'Raster';
+  } else if (resource.subtype === 'vector') {
+    geomType = await fetchGeometryType(resource, 'sigic');
+  } else {
+    geomType = 'Otro';
+  }
+  return geomType;
+}
 /**
  * Espera el tiempo indicado para ejecutar la siguiente linea
  * @param {Number} miliseconds

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { buildUrl, resourceTypeDic, resourceTypeGeonode } from '~/utils/consulta';
+import { buildUrl, defineGeomType, resourceTypeDic, resourceTypeGeonode } from '~/utils/consulta';
 
 export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => {
   const config = useRuntimeConfig();
@@ -27,6 +27,11 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
     totals,
     resources,
     byResourceType,
+
+    resetByType(resourceType = storeConsulta.resourceType) {
+      resources[resourceType] = [];
+    },
+
     async getTotalResources(resourceType = storeConsulta.resourceType) {
       const { gnoxyFetch } = useGnoxyUrl();
 
@@ -52,14 +57,15 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
       totals[resourceType] = res.total;
     },
 
-    async fill(resourceType = storeConsulta.resourceType, pageNum) {
+    async fillByCategory(resourceType = storeConsulta.resourceType, pageNum, category) {
       const { gnoxyFetch } = useGnoxyUrl();
       this.isLoading = true;
       const queryParams = {
         custom: 'true',
         'filter{resource_type}': resourceTypeGeonode[resourceType],
+        'filter{category.identifier}': category,
         page: pageNum,
-        page_size: 20,
+        page_size: 10,
       };
       if (resourceType === 'dataLayer') {
         queryParams['extent_ne'] = '[-1,-1,0,0]';
@@ -73,10 +79,18 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
       const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
       const request = await gnoxyFetch(url);
       const res = await request.json();
+
+      // Agregamos el tipo de geometría cuando sea necesario
+      if (resourceType === 'dataLayer') {
+        await Promise.all(
+          res.resources.map(async (d) => {
+            d.geomType = await defineGeomType(d);
+          })
+        );
+      }
+
       const data = res.resources;
-      //const filteredResources = await validacionTemporal(data, storeConsulta.resourceType);
       resources[resourceType] = [...resources[resourceType], ...data];
-      //console.log('Elementos en la store:', resources[resourceType].length);
       this.isLoading = false;
     },
 

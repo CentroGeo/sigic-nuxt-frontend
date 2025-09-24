@@ -1,8 +1,7 @@
 <script setup>
-// PENDING: Todos los archivos remotos tienen en subtype = remote?
 import { onMounted, onUnmounted, ref, toRefs } from 'vue';
-import { fetchGeometryType, getWMSserver, hasWMS, tooltipContent } from '~/utils/consulta';
-const config = useRuntimeConfig();
+import { tooltipContent } from '~/utils/consulta';
+
 const storeSelected = useSelectedResources2Store();
 const storeConsulta = useConsultaStore();
 const storeFetched = useFetchedResources2Store();
@@ -18,15 +17,12 @@ const props = defineProps({
   },
 });
 const { catalogueElement } = toRefs(props);
-//console.log(catalogueElement.value);
 
 const { data } = useAuth();
 const isLoggedIn = ref(data.value ? true : false);
 const userEmail = ref(data.value?.user.email);
-const subtype = ref(catalogueElement.value.subtype);
-const geomType = ref(null);
-const buttons = ref([]);
-const optionsDict = {
+const geomType = ref(catalogueElement.value.geomType);
+const geomDict = {
   Point: { tooltipText: 'Capa de puntos', class: 'pictograma-capa-puntos' },
   MultiPoint: {
     tooltipText: 'Capa de puntos',
@@ -73,6 +69,41 @@ const optionsDict = {
     class: 'pictograma-alerta',
   },
 };
+
+const iconOptions = {
+  dataLayer: [
+    {
+      tooltipText: geomDict[geomType.value].tooltipText,
+      class: geomDict[geomType.value].class,
+      position: 'arriba',
+    },
+    {
+      tooltipText: 'Variables disponibles',
+      class: 'pictograma-visualizador',
+      position: 'arriba',
+    },
+    {
+      tooltipText: tooltipContent(catalogueElement.value),
+      class: 'pictograma-informacion',
+      position: 'derecha',
+    },
+  ],
+  dataTable: [
+    {
+      tooltipText: tooltipContent(catalogueElement.value),
+      class: 'pictograma-informacion',
+      position: 'derecha',
+    },
+  ],
+  document: [
+    {
+      tooltipText: tooltipContent(catalogueElement.value),
+      class: 'pictograma-informacion',
+      position: 'derecha',
+    },
+  ],
+};
+
 // Para triggerear la función de observar
 let observer;
 const rootEl = ref();
@@ -90,59 +121,8 @@ onMounted(() => {
     async (entries) => {
       for (const entry of entries) {
         if (entry.isIntersecting) {
-          // Primero checamos si no es dataset
           if (props.catalogueElement.uuid === nthElementUuid.value) {
             emit('triggerFetch');
-          }
-          if (storeConsulta.resourceType !== 'dataLayer') {
-            buttons.value = [
-              {
-                tooltipText: tooltipContent(catalogueElement.value),
-                class: 'pictograma-informacion',
-                position: 'derecha',
-              },
-            ];
-          } else {
-            if (subtype.value === 'remote') {
-              const resourceHasWMS = await hasWMS(
-                props.catalogueElement,
-                'geometry',
-                config.public.geonodeUrl
-              );
-              if (resourceHasWMS) {
-                const server = getWMSserver(props.catalogueElement);
-                geomType.value = await fetchGeometryType(props.catalogueElement, server);
-              } else {
-                geomType.value = 'Remoto';
-              }
-            } else if (subtype.value === 'raster') {
-              // Si es raster
-              geomType.value = 'Raster';
-            } else if (subtype.value === 'vector') {
-              // Si es vectorial
-              // Solicitamos la geometría hasta que la tarjeta va a entrar a la vista
-              geomType.value = await fetchGeometryType(catalogueElement.value, 'sigic');
-              //geomType.value = "Point";
-            } else {
-              geomType.value = 'Otro';
-            }
-            buttons.value = [
-              {
-                tooltipText: optionsDict[geomType.value].tooltipText,
-                class: optionsDict[geomType.value].class,
-                position: 'arriba',
-              },
-              {
-                tooltipText: 'Variables disponibles',
-                class: 'pictograma-visualizador',
-                position: 'arriba',
-              },
-              {
-                tooltipText: tooltipContent(catalogueElement.value),
-                class: 'pictograma-informacion',
-                position: 'derecha',
-              },
-            ];
           }
           observer.unobserve(entry.target);
         }
@@ -183,6 +163,7 @@ onUnmounted(() => {
       <span class="pictograma-colaborar"></span>
       Archivo remoto
     </div>
+
     <div class="tarjeta-elemento">
       <input
         :id="`checkbox-consulta-catalogo-${catalogueElement.uuid}`"
@@ -198,7 +179,7 @@ onUnmounted(() => {
 
     <div class="flex flex-contenido-inicio m-y-3">
       <span
-        v-for="(button, i) in buttons"
+        v-for="(button, i) in iconOptions[storeConsulta.resourceType]"
         :key="i"
         v-globo-informacion:[button.position]="button.tooltipText"
         :class="[button.class, 'pictograma-mediano picto']"

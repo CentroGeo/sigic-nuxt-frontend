@@ -6,11 +6,9 @@ import { buildUrl, categoriesInSpanish, resourceTypeGeonode } from '~/utils/cons
 const { gnoxyFetch } = useGnoxyUrl();
 const config = useRuntimeConfig();
 const storeResources = useResourcesConsultaStore();
-//const storeFetched = useFetchedResources2Store();
 const storeConsulta = useConsultaStore();
 const totalResources = computed(() => storeResources.totals[storeConsulta.resourceType]);
-
-//watch(totalResources, (nv) => console.log('Total de recursos', nv));
+//const storeFetched = useFetchedResources2Store();
 //const storeFilters = useFilteredResources();
 defineProps({
   titulo: { type: String, default: 'Título' },
@@ -19,11 +17,11 @@ defineProps({
 //const { data } = useAuth();
 //const isLoggedIn = ref(data.value ? true : false);
 const apiCategorias = `${config.public.geonodeApi}/facets/category`;
-//const resources = computed(() => storeFetched.byResourceType());
-//const filteredResources = ref([]);
+const resources = computed(() => storeResources.byResourceType());
+const filteredResources = ref([]);
 const categoriesDict = ref({});
-//const categorizedResources = ref({});
-//const selectedCategories = ref([]);
+const categorizedResources = ref({});
+const selectedCategories = ref([]);
 //const modalFiltroAvanzado = ref(null);
 /* const isFilterActive = ref(false);
 const selectedOwner = computed({
@@ -70,6 +68,8 @@ async function buildCategoriesDict() {
       name: 'sinClasificar',
       inSpanish: categoriesInSpanish['Sin Clasificar'],
       total: totalResources.value,
+      page: 1,
+      isLoading: false,
     };
   } else {
     const results = await Promise.all(
@@ -80,6 +80,8 @@ async function buildCategoriesDict() {
           name: d.key,
           inSpanish: categoriesInSpanish[d.label],
           total: totalByCat,
+          page: 1,
+          isLoading: false,
         };
         return totalByCat;
       })
@@ -90,17 +92,29 @@ async function buildCategoriesDict() {
       name: 'sinClasificar',
       inSpanish: categoriesInSpanish['Sin Clasificar'],
       total: totalResources.value - totalWithCategory,
+      page: 1,
+      isLoading: false,
     };
   }
 }
-buildCategoriesDict();
+async function callResources(categoria) {
+  categoriesDict.value[categoria].isLoading = true;
+  const total = categoriesDict.value[categoria].total;
+  const count = categorizedResources.value[categoria]
+    ? categorizedResources.value[categoria].length
+    : 0;
+  if (total > count) {
+    await storeResources.fillByCategory(
+      storeConsulta.resourceType,
+      categoriesDict.value[categoria],
+      categoriesDict.value[categoria].name
+    );
+    categoriesDict.value[categoria].page += 1;
+  }
+  categoriesDict.value[categoria].isLoading = false;
+}
 
-watch(totalResources, () => {
-  buildCategoriesDict();
-});
-//const { data: geonodeCategories } = await gno
-
-/* function groupResults() {
+function groupResults() {
   categorizedResources.value = {};
   filteredResources.value.map((r) => {
     if (r.category) {
@@ -122,13 +136,32 @@ watch(totalResources, () => {
   });
 }
 
-function setSelectedCategory(categoria) {
+function updateResources(nuevosRecursos) {
+  filteredResources.value = nuevosRecursos;
+  groupResults();
+}
+
+async function setSelectedCategory(categoria) {
   if (selectedCategories.value.includes(categoria)) {
     selectedCategories.value = selectedCategories.value.filter((c) => c !== categoria);
   } else {
     selectedCategories.value.push(categoria);
   }
+  // Se agrega este if para que no se dispare la misma petición más de una vez
+  if (!categoriesDict.value[categoria].isLoading) {
+    await callResources(categoria);
+    updateResources(resources.value);
+  }
 }
+buildCategoriesDict();
+watch(totalResources, () => {
+  buildCategoriesDict();
+});
+
+//const { data: geonodeCategories } = await gno
+
+/*
+
 function applyAdvancedFilter() {
   isFilterActive.value = true;
   modalFiltroAvanzado.value.cerrarModalBusqueda();
@@ -231,31 +264,32 @@ async function fetchNewData() {
         <UiNumeroElementos :numero="totalResources" :etiqueta="etiquetaElementos" />
       </div>
     </div>
-
-    <div v-for="category in Object.keys(categoriesDict)" :key="category" class="m-y-1">
-      <ConsultaElementoCategoria
-        :title="categoriesDict[category].inSpanish"
-        :tag="etiquetaElementos"
-        :number-elements="categoriesDict[category].total"
-        @click="setSelectedCategory(category)"
-      />
-    </div>
-
-    <!--
-      <div
-        v-for="(resource, index) in categorizedResources[category]"
-        :key="index"
-        class="contenedor-archivos"
-      >
-        <ConsultaElementoCatalogo
-          v-if="selectedCategories.includes(category)"
-          :key="index"
-          class="elemento-catalogo"
-          :catalogue-element="resource"
-          :resource-type="storeConsulta.resourceType"
-          @trigger-fetch="fetchNewData()"
+    <div v-if="totalResources !== 0">
+      <div v-for="category in Object.keys(categoriesDict)" :key="category" class="m-y-1">
+        <ConsultaElementoCategoria
+          :title="categoriesDict[category].inSpanish"
+          :tag="etiquetaElementos"
+          :number-elements="categoriesDict[category].total"
+          @click="setSelectedCategory(category)"
         />
-      </div>-->
+
+        <div
+          v-for="(resource, index) in categorizedResources[category]"
+          :key="index"
+          class="contenedor-archivos"
+        >
+          <ConsultaElementoCatalogo
+            v-if="selectedCategories.includes(category)"
+            :key="index"
+            class="elemento-catalogo"
+            :catalogue-element="resource"
+            :resource-type="storeConsulta.resourceType"
+            @trigger-fetch="console.log('Se triguereó un nuevo fetch')"
+          />
+        </div>
+        <div v-if="categoriesDict[category].isLoading">....Cargando</div>
+      </div>
+    </div>
   </div>
 
   <!--   <ConsultaModalBusqueda
