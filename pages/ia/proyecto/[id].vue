@@ -139,6 +139,9 @@ watch(botonRadio, (nv) => {
 
 //
 const campoCasilla = ref(false);
+watch([campoCasilla], (nv) => {
+  console.log(nv);
+});
 const agregaInfoCatModal = ref(null);
 const capasModal = ref(null);
 const archivosSeleccionados = ref([]);
@@ -575,7 +578,6 @@ function siguiente() {
           <template #encabezado>
             <h2>Agregar {{ botonRadio }} del catálogo</h2>
           </template>
-
           <template #cuerpo>
             <div class="p-r-2">
               <p>Explora el catálogo y selecciona fuentes de información para el proyecto</p>
@@ -602,8 +604,9 @@ function siguiente() {
                     type="button"
                   >
                     <span class="pictograma-buscar" aria-hidden="true" />
-                  </button></form
-              ></ClientOnly>
+                  </button>
+                </form>
+              </ClientOnly>
 
               <div class="flex flex-contenido-separado">
                 <div class="columna-5">
@@ -680,6 +683,7 @@ function siguiente() {
                 </div>
                 <div class="columna-5">
                   <div>
+                    <!-- TODO: agregar recursos seleccionados-->
                     <UiNumeroElementos :numero="2" etiqueta="Capas seleccionadas" class="m-b-3" />
                     <ul class="lista-sin-estilo" style="overflow-y: auto">
                       <li v-for="capa in capasSeleccionadas" :key="capa.id" class="m-y-0">
