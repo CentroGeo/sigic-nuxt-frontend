@@ -231,6 +231,8 @@ const submitMensaje = async () => {
 
   if (json['chat_id'] !== null && json['chat_id'] !== undefined) {
     chatID.value = json['chat_id'];
+
+    storeIA.triggerChatsReload();
   }
 
   if (!jobId) {
@@ -338,6 +340,8 @@ const submitMensaje = async () => {
     scrollToBottomIfNeeded();
   } finally {
     isSubmitting.value = false;
+
+    storeIA.triggerChatsReload();
   }
 };
 

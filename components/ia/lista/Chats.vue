@@ -142,6 +142,13 @@ const handleDelete = async (chatId) => {
     console.log(err);
   }
 };
+
+watch(
+  () => storeIA.chatsVersion,
+  () => {
+    loadChatsList();
+  }
+);
 </script>
 
 <template>

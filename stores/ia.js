@@ -15,6 +15,7 @@ export const useIAStore = defineStore('ia', {
     chatSeleccionado: null,
     contextoSeleccionado: null,
     backend: useRuntimeConfig().public.iaBackendUrl,
+    chatsVersion: 0,
   }),
   getters: {
     authToken: () => {
@@ -581,6 +582,9 @@ export const useIAStore = defineStore('ia', {
         console.error('Error:', error);
         throw error;
       }
+    },
+    triggerChatsReload() {
+      this.chatsVersion++;
     },
   },
 });
