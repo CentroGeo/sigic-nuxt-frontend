@@ -210,7 +210,7 @@ const submitMensaje = async () => {
   // Envía la pregunta
   const token = data.value?.accessToken;
 
-  const res = await fetch(`${config.public.iaBackendUrl}queue/start`, {
+  const res = await fetch(`${config.public.iaBackendUrl}/queue/start`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -254,7 +254,7 @@ const submitMensaje = async () => {
   try {
     const token = data.value?.accessToken;
 
-    const streamRes = await fetch(`${config.public.iaBackendUrl}queue/stream/${jobId}`, {
+    const streamRes = await fetch(`${config.public.iaBackendUrl}/queue/stream/${jobId}`, {
       method: 'GET',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     });
