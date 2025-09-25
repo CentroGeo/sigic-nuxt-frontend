@@ -3,21 +3,10 @@ import { resourceTypeDic } from '~/utils/consulta';
 
 const storeConsulta = useConsultaStore();
 const storeResources = useResourcesConsultaStore();
-storeConsulta.resourceType = resourceTypeDic.dataTable;
-const resourceType = resourceTypeDic.dataTable;
-
-onMounted(async () => {
-  storeResources.resetByType(storeConsulta.resourceType);
-  storeResources.getTotalResources(storeConsulta.resourceType);
-});
-/* import { resourceTypeDic } from '~/utils/consulta';
-
-const storeConsulta = useConsultaStore();
-const storeFetched = useFetchedResources2Store();
 const storeSelected = useSelectedResources2Store();
 
-storeConsulta.resourceType = resourceType;
-storeFetched.checkFilling();
+storeConsulta.resourceType = resourceTypeDic.dataTable;
+const resourceType = resourceTypeDic.dataTable;
 
 const route = useRoute();
 const router = useRouter();
@@ -46,8 +35,8 @@ watch(paginaActual, () => {
   });
 });
 
-watch([() => selectedUuid.value, () => storeFetched.byResourceType(resourceType)], () => {
-  selectedElement.value = storeFetched.findResources([selectedUuid.value])[0];
+watch([() => selectedUuid.value, () => storeResources.resourcesByType(resourceType)], () => {
+  selectedElement.value = storeResources.findResources([selectedUuid.value])[0];
   paginaActual.value = 0;
   // console.log(selectedUuid.value);
   fetchTable({
@@ -61,7 +50,7 @@ watch([() => selectedUuid.value, () => storeFetched.byResourceType(resourceType)
  * Actualiza el queryParam.
  * @param newQueryParam para asignar.
  */
-/*
+
 function updateQueryParam(tablas) {
   if (tablas !== route.query.tablas) {
     router.replace({ query: { tablas } });
@@ -69,21 +58,23 @@ function updateQueryParam(tablas) {
 }
 watch(() => storeSelected.asQueryParam(), updateQueryParam);
 
-onMounted(() => {
+onMounted(async () => {
+  storeResources.resetByType(storeConsulta.resourceType);
+  storeResources.getTotalResources(storeConsulta.resourceType);
   storeSelected.addFromQueryParam(route.query.tablas);
 
   // Para cuando hacem el cambio de página
   if (storeSelected.uuids.length > 0) {
     updateQueryParam(storeSelected.asQueryParam());
 
-    selectedElement.value = storeFetched.findResources([selectedUuid.value])[0];
+    selectedElement.value = storeResources.findResources([selectedUuid.value])[0];
     fetchTable({
       paginaActual: paginaActual.value,
       tamanioPagina: tamanioPagina,
       resource: selectedElement.value,
     });
   }
-}); */
+});
 </script>
 
 <template>
@@ -93,7 +84,7 @@ onMounted(() => {
     </template>
 
     <template #visualizador>
-      <!--       <template v-if="storeFetched.isLoading">Cargando...</template>
+      <template v-if="storeResources.isLoading">Cargando...</template>
       <div v-else-if="storeSelected.uuids.length === 0" class="contenedor">
         <h1>No hay seleccion</h1>
       </div>
@@ -106,7 +97,7 @@ onMounted(() => {
           <h2 v-if="selectedElement" class="m-t-1 m-b-0 m-x-2">{{ selectedElement.title }}</h2>
           <UiTablaAccesible class="tabla" :variables="variables" :datos="datos" />
         </div>
-      </div> -->
+      </div>
     </template>
 
     <template #seleccion>

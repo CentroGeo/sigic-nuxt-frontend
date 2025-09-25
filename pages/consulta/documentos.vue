@@ -3,24 +3,9 @@ import { resourceTypeDic } from '~/utils/consulta';
 
 const storeConsulta = useConsultaStore();
 const storeResources = useResourcesConsultaStore();
+const storeSelected = useSelectedResources2Store();
 storeConsulta.resourceType = resourceTypeDic.document;
 const resourceType = resourceTypeDic.document;
-
-onMounted(async () => {
-  storeResources.resetByType(storeConsulta.resourceType);
-  storeResources.getTotalResources(storeConsulta.resourceType);
-});
-/* import { resourceTypeDic } from '~/utils/consulta';
-
-
-
-const storeConsulta = useConsultaStore();
-//const storeFetched = useFetchedResourcesStore();
-const storeFetched = useFetchedResources2Store();
-const storeSelected = useSelectedResources2Store();
-
-storeFetched.checkFilling();
-
 const route = useRoute();
 const router = useRouter();
 
@@ -28,7 +13,7 @@ const router = useRouter();
  * Actualiza el queryParam desde los valores del store.
  * @param queryParam generado por el store.
  */
-/*
+
 function updateQueryFromStore(queryParam) {
   const query = { docs: queryParam };
 
@@ -38,14 +23,16 @@ function updateQueryFromStore(queryParam) {
 }
 watch(() => storeSelected.asQueryParam(), updateQueryFromStore);
 
-onMounted(() => {
+onMounted(async () => {
+  storeResources.resetByType(storeConsulta.resourceType);
+  storeResources.getTotalResources(storeConsulta.resourceType);
   storeSelected.addFromQueryParam(route.query.docs);
 
   // Para cuando hacemos el cambio de página
   if (storeSelected.uuids.length > 0) {
     updateQueryFromStore(storeSelected.asQueryParam());
   }
-}); */
+});
 </script>
 
 <template>
@@ -55,11 +42,11 @@ onMounted(() => {
     </template>
 
     <template #visualizador>
-      <!--       <template v-if="storeFetched.isLoading">Cargando...</template>
+      <template v-if="storeResources.isLoading">Cargando...</template>
       <div v-else-if="storeSelected.uuids.length === 0" class="contenedor">
         <h1>No hay seleccion</h1>
       </div>
-      <ConsultaVisualizacionDocumento v-else /> -->
+      <ConsultaVisualizacionDocumento v-else />
     </template>
 
     <template #seleccion>
