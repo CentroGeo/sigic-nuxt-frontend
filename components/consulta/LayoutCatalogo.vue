@@ -1,32 +1,22 @@
 <script setup>
 // TODO: Quitar toda la logica para elementos sin categoria
-//import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-//import { categoriesInSpanish } from '~/utils/consulta';
+import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { buildUrl, categoriesInSpanish, resourceTypeGeonode } from '~/utils/consulta';
 
-const { gnoxyFetch } = useGnoxyUrl();
 const config = useRuntimeConfig();
 const storeResources = useResourcesConsultaStore();
 const storeConsulta = useConsultaStore();
-const totalResources = computed(() => storeResources.totalByType());
-const isLoading = computed(() => storeResources.isLoading);
-const nthElement = 1;
-//const storeFetched = useFetchedResources2Store();
-//const storeFilters = useFilteredResources();
+const storeFilters = useFilteredResources();
+const { gnoxyFetch } = useGnoxyUrl();
+const { data } = useAuth();
+
 defineProps({
   titulo: { type: String, default: 'Título' },
   etiquetaElementos: { type: String, default: undefined },
 });
-//const { data } = useAuth();
-//const isLoggedIn = ref(data.value ? true : false);
-const apiCategorias = `${config.public.geonodeApi}/facets/category`;
+const totalResources = computed(() => storeResources.totalByType());
+const isLoading = computed(() => storeResources.isLoading);
 const resources = computed(() => storeResources.resourcesByType());
-const filteredResources = ref([]);
-const categoriesDict = ref({});
-const categorizedResources = ref({});
-const selectedCategories = ref([]);
-//const modalFiltroAvanzado = ref(null);
-/* const isFilterActive = ref(false);
 const selectedOwner = computed({
   get: () => storeFilters.filters.owner,
   set: (value) => storeFilters.updateFilter('owner', value),
@@ -34,7 +24,17 @@ const selectedOwner = computed({
 const inputSearch = computed({
   get: () => storeFilters.filters.inputSearch,
   set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
-}); */
+});
+const nthElement = 1;
+//const storeFetched = useFetchedResources2Store();
+const isLoggedIn = ref(data.value ? true : false);
+const apiCategorias = `${config.public.geonodeApi}/facets/category`;
+const filteredResources = ref([]);
+const categoriesDict = ref({});
+const categorizedResources = ref({});
+const selectedCategories = ref([]);
+const modalFiltroAvanzado = ref(null);
+const isFilterActive = ref(false);
 
 // TODO: Llevar esta fución a los utils
 async function fetchTotalByCategory(category) {
@@ -53,7 +53,7 @@ async function fetchTotalByCategory(category) {
     queryParams['file_extension'] = ['pdf', 'txt'];
   }
   const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
-  const request = await gnoxyFetch(url);
+  const request = await gnoxyFetch(url.toString());
   const res = await request.json();
   return res.total;
 }
@@ -117,6 +117,7 @@ async function callResources(categoria) {
   }
   categoriesDict.value[categoria].isLoading = false;
 }
+
 function getNthElements() {
   const nthElementsUuids = [];
   const categoriesList = Object.keys(categorizedResources.value);
@@ -169,21 +170,19 @@ async function setSelectedCategory(categoria) {
   }
 }
 
-// Prueba de consumo de recursos paginado y usando gnoxy
 async function fetchNewData(category) {
+  console.log(category);
   await callResources(category);
   updateResources(resources.value);
 }
-// Eventualmente quitar la siguiente línea
-buildCategoriesDict();
+
 watch(totalResources, () => {
   buildCategoriesDict();
 });
-
-//const { data: geonodeCategories } = await gno
-
+onMounted(async () => {
+  storeFilters.resetAll();
+});
 /*
-
 function applyAdvancedFilter() {
   isFilterActive.value = true;
   modalFiltroAvanzado.value.cerrarModalBusqueda();
@@ -220,7 +219,7 @@ onMounted(async () => {
       <p class="h4 fondo-color-acento p-3 m-0">{{ titulo }}</p>
 
       <div class="m-x-2 m-y-1">
-        <!--         <p v-if="!isLoggedIn" class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
+        <p v-if="!isLoggedIn" class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
 
         <ClientOnly>
           <SisdaiSelector
@@ -279,7 +278,7 @@ onMounted(async () => {
               <span class="pictograma-filtro" aria-hidden="true" />
             </button>
           </div>
-        </ClientOnly> -->
+        </ClientOnly>
         <UiNumeroElementos :numero="totalResources" :etiqueta="etiquetaElementos" />
       </div>
     </div>
@@ -312,11 +311,11 @@ onMounted(async () => {
     </div>
   </div>
 
-  <!--   <ConsultaModalBusqueda
+  <ConsultaModalBusqueda
     ref="modalFiltroAvanzado"
     @apply-filter="applyAdvancedFilter"
     @reset-filter="resetAdvancedFilter"
-  /> -->
+  />
 </template>
 
 <style lang="scss" scoped>

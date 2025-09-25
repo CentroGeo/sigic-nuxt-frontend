@@ -40,13 +40,13 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
     },
 
     resetByType(resourceType = storeConsulta.resourceType) {
+      totals[resourceType] = 0;
       resources[resourceType] = [];
     },
 
     async getTotalResources(resourceType = storeConsulta.resourceType) {
-      this.isLoading = true;
       const { gnoxyFetch } = useGnoxyUrl();
-
+      this.isLoading = true;
       const queryParams = {
         custom: 'true',
         'filter{resource_type}': resourceTypeGeonode[resourceType],
@@ -64,7 +64,7 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
       }
 
       const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
-      const request = await gnoxyFetch(url);
+      const request = await gnoxyFetch(url.toString());
       const res = await request.json();
       totals[resourceType] = res.total;
       this.isLoading = false;

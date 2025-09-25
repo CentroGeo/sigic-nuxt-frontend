@@ -8,7 +8,11 @@ import { resourceTypeDic } from '~/utils/consulta';
 const storeConsulta = useConsultaStore();
 storeConsulta.resourceType = resourceTypeDic.dataLayer;
 const consultaResources = useResourcesConsultaStore();
-consultaResources.getTotalResources(storeConsulta.resourceType);
+
+onMounted(async () => {
+  consultaResources.resetByType(storeConsulta.resourceType);
+  consultaResources.getTotalResources(storeConsulta.resourceType);
+});
 /*const storeFetched = useFetchedResources2Store();
 const storeSelected = useSelectedResources2Store();
 const route = useRoute();
