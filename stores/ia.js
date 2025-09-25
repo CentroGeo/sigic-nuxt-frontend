@@ -543,7 +543,7 @@ export const useIAStore = defineStore('ia', {
     async updateChat(title, chat_id) {
       const token = this.authToken;
 
-      const response = await fetch(this.backend + 'direct/api/chat/history/title', {
+      const response = await fetch(this.backend + '/direct/api/chat/history/title', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -565,7 +565,7 @@ export const useIAStore = defineStore('ia', {
       try {
         const token = this.authToken;
 
-        const response = await fetch(this.backend + `direct/api/chat/history/remove/${chat_id}`, {
+        const response = await fetch(this.backend + `/direct/api/chat/history/remove/${chat_id}`, {
           method: 'DELETE',
           headers: {
             Authorization: `Bearer ${token}`,

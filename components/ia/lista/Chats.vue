@@ -27,7 +27,6 @@ const seleccionProyecto = ref('');
 const seleccionContexto = ref('');
 
 const router = useRouter();
-//const route = useRoute();
 
 const editarChatModal = ref(null);
 const tituloChat = ref('');
@@ -125,12 +124,18 @@ onMounted(() => {
 const handleDelete = async (chatId) => {
   try {
     const chatActual = storeIA.chatActual;
+    const route = router.currentRoute.value;
+
+    const estaEnChat = route.path === '/ia/chat/dinamica';
+
     const esChatActual = chatActual && chatActual.id === chatId;
+
+    const esNuevoChatSinId = estaEnChat && (!chatActual || !chatActual.id);
 
     await storeIA.deleteChat(chatId);
     await loadChatsList();
 
-    if (esChatActual) {
+    if (esChatActual || esNuevoChatSinId) {
       storeIA.clearChatActual();
       router.push('/ia/chats');
     }
