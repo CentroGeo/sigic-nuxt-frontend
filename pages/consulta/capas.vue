@@ -1,18 +1,17 @@
 <script setup>
 import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
-import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
+//import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
 import { findServer, resourceTypeDic } from '~/utils/consulta';
 
-// const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
-const storeFetched = useFetchedResources2Store();
+const storeResources = useResourcesConsultaStore();
 const storeSelected = useSelectedResources2Store();
+const { gnoxyFetch } = useGnoxyUrl();
 const route = useRoute();
 const router = useRouter();
-//const proxy = `${config.public.geonodeUrl}/proxy/?url=`;
 storeConsulta.resourceType = resourceTypeDic.dataLayer;
-storeFetched.checkFilling();
-//const { gnoxyUrl } = useGnoxyUrl();
+
+const vistaDelMapa = ref({ extension: storeConsulta.mapExtent });
 
 const linkExportaMapa = ref();
 function exportarMapa() {
@@ -21,6 +20,58 @@ function exportarMapa() {
     linkExportaMapa.value
   );
 }
+
+/**
+ * Agrega en un parametro hash los valores de la vista del mapa
+ * @param param vista del mapa
+ */
+function actualizarHashDesdeVista({ acercamiento, centro }) {
+  const hash = `#vista=${acercamiento.toFixed(0)}/${centro[1].toFixed(4)}/${centro[0].toFixed(4)}`;
+
+  if (hash !== route.hash) {
+    router.replace({ query: route.query, hash });
+  }
+}
+
+/**
+ * Actualiza la vista del mapa dependiendo del hash.
+ * @param hashVista texto hash sin el carácter #.
+ */
+function updateMapFromHash(hashVista) {
+  if (hashVista === '') return;
+
+  const [acercamiento, latitud, longitud] = hashVista.split('=')[1].split('/');
+  storeConsulta.mapExtent = undefined;
+  vistaDelMapa.value = { acercamiento, centro: [longitud, latitud] };
+}
+/**
+ * Actualiza el queryParam.
+ * @param newQueryParam para asignar.
+ */
+function updateQueryParam(capas) {
+  if (capas !== route.query.capas) {
+    router.replace({ query: { capas }, hash: route.hash });
+  }
+}
+watch(() => storeSelected.asQueryParam(), updateQueryParam);
+watch(
+  () => storeConsulta.mapExtent,
+  (extension) => {
+    if (extension === undefined) return;
+    vistaDelMapa.value = { extension };
+  }
+);
+onMounted(async () => {
+  storeResources.resetByType(storeConsulta.resourceType);
+  storeResources.getTotalResources(storeConsulta.resourceType);
+  updateMapFromHash(route.hash?.slice(1));
+  storeSelected.addFromQueryParam(route.query.capas);
+
+  // Para cuando hace el cambio de página
+  if (storeSelected.uuids.length > 0) {
+    updateQueryParam(storeSelected.asQueryParam());
+  }
+});
 
 // const attributos = reactive({});
 // async function addAttribute(pk) {
@@ -93,75 +144,7 @@ function exportarMapa() {
 //   { deep: true }
 // );
 
-const vistaDelMapa = ref({ extension: storeConsulta.mapExtent });
-watch(
-  () => storeConsulta.mapExtent,
-  (extension) => {
-    if (extension === undefined) return;
-    vistaDelMapa.value = { extension };
-  }
-);
-
-/**
- * Agrega en un parametro hash los valores de la vista del mapa
- * @param param vista del mapa
- */
-function actualizarHashDesdeVista({ acercamiento, centro }) {
-  const hash = `#vista=${acercamiento.toFixed(0)}/${centro[1].toFixed(4)}/${centro[0].toFixed(4)}`;
-
-  if (hash !== route.hash) {
-    router.replace({ query: route.query, hash });
-  }
-}
-
-/**
- * Actualiza la vista del mapa dependiendo del hash.
- * @param hashVista texto hash sin el carácter #.
- */
-function updateMapFromHash(hashVista) {
-  if (hashVista === '') return;
-
-  const [acercamiento, latitud, longitud] = hashVista.split('=')[1].split('/');
-  storeConsulta.mapExtent = undefined;
-  vistaDelMapa.value = { acercamiento, centro: [longitud, latitud] };
-}
-
-/**
- * Actualiza el queryParam.
- * @param newQueryParam para asignar.
- */
-function updateQueryParam(capas) {
-  if (capas !== route.query.capas) {
-    router.replace({ query: { capas }, hash: route.hash });
-  }
-}
-watch(() => storeSelected.asQueryParam(), updateQueryParam);
-
-/* function findServer(resource) {
-  if (resource.sourcetype === 'REMOTE') {
-    const url = getWMSserver(resource);
-    //const urlCurada = gnoxyUrl(url);
-    //return urlCurada;
-    return url;
-  } else {
-    const url = `${config.public.geonodeUrl}/gs/wms?`;
-    const urlCurada = gnoxyUrl(url);
-    return urlCurada;
-    // return `${config.public.geonodeUrl}/gs`;
-  }
-} */
-onMounted(() => {
-  updateMapFromHash(route.hash?.slice(1));
-  storeSelected.addFromQueryParam(route.query.capas);
-
-  // Para cuando hace el cambio de página
-  if (storeSelected.uuids.length > 0) {
-    updateQueryParam(storeSelected.asQueryParam());
-  }
-});
-
 // api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
-const { gnoxyFetch } = useGnoxyUrl();
 </script>
 
 <template>
@@ -171,7 +154,7 @@ const { gnoxyFetch } = useGnoxyUrl();
     </template>
 
     <template #visualizador>
-      <template v-if="storeFetched.isLoading">Cargando...</template>
+      <template v-if="storeResources.isLoading">Cargando...</template>
 
       <ClientOnly>
         <SisdaiMapa
@@ -183,7 +166,7 @@ const { gnoxyFetch } = useGnoxyUrl();
           <SisdaiCapaXyz :posicion="0" />
 
           <SisdaiCapaWms
-            v-for="resource in storeFetched.findResources(storeSelected.uuids)"
+            v-for="resource in storeResources.findResources(storeSelected.uuids)"
             :key="`wms-${resource.uuid}`"
             :capa="resource.alternate"
             :consulta="gnoxyFetch"

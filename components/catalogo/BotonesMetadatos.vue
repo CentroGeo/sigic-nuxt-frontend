@@ -17,8 +17,8 @@ const props = defineProps({
     default: () => ({}),
   },
 });
-const storeCatalogo = useCatalogoStore();
-const { data } = useAuth();
+//const storeCatalogo = useCatalogoStore();
+//const { data } = useAuth();
 const cargaExitosa = ref(false);
 
 const rutas = ref({});
@@ -53,7 +53,7 @@ function irARutaConQuery(direccion) {
  * Actualiza los metadatos con los valores del store
  */
 
-async function actualizaMetadatos() {
+/*async function actualizaMetadatos() {
   // console.log(data.value?.accessToken);
   const response = await $fetch('/api/metadatos', {
     method: 'POST',
@@ -66,8 +66,8 @@ async function actualizaMetadatos() {
     },
   });
   console.warn('response', response);
-  cargaExitosa.value = true;
-}
+  cargaExitosa.value = true; 
+}*/
 </script>
 <template>
   <div>
@@ -82,9 +82,8 @@ async function actualizaMetadatos() {
       >
         Regresar
       </button>
-      <button class="boton-primario boton-chico" :disabled="false" @click="actualizaMetadatos()">
-        Actualizar
-      </button>
+      <!--<button class="boton-primario boton-chico" :disabled="false" @click="actualizaMetadatos()"> -->
+      <button class="boton-primario boton-chico" :disabled="false">Actualizar</button>
       <button
         v-if="props.title !== lastButton"
         class="boton-primario boton-chico"
