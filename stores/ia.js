@@ -12,7 +12,7 @@ export const useIAStore = defineStore('ia', {
     uploadProgress: 0,
     isUploading: false,
     chats: [],
-    chatSeleccionado: null,
+    chatActual: null,
     contextoSeleccionado: null,
     backend: useRuntimeConfig().public.iaBackendUrl,
     chatsVersion: 0,
@@ -585,6 +585,12 @@ export const useIAStore = defineStore('ia', {
     },
     triggerChatsReload() {
       this.chatsVersion++;
+    },
+    setChatActual(chat) {
+      this.chatActual = chat;
+    },
+    clearChatActual() {
+      this.chatActual = null;
     },
   },
 });

@@ -4,7 +4,7 @@ import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 
 const storeIA = useIAStore();
 
@@ -27,7 +27,7 @@ const seleccionProyecto = ref('');
 const seleccionContexto = ref('');
 
 const router = useRouter();
-const route = useRoute();
+//const route = useRoute();
 
 const editarChatModal = ref(null);
 const tituloChat = ref('');
@@ -101,6 +101,8 @@ function transformarHistorial(historiales) {
 
 function openChat(chat) {
   //console.log("openChat: ",chat)
+  storeIA.setChatActual(chat);
+
   router.push({
     path: '/ia/chat/dinamica',
     query: {
@@ -122,19 +124,14 @@ onMounted(() => {
 
 const handleDelete = async (chatId) => {
   try {
+    const chatActual = storeIA.chatActual;
+    const esChatActual = chatActual && chatActual.id === chatId;
+
     await storeIA.deleteChat(chatId);
     await loadChatsList();
 
-    const currentChatId = route.query.chat_id ? Number(route.query.chat_id) : null;
-
-    if (currentChatId === chatId) {
-      router.push('/ia/chats');
-      return;
-    }
-
-    const isInChatView = route.path.includes('/ia/chat');
-
-    if (!currentChatId && isInChatView && grupo.chatActual?.id === chatId) {
+    if (esChatActual) {
+      storeIA.clearChatActual();
       router.push('/ia/chats');
     }
   } catch (err) {
