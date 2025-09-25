@@ -1,6 +1,4 @@
 <script setup>
-import { watch } from 'vue';
-import { useRoute } from 'vue-router';
 import { resourceTypeDic } from '~/utils/consulta';
 
 definePageMeta({ auth: false, key: 'inicio' });
@@ -11,6 +9,7 @@ async function iniciarSesion() {
     callbackUrl: '/', // A dónde volver después del login
   });
 }
+/*
 const route = useRoute();
 
 useHead({
@@ -112,7 +111,7 @@ onUnmounted(() => {
     }
   }
 });
-
+*/
 // Capas recientes
 const storeFetched = useFetchedResources2Store();
 storeFetched.checkFilling(resourceTypeDic.dataLayer);
@@ -478,6 +477,7 @@ const capasMasRecientes = obtenerMasRecientes(resourceTypeDic.dataLayer);
 .init-sesion {
   display: inline;
 }
+/*
 .solo-en-index {
   .contenido {
     padding-top: 54px;
@@ -486,7 +486,7 @@ const capasMasRecientes = obtenerMasRecientes(resourceTypeDic.dataLayer);
     top: 54px;
   }
 }
-
+*/
 :root {
   --escala-rem-gob-sisdai: 0.65;
 }

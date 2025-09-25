@@ -10,6 +10,7 @@ const props = defineProps({
     default: () => ({}),
   },
 });
+const { gnoxyFetch } = useGnoxyUrl();
 const extentMap = ref(undefined);
 //const estilosLista = ref(['Opcion 1', 'Opción 2', 'Opcion 3']);
 //const estiloSeleccionado = ref(estilosLista.value[0]);
@@ -32,12 +33,19 @@ function downloadClicked() {
 function abrirModalMapa() {
   modalMapa.value?.abrirModal();
 }
-
+/* function findServer(resource) {
+  if (resource.sourcetype === 'REMOTE') {
+    const url = getWMSserver(resource);
+    return url;
+  } else {
+    const url = `${config.public.geonodeUrl}/gs/wms?`;
+    const urlCurada = gnoxyUrl(url);
+    return urlCurada;
+  }
+} */
 defineExpose({
   abrirModalMapa,
 });
-
-const { gnoxyFetch } = useGnoxyUrl();
 </script>
 
 <template>
