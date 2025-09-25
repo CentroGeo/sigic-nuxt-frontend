@@ -2,16 +2,15 @@
 import { resourceTypeDic } from '~/utils/consulta';
 
 const storeConsulta = useConsultaStore();
-storeConsulta.resourceType = resourceTypeDic.dataTable;
 const storeResources = useResourcesConsultaStore();
+storeConsulta.resourceType = resourceTypeDic.dataTable;
+const resourceType = resourceTypeDic.dataTable;
 
 onMounted(async () => {
   storeResources.resetByType(storeConsulta.resourceType);
   storeResources.getTotalResources(storeConsulta.resourceType);
 });
 /* import { resourceTypeDic } from '~/utils/consulta';
-
-const resourceType = resourceTypeDic.dataTable;
 
 const storeConsulta = useConsultaStore();
 const storeFetched = useFetchedResources2Store();
@@ -111,11 +110,11 @@ onMounted(() => {
     </template>
 
     <template #seleccion>
-      <!--       <ConsultaLayoutSeleccion
+      <ConsultaLayoutSeleccion
         titulo="Tabulados de datos"
         :resource-type="resourceType"
         etiqueta-elementos="Datos tabulados"
-      /> -->
+      />
     </template>
   </ConsultaLayoutPaneles>
 </template>

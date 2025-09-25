@@ -6,13 +6,21 @@ import { resourceTypeDic } from '~/utils/consulta';
 
 // const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
-storeConsulta.resourceType = resourceTypeDic.dataLayer;
 const storeResources = useResourcesConsultaStore();
+storeConsulta.resourceType = resourceTypeDic.dataLayer;
 
 onMounted(async () => {
   storeResources.resetByType(storeConsulta.resourceType);
   storeResources.getTotalResources(storeConsulta.resourceType);
 });
+
+const linkExportaMapa = ref();
+function exportarMapa() {
+  exportarHTMLComoPNG(
+    document.querySelectorAll('.mapa .ol-viewport').item(0),
+    linkExportaMapa.value
+  );
+}
 /*const storeFetched = useFetchedResources2Store();
 const storeSelected = useSelectedResources2Store();
 const route = useRoute();
@@ -20,14 +28,6 @@ const router = useRouter(); */
 //const proxy = `${config.public.geonodeUrl}/proxy/?url=`;
 //storeFetched.checkFilling(); */
 //const { gnoxyUrl } = useGnoxyUrl();
-
-/* const linkExportaMapa = ref();
-function exportarMapa() {
-  exportarHTMLComoPNG(
-    document.querySelectorAll('.mapa .ol-viewport').item(0),
-    linkExportaMapa.value
-  );
-} */
 
 // const attributos = reactive({});
 // async function addAttribute(pk) {
@@ -205,14 +205,13 @@ watch(() => storeSelected.asQueryParam(), updateQueryParam);
     </template>
 
     <template #seleccion>
-      <p>Panel selector</p>
-      <!--       <ConsultaLayoutSeleccion
+      <ConsultaLayoutSeleccion
         titulo="Capas seleccionadas"
         :resource-type="storeConsulta.resourceType"
         etiqueta-elementos="Capas"
         :funcion-descarga="exportarMapa"
       />
-      <a ref="linkExportaMapa" class="oculto" download="sigic.png" /> -->
+      <a ref="linkExportaMapa" class="oculto" download="sigic.png" />
     </template>
   </ConsultaLayoutPaneles>
 </template>

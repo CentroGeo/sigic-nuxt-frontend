@@ -17,6 +17,7 @@ const props = defineProps({
 });
 const { catalogueElement } = toRefs(props);
 const { data } = useAuth();
+//console.log(data.value?.accessToken);
 const isLoggedIn = ref(data.value ? true : false);
 const userEmail = ref(data.value?.user.email);
 const nthElementsUuids = computed(() => storeResources.nthElementsByType());
@@ -116,8 +117,8 @@ onMounted(() => {
     async (entries) => {
       for (const entry of entries) {
         if (entry.isIntersecting) {
-          if (nthElementsUuids.value.includes(props.catalogueElement.uuid)) {
-            emit('triggerFetch', props.catalogueElement.category.gn_description);
+          if (nthElementsUuids.value.includes(catalogueElement.value.uuid)) {
+            emit('triggerFetch', catalogueElement.value.category.gn_description);
           }
           observer.unobserve(entry.target);
         }

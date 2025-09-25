@@ -2,8 +2,9 @@
 import { resourceTypeDic } from '~/utils/consulta';
 
 const storeConsulta = useConsultaStore();
-storeConsulta.resourceType = resourceTypeDic.document;
 const storeResources = useResourcesConsultaStore();
+storeConsulta.resourceType = resourceTypeDic.document;
+const resourceType = resourceTypeDic.document;
 
 onMounted(async () => {
   storeResources.resetByType(storeConsulta.resourceType);
@@ -11,14 +12,13 @@ onMounted(async () => {
 });
 /* import { resourceTypeDic } from '~/utils/consulta';
 
-const resourceType = resourceTypeDic.document;
+
 
 const storeConsulta = useConsultaStore();
 //const storeFetched = useFetchedResourcesStore();
 const storeFetched = useFetchedResources2Store();
 const storeSelected = useSelectedResources2Store();
 
-storeConsulta.resourceType = resourceTypeDic.document;
 storeFetched.checkFilling();
 
 const route = useRoute();
@@ -63,11 +63,11 @@ onMounted(() => {
     </template>
 
     <template #seleccion>
-      <!--       <ConsultaLayoutSeleccion
+      <ConsultaLayoutSeleccion
         titulo="Documentos seleccionados"
         :resource-type="resourceType"
         etiqueta-elementos="Documentos"
-      /> -->
+      />
     </template>
   </ConsultaLayoutPaneles>
 </template>

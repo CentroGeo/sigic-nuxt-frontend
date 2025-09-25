@@ -36,7 +36,6 @@ const selectedCategories = ref([]);
 const modalFiltroAvanzado = ref(null);
 const isFilterActive = ref(false);
 
-// TODO: Llevar esta fución a los utils
 async function fetchTotalByCategory(category) {
   const queryParams = {
     custom: 'true',
@@ -315,8 +314,8 @@ onMounted(async () => {
 
   <ConsultaModalBusqueda
     ref="modalFiltroAvanzado"
-    @apply-filter="applyAdvancedFilter"
-    @reset-filter="resetAdvancedFilter"
+    @apply-filter="console.log('applyAdvancedFilter')"
+    @reset-filter="console.log('resetAdvancedFilter')"
   />
 </template>
 

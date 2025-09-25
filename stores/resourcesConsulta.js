@@ -60,9 +60,9 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
         //queryParams['filter{subtype.in}'] = ['vector', 'remote'];
         queryParams['filter{subtype.in}'] = 'vector';
       }
-      if (resourceType === 'document') {
+      /*  if (resourceType === 'document') {
         queryParams['file_extension'] = ['pdf', 'txt'];
-      }
+      } */
 
       const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
       const request = await gnoxyFetch(url.toString());
