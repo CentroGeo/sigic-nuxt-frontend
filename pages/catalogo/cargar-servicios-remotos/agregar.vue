@@ -3,6 +3,13 @@ import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/cam
 import SisdaiCasillaVerificacion from '@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
+definePageMeta({
+  middleware: 'sidebase-auth',
+  bodyAttrs: {
+    class: '',
+  },
+});
+
 const selecTipoFuente = ref('');
 const campoURL = ref('');
 const casillaUnicaAutenticacion0 = ref(false);
@@ -88,9 +95,6 @@ async function crearCatalogoExterno() {
           <p>Selecciona los recursos que quieres importar:</p>
           <form @keypress.enter.exact.prevent="importarCatalogoExterno()">
             <table class="tabla-condensada">
-              <!-- <caption>
-                  Nombre del servicio
-                </caption> -->
               <thead>
                 <tr>
                   <th>Nombre</th>

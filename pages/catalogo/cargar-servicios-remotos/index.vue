@@ -1,45 +1,26 @@
 <script setup>
-import { resourceTypeDic } from '~/utils/consulta';
-
-const storeFilters = useFilteredResources();
-const storeFetched = useFetchedResources2Store();
-storeFetched.checkFilling(resourceTypeDic.dataLayer);
-storeFetched.checkFilling(resourceTypeDic.dataTable);
-storeFetched.checkFilling(resourceTypeDic.document);
-
-const recursos = computed(() => storeFetched.all);
-const filteredResources = ref([]);
-
-function updateResources(nuevosRecursos) {
-  filteredResources.value = nuevosRecursos;
-
-  if (filteredResources.value.length > 0) {
-    filteredResources.value = filteredResources.value.filter(
-      (resource) => resource.sourcetype === 'REMOTE'
-    );
-    // si hay recursos remotos
-    if (filteredResources.value.length !== 0) {
-      navigateTo({
-        path: '/catalogo/cargar-servicios-remotos/agregar',
-      });
-    } else {
-      navigateTo({
-        path: '/catalogo/cargar-servicios-remotos/cargados',
-      });
-    }
+try {
+  const { data } = useAuth();
+  const token = data.value?.accessToken;
+  // console.log(token);
+  const response = await $fetch('https://geonode.dev.geoint.mx/api/v2/harvesters/', {
+    method: 'GET',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+  });
+  // console.log('response', response);
+  const harvesters = response.harvesters;
+  if (harvesters.length === 0) {
+    navigateTo({
+      path: '/catalogo/cargar-servicios-remotos/agregar',
+    });
+  } else {
+    navigateTo({
+      path: '/catalogo/cargar-servicios-remotos/cargados',
+    });
   }
+} catch (err) {
+  console.warn('Error en el streaming: ' + err);
 }
-
-watch([recursos], () => {
-  updateResources(storeFilters.filter('all'));
-});
-
-onMounted(() => {
-  storeFilters.resetAll();
-  if (recursos.value.length !== 0) {
-    updateResources(recursos.value);
-  }
-});
 </script>
 <template>
   <UiLayoutPaneles>
@@ -48,9 +29,12 @@ onMounted(() => {
     </template>
 
     <template #visualizador>
-      <main id="principal" class="contenedor m-b-10">
-        <p>...cargando</p>
-      </main>
+      <main>...cargando</main>
     </template>
   </UiLayoutPaneles>
 </template>
+<style lang="scss">
+form table {
+  width: 100%;
+}
+</style>

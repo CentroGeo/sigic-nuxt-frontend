@@ -1,33 +1,105 @@
 <script setup>
-import { resourceTypeDic } from '~/utils/consulta';
+definePageMeta({
+  middleware: 'sidebase-auth',
+  bodyAttrs: {
+    class: '',
+  },
+});
 
-const storeFilters = useFilteredResources();
-const storeFetched = useFetchedResources2Store();
-storeFetched.checkFilling(resourceTypeDic.dataLayer);
-storeFetched.checkFilling(resourceTypeDic.dataTable);
-storeFetched.checkFilling(resourceTypeDic.document);
+const { data } = useAuth();
+const token = data.value?.accessToken;
+// console.log(token);
+const headers = ref({ Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' });
+const configEnv = useRuntimeConfig();
+const baseUrl = configEnv.public.geonodeApi;
 
-const recursos = computed(() => storeFetched.all);
-const filteredRemoteResources = ref([]);
+const harvesters = ref([]);
+const resources = ref([]);
+const remoteHaverstersResources = ref([]);
+const harvestableResources = ref([]);
 
-function updateResources(nuevosRecursos) {
-  filteredRemoteResources.value = nuevosRecursos;
-  filteredRemoteResources.value = filteredRemoteResources.value.filter(
-    (resource) => resource.sourcetype === 'REMOTE'
+try {
+  const responseHaversters = await $fetch(`${baseUrl}/harvesters`, {
+    method: 'GET',
+    headers: headers.value,
+  });
+  // console.log('response', response);
+  const responseResources = await $fetch(`${baseUrl}/resources?filter{resource_type}=service`, {
+    method: 'GET',
+    headers: headers.value,
+  });
+  // console.log('responseResources', responseResources);
+
+  harvesters.value = responseHaversters.harvesters;
+  resources.value = responseResources.resources;
+
+  resources.value.forEach((d) =>
+    harvesters.value.forEach(async (dd) => {
+      if (d.owner.pk === dd.default_owner) {
+        const exportedResources = ref(0);
+        harvestableResources.value = [];
+        const totalResources = ref(0);
+        const url = `${baseUrl}/harvesters/${dd.id}/harvestable-resources`;
+
+        // para obtener el total de recursos
+        const res = await $fetch(url, {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        });
+        totalResources.value = res.total;
+        // para obtener todos los recursos
+        const response = await $fetch(`${url}/?page_size=${totalResources.value}`, {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        });
+        harvestableResources.value = response.harvestable_resources;
+
+        // filtramos por los que ya están importados a sigic
+        exportedResources.value = harvestableResources.value.filter(
+          (j) => j.should_be_harvested === true && j.remote_resource_type
+        );
+
+        // push al objeto final
+        remoteHaverstersResources.value.push({
+          id: dd.id,
+          title: d.title,
+          exported_resources: exportedResources.value.length,
+          to_attend_resources: totalResources.value - exportedResources.value.length,
+          remote_url: dd.remote_url,
+
+          unique_identifier: exportedResources.value.map((e) => {
+            return e.unique_identifier;
+          }),
+          remote_resource_type: exportedResources.value.map((e) => {
+            return e.remote_resource_type;
+          }),
+          a: [
+            exportedResources.value.map((e) => ({
+              unique_identifier: e.unique_identifier,
+              remote_resource_type: e.remote_resource_type,
+            })),
+          ],
+        });
+        // console.log('remoteHaverstersResources.value', remoteHaverstersResources.value);
+      }
+    })
   );
-  // console.log('filteredRemoteResources', filteredRemoteResources.value);
+} catch (err) {
+  console.warn('Error en el streaming: ' + err);
 }
-
-watch([recursos], () => {
-  updateResources(storeFilters.filter('all'));
-});
-
-onMounted(() => {
-  storeFilters.resetAll();
-  if (recursos.value.length !== 0) {
-    updateResources(recursos.value);
-  }
-});
+const cargando = ref(false);
+const irARutaQuery = (v) => {
+  // console.log(v);
+  cargando.value = true;
+  navigateTo({
+    path: `/catalogo/cargar-servicios-remotos/${v.id}`,
+    query: {
+      title: v.title,
+      unique_identifier: v.unique_identifier,
+      remote_resource_type: v.remote_resource_type,
+    },
+  });
+};
 </script>
 
 <template>
@@ -37,28 +109,49 @@ onMounted(() => {
     </template>
 
     <template #visualizador>
-      <main id="principal" class="contenedor m-b-10">
+      <main
+        v-if="remoteHaverstersResources.length !== 0 && !cargando"
+        id="principal"
+        class="contenedor m-b-10"
+      >
         <h2>Carga catálogos externos</h2>
-
         <div class="ancho-fijo">
           <h3>Recursos cargados</h3>
+          <p
+            class="texto-color-alerta fondo-color-alerta borde borde-color-alerta p-2 borde-redondeado-8"
+          >
+            Los catálogos externos tienen funciones limitadas. Algunas descargas o consultas pueden
+            no estar disponibles
+          </p>
           <form>
             <table>
               <thead>
                 <tr>
                   <th>Nombre de servicio externo</th>
-                  <th>Recursos exportados</th>
+                  <th>Recursos importados</th>
                   <th>Recursos pendientes</th>
                   <th>URL</th>
                   <th>Tipo</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="value in filteredRemoteResources" :key="value.pk">
+                <tr v-for="value in remoteHaverstersResources" :key="value.pk">
                   <td>{{ value.title }}</td>
-                  <td><a href="#">''</a></td>
-                  <td><a href="#">''</a></td>
-                  <td>https://</td>
+                  <td>
+                    <nuxt-link @click="irARutaQuery(value)">{{
+                      value.exported_resources
+                    }}</nuxt-link>
+                  </td>
+                  <td>
+                    <nuxt-link @click="irARutaQuery(value)">{{
+                      value.to_attend_resources
+                    }}</nuxt-link>
+                  </td>
+                  <td>
+                    <a :href="value.remote_url" target="_blank" rel="noopener noreferrer">{{
+                      value.remote_url
+                    }}</a>
+                  </td>
                   <!-- <td>ArcGIS REST MapServer</td> -->
                   <td>Servcio de Mapas</td>
                 </tr>
@@ -74,13 +167,15 @@ onMounted(() => {
               <nuxt-link
                 class="boton boton-secundario"
                 aria-label="Agregar servicio remoto"
-                to="/catalogo/cargar-servicios-remotos"
+                to="/catalogo/cargar-servicios-remotos/agregar"
                 >Agregar servicio remoto</nuxt-link
               >
             </div>
           </form>
         </div>
       </main>
+      <main v-else>...cargando</main>
+      <main v-if="cargando">...cargando</main>
     </template>
   </UiLayoutPaneles>
 </template>
