@@ -1,6 +1,16 @@
 <script setup>
 import { resourceTypeDic } from '~/utils/consulta';
 
+const storeConsulta = useConsultaStore();
+storeConsulta.resourceType = resourceTypeDic.document;
+const storeResources = useResourcesConsultaStore();
+
+onMounted(async () => {
+  storeResources.resetByType(storeConsulta.resourceType);
+  storeResources.getTotalResources(storeConsulta.resourceType);
+});
+/* import { resourceTypeDic } from '~/utils/consulta';
+
 const resourceType = resourceTypeDic.document;
 
 const storeConsulta = useConsultaStore();
@@ -18,6 +28,7 @@ const router = useRouter();
  * Actualiza el queryParam desde los valores del store.
  * @param queryParam generado por el store.
  */
+/*
 function updateQueryFromStore(queryParam) {
   const query = { docs: queryParam };
 
@@ -34,7 +45,7 @@ onMounted(() => {
   if (storeSelected.uuids.length > 0) {
     updateQueryFromStore(storeSelected.asQueryParam());
   }
-});
+}); */
 </script>
 
 <template>
@@ -44,19 +55,19 @@ onMounted(() => {
     </template>
 
     <template #visualizador>
-      <template v-if="storeFetched.isLoading">Cargando...</template>
+      <!--       <template v-if="storeFetched.isLoading">Cargando...</template>
       <div v-else-if="storeSelected.uuids.length === 0" class="contenedor">
         <h1>No hay seleccion</h1>
       </div>
-      <ConsultaVisualizacionDocumento v-else />
+      <ConsultaVisualizacionDocumento v-else /> -->
     </template>
 
     <template #seleccion>
-      <ConsultaLayoutSeleccion
+      <!--       <ConsultaLayoutSeleccion
         titulo="Documentos seleccionados"
         :resource-type="resourceType"
         etiqueta-elementos="Documentos"
-      />
+      /> -->
     </template>
   </ConsultaLayoutPaneles>
 </template>

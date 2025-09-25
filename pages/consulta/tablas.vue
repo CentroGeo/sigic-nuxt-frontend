@@ -1,6 +1,16 @@
 <script setup>
 import { resourceTypeDic } from '~/utils/consulta';
 
+const storeConsulta = useConsultaStore();
+storeConsulta.resourceType = resourceTypeDic.dataTable;
+const storeResources = useResourcesConsultaStore();
+
+onMounted(async () => {
+  storeResources.resetByType(storeConsulta.resourceType);
+  storeResources.getTotalResources(storeConsulta.resourceType);
+});
+/* import { resourceTypeDic } from '~/utils/consulta';
+
 const resourceType = resourceTypeDic.dataTable;
 
 const storeConsulta = useConsultaStore();
@@ -52,6 +62,7 @@ watch([() => selectedUuid.value, () => storeFetched.byResourceType(resourceType)
  * Actualiza el queryParam.
  * @param newQueryParam para asignar.
  */
+/*
 function updateQueryParam(tablas) {
   if (tablas !== route.query.tablas) {
     router.replace({ query: { tablas } });
@@ -73,7 +84,7 @@ onMounted(() => {
       resource: selectedElement.value,
     });
   }
-});
+}); */
 </script>
 
 <template>
@@ -83,7 +94,7 @@ onMounted(() => {
     </template>
 
     <template #visualizador>
-      <template v-if="storeFetched.isLoading">Cargando...</template>
+      <!--       <template v-if="storeFetched.isLoading">Cargando...</template>
       <div v-else-if="storeSelected.uuids.length === 0" class="contenedor">
         <h1>No hay seleccion</h1>
       </div>
@@ -96,15 +107,15 @@ onMounted(() => {
           <h2 v-if="selectedElement" class="m-t-1 m-b-0 m-x-2">{{ selectedElement.title }}</h2>
           <UiTablaAccesible class="tabla" :variables="variables" :datos="datos" />
         </div>
-      </div>
+      </div> -->
     </template>
 
     <template #seleccion>
-      <ConsultaLayoutSeleccion
+      <!--       <ConsultaLayoutSeleccion
         titulo="Tabulados de datos"
         :resource-type="resourceType"
         etiqueta-elementos="Datos tabulados"
-      />
+      /> -->
     </template>
   </ConsultaLayoutPaneles>
 </template>

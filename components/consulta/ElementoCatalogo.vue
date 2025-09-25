@@ -5,9 +5,6 @@ import { tooltipContent } from '~/utils/consulta';
 const storeSelected = useSelectedResources2Store();
 const storeConsulta = useConsultaStore();
 const storeResources = useResourcesConsultaStore();
-
-//const storeFetched = useFetchedResources2Store();
-
 const capasSeleccionadas = computed({
   get: () => storeSelected.uuids,
   set: (uuids) => storeSelected.updateByUuids(uuids),
@@ -23,7 +20,7 @@ const { data } = useAuth();
 const isLoggedIn = ref(data.value ? true : false);
 const userEmail = ref(data.value?.user.email);
 const nthElementsUuids = computed(() => storeResources.nthElementsByType());
-const geomType = ref(catalogueElement.value.geomType);
+const geomType = ref(catalogueElement.value.geomType ? catalogueElement.value.geomType : 'Otro');
 const geomDict = {
   Point: { tooltipText: 'Capa de puntos', class: 'pictograma-capa-puntos' },
   MultiPoint: {

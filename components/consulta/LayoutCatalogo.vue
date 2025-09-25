@@ -47,11 +47,12 @@ async function fetchTotalByCategory(category) {
     queryParams['extent_ne'] = '[-1,-1,0,0]';
   }
   if (storeConsulta.resourceType === 'dataTable') {
-    queryParams['filter{subtype.in}'] = ['vector', 'remote'];
+    //queryParams['filter{subtype.in}'] = ['vector', 'remote'];
+    queryParams['filter{subtype.in}'] = 'vector';
   }
-  if (storeConsulta.resourceType === 'document') {
+  /*if (storeConsulta.resourceType === 'document') {
     queryParams['file_extension'] = ['pdf', 'txt'];
-  }
+  } */
   const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
   const request = await gnoxyFetch(url.toString());
   const res = await request.json();
@@ -78,14 +79,16 @@ async function buildCategoriesDict() {
     const results = await Promise.all(
       geonodeCategories.topics.items.map(async (d) => {
         const totalByCat = await fetchTotalByCategory(d.key);
-        categoriesDict.value[d.label] = {
-          label: d.label,
-          name: d.key,
-          inSpanish: categoriesInSpanish[d.label],
-          total: totalByCat,
-          page: 1,
-          isLoading: false,
-        };
+        if (totalByCat !== 0) {
+          categoriesDict.value[d.label] = {
+            label: d.label,
+            name: d.key,
+            inSpanish: categoriesInSpanish[d.label],
+            total: totalByCat,
+            page: 1,
+            isLoading: false,
+          };
+        }
         return totalByCat;
       })
     );
@@ -171,7 +174,6 @@ async function setSelectedCategory(categoria) {
 }
 
 async function fetchNewData(category) {
-  console.log(category);
   await callResources(category);
   updateResources(resources.value);
 }

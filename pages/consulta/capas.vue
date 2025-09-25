@@ -7,11 +7,11 @@ import { resourceTypeDic } from '~/utils/consulta';
 // const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
 storeConsulta.resourceType = resourceTypeDic.dataLayer;
-const consultaResources = useResourcesConsultaStore();
+const storeResources = useResourcesConsultaStore();
 
 onMounted(async () => {
-  consultaResources.resetByType(storeConsulta.resourceType);
-  consultaResources.getTotalResources(storeConsulta.resourceType);
+  storeResources.resetByType(storeConsulta.resourceType);
+  storeResources.getTotalResources(storeConsulta.resourceType);
 });
 /*const storeFetched = useFetchedResources2Store();
 const storeSelected = useSelectedResources2Store();
@@ -178,8 +178,8 @@ watch(() => storeSelected.asQueryParam(), updateQueryParam);
     </template>
 
     <template #visualizador>
-      <p>Panel central</p>
-      <!-- <template v-if="storeFetched.isLoading">Cargando...</template>
+      <p>Panel Central</p>
+      <!--       <template v-if="storeFetched.isLoading">Cargando...</template>
 
       <ClientOnly>
         <SisdaiMapa
@@ -190,7 +190,7 @@ watch(() => storeSelected.asQueryParam(), updateQueryParam);
         >
           <SisdaiCapaXyz :posicion="0" />
 
-          <SisdaiCapaWms
+                   <SisdaiCapaWms
             v-for="resource in storeFetched.findResources(storeSelected.uuids)"
             :key="`wms-${resource.uuid}`"
             :capa="resource.alternate"
@@ -200,8 +200,8 @@ watch(() => storeSelected.asQueryParam(), updateQueryParam);
             :posicion="storeSelected.byUuid(resource.uuid).posicion + 1"
             :visible="storeSelected.byUuid(resource.uuid).visible"
           />
-        </SisdaiMapa>
-      </ClientOnly>-->
+        </SisdaiMapa> </ClientOnly
+      > -->
     </template>
 
     <template #seleccion>
