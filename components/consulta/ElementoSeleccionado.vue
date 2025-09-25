@@ -1,7 +1,8 @@
 <script setup>
 import { categoriesInSpanish, resourceTypeDic, tooltipContent } from '~/utils/consulta';
 
-const storeFetched = useFetchedResources2Store();
+//const storeFetched = useFetchedResources2Store();
+const storeResources = useResourcesConsultaStore();
 const storeSelected = useSelectedResources2Store();
 const emit = defineEmits(['openOpacity', 'openDownload', 'openTabla', 'openMapa']);
 
@@ -13,7 +14,7 @@ const props = defineProps({
   resourceType: { type: String, required: true },
 });
 
-const resourceElement = computed(() => storeFetched.findResource(props.selectedElement.uuid));
+const resourceElement = computed(() => storeResources.findResource(props.selectedElement.uuid));
 const { data } = useAuth();
 const isLoggedIn = ref(data.value ? true : false);
 const userEmail = ref(data.value?.user.email);

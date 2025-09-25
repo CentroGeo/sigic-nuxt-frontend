@@ -189,7 +189,7 @@ async function updateFunctions() {
     resourceElement.value.owner.email === userEmail.value &&
     !resourceElement.value.is_published
   ) {
-    buttons = buttons.filter((d) => d.label !== 'Vínculo WFS');
+    buttons = buttons.filter((d) => d.label !== 'Vínculo WMS');
   }
   actualButtons.value = buttons;
 }

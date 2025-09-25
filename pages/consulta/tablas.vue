@@ -1,14 +1,12 @@
 <script setup>
 import { resourceTypeDic } from '~/utils/consulta';
 
-const resourceType = resourceTypeDic.dataTable;
-
 const storeConsulta = useConsultaStore();
-const storeFetched = useFetchedResources2Store();
+const storeResources = useResourcesConsultaStore();
 const storeSelected = useSelectedResources2Store();
 
-storeConsulta.resourceType = resourceType;
-storeFetched.checkFilling();
+storeConsulta.resourceType = resourceTypeDic.dataTable;
+const resourceType = resourceTypeDic.dataTable;
 
 const route = useRoute();
 const router = useRouter();
@@ -37,8 +35,8 @@ watch(paginaActual, () => {
   });
 });
 
-watch([() => selectedUuid.value, () => storeFetched.byResourceType(resourceType)], () => {
-  selectedElement.value = storeFetched.findResources([selectedUuid.value])[0];
+watch([() => selectedUuid.value, () => storeResources.resourcesByType(resourceType)], () => {
+  selectedElement.value = storeResources.findResources([selectedUuid.value])[0];
   paginaActual.value = 0;
   // console.log(selectedUuid.value);
   fetchTable({
@@ -52,6 +50,7 @@ watch([() => selectedUuid.value, () => storeFetched.byResourceType(resourceType)
  * Actualiza el queryParam.
  * @param newQueryParam para asignar.
  */
+
 function updateQueryParam(tablas) {
   if (tablas !== route.query.tablas) {
     router.replace({ query: { tablas } });
@@ -59,14 +58,16 @@ function updateQueryParam(tablas) {
 }
 watch(() => storeSelected.asQueryParam(), updateQueryParam);
 
-onMounted(() => {
+onMounted(async () => {
+  storeResources.resetByType(storeConsulta.resourceType);
+  storeResources.getTotalResources(storeConsulta.resourceType);
   storeSelected.addFromQueryParam(route.query.tablas);
 
   // Para cuando hacem el cambio de página
   if (storeSelected.uuids.length > 0) {
     updateQueryParam(storeSelected.asQueryParam());
 
-    selectedElement.value = storeFetched.findResources([selectedUuid.value])[0];
+    selectedElement.value = storeResources.findResources([selectedUuid.value])[0];
     fetchTable({
       paginaActual: paginaActual.value,
       tamanioPagina: tamanioPagina,
@@ -83,7 +84,7 @@ onMounted(() => {
     </template>
 
     <template #visualizador>
-      <template v-if="storeFetched.isLoading">Cargando...</template>
+      <template v-if="storeResources.isLoading">Cargando...</template>
       <div v-else-if="storeSelected.uuids.length === 0" class="contenedor">
         <h1>No hay seleccion</h1>
       </div>
