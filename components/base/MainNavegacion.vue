@@ -20,15 +20,29 @@ async function cerrarSesion() {
   <SisdaiNavegacionPrincipal>
     <!--Definiendo el logo del sitio-->
     <template #identidad>
-      <a href="#" target="_blank" rel="noopener noreferrer" class="nav-hiperviculo-logo">
-        <!-- <img
-          src="https://www.centrogeo.org.mx/templates/ja_resume/images/logo_centrogeo_wide.svg"
-          class="nav-logo color-invertir"
-          alt="logo"
-          width="232"
-          height="38"
-        /> -->
-      </a>
+      <div class="contenedor-identidades-nav">
+        <a
+          href="https://secihti.mx/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="nav-hiperviculo-logo"
+        >
+          <img
+            :src="`/img/logo_secihiti.svg`"
+            class="nav-logo color-invertir"
+            alt="SECIHITI"
+            height="36"
+          />
+        </a>
+        <NuxtLink to="/" rel="noopener noreferrer" class="nav-hiperviculo-logo">
+          <img
+            :src="`/img/logo_sigic.svg`"
+            class="nav-logo color-invertir"
+            alt="SIGIC"
+            height="36"
+          />
+        </NuxtLink>
+      </div>
     </template>
 
     <ul class="nav-menu">
@@ -84,5 +98,13 @@ button.boton-secundario.btn-inicio-sesion {
   &:active {
     box-shadow: inset 0 -4px 0 0 var(--navegacion-primaria-activo-borde);
   }
+}
+body[data-tema='oscuro'] {
+  img.color-invertir {
+    filter: grayscale(1) brightness(100);
+  }
+}
+.contenedor-identidades-nav {
+  display: inline-flex;
 }
 </style>

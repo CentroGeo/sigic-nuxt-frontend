@@ -40,15 +40,6 @@ ENV NUXT_PUBLIC_BASE_URL=${NUXT_PUBLIC_BASE_URL:-http://localhost:3000}
 WORKDIR /app
 
 COPY --from=builder /app/.output/ .output/
-COPY --from=builder /app/package.json .
-# COPY --from=builder /app/package-lock.json .
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends git openssh-client && \
-    rm -rf /var/lib/apt/lists/* && \
-    touch package-lock.json &&  \
-    rm -rf package-lock.json && \
-    npm install
 
 EXPOSE 3000
 
