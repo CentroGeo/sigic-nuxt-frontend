@@ -268,9 +268,9 @@ export async function fetchDoc(url) {
     throw new Error(`Fetchfailed: ${res.status}`);
   }
   const blob = await res.blob();
-  console.log(blob);
+  //console.log(blob);
   const newUrl = URL.createObjectURL(blob);
-  console.log(newUrl);
+  //console.log(newUrl);
   return newUrl;
 }
 

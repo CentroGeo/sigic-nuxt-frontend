@@ -48,7 +48,7 @@ watch(selectedElement, (nv) => {
 
       urlEmbebido.value =
         extensionDocumento.value === 'pdf' ? nv.embed_url : nv.embed_url.replace('/embed', '/link');
-      console.log(urlEmbebido.value);
+      //console.log(urlEmbebido.value);
       //updateValues();
       // esperar a que el <embed> esté en DOM
       await nextTick();
