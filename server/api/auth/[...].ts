@@ -1,9 +1,7 @@
 import { NuxtAuthHandler } from '#auth';
 import KeycloakProvider from 'next-auth/providers/keycloak';
 
-// Función para comprobar si el token ha expirado
 function isTokenExpired(expiresAt?: number): boolean {
-  // console.log('expira en:', expiresAt, 'ahora:', Date.now());
   if (!expiresAt) return true;
   return Date.now() >= expiresAt - 40;
 }
