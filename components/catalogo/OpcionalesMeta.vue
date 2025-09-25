@@ -42,6 +42,21 @@ const seleccionRecursosRelacionados = ref('');
 const campoPuntoContacto = ref('');
 const seleccionDuenio = ref('');
 
+const dictFrecuenciaActual = [
+  { unknown: 'se desconoce la frecuencia de actualización de los datos' },
+  { continual: 'los datos se actualizan repetida y frecuentemente' },
+  { notPlanned: 'no existen planes de actualizar los datos' },
+  { daily: 'los datos se actualizan a diario' },
+  { annually: 'los datos se actualizan cada año' },
+  { asNeeded: 'los datos se actualizan cuando se considera necesario' },
+  { monthly: 'los datos se actualizan todos los meses' },
+  { fortnightly: 'los datos se actualizan cada dos semanas' },
+  { irregular: 'los datos se actualizan a intervalos de duración irregular' },
+  { weekly: 'los datos se actualizan semanalmente' },
+  { biannually: 'los datos se actualizan dos veces al año' },
+  { quarterly: 'los datos se actualizan cada tres meses' },
+];
+
 // function editarMetadatos(dato, valor) {
 //   storeCatalogo.metadatos[dato] = valor;
 //   // console.log(storeCatalogo.metadatos[dato]);
@@ -148,24 +163,13 @@ const seleccionDuenio = ref('');
               etiqueta="Frencuencia de actualización"
             >
               <option value="" selected="">---------</option>
-              <option value="unknown">
-                se desconoce la frecuencia de actualización de los datos
+              <option
+                v-for="value in dictFrecuenciaActual"
+                :key="Object.keys(value)"
+                :value="Object.keys(value)"
+              >
+                {{ value[Object.keys(value)] }}
               </option>
-              <option value="continual">los datos se actualizan repetida y frecuentemente</option>
-              <option value="notPlanned">no existen planes de actualizar los datos</option>
-              <option value="daily">los datos se actualizan a diario</option>
-              <option value="annually">los datos se actualizan cada año</option>
-              <option value="asNeeded">
-                los datos se actualizan cuando se considera necesario
-              </option>
-              <option value="monthly">los datos se actualizan todos los meses</option>
-              <option value="fortnightly">los datos se actualizan cada dos semanas</option>
-              <option value="irregular">
-                los datos se actualizan a intervalos de duración irregular
-              </option>
-              <option value="weekly">los datos se actualizan semanalmente</option>
-              <option value="biannually">los datos se actualizan dos veces al año</option>
-              <option value="quarterly">los datos se actualizan cada tres meses</option>
             </SisdaiSelector>
           </ClientOnly>
         </div>

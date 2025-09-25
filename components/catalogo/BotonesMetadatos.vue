@@ -52,7 +52,9 @@ function irARutaConQuery(direccion) {
 /**
  * Actualiza los metadatos con los valores del store
  */
+
 async function actualizaMetadatos() {
+  // console.log(data.value?.accessToken);
   const response = await $fetch('/api/metadatos', {
     method: 'POST',
     body: {
