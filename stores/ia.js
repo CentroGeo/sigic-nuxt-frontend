@@ -146,6 +146,7 @@ export const useIAStore = defineStore('ia', {
     async getProjectsList() {
       //this.existeContexto = true;
       const token = this.authToken;
+      console.log(token);
 
       const response = await fetch(this.backend + '/direct/api/fileuploads/workspaces/admin', {
         method: 'POST',

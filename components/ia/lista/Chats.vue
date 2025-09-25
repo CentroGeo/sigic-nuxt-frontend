@@ -41,6 +41,8 @@ const fechaHoy = new Date().toLocaleDateString('es-ES', {
 const catalogo = ref([]);
 const catalogoFiltrado = ref(catalogo.value);
 
+const eliminarChatModal = ref(null);
+
 // Función para consultar lista de proyectos
 const loadChatsList = async () => {
   let arrayChats = [];
@@ -121,15 +123,21 @@ onMounted(() => {
   loadChatsList();
 });
 
-const handleDelete = async (chatId) => {
+function openEliminarModal(chat_id) {
+  eliminarChatModal.value?.abrirModal();
+  idChat.value = chat_id;
+}
+
+const handleDelete = async () => {
   try {
+    const chatId = idChat.value; // 🔸 Usamos el valor reactivo
+    if (!chatId) return;
+
     const chatActual = storeIA.chatActual;
     const route = router.currentRoute.value;
 
     const estaEnChat = route.path === '/ia/chat/dinamica';
-
     const esChatActual = chatActual && chatActual.id === chatId;
-
     const esNuevoChatSinId = estaEnChat && (!chatActual || !chatActual.id);
 
     await storeIA.deleteChat(chatId);
@@ -139,6 +147,10 @@ const handleDelete = async (chatId) => {
       storeIA.clearChatActual();
       router.push('/ia/chats');
     }
+
+    eliminarChatModal.value?.cerrarModal();
+
+    idChat.value = null;
   } catch (err) {
     console.error('Error al eliminar el chat.');
     console.log(err);
@@ -217,7 +229,7 @@ watch(
                           class="boton-pictograma boton-sin-contenedor-secundario"
                           aria-label="Remover chat"
                           type="button"
-                          @click.stop="handleDelete(chat.id)"
+                          @click.stop="openEliminarModal(chat.id)"
                         >
                           <span class="pictograma-eliminar" aria-hidden="true" />
                         </button>
@@ -295,6 +307,27 @@ watch(
         >
           Guardar
         </button>
+      </template>
+    </SisdaiModal>
+
+    <SisdaiModal ref="eliminarChatModal">
+      <template #encabezado>
+        <h2>Eliminar chat</h2>
+      </template>
+
+      <template #cuerpo>
+        <p>¿Desea eliminar este chat? Esta acción no se puede deshacer.</p>
+      </template>
+
+      <template #pie>
+        <button
+          type="button"
+          class="boton-secundario boton-chico"
+          @click="eliminarChatModal?.cerrarModal()"
+        >
+          No
+        </button>
+        <button type="button" class="boton-primario boton-chico" @click="handleDelete">Si</button>
       </template>
     </SisdaiModal>
   </ClientOnly>
