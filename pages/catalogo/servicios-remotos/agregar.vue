@@ -2,6 +2,8 @@
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
+const storeCatalogo = useCatalogoStore();
+
 definePageMeta({
   middleware: 'sidebase-auth',
   bodyAttrs: {
@@ -50,7 +52,7 @@ async function crearConexion() {
 </script>
 
 <template>
-  <UiLayoutPaneles>
+  <UiLayoutPaneles :estado-colapable="storeCatalogo.catalogoColapsado">
     <template #catalogo>
       <CatalogoListaMenuLateral />
     </template>

@@ -1,6 +1,8 @@
 <script setup>
 import SisdaiCasillaVerificacion from '@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue';
 
+const storeCatalogo = useCatalogoStore();
+
 definePageMeta({
   middleware: 'sidebase-auth',
   bodyAttrs: {
@@ -75,7 +77,7 @@ for (let index = 0; index < selectedUniqueIdentifier.length; index++) {
 // }
 </script>
 <template>
-  <UiLayoutPaneles>
+  <UiLayoutPaneles :estado-colapable="storeCatalogo.catalogoColapsado">
     <template #catalogo>
       <CatalogoListaMenuLateral />
     </template>

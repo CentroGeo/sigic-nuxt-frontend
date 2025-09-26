@@ -14,6 +14,7 @@ definePageMeta({
 const { data } = useAuth();
 const userEmail = data.value.user.email;
 
+const storeCatalogo = useCatalogoStore();
 const storeFetched = useFetchedResources2Store();
 const storeFilters = useFilteredResources();
 
@@ -133,7 +134,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <UiLayoutPaneles>
+  <UiLayoutPaneles :estado-colapable="storeCatalogo.catalogoColapsado">
     <template #catalogo>
       <CatalogoListaMenuLateral />
     </template>

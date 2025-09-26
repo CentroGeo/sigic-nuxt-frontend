@@ -1,5 +1,7 @@
 <script setup>
 import { resourceTypeDic } from '~/utils/consulta';
+
+const storeCatalogo = useCatalogoStore();
 const storeFetched = useFetchedResources2Store();
 
 storeFetched.checkFilling(resourceTypeDic.dataLayer);
@@ -51,7 +53,7 @@ const formatearAbstract = (resource) => {
 
 <template>
   <div>
-    <UiLayoutPaneles>
+    <UiLayoutPaneles :estado-colapable="storeCatalogo.catalogoColapsado">
       <template #catalogo>
         <CatalogoListaMenuLateral />
       </template>

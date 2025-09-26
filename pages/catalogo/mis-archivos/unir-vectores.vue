@@ -7,10 +7,12 @@ import { getWMSserver, hasWMS, resourceTypeDic } from '~/utils/consulta';
 const { data } = useAuth();
 const token = data.value?.accessToken;
 const userEmail = data.value?.user.email;
-const route = useRoute();
 
+const route = useRoute();
 const selectedPk = route.query.data;
 const resourceType = route.query.type;
+
+const storeCatalogo = useCatalogoStore();
 // Recuperamos la información completa del recurso
 const storeFetched = useFetchedResources2Store();
 storeFetched.checkFilling(resourceType);
@@ -132,7 +134,7 @@ watch([seleccionCampoCapa, seleccionCapaGeo, seleccionCampoObjetivo], ([n1, n2, 
 </script>
 
 <template>
-  <UiLayoutPaneles>
+  <UiLayoutPaneles :estado-colapable="storeCatalogo.catalogoColapsado">
     <template #catalogo>
       <CatalogoListaMenuLateral />
     </template>

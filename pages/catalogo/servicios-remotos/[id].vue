@@ -9,6 +9,8 @@ definePageMeta({
   },
 });
 
+const storeCatalogo = useCatalogoStore();
+
 const route = useRoute();
 const selectedTitle = route.query.title;
 const selectedUniqueIdentifier = route.query.unique_identifier;
@@ -86,7 +88,7 @@ try {
 }
 </script>
 <template>
-  <UiLayoutPaneles>
+  <UiLayoutPaneles :estado-colapable="storeCatalogo.catalogoColapsado">
     <template #catalogo>
       <CatalogoListaMenuLateral />
     </template>

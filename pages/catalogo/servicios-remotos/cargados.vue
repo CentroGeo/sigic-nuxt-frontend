@@ -6,6 +6,8 @@ definePageMeta({
   },
 });
 
+const storeCatalogo = useCatalogoStore();
+
 const { data } = useAuth();
 const token = data.value?.accessToken;
 // console.log(token);
@@ -109,7 +111,7 @@ try {
 </script>
 
 <template>
-  <UiLayoutPaneles>
+  <UiLayoutPaneles :estado-colapable="storeCatalogo.catalogoColapsado">
     <template #catalogo>
       <CatalogoListaMenuLateral />
     </template>

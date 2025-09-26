@@ -1,6 +1,8 @@
 <script setup>
 import { fetchByPk } from '~/utils/catalogo';
 
+const storeCatalogo = useCatalogoStore();
+
 // Recuperamos información a partir de la url
 const route = useRoute();
 const selectedPk = route.query.data;
@@ -21,7 +23,7 @@ const resources = computed(() => storeFetched.byResourceType(typeDict[type]));
 const editedResource = computed(() => resources.value.find(({ pk }) => pk === selectedPk)); */
 </script>
 <template>
-  <UiLayoutPaneles>
+  <UiLayoutPaneles :estado-colapable="storeCatalogo.catalogoColapsado">
     <template #catalogo>
       <CatalogoListaMenuLateral />
     </template>
