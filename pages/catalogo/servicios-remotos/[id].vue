@@ -12,6 +12,7 @@ definePageMeta({
 const storeCatalogo = useCatalogoStore();
 
 const route = useRoute();
+const selectedId = route.query.id;
 const selectedTitle = route.query.title;
 const selectedUniqueIdentifier = route.query.unique_identifier;
 const selectedRemoteSourceType = route.query.remote_resource_type;
@@ -31,11 +32,15 @@ const configEnv = useRuntimeConfig();
 const baseUrl = configEnv.public.geonodeApi;
 const totalResources = ref(0);
 const filteredAlternateResources = ref([]);
+const dictTipoRecursoRemoto = {
+  layers: 'Capas',
+};
 
 function irAImportarRecursos() {
   navigateTo({
     path: `/catalogo/servicios-remotos/importar`,
     query: {
+      id: selectedId,
       title: selectedTitle,
       unique_identifier: selectedUniqueIdentifier,
       remote_resource_type: selectedRemoteSourceType,
@@ -125,7 +130,7 @@ try {
                   <nuxt-link @click="openResourceView(value)">{{ value.title }}</nuxt-link>
                 </td>
                 <td>{{ value.abstract }}</td>
-                <td>{{ value.remote_resource_type }}</td>
+                <td>{{ dictTipoRecursoRemoto[value.remote_resource_type] }}</td>
               </tr>
             </tbody>
           </table>

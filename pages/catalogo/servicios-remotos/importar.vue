@@ -10,9 +10,8 @@ definePageMeta({
   },
 });
 
-const casilla = ref('');
-
 const route = useRoute();
+const selectedId = route.query.id;
 const selectedTitle = route.query.title;
 const selectedUniqueIdentifier = route.query.unique_identifier;
 const selectedRemoteSourceType = route.query.remote_resource_type;
@@ -24,57 +23,56 @@ for (let index = 0; index < selectedUniqueIdentifier.length; index++) {
   });
 }
 
-// const { data } = useAuth();
-// const token = data.value?.accessToken;
-// console.log(token);
-// const headers = ref({ Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' });
-// const configEnv = useRuntimeConfig();
-// const baseUrl = configEnv.public.geonodeApi;
-// const totalResources = ref(0);
-// const filteredAlternateResources = ref([]);
-// const { gnoxyUrl } = useGnoxyUrl();
-// try {
-//   const res = await $fetch(`${baseUrl}/resources?custom=true&filter{subtype.in}=remote`, {
-//     method: 'GET',
-//     headers: headers.value,
-//   });
-//   totalResources.value = res.total;
-//   const response = await $fetch(
-//     `${baseUrl}/resources/?custom=true&filter{subtype.in}=remote&page_size=${totalResources.value}`,
-//     {
-//       method: 'GET',
-//       headers: headers.value,
-//     }
-//   );
-//   const resources = response.resources;
-//   // const filteredRemoteResources = resources.filter((resource) => resource.sourcetype === 'REMOTE');
-//   resources.forEach((d) =>
-//     b.value.forEach((dd) => {
-//       if (d.alternate === dd.unique_identifier) {
-//         filteredAlternateResources.value.push({
-//           title: d.title,
-//           abstract: d.abstract,
-//           remote_resource_type: dd.remote_resource_type,
-//           uuid: d.uuid,
-//         });
-//       }
-//     })
-//   );
-//   // console.log('filteredAlternateResources', filteredAlternateResources);
-// } catch (err) {
-//   console.warn('Error en el streaming: ' + err);
-// }
-// /**
-//  * Agrega un recurso seleccionado al módulo de consulta y navega a la vista
-//  * @param resource del que se toma el uuid para la selección
-//  */
-// async function openResourceView(resource) {
-//   useSelectedResources2Store().add(
-//     new SelectedLayer({ uuid: resource.uuid }),
-//     resourceTypeDic.dataLayer
-//   );
-//   await navigateTo('/consulta/capas');
-// }
+const casilla = ref('');
+const notShouldBeHarvested = ref([]);
+const dictTipoRecursoRemoto = {
+  layers: 'Capas',
+};
+
+function importarRecursos() {
+  // TODO: importar recursos al backend
+  console.warn('épale');
+  navigateTo({
+    path: `/catalogo/servicios-remotos/${selectedId}`,
+    query: {
+      id: selectedId,
+      title: selectedTitle,
+      unique_identifier: selectedUniqueIdentifier,
+      remote_resource_type: selectedRemoteSourceType,
+    },
+  });
+}
+
+try {
+  const { data } = useAuth();
+  const token = data.value?.accessToken;
+  const headers = ref({ Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' });
+
+  const configEnv = useRuntimeConfig();
+  const baseUrl = configEnv.public.geonodeApi;
+
+  const page = ref(1);
+  // TODO: paginación de recursos
+  // const linksNext = ref(null);
+  const haverstableResources = ref([]);
+
+  const response = await $fetch(
+    `${baseUrl}/harvesters/${selectedId}/harvestable-resources/?page=${page.value}`,
+    {
+      method: 'GET',
+      headers: headers.value,
+    }
+  );
+  // console.log('response', response);
+  haverstableResources.value = response.harvestable_resources;
+  // console.log('haverstableResources.value', haverstableResources.value);
+  notShouldBeHarvested.value = haverstableResources.value.filter(
+    (d) => d.should_be_harvested === false
+  );
+  // console.log('notShouldBeHarvested.value', notShouldBeHarvested.value);
+} catch (err) {
+  console.warn('Error en el streaming: ' + err);
+}
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeCatalogo.catalogoColapsado">
@@ -98,44 +96,18 @@ for (let index = 0; index < selectedUniqueIdentifier.length; index++) {
               </tr>
             </thead>
             <tbody>
-              <tr>
+              <tr v-for="value in notShouldBeHarvested" :key="value.unique_identifier">
                 <td>
                   <ClientOnly>
                     <SisdaiCasillaVerificacion
                       v-model="casilla"
-                      :etiqueta="`https://sampleserver6.arcgisonline.com/arcgis/rest/services/USA/MapServer/1`"
+                      :etiqueta="value.unique_identifier"
                     />
                   </ClientOnly>
                 </td>
-                <td>Estados</td>
+                <td>{{ value.title }}</td>
                 <td></td>
-                <td>Capa</td>
-              </tr>
-              <tr>
-                <td>
-                  <ClientOnly>
-                    <SisdaiCasillaVerificacion
-                      v-model="casilla"
-                      :etiqueta="`https://sampleserver6.arcgisonline.com/arcgis/rest/services/USA/MapServer/2`"
-                    />
-                  </ClientOnly>
-                </td>
-                <td>Municipios</td>
-                <td></td>
-                <td>Capa</td>
-              </tr>
-              <tr>
-                <td>
-                  <ClientOnly>
-                    <SisdaiCasillaVerificacion
-                      v-model="casilla"
-                      :etiqueta="`https://sampleserver6.arcgisonline.com/arcgis/rest/services/USA/MapServer/3`"
-                    />
-                  </ClientOnly>
-                </td>
-                <td>Localidades</td>
-                <td></td>
-                <td>Capa</td>
+                <td>{{ dictTipoRecursoRemoto[value.remote_resource_type] }}</td>
               </tr>
             </tbody>
           </table>
@@ -144,7 +116,7 @@ for (let index = 0; index < selectedUniqueIdentifier.length; index++) {
               class="boton-primario"
               aria-label="Importar recursos de catálogo externo"
               type="button"
-              @click="console.log('épale')"
+              @click="importarRecursos"
             >
               Importar recursos
             </button>

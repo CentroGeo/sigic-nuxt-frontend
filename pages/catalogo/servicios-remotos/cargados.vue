@@ -26,6 +26,7 @@ const irARutaQuery = (v, destino) => {
     navigateTo({
       path: `/catalogo/servicios-remotos/${v.id}`,
       query: {
+        id: v.id,
         title: v.title,
         unique_identifier: v.unique_identifier,
         remote_resource_type: v.remote_resource_type,
@@ -35,6 +36,7 @@ const irARutaQuery = (v, destino) => {
     navigateTo({
       path: `/catalogo/servicios-remotos/importar`,
       query: {
+        id: v.id,
         title: v.title,
         unique_identifier: v.unique_identifier,
         remote_resource_type: v.remote_resource_type,
