@@ -27,11 +27,31 @@ const token = data.value?.accessToken;
 const headers = ref({ Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' });
 const configEnv = useRuntimeConfig();
 const baseUrl = configEnv.public.geonodeApi;
-
 const totalResources = ref(0);
 const filteredAlternateResources = ref([]);
 
-// const { gnoxyUrl } = useGnoxyUrl();
+function irAImportarRecursos() {
+  navigateTo({
+    path: `/catalogo/servicios-remotos/importar`,
+    query: {
+      title: selectedTitle,
+      unique_identifier: selectedUniqueIdentifier,
+      remote_resource_type: selectedRemoteSourceType,
+    },
+  });
+}
+
+/**
+ * Agrega un recurso seleccionado al módulo de consulta y navega a la vista
+ * @param resource del que se toma el uuid para la selección
+ */
+async function openResourceView(resource) {
+  useSelectedResources2Store().add(
+    new SelectedLayer({ uuid: resource.uuid }),
+    resourceTypeDic.dataLayer
+  );
+  await navigateTo('/consulta/capas');
+}
 
 try {
   const res = await $fetch(`${baseUrl}/resources?custom=true&filter{subtype.in}=remote`, {
@@ -64,18 +84,6 @@ try {
 } catch (err) {
   console.warn('Error en el streaming: ' + err);
 }
-
-/**
- * Agrega un recurso seleccionado al módulo de consulta y navega a la vista
- * @param resource del que se toma el uuid para la selección
- */
-async function openResourceView(resource) {
-  useSelectedResources2Store().add(
-    new SelectedLayer({ uuid: resource.uuid }),
-    resourceTypeDic.dataLayer
-  );
-  await navigateTo('/consulta/capas');
-}
 </script>
 <template>
   <UiLayoutPaneles>
@@ -90,7 +98,7 @@ async function openResourceView(resource) {
         class="contenedor m-b-10 m-y-3"
       >
         <div class="flex">
-          <nuxt-link to="/catalogo/cargar-servicios-remotos" aria-label="regresar a mis archivos">
+          <nuxt-link to="/catalogo/servicios-remotos" aria-label="regresar a mis archivos">
             <span
               class="pictograma-flecha-izquierda pictograma-mediano texto-color-acento"
               aria-hidden="true"
@@ -98,7 +106,6 @@ async function openResourceView(resource) {
             <span class="h5 texto-color-primario p-l-2">Conexiones remotas</span>
           </nuxt-link>
         </div>
-
         <h2>Carga catálogos externos</h2>
         <h3>{{ selectedTitle }}</h3>
         <form>
@@ -124,9 +131,9 @@ async function openResourceView(resource) {
             <nuxt-link
               class="boton boton-primario"
               aria-label="Ir a recursos externos aún no importados"
-              to="/catalogo/mis-archivos"
-              >Ver recursos no importados</nuxt-link
-            >
+              @click="irAImportarRecursos"
+              >Ver recursos no importados
+            </nuxt-link>
           </div>
         </form>
       </main>

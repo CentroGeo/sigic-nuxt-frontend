@@ -12,49 +12,74 @@ const token = data.value?.accessToken;
 const headers = ref({ Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' });
 const configEnv = useRuntimeConfig();
 const baseUrl = configEnv.public.geonodeApi;
-
 const harvesters = ref([]);
 const resources = ref([]);
 const remoteHaverstersResources = ref([]);
 const harvestableResources = ref([]);
+const cargando = ref(false);
+
+const irARutaQuery = (v, destino) => {
+  cargando.value = true;
+  if (destino !== 'pendientes') {
+    navigateTo({
+      path: `/catalogo/servicios-remotos/${v.id}`,
+      query: {
+        title: v.title,
+        unique_identifier: v.unique_identifier,
+        remote_resource_type: v.remote_resource_type,
+      },
+    });
+  } else {
+    navigateTo({
+      path: `/catalogo/servicios-remotos/importar`,
+      query: {
+        title: v.title,
+        unique_identifier: v.unique_identifier,
+        remote_resource_type: v.remote_resource_type,
+      },
+    });
+  }
+};
 
 try {
+  // petición a los recursos consechados de services remotos
   const responseHaversters = await $fetch(`${baseUrl}/harvesters`, {
     method: 'GET',
     headers: headers.value,
   });
-  // console.log('response', response);
+  // console.log('responseHaversters', responseHaversters);
+  harvesters.value = responseHaversters.harvesters;
   const responseResources = await $fetch(`${baseUrl}/resources?filter{resource_type}=service`, {
     method: 'GET',
     headers: headers.value,
   });
   // console.log('responseResources', responseResources);
-
-  harvesters.value = responseHaversters.harvesters;
   resources.value = responseResources.resources;
 
+  // llenamos con los recursos remotos
   resources.value.forEach((d) =>
     harvesters.value.forEach(async (dd) => {
+      // el identificador del owner es un número entero
       if (d.owner.pk === dd.default_owner) {
         const exportedResources = ref(0);
         harvestableResources.value = [];
         const totalResources = ref(0);
         const url = `${baseUrl}/harvesters/${dd.id}/harvestable-resources`;
 
-        // para obtener el total de recursos
+        // obtenemos total de recursos
         const res = await $fetch(url, {
           method: 'GET',
           headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         });
         totalResources.value = res.total;
-        // para obtener todos los recursos
+        // obtenemos todos los recursos cosechados
         const response = await $fetch(`${url}/?page_size=${totalResources.value}`, {
           method: 'GET',
           headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         });
         harvestableResources.value = response.harvestable_resources;
 
-        // filtramos por los que ya están importados a sigic
+        // filtramos por los remotos ya están importados a sigic junto con tipo de recurso
         exportedResources.value = harvestableResources.value.filter(
           (j) => j.should_be_harvested === true && j.remote_resource_type
         );
@@ -73,12 +98,6 @@ try {
           remote_resource_type: exportedResources.value.map((e) => {
             return e.remote_resource_type;
           }),
-          a: [
-            exportedResources.value.map((e) => ({
-              unique_identifier: e.unique_identifier,
-              remote_resource_type: e.remote_resource_type,
-            })),
-          ],
         });
         // console.log('remoteHaverstersResources.value', remoteHaverstersResources.value);
       }
@@ -87,19 +106,6 @@ try {
 } catch (err) {
   console.warn('Error en el streaming: ' + err);
 }
-const cargando = ref(false);
-const irARutaQuery = (v) => {
-  // console.log(v);
-  cargando.value = true;
-  navigateTo({
-    path: `/catalogo/cargar-servicios-remotos/${v.id}`,
-    query: {
-      title: v.title,
-      unique_identifier: v.unique_identifier,
-      remote_resource_type: v.remote_resource_type,
-    },
-  });
-};
 </script>
 
 <template>
@@ -107,7 +113,6 @@ const irARutaQuery = (v) => {
     <template #catalogo>
       <CatalogoListaMenuLateral />
     </template>
-
     <template #visualizador>
       <main
         v-if="remoteHaverstersResources.length !== 0 && !cargando"
@@ -135,24 +140,23 @@ const irARutaQuery = (v) => {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="value in remoteHaverstersResources" :key="value.pk">
+                <tr v-for="value in remoteHaverstersResources" :key="value.id">
                   <td>{{ value.title }}</td>
                   <td>
-                    <nuxt-link @click="irARutaQuery(value)">{{
-                      value.exported_resources
-                    }}</nuxt-link>
+                    <nuxt-link @click="irARutaQuery(value, '')">
+                      {{ value.exported_resources }}
+                    </nuxt-link>
                   </td>
                   <td>
-                    <nuxt-link @click="irARutaQuery(value)">{{
-                      value.to_attend_resources
-                    }}</nuxt-link>
+                    <nuxt-link @click="irARutaQuery(value, 'pendientes')">
+                      {{ value.to_attend_resources }}
+                    </nuxt-link>
                   </td>
                   <td>
-                    <a :href="value.remote_url" target="_blank" rel="noopener noreferrer">{{
-                      value.remote_url
-                    }}</a>
+                    <a :href="value.remote_url" target="_blank" rel="noopener noreferrer">
+                      {{ value.remote_url }}
+                    </a>
                   </td>
-                  <!-- <td>ArcGIS REST MapServer</td> -->
                   <td>Servcio de Mapas</td>
                 </tr>
               </tbody>
@@ -162,14 +166,14 @@ const irARutaQuery = (v) => {
                 class="boton boton-primario"
                 aria-label="Ir a catálogo externo en mis archivos"
                 to="/catalogo/mis-archivos"
-                >Ver catálogo Externo en Mis Archivos</nuxt-link
-              >
+                >Ver catálogo Externo en Mis Archivos
+              </nuxt-link>
               <nuxt-link
                 class="boton boton-secundario"
                 aria-label="Agregar servicio remoto"
-                to="/catalogo/cargar-servicios-remotos/agregar"
-                >Agregar servicio remoto</nuxt-link
-              >
+                to="/catalogo/servicios-remotos/agregar"
+                >Agregar servicio remoto
+              </nuxt-link>
             </div>
           </form>
         </div>

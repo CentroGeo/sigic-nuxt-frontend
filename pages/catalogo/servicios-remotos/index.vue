@@ -1,4 +1,11 @@
 <script setup>
+definePageMeta({
+  middleware: 'sidebase-auth',
+  bodyAttrs: {
+    class: '',
+  },
+});
+
 try {
   const { data } = useAuth();
   const token = data.value?.accessToken;
@@ -11,11 +18,11 @@ try {
   const harvesters = response.harvesters;
   if (harvesters.length === 0) {
     navigateTo({
-      path: '/catalogo/cargar-servicios-remotos/agregar',
+      path: '/catalogo/servicios-remotos/agregar',
     });
   } else {
     navigateTo({
-      path: '/catalogo/cargar-servicios-remotos/cargados',
+      path: '/catalogo/servicios-remotos/cargados',
     });
   }
 } catch (err) {
