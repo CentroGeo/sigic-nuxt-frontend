@@ -88,7 +88,7 @@ export const useIAStore = defineStore('ia', {
             reject(new Error('Subida cancelada'));
           });
 
-          xhr.open('POST', this.backend + 'direct/api/fileuploads/workspaces/admin/create');
+          xhr.open('POST', this.backend + '/direct/api/fileuploads/workspaces/admin/create');
           xhr.setRequestHeader('Authorization', `Bearer ${token}`);
           xhr.send(formData);
         });
@@ -113,7 +113,7 @@ export const useIAStore = defineStore('ia', {
  */
 
         const response = await fetch(
-          this.backend + 'direct/api/fileuploads/workspaces/admin/contexts/create',
+          this.backend + '/direct/api/fileuploads/workspaces/admin/contexts/create',
           {
             method: 'POST',
             headers: {
@@ -146,7 +146,7 @@ export const useIAStore = defineStore('ia', {
       //this.existeContexto = true;
       const token = this.authToken;
 
-      const response = await fetch(this.backend + 'direct/api/fileuploads/workspaces/admin', {
+      const response = await fetch(this.backend + '/direct/api/fileuploads/workspaces/admin', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -177,7 +177,7 @@ export const useIAStore = defineStore('ia', {
       const token = this.authToken;
 
       const response = await fetch(
-        this.backend + 'direct/api/fileuploads/workspaces/admin/' + project_id + '/files',
+        this.backend + '/direct/api/fileuploads/workspaces/admin/' + project_id + '/files',
         {
           method: 'POST',
           headers: {
@@ -209,7 +209,7 @@ export const useIAStore = defineStore('ia', {
     async getProjectContexts(project_id) {
       const token = this.authToken;
       const response = await fetch(
-        this.backend + 'direct/api/fileuploads/workspaces/admin/' + project_id + '/contexts',
+        this.backend + '/direct/api/fileuploads/workspaces/admin/' + project_id + '/contexts',
         {
           method: 'POST',
           headers: {
@@ -249,8 +249,8 @@ export const useIAStore = defineStore('ia', {
       const token = this.authToken;
       //this.existeContexto = true;
       console.log(user_id);
-      console.log(token);
-      const response = await fetch(this.backend + 'direct/api/chat/history/getchats', {
+
+      const response = await fetch(this.backend + '/direct/api/chat/history/getchats', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -281,7 +281,7 @@ export const useIAStore = defineStore('ia', {
       //this.existeContexto = true;
       console.log(chat_id);
 
-      const response = await fetch(this.backend + 'direct/api/chat/history/user', {
+      const response = await fetch(this.backend + '/direct/api/chat/history/user', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -319,7 +319,7 @@ export const useIAStore = defineStore('ia', {
     async getProjectById(project_id) {
       const token = this.authToken;
       const response = await fetch(
-        this.backend + `direct/api/fileuploads/workspaces/admin/register/${project_id}`,
+        this.backend + `/direct/api/fileuploads/workspaces/admin/register/${project_id}`,
         {
           method: 'POST',
           headers: {
@@ -352,7 +352,7 @@ export const useIAStore = defineStore('ia', {
     async getContextById(project_id) {
       const token = this.authToken;
       const response = await fetch(
-        this.backend + `direct/api/fileuploads/workspaces/admin/contexts/register/${project_id}`,
+        this.backend + `/direct/api/fileuploads/workspaces/admin/contexts/register/${project_id}`,
         {
           method: 'POST',
           headers: {
@@ -450,7 +450,7 @@ export const useIAStore = defineStore('ia', {
 
           xhr.open(
             'POST',
-            this.backend + `direct/api/fileuploads/workspaces/admin/edit/${project_id}`
+            this.backend + `/direct/api/fileuploads/workspaces/admin/edit/${project_id}`
           );
           xhr.setRequestHeader('Authorization', `Bearer ${token}`);
           xhr.send(formData);
@@ -466,7 +466,7 @@ export const useIAStore = defineStore('ia', {
         const token = this.authToken;
 
         const response = await fetch(
-          this.backend + `direct/api/fileuploads/workspaces/admin/contexts/edit/${contexto_id}`,
+          this.backend + `/direct/api/fileuploads/workspaces/admin/contexts/edit/${contexto_id}`,
           {
             method: 'POST',
             headers: {
@@ -494,7 +494,7 @@ export const useIAStore = defineStore('ia', {
         const token = this.authToken;
 
         const response = await fetch(
-          this.backend + `direct/api/fileuploads/workspaces/admin/delete/${project_id}`,
+          this.backend + `/direct/api/fileuploads/workspaces/admin/delete/${project_id}`,
           {
             method: 'DELETE',
             headers: {
@@ -521,7 +521,7 @@ export const useIAStore = defineStore('ia', {
         const token = this.authToken;
 
         const response = await fetch(
-          this.backend + `direct/api/fileuploads/workspaces/admin/contexts/delete/${contexto_id}`,
+          this.backend + `/direct/api/fileuploads/workspaces/admin/contexts/delete/${contexto_id}`,
           {
             method: 'DELETE',
             headers: {

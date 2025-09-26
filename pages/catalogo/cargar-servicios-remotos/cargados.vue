@@ -15,7 +15,7 @@ function updateResources(nuevosRecursos) {
   filteredRemoteResources.value = filteredRemoteResources.value.filter(
     (resource) => resource.sourcetype === 'REMOTE'
   );
-  // console.log('filteredRemoteResources', filteredRemoteResources.value);
+  console.warn('filteredRemoteResources', filteredRemoteResources.value);
 }
 
 watch([recursos], () => {

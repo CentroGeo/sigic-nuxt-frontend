@@ -66,6 +66,16 @@ export function tooltipContent(resource) {
     `<p style="max-width:250px">${resource.attribution || 'Sin fuente'}</p>`;
   return content;
 }
+
+/**
+ * Espera el tiempo indicado para ejecutar la siguiente linea
+ * @param {Number} miliseconds
+ * @returns
+ */
+export async function wait(miliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, miliseconds));
+}
+
 /**
  * Esta función construye urls con queryparams
  * @param {String} server
@@ -89,17 +99,20 @@ export function buildUrl(endpoint, query) {
   return pruebaUrl;
 }
 /**
- * Regresa el servidor en el que esta alojado un recurso
+ * Regresa el servidor en el que esta alojado un recurso remoto
  * @param {Object} resource
  * @returns {String}
  */
 export function getWMSserver(resource) {
-  //const proxy = 'https://geonode.dev.geoint.mx/proxy/?url=';
   const wmsObject = resource.links.find((link) => link.link_type === 'OGC:WMS');
-  const link = wmsObject['url']; //.replace('http', 'https').replace('httpss', 'https');
+  const link = wmsObject['url'];
   return `${link.split('?')[0]}?`;
 }
-
+/**
+ * Obtiene el servidor que aloja al recurso
+ * @param {Object} resource
+ * @returns {String}
+ */
 export function findServer(resource) {
   if (resource.sourcetype === 'REMOTE') {
     return getWMSserver(resource);
@@ -117,18 +130,18 @@ export function findServer(resource) {
  * Puede ser map, table o geometry
  * @returns {Boolean}
  */
-export async function hasWMS(resource, service, proxyURL, requestType) {
-  const maxAttempts = 3;
-  const proxy = `${proxyURL}/proxy/?url=`;
-  const url = new URL(getWMSserver(resource));
+export async function hasWMS(resource, service) {
+  const { gnoxyFetch } = useGnoxyUrl();
+  const maxAttempts = 5;
+  const url = new URL(findServer(resource));
   url.search = new URLSearchParams({
     service: 'WFS',
     version: '1.0.0',
     request: 'GetCapabilities',
-  }).toString();
+  });
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
-      const res = await fetch(proxy + `${encodeURIComponent(url)}`);
+      const res = await gnoxyFetch(url.toString());
       if (!res.ok) {
         console.error('Fracasó la petición getCapabilities');
         continue;
@@ -140,23 +153,22 @@ export async function hasWMS(resource, service, proxyURL, requestType) {
         return false;
       }
 
-      if (requestType === 'GetFeatureInfo') {
+      /*       if (requestType === 'GetFeatureInfo') {
         if (data.includes('GetFeatureInfo')) {
           return true;
         } else {
           return false;
         }
-      } else {
-        if (service === 'map') {
+      } else {} */
+      if (service === 'map') {
+        return true;
+      } else if (service === 'table' || service === 'geometry') {
+        if (data.includes('GetFeature')) {
           return true;
-        } else if (service === 'table' || service === 'geometry') {
-          if (data.includes('GetFeature')) {
-            return true;
-          } else return false;
-        } else {
-          console.error('No se reconoce el tipo de petición que se necesita', url);
-          return false;
-        }
+        } else return false;
+      } else {
+        console.error('No se reconoce el tipo de petición que se necesita', url);
+        return false;
       }
     } catch {
       console.error(`fracaso la peticion para ${resource.alternate}`);
@@ -166,20 +178,16 @@ export async function hasWMS(resource, service, proxyURL, requestType) {
 }
 
 /**
- * Consulta al servidor que aloja un recurso o servicio remoto WFS para
- * obtener el tipo de geomeria del mismo
+ * Consulta al servidor que aloja un recurso remoto o de tipo vectorail para
+ * obtener el tipo de geometria del mismo
  * @param {Object} resource
  * @param {String} server
  * @returns {String}
  */
-export async function fetchGeometryType(resource, server) {
-  const maxAttempts = 4;
-  const config = useRuntimeConfig();
-  const proxy = `${config.public.geonodeUrl}/proxy/?url=`;
-  const { data } = useAuth();
-  const token = data.value?.accessToken;
-  const api = config.public.geonodeUrl;
-  const url = server === 'sigic' ? new URL(`${api}/gs/ows`) : new URL(server);
+export async function fetchGeometryType(resource) {
+  const { gnoxyFetch } = useGnoxyUrl();
+  const maxAttempts = 5;
+  const url = new URL(findServer(resource));
   url.search = new URLSearchParams({
     service: 'WFS',
     version: '1.0.0',
@@ -187,26 +195,16 @@ export async function fetchGeometryType(resource, server) {
     typeName: resource.alternate,
     maxFeatures: 1,
     outputFormat: 'application/json',
-  }).toString();
-  //console.log(resource.alternate, url);
-  let res;
-  if (server !== 'sigic') {
-    res = await fetch(proxy + `${encodeURIComponent(url)}`);
-  } else if (!token) {
-    res = await fetch(url);
-  } else if (token) {
-    res = await fetch(url.toString(), {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-  }
-  if (!res.ok) {
-    return 'Error';
-  }
+  });
 
   // Ahora hacemos una petición get al vínculo statusLocation.
   // Como a veces hace timeout, lo intentamos tres veces
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
+      const res = await gnoxyFetch(url.toString());
+      if (!res.ok) {
+        return 'Error';
+      }
       const data = await res.json();
       //console.log(resource.alternate, data);
       if (
@@ -225,13 +223,30 @@ export async function fetchGeometryType(resource, server) {
 }
 
 /**
- * Espera el tiempo indicado para ejecutar la siguiente linea
- * @param {Number} miliseconds
+ * Define el tipo de geometría de un archivo de tipo dataset
+ * sin importar si es remoto o local, raster o vectoria
+ * @param {Object} resource
  * @returns
  */
-export async function wait(miliseconds) {
-  return new Promise((resolve) => setTimeout(resolve, miliseconds));
+export async function defineGeomType(resource) {
+  let geomType;
+  if (resource.sourcetype === 'REMOTE') {
+    const resourceHasWMS = await hasWMS(resource, 'geometry');
+    if (resourceHasWMS) {
+      geomType = await fetchGeometryType(resource);
+    } else {
+      geomType = 'Remoto';
+    }
+  } else if (resource.subtype === 'raster') {
+    geomType = 'Raster';
+  } else if (resource.subtype === 'vector') {
+    geomType = await fetchGeometryType(resource);
+  } else {
+    geomType = 'Otro';
+  }
+  return geomType;
 }
+
 /**
  * Crea una url autenticada que permite visualizar documentos
  * @param {String} url
@@ -253,7 +268,9 @@ export async function fetchDoc(url) {
     throw new Error(`Fetchfailed: ${res.status}`);
   }
   const blob = await res.blob();
+  //console.log(blob);
   const newUrl = URL.createObjectURL(blob);
+  //console.log(newUrl);
   return newUrl;
 }
 
