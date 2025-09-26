@@ -1,31 +1,7 @@
 <script setup>
-// import { resourceTypeDic } from '~/utils/consulta';
-// const storeFilters = useFilteredResources();
-// const storeFetched = useFetchedResources2Store();
-// storeFetched.checkFilling(resourceTypeDic.dataLayer);
-// storeFetched.checkFilling(resourceTypeDic.dataTable);
-// storeFetched.checkFilling(resourceTypeDic.document);
-// const recursos = computed(() => storeFetched.all);
-// const filteredRemoteResources = ref([]);
-// function updateResources(nuevosRecursos) {
-//   filteredRemoteResources.value = nuevosRecursos;
-//   // filteredRemoteResources.value = filteredRemoteResources.value.filter(
-//   //   (resource) => resource.sourcetype === 'REMOTE'
-//   // );
-//   filteredRemoteResources.value = filteredRemoteResources.value.filter(
-//     (resource) => resource.alternate === selectedUniqueIdentifier.map((d) => d)
-//   );
-//   console.log('filteredRemoteResources', filteredRemoteResources.value);
-// }
-// watch([recursos], () => {
-//   updateResources(storeFilters.filter('all'));
-// });
-// onMounted(() => {
-//   storeFilters.resetAll();
-//   if (recursos.value.length !== 0) {
-//     updateResources(recursos.value);
-//   }
-// });
+import { resourceTypeDic } from '~/utils/consulta';
+import SelectedLayer from '~/utils/consulta/SelectedLayer';
+
 definePageMeta({
   middleware: 'sidebase-auth',
   bodyAttrs: {
@@ -58,28 +34,28 @@ const filteredAlternateResources = ref([]);
 // const { gnoxyUrl } = useGnoxyUrl();
 
 try {
-  const res = await $fetch(`${baseUrl}/resources`, {
+  const res = await $fetch(`${baseUrl}/resources?custom=true&filter{subtype.in}=remote`, {
     method: 'GET',
     headers: headers.value,
   });
   totalResources.value = res.total;
   const response = await $fetch(
-    `${baseUrl}/resources/?custom=true&page_size=${totalResources.value}`,
+    `${baseUrl}/resources/?custom=true&filter{subtype.in}=remote&page_size=${totalResources.value}`,
     {
       method: 'GET',
       headers: headers.value,
     }
   );
   const resources = response.resources;
-  const filteredRemoteResources = resources.filter((resource) => resource.sourcetype === 'REMOTE');
-
-  filteredRemoteResources.forEach((d) =>
+  // const filteredRemoteResources = resources.filter((resource) => resource.sourcetype === 'REMOTE');
+  resources.forEach((d) =>
     b.value.forEach((dd) => {
       if (d.alternate === dd.unique_identifier) {
         filteredAlternateResources.value.push({
           title: d.title,
           abstract: d.abstract,
           remote_resource_type: dd.remote_resource_type,
+          uuid: d.uuid,
         });
       }
     })
@@ -87,6 +63,18 @@ try {
   // console.log('filteredAlternateResources', filteredAlternateResources);
 } catch (err) {
   console.warn('Error en el streaming: ' + err);
+}
+
+/**
+ * Agrega un recurso seleccionado al módulo de consulta y navega a la vista
+ * @param resource del que se toma el uuid para la selección
+ */
+async function openResourceView(resource) {
+  useSelectedResources2Store().add(
+    new SelectedLayer({ uuid: resource.uuid }),
+    resourceTypeDic.dataLayer
+  );
+  await navigateTo('/consulta/capas');
 }
 </script>
 <template>
@@ -96,14 +84,27 @@ try {
     </template>
 
     <template #visualizador>
-      <main v-if="filteredAlternateResources.length !== 0" id="principal" class="contenedor m-b-10">
+      <main
+        v-if="filteredAlternateResources.length !== 0"
+        id="principal"
+        class="contenedor m-b-10 m-y-3"
+      >
+        <div class="flex">
+          <nuxt-link to="/catalogo/cargar-servicios-remotos" aria-label="regresar a mis archivos">
+            <span
+              class="pictograma-flecha-izquierda pictograma-mediano texto-color-acento"
+              aria-hidden="true"
+            />
+            <span class="h5 texto-color-primario p-l-2">Conexiones remotas</span>
+          </nuxt-link>
+        </div>
+
         <h2>Carga catálogos externos</h2>
         <h3>{{ selectedTitle }}</h3>
         <form>
           <table>
             <thead>
               <tr>
-                <th>URL</th>
                 <th>Título</th>
                 <th>Resumen</th>
                 <th>Tipo</th>
@@ -111,9 +112,8 @@ try {
             </thead>
             <tbody>
               <tr v-for="value in filteredAlternateResources" :key="value.pk">
-                <td><a href="#verenvisor">{ { value.url } }</a></td>
                 <td>
-                  {{ value.title }}
+                  <nuxt-link @click="openResourceView(value)">{{ value.title }}</nuxt-link>
                 </td>
                 <td>{{ value.abstract }}</td>
                 <td>{{ value.remote_resource_type }}</td>
