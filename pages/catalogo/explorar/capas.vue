@@ -1,32 +1,78 @@
 <script setup>
 // TODO: fix paginador
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-
 import { cleanInput, resourceTypeDic } from '~/utils/consulta';
 
-const storeFetched = useFetchedResources2Store();
-const storeFilters = useFilteredResources();
+const storeResources = useResourcesCatalogoStore();
 const storeConsulta = useConsultaStore();
+const storeFilters = useFilteredResources();
 storeConsulta.resourceType = resourceTypeDic.dataLayer;
+storeResources.getTotalResources(resourceTypeDic.dataLayer);
+
+//const storeFetched = useFetchedResources2Store();
+//const storeFilters = useFilteredResources();
 //storeFilters.resourceType = 'dataLayer';
-storeFetched.checkFilling(resourceTypeDic.dataLayer);
+//storeFetched.checkFilling(resourceTypeDic.dataLayer);
 
-const resourcesCapas = computed(() => storeFetched.byResourceType(resourceTypeDic.dataLayer));
-const filteredResources = ref([]);
+const totalReources = computed(() => storeResources.totalByType());
+const paginaActual = ref(0);
+const tamanioPagina = 10;
+const totalPags = computed(() => Math.ceil(totalReources.value / tamanioPagina));
+const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'acciones'];
+const resources = computed(() => storeResources.resourcesByType());
 const tableResources = ref([]);
+const modalFiltroAvanzado = ref(null);
+const isFilterActive = ref(false);
 const seleccionOrden = ref('');
+const inputSearch = computed({
+  get: () => storeFilters.filters.inputSearch,
+  set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
+});
+function updateResources() {
+  //filteredResources.value = nuevosRecursos;
+  // obteniendo datos por las props de la tabla
+  tableResources.value = resources.value.map((d) => ({
+    pk: d.pk,
+    titulo: d.title,
+    tipo_recurso: 'Capa geográfica',
+    categoria: d.category,
+    actualizacion: d.last_updated,
+    acciones: 'Ver, Descargar',
+    uuid: d.uuid,
+    recurso_completo: d,
+  }));
+}
+function fetchNewData() {
+  storeResources.resetByType();
+  storeResources.getResourcesByPage(
+    storeConsulta.resourceType,
+    paginaActual.value + 1,
+    tamanioPagina
+  );
+}
+fetchNewData();
 
+watch(paginaActual, () => {
+  fetchNewData();
+});
+
+watch(resources, () => {
+  updateResources();
+});
+//const tableResources = ref([]);
+/* const filteredResources = ref([]);
+const seleccionOrden = ref('');
 const inputSearch = computed({
   get: () => storeFilters.filters.inputSearch,
   set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
 });
 const modalFiltroAvanzado = ref(null);
-const isFilterActive = ref(false);
+const isFilterActive = ref(false); */
 
 // obteniendo las variables keys para la tabla
-const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'acciones'];
+//const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'acciones'];
 
-function updateResources(nuevosRecursos) {
+/* function updateResources(nuevosRecursos) {
   filteredResources.value = nuevosRecursos;
   // obteniendo datos por las props de la tabla
   tableResources.value = filteredResources.value.map((d) => ({
@@ -39,9 +85,9 @@ function updateResources(nuevosRecursos) {
     uuid: d.uuid,
     recurso_completo: d,
   }));
-}
+} */
 
-function applyAdvancedFilter() {
+/* function applyAdvancedFilter() {
   isFilterActive.value = true;
   modalFiltroAvanzado.value.cerrarModalBusqueda();
   updateResources(storeFilters.filter());
@@ -68,7 +114,7 @@ onMounted(async () => {
   if (resourcesCapas.value.length !== 0) {
     updateResources(resourcesCapas.value);
   }
-});
+}); */
 </script>
 
 <template>
@@ -80,7 +126,6 @@ onMounted(async () => {
     <template #visualizador>
       <main id="principal" class="contenedor m-b-10 m-t-3">
         <div class="flex">
-          <!-- Selector Orden -->
           <div class="columna-8">
             <ClientOnly>
               <SisdaiSelector v-model="seleccionOrden" etiqueta="Ordenar por">
@@ -91,7 +136,6 @@ onMounted(async () => {
               </SisdaiSelector>
             </ClientOnly>
           </div>
-          <!-- Campo de búsqueda avanzada -->
           <div class="columna-8">
             <div class="flex flex-contenido-separado">
               <div class="columna-14">
@@ -146,16 +190,13 @@ onMounted(async () => {
 
         <div class="flex">
           <h2>Capas geográficas</h2>
-          <UiNumeroElementos :numero="tableResources.length" />
+          <UiNumeroElementos :numero="totalReources" />
         </div>
 
         <div class="flex">
-          <div class="columna-16">
-            <!-- TODO: implementar paginador -->
-            <ClientOnly>
-              <UiTablaAccesibleV2 :variables="variables" :datos="tableResources" />
-              <UiPaginador :total-paginas="1" @cambio="1" />
-            </ClientOnly>
+          <div class="columna - 16">
+            <UiTablaAccesibleV2 :variables="variables" :datos="tableResources" />
+            <UiPaginador :total-paginas="totalPags" @cambio="paginaActual = $event" />
           </div>
         </div>
       </main>
@@ -163,8 +204,8 @@ onMounted(async () => {
       <!-- Modal Búsqueda avanzada -->
       <ConsultaModalBusqueda
         ref="modalFiltroAvanzado"
-        @apply-filter="applyAdvancedFilter"
-        @reset-filter="resetAdvancedFilter"
+        @apply-filter="console.log('applyAdvancedFilter')"
+        @reset-filter="console.log('resetAdvancedFilter')"
       />
     </template>
   </UiLayoutPaneles>

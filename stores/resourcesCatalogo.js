@@ -43,7 +43,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
     },
 
     resetByType(resourceType = storeConsulta.resourceType) {
-      totals[resourceType] = 0;
       resources[resourceType] = [];
     },
 
@@ -74,7 +73,32 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       latestResources[resourceType] = res.resources[0];
       this.isLoading = false;
     },
+    async getResourcesByPage(resourceType = storeConsulta.resourceType, pageNum, pageSize) {
+      const { gnoxyFetch } = useGnoxyUrl();
+      this.isLoading = true;
+      const queryParams = {
+        custom: 'true',
+        'filter{resource_type}': resourceTypeGeonode[resourceType],
+        page: pageNum,
+        page_size: pageSize,
+      };
+      if (resourceType === 'dataLayer') {
+        queryParams['extent_ne'] = '[-1,-1,0,0]';
+      }
+      if (resourceType === 'dataTable') {
+        //queryParams['filter{subtype.in}'] = ['vector', 'remote'];
+        queryParams['filter{subtype.in}'] = 'vector';
+      }
+      /*  if (resourceType === 'document') {
+        queryParams['file_extension'] = ['pdf', 'txt'];
+      } */
 
+      const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
+      const request = await gnoxyFetch(url.toString());
+      const res = await request.json();
+      resources[resourceType] = res.resources;
+      this.isLoading = false;
+    },
     /**
      * Devuelve un recursos que coincida con un uuid.
      * @param {String} uuid del catalogo a buscar.
