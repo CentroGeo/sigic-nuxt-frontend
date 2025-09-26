@@ -3,6 +3,7 @@ import SisdaiNavegacionPrincipal from '@centrogeomx/sisdai-componentes/src/compo
 
 const { status, signIn, signOut } = useAuth();
 const route = useRoute();
+const config = useRuntimeConfig();
 
 async function iniciarSesion() {
   await signIn('keycloak', {
@@ -14,6 +15,11 @@ async function iniciarSesion() {
 async function cerrarSesion() {
   await signOut({ callbackUrl: route.fullPath });
 }
+
+const mostrarCatalogo = computed(() => config.public.enableCatalogoVista);
+const mostrarConsulta = computed(() => config.public.enableConsulta);
+const mostrarIaa = computed(() => config.public.enableIaa);
+const mostrarAuth = computed(() => config.public.enableAuth);
 </script>
 
 <template>
@@ -50,16 +56,16 @@ async function cerrarSesion() {
         <NuxtLink class="nav-hipervinculo" to="/" exact-path>Inicio</NuxtLink>
       </li>
       <!-- <li><NuxtLink class="nav-hipervinculo" to="/carga">Carga</NuxtLink></li> -->
-      <li v-if="false">
+      <li v-if="mostrarCatalogo">
         <NuxtLink class="nav-hipervinculo" to="/catalogo">Catálogo</NuxtLink>
       </li>
-      <li>
+      <li v-if="mostrarConsulta">
         <NuxtLink class="nav-hipervinculo" to="/consulta">Consulta</NuxtLink>
       </li>
-      <li v-if="false">
+      <li v-if="mostrarIaa">
         <NuxtLink class="nav-hipervinculo" to="/ia">Análisis Inteligencia Artificial</NuxtLink>
       </li>
-      <li v-if="false">
+      <li v-if="mostrarAuth">
         <button
           v-if="status === 'authenticated'"
           aria-label="Cerrar sesión"
