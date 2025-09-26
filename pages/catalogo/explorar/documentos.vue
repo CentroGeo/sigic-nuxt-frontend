@@ -4,6 +4,7 @@ import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/sele
 import { cleanInput, resourceTypeDic } from '~/utils/consulta';
 
 const storeResources = useResourcesCatalogoStore();
+const storeCatalogo = useCatalogoStore();
 const storeConsulta = useConsultaStore();
 const storeFilters = useFilteredResources();
 storeConsulta.resourceType = resourceTypeDic.document;
@@ -29,7 +30,7 @@ function updateResources() {
   tableResources.value = resources.value.map((d) => ({
     pk: d.pk,
     titulo: d.title,
-    tipo_recurso: 'Capa geográfica',
+    tipo_recurso: 'Documentos',
     categoria: d.category,
     actualizacion: d.last_updated,
     acciones: 'Ver, Descargar',
@@ -86,7 +87,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <UiLayoutPaneles>
+  <UiLayoutPaneles :estado-colapable="storeCatalogo.catalogoColapsado">
     <template #catalogo>
       <CatalogoListaMenuLateral />
     </template>

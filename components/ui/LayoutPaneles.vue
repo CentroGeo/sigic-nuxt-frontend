@@ -2,6 +2,7 @@
 /**
  * @typedef {Object} Props
  * @property {Number} [paneles=2] - Indica el número de paneles a utilizar.
+ * @property {Boolean} [estadoColapable=false] - Estado del icono colapsar, visible si se recibe la `funcionColapsar`.
  */
 
 /** @type {Props} */
@@ -10,16 +11,18 @@ defineProps({
     type: Number,
     default: 2,
   },
+  estadoColapable: {
+    type: Boolean,
+    default: false,
+  },
 });
-// store
-const storeCatalogo = useCatalogoStore();
 const route = useRoute();
 </script>
 <template>
   <div class="contenedor-paneles grid">
     <div
       :class="`
-      ${storeCatalogo.catalogoColapsado ? 'oculto' : 'columna-4'} 
+      ${estadoColapable ? 'oculto' : 'columna-4'} 
       ${paneles === 2 && !route.path.includes('/ia/') ? 'menu-lateral-fondo' : ''}`"
     >
       <slot name="catalogo">
@@ -30,9 +33,9 @@ const route = useRoute();
     <div
       :class="`${
         paneles === 2
-          ? `columna-${storeCatalogo.catalogoColapsado ? '16' : '12'}`
+          ? `columna-${estadoColapable ? '16' : '12'}`
           : paneles === 3
-            ? `columna-${storeCatalogo.catalogoColapsado ? '12' : '8'}`
+            ? `columna-${estadoColapable ? '12' : '8'}`
             : ''
       }`"
     >

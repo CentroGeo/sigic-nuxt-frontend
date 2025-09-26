@@ -4,6 +4,7 @@ import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/sele
 import { cleanInput, resourceTypeDic } from '~/utils/consulta';
 
 const storeResources = useResourcesCatalogoStore();
+const storeCatalogo = useCatalogoStore();
 const storeConsulta = useConsultaStore();
 const storeFilters = useFilteredResources();
 storeConsulta.resourceType = resourceTypeDic.dataLayer;
@@ -118,7 +119,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <UiLayoutPaneles>
+  <UiLayoutPaneles :estado-colapable="storeCatalogo.catalogoColapsado">
     <template #catalogo>
       <CatalogoListaMenuLateral />
     </template>

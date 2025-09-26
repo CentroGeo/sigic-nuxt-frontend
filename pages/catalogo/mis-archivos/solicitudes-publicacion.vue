@@ -9,6 +9,7 @@ definePageMeta({
 });
 const storeResources = useResourcesCatalogoStore();
 const storeFilters = useFilteredResources();
+const storeCatalogo = useCatalogoStore();
 const section = 'publicacion';
 storeResources.getMyTotal(section);
 const totalResources = computed(() => storeResources.myTotalBySection(section));
@@ -231,7 +232,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <UiLayoutPaneles>
+  <UiLayoutPaneles :estado-colapable="storeCatalogo.catalogoColapsado">
     <template #catalogo>
       <CatalogoListaMenuLateral />
     </template>
