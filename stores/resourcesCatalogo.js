@@ -17,25 +17,41 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
     [resourceTypeDic.dataTable]: [],
     [resourceTypeDic.document]: [],
   });
-
   const latestResources = reactive({
     [resourceTypeDic.dataLayer]: undefined,
     [resourceTypeDic.dataTable]: undefined,
     [resourceTypeDic.document]: undefined,
   });
-
+  const misArchivos = reactive({
+    disponibles: [],
+    pendientes: [],
+    publicacion: [],
+  });
+  const totalMisArchivos = reactive({
+    disponibles: 0,
+    pendientes: 0,
+    publicacion: 0,
+  });
   return {
     isLoading: ref(false),
     totals,
     resources,
     latestResources,
+    misArchivos,
+    totalMisArchivos,
 
     resourcesByType(resourceType = storeConsulta.resourceType) {
       return resources[resourceType];
     },
-
+    mineBySection(section) {
+      return misArchivos[section];
+    },
     totalByType(resourceType = storeConsulta.resourceType) {
       return totals[resourceType];
+    },
+
+    myTotalBySection(section) {
+      return totalMisArchivos[section];
     },
 
     latestByType(resourceType = storeConsulta.resourceType) {
@@ -44,6 +60,9 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
 
     resetByType(resourceType = storeConsulta.resourceType) {
       resources[resourceType] = [];
+    },
+    resetBySection(section) {
+      misArchivos[section] = [];
     },
     /**Hace una petición de solo 1 recurso para obtener el total de recursos y el último recurso */
     async getTotalResources(resourceType = storeConsulta.resourceType) {
@@ -68,10 +87,29 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
-      console.log('Queremos ver el total: ', res);
       totals[resourceType] = res.total;
       latestResources[resourceType] = res.resources[0];
       this.isLoading = false;
+    },
+    /**
+     *
+     * @param {*} section
+     */
+    async getMyTotal(section) {
+      const { gnoxyFetch } = useGnoxyUrl();
+      this.isLoading = true;
+      const queryParams = {
+        custom: 'true',
+        page_size: 100,
+        'filter{owner.username}': 'proteanull',
+      };
+      // Agregar toda la lógica de queryparams correspondientes por sección
+      const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
+      const request = await gnoxyFetch(url.toString());
+      const res = await request.json();
+      totalMisArchivos[section] = res.total;
+      this.isLoading = false;
+      console.log('Se pidió el total de los recuros');
     },
     /**
      *Hace una petición de recursos especificando la página y el número de recursos que se desea traer
@@ -103,6 +141,32 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
       resources[resourceType] = res.resources;
+      this.isLoading = false;
+    },
+
+    async getMyResourcesByPage(section, pageNum, pageSize) {
+      const { gnoxyFetch } = useGnoxyUrl();
+      this.isLoading = true;
+      const queryParams = {
+        custom: 'true',
+        page: pageNum,
+        page_size: pageSize,
+        'filter{owner.username}': 'proteanull',
+      };
+
+      const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
+      const request = await gnoxyFetch(url.toString());
+      const res = await request.json();
+      let datum;
+      if (section === 'disponibles') {
+        datum = res.resources.filter((d) => d.category !== null);
+      } else if (section === 'pendientes') {
+        datum = res.resources.filter((d) => d.category === null);
+      } else {
+        datum = [];
+      }
+      misArchivos[section] = datum;
+      console.log('Mis archivos traídos por pagian', misArchivos[section]);
       this.isLoading = false;
     },
     /**
