@@ -50,16 +50,16 @@ async function cerrarSesion() {
         <NuxtLink class="nav-hipervinculo" to="/" exact-path>Inicio</NuxtLink>
       </li>
       <!-- <li><NuxtLink class="nav-hipervinculo" to="/carga">Carga</NuxtLink></li> -->
-      <li>
+      <li v-if="false">
         <NuxtLink class="nav-hipervinculo" to="/catalogo">Catálogo</NuxtLink>
       </li>
       <li>
         <NuxtLink class="nav-hipervinculo" to="/consulta">Consulta</NuxtLink>
       </li>
-      <li>
-        <NuxtLink class="nav-hipervinculo" to="/ia"> Análisis Inteligencia Artificial </NuxtLink>
+      <li v-if="false">
+        <NuxtLink class="nav-hipervinculo" to="/ia">Análisis Inteligencia Artificial</NuxtLink>
       </li>
-      <li>
+      <li v-if="false">
         <button
           v-if="status === 'authenticated'"
           aria-label="Cerrar sesión"
