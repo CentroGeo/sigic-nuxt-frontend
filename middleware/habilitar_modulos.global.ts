@@ -1,4 +1,19 @@
-// middleware/feature-flags.global.ts
+// SPDX-FileCopyrightText: 2025 CentroGeo
+// SPDX-FileContributor: César Benjamín <cesarbenjamindotnet@gmail.com>
+// SPDX-License-Identifier: MIT
+//
+// Descripción:
+//   Middleware global de Nuxt 3 que controla el acceso a rutas mediante
+//   feature flags definidos en `runtimeConfig.public`.
+//   - Define la interfaz `FeatureFlags` para habilitar o deshabilitar
+//     funcionalidades como autenticación, catálogo, consulta o IAA.
+//   - Construye un mapa de reglas (ruta → condición).
+//   - Si el usuario accede a una ruta deshabilitada, aborta la navegación
+//     devolviendo un 404 (con opción a redirigir a la raíz).
+//
+//   Esto permite activar o desactivar secciones enteras de la aplicación
+//   según configuración de despliegue o entorno.
+
 interface FeatureFlags {
   enableAuth: boolean;
   enableCatalogoVista: boolean;

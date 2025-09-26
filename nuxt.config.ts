@@ -80,11 +80,6 @@ export default defineNuxtConfig({
 
     // Variables públicas (disponibles también en el cliente)
     public: {
-      geonodeApi: process.env.NUXT_PUBLIC_GEONODE_API,
-      geonodeUrl: process.env.NUXT_PUBLIC_GEONODE_URL,
-      geoserverUrl: process.env.NUXT_PUBLIC_GEOSERVER_URL,
-      iaBackendUrl: process.env.NUXT_PUBLIC_IA_BACKEND_URL,
-      baseURL: baseUrl,
       enableAuth: process.env.NUXT_PUBLIC_ENABLE_AUTH === 'true' || false,
       enableCatalogoVista: process.env.NUXT_PUBLIC_ENABLE_CATALOGO_VISTA === 'true' || false,
       enableCatalogoCarga: process.env.NUXT_PUBLIC_ENABLE_CATALOGO_CARGA === 'true' || false,
