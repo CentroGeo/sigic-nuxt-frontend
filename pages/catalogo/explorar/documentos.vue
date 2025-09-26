@@ -1,38 +1,35 @@
 <script setup>
-// TODO: fix paginador
+// TODO: Reactivar filtrado
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-
 import { cleanInput, resourceTypeDic } from '~/utils/consulta';
 
-const storeFetched = useFetchedResources2Store();
-const storeFilters = useFilteredResources();
+const storeResources = useResourcesCatalogoStore();
 const storeConsulta = useConsultaStore();
+const storeFilters = useFilteredResources();
 storeConsulta.resourceType = resourceTypeDic.document;
-//storeFilters.resourceType = 'document';
-storeFetched.checkFilling(resourceTypeDic.document);
+storeResources.getTotalResources(resourceTypeDic.document);
 
-const resourcesTablas = computed(() => storeFetched.byResourceType(resourceTypeDic.document));
-const filteredResources = ref([]);
+const totalReources = computed(() => storeResources.totalByType());
+const paginaActual = ref(0);
+const tamanioPagina = 10;
+const totalPags = computed(() => Math.ceil(totalReources.value / tamanioPagina));
+const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'acciones'];
+const resources = computed(() => storeResources.resourcesByType());
 const tableResources = ref([]);
+const modalFiltroAvanzado = ref(null);
+const isFilterActive = ref(false);
 const seleccionOrden = ref('');
-
 const inputSearch = computed({
   get: () => storeFilters.filters.inputSearch,
   set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
 });
-const modalFiltroAvanzado = ref(null);
-const isFilterActive = ref(false);
-
-// obteniendo las variables keys para la tabla
-const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'acciones'];
-
-function updateResources(nuevosRecursos) {
-  filteredResources.value = nuevosRecursos;
+function updateResources() {
+  //filteredResources.value = nuevosRecursos;
   // obteniendo datos por las props de la tabla
-  tableResources.value = filteredResources.value.map((d) => ({
+  tableResources.value = resources.value.map((d) => ({
     pk: d.pk,
     titulo: d.title,
-    tipo_recurso: 'Documentos',
+    tipo_recurso: 'Capa geográfica',
     categoria: d.category,
     actualizacion: d.last_updated,
     acciones: 'Ver, Descargar',
@@ -40,8 +37,25 @@ function updateResources(nuevosRecursos) {
     recurso_completo: d,
   }));
 }
+function fetchNewData() {
+  storeResources.resetByType();
+  storeResources.getResourcesByPage(
+    storeConsulta.resourceType,
+    paginaActual.value + 1,
+    tamanioPagina
+  );
+}
+fetchNewData();
 
-function applyAdvancedFilter() {
+watch(paginaActual, () => {
+  fetchNewData();
+});
+
+watch(resources, () => {
+  updateResources();
+});
+
+/* function applyAdvancedFilter() {
   isFilterActive.value = true;
   modalFiltroAvanzado.value.cerrarModalBusqueda();
   updateResources(storeFilters.filter());
@@ -68,7 +82,7 @@ onMounted(async () => {
   if (resourcesTablas.value.length !== 0) {
     updateResources(resourcesTablas.value);
   }
-});
+}); */
 </script>
 
 <template>
@@ -147,7 +161,7 @@ onMounted(async () => {
 
         <div class="flex">
           <h2>Documentos</h2>
-          <UiNumeroElementos :numero="tableResources.length" />
+          <UiNumeroElementos :numero="totalReources" />
         </div>
 
         <div class="flex">
@@ -155,7 +169,7 @@ onMounted(async () => {
             <!-- TODO: implementar paginador -->
             <ClientOnly>
               <UiTablaAccesibleV2 :variables="variables" :datos="tableResources" />
-              <UiPaginador :total-paginas="1" @cambio="1" />
+              <UiPaginador :total-paginas="totalPags" @cambio="paginaActual = $event" />
             </ClientOnly>
           </div>
         </div>
@@ -164,8 +178,8 @@ onMounted(async () => {
       <!-- Modal Búsqueda avanzada -->
       <ConsultaModalBusqueda
         ref="modalFiltroAvanzado"
-        @apply-filter="applyAdvancedFilter"
-        @reset-filter="resetAdvancedFilter"
+        @apply-filter="console.log('applyAdvancedFilter')"
+        @reset-filter="console.log('resetAdvancedFilter')"
       />
     </template>
   </UiLayoutPaneles>

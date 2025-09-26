@@ -1,5 +1,5 @@
 <script setup>
-// TODO: fix paginador
+// TODO: Reactivar filtrado
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { cleanInput, resourceTypeDic } from '~/utils/consulta';
 
@@ -126,6 +126,7 @@ onMounted(async () => {
     <template #visualizador>
       <main id="principal" class="contenedor m-b-10 m-t-3">
         <div class="flex">
+          <!-- Selector Orden -->
           <div class="columna-8">
             <ClientOnly>
               <SisdaiSelector v-model="seleccionOrden" etiqueta="Ordenar por">
@@ -136,6 +137,7 @@ onMounted(async () => {
               </SisdaiSelector>
             </ClientOnly>
           </div>
+          <!-- Campo de búsqueda avanzada -->
           <div class="columna-8">
             <div class="flex flex-contenido-separado">
               <div class="columna-14">
@@ -195,8 +197,10 @@ onMounted(async () => {
 
         <div class="flex">
           <div class="columna - 16">
-            <UiTablaAccesibleV2 :variables="variables" :datos="tableResources" />
-            <UiPaginador :total-paginas="totalPags" @cambio="paginaActual = $event" />
+            <ClientOnly>
+              <UiTablaAccesibleV2 :variables="variables" :datos="tableResources" />
+              <UiPaginador :total-paginas="totalPags" @cambio="paginaActual = $event" />
+            </ClientOnly>
           </div>
         </div>
       </main>

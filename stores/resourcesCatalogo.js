@@ -45,14 +45,13 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
     resetByType(resourceType = storeConsulta.resourceType) {
       resources[resourceType] = [];
     },
-
+    /**Hace una petición de solo 1 recurso para obtener el total de recursos y el último recurso */
     async getTotalResources(resourceType = storeConsulta.resourceType) {
       const { gnoxyFetch } = useGnoxyUrl();
       this.isLoading = true;
       const queryParams = {
         custom: 'true',
         'filter{resource_type}': resourceTypeGeonode[resourceType],
-        // TODO: Cambiar este valor por un 1
         page_size: 100,
       };
       if (resourceType === 'dataLayer') {
@@ -69,10 +68,17 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
+      console.log('Queremos ver el total: ', res);
       totals[resourceType] = res.total;
       latestResources[resourceType] = res.resources[0];
       this.isLoading = false;
     },
+    /**
+     *Hace una petición de recursos especificando la página y el número de recursos que se desea traer
+     * @param {Object} resourceType
+     * @param {Number} pageNum
+     * @param {Number} pageSize
+     */
     async getResourcesByPage(resourceType = storeConsulta.resourceType, pageNum, pageSize) {
       const { gnoxyFetch } = useGnoxyUrl();
       this.isLoading = true;
