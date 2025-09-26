@@ -16,6 +16,7 @@ async function cerrarSesion() {
   await signOut({ callbackUrl: route.fullPath });
 }
 
+const mostrarInicio = computed(() => !config.public.defaultPage);
 const mostrarCatalogo = computed(() => config.public.enableCatalogoVista);
 const mostrarConsulta = computed(() => config.public.enableConsulta);
 const mostrarIaa = computed(() => config.public.enableIaa);
@@ -52,7 +53,7 @@ const mostrarAuth = computed(() => config.public.enableAuth);
     </template>
 
     <ul class="nav-menu">
-      <li>
+      <li v-if="mostrarInicio">
         <NuxtLink class="nav-hipervinculo" to="/" exact-path>Inicio</NuxtLink>
       </li>
       <!-- <li><NuxtLink class="nav-hipervinculo" to="/carga">Carga</NuxtLink></li> -->
