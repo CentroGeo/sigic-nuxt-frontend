@@ -148,6 +148,18 @@ const optionsDict = {
   },
 };
 
+function confirmarSolicitud(cerrarModal) {
+  if (cerrarModal === 'modalPublica3') {
+    modalPublica3.value.cerrarModal();
+  } else {
+    modalPublica4.value.cerrarModal();
+  }
+  console.warn('confirmada');
+  navigateTo({
+    path: '/catalogo/mis-archivos/solicitudes-publicacion',
+  });
+}
+
 defineExpose({
   abrirModalDescarga,
 });
@@ -331,7 +343,6 @@ defineExpose({
           </p>
         </div>
       </template>
-
       <template #cuerpo>
         <CatalogoOpcionalesMeta
           :recurso="selectedElement"
@@ -354,7 +365,12 @@ defineExpose({
             </button>
           </div>
           <div class="columna-8">
-            <button v-if="tagTitle !== 'capa'" type="button" class="boton-primario texto-centrado">
+            <button
+              v-if="tagTitle !== 'capa'"
+              type="button"
+              class="boton-primario texto-centrado"
+              @click="confirmarSolicitud('modalPublica3')"
+            >
               Confirmar
             </button>
             <!-- TODO: revisar la parte de capa con geometría y subtipo con vector -->
@@ -388,7 +404,13 @@ defineExpose({
         </div>
       </template>
       <template #cuerpo>
-        <p>Atributos</p>
+        <CatalogoAtributosMeta
+          :recurso="selectedElement"
+          :resource-pk="selectedElement.pk"
+          :resource-type="resourceType"
+          :is-modal="true"
+        />
+
         <div class="flex flex-contenido-separado m-t-3">
           <div class="columna-8 texto-centrado">
             <button
@@ -403,7 +425,13 @@ defineExpose({
             </button>
           </div>
           <div class="columna-8">
-            <button type="button" class="boton-primario texto-centrado">Confirmar</button>
+            <button
+              type="button"
+              class="boton-primario texto-centrado"
+              @click="confirmarSolicitud('modalPublica4')"
+            >
+              Confirmar
+            </button>
           </div>
         </div>
       </template>

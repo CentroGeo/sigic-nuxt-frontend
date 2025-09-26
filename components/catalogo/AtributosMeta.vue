@@ -61,7 +61,7 @@ watch(
       <CatalogoHeaderMetadatos
         :resource="props.resource"
         :title="'Atributos del Conjunto de Datos'"
-        :exclude-links="false"
+        :exclude-links="props.isModal"
       ></CatalogoHeaderMetadatos>
     </div>
 
@@ -147,6 +147,7 @@ watch(
 
       <p v-else>...Cargando</p>
       <CatalogoBotonesMetadatos
+        v-if="!props.isModal"
         :key="`4-${props.resourcePk}-buttons`"
         :title="'AtributosConjunto'"
         :pk="props.resourcePk"

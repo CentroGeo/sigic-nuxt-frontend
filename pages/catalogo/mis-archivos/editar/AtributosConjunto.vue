@@ -30,15 +30,14 @@ const editedResource = computed(() => resources.value.find(({ pk }) => pk === se
 
     <template #visualizador>
       <main v-if="editedResource" id="atributos-conjunto" class="contenedor m-b-10 m-y-3">
-        <div class="flex m-0 contenedor-botones">
-          <button
-            class="boton-pictograma boton-sin-contenedor-secundario"
-            aria-label="Acción a realizar"
-            type="button"
-          >
-            <span class="pictograma-flecha-izquierda" aria-hidden="true" />
-          </button>
-          <p>Editar</p>
+        <div class="flex">
+          <nuxt-link to="/catalogo/mis-archivos" aria-label="regresar a mis archivos">
+            <span
+              class="pictograma-flecha-izquierda pictograma-mediano texto-color-acento"
+              aria-hidden="true"
+            />
+            <span class="h5 texto-color-primario p-l-2">Editar</span>
+          </nuxt-link>
         </div>
 
         <CatalogoAtributosMeta
