@@ -86,6 +86,7 @@ export default defineNuxtConfig({
       iaBackendUrl: process.env.NUXT_PUBLIC_IA_BACKEND_URL,
       baseURL: baseUrl,
       defaultPage: process.env.NUXT_PUBLIC_DEFAULT_PAGE,
+      geonodeApiDefaultFilter: process.env.NUXT_PUBLIC_GEONODE_API_DEFAULT_FILTER || '',
       enableAuth: process.env.NUXT_PUBLIC_ENABLE_AUTH === 'true' || false,
       enableCatalogoVista: process.env.NUXT_PUBLIC_ENABLE_CATALOGO_VISTA === 'true' || false,
       enableCatalogoCarga: process.env.NUXT_PUBLIC_ENABLE_CATALOGO_CARGA === 'true' || false,
