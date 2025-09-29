@@ -12,9 +12,10 @@ export const useIAStore = defineStore('ia', {
     uploadProgress: 0,
     isUploading: false,
     chats: [],
-    chatSeleccionado: null,
+    chatActual: null,
     contextoSeleccionado: null,
     backend: useRuntimeConfig().public.iaBackendUrl,
+    chatsVersion: 0,
   }),
   getters: {
     authToken: () => {
@@ -538,6 +539,58 @@ export const useIAStore = defineStore('ia', {
         console.error('Error:', error);
         throw error;
       }
+    },
+    async updateChat(title, chat_id) {
+      const token = this.authToken;
+
+      const response = await fetch(this.backend + '/direct/api/chat/history/title', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ title: title, chat_id: parseInt(chat_id) }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al actualizar chat');
+      }
+
+      const data = await response.json();
+      console.log(data);
+
+      return data;
+    },
+    async deleteChat(chat_id) {
+      try {
+        const token = this.authToken;
+
+        const response = await fetch(this.backend + `/direct/api/chat/history/remove/${chat_id}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al eliminar el chat');
+        }
+
+        const data = await response.json();
+        console.log('Chat eliminado:', data);
+      } catch (error) {
+        console.error('Error:', error);
+        throw error;
+      }
+    },
+    triggerChatsReload() {
+      this.chatsVersion++;
+    },
+    setChatActual(chat) {
+      this.chatActual = chat;
+    },
+    clearChatActual() {
+      this.chatActual = null;
     },
   },
 });
