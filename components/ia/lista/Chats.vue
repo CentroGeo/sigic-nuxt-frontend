@@ -3,7 +3,6 @@ import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/cam
 import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const storeIA = useIAStore();
@@ -212,52 +211,54 @@ watch(
             />
           </ClientOnly>
 
-          <h6>Selecciona un chat para empezar a interactuar con el asistente.</h6>
+          <div class="overflowYAuto">
+            <h6>Selecciona un chat para empezar a interactuar con el asistente.</h6>
 
-          <ul class="lista-sin-estilo">
-            <li v-for="grupo in catalogoFiltrado" :id="grupo.id" :key="grupo.id">
-              <p class="fecha-grupo">
-                {{ grupo.fecha == fechaHoy ? 'Hoy' : grupo.fecha }}
-              </p>
+            <ul class="lista-sin-estilo">
+              <li v-for="grupo in catalogoFiltrado" :id="grupo.id" :key="grupo.id">
+                <p class="fecha-grupo">
+                  {{ grupo.fecha == fechaHoy ? 'Hoy' : grupo.fecha }}
+                </p>
 
-              <ul class="lista-sin-estilo">
-                <li v-for="chat in grupo.chat" :id="chat.id" :key="chat.id">
-                  <div class="tarjeta-chat p-3 borde borde-redondeado-20" @click="openChat(chat)">
-                    <h5 class="tarjeta-titulo m-t-0 m-b-2">
-                      {{ chat.titulo }}
-                    </h5>
-                    <p class="tarjeta-nombre-proyecto m-t-0 m-b-1">
-                      {{ chat.proyecto }}
-                    </p>
-                    <p class="tarjeta-nombre-contexto m-t-0 m-b-2">
-                      {{ chat.contexto }}
-                    </p>
+                <ul class="lista-sin-estilo">
+                  <li v-for="chat in grupo.chat" :id="chat.id" :key="chat.id">
+                    <div class="tarjeta-chat p-3 borde borde-redondeado-20" @click="openChat(chat)">
+                      <h5 class="tarjeta-titulo m-t-0 m-b-2">
+                        {{ chat.titulo }}
+                      </h5>
+                      <p class="tarjeta-nombre-proyecto m-t-0 m-b-1">
+                        {{ chat.proyecto }}
+                      </p>
+                      <p class="tarjeta-nombre-contexto m-t-0 m-b-2">
+                        {{ chat.contexto }}
+                      </p>
 
-                    <div class="flex flex-contenido-final">
-                      <div>
-                        <button
-                          class="boton-pictograma boton-sin-contenedor-secundario"
-                          aria-label="Editar chat"
-                          type="button"
-                          @click.stop="openEditModal(chat.titulo, chat.id)"
-                        >
-                          <span class="pictograma-editar" aria-hidden="true" />
-                        </button>
-                        <button
-                          class="boton-pictograma boton-sin-contenedor-secundario"
-                          aria-label="Remover chat"
-                          type="button"
-                          @click.stop="openEliminarModal(chat.id)"
-                        >
-                          <span class="pictograma-eliminar" aria-hidden="true" />
-                        </button>
+                      <div class="flex flex-contenido-final">
+                        <div>
+                          <button
+                            class="boton-pictograma boton-sin-contenedor-secundario"
+                            aria-label="Editar chat"
+                            type="button"
+                            @click.stop="openEditModal(chat.titulo, chat.id)"
+                          >
+                            <span class="pictograma-editar" aria-hidden="true" />
+                          </button>
+                          <button
+                            class="boton-pictograma boton-sin-contenedor-secundario"
+                            aria-label="Remover chat"
+                            type="button"
+                            @click.stop="openEliminarModal(chat.id)"
+                          >
+                            <span class="pictograma-eliminar" aria-hidden="true" />
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </li>
-              </ul>
-            </li>
-          </ul>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -353,6 +354,10 @@ watch(
 </template>
 
 <style lang="scss">
+.overflowYAuto {
+  height: 65vh;
+  overflow-y: auto;
+}
 .boton-listas {
   width: 100%;
   text-align: center;

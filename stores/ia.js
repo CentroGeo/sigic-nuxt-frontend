@@ -228,7 +228,7 @@ export const useIAStore = defineStore('ia', {
       const data = await response.json();
       this.contextosProyecto = data;
 
-      this.existeContexto = true;
+      // this.existeContexto = true;
 
       /*    if (data.length > 0) {
         this.proyectoSeleccionado = data[0];

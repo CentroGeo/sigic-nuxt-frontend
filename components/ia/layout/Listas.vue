@@ -1,8 +1,5 @@
 <script setup>
-// import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
-import { onMounted, ref } from 'vue';
-
-const storeIA = useIAStore();
+import { cleanInput } from '~/utils/consulta';
 
 /**
  * @typedef {Object} Props
@@ -18,6 +15,7 @@ const props = defineProps({
 });
 const { titulo, textoBoton, etiquetaBusqueda } = toRefs(props);
 
+const storeIA = useIAStore();
 const catalogo = ref([]);
 const catalogoFiltrado = ref(catalogo.value);
 
@@ -38,6 +36,22 @@ const loadProjectList = async () => {
   catalogo.value = arrayProjects;
   catalogoFiltrado.value = arrayProjects;
 };
+
+function removerBusqueda() {
+  campoBusqueda.value = '';
+  catalogoFiltrado.value = catalogo.value;
+}
+
+watch(campoBusqueda, (nv) => {
+  // filtra lista de catálogo proyectos por título
+  if (nv !== '') {
+    catalogoFiltrado.value = catalogoFiltrado.value.filter((resource) =>
+      cleanInput(resource.title).includes(nv)
+    );
+  } else {
+    catalogoFiltrado.value = catalogo.value;
+  }
+});
 
 onMounted(() => {
   loadProjectList();
@@ -72,12 +86,6 @@ function seleccionarProyecto(proyecto) {
         </nuxt-link>
 
         <ClientOnly>
-          <!-- <SisdaiCampoBusqueda
-            class="m-y-3"
-            :catalogo="recursoLista"
-            :etiqueta="etiquetaBusqueda"
-            propiedad-busqueda="titulo"
-          /> -->
           <form class="campo-busqueda" @submit.prevent>
             <input
               id="idcampobusquedaialistas"
@@ -85,14 +93,15 @@ function seleccionarProyecto(proyecto) {
               class="campo-busqueda-entrada"
               type="search"
               :placeholder="etiquetaBusqueda"
-              :disabled="true"
+              :disabled="!storeIA.existenProyectos"
             />
             <button
-              v-if="false"
+              v-if="campoBusqueda"
               class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
               aria-label="Borrar"
               type="button"
-              :disabled="true"
+              :disabled="!storeIA.existenProyectos"
+              @click="removerBusqueda"
             >
               <span aria-hidden="true" class="pictograma-cerrar" />
             </button>
@@ -100,7 +109,7 @@ function seleccionarProyecto(proyecto) {
               class="boton-primario boton-pictograma campo-busqueda-buscar"
               aria-label="Buscar"
               type="button"
-              disabled
+              :disabled="!storeIA.existenProyectos"
             >
               <span class="pictograma-buscar" aria-hidden="true" />
             </button>
