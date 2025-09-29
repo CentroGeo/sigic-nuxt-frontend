@@ -86,7 +86,7 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
       const { error, allResults } = await $fetch('/api/catalogo', options);
 
       if (error !== undefined) {
-        console.log(error);
+        console.error(error);
         alert('Vuelve a iniciar sesión');
         return;
       }
