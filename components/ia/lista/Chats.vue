@@ -1,8 +1,10 @@
 <script setup>
+import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 const storeIA = useIAStore();
 
@@ -24,6 +26,12 @@ const nuevoChatModal = ref(null);
 const seleccionProyecto = ref('');
 const seleccionContexto = ref('');
 
+const router = useRouter();
+
+const editarChatModal = ref(null);
+const tituloChat = ref('');
+const idChat = ref('');
+
 const fechaHoy = new Date().toLocaleDateString('es-ES', {
   day: '2-digit',
   month: '2-digit',
@@ -39,6 +47,8 @@ const catalogoFiltrado = ref([
     chat: [{ id: 0, id_contexto: 0, titulo: 'titulo', proyecto: 'proyecto', contexto: 'contexto' }],
   },
 ]);
+
+const eliminarChatModal = ref(null);
 
 // Función para consultar lista de proyectos
 const loadChatsList = async () => {
@@ -110,18 +120,67 @@ function transformarHistorial(historiales) {
 
 function openChat(chat) {
   //console.log("openChat: ",chat)
-  return {
+  storeIA.setChatActual(chat);
+
+  router.push({
     path: '/ia/chat/dinamica',
     query: {
       chat_id: chat.id,
       context_id: chat.id_contexto,
     },
-  };
+  });
+}
+
+function openEditModal(title, chat_id) {
+  editarChatModal.value?.abrirModal();
+  tituloChat.value = title;
+  idChat.value = chat_id;
 }
 
 onMounted(() => {
   loadChatsList();
 });
+
+function openEliminarModal(chat_id) {
+  eliminarChatModal.value?.abrirModal();
+  idChat.value = chat_id;
+}
+
+const handleDelete = async () => {
+  try {
+    const chatId = idChat.value; // 🔸 Usamos el valor reactivo
+    if (!chatId) return;
+
+    const chatActual = storeIA.chatActual;
+    const route = router.currentRoute.value;
+
+    const estaEnChat = route.path === '/ia/chat/dinamica';
+    const esChatActual = chatActual && chatActual.id === chatId;
+    const esNuevoChatSinId = estaEnChat && (!chatActual || !chatActual.id);
+
+    await storeIA.deleteChat(chatId);
+    await loadChatsList();
+
+    if (esChatActual || esNuevoChatSinId) {
+      storeIA.clearChatActual();
+      router.push('/ia/chats');
+    }
+
+    eliminarChatModal.value?.cerrarModal();
+
+    idChat.value = null;
+  } catch (err) {
+    console.error('Error al eliminar el chat.');
+    console.log(err);
+  }
+};
+
+watch(
+  () => storeIA.chatsVersion,
+  () => {
+    loadChatsList();
+  }
+);
 </script>
 
 <template>
@@ -163,40 +222,38 @@ onMounted(() => {
 
               <ul class="lista-sin-estilo">
                 <li v-for="chat in grupo.chat" :id="chat.id" :key="chat.id">
-                  <nuxt-link
-                    class="tarjeta-chat p-3 borde borde-redondeado-20"
-                    :to="openChat(chat)"
-                  >
-                    <div>
-                      <h5 class="tarjeta-titulo m-t-0 m-b-2">
-                        {{ chat.titulo }}
-                      </h5>
-                      <p class="tarjeta-nombre-proyecto m-t-0 m-b-1">
-                        {{ chat.proyecto }}
-                      </p>
-                      <p class="tarjeta-nombre-contexto m-t-0 m-b-2">
-                        {{ chat.contexto }}
-                      </p>
-                      <div class="flex flex-contenido-final">
-                        <div>
-                          <button
-                            class="boton-pictograma boton-sin-contenedor-secundario"
-                            aria-label="Editar chat"
-                            type="button"
-                          >
-                            <span class="pictograma-editar" aria-hidden="true" />
-                          </button>
-                          <button
-                            class="boton-pictograma boton-sin-contenedor-secundario"
-                            aria-label="Remover chat"
-                            type="button"
-                          >
-                            <span class="pictograma-eliminar" aria-hidden="true" />
-                          </button>
-                        </div>
+                  <div class="tarjeta-chat p-3 borde borde-redondeado-20" @click="openChat(chat)">
+                    <h5 class="tarjeta-titulo m-t-0 m-b-2">
+                      {{ chat.titulo }}
+                    </h5>
+                    <p class="tarjeta-nombre-proyecto m-t-0 m-b-1">
+                      {{ chat.proyecto }}
+                    </p>
+                    <p class="tarjeta-nombre-contexto m-t-0 m-b-2">
+                      {{ chat.contexto }}
+                    </p>
+
+                    <div class="flex flex-contenido-final">
+                      <div>
+                        <button
+                          class="boton-pictograma boton-sin-contenedor-secundario"
+                          aria-label="Editar chat"
+                          type="button"
+                          @click.stop="openEditModal(chat.titulo, chat.id)"
+                        >
+                          <span class="pictograma-editar" aria-hidden="true" />
+                        </button>
+                        <button
+                          class="boton-pictograma boton-sin-contenedor-secundario"
+                          aria-label="Remover chat"
+                          type="button"
+                          @click.stop="openEliminarModal(chat.id)"
+                        >
+                          <span class="pictograma-eliminar" aria-hidden="true" />
+                        </button>
                       </div>
                     </div>
-                  </nuxt-link>
+                  </div>
                 </li>
               </ul>
             </li>
@@ -236,6 +293,63 @@ onMounted(() => {
       </template>
     </SisdaiModal>
   </ClientOnly>
+
+  <ClientOnly>
+    <SisdaiModal ref="editarChatModal">
+      <template #encabezado>
+        <h2>Editar título de chat</h2>
+      </template>
+
+      <template #cuerpo>
+        <p>Ingresa el nuevo título del chat</p>
+        <SisdaiCampoBase
+          v-model="tituloChat"
+          etiqueta="Título del chat"
+          ejemplo="Escribe el título de tu chat"
+          :es_etiqueta_visible="false"
+          class="m-b-3"
+        />
+      </template>
+
+      <template #pie>
+        <button
+          type="button"
+          class="boton-secundario boton-chico"
+          @click="editarChatModal?.cerrarModal()"
+        >
+          Cerrar
+        </button>
+        <button
+          type="button"
+          class="boton-primario boton-chico"
+          @click="storeIA.updateChat(tituloChat, idChat)"
+        >
+          Guardar
+        </button>
+      </template>
+    </SisdaiModal>
+
+    <SisdaiModal ref="eliminarChatModal">
+      <template #encabezado>
+        <h2>Eliminar chat</h2>
+      </template>
+
+      <template #cuerpo>
+        <p>¿Desea eliminar este chat? Esta acción no se puede deshacer.</p>
+      </template>
+
+      <template #pie>
+        <button
+          type="button"
+          class="boton-secundario boton-chico"
+          @click="eliminarChatModal?.cerrarModal()"
+        >
+          No
+        </button>
+        <button type="button" class="boton-primario boton-chico" @click="handleDelete">Si</button>
+      </template>
+    </SisdaiModal>
+  </ClientOnly>
 </template>
 
 <style lang="scss">
@@ -249,12 +363,15 @@ onMounted(() => {
   background-color: var(--fondo-acento);
   border: 1px solid var(--borde-acento);
   width: 100%;
-  &:hover {
-    text-decoration: none !important;
-    background-color: var(--fondo-acento);
-    border-color: var(--borde-acento);
-    box-shadow: none;
-    color: inherit;
+  cursor: pointer;
+  a {
+    &:hover {
+      text-decoration: none !important;
+      background-color: var(--fondo-acento);
+      border-color: var(--borde-acento);
+      box-shadow: none;
+      color: inherit;
+    }
   }
   h5 {
     color: var(--texto-acento);
