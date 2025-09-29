@@ -3,10 +3,8 @@ import SisdaiAreaTexto from '@centrogeomx/sisdai-componentes/src/componentes/are
 import SisdaiGrupoBotonesRadio from '@centrogeomx/sisdai-componentes/src/componentes/boton-radio-grupo/SisdaiBotonesRadioGrupo.vue';
 import SisdaiBotonRadio from '@centrogeomx/sisdai-componentes/src/componentes/boton-radio/SisdaiBotonRadio.vue';
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
-// import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
 import SisdaiCasilla from '@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
-import { ref } from 'vue';
 
 import {
   categoriesInSpanish,
@@ -17,22 +15,32 @@ import {
   resourceTypeDic,
   tooltipContent,
 } from '~/utils/consulta';
+
 const config = useRuntimeConfig();
 const storeFetched = useFetchedResources2Store();
 const storeFilters = useFilteredResources();
+
 storeFetched.checkFilling(resourceTypeDic.dataLayer);
 storeFetched.checkFilling(resourceTypeDic.dataTable);
 storeFetched.checkFilling(resourceTypeDic.document);
+
 const resources = computed(() => storeFetched.all);
 const filteredResources = ref([]);
 const categorizedResources = ref({});
-const botonRadio = ref('capas');
-const catSeleccLength = ref(0);
-const etiquetaRecursos = ref(botonRadio.value);
+
+const agregaCatalogoModal = ref(null);
+const botonRadioSeleccion = ref('capas');
+
+const seleccionCatalogoModal = ref(null);
 const inputSearch = computed({
   get: () => storeFilters.filters.inputSearch,
   set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
 });
+const selectedCategoryResourcesLength = ref(0);
+const etiquetaRecursos = ref(botonRadioSeleccion.value);
+
+const recursosSeleccionados = ref([]);
+const buttons = ref([]);
 const geomType = ref(null);
 const optionsDict = {
   Point: { tooltipText: 'Capa de puntos', class: 'pictograma-capa-puntos' },
@@ -81,28 +89,11 @@ const optionsDict = {
     class: 'pictograma-alerta',
   },
 };
-const buttons = ref([]);
-function asignarEtiquetaRecursos() {
-  if (botonRadio.value === 'capas') {
-    if (catSeleccLength.value === 1) {
-      etiquetaRecursos.value = 'capa';
-    } else {
-      etiquetaRecursos.value = 'capas';
-    }
-  } else if (botonRadio.value === 'tablas') {
-    if (catSeleccLength.value === 1) {
-      etiquetaRecursos.value = 'tabla';
-    } else {
-      etiquetaRecursos.value = 'tablas';
-    }
-  } else if (botonRadio.value === 'documentos') {
-    if (catSeleccLength.value === 1) {
-      etiquetaRecursos.value = 'documento';
-    } else {
-      etiquetaRecursos.value = 'documentos';
-    }
-  }
-}
+const etiquetaRecursosSeleccionados = ref('');
+
+const archivosSeleccionados = ref([]);
+const categoriaSeleccionada = ref(null);
+
 function groupResults() {
   categorizedResources.value = {};
   filteredResources.value.map((r) => {
@@ -128,23 +119,84 @@ function updateResources(nuevosRecursos) {
   filteredResources.value = nuevosRecursos;
   groupResults();
 }
+function botonSiguiente() {
+  agregaCatalogoModal.value?.cerrarModal();
+  selectedCategoryResourcesLength.value = 0;
+  recursosSeleccionados.value = [];
+  etiquetaRecursos.value = botonRadioSeleccion.value;
+  seleccionCatalogoModal.value?.abrirModal();
+}
+function asignarEtiquetaRecursos() {
+  if (botonRadioSeleccion.value === 'capas') {
+    if (selectedCategoryResourcesLength.value === 1) {
+      etiquetaRecursos.value = 'capa';
+    } else {
+      etiquetaRecursos.value = 'capas';
+    }
+  } else if (botonRadioSeleccion.value === 'tablas') {
+    if (selectedCategoryResourcesLength.value === 1) {
+      etiquetaRecursos.value = 'tabla';
+    } else {
+      etiquetaRecursos.value = 'tablas';
+    }
+  } else if (botonRadioSeleccion.value === 'documentos') {
+    if (selectedCategoryResourcesLength.value === 1) {
+      etiquetaRecursos.value = 'documento';
+    } else {
+      etiquetaRecursos.value = 'documentos';
+    }
+  }
+}
+function removerRecursoSeleccionado(capa) {
+  const index = recursosSeleccionados.value.indexOf(capa);
+  if (index > -1) {
+    recursosSeleccionados.value.splice(index, 1);
+  }
+}
+function cargarArchivosASubir() {
+  seleccionCatalogoModal?.value.cerrarModal();
+  // TODO: fix tipo de archivo y archivo file para subir
+  const nuevosArchivos = recursosSeleccionados.value.map((file) => ({
+    id: Date.now() + Math.random().toString(36).substr(2, 9),
+    nombre: file.title,
+    tipo: obtenerTipoArchivo(file.title),
+    archivo: file, // Objeto File original
+    categoria: 'Archivo',
+    origen: 'Catálogo',
+  }));
+
+  archivosSeleccionados.value = [...archivosSeleccionados.value, ...nuevosArchivos];
+}
+
 watch([resources, inputSearch], () => {
   updateResources(storeFilters.filter('all'));
 });
-watch(botonRadio, (nv) => {
+watch(botonRadioSeleccion, (nv) => {
   categoriaSeleccionada.value = null;
   storeFilters.filters.resourceType = nv;
   updateResources(storeFilters.filter('all'));
 });
-
-//
-const campoCasilla = ref(false);
-watch([campoCasilla], (nv) => {
-  console.log(nv);
+watch(recursosSeleccionados, () => {
+  if (botonRadioSeleccion.value === 'capas') {
+    if (recursosSeleccionados.value.length === 1) {
+      etiquetaRecursosSeleccionados.value = 'capa seleccionada';
+    } else {
+      etiquetaRecursosSeleccionados.value = 'capas seleccionadas';
+    }
+  } else if (botonRadioSeleccion.value === 'tablas') {
+    if (recursosSeleccionados.value.length === 1) {
+      etiquetaRecursosSeleccionados.value = 'tabla seleccionada';
+    } else {
+      etiquetaRecursosSeleccionados.value = 'tablas seleccionadas';
+    }
+  } else if (botonRadioSeleccion.value === 'documentos') {
+    if (recursosSeleccionados.value.length === 1) {
+      etiquetaRecursosSeleccionados.value = 'documento seleccionada';
+    } else {
+      etiquetaRecursosSeleccionados.value = 'documentos seleccionados';
+    }
+  }
 });
-const agregaInfoCatModal = ref(null);
-const capasModal = ref(null);
-const archivosSeleccionados = ref([]);
 
 const storeIA = useIAStore();
 
@@ -152,59 +204,6 @@ const storeIA = useIAStore();
 const nombreProyecto = ref('');
 const descripcionProyecto = ref('');
 const visibilidadProyecto = ref('publico'); // Valor por defecto
-
-// const categorias = ref([
-//   {
-//     id: 0,
-//     titulo: 'Nombre de categoría 1',
-//   },
-//   {
-//     id: 1,
-//     titulo: 'Nombre de categoría 2',
-//   },
-//   {
-//     id: 2,
-//     titulo: 'Nombre de categoría 3',
-//   },
-//   {
-//     id: 3,
-//     titulo: 'Nombre de categoría 4',
-//   },
-// ]);
-// const capasGeograficas = ref([
-//   {
-//     id: 0,
-//     titulo: 'Nombre de la fuente de información',
-//     tipo: 'Poligonos',
-//   },
-//   {
-//     id: 1,
-//     titulo: 'Nombre de la fuente de información',
-//     tipo: 'Puntos',
-//   },
-//   {
-//     id: 2,
-//     titulo: 'Nombre de la fuente de información',
-//     tipo: 'Líneas',
-//   },
-// ]);
-
-const capasSeleccionadas = ref([
-  {
-    id: 0,
-    titulo: 'Nombre de la fuente de información',
-    cateogria: 'Categoría 1',
-    tipo: 'Poligonos',
-  },
-  {
-    id: 1,
-    titulo: 'Nombre de la fuente de información',
-    cateogria: 'Categoría 3',
-    tipo: 'Puntos',
-  },
-]);
-
-const categoriaSeleccionada = ref(null);
 
 const route = useRoute();
 const esEdicion = ref(false);
@@ -215,6 +214,7 @@ const archivosEliminados = ref([]);
 
 onMounted(async () => {
   storeFilters.resetAll();
+  storeFilters.filters.resourceType = botonRadioSeleccion.value;
   if (resources.value.length !== 0) {
     updateResources(resources.value);
   }
@@ -245,7 +245,8 @@ onMounted(async () => {
 
 const seleccionarCategoria = (categoria) => {
   categoriaSeleccionada.value = categoria;
-  catSeleccLength.value = categorizedResources.value[categoriaSeleccionada.value].length || 0;
+  selectedCategoryResourcesLength.value =
+    categorizedResources.value[categoriaSeleccionada.value].length || 0;
 
   asignarEtiquetaRecursos();
 
@@ -260,7 +261,6 @@ const seleccionarCategoria = (categoria) => {
       } else {
         geomType.value = 'Remoto';
       }
-      // geomType.value = 'Remoto';
     } else if (e.subtype === 'raster') {
       // Si es raster
       geomType.value = 'Raster';
@@ -271,7 +271,7 @@ const seleccionarCategoria = (categoria) => {
     } else {
       geomType.value = 'Otro';
     }
-    if (botonRadio.value === 'capas') {
+    if (botonRadioSeleccion.value === 'capas') {
       buttons.value.push({
         class: optionsDict[geomType.value].class,
         tooltipText: optionsDict[geomType.value].tooltipText,
@@ -379,13 +379,6 @@ const editarProyecto = async () => {
     console.log('Error al actualizar: ' + error.message);
   }
 };
-
-function siguiente() {
-  agregaInfoCatModal.value?.cerrarModal();
-  catSeleccLength.value = 0;
-  etiquetaRecursos.value = botonRadio.value;
-  capasModal.value?.abrirModal();
-}
 </script>
 
 <template>
@@ -410,9 +403,9 @@ function siguiente() {
                   etiqueta="Nombre del proyecto"
                   ejemplo="Escribe el nombre de tu proyecto"
                   :es_etiqueta_visible="true"
+                  :es_obligatorio="true"
                   class="m-b-3"
                 />
-
                 <SisdaiAreaTexto
                   v-model="descripcionProyecto"
                   etiqueta="Descripción del proyecto"
@@ -421,7 +414,6 @@ function siguiente() {
                   :es_obligatorio="false"
                   class="m-b-3"
                 />
-
                 <SisdaiGrupoBotonesRadio leyenda="Visibilidad">
                   <SisdaiBotonRadio
                     v-model="visibilidadProyecto"
@@ -449,13 +441,12 @@ function siguiente() {
               <div>
                 <button
                   class="boton-pictograma boton-primario m-r-2"
-                  aria-label="Agregar del catalogo"
-                  @click="agregaInfoCatModal?.abrirModal()"
+                  aria-label="Agregar fuentes del catalogo"
+                  @click="agregaCatalogoModal?.abrirModal()"
                 >
                   Agregar del catálogo
                   <span class="pictograma-agregar" aria-hidden="true" />
                 </button>
-
                 <!-- botón "Subir archivos" -->
                 <button
                   class="boton-pictograma boton-primario"
@@ -465,7 +456,6 @@ function siguiente() {
                   Subir archivos
                   <span class="pictograma-archivo-subir" aria-hidden="true" />
                 </button>
-
                 <!-- Input de archivo oculto -->
                 <input
                   ref="fileInput"
@@ -477,6 +467,7 @@ function siguiente() {
                 />
               </div>
             </div>
+
             <div v-if="archivosSeleccionados.length > 0" class="tabla-archivos m-y-3">
               <h3>Archivos a subir</h3>
               <table class="tabla">
@@ -512,6 +503,7 @@ function siguiente() {
                 </tbody>
               </table>
             </div>
+
             <div class="flex flex-contenido-final">
               <NuxtLink
                 class="boton boton-chico boton-primario"
@@ -533,31 +525,30 @@ function siguiente() {
       </main>
 
       <ClientOnly>
-        <!-- Modal agregar catálogo -->
-        <SisdaiModal ref="agregaInfoCatModal">
+        <SisdaiModal ref="agregaCatalogoModal">
           <template #encabezado>
             <h2>Agregar información del catálogo</h2>
           </template>
           <template #cuerpo>
             <p>Selecciona el tipo de fuente de información que deseas agregar a tu proyecto</p>
-            <form @keydown.enter.prevent="siguiente">
+            <form @keydown.enter.prevent="botonSiguiente">
               <SisdaiGrupoBotonesRadio class="radio-catalogo" leyenda="" :es_vertical="true">
                 <SisdaiBotonRadio
-                  v-model="botonRadio"
+                  v-model="botonRadioSeleccion"
                   etiqueta="Capas geográficas"
                   value="capas"
                   name="tipodefuente"
                   :es_obligatorio="true"
                 />
                 <SisdaiBotonRadio
-                  v-model="botonRadio"
+                  v-model="botonRadioSeleccion"
                   etiqueta="Tabulados de datos"
                   value="tablas"
                   name="tipodefuente"
                   :es_obligatorio="true"
                 />
                 <SisdaiBotonRadio
-                  v-model="botonRadio"
+                  v-model="botonRadioSeleccion"
                   etiqueta="Documentos"
                   value="documentos"
                   name="tipodefuente"
@@ -567,22 +558,20 @@ function siguiente() {
             </form>
           </template>
           <template #pie>
-            <button type="button" class="boton-primario boton-chico" @click="siguiente">
+            <button class="boton-primario boton-chico" type="button" @click="botonSiguiente">
               Siguiente
             </button>
           </template>
         </SisdaiModal>
 
-        <!-- Modal agregar capas -->
-        <SisdaiModal ref="capasModal" class="modal-grande">
+        <SisdaiModal ref="seleccionCatalogoModal" class="modal-grande">
           <template #encabezado>
-            <h2>Agregar {{ botonRadio }} del catálogo</h2>
+            <h2>Agregar {{ botonRadioSeleccion }} del catálogo</h2>
           </template>
           <template #cuerpo>
             <div class="p-r-2">
               <p>Explora el catálogo y selecciona fuentes de información para el proyecto</p>
               <ClientOnly>
-                <!-- <SisdaiCampoBusqueda class="m-y-3" etiqueta="Buscar del catálogo" /> -->
                 <form class="campo-busqueda m-y-3" @submit.prevent>
                   <input
                     id="idcampobusquedaialistas"
@@ -595,6 +584,7 @@ function siguiente() {
                     class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
                     aria-label="Borrar"
                     type="button"
+                    @click="storeFilters.updateFilter('inputSearch', '')"
                   >
                     <span aria-hidden="true" class="pictograma-cerrar" />
                   </button>
@@ -616,22 +606,16 @@ function siguiente() {
                       etiqueta="Categorías"
                       class="m-b-3"
                     />
-                    <ul class="lista-sin-estilo" style="overflow-y: auto">
+                    <ul
+                      v-if="Object.keys(categorizedResources).length !== 0"
+                      class="lista-sin-estilo"
+                      style="overflow-y: auto"
+                    >
                       <li
                         v-for="categoria in Object.keys(categorizedResources)"
                         :key="categoria + '-key'"
                         class="m-y-0"
                       >
-                        <!-- <div
-                          v-if="ixd = 1 && categoria === 'Population'"
-                          class="categoria p-l-6 p-r-2 p-y-1"
-                          :class="{
-                            seleccionada: categoria === categoriaSeleccionada,
-                          }"
-                          @click="seleccionarCategoria(categoria)"
-                        >
-                          {{ categoria.titulo }}
-                        </div> -->
                         <button
                           class="categoria p-l-6 p-r-2 p-y-1"
                           :class="{
@@ -643,24 +627,37 @@ function siguiente() {
                         </button>
                       </li>
                     </ul>
+                    <p v-else>...cargando</p>
                   </div>
                 </div>
+
                 <div class="columna-5">
                   <div>
                     <UiNumeroElementos
-                      :numero="catSeleccLength"
+                      :numero="
+                        categoriaSeleccionada !== 'Sin Clasificar'
+                          ? selectedCategoryResourcesLength
+                          : 0
+                      "
                       :etiqueta="etiquetaRecursos"
                       class="m-b-3"
                     />
                     <ul class="lista-sin-estilo" style="overflow-y: auto">
                       <li
-                        v-for="(capa, i) in categorizedResources[categoriaSeleccionada]"
-                        :key="capa.pk"
+                        v-for="(recurso, i) in categorizedResources[categoriaSeleccionada]"
+                        :key="recurso.pk"
                         class="m-y-0"
                       >
-                        <div class="capa p-2 m-b-2 borde-redondeado-20">
-                          <SisdaiCasilla v-model="campoCasilla" :etiqueta="capa.title" />
-                          <div v-if="botonRadio === 'capas'" class="icono">
+                        <div
+                          v-if="categoriaSeleccionada !== 'Sin Clasificar'"
+                          class="capa p-2 m-b-2 borde-redondeado-20"
+                        >
+                          <SisdaiCasilla
+                            v-model="recursosSeleccionados"
+                            :etiqueta="recurso.title"
+                            :value="recurso"
+                          />
+                          <div v-if="botonRadioSeleccion === 'capas'" class="icono">
                             <span
                               class="m-r-1"
                               :class="[buttons[i]?.class, 'pictograma-mediano picto']"
@@ -681,26 +678,47 @@ function siguiente() {
                     </ul>
                   </div>
                 </div>
+
                 <div class="columna-5">
                   <div>
-                    <!-- TODO: agregar recursos seleccionados-->
-                    <UiNumeroElementos :numero="2" etiqueta="Capas seleccionadas" class="m-b-3" />
+                    <UiNumeroElementos
+                      :numero="recursosSeleccionados.length || 0"
+                      :etiqueta="etiquetaRecursosSeleccionados"
+                      class="m-b-3"
+                    />
                     <ul class="lista-sin-estilo" style="overflow-y: auto">
-                      <li v-for="capa in capasSeleccionadas" :key="capa.id" class="m-y-0">
+                      <li
+                        v-for="(recurso, i) in recursosSeleccionados"
+                        :key="recurso.id"
+                        class="m-y-0"
+                      >
                         <div class="capa p-2 m-b-2 borde-redondeado-20">
-                          <h6 class="m-t-0 m-b-1">{{ capa.titulo }}</h6>
+                          <h6 class="m-t-0 m-b-1">{{ recurso.title }}</h6>
                           <div class="m-b-1">
-                            {{ capa.categoria }}
+                            {{ recurso.category.gn_description }}
                           </div>
-                          <div class="icono m-b-1">
-                            <span class="pictograma-capa-poligono m-r-1" aria-hidden="true" />
-                            <span>{{ capa.tipo }}</span>
+                          <div v-if="botonRadioSeleccion === 'capas'" class="icono">
+                            <span
+                              class="m-r-1"
+                              :class="[buttons[i]?.class, 'pictograma-mediano picto']"
+                              aria-hidden="true"
+                            />
+                            <span>{{ buttons[i]?.tooltipText }}</span>
+                          </div>
+                          <div v-else class="icono">
+                            <span
+                              v-globo-informacion:derecha="buttons[i]?.tooltipText"
+                              class="m-r-1"
+                              :class="[buttons[i]?.class, 'pictograma-mediano picto']"
+                              aria-hidden="true"
+                            />
                           </div>
                           <div class="flex flex-contenido-final">
                             <button
                               class="boton-pictograma boton-sin-contenedor-secundario boton-chico"
                               aria-label="Remover"
                               type="button"
+                              @click="removerRecursoSeleccionado(recurso)"
                             >
                               <span class="pictograma-eliminar" aria-hidden="true" />
                             </button>
@@ -713,12 +731,12 @@ function siguiente() {
               </div>
             </div>
           </template>
-
           <template #pie>
             <button
-              type="button"
               class="boton-primario boton-chico"
-              @click="capasModal?.cerrarModal()"
+              type="button"
+              :disabled="recursosSeleccionados.length === 0"
+              @click="cargarArchivosASubir"
             >
               Aceptar
             </button>
