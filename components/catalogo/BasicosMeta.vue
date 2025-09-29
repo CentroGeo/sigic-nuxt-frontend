@@ -27,30 +27,75 @@ const props = defineProps({
     default: false,
   },
 });
-// Desde aquí ir subiendo al store catalogo?
-const storeCatalogo = useCatalogoStore();
-
+//const storeCatalogo = useCatalogoStore();
+const storeMetadatos = useEditedMetadataStore();
+storeMetadatos.checkFilling(props.resourcePk, props.resourceType);
 //const imagen = ref();
-const campoTitulo = ref(props.recurso.title);
-const campoResumen = ref(props.recurso.raw_abstract);
-const seleccionTipoFecha = ref('');
-const seleccionFecha = ref('');
-const seleccionCategoria = ref('');
-const seleccionGrupo = ref('');
-const campoPalabrasClave = ref('');
+const campoTitulo = computed({
+  get: () => storeMetadatos.metadata.title,
+  set: (value) => storeMetadatos.updateAttr('title', value),
+});
+const campoResumen = computed({
+  get: () => storeMetadatos.metadata.abstract,
+  set: (value) => storeMetadatos.updateAttr('abstract', value),
+});
+const seleccionTipoFecha = computed({
+  get: () => storeMetadatos.metadata.date_type,
+  set: (value) => storeMetadatos.updateAttr('date_type', value),
+});
+const seleccionFecha = computed({
+  get: () => storeMetadatos.metadata.date,
+  set: (value) => storeMetadatos.updateAttr('date', value),
+});
+const seleccionCategoria = computed({
+  get: () => storeMetadatos.metadata.category?.identifier,
+  set: (value) => storeMetadatos.updateAttr('category', value),
+});
+//const seleccionGrupo = ref('');
+const campoPalabrasClave = computed({
+  get: () => storeMetadatos.metadata.keywords,
+  set: (value) => storeMetadatos.updateAttr('keywords', value),
+});
 const campoAutor = ref('');
 const campoAnioPublicacion = ref('');
 
-function editarMetadatos(dato, valor) {
-  storeCatalogo.metadatos[dato] = valor;
-  // console.log(storeCatalogo.metadatos[dato]);
-}
+const dictCategoria = [
+  { imagery_base_maps_earth_cover: 'Mapas Base y Cobertura Terrestre' },
+  { society: 'Sociedad' },
+  { economy: 'Economía' },
+  { utilities_communication: 'Servicios Públicos y Comunicación' },
+  { environment: 'Medio Ambiente' },
+  { oceans: 'Océanos' },
+  { biota: 'Biota' },
+  { health: 'Salud' },
+  { elevation: 'Elevación' },
+  { geoscientific_information: 'Información Geocientífica' },
+  { planning_cadastre: 'Planeación Catastral' },
+  { inland_waters: 'Aguas Continentales' },
+  { boundaries: 'Fronteras' },
+  { structure: 'Estructura' },
+  { transportation: 'Transporte' },
+  { intelligence_military: 'Inteligencia Militar' },
+  { location: 'Ubicación' },
+  { climatology_meteorology_atmosphere: 'Climatología, Meteorología y Atmósfera' },
+  { farming: 'Agricultura' },
+  { population: 'Población' },
+];
 
-watch([campoTitulo, campoResumen], (nv) => {
-  // console.log('nv', nv);
-  editarMetadatos('title', nv[0]);
-  editarMetadatos('abstract', nv[1]);
-});
+// function editarMetadatos(dato, valor) {
+//   storeCatalogo.metadatos[dato] = valor;
+//   // console.log(storeCatalogo.metadatos[dato]);
+// }
+
+watch(
+  () => storeMetadatos.metadata,
+  (nv) => {
+    console.warn('nv', nv);
+    //editarMetadatos('title', nv[0]);
+    //editarMetadatos('abstract', nv[1]);
+  },
+  { deep: true }
+);
 
 const dragNdDrop = ref(null);
 const img_files = ['.jpg', '.jpeg', '.png', '.webp'];
@@ -63,18 +108,19 @@ async function guardarImagen(files) {
   }
 }
 </script>
+
 <template>
   <div>
     <CatalogoHeaderMetadatos
       :resource="props.recurso"
       :title="'Metadatos básicos'"
       :exclude-links="props.isModal"
-    ></CatalogoHeaderMetadatos>
-    <div v-if="!props.isModal">
-      <p>
-        <b>Miniatura imagen no mayor a 9kb tamaño 120x120px. Archivos Png o JPG</b>
-      </p>
+    />
 
+    <div v-if="!props.isModal">
+      <p class="texto-peso-600">
+        Miniatura imagen no mayor a 9kb tamaño 120x120px. Archivos Png o JPG
+      </p>
       <!-- Drag & Drop -->
       <ClientOnly>
         <CatalogoElementoDragNdDrop ref="dragNdDrop" @pasar-archivo="(i) => guardarImagen(i)" />
@@ -83,18 +129,24 @@ async function guardarImagen(files) {
 
     <!-- Formulario -->
     <div class="m-t-3">
-      <div class="flex">
+      <div class="flex" style="gap: 0 24px">
         <div class="columna-16">
           <ClientOnly>
-            <SisdaiCampoBase v-model="campoTitulo" etiqueta="Título" ejemplo="Añade un nombre" />
-          </ClientOnly>
-        </div>
-        <div class="columna-16">
-          <ClientOnly>
+            <SisdaiCampoBase
+              v-model="campoTitulo"
+              etiqueta="Título"
+              ejemplo="Añade un nombre"
+              tipo="text"
+              :es_etiqueta_visible="true"
+              :es_obligatorio="true"
+            />
             <SisdaiCampoBase
               v-model="campoResumen"
               etiqueta="Resumen"
               ejemplo="El texto descriptivo es conciso y significativo. Debe ayudar a la persona usuaria a..."
+              tipo="text"
+              :es_etiqueta_visible="true"
+              :es_obligatorio="true"
             />
           </ClientOnly>
         </div>
@@ -105,9 +157,9 @@ async function guardarImagen(files) {
               etiqueta="Tipo de fecha"
               texto_ayuda="Creación, publicación o revisión."
             >
-              <option value="1">Creación</option>
-              <option value="2">Publicación</option>
-              <option value="3">Revisón</option>
+              <option value="creation">Creación</option>
+              <option value="publication">Publicación</option>
+              <option value="revison">Revisón</option>
             </SisdaiSelector>
           </ClientOnly>
         </div>
@@ -124,31 +176,31 @@ async function guardarImagen(files) {
         </div>
         <div class="columna-16">
           <ClientOnly>
-            <SisdaiSelector v-model="seleccionCategoria" etiqueta="Categoría">
-              <option value="1">Opcion Uno</option>
-              <option value="2">Opcion Dos</option>
-              <option value="3">Opcion Tres</option>
-            </SisdaiSelector>
-          </ClientOnly>
-        </div>
-        <div class="columna-16">
-          <ClientOnly>
             <SisdaiSelector
+              v-model="seleccionCategoria"
+              etiqueta="Categoría"
+              :es_obligatorio="true"
+            >
+              <option
+                v-for="value in dictCategoria"
+                :key="Object.keys(value)"
+                :value="Object.keys(value)"
+              >
+                {{ value[Object.keys(value)] }}
+              </option>
+            </SisdaiSelector>
+            <!--             <SisdaiSelector
               v-model="seleccionGrupo"
               etiqueta="Selecciona al grupo con el que compartirás tu archivo"
+              texto_ayuda=" "
             >
-              <option value="1">Opcion Uno</option>
-              <option value="2">Opcion Dos</option>
-              <option value="3">Opcion Tres</option>
-            </SisdaiSelector>
-          </ClientOnly>
-        </div>
-        <div class="columna-16">
-          <ClientOnly>
+              <option value="1">grupo uno publico</option>
+            </SisdaiSelector> -->
             <SisdaiCampoBase
               v-model="campoPalabrasClave"
               etiqueta="Palabras clave"
               ejemplo="Agua, educación, conservación..."
+              :es_obligatorio="true"
             />
           </ClientOnly>
         </div>
@@ -171,6 +223,7 @@ async function guardarImagen(files) {
           </ClientOnly>
         </div>
       </div>
+
       <CatalogoBotonesMetadatos
         v-if="!props.isModal"
         :key="`1-${props.resourcePk}-buttons`"
@@ -178,7 +231,7 @@ async function guardarImagen(files) {
         :title="'MetadatosBasicos'"
         :pk="props.resourcePk"
         :tipo="props.resourceType"
-      ></CatalogoBotonesMetadatos>
+      />
     </div>
   </div>
 </template>

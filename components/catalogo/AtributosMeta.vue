@@ -1,0 +1,158 @@
+<script setup>
+import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
+import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
+
+const props = defineProps({
+  resource: {
+    type: Object,
+    default: () => ({}),
+  },
+  resourcePk: {
+    type: String,
+    default: '',
+  },
+  resourceType: {
+    type: String,
+    default: '',
+  },
+  isModal: {
+    type: Boolean,
+    default: false,
+  },
+});
+const storeMetadatos = useEditedMetadataStore();
+storeMetadatos.checkFilling(props.resourcePk, props.resourceType);
+const attrSet = computed(() => storeMetadatos.metadata.attribute_set);
+const sortedAttrs = ref(attrSet.value.sort((a, b) => a.display_order - b.display_order));
+
+const variables = {
+  attribute: 'Atributo',
+  attribute_label: 'Etiqueta',
+  description: 'Descripción',
+  display_order: 'Mostrar Orden',
+  featureinfo_type: 'Display type',
+  visible: 'Visible',
+};
+const typeOptions = {
+  Label: 'type_property',
+  URL: 'type_href',
+  Image: 'type_image',
+  'Video (mp4)': 'type_video_mp4',
+  'Video (ogg)': 'type_video_ogg',
+  'Video (webm)': 'type_video_webm',
+  'Video (3gp)': 'type_video_3gp',
+  'Video (flv)': 'type_video_flv',
+  'Video (YouTube/VIMEO)': 'type_video_youtube',
+  Audio: 'type_audio',
+  IFRAME: 'type_iframe',
+};
+
+watch(
+  attrSet,
+  (newVal) => {
+    sortedAttrs.value = newVal.sort((a, b) => a.display_order - b.display_order);
+  },
+  { deep: true }
+);
+</script>
+<template>
+  <div>
+    <div class="alineacion-izquierda ancho-lectura">
+      <CatalogoHeaderMetadatos
+        :resource="props.resource"
+        :title="'Atributos del Conjunto de Datos'"
+        :exclude-links="false"
+      ></CatalogoHeaderMetadatos>
+    </div>
+
+    <div class="contenedor-tabla p-2">
+      <table v-if="sortedAttrs.length > 0">
+        <thead>
+          <tr>
+            <th
+              v-for="(variable, v) in Object.keys(variables)"
+              :id="`${variable}-col-${v}`"
+              :key="v"
+              scope="col"
+            >
+              {{ variables[variable] }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(datum, d) in sortedAttrs" :id="`${datum}-ren-${d}`" :key="d">
+            <td>{{ datum['attribute'] }}</td>
+            <td>
+              <ClientOnly>
+                <SisdaiCampoBase
+                  :id="datum['attribute_label']"
+                  v-model="datum['attribute_label']"
+                  etiqueta=""
+                  tipo="text"
+                  class="m-y-1"
+                  :ejemplo="datum['attribute_label']"
+                />
+              </ClientOnly>
+            </td>
+            <td>
+              <ClientOnly>
+                <SisdaiCampoBase
+                  :id="datum['description']"
+                  v-model="datum['description']"
+                  etiqueta=""
+                  tipo="text"
+                  class="m-y-1"
+                  :ejemplo="datum['description']"
+                />
+              </ClientOnly>
+            </td>
+            <td>
+              <ClientOnly>
+                <SisdaiCampoBase
+                  :id="`${datum['display_order']}`"
+                  v-model="datum['display_order']"
+                  etiqueta=""
+                  tipo="number"
+                  class="m-y-1"
+                  :ejemplo="datum['display_order']"
+                />
+              </ClientOnly>
+            </td>
+            <td>
+              <ClientOnly>
+                <SisdaiSelector v-model="datum['featureinfo_type']" etiqueta="">
+                  <option
+                    v-for="type in Object.keys(typeOptions)"
+                    :key="`${type}-tipo-opcion`"
+                    :value="typeOptions[type]"
+                  >
+                    {{ type }}
+                  </option>
+                  <option value="catalogo">Opcion 2</option>
+                </SisdaiSelector>
+              </ClientOnly>
+            </td>
+            <td>
+              <input
+                :id="`${datum['attr']}-checkbox`"
+                v-model="datum['visible']"
+                type="checkbox"
+                :value="datum['visible']"
+              />
+              <label :for="`${datum['Atributo']}-checkbox`">Visible</label>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p v-else>...Cargando</p>
+      <CatalogoBotonesMetadatos
+        :key="`4-${props.resourcePk}-buttons`"
+        :title="'AtributosConjunto'"
+        :pk="props.resourcePk"
+        :tipo="props.resourceType"
+        :resource="props.resource"
+      ></CatalogoBotonesMetadatos>
+    </div>
+  </div>
+</template>

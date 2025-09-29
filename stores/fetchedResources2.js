@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia';
-import { hasWMS, resourceTypeDic, resourceTypeGeonode } from '~/utils/consulta';
+import { resourceTypeDic, resourceTypeGeonode } from '~/utils/consulta';
 
 export const useFetchedResources2Store = defineStore('fetchedResources2', () => {
-  const config = useRuntimeConfig();
+  //const config = useRuntimeConfig();
   const storeConsulta = useConsultaStore();
   /**
    * Almacenamiento reactivo de los recursos seleccionados.
@@ -89,13 +89,13 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
         alert('Vuelve a iniciar sesión');
         return;
       }
-
+      resources[resourceType] = allResults;
       // T E M P O R A L
-      resources[resourceType] = await validacionTemporal(
+      /*       resources[resourceType] = await validacionTemporal(
         allResults,
         resourceType,
         config.public.geonodeUrl
-      );
+      ); */
       this.isLoading = false;
 
       // Prueba de consumo de recursos paginado y usando gnoxy
@@ -142,7 +142,7 @@ export const useFetchedResources2Store = defineStore('fetchedResources2', () => 
   };
 });
 
-async function validacionTemporal(resources, resourceType, proxyURL) {
+/* async function validacionTemporal(resources, resourceType, proxyURL) {
   if (resourceType === resourceTypeDic.document) {
     return resources;
   }
@@ -173,4 +173,4 @@ async function validacionTemporal(resources, resourceType, proxyURL) {
     remotes = filterRemotes.filter((d) => d.resourceHasWms).map((d) => d.resourceValue);
     return locals.concat(remotes);
   }
-}
+} */
