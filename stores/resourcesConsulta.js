@@ -48,7 +48,7 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
       const { gnoxyFetch } = useGnoxyUrl();
       this.isLoading = true;
       const queryParams = {
-        custom: 'true',
+        //custom: 'true',
         'filter{resource_type}': resourceTypeGeonode[resourceType],
         // TODO: Cambiar este valor por un 1
         page_size: 100,
@@ -57,16 +57,19 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
         queryParams['extent_ne'] = '[-1,-1,0,0]';
       }
       if (resourceType === 'dataTable') {
-        //queryParams['filter{subtype.in}'] = ['vector', 'remote'];
-        queryParams['filter{subtype.in}'] = 'vector';
+        queryParams['filter{subtype.in}'] = ['vector', 'remote'];
+        //queryParams['filter{subtype.in}'] = 'vector';
       }
       /*  if (resourceType === 'document') {
         queryParams['file_extension'] = ['pdf', 'txt'];
       } */
 
       const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
+      console.log('La url generada: ', url);
       const request = await gnoxyFetch(url.toString());
+      console.log('La solicitud:', request);
       const res = await request.json();
+      console.log('La respuesta:', res);
       totals[resourceType] = res.total;
       this.isLoading = false;
     },
