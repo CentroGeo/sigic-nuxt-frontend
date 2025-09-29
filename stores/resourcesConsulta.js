@@ -58,18 +58,17 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
       }
       if (resourceType === 'dataTable') {
         queryParams['filter{subtype.in}'] = ['vector', 'remote'];
-        //queryParams['filter{subtype.in}'] = 'vector';
       }
-      /*  if (resourceType === 'document') {
+      if (resourceType === 'document') {
         queryParams['file_extension'] = ['pdf', 'txt'];
-      } */
+      }
 
       const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
-      console.log('La url generada: ', url);
+      //console.log('La url generada: ', url);
       const request = await gnoxyFetch(url.toString());
-      console.log('La solicitud:', request);
+      //console.log('La solicitud:', request);
       const res = await request.json();
-      console.log('La respuesta:', res);
+      //console.log('La respuesta:', res);
       totals[resourceType] = res.total;
       this.isLoading = false;
     },
