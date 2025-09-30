@@ -17,7 +17,7 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
   });
 
   /**
-   * Devuelve un objeto con los recursos seleccionados, el uuid es el key de
+   * Devuelve un objeto con los recursos seleccionados, el pks es el key de
    * cada objeto.
    * @param {String} resourceType tipo de recursos a consultar.
    * @returns {Object} objeto de recursos seleccionados.
@@ -44,8 +44,8 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
      * @param {String} resourceType tipo de recurso a agregar.
      */
     add(newResource, resourceType = storeConsulta.resourceType) {
-      if (this.byUuid(newResource.uuid, resourceType)) {
-        this.removeByUuid(newResource.uuid, resourceType);
+      if (this.byPk(newResource.pk, resourceType)) {
+        this.removeByPk(newResource.pk, resourceType);
       }
 
       // Si el nuevo recurso no tiene posición asignada
@@ -57,11 +57,11 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
       if (resourceType !== resourceTypeDic.dataLayer) {
         // Si el nuevo recurso tiene visibilidad, quitar visibiidad a los demás
         if (newResource.visible) {
-          this.setOnlyOneVisible(newResource.uuid, resourceType);
+          this.setOnlyOneVisible(newResource.pk, resourceType);
         }
       }
 
-      resources[resourceType][newResource.uuid] = newResource;
+      resources[resourceType][newResource.pk] = newResource;
     },
 
     /**
@@ -93,31 +93,31 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
     },
 
     /**
-     * Devuelve un recurso seleccionado que coincidan con un uuid.
-     * @param {String} uuid del catalogo a buscar.
+     * Devuelve un recurso seleccionado que coincidan con un pk.
+     * @param {String} pk del catalogo a buscar.
      * @param {String} resourceType tipo de recurso a consultar.
      * @returns {Object} objeto del recurso seleccionado.
      */
-    byUuid(uuid, resourceType = storeConsulta.resourceType) {
-      return byResourceType(resourceType)[uuid];
+    byPk(pk, resourceType = storeConsulta.resourceType) {
+      return byResourceType(resourceType)[pk];
     },
 
     /**
      * Cambia la posición de un elemento afectando a los otros. Si se sube una
      * pocisión, al recurso que tenga la nueva posición se le asignará la posición
-     * original del uuid.
-     * @param {String} uuid del elemento a cabiar posición.
+     * original del pk.
+     * @param {String} pk del elemento a cabiar posición.
      * @param {Number} addPosition nuemro de posiciones a modificar.
      */
-    changePosition(uuid, addPosition) {
-      const { posicion } = this.byUuid(uuid);
+    changePosition(pk, addPosition) {
+      const { posicion } = this.byPk(pk);
       const newPosition = posicion + addPosition;
-      const { uuid: uuidB } = this.list().find(({ posicion }) => posicion === newPosition);
+      const { pk: pkB } = this.list().find(({ posicion }) => posicion === newPosition);
 
-      // console.log('cambiar:', uuid, 'de', posicion, 'a', newPosition);
-      this.byUuid(uuid).posicion = newPosition;
-      // console.log('cambiar:', uuidB, 'de', newPosition, 'a', posicion);
-      this.byUuid(uuidB).posicion = posicion;
+      // console.log('cambiar:', pk, 'de', posicion, 'a', newPosition);
+      this.byPk(pk).posicion = newPosition;
+      // console.log('cambiar:', pkB, 'de', newPosition, 'a', posicion);
+      this.byPk(pkB).posicion = posicion;
     },
 
     /**
@@ -139,24 +139,24 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
 
     /**
      * Elimina un recurso de la selección. Si elimina una tabla o doc seleccionado, reselecciona el primero.
-     * @param {String} uuid del recurso a eliminar.
+     * @param {String} pk del recurso a eliminar.
      * @param {String} resourceType tipo de recurso a consultar.
      */
-    removeByUuid(uuidToRemove, resourceType = storeConsulta.resourceType) {
-      const wasVisible = this.byUuid(uuidToRemove, resourceType).visible;
+    removeByPk(pkToRemove, resourceType = storeConsulta.resourceType) {
+      const wasVisible = this.byPk(pkToRemove, resourceType).visible;
 
-      delete byResourceType(resourceType)[uuidToRemove];
+      delete byResourceType(resourceType)[pkToRemove];
 
       // Reasignar las posiciones cada que se elimine un elemento
-      this.sortedAscending(resourceType).forEach(({ uuid }, idx) => {
-        this.byUuid(uuid, resourceType).posicion = idx;
+      this.sortedAscending(resourceType).forEach(({ pk }, idx) => {
+        this.byPk(pk, resourceType).posicion = idx;
       });
 
       // Cuando no se elimine una capa
       if (resourceType !== resourceTypeDic.dataLayer) {
         // Si se elimina el recurso seleccionado, marca el último de la lista
         if (wasVisible && this.list(resourceType).length > 0) {
-          this.setOnlyOneVisible(this.sortedDescending(resourceType)[0].uuid, resourceType);
+          this.setOnlyOneVisible(this.sortedDescending(resourceType)[0].pk, resourceType);
         }
       }
     },
@@ -171,12 +171,12 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
 
     /**
      * Asigna visivilidad solo a un elemento de la selección.
-     * @param {String} uuid del recurso a modificar.
+     * @param {String} pk del recurso a modificar.
      * @param {String} resourceType tipo de recurso a modificar.
      */
-    setOnlyOneVisible(uuidToChange, resourceType = storeConsulta.resourceType) {
-      this.list(resourceType).forEach(({ uuid }) => {
-        this.byUuid(uuid, resourceType).visible = Boolean(uuidToChange === uuid);
+    setOnlyOneVisible(pkToChange, resourceType = storeConsulta.resourceType) {
+      this.list(resourceType).forEach(({ pk }) => {
+        this.byPk(pk, resourceType).visible = Boolean(pkToChange === pk);
       });
     },
 
@@ -205,28 +205,28 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
     },
 
     /**
-     * Actualiza los elementos seleccionados de acuerdo a una lista de uuids,
+     * Actualiza los elementos seleccionados de acuerdo a una lista de pks,
      * si detecta que se deben quitar elementos los elimina, si detecta que debe
-     * agregar elementos los agrega. Los uuids que no deba quitar o agregar, los
+     * agregar elementos los agrega. Los pks que no deba quitar o agregar, los
      * conserva.
-     * @param {Array<String>} newUuids
+     * @param {Array<String>} newpks
      * @param {String} resourceType tipo de recursos a modificar.
      */
-    updateByUuids(newUuids, resourceType = storeConsulta.resourceType) {
-      const { news, olds } = arrayNewsOlds(this.uuids, newUuids);
+    updateByPks(newPks, resourceType = storeConsulta.resourceType) {
+      const { news, olds } = arrayNewsOlds(this.pks, newPks);
 
-      olds.forEach((uuid) => this.removeByUuid(uuid, resourceType));
+      olds.forEach((pk) => this.removeByPk(pk, resourceType));
 
       const ClassToUse =
         resourceType === resourceTypeDic.dataLayer ? SelectedLayer : SelectedResource;
-      news.forEach((uuid) => this.add(new ClassToUse({ uuid }), resourceType));
+      news.forEach((pk) => this.add(new ClassToUse({ pk }), resourceType));
     },
 
     /**
-     * Contiene la lista de uuids de los elementos seleccionados en un arreglo.
+     * Contiene la lista de pks de los elementos seleccionados en un arreglo.
      * @type {Array<string>}
      */
-    uuids: computed(() => Object.keys(byResourceType())),
+    pks: computed(() => Object.keys(byResourceType())),
   };
 });
 

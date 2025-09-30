@@ -68,7 +68,7 @@ onMounted(async () => {
   storeSelected.addFromQueryParam(route.query.capas);
 
   // Para cuando hace el cambio de página
-  if (storeSelected.uuids.length > 0) {
+  if (storeSelected.pks.length > 0) {
     updateQueryParam(storeSelected.asQueryParam());
   }
 });
@@ -166,14 +166,14 @@ onMounted(async () => {
           <SisdaiCapaXyz :posicion="0" />
 
           <SisdaiCapaWms
-            v-for="resource in storeResources.findResources(storeSelected.uuids)"
-            :key="`wms-${resource.uuid}`"
+            v-for="resource in storeResources.findResources(storeSelected.pks)"
+            :key="`wms-${resource.pk}`"
             :capa="resource.alternate"
             :consulta="gnoxyFetch"
             :fuente="findServer(resource)"
-            :opacidad="storeSelected.byUuid(resource.uuid).opacidad"
-            :posicion="storeSelected.byUuid(resource.uuid).posicion + 1"
-            :visible="storeSelected.byUuid(resource.uuid).visible"
+            :opacidad="storeSelected.byPk(resource.pk).opacidad"
+            :posicion="storeSelected.byPk(resource.pk).posicion + 1"
+            :visible="storeSelected.byPk(resource.pk).visible"
           />
         </SisdaiMapa>
       </ClientOnly>

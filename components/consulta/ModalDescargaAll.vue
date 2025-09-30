@@ -14,7 +14,7 @@ const selectedOption = ref();
 const tagTitle = ref();
 /* const includesRemote = computed(() =>
   storeFetched
-    .findResources(storeSelected.uuids)
+    .findResources(storeSelected.pks)
     .map((resource) => resource.sourcetype)
     .includes('REMOTE')
 ); */
@@ -27,7 +27,7 @@ function abrirModalDescargaAll() {
 }
 
 async function downloadAllDataTables(format) {
-  const resourceList = storeFetched.findResources(storeSelected.uuids);
+  const resourceList = storeFetched.findResources(storeSelected.pks);
   for (let i = 0; i < resourceList.length; i++) {
     if (resourceList[i].sourcetype !== 'REMOTE') {
       await downloadNoGeometry(resourceList[i], format);
@@ -38,7 +38,7 @@ async function downloadAllDataTables(format) {
 }
 
 async function downloadAllDocs() {
-  const resourceList = storeFetched.findResources(storeSelected.uuids);
+  const resourceList = storeFetched.findResources(storeSelected.pks);
   for (let i = 0; i < resourceList.length; i++) {
     if (resourceList[i].sourcetype !== 'REMOTE') {
       downloadDocs(resourceList[i]);
@@ -49,7 +49,7 @@ async function downloadAllDocs() {
 }
 
 async function downloadAllMetadata() {
-  const resourceList = storeFetched.findResources(storeSelected.uuids);
+  const resourceList = storeFetched.findResources(storeSelected.pks);
   for (let i = 0; i < resourceList.length; i++) {
     if (resourceList[i].sourcetype !== 'REMOTE') {
       await downloadMetadata(resourceList[i]);

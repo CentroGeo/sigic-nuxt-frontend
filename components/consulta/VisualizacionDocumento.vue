@@ -6,10 +6,10 @@ const storeResources = useResourcesConsultaStore();
 const storeSelected = useSelectedResources2Store();
 const resourceType = resourceTypeDic.document;
 const embedRef = ref(null);
-const selectedUuid = computed(() => storeSelected.lastVisible()?.uuid ?? null);
+const selectedPk = computed(() => storeSelected.lastVisible()?.pk ?? null);
 const selectedElement = computed(() => {
-  if (!selectedUuid.value) return null;
-  return storeResources.findResources([selectedUuid.value], resourceType)[0] ?? null;
+  if (!selectedPk.value) return null;
+  return storeResources.findResources([selectedPk.value], resourceType)[0] ?? null;
 });
 let resizeObserver;
 /* const extensionDocumento = computed(() => {
@@ -36,7 +36,7 @@ async function updateValues() {
 updateValues();
 watch(selectedElement, (nv) => {
   (async () => {
-    // console.log('cambio el uuid');
+    // console.log('cambio el pk');
     if (nv) {
       // limpiar antes de volver a asignar
       urlEmbebido.value = null;

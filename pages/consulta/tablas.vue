@@ -13,7 +13,7 @@ const router = useRouter();
 
 const paginaActual = ref(0);
 const tamanioPagina = 10;
-const selectedUuid = computed(() => storeSelected.lastVisible()?.uuid ?? null);
+const selectedPk = computed(() => storeSelected.lastVisible()?.pk ?? null);
 const selectedElement = ref();
 
 const {
@@ -35,10 +35,10 @@ watch(paginaActual, () => {
   });
 });
 
-watch([() => selectedUuid.value, () => storeResources.resourcesByType(resourceType)], () => {
-  selectedElement.value = storeResources.findResources([selectedUuid.value])[0];
+watch([() => selectedPk.value, () => storeResources.resourcesByType(resourceType)], () => {
+  selectedElement.value = storeResources.findResources([selectedPk.value])[0];
   paginaActual.value = 0;
-  // console.log(selectedUuid.value);
+  // console.log(selectedPk.value);
   fetchTable({
     paginaActual: paginaActual.value,
     tamanioPagina: tamanioPagina,
@@ -64,10 +64,10 @@ onMounted(async () => {
   storeSelected.addFromQueryParam(route.query.tablas);
 
   // Para cuando hacem el cambio de página
-  if (storeSelected.uuids.length > 0) {
+  if (storeSelected.pks.length > 0) {
     updateQueryParam(storeSelected.asQueryParam());
 
-    selectedElement.value = storeResources.findResources([selectedUuid.value])[0];
+    selectedElement.value = storeResources.findResources([selectedPk.value])[0];
     fetchTable({
       paginaActual: paginaActual.value,
       tamanioPagina: tamanioPagina,
@@ -85,7 +85,7 @@ onMounted(async () => {
 
     <template #visualizador>
       <template v-if="storeResources.isLoading">Cargando...</template>
-      <div v-else-if="storeSelected.uuids.length === 0" class="contenedor">
+      <div v-else-if="storeSelected.pks.length === 0" class="contenedor">
         <h1>No hay seleccion</h1>
       </div>
       <div v-else>

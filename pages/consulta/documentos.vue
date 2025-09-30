@@ -29,7 +29,7 @@ onMounted(async () => {
   storeSelected.addFromQueryParam(route.query.docs);
 
   // Para cuando hacemos el cambio de página
-  if (storeSelected.uuids.length > 0) {
+  if (storeSelected.pks.length > 0) {
     updateQueryFromStore(storeSelected.asQueryParam());
   }
 });
@@ -43,7 +43,7 @@ onMounted(async () => {
 
     <template #visualizador>
       <template v-if="storeResources.isLoading">Cargando...</template>
-      <div v-else-if="storeSelected.uuids.length === 0" class="contenedor">
+      <div v-else-if="storeSelected.pks.length === 0" class="contenedor">
         <h1>No hay seleccion</h1>
       </div>
       <ConsultaVisualizacionDocumento v-else />
