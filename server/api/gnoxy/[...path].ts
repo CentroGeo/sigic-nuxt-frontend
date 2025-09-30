@@ -6,6 +6,10 @@ export default defineEventHandler(async (event) => {
   const path = Array.isArray(rawPath) ? rawPath.join('/') : rawPath || '';
   const query = getQuery(event);
 
+  const session = await getServerSession(event);
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  const token = (session as any)?.accessToken;
+
   // Caso especial: /api/gnoxy/proxy/?url=...
   if (path === 'proxy' && query.url) {
     const targetUrl = String(query.url);
@@ -29,16 +33,14 @@ export default defineEventHandler(async (event) => {
 
   const url = `${backendBase}/${path}${params.toString() ? '?' + params.toString() : ''}`;
 
-  const session = await getServerSession(event);
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  const token = (session as any)?.accessToken;
+  // const headers = Object.fromEntries(event.headers) as Record<string, string>;
+  // delete headers.cookie;
+  // delete headers.host;
 
-  const headers = Object.fromEntries(event.headers) as Record<string, string>;
-  delete headers.cookie;
-  delete headers.host;
+  const headers: Record<string, string> = {};
 
   if (token) {
-    headers['authorization'] = `Bearer ${token}`;
+    headers['Authorization'] = `Bearer ${token}`;
   }
 
   return proxyRequest(event, url, { headers });
