@@ -61,7 +61,7 @@ watch(
       <CatalogoHeaderMetadatos
         :resource="props.resource"
         :title="'Atributos del Conjunto de Datos'"
-        :exclude-links="false"
+        :exclude-links="props.isModal"
       ></CatalogoHeaderMetadatos>
     </div>
 
@@ -110,11 +110,11 @@ watch(
               <ClientOnly>
                 <SisdaiCampoBase
                   :id="`${datum['display_order']}`"
-                  v-model="datum['display_order']"
+                  :v-model="datum['display_order']"
                   etiqueta=""
                   tipo="number"
                   class="m-y-1"
-                  :ejemplo="datum['display_order']"
+                  :ejemplo="`${datum['display_order']}`"
                 />
               </ClientOnly>
             </td>
@@ -147,6 +147,7 @@ watch(
 
       <p v-else>...Cargando</p>
       <CatalogoBotonesMetadatos
+        v-if="!props.isModal"
         :key="`4-${props.resourcePk}-buttons`"
         :title="'AtributosConjunto'"
         :pk="props.resourcePk"

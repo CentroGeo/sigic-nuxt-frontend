@@ -11,16 +11,16 @@ export function fromQueryParam(queryParam, vars) {
 
 export default class SelectedResource {
   constructor(options = {}) {
-    const vars = ['uuid', 'visible', 'posicion'];
+    const vars = ['pk', 'visible', 'posicion'];
     const _options = typeof options === 'string' ? fromQueryParam(options, vars) : options;
 
-    this.uuid = _options.uuid || undefined;
+    this.pk = _options.pk || undefined;
     this.visible = _options.visible ?? 1;
     this.posicion = _options.posicion;
   }
 
   get asQueryParam() {
-    return [this.uuid, Number(this.visible)].join(',');
+    return [this.pk, Number(this.visible)].join(',');
   }
 
   get posicion() {

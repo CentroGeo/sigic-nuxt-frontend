@@ -18,7 +18,7 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
     [resourceTypeDic.document]: [],
   });
 
-  const nthElementsUuids = reactive({
+  const nthElementsPks = reactive({
     [resourceTypeDic.dataLayer]: [],
     [resourceTypeDic.dataTable]: [],
     [resourceTypeDic.document]: [],
@@ -36,7 +36,7 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
       return totals[resourceType];
     },
     nthElementsByType(resourceType = storeConsulta.resourceType) {
-      return nthElementsUuids[resourceType];
+      return nthElementsPks[resourceType];
     },
 
     resetByType(resourceType = storeConsulta.resourceType) {
@@ -48,25 +48,27 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
       const { gnoxyFetch } = useGnoxyUrl();
       this.isLoading = true;
       const queryParams = {
-        custom: 'true',
+        //custom: 'true',
         'filter{resource_type}': resourceTypeGeonode[resourceType],
         // TODO: Cambiar este valor por un 1
-        page_size: 100,
+        page_size: 1,
       };
-      if (resourceType === 'dataLayer') {
+      /* if (resourceType === 'dataLayer') {
         queryParams['extent_ne'] = '[-1,-1,0,0]';
-      }
+      } */
       if (resourceType === 'dataTable') {
-        //queryParams['filter{subtype.in}'] = ['vector', 'remote'];
-        queryParams['filter{subtype.in}'] = 'vector';
+        queryParams['filter{subtype.in}'] = ['vector', 'remote'];
       }
-      /*  if (resourceType === 'document') {
+      /* if (resourceType === 'document') {
         queryParams['file_extension'] = ['pdf', 'txt'];
       } */
 
       const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
+      //console.log('La url generada: ', url);
       const request = await gnoxyFetch(url.toString());
+      //console.log('La solicitud:', request);
       const res = await request.json();
+      //console.log('La respuesta:', res);
       totals[resourceType] = res.total;
       this.isLoading = false;
     },
@@ -107,27 +109,36 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
       resources[resourceType] = [...resources[resourceType], ...data];
     },
 
-    setNthElements(resourceType = storeConsulta.resourceType, uuidsList) {
-      nthElementsUuids[resourceType] = uuidsList;
+    setNthElements(resourceType = storeConsulta.resourceType, pksList) {
+      nthElementsPks[resourceType] = pksList;
+    },
+
+    async fetchResourceByPk(pkToFind, resourceType = storeConsulta.resourceType) {
+      const { gnoxyFetch } = useGnoxyUrl();
+      const url = `${config.public.geonodeApi}/resources/${pkToFind}`;
+      const res = await gnoxyFetch(url);
+      // TODO: Si la petición falla porque el recurso es privado, eliminarlo de la store de seleccion
+      const resource = await res.json();
+      resources[resourceType].push(resource.resource);
     },
 
     /**
-     * Devuelve un recursos que coincida con un uuid.
-     * @param {String} uuid del catalogo a buscar.
+     * Devuelve un recursos que coincida con un pk.
+     * @param {String} pk del catalogo a buscar.
      * @param {String} resourceType tipo de resursos a consultar.
      * @returns {Object} ojeto de recursos de geonode.
      */
-    findResource(uuidToFind, resourceType = storeConsulta.resourceType) {
-      return resources[resourceType].find(({ uuid }) => uuid === uuidToFind);
+    findResource(pkToFind, resourceType = storeConsulta.resourceType) {
+      return resources[resourceType].find(({ pk }) => pk === pkToFind);
     },
     /**
-     * Devuelve una lista de recursos que coincidan con una lista de uuids.
-     * @param {Array<String>} uuids del catalogo a buscar.
+     * Devuelve una lista de recursos que coincidan con una lista de pks.
+     * @param {Array<String>} pks del catalogo a buscar.
      * @param {String} resourceType tipo de resursos a consultar.
      * @returns {Array<Object>} lista de ojetos de recursos de geonode.
      */
-    findResources(uuidsToFind, resourceType = storeConsulta.resourceType) {
-      return resources[resourceType].filter(({ uuid }) => uuidsToFind.includes(uuid));
+    findResources(pksToFind, resourceType = storeConsulta.resourceType) {
+      return resources[resourceType].filter(({ pk }) => pksToFind.includes(pk));
     },
   };
 });

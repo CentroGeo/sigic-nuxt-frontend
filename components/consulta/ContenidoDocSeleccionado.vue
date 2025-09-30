@@ -15,8 +15,8 @@ const props = defineProps({
 const { groupName, resourceElement } = toRefs(props);
 
 const selectedResource = computed({
-  get: () => storeSelected.lastVisible().uuid,
-  set: (newSelectedUuid) => storeSelected.setOnlyOneVisible(newSelectedUuid),
+  get: () => storeSelected.lastVisible().pk,
+  set: (newSelectedPk) => storeSelected.setOnlyOneVisible(newSelectedPk),
 });
 const hasGeometry = computed(() => {
   if (props.resourceType !== resourceTypeDic.dataTable) return false;
@@ -35,14 +35,14 @@ const hasGeometry = computed(() => {
   <div>
     <div>
       <input
-        :id="resourceElement.uuid"
+        :id="resourceElement.pk"
         v-model="selectedResource"
         type="radio"
         :name="groupName"
-        :value="resourceElement.uuid"
-        :checked="resourceElement.uuid === selectedResource"
+        :value="resourceElement.pk"
+        :checked="resourceElement.pk === selectedResource"
       />
-      <label :for="resourceElement.uuid">{{ resourceElement.title || 'Cargando...' }}</label>
+      <label :for="resourceElement.pk">{{ resourceElement.title || 'Cargando...' }}</label>
     </div>
 
     <div class="flex flex-contenido-final">
@@ -62,7 +62,7 @@ const hasGeometry = computed(() => {
         class="boton-pictograma boton-sin-contenedor-secundario"
         aria-label="Borrar selección"
         type="button"
-        @click="() => storeSelected.removeByUuid(resourceElement.uuid)"
+        @click="() => storeSelected.removeByPk(resourceElement.pk)"
       >
         <span class="pictograma-eliminar" aria-hidden="true" />
       </button>

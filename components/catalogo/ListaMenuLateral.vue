@@ -30,7 +30,7 @@ const estaLogueado = computed(() => status.value === 'authenticated');
           <nuxt-link to="/catalogo/cargar-archivos">Carga de archivos</nuxt-link>
         </li>
         <li>
-          <nuxt-link to="/catalogo/cargar-servicios-remotos">Carga de catálogos externos</nuxt-link>
+          <nuxt-link to="/catalogo/servicios-remotos">Carga de catálogos externos</nuxt-link>
         </li>
       </ul>
     </div>

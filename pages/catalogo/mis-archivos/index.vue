@@ -1,6 +1,85 @@
 <script setup>
-// TODO: fix paginador
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
+import { cleanInput } from '~/utils/consulta';
+
+definePageMeta({
+  middleware: 'sidebase-auth',
+  bodyAttrs: {
+    class: '',
+  },
+});
+const storeResources = useResourcesCatalogoStore();
+const storeFilters = useFilteredResources();
+const storeCatalogo = useCatalogoStore();
+
+const section = 'disponibles';
+storeResources.getMyTotal(section);
+const totalResources = computed(() => storeResources.myTotalBySection(section));
+const resources = computed(() => storeResources.mineBySection(section));
+const tableResources = ref([]);
+const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'acciones'];
+const paginaActual = ref(0);
+const tamanioPagina = 10;
+const totalPags = computed(() => Math.ceil(totalResources.value / tamanioPagina));
+const hayMetaPendiente = computed(() =>
+  storeResources.myTotalBySection('pendientes') > 0 ? true : false
+);
+const modalFiltroAvanzado = ref(null);
+const isFilterActive = ref(false);
+const seleccionOrden = ref('');
+const seleccionTipoArchivo = ref('');
+const inputSearch = computed({
+  get: () => storeFilters.filters.inputSearch,
+  set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
+});
+
+const { data, status } = useAuth();
+console.log('data:', data.value);
+console.log('status:', status.value);
+
+/**
+ * Valida si el tipo de recurso es documento o dataset con geometría o no
+ * @param recurso del catálogo
+ * @returns {String} ya sea Documentos, Capa geográfica o Datos tabulados
+ */
+function tipoRecurso(recurso) {
+  if (recurso.resource_type === 'document') {
+    return 'Documentos';
+  } else {
+    return isGeometricExtension(recurso.extent) ? 'Capa geográfica' : 'Datos tabulados';
+  }
+}
+function updateResources() {
+  //filteredResources.value = nuevosRecursos;
+  // obteniendo datos por las props de la tabla
+  tableResources.value = resources.value.map((d) => ({
+    pk: d.pk,
+    titulo: d.title,
+    tipo_recurso: tipoRecurso(d),
+    categoria: d.category,
+    actualizacion: d.last_updated,
+    acciones: 'Editar, Ver, Descargar, Remover',
+    uuid: d.uuid,
+    resource_type: d.resource_type,
+    extent: d.extent,
+    recurso_completo: d,
+  }));
+}
+function fetchNewData() {
+  storeResources.resetBySection(section);
+  storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina);
+}
+fetchNewData();
+
+watch(paginaActual, () => {
+  fetchNewData();
+});
+
+watch(resources, () => {
+  updateResources();
+});
+// TODO: fix paginador
+/* import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { cleanInput, resourceTypeDic } from '~/utils/consulta';
 
 definePageMeta({
@@ -14,6 +93,7 @@ definePageMeta({
 const { data } = useAuth();
 const userEmail = data.value.user.email;
 
+const storeCatalogo = useCatalogoStore();
 const storeFetched = useFetchedResources2Store();
 const storeFilters = useFilteredResources();
 
@@ -43,7 +123,7 @@ const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion',
  * @param recurso del catálogo
  * @returns {String} ya sea Documentos, Capa geográfica o Datos tabulados
  */
-function tipoRecurso(recurso) {
+/*function tipoRecurso(recurso) {
   if (recurso.resource_type === 'document') {
     return 'Documentos';
   } else {
@@ -113,11 +193,11 @@ onMounted(async () => {
   if (recursos.value.length !== 0) {
     updateResources(recursos.value);
   }
-});
+}); */
 </script>
 
 <template>
-  <UiLayoutPaneles>
+  <UiLayoutPaneles :estado-colapable="storeCatalogo.catalogoColapsado">
     <template #catalogo>
       <CatalogoListaMenuLateral />
     </template>
@@ -222,7 +302,7 @@ onMounted(async () => {
             a la pestaña Pendientes y complétalos para que se muestren en esta sección.
           </p>
           <h2>Todos mis archivos disponibles</h2>
-          <UiNumeroElementos :numero="tableResources.length" />
+          <UiNumeroElementos :numero="totalResources" />
         </div>
         <p>En esta tabla se muestran los archivos disponibles para su consulta y uso.</p>
         <div class="flex">
@@ -230,7 +310,7 @@ onMounted(async () => {
             <!-- TODO: implementar paginador -->
             <ClientOnly>
               <UiTablaAccesibleV2 :variables="variables" :datos="tableResources" />
-              <UiPaginador :total-paginas="1" @cambio="1" />
+              <UiPaginador :total-paginas="totalPags" @cambio="paginaActual = $event" />
             </ClientOnly>
           </div>
         </div>
@@ -239,8 +319,8 @@ onMounted(async () => {
       <!-- Modal Búsqueda avanzada -->
       <ConsultaModalBusqueda
         ref="modalFiltroAvanzado"
-        @apply-filter="applyAdvancedFilter"
-        @reset-filter="resetAdvancedFilter"
+        @apply-filter="console.log('applyAdvancedFilter')"
+        @reset-filter="console.log('resetAdvancedFilter')"
       />
     </template>
   </UiLayoutPaneles>

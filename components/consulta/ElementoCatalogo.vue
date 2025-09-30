@@ -6,8 +6,8 @@ const storeSelected = useSelectedResources2Store();
 const storeConsulta = useConsultaStore();
 const storeResources = useResourcesConsultaStore();
 const capasSeleccionadas = computed({
-  get: () => storeSelected.uuids,
-  set: (uuids) => storeSelected.updateByUuids(uuids),
+  get: () => storeSelected.pks,
+  set: (pks) => storeSelected.updateByPks(pks),
 });
 const props = defineProps({
   catalogueElement: {
@@ -20,7 +20,7 @@ const { data } = useAuth();
 //console.log(data.value?.accessToken);
 const isLoggedIn = ref(data.value ? true : false);
 const userEmail = ref(data.value?.user.email);
-const nthElementsUuids = computed(() => storeResources.nthElementsByType());
+const nthElementsPks = computed(() => storeResources.nthElementsByType());
 const geomType = ref(catalogueElement.value.geomType ? catalogueElement.value.geomType : 'Otro');
 const geomDict = {
   Point: { tooltipText: 'Capa de puntos', class: 'pictograma-capa-puntos' },
@@ -110,14 +110,13 @@ const rootEl = ref();
 
 // Para hacer algo si es el enésimo elemento e incorporar el consumo de recursos paginados.
 const emit = defineEmits(['triggerFetch']);
-
 onMounted(() => {
   // Esto es para observar cuando la tarjeta entra en la vista
   observer = new IntersectionObserver(
     async (entries) => {
       for (const entry of entries) {
         if (entry.isIntersecting) {
-          if (nthElementsUuids.value.includes(catalogueElement.value.uuid)) {
+          if (nthElementsPks.value.includes(catalogueElement.value.pk)) {
             emit('triggerFetch', catalogueElement.value.category.gn_description);
           }
           observer.unobserve(entry.target);
@@ -145,7 +144,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div :id="`elemento-${catalogueElement.uuid}`" ref="rootEl" class="tarjeta-catalogo">
+  <div :id="`elemento-${catalogueElement.pk}`" ref="rootEl" class="tarjeta-catalogo">
     <div
       v-if="
         isLoggedIn && catalogueElement.owner.email === userEmail && !catalogueElement.is_published
@@ -162,13 +161,13 @@ onUnmounted(() => {
 
     <div class="tarjeta-elemento">
       <input
-        :id="`checkbox-consulta-catalogo-${catalogueElement.uuid}`"
+        :id="`checkbox-consulta-catalogo-${catalogueElement.pk}`"
         v-model="capasSeleccionadas"
         type="checkbox"
-        :value="catalogueElement.uuid"
+        :value="catalogueElement.pk"
       />
 
-      <label :for="`checkbox-consulta-catalogo-${catalogueElement.uuid}`">
+      <label :for="`checkbox-consulta-catalogo-${catalogueElement.pk}`">
         {{ catalogueElement.title }}
       </label>
     </div>

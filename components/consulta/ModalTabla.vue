@@ -32,7 +32,7 @@ function abrirModalTabla() {
 async function openTablas() {
   // modalTabla.value?.cerrarModal();
   useSelectedResources2Store().add(
-    new SelectedResource({ uuid: props.selectedElement.uuid }),
+    new SelectedResource({ pk: props.selectedElement.pk }),
     resourceTypeDic.dataTable
   );
 
