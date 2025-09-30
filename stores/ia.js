@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia';
-// TODO: intentar hacer un módulo para cada set proyectos,fuentes,contextos,chats
 
 export const useIAStore = defineStore('ia', {
   state: () => ({
@@ -165,11 +164,11 @@ export const useIAStore = defineStore('ia', {
 
       if (data.length > 0) {
         this.proyectoSeleccionado = data[0];
+        this.existenProyectos = true;
       } else {
         this.proyectoSeleccionado = null;
       }
 
-      this.existenProyectos = true;
       //console.log('Proyectos:', data);
       return data;
     },
@@ -228,7 +227,7 @@ export const useIAStore = defineStore('ia', {
       const data = await response.json();
       this.contextosProyecto = data;
 
-      this.existeContexto = true;
+      // this.existeContexto = true;
 
       /*    if (data.length > 0) {
         this.proyectoSeleccionado = data[0];
@@ -241,6 +240,11 @@ export const useIAStore = defineStore('ia', {
       return data;
     },
 
+    /**
+     * Devuelve la lista de chats con fetch al backend
+     * @param {Number} user_id
+     * @returns {Array} data con los chats
+     */
     async getChatList(user_id) {
       const token = this.authToken;
       //this.existeContexto = true;
@@ -267,7 +271,6 @@ export const useIAStore = defineStore('ia', {
       } else {
         this.proyectoSeleccionado = null;
       } */
-
       //this.existenProyectos = true;
       //console.log('Proyectos:', data);
       return data;
