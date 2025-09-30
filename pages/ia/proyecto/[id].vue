@@ -163,6 +163,9 @@ function cargarArchivosASubir() {
     archivo: file, // Objeto File original
     categoria: 'Archivo',
     origen: 'Catálogo',
+    // download_url: file.download_url,
+    // embed_url: file.embed_url,
+    // pk: file.pk,
   }));
 
   archivosSeleccionados.value = [...archivosSeleccionados.value, ...nuevosArchivos];

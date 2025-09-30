@@ -5,8 +5,6 @@ import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/S
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { useRouter } from 'vue-router';
 
-const storeIA = useIAStore();
-
 /**
  * @typedef {Object} Props
  * @property {String} [titulo='Título'] - Indica el título de la lista.
@@ -19,7 +17,9 @@ const props = defineProps({
   textoBoton: { type: String, default: 'Texto botón' },
   etiquetaBusqueda: { type: String, default: undefined },
 });
-const { titulo, textoBoton, recursoLista, etiquetaBusqueda } = toRefs(props);
+const { titulo, textoBoton, etiquetaBusqueda } = toRefs(props);
+
+const storeIA = useIAStore();
 
 const nuevoChatModal = ref(null);
 const seleccionProyecto = ref('');
@@ -39,15 +39,25 @@ const fechaHoy = new Date().toLocaleDateString('es-ES', {
 
 const catalogo = ref([]);
 // const catalogoFiltrado = ref(catalogo.value);
-const catalogoFiltrado = ref([
-  {
-    id: 0,
-    fecha: '23/09/2025',
-    chat: [{ id: 0, id_contexto: 0, titulo: 'titulo', proyecto: 'proyecto', contexto: 'contexto' }],
-  },
-]);
+const catalogoFiltrado = ref([]);
 
 const eliminarChatModal = ref(null);
+
+const listaProyectos = ref([]);
+const loadProjectList = async () => {
+  let arrayProjects = [];
+
+  // Consulta proyectos
+  arrayProjects = await storeIA.getProjectsList();
+
+  listaProyectos.value = arrayProjects;
+};
+
+const listaContextos = ref([]);
+const loadContexts = async (id) => {
+  //Consulta fuentes
+  listaContextos.value = await storeIA.getProjectContexts(id);
+};
 
 // Función para consultar lista de proyectos
 const loadChatsList = async () => {
@@ -136,8 +146,13 @@ function openEditModal(title, chat_id) {
   idChat.value = chat_id;
 }
 
+watch(seleccionProyecto, (nv) => {
+  loadContexts(nv);
+});
+
 onMounted(() => {
   loadChatsList();
+  loadProjectList();
 });
 
 function openEliminarModal(chat_id) {
@@ -203,7 +218,7 @@ watch(
             <SisdaiCampoBusqueda
               class="m-y-3"
               :etiqueta="etiquetaBusqueda"
-              :catalogo="recursoLista"
+              :catalogo="catalogo"
               :catalogo-anidado="true"
               catalogo-anidado-propiedad-elementos="chat"
               propiedad-busqueda="titulo"
@@ -271,26 +286,32 @@ watch(
         <SisdaiSelector
           v-model="seleccionProyecto"
           etiqueta="Selecciona un proyecto"
-          texto_ayuda="Texto de ayuda."
+          :es_obligatorio="true"
         >
-          <option value="1">Opcion Uno</option>
-          <option value="2">Opcion Dos</option>
-          <option value="3">Opcion Tres</option>
+          <option v-for="value in listaProyectos" :key="value.id" :value="value.id">
+            {{ value.title }}
+          </option>
         </SisdaiSelector>
         <SisdaiSelector
+          v-if="seleccionProyecto !== ''"
           v-model="seleccionContexto"
           etiqueta="Selecciona un contexto"
-          texto_ayuda="Texto de ayuda."
+          :es_obligatorio="true"
         >
-          <option value="1">Opcion Uno</option>
-          <option value="2">Opcion Dos</option>
-          <option value="3">Opcion Tres</option>
+          <option v-for="value in listaContextos" :key="value.id" :value="value.id">
+            {{ value.title }}
+          </option>
         </SisdaiSelector>
       </template>
       <template #pie>
-        <button class="boton-primario boton-chico" aria-label="Iniciar chat" type="button">
+        <nuxt-link
+          class="boton boton-primario boton-chico"
+          aria-label="Iniciar chat"
+          type="button"
+          :to="`/ia/chat/dinamica?context_id=${seleccionContexto}`"
+        >
           Iniciar chat
-        </button>
+        </nuxt-link>
       </template>
     </SisdaiModal>
   </ClientOnly>

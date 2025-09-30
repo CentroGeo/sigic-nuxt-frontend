@@ -22,6 +22,7 @@ const storeIA = useIAStore();
         :style="storeIA.existenProyectos ? 'height: 85vh;' : ''"
       >
         <IaLeyendaInicioVistas v-if="!storeIA.existenProyectos" />
+        <p v-else>Selecciona un chat</p>
       </main>
     </template>
   </UiLayoutPaneles>
