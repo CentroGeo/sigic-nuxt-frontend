@@ -109,7 +109,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       const res = await request.json();
       totalMisArchivos[section] = res.total;
       this.isLoading = false;
-      console.log('Se pidió el total de los recuros');
     },
     /**
      *Hace una petición de recursos especificando la página y el número de recursos que se desea traer
@@ -166,7 +165,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
         datum = [];
       }
       misArchivos[section] = datum;
-      console.log('Mis archivos traídos por pagian', misArchivos[section]);
       this.isLoading = false;
     },
     /**
@@ -178,6 +176,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
     findResource(uuidToFind, resourceType = storeConsulta.resourceType) {
       return resources[resourceType].find(({ uuid }) => uuid === uuidToFind);
     },
+
     /**
      * Devuelve una lista de recursos que coincidan con una lista de uuids.
      * @param {Array<String>} uuids del catalogo a buscar.

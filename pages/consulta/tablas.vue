@@ -35,16 +35,20 @@ watch(paginaActual, () => {
   });
 });
 
-watch([() => selectedPk.value, () => storeResources.resourcesByType(resourceType)], () => {
-  selectedElement.value = storeResources.findResources([selectedPk.value])[0];
-  paginaActual.value = 0;
-  // console.log(selectedPk.value);
-  fetchTable({
-    paginaActual: paginaActual.value,
-    tamanioPagina: tamanioPagina,
-    resource: selectedElement.value,
-  });
-});
+watch(
+  [() => selectedPk.value, () => storeResources.resourcesByType(resourceType)],
+  () => {
+    selectedElement.value = storeResources.findResource(selectedPk.value);
+    paginaActual.value = 0;
+    // console.log(selectedPk.value);
+    fetchTable({
+      paginaActual: paginaActual.value,
+      tamanioPagina: tamanioPagina,
+      resource: selectedElement.value,
+    });
+  },
+  { deep: true }
+);
 
 /**
  * Actualiza el queryParam.
@@ -63,16 +67,10 @@ onMounted(async () => {
   storeResources.getTotalResources(storeConsulta.resourceType);
   storeSelected.addFromQueryParam(route.query.tablas);
 
-  // Para cuando hacem el cambio de página
+  // Para cuando hacemos el cambio de página
   if (storeSelected.pks.length > 0) {
     updateQueryParam(storeSelected.asQueryParam());
-
-    selectedElement.value = storeResources.findResources([selectedPk.value])[0];
-    fetchTable({
-      paginaActual: paginaActual.value,
-      tamanioPagina: tamanioPagina,
-      resource: selectedElement.value,
-    });
+    storeSelected.pks.forEach((pk) => storeResources.fetchResourceByPk(pk));
   }
 });
 </script>

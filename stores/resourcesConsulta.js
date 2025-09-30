@@ -45,7 +45,6 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
     },
 
     async getTotalResources(resourceType = storeConsulta.resourceType) {
-      console.log('Se disparó la petición por el total');
       const { gnoxyFetch } = useGnoxyUrl();
       this.isLoading = true;
       const queryParams = {
@@ -112,6 +111,15 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
 
     setNthElements(resourceType = storeConsulta.resourceType, pksList) {
       nthElementsPks[resourceType] = pksList;
+    },
+
+    async fetchResourceByPk(pkToFind, resourceType = storeConsulta.resourceType) {
+      const { gnoxyFetch } = useGnoxyUrl();
+      const url = `${config.public.geonodeApi}/resources/${pkToFind}`;
+      const res = await gnoxyFetch(url);
+      // TODO: Si la petición falla porque el recurso es privado, eliminarlo de la store de seleccion
+      const resource = await res.json();
+      resources[resourceType].push(resource.resource);
     },
 
     /**
