@@ -1,6 +1,4 @@
 <script setup>
-import { ref } from 'vue';
-
 const storeIA = useIAStore();
 
 const proyecto = computed(() => storeIA.proyectoSeleccionado);
@@ -29,6 +27,11 @@ const loadContexts = async () => {
 
   //Consulta fuentes
   contextos.value = await storeIA.getProjectContexts(proyecto.value['id']);
+  if (contextos.value.length > 0) {
+    storeIA.existeContexto = true;
+  } else {
+    storeIA.existeContexto = false;
+  }
 
   //console.log("contextos: ",contextos);
 
@@ -199,19 +202,6 @@ const obtenerTipoArchivo = (nombre) => {
           <p class="separador borde-b" />
           <div class="flex flex-contenido-separado fuentes-encabezado">
             <h4>Fuentes de información:</h4>
-            <!-- <div>
-              <button
-                class="boton-pictograma boton-secundario m-r-2"
-                aria-label="Agregar del catalogo"
-              >
-                Agregar del catálogo
-                <span class="pictograma-agregar" aria-hidden="true" />
-              </button>
-              <button class="boton-pictograma boton-secundario" aria-label="Subir archivos">
-                Subir archivos
-                <span class="pictograma-archivo-subir" aria-hidden="true" />
-              </button>
-            </div> -->
           </div>
 
           <div v-if="arraySources.length > 0" class="tabla-archivos m-t-3">
@@ -270,12 +260,6 @@ const obtenerTipoArchivo = (nombre) => {
 .proyecto-encabezado {
   align-items: center;
 }
-
-// .proyecto-estado {
-//   // border-radius: var(--Escalas-Bordes-redondeados-br-2, 8px);
-//   // border: 1px solid var(--Base-Borde---borde-acento, #53323c);
-//   // background: var(--fondo-acento);
-// }
 
 .separador {
   width: 100%;
