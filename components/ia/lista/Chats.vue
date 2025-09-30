@@ -38,12 +38,13 @@ const fechaHoy = new Date().toLocaleDateString('es-ES', {
 });
 
 const catalogo = ref([]);
-// const catalogoFiltrado = ref(catalogo.value);
-const catalogoFiltrado = ref([]);
+const catalogoFiltrado = ref(catalogo.value);
 
 const eliminarChatModal = ref(null);
 
 const listaProyectos = ref([]);
+const listaContextos = ref([]);
+
 const loadProjectList = async () => {
   let arrayProjects = [];
 
@@ -53,7 +54,6 @@ const loadProjectList = async () => {
   listaProyectos.value = arrayProjects;
 };
 
-const listaContextos = ref([]);
 const loadContexts = async (id) => {
   //Consulta fuentes
   listaContextos.value = await storeIA.getProjectContexts(id);
@@ -66,7 +66,6 @@ const loadChatsList = async () => {
   // Consulta proyectos
   arrayChats = await storeIA.getChatList(1);
   console.log(arrayChats);
-  console.log('storeIA.chats', storeIA.chats);
 
   transformarHistorial(arrayChats);
 };
@@ -78,7 +77,6 @@ const loadChatsList = async () => {
  */
 function transformarHistorial(historiales) {
   const agrupadoPorFecha = {};
-  console.log('historiales', historiales);
 
   // agrupamos por fecha
   historiales.forEach((historial) => {
@@ -89,7 +87,6 @@ function transformarHistorial(historiales) {
       month: '2-digit',
       year: 'numeric',
     });
-    // console.log('fecha', fecha);
 
     historial.context.forEach((contexto) => {
       // obtenemos los items del chat
@@ -100,7 +97,6 @@ function transformarHistorial(historiales) {
         contexto: contexto.title || '',
         id_contexto: contexto.id || '',
       };
-      // console.log('chatItem', chatItem);
 
       if (!agrupadoPorFecha[fecha]) {
         agrupadoPorFecha[fecha] = [];
@@ -378,11 +374,6 @@ watch(
 .overflowYAuto {
   height: 65vh;
   overflow-y: auto;
-}
-.boton-listas {
-  width: 100%;
-  text-align: center;
-  display: inline-block;
 }
 
 .tarjeta-chat {

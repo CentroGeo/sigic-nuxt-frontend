@@ -152,12 +152,6 @@ function seleccionarProyecto(proyecto) {
 </template>
 
 <style lang="scss">
-.boton-listas {
-  width: 100%;
-  text-align: center;
-  display: inline-block;
-}
-
 .proyecto {
   cursor: pointer;
   border-left: var(--Escalas-Bordes-borde-8, 8px) solid transparent;

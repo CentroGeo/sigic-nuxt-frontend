@@ -775,10 +775,12 @@ const editarProyecto = async () => {
   font-size: 16px;
   font-style: normal;
   font-weight: 400;
+  text-align: inherit;
   cursor: pointer;
 
   &.seleccionada,
-  &:focus {
+  &:focus,
+  &:hover {
     border-left: 8px solid var(--navegacion-secundaria-activo-borde);
     background: var(--navegacion-secundaria-activo-fondo);
   }

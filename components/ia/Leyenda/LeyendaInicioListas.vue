@@ -1,5 +1,4 @@
 <script setup>
-// import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
 const storeIA = useIAStore();
 const campoBusqueda = ref('');
 </script>
@@ -16,9 +15,7 @@ const campoBusqueda = ref('');
       >
         Nuevo chat
       </button>
-
       <ClientOnly>
-        <!-- <SisdaiCampoBusqueda class="m-y-3" etiqueta="Buscar chats" /> -->
         <form class="campo-busqueda" @submit.prevent>
           <input
             id="idcampobusquedaia"
@@ -38,7 +35,6 @@ const campoBusqueda = ref('');
           </button>
         </form>
       </ClientOnly>
-
       <div class="nota fondo-color-neutro p-2 borde-redondeado-8">
         <h6 class="m-t-0">Crea un contexto para iniciar un chat</h6>
         <p class="m-b-0">
@@ -49,11 +45,4 @@ const campoBusqueda = ref('');
     </div>
   </div>
 </template>
-
-<style lang="scss">
-.boton-listas {
-  width: 100%;
-  text-align: center;
-  display: inline-block;
-}
-</style>
+<style lang="scss"></style>
