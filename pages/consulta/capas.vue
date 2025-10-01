@@ -1,6 +1,6 @@
 <script setup>
 import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
-//import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
+import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
 import { findServer, resourceTypeDic } from '~/utils/consulta';
 
 const storeConsulta = useConsultaStore();
