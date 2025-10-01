@@ -6,7 +6,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
   const storeConsulta = useConsultaStore();
   const { data } = useAuth();
   const userEmail = data.value?.user.email;
-  const userName = userEmail?.split('@')[0];
+  //const userName = userEmail?.split('@')[0];
   /**
    * Almacenamiento reactivo de los recursos seleccionados.
    */
@@ -55,6 +55,27 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
     misArchivos,
     totalMisArchivos,
 
+    mineBySection(section) {
+      return misArchivos[section];
+    },
+    totalByType(resourceType = storeConsulta.resourceType) {
+      return totals[resourceType];
+    },
+
+    myTotalBySection(section) {
+      return totalMisArchivos[section];
+    },
+
+    latestByType(resourceType = storeConsulta.resourceType) {
+      return latestResources[resourceType];
+    },
+
+    resetByType(resourceType = storeConsulta.resourceType) {
+      resources[resourceType] = [];
+    },
+    resetBySection(section) {
+      misArchivos[section] = [];
+    },
     async resourcesByType(resourceType = storeConsulta.resourceType) {
       const { gnoxyFetch } = useGnoxyUrl();
       this.isLoading = true;
@@ -88,7 +109,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
         custom: 'true',
         'filter{resource_type}': resourceTypeGeonode[resourceType],
         page_size: myTotals[resourceType],
-        'filter{owner.username}': userName,
+        'filter{owner.username}': userEmail,
       };
       if (resourceType === 'dataLayer') {
         queryParams['extent_ne'] = '[-1,-1,0,0]';
@@ -107,27 +128,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       myResources[resourceType] = res.resources;
       this.isLoading = false;
       //return resources[resourceType];
-    },
-    mineBySection(section) {
-      return misArchivos[section];
-    },
-    totalByType(resourceType = storeConsulta.resourceType) {
-      return totals[resourceType];
-    },
-
-    myTotalBySection(section) {
-      return totalMisArchivos[section];
-    },
-
-    latestByType(resourceType = storeConsulta.resourceType) {
-      return latestResources[resourceType];
-    },
-
-    resetByType(resourceType = storeConsulta.resourceType) {
-      resources[resourceType] = [];
-    },
-    resetBySection(section) {
-      misArchivos[section] = [];
     },
     /**Hace una petición de solo 1 recurso para obtener el total de recursos y el último recurso */
     async getTotalResources(resourceType = storeConsulta.resourceType) {
@@ -163,7 +163,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
         custom: 'true',
         'filter{resource_type}': resourceTypeGeonode[resourceType],
         page_size: 100,
-        'filter{owner.username}': userName,
+        'filter{owner.username}': userEmail,
       };
       if (resourceType === 'dataLayer') {
         queryParams['extent_ne'] = '[-1,-1,0,0]';
@@ -193,7 +193,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       const queryParams = {
         custom: 'true',
         page_size: 100,
-        'filter{owner.username}': userName,
+        'filter{owner.username}': userEmail,
       };
       // Agregar toda la lógica de queryparams correspondientes por sección
       const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
@@ -242,7 +242,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
         custom: 'true',
         page: pageNum,
         page_size: pageSize,
-        'filter{owner.username}': userName,
+        'filter{owner.username}': userEmail,
       };
 
       const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
