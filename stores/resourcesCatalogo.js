@@ -6,7 +6,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
   const storeConsulta = useConsultaStore();
   const { data } = useAuth();
   const userEmail = data.value?.user.email;
-  const userName = userEmail.split('@')[0];
+  const userName = userEmail?.split('@')[0];
   /**
    * Almacenamiento reactivo de los recursos seleccionados.
    */
