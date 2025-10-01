@@ -4,6 +4,9 @@ import { buildUrl, resourceTypeDic, resourceTypeGeonode } from '~/utils/consulta
 export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => {
   const config = useRuntimeConfig();
   const storeConsulta = useConsultaStore();
+  const { data } = useAuth();
+  const userEmail = data.value?.user.email;
+  const userName = userEmail?.split('@')[0];
   /**
    * Almacenamiento reactivo de los recursos seleccionados.
    */
@@ -12,7 +15,17 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
     [resourceTypeDic.dataTable]: 0,
     [resourceTypeDic.document]: 0,
   });
+  const myTotals = reactive({
+    [resourceTypeDic.dataLayer]: 0,
+    [resourceTypeDic.dataTable]: 0,
+    [resourceTypeDic.document]: 0,
+  });
   const resources = reactive({
+    [resourceTypeDic.dataLayer]: [],
+    [resourceTypeDic.dataTable]: [],
+    [resourceTypeDic.document]: [],
+  });
+  const myResources = reactive({
     [resourceTypeDic.dataLayer]: [],
     [resourceTypeDic.dataTable]: [],
     [resourceTypeDic.document]: [],
@@ -35,13 +48,65 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
   return {
     isLoading: ref(false),
     totals,
+    myTotals,
     resources,
+    myResources,
     latestResources,
     misArchivos,
     totalMisArchivos,
 
-    resourcesByType(resourceType = storeConsulta.resourceType) {
-      return resources[resourceType];
+    async resourcesByType(resourceType = storeConsulta.resourceType) {
+      const { gnoxyFetch } = useGnoxyUrl();
+      this.isLoading = true;
+      const queryParams = {
+        custom: 'true',
+        'filter{resource_type}': resourceTypeGeonode[resourceType],
+        page_size: totals[resourceType],
+      };
+      if (resourceType === 'dataLayer') {
+        queryParams['extent_ne'] = '[-1,-1,0,0]';
+      }
+      if (resourceType === 'dataTable') {
+        //queryParams['filter{subtype.in}'] = ['vector', 'remote'];
+        queryParams['filter{subtype.in}'] = 'vector';
+      }
+      /*  if (resourceType === 'document') {
+        queryParams['file_extension'] = ['pdf', 'txt'];
+      } */
+
+      const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
+      const request = await gnoxyFetch(url.toString());
+      const res = await request.json();
+      resources[resourceType] = res.resources;
+      this.isLoading = false;
+      //return resources[resourceType];
+    },
+    async myResourcesByType(resourceType = storeConsulta.resourceType) {
+      const { gnoxyFetch } = useGnoxyUrl();
+      this.isLoading = true;
+      const queryParams = {
+        custom: 'true',
+        'filter{resource_type}': resourceTypeGeonode[resourceType],
+        page_size: myTotals[resourceType],
+        'filter{owner.username}': userName,
+      };
+      if (resourceType === 'dataLayer') {
+        queryParams['extent_ne'] = '[-1,-1,0,0]';
+      }
+      if (resourceType === 'dataTable') {
+        //queryParams['filter{subtype.in}'] = ['vector', 'remote'];
+        queryParams['filter{subtype.in}'] = 'vector';
+      }
+      /*  if (resourceType === 'document') {
+        queryParams['file_extension'] = ['pdf', 'txt'];
+      } */
+
+      const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
+      const request = await gnoxyFetch(url.toString());
+      const res = await request.json();
+      myResources[resourceType] = res.resources;
+      this.isLoading = false;
+      //return resources[resourceType];
     },
     mineBySection(section) {
       return misArchivos[section];
@@ -91,6 +156,33 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       latestResources[resourceType] = res.resources[0];
       this.isLoading = false;
     },
+    async getMyTotalResources(resourceType = storeConsulta.resourceType) {
+      const { gnoxyFetch } = useGnoxyUrl();
+      this.isLoading = true;
+      const queryParams = {
+        custom: 'true',
+        'filter{resource_type}': resourceTypeGeonode[resourceType],
+        page_size: 100,
+        'filter{owner.username}': userName,
+      };
+      if (resourceType === 'dataLayer') {
+        queryParams['extent_ne'] = '[-1,-1,0,0]';
+      }
+      if (resourceType === 'dataTable') {
+        //queryParams['filter{subtype.in}'] = ['vector', 'remote'];
+        queryParams['filter{subtype.in}'] = 'vector';
+      }
+      /*  if (resourceType === 'document') {
+        queryParams['file_extension'] = ['pdf', 'txt'];
+      } */
+
+      // Agregar toda la lógica de queryparams correspondientes por sección
+      const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
+      const request = await gnoxyFetch(url.toString());
+      const res = await request.json();
+      myTotals[resourceType] = res.total;
+      this.isLoading = false;
+    },
     /**
      *
      * @param {*} section
@@ -101,7 +193,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       const queryParams = {
         custom: 'true',
         page_size: 100,
-        'filter{owner.username}': 'proteanull',
+        'filter{owner.username}': userName,
       };
       // Agregar toda la lógica de queryparams correspondientes por sección
       const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
@@ -150,7 +242,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
         custom: 'true',
         page: pageNum,
         page_size: pageSize,
-        'filter{owner.username}': 'proteanull',
+        'filter{owner.username}': userName,
       };
 
       const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
