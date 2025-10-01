@@ -1,17 +1,25 @@
 <script setup>
+import { fetchByPk } from '~/utils/catalogo';
+
+const storeCatalogo = useCatalogoStore();
+
 // Recuperamos información a partir de la url
 const route = useRoute();
 const selectedPk = route.query.data;
 const type = route.query.type;
+const editedResource = ref(undefined);
+onMounted(async () => {
+  editedResource.value = await fetchByPk(selectedPk);
+});
 // Recuperamos la información completa del recurso
-const storeFetched = useFetchedResources2Store();
+/* const storeFetched = useFetchedResources2Store();
 storeFetched.checkFilling(type);
 const editedResource = computed(() =>
   storeFetched.byResourceType(type).find(({ pk }) => pk === selectedPk)
-);
+); */
 </script>
 <template>
-  <UiLayoutPaneles>
+  <UiLayoutPaneles :estado-colapable="storeCatalogo.catalogoColapsado">
     <template #catalogo>
       <CatalogoListaMenuLateral />
     </template>
@@ -34,7 +42,7 @@ const editedResource = computed(() =>
             :resource-pk="selectedPk"
             :resource-type="type"
             :is-modal="false"
-          ></CatalogoBasicosMeta>
+          />
         </div>
       </main>
 

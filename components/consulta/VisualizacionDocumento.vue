@@ -2,18 +2,17 @@
 import { onBeforeUnmount, ref } from 'vue';
 import { fetchDoc, resourceTypeDic } from '~/utils/consulta';
 
-const resourceType = resourceTypeDic.document;
-
-const storeFetched = useFetchedResources2Store();
+const storeResources = useResourcesConsultaStore();
 const storeSelected = useSelectedResources2Store();
+const resourceType = resourceTypeDic.document;
 const embedRef = ref(null);
-const selectedUuid = computed(() => storeSelected.lastVisible()?.uuid ?? null);
+const selectedPk = computed(() => storeSelected.lastVisible()?.pk ?? null);
 const selectedElement = computed(() => {
-  if (!selectedUuid.value) return null;
-  return storeFetched.findResources([selectedUuid.value], resourceType)[0] ?? null;
+  if (!selectedPk.value) return null;
+  return storeResources.findResources([selectedPk.value], resourceType)[0] ?? null;
 });
 let resizeObserver;
-/*const extensionDocumento = computed(() => {
+/* const extensionDocumento = computed(() => {
   const linkCargado = selectedElement.value.links.find((link) => link.link_type === 'uploaded');
   if (linkCargado.url) {
     return linkCargado.extension;
@@ -37,17 +36,17 @@ async function updateValues() {
 updateValues();
 watch(selectedElement, (nv) => {
   (async () => {
-    // console.log('cambio el uuid');
+    // console.log('cambio el pk');
     if (nv) {
       // limpiar antes de volver a asignar
       urlEmbebido.value = null;
       blobedUrl.value = null;
       extensionDocumento.value = null;
-      // esperar a que el DOM reaccione
+      //esperar a que el DOM reaccione
       await nextTick();
 
       /*       urlEmbebido.value =
-        extensionDocumento.value === 'pdf' ? nv.embed_url : nv.embed_url.replace('/embed', '/link'); */
+        extensionDocumento.value === 'pdf' ? nv.embed_url : nv.embed_url.replace('/embed', '/link');*/
       updateValues();
       // esperar a que el <embed> esté en DOM
       await nextTick();

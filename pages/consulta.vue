@@ -45,7 +45,7 @@ onUnmounted(() => (document.querySelector('body').className = ''));
 
 <style lang="scss" scoped>
 .modulo-consultas {
-  --altura-consulta-esc: 85vh;
+  --altura-consulta-esc: calc(100vh - 55px);
   height: var(--altura-consulta-esc);
   gap: 0;
 

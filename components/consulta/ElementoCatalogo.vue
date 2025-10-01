@@ -1,15 +1,13 @@
 <script setup>
-// PENDING: Todos los archivos remotos tienen en subtype = remote?
 import { onMounted, onUnmounted, ref, toRefs } from 'vue';
-import { fetchGeometryType, getWMSserver, hasWMS, tooltipContent } from '~/utils/consulta';
-const config = useRuntimeConfig();
+import { tooltipContent } from '~/utils/consulta';
+
 const storeSelected = useSelectedResources2Store();
 const storeConsulta = useConsultaStore();
-const storeFetched = useFetchedResources2Store();
-
+const storeResources = useResourcesConsultaStore();
 const capasSeleccionadas = computed({
-  get: () => storeSelected.uuids,
-  set: (uuids) => storeSelected.updateByUuids(uuids),
+  get: () => storeSelected.pks,
+  set: (pks) => storeSelected.updateByPks(pks),
 });
 const props = defineProps({
   catalogueElement: {
@@ -18,15 +16,13 @@ const props = defineProps({
   },
 });
 const { catalogueElement } = toRefs(props);
-//console.log(catalogueElement.value);
-
 const { data } = useAuth();
+//console.log(data.value?.accessToken);
 const isLoggedIn = ref(data.value ? true : false);
 const userEmail = ref(data.value?.user.email);
-const subtype = ref(catalogueElement.value.subtype);
-const geomType = ref(null);
-const buttons = ref([]);
-const optionsDict = {
+const nthElementsPks = computed(() => storeResources.nthElementsByType());
+const geomType = ref(catalogueElement.value.geomType ? catalogueElement.value.geomType : 'Otro');
+const geomDict = {
   Point: { tooltipText: 'Capa de puntos', class: 'pictograma-capa-puntos' },
   MultiPoint: {
     tooltipText: 'Capa de puntos',
@@ -73,76 +69,55 @@ const optionsDict = {
     class: 'pictograma-alerta',
   },
 };
+
+const iconOptions = {
+  dataLayer: [
+    {
+      tooltipText: geomDict[geomType.value].tooltipText,
+      class: geomDict[geomType.value].class,
+      position: 'arriba',
+    },
+    {
+      tooltipText: 'Variables disponibles',
+      class: 'pictograma-visualizador',
+      position: 'arriba',
+    },
+    {
+      tooltipText: tooltipContent(catalogueElement.value),
+      class: 'pictograma-informacion',
+      position: 'derecha',
+    },
+  ],
+  dataTable: [
+    {
+      tooltipText: tooltipContent(catalogueElement.value),
+      class: 'pictograma-informacion',
+      position: 'derecha',
+    },
+  ],
+  document: [
+    {
+      tooltipText: tooltipContent(catalogueElement.value),
+      class: 'pictograma-informacion',
+      position: 'derecha',
+    },
+  ],
+};
+
 // Para triggerear la función de observar
 let observer;
 const rootEl = ref();
 
 // Para hacer algo si es el enésimo elemento e incorporar el consumo de recursos paginados.
-const indexElement = computed(() => storeFetched.byResourceType().length - 5);
-const nthElementUuid = computed(() =>
-  storeFetched.nthElement(storeConsulta.resourceType, indexElement.value)
-);
 const emit = defineEmits(['triggerFetch']);
-
 onMounted(() => {
   // Esto es para observar cuando la tarjeta entra en la vista
   observer = new IntersectionObserver(
     async (entries) => {
       for (const entry of entries) {
         if (entry.isIntersecting) {
-          // Primero checamos si no es dataset
-          if (props.catalogueElement.uuid === nthElementUuid.value) {
-            emit('triggerFetch');
-          }
-          if (storeConsulta.resourceType !== 'dataLayer') {
-            buttons.value = [
-              {
-                tooltipText: tooltipContent(catalogueElement.value),
-                class: 'pictograma-informacion',
-                position: 'derecha',
-              },
-            ];
-          } else {
-            if (subtype.value === 'remote') {
-              const resourceHasWMS = await hasWMS(
-                props.catalogueElement,
-                'geometry',
-                config.public.geonodeUrl
-              );
-              if (resourceHasWMS) {
-                const server = getWMSserver(props.catalogueElement);
-                geomType.value = await fetchGeometryType(props.catalogueElement, server);
-              } else {
-                geomType.value = 'Remoto';
-              }
-            } else if (subtype.value === 'raster') {
-              // Si es raster
-              geomType.value = 'Raster';
-            } else if (subtype.value === 'vector') {
-              // Si es vectorial
-              // Solicitamos la geometría hasta que la tarjeta va a entrar a la vista
-              geomType.value = await fetchGeometryType(catalogueElement.value, 'sigic');
-              //geomType.value = "Point";
-            } else {
-              geomType.value = 'Otro';
-            }
-            buttons.value = [
-              {
-                tooltipText: optionsDict[geomType.value].tooltipText,
-                class: optionsDict[geomType.value].class,
-                position: 'arriba',
-              },
-              {
-                tooltipText: 'Variables disponibles',
-                class: 'pictograma-visualizador',
-                position: 'arriba',
-              },
-              {
-                tooltipText: tooltipContent(catalogueElement.value),
-                class: 'pictograma-informacion',
-                position: 'derecha',
-              },
-            ];
+          if (nthElementsPks.value.includes(catalogueElement.value.pk)) {
+            emit('triggerFetch', catalogueElement.value.category.gn_description);
           }
           observer.unobserve(entry.target);
         }
@@ -169,7 +144,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div :id="`elemento-${catalogueElement.uuid}`" ref="rootEl" class="tarjeta-catalogo">
+  <div :id="`elemento-${catalogueElement.pk}`" ref="rootEl" class="tarjeta-catalogo">
     <div
       v-if="
         isLoggedIn && catalogueElement.owner.email === userEmail && !catalogueElement.is_published
@@ -183,22 +158,23 @@ onUnmounted(() => {
       <span class="pictograma-colaborar"></span>
       Archivo remoto
     </div>
+
     <div class="tarjeta-elemento">
       <input
-        :id="`checkbox-consulta-catalogo-${catalogueElement.uuid}`"
+        :id="`checkbox-consulta-catalogo-${catalogueElement.pk}`"
         v-model="capasSeleccionadas"
         type="checkbox"
-        :value="catalogueElement.uuid"
+        :value="catalogueElement.pk"
       />
 
-      <label :for="`checkbox-consulta-catalogo-${catalogueElement.uuid}`">
+      <label :for="`checkbox-consulta-catalogo-${catalogueElement.pk}`">
         {{ catalogueElement.title }}
       </label>
     </div>
 
     <div class="flex flex-contenido-inicio m-y-3">
       <span
-        v-for="(button, i) in buttons"
+        v-for="(button, i) in iconOptions[storeConsulta.resourceType]"
         :key="i"
         v-globo-informacion:[button.position]="button.tooltipText"
         :class="[button.class, 'pictograma-mediano picto']"

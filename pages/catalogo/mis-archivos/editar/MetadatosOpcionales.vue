@@ -1,27 +1,20 @@
 <script setup>
 import { fetchByPk } from '~/utils/catalogo';
+
+const storeCatalogo = useCatalogoStore();
+
 // Recuperamos información a partir de la url
 const route = useRoute();
 const selectedPk = route.query.data;
 const type = route.query.type;
-/* const typeDict = {
-  Documentos: 'document',
-  'Capa geográfica': 'dataLayer',
-  'Datos tabulados': 'dataTable',
-}; */
 // Recuperamos la información completa del recurso
-/* const storeFetched = useFetchedResources2Store();
-storeFetched.checkFilling(typeDict[type]);
-const resources = computed(() => storeFetched.byResourceType(typeDict[type]));
-const editedResource = computed(() => resources.value.find(({ pk }) => pk === selectedPk)); */
-
 const editedResource = ref(undefined);
 onMounted(async () => {
   editedResource.value = await fetchByPk(selectedPk);
 });
 </script>
 <template>
-  <UiLayoutPaneles>
+  <UiLayoutPaneles :estado-colapable="storeCatalogo.catalogoColapsado">
     <template #catalogo>
       <CatalogoListaMenuLateral />
     </template>
@@ -39,21 +32,12 @@ onMounted(async () => {
             </nuxt-link>
           </div>
 
-          <CatalogoHeaderMetadatos
-            :resource="editedResource"
-            :title="'Metadatos Opcionales'"
-            :exclude-links="false"
-          ></CatalogoHeaderMetadatos>
-
-          <h3>Un placeholder</h3>
-
-          <CatalogoBotonesMetadatos
-            :key="`3-${selectedPk}-buttons`"
-            :title="'MetadatosOpcionales'"
-            :pk="selectedPk"
-            :tipo="type"
-            :resource="editedResource"
-          ></CatalogoBotonesMetadatos>
+          <CatalogoOpcionalesMeta
+            :recurso="editedResource"
+            :resource-pk="selectedPk"
+            :resource-type="type"
+            :is-modal="false"
+          />
         </div>
       </main>
 

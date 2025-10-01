@@ -96,17 +96,17 @@ const optionsButtons = ref([
     excludeFor: 'none',
     label: 'Mostrar',
     get pictogram() {
-      return storeSelected.byUuid(resourceElement.value.uuid)?.visible
+      return storeSelected.byPk(resourceElement.value.pk)?.visible
         ? 'pictograma-ojo-ver'
         : 'pictograma-ojo-ocultar';
     },
     get globo() {
-      return storeSelected.byUuid(resourceElement.value.uuid)?.visible
+      return storeSelected.byPk(resourceElement.value.pk)?.visible
         ? 'Ocultar capa'
         : 'Mostrar capa';
     },
     action: () => {
-      storeSelected.byUuid(resourceElement.value.uuid).toggleVisibility();
+      storeSelected.byPk(resourceElement.value.pk).toggleVisibility();
     },
   },
   {
@@ -148,7 +148,7 @@ const optionsButtons = ref([
     pictogram: 'pictograma-eliminar',
     globo: 'Eliminar',
     action: () => {
-      storeSelected.removeByUuid(resourceElement.value.uuid);
+      storeSelected.removeByPk(resourceElement.value.pk);
     },
   },
   {
@@ -189,7 +189,7 @@ async function updateFunctions() {
     resourceElement.value.owner.email === userEmail.value &&
     !resourceElement.value.is_published
   ) {
-    buttons = buttons.filter((d) => d.label !== 'Vínculo WFS');
+    buttons = buttons.filter((d) => d.label !== 'Vínculo WMS');
   }
   actualButtons.value = buttons;
 }

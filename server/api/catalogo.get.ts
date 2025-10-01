@@ -14,6 +14,17 @@ export default defineEventHandler(async (event) => {
 
   //const dataParams = new URLSearchParams(query);
   const dataParams = new URLSearchParams();
+
+  if (config.public.geonodeApiDefaultFilter) {
+    const defaults = config.public.geonodeApiDefaultFilter.toString().split('&');
+    defaults.forEach((pair: string) => {
+      const [key, value] = pair.split('=');
+      if (key && value) {
+        dataParams.append(key, value);
+      }
+    });
+  }
+
   const filtersDict = Object.keys(query);
   filtersDict.forEach((filter) => {
     const value = query[filter];

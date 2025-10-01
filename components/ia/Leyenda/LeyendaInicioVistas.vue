@@ -17,7 +17,7 @@ const storeIA = useIAStore();
         </div>
         <div class="texto-centrado m-t-3">
           <NuxtLink
-            class="boton-pictograma boton-primario"
+            class="boton-primario boton-pictograma boton-grande"
             aria-label="Crear nuevo proyecto"
             to="/ia/proyecto/nuevo"
           >
@@ -33,6 +33,6 @@ const storeIA = useIAStore();
 
 <style lang="scss">
 .height-vh {
-  height: 85vh;
+  height: var(--altura-consulta-esc);
 }
 </style>

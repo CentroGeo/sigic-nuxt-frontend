@@ -3,7 +3,6 @@ import SisdaiControlDeslizante from '@centrogeomx/sisdai-componentes/src/compone
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import DOMPurify from 'dompurify'; // Para seguridad XSS
 import { marked } from 'marked'; // Importar marked para mostrar formato markdown
-import { defineProps, ref, watch } from 'vue';
 
 const storeIA = useIAStore();
 
@@ -231,6 +230,8 @@ const submitMensaje = async () => {
 
   if (json['chat_id'] !== null && json['chat_id'] !== undefined) {
     chatID.value = json['chat_id'];
+
+    storeIA.triggerChatsReload();
   }
 
   if (!jobId) {
@@ -338,6 +339,8 @@ const submitMensaje = async () => {
     scrollToBottomIfNeeded();
   } finally {
     isSubmitting.value = false;
+
+    storeIA.triggerChatsReload();
   }
 };
 
@@ -384,6 +387,7 @@ const idAleatorioCD = generaIdAleatorio('controldeslizante-');
 
                     <!-- Mensaje chat con markdown -->
                     <!-- TO DO: corregir altura de contenedor de mensaje  -->
+                    <!-- eslint-disable vue/no-v-html -->
                     <div
                       class="m-0 markdown-content"
                       :class="
@@ -392,6 +396,7 @@ const idAleatorioCD = generaIdAleatorio('controldeslizante-');
                       :style="m.actor == 'Humano' ? 'max-width: 592px' : ''"
                       v-html="renderMarkdown(m.message)"
                     ></div>
+                    <!-- eslint-enable -->
 
                     <!-- Reporte -->
                     <div v-if="m.actor == 'AI' && m.reporte" class="">
@@ -534,7 +539,7 @@ const idAleatorioCD = generaIdAleatorio('controldeslizante-');
 
 <style lang="scss">
 .contenedor-chat {
-  height: 85vh;
+  height: var(--altura-consulta-esc);
   .contenedor-chat-contenido {
     height: 100%;
     position: relative;

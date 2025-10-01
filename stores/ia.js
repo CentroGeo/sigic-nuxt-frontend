@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia';
-// TODO: intentar hacer un módulo para cada set proyectos,fuentes,contextos,chats
 
 export const useIAStore = defineStore('ia', {
   state: () => ({
@@ -12,9 +11,10 @@ export const useIAStore = defineStore('ia', {
     uploadProgress: 0,
     isUploading: false,
     chats: [],
-    chatSeleccionado: null,
+    chatActual: null,
     contextoSeleccionado: null,
     backend: useRuntimeConfig().public.iaBackendUrl,
+    chatsVersion: 0,
   }),
   getters: {
     authToken: () => {
@@ -164,11 +164,11 @@ export const useIAStore = defineStore('ia', {
 
       if (data.length > 0) {
         this.proyectoSeleccionado = data[0];
+        this.existenProyectos = true;
       } else {
         this.proyectoSeleccionado = null;
       }
 
-      this.existenProyectos = true;
       //console.log('Proyectos:', data);
       return data;
     },
@@ -227,7 +227,7 @@ export const useIAStore = defineStore('ia', {
       const data = await response.json();
       this.contextosProyecto = data;
 
-      this.existeContexto = true;
+      // this.existeContexto = true;
 
       /*    if (data.length > 0) {
         this.proyectoSeleccionado = data[0];
@@ -240,6 +240,11 @@ export const useIAStore = defineStore('ia', {
       return data;
     },
 
+    /**
+     * Devuelve la lista de chats con fetch al backend
+     * @param {Number} user_id
+     * @returns {Array} data con los chats
+     */
     async getChatList(user_id) {
       const token = this.authToken;
       //this.existeContexto = true;
@@ -266,7 +271,6 @@ export const useIAStore = defineStore('ia', {
       } else {
         this.proyectoSeleccionado = null;
       } */
-
       //this.existenProyectos = true;
       //console.log('Proyectos:', data);
       return data;
@@ -538,6 +542,58 @@ export const useIAStore = defineStore('ia', {
         console.error('Error:', error);
         throw error;
       }
+    },
+    async updateChat(title, chat_id) {
+      const token = this.authToken;
+
+      const response = await fetch(this.backend + '/direct/api/chat/history/title', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ title: title, chat_id: parseInt(chat_id) }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al actualizar chat');
+      }
+
+      const data = await response.json();
+      console.log(data);
+
+      return data;
+    },
+    async deleteChat(chat_id) {
+      try {
+        const token = this.authToken;
+
+        const response = await fetch(this.backend + `/direct/api/chat/history/remove/${chat_id}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al eliminar el chat');
+        }
+
+        const data = await response.json();
+        console.log('Chat eliminado:', data);
+      } catch (error) {
+        console.error('Error:', error);
+        throw error;
+      }
+    },
+    triggerChatsReload() {
+      this.chatsVersion++;
+    },
+    setChatActual(chat) {
+      this.chatActual = chat;
+    },
+    clearChatActual() {
+      this.chatActual = null;
     },
   },
 });

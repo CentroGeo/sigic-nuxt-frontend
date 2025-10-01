@@ -1,6 +1,8 @@
 <script setup>
 import SisdaiControlDeslizante from '@centrogeomx/sisdai-componentes/src/componentes/control-deslizante/SisdaiControlDeslizante.vue';
 
+const storeCatalogo = useCatalogoStore();
+
 definePageMeta({
   middleware: 'sidebase-auth',
   bodyAttrs: {
@@ -14,7 +16,7 @@ const generaIdAleatorio = (el) => {
 };
 const idAleatorioControlDes = generaIdAleatorio('controldeslizante-');
 
-const statusOk = ref(true);
+const statusOk = ref(false);
 const pending = ref(false);
 
 const { data } = useAuth();
@@ -23,8 +25,11 @@ const dragNdDrop = ref(null);
 const base_files = ['.geojson', 'gpkg', '.xls', '.xlsx', '.zip', '.csv'];
 const docs_files = ['.txt', '.pdf'];
 
+const nombreArchivo = ref('Nombre del archivo');
+
 async function guardarArchivo(files) {
   const token = ref(data.value?.accessToken);
+  nombreArchivo.value = file?.name;
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
     // Si el archivo pertenece a bases de datos o capas:
@@ -55,6 +60,8 @@ async function guardarArchivo(files) {
 
       if (!response.ok) {
         throw new Error(`Error al cargar archivos: ${response.status}`);
+      } else {
+        statusOk.value = true;
       }
     }
   }
@@ -62,7 +69,7 @@ async function guardarArchivo(files) {
 </script>
 
 <template>
-  <UiLayoutPaneles>
+  <UiLayoutPaneles :estado-colapable="storeCatalogo.catalogoColapsado">
     <template #catalogo>
       <CatalogoListaMenuLateral />
     </template>
@@ -90,14 +97,14 @@ async function guardarArchivo(files) {
                 <b> Archivo cargado correctamente </b>
               </div>
 
-              <p>Capas_lago_texcoco.json</p>
+              <p>{{ nombreArchivo }}</p>
               <div class="texto-color-confirmacion">
-                <p class="m-b-0">Se detectaron 236 polígonos/líneas/puntos válidos</p>
-                <p class="m-t-0">Sistema de referencia EPSG:4326</p>
+                <!-- <p class="m-b-0">Se detectaron 236 polígonos/líneas/puntos válidos</p>
+                <p class="m-t-0">Sistema de referencia EPSG:4326</p> -->
               </div>
 
               <div class="flex flex-contenido-separado">
-                <div>
+                <!-- <div>
                   <nuxt-link to="/catalogo/mis-archivos/editar/metadatos"
                     >Editar metadatos</nuxt-link
                   >
@@ -107,7 +114,7 @@ async function guardarArchivo(files) {
                 </div>
                 <div>
                   <nuxt-link to="/catalogo/mis-archivos">Ver en mis archivos</nuxt-link>
-                </div>
+                </div> -->
               </div>
             </div>
           </div>
