@@ -37,7 +37,7 @@ const listaProyectosFiltrada = ref(proyectos.value);
     </div>
 
     <div v-if="storeIA.existenProyectos" class="lista-chats">
-      <ul class="lista-sin-estilo" style="max-height: 85vh; overflow-y: auto">
+      <ul class="lista-sin-estilo" style="max-height: var(--altura-consulta-esc); overflow-y: auto">
         <li v-for="proyecto in listaProyectosFiltrada" :key="proyecto.titulo">
           <div class="proyecto seleccionado p-l-4 p-r-2 p-y-1">
             <div class="proyecto-titulo m-b-1">{{ proyecto.titulo }}</div>
@@ -54,7 +54,7 @@ const listaProyectosFiltrada = ref(proyectos.value);
 
 <style lang="scss">
 .lista-chats {
-  max-height: 85vh;
+  max-height: var(--altura-consulta-esc);
   overflow-y: auto;
 }
 .boton-nuevo-proyecto {

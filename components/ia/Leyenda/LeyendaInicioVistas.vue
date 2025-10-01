@@ -33,6 +33,6 @@ const storeIA = useIAStore();
 
 <style lang="scss">
 .height-vh {
-  height: 85vh;
+  height: var(--altura-consulta-esc);
 }
 </style>

@@ -19,7 +19,7 @@ const storeIA = useIAStore();
       <main
         id="principal"
         class="contenedor m-b-10 p-t-3"
-        :style="storeIA.existenProyectos ? 'height: 85vh;' : ''"
+        :style="storeIA.existenProyectos ? 'height: var(--altura-consulta-esc);' : ''"
       >
         <IaLeyendaInicioVistas v-if="!storeIA.existenProyectos" />
         <p v-else>Selecciona un chat</p>
