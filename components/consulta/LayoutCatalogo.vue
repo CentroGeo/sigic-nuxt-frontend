@@ -1,7 +1,7 @@
 <script setup>
 // TODO: Quitar toda la logica para elementos sin categoria
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { buildUrl, categoriesInSpanish, resourceTypeGeonode } from '~/utils/consulta';
+import { buildUrl, categoriesInSpanish, cleanInput, resourceTypeGeonode } from '~/utils/consulta';
 
 const config = useRuntimeConfig();
 const storeResources = useResourcesConsultaStore();
@@ -150,11 +150,11 @@ function groupResults() {
       }
     }
   });
-
   storeResources.setNthElements(storeConsulta.resourceType, getNthElements());
 }
 
 function updateResources(nuevosRecursos) {
+  //console.log('Los nuevos recursos', nuevosRecursos);
   filteredResources.value = nuevosRecursos;
   groupResults();
 }
@@ -177,30 +177,28 @@ async function fetchNewData(category) {
   updateResources(resources.value);
 }
 
-watch(totalResources, () => {
-  buildCategoriesDict();
-});
-onMounted(async () => {
-  storeFilters.resetAll();
-});
-/*
-function applyAdvancedFilter() {
+async function applyAdvancedFilter() {
   isFilterActive.value = true;
   modalFiltroAvanzado.value.cerrarModalBusqueda();
-  updateResources(storeFilters.filter(storeConsulta.resourceType));
+  //storeFilters.fetchFilteredData(storeConsulta.resourceType);
+  const newdata = await storeFilters.fetchFilteredData(storeConsulta.resourceType);
+  updateResources(newdata);
 }
 
 function resetAdvancedFilter() {
   isFilterActive.value = false;
   storeFilters.resetFilters();
   modalFiltroAvanzado.value.cerrarModalBusqueda();
-  updateResources(storeFilters.filter(storeConsulta.resourceType));
+  updateResources(storeFilters.fetchFilteredData(storeConsulta.resourceType));
 }
-function updateResources(nuevosRecursos) {
-  filteredResources.value = nuevosRecursos;
-  groupResults();
-}
+watch(totalResources, () => {
+  buildCategoriesDict();
+});
+onMounted(async () => {
+  storeFilters.resetAll();
+});
 
+/*
 watch([inputSearch, selectedOwner, resources], () => {
   updateResources(storeFilters.filter(storeConsulta.resourceType));
 });
@@ -210,8 +208,7 @@ onMounted(async () => {
   if (resources.value.length !== 0) {
     updateResources(resources.value);
   }
-});
- */
+}); */
 </script>
 
 <template>
@@ -314,8 +311,8 @@ onMounted(async () => {
 
   <ConsultaModalBusqueda
     ref="modalFiltroAvanzado"
-    @apply-filter="console.log('applyAdvancedFilter')"
-    @reset-filter="console.log('resetAdvancedFilter')"
+    @apply-filter="applyAdvancedFilter"
+    @reset-filter="resetAdvancedFilter"
   />
 </template>
 

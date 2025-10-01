@@ -3,7 +3,7 @@ import { downloadDocs, downloadMetadata, downloadNoGeometry, wait } from '@/util
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 
 const storeSelected = useSelectedResources2Store();
-const storeFetched = useResourcesConsultaStore();
+const storeResources = useResourcesConsultaStore();
 
 const props = defineProps({
   resourceType: { type: String, required: true },
@@ -13,7 +13,7 @@ const optionsList = ref(null);
 const selectedOption = ref();
 const tagTitle = ref();
 /* const includesRemote = computed(() =>
-  storeFetched
+  storeResources
     .findResources(storeSelected.pks)
     .map((resource) => resource.sourcetype)
     .includes('REMOTE')
@@ -27,7 +27,7 @@ function abrirModalDescargaAll() {
 }
 
 async function downloadAllDataTables(format) {
-  const resourceList = storeFetched.findResources(storeSelected.pks);
+  const resourceList = storeResources.findResources(storeSelected.pks);
   for (let i = 0; i < resourceList.length; i++) {
     if (resourceList[i].sourcetype !== 'REMOTE') {
       await downloadNoGeometry(resourceList[i], format);
@@ -38,7 +38,7 @@ async function downloadAllDataTables(format) {
 }
 
 async function downloadAllDocs() {
-  const resourceList = storeFetched.findResources(storeSelected.pks);
+  const resourceList = storeResources.findResources(storeSelected.pks);
   for (let i = 0; i < resourceList.length; i++) {
     if (resourceList[i].sourcetype !== 'REMOTE') {
       downloadDocs(resourceList[i]);
@@ -49,7 +49,7 @@ async function downloadAllDocs() {
 }
 
 async function downloadAllMetadata() {
-  const resourceList = storeFetched.findResources(storeSelected.pks);
+  const resourceList = storeResources.findResources(storeSelected.pks);
   for (let i = 0; i < resourceList.length; i++) {
     if (resourceList[i].sourcetype !== 'REMOTE') {
       await downloadMetadata(resourceList[i]);
