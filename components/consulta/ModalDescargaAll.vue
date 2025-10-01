@@ -3,7 +3,7 @@ import { downloadDocs, downloadMetadata, downloadNoGeometry, wait } from '@/util
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 
 const storeSelected = useSelectedResources2Store();
-const storeFetched = useFetchedResources2Store();
+const storeFetched = useResourcesConsultaStore();
 
 const props = defineProps({
   resourceType: { type: String, required: true },

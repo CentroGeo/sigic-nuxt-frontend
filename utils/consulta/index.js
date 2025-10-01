@@ -118,7 +118,7 @@ export function findServer(resource) {
     return getWMSserver(resource);
   } else {
     const config = useRuntimeConfig();
-    return `${config.public.geonodeUrl}/gs/wms`;
+    return `${config.public.geonodeUrl}/gs/ows`;
   }
 }
 
@@ -254,10 +254,22 @@ export async function defineGeomType(resource) {
  */
 export async function fetchDoc(url) {
   const { gnoxyFetch } = useGnoxyUrl();
-  const res = await gnoxyFetch(url);
-  const blob = await res.blob();
-  const newUrl = URL.createObjectURL(blob);
-  return newUrl;
+  const maxAttempts = 5;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const res = await gnoxyFetch(url.toString());
+      if (!res.ok) {
+        return 'Error';
+      }
+      const blob = await res.blob();
+      const newUrl = URL.createObjectURL(blob);
+      return newUrl;
+    } catch {
+      console.warn('Se está intentando una vez más');
+    }
+    // Si fracasa en todos los intentos
+    return 'Error';
+  }
 }
 
 /**
@@ -266,35 +278,41 @@ export async function fetchDoc(url) {
  * @param {Object} resource
  */
 export async function downloadDocs(resource) {
-  const { data } = useAuth();
-  const token = data.value?.accessToken;
+  const { gnoxyFetch } = useGnoxyUrl();
+  const maxAttempts = 5;
   const extension = resource.links?.find((link) => link.link_type === 'uploaded').extension;
-
-  let res;
-  if (token) {
-    res = await fetch(resource.download_url, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-  } else {
-    res = await fetch(resource.download_url);
+  const url = resource.download_url;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const res = await gnoxyFetch(url.toString());
+      if (!res.ok) {
+        throw new Error(`Falló la descarga: ${res.status}`);
+      }
+      const blob = await res.blob();
+      const newUrl = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = newUrl;
+      anchor.download = `${resource.title.replace('.pdf', '').replace('.txt', '')}.${extension}`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      URL.revokeObjectURL(newUrl);
+      return;
+    } catch {
+      console.warn(`Falló el intento ${attempt + 1}.`);
+    }
   }
-  if (!res.ok) {
-    throw new Error(`Fetchfailed: ${res.status}`);
-  }
-  const blob = await res.blob();
-  const newUrl = URL.createObjectURL(blob);
-  const anchor = document.createElement('a');
-  anchor.href = newUrl;
-  anchor.download = `${resource.title.replace('.pdf', '').replace('.txt', '')}.${extension}`;
-  document.body.appendChild(anchor);
-  anchor.click();
-  document.body.removeChild(anchor);
 }
 
+/**
+ * Crea un link de para descargar los metadatos de un recurso
+ * @param {Object} resource
+ * @returns
+ */
 export async function downloadMetadata(resource) {
-  const { data } = useAuth();
-  const token = data.value?.accessToken;
+  const { gnoxyFetch } = useGnoxyUrl();
   const config = useRuntimeConfig();
+  const maxAttempts = 5;
   const api = new URL(`${config.public.geonodeUrl}/catalogue/csw`);
   api.search = new URLSearchParams({
     request: 'GetRecordById',
@@ -305,28 +323,27 @@ export async function downloadMetadata(resource) {
     elementsetname: 'full',
   }).toString();
 
-  //const res = await fetch(api);
-  let res;
-  if (token) {
-    res = await fetch(api, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-  } else {
-    res = await fetch(api);
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const res = await gnoxyFetch(api.toString());
+      if (!res.ok) {
+        throw new Error(`Falló la descarga: ${res.status}`);
+      }
+      const dataBlob = await res.blob();
+      const blobLink = URL.createObjectURL(dataBlob);
+      const anchor = document.createElement('a');
+      anchor.href = blobLink;
+      anchor.style.display = 'none';
+      anchor.download = `${resource.title}_metadata.xml`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      URL.revokeObjectURL(blobLink);
+      return;
+    } catch {
+      console.warn(`Falló el intento ${attempt + 1}.`);
+    }
   }
-  if (!res.ok) {
-    throw new Error(`Fetchfailed: ${res.status}`);
-  }
-  //console.log(res);
-  const dataBlob = await res.blob();
-  const blobLink = URL.createObjectURL(dataBlob);
-  const anchor = document.createElement('a');
-  anchor.href = blobLink;
-  anchor.download = `${resource.title}_metadata.xml`;
-  document.body.appendChild(anchor);
-  anchor.click();
-  document.body.removeChild(anchor);
-  URL.revokeObjectURL(blobLink);
 }
 
 /**
@@ -339,9 +356,9 @@ export async function downloadMetadata(resource) {
  * @param {Stringy} featureTypes
  */
 export async function downloadWMS(resource, format, featureTypes) {
+  const { gnoxyFetch } = useGnoxyUrl();
   const config = useRuntimeConfig();
-  const { data } = useAuth();
-  const token = data.value?.accessToken;
+  const maxAttempts = 3;
   const formatDict = {
     xls: 'excel',
     xlsx: 'excel2007',
@@ -369,29 +386,30 @@ export async function downloadWMS(resource, format, featureTypes) {
       outputFormat: formatDict[format],
     };
   }
-  let res;
   const url = new URL(`${config.public.geonodeUrl}/gs/ows`);
   url.search = new URLSearchParams(params).toString();
-
-  if (token) {
-    res = await fetch(url.toString(), {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-  } else {
-    res = await fetch(url);
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const res = await gnoxyFetch(url.toString());
+      if (!res.ok) {
+        throw new Error(`Download failed: ${res.status}`);
+      }
+      const blob = await res.blob();
+      const anchor = document.createElement('a');
+      const downloadUrl = URL.createObjectURL(blob);
+      anchor.href = downloadUrl;
+      //anchor.target = '_blank';
+      anchor.style.display = 'none';
+      anchor.download = `${resource.title}.${format}`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      URL.revokeObjectURL(downloadUrl);
+      return;
+    } catch {
+      console.warn(`Falló el intento ${attempt + 1}.`);
+    }
   }
-  if (!res.ok) {
-    throw new Error(`Download failed: ${res.status}`);
-  }
-
-  const blob = await res.blob();
-  const anchor = document.createElement('a');
-  anchor.href = URL.createObjectURL(blob);
-  anchor.target = '_blank';
-  anchor.download = `${resource.title}.${format}`;
-  document.body.appendChild(anchor);
-  anchor.click();
-  document.body.removeChild(anchor);
 }
 
 /**
@@ -402,19 +420,9 @@ export async function downloadWMS(resource, format, featureTypes) {
  * @returns
  */
 export async function getFeatures(resource) {
-  const config = useRuntimeConfig();
-  const { data } = useAuth();
-  const token = data.value?.accessToken;
-  const proxy = `${config.public.geonodeUrl}/proxy/?url=`;
-
-  // Revisamos si el recurso es remoto o no para generar obtener la url
-  let describeFeatureUrl;
-  if (resource.sourcetype !== 'REMOTE') {
-    describeFeatureUrl = new URL(`${config.public.geonodeUrl}/gs/ows`);
-  } else if (resource.sourcetype === 'REMOTE') {
-    const link = getWMSserver(resource);
-    describeFeatureUrl = new URL(link);
-  }
+  const { gnoxyFetch } = useGnoxyUrl();
+  const maxAttempts = 3;
+  const describeFeatureUrl = new URL(findServer(resource));
   // Revisamos sus columnas para excluir las de geometria
   describeFeatureUrl.search = new URLSearchParams({
     service: 'WFS',
@@ -423,27 +431,24 @@ export async function getFeatures(resource) {
     typeName: resource.alternate,
     outputFormat: 'application/json',
   }).toString();
-
-  let res;
-  if (resource.sourcetype === 'REMOTE') {
-    res = await fetch(proxy + `${encodeURIComponent(describeFeatureUrl)}`);
-  } else if (!token) {
-    res = await fetch(describeFeatureUrl);
-  } else if (token) {
-    res = await fetch(describeFeatureUrl.toString(), {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const res = await gnoxyFetch(describeFeatureUrl.toString());
+      if (!res.ok) {
+        throw new Error(`getFeatures falló: ${res.status}`);
+      }
+      const fileData = await res.json();
+      const features = fileData.featureTypes[0]['properties'];
+      const props = features
+        .filter(
+          (prop) => prop.name.toLowerCase() !== 'geometry' && prop.name.toLowerCase() !== 'geom'
+        )
+        .map((prop) => prop.name);
+      return props;
+    } catch {
+      console.warn(`Falló el intento ${attempt + 1}.`);
+    }
   }
-  if (!res.ok) {
-    return 'Error';
-  }
-  const fileData = await res.json();
-  const features = fileData.featureTypes[0]['properties'];
-  const props = features
-    .filter((prop) => prop.name.toLowerCase() !== 'geometry')
-    .map((prop) => prop.name);
-  //console.log(Array.isArray(props), props);
-  return props;
 }
 
 /**
@@ -460,10 +465,39 @@ export async function downloadNoGeometry(resource, format) {
 }
 
 /**
- * Hace una peticióon WMS para descargar una capa tipo raster en formato geotiff
+ * Hace una petición para descargar una capa tipo raster en formato geotiff
  * @param {Object} resource
  */
 export async function downloadRaster(resource) {
+  const { gnoxyFetch } = useGnoxyUrl();
+  const config = useRuntimeConfig();
+  const maxAttempts = 3;
+  const url = `${config.public.geonodeUrl}/datasets/${resource.alternate}/dataset_download`;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const res = await gnoxyFetch(url.toString());
+      if (!res.ok) {
+        throw new Error(`Download failed: ${res.status}`);
+      }
+      const blob = await res.blob();
+      const anchor = document.createElement('a');
+      const downloadUrl = URL.createObjectURL(blob);
+      anchor.href = URL.createObjectURL(downloadUrl);
+      anchor.download = `${resource.title}.tiff`;
+      anchor.style.display = 'none';
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      URL.revokeObjectURL(downloadUrl);
+      return;
+    } catch {
+      console.warn(`Falló el intento ${attempt + 1}.`);
+    }
+  }
+  throw new Error(`La descarga fracasó después de ${maxAttempts} intentos`);
+}
+
+/* export async function downloadRaster(resource) {
   //const urlArray = resource.download_urls.filter((link) => link.url.includes('/assets/'));
   //const url = urlArray[0].url;
   //const config = useRuntimeConfig();
@@ -511,4 +545,4 @@ export async function downloadRaster(resource) {
   document.body.appendChild(anchor);
   anchor.click();
   document.body.removeChild(anchor);
-}
+} */
