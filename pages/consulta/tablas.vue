@@ -39,7 +39,7 @@ watch(
   [
     () => selectedPk.value,
     () => storeResources.resourcesByType(resourceType),
-    storeResources.selectedResources[resourceType],
+    () => storeResources.selectedResources[resourceType],
   ],
   () => {
     selectedElement.value = storeResources.findResource(selectedPk.value);
