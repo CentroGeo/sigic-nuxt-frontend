@@ -128,6 +128,18 @@ function openEliminarModal(chat_id) {
   idChat.value = chat_id;
 }
 
+const handleEdit = async () => {
+  try {
+    await storeIA.updateChat(tituloChat.value, idChat.value);
+    await loadChatsList();
+
+    editarChatModal.value?.cerrarModal();
+  } catch (err) {
+    console.error('Error al editar el chat.');
+    console.log(err);
+  }
+};
+
 const handleDelete = async () => {
   try {
     const chatId = idChat.value; // 🔸 Usamos el valor reactivo
@@ -300,11 +312,7 @@ watch(
         >
           Cerrar
         </button>
-        <button
-          type="button"
-          class="boton-primario boton-chico"
-          @click="storeIA.updateChat(tituloChat, idChat)"
-        >
+        <button type="button" class="boton-primario boton-chico" @click="handleEdit">
           Guardar
         </button>
       </template>
