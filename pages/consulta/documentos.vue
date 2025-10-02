@@ -25,13 +25,12 @@ watch(() => storeSelected.asQueryParam(), updateQueryFromStore);
 
 onMounted(async () => {
   storeResources.resetByType(storeConsulta.resourceType);
-  storeResources.getTotalResources(storeConsulta.resourceType);
   storeSelected.addFromQueryParam(route.query.docs);
 
   // Para cuando hacemos el cambio de página
   if (storeSelected.pks.length > 0) {
     updateQueryFromStore(storeSelected.asQueryParam());
-    storeSelected.pks.forEach((pk) => storeResources.fetchResourceByPk(pk));
+    storeResources.fetchResourcesByPk(storeConsulta.resourceType, storeSelected.pks);
   }
 });
 </script>

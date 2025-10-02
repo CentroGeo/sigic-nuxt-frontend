@@ -1,6 +1,6 @@
 <script setup>
 import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
-//import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
+import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
 import { findServer, resourceTypeDic } from '~/utils/consulta';
 
 const storeConsulta = useConsultaStore();
@@ -63,14 +63,13 @@ watch(
 );
 onMounted(async () => {
   storeResources.resetByType(storeConsulta.resourceType);
-  storeResources.getTotalResources(storeConsulta.resourceType);
   updateMapFromHash(route.hash?.slice(1));
   storeSelected.addFromQueryParam(route.query.capas);
 
   // Para cuando hace el cambio de página
   if (storeSelected.pks.length > 0) {
     updateQueryParam(storeSelected.asQueryParam());
-    storeSelected.pks.forEach((pk) => storeResources.fetchResourceByPk(pk));
+    storeResources.fetchResourcesByPk(storeConsulta.resourceType, storeSelected.pks);
   }
 });
 

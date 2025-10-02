@@ -8,8 +8,7 @@ const storeCatalogo = useCatalogoStore();
 const storeConsulta = useConsultaStore();
 const storeFilters = useFilteredResources();
 storeConsulta.resourceType = resourceTypeDic.document;
-storeResources.getTotalResources(resourceTypeDic.document);
-
+const params = computed(() => storeFilters.filters.queryParams);
 const totalReources = computed(() => storeResources.totalByType());
 const paginaActual = ref(0);
 const tamanioPagina = 10;
@@ -43,17 +42,45 @@ function fetchNewData() {
   storeResources.getResourcesByPage(
     storeConsulta.resourceType,
     paginaActual.value + 1,
-    tamanioPagina
+    tamanioPagina,
+    params.value
   );
 }
-fetchNewData();
+function applyAdvancedFilter() {
+  isFilterActive.value = true;
+  modalFiltroAvanzado.value.cerrarModalBusqueda();
+  storeFilters.buildQueryParams();
+}
+
+function resetAdvancedFilter() {
+  isFilterActive.value = false;
+  storeFilters.resetFilters();
+  modalFiltroAvanzado.value.cerrarModalBusqueda();
+  storeFilters.buildQueryParams();
+}
 
 watch(paginaActual, () => {
   fetchNewData();
 });
 
-watch(resources, () => {
-  updateResources();
+watch(params, () => {
+  paginaActual.value = 0;
+  storeResources.getTotalResources(storeConsulta.resourceType, params.value);
+  fetchNewData();
+});
+watch(
+  resources,
+  () => {
+    updateResources();
+  },
+  { deep: true }
+);
+
+onMounted(async () => {
+  storeFilters.resetAll();
+  storeFilters.buildQueryParams();
+  storeResources.getTotalResources(storeConsulta.resourceType, params.value);
+  fetchNewData();
 });
 
 /* function applyAdvancedFilter() {
@@ -179,8 +206,8 @@ onMounted(async () => {
       <!-- Modal Búsqueda avanzada -->
       <ConsultaModalBusqueda
         ref="modalFiltroAvanzado"
-        @apply-filter="console.log('applyAdvancedFilter')"
-        @reset-filter="console.log('resetAdvancedFilter')"
+        @apply-filter="applyAdvancedFilter"
+        @reset-filter="resetAdvancedFilter"
       />
     </template>
   </UiLayoutPaneles>

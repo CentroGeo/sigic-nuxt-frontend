@@ -1,7 +1,6 @@
 <script setup>
 import { onMounted, onUnmounted, ref, toRefs } from 'vue';
 import { tooltipContent } from '~/utils/consulta';
-
 const storeSelected = useSelectedResources2Store();
 const storeConsulta = useConsultaStore();
 const storeResources = useResourcesConsultaStore();
@@ -16,10 +15,12 @@ const props = defineProps({
   },
 });
 const { catalogueElement } = toRefs(props);
-const { data } = useAuth();
+// Para hacer algo si es el enésimo elemento e incorporar el consumo de recursos paginados.
+const emit = defineEmits(['triggerFetch']);
+//const { data } = useAuth();
 //console.log(data.value?.accessToken);
-const isLoggedIn = ref(data.value ? true : false);
-const userEmail = ref(data.value?.user.email);
+//const isLoggedIn = ref(data.value ? true : false);
+//const userEmail = ref(data.value?.user.email);
 const nthElementsPks = computed(() => storeResources.nthElementsByType());
 const geomType = ref(catalogueElement.value.geomType ? catalogueElement.value.geomType : 'Otro');
 const geomDict = {
@@ -69,6 +70,9 @@ const geomDict = {
     class: 'pictograma-alerta',
   },
 };
+// Para triggerear la función de observar
+let observer;
+const rootEl = ref();
 
 const iconOptions = {
   dataLayer: [
@@ -104,12 +108,10 @@ const iconOptions = {
   ],
 };
 
-// Para triggerear la función de observar
-let observer;
-const rootEl = ref();
+watch(capasSeleccionadas, () => {
+  storeResources.fetchResourcesByPk(storeConsulta.resourceType, storeSelected.pks);
+});
 
-// Para hacer algo si es el enésimo elemento e incorporar el consumo de recursos paginados.
-const emit = defineEmits(['triggerFetch']);
 onMounted(() => {
   // Esto es para observar cuando la tarjeta entra en la vista
   observer = new IntersectionObserver(
@@ -145,10 +147,9 @@ onUnmounted(() => {
 
 <template>
   <div :id="`elemento-${catalogueElement.pk}`" ref="rootEl" class="tarjeta-catalogo">
+    <!--isLoggedIn && catalogueElement.owner.email === userEmail && !catalogueElement.is_published-->
     <div
-      v-if="
-        isLoggedIn && catalogueElement.owner.email === userEmail && !catalogueElement.is_published
-      "
+      v-if="catalogueElement.is_approved === false && catalogueElement.is_published === false"
       class="id-tag flex m-b-1 m-t-0"
     >
       <span class="pictograma-persona"></span>
