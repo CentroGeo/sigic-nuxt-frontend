@@ -183,18 +183,14 @@ function resetAdvancedFilter() {
   storeFilters.buildQueryParams();
   modalFiltroAvanzado.value.cerrarModalBusqueda();
 }
-/*
-watch([inputSearch, selectedOwner, resources], () => {
+
+watch(selectedOwner, () => {
   storeFilters.buildQueryParams();
-});*/
+});
 
 watch(params, async () => {
   isLoading.value = true;
-  storeResources.resetByType();
-  const url = buildUrl(`${config.public.geonodeApi}/resources`, params.value);
-  const request = await gnoxyFetch(url.toString());
-  const res = await request.json();
-  filteredResources.value = res.resources;
+  totalResources.value = 0;
   buildCategoriesDict();
   isLoading.value = false;
 });
@@ -212,71 +208,73 @@ onMounted(async () => {
   <div class="catalogo-layout">
     <div class="encabeado-catalogo">
       <p class="h4 fondo-color-acento p-3 m-0">{{ titulo }}</p>
-      <div v-if="isLoading">....Cargando</div>
-      <div v-else>
-        <div class="m-x-2 m-y-1">
-          <p v-if="!isLoggedIn" class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
 
-          <ClientOnly>
-            <SisdaiSelector
-              v-if="isLoggedIn"
-              v-model="selectedOwner"
-              class="m-y-2"
-              etiqueta="Buscar en catálogo y tus archivos:"
-              instruccional="Selecciona los recursos por permisos"
-            >
-              <option value="todos">Todos los conjuntos de datos</option>
-              <option value="catalogo">Archivos del catálogo</option>
-              <option value="misArchivos">Mis Archivos</option>
-            </SisdaiSelector>
-          </ClientOnly>
+      <div class="m-x-2 m-y-1">
+        <p v-if="!isLoggedIn" class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
 
-          <ClientOnly>
-            <div class="flex flex-contenido-centrado m-y-3">
-              <form class="campo-busqueda columna-12" @submit.prevent>
-                <label for="idunicobusqueda" class="a11y-solo-lectura"> Campo de búsqueda </label>
-                <input
-                  id="input-busqueda-consulta"
-                  v-model="inputSearch"
-                  type="search"
-                  class="campo-busqueda-entrada"
-                  placeholder="Campo de búsqueda"
-                />
+        <ClientOnly>
+          <SisdaiSelector
+            v-if="isLoggedIn"
+            v-model="selectedOwner"
+            class="m-y-2"
+            etiqueta="Buscar en catálogo y tus archivos:"
+            instruccional="Selecciona los recursos por permisos"
+          >
+            <option value="todos">Todos los conjuntos de datos</option>
+            <option value="catalogo">Archivos del catálogo</option>
+            <option value="misArchivos">Mis Archivos</option>
+          </SisdaiSelector>
+        </ClientOnly>
 
-                <button
-                  aria-label="Borrar"
-                  class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
-                  type="button"
-                  @click="storeFilters.updateFilter('inputSearch', '')"
-                >
-                  <span aria-hidden="true" class="pictograma-cerrar" />
-                </button>
-
-                <button
-                  aria-label="Buscar"
-                  class="boton-primario boton-pictograma campo-busqueda-buscar"
-                  type="button"
-                >
-                  <span class="pictograma-buscar" aria-hidden="true" />
-                </button>
-              </form>
+        <ClientOnly>
+          <div class="flex flex-contenido-centrado m-y-3">
+            <form class="campo-busqueda columna-12" @submit.prevent>
+              <label for="idunicobusqueda" class="a11y-solo-lectura"> Campo de búsqueda </label>
+              <input
+                id="input-busqueda-consulta"
+                v-model="inputSearch"
+                type="search"
+                class="campo-busqueda-entrada"
+                placeholder="Campo de búsqueda"
+              />
 
               <button
+                aria-label="Borrar"
+                class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
                 type="button"
-                :class="
-                  isFilterActive
-                    ? 'boton-primario boton-pictograma boton-grande'
-                    : 'boton-secundario boton-pictograma boton-grande'
-                "
-                aria-label="Filtro Avanzado"
-                @click="modalFiltroAvanzado.abrirModalBusqueda"
+                @click="storeFilters.updateFilter('inputSearch', '')"
               >
-                <span class="pictograma-filtro" aria-hidden="true" />
+                <span aria-hidden="true" class="pictograma-cerrar" />
               </button>
-            </div>
-          </ClientOnly>
-          <UiNumeroElementos :numero="totalResources" :etiqueta="etiquetaElementos" />
-        </div>
+
+              <button
+                aria-label="Buscar"
+                class="boton-primario boton-pictograma campo-busqueda-buscar"
+                type="button"
+                @click="storeFilters.buildQueryParams"
+              >
+                <span class="pictograma-buscar" aria-hidden="true" />
+              </button>
+            </form>
+
+            <button
+              type="button"
+              :class="
+                isFilterActive
+                  ? 'boton-primario boton-pictograma boton-grande'
+                  : 'boton-secundario boton-pictograma boton-grande'
+              "
+              aria-label="Filtro Avanzado"
+              @click="modalFiltroAvanzado.abrirModalBusqueda"
+            >
+              <span class="pictograma-filtro" aria-hidden="true" />
+            </button>
+          </div>
+        </ClientOnly>
+        <UiNumeroElementos :numero="totalResources" :etiqueta="etiquetaElementos" />
+      </div>
+      <div v-if="isLoading">....Cargando</div>
+      <div v-else>
         <div v-for="category in Object.keys(categoriesDict)" :key="category" class="m-y-1">
           <ConsultaElementoCategoria
             :title="categoriesDict[category].inSpanish"

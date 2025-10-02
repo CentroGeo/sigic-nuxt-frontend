@@ -4,9 +4,8 @@ import { cleanInput, resourceTypeGeonode } from '~/utils/consulta';
 
 export const useFilteredResources = defineStore('filteredResources', () => {
   const storeConsulta = useConsultaStore();
-  //const { data } = useAuth();
-  //const isLoggedIn = ref(data.value ? true : false);
-  //const userEmail = data.value?.user.email;
+  const { data } = useAuth();
+  const userEmail = data.value?.user.email;
   const filters = reactive({
     inputSearch: null,
     owner: 'todos',
@@ -52,28 +51,27 @@ export const useFilteredResources = defineStore('filteredResources', () => {
           queryParams['extent_ne'] = '[-1,-1,0,0]';
         }
         if (filters.resourceType === 'dataTable') {
-          //queryParams['filter{subtype.in}'] = ['vector', 'remote'];
-          queryParams['filter{subtype.in}'] = 'vector';
+          queryParams['filter{subtype.in}'] = ['vector', 'remote'];
         }
-        /*if (filters.resourceType === 'document') {
-    queryParams['file_extension'] = ['pdf', 'txt'];
-  } */
+        if (filters.resourceType === 'document') {
+          queryParams['file_extension'] = ['pdf', 'txt'];
+        }
       }
-      /* if (filters.inputSearch !== null) {
-        queryParams['search'] = filters.inputSearch;
+      /*       if (filters.inputSearch !== null && filters.inputSearch.length > 0) {
+        const wordsToSearch = filters.inputSearch.split(',').map((d) => cleanInput(d));
         queryParams['search_fields'] = ['title', 'abstract'];
+        queryParams['search'] = wordsToSearch;
       } */
-      /* if (isLoggedIn && filters.owner !== 'todos') {
-        if (filters.owner === userEmail) {
-          queryParams['owner'] = userEmail;
-        } else {
-          // Agregar la logica para excluir un usuario
+      if (filters.owner !== 'todos') {
+        if (filters.owner === 'misArchivos') {
+          queryParams['filter{owner.username}'] = userEmail;
         }
-      } */
+        // Agregar la logica para excluir un usuario
+      }
       if (filters.categories.length > 0) {
         queryParams['filter{category.identifier.in}'] = filters.categories;
       }
-      /*     if (filters.years !== null && filters.years.length > 0) {
+      /*if (filters.years !== null && filters.years.length > 0) {
       }
       if (filters.institutions !== null && filters.institutions.length > 0) {
       } */
@@ -81,7 +79,7 @@ export const useFilteredResources = defineStore('filteredResources', () => {
         const newKeywords = filters.keywords.split(',').map((d) => cleanInput(d));
         queryParams['filter{keywords.name.in}'] = newKeywords;
       }
-      /*     if (filters.sort !== null) {
+      /*if (filters.sort !== null) {
       } */
       filters.queryParams = queryParams;
     },
