@@ -167,8 +167,10 @@ const submitMensaje = async () => {
 
   isSubmitting.value = true;
 
+  const userEmail = data.value?.user.email;
+
   const body = {
-    user_id: 'c5461377-f021-402a-9700-a6d43c82e30c',
+    user_id: userEmail,
     //type: "Preguntar",
     type: 'RAG',
     //context_id: parseInt(contextId),
