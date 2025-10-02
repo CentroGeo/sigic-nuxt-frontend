@@ -1,11 +1,8 @@
 import { defineStore } from 'pinia';
-//import { cleanInput } from '~/utils/consulta';
 import { cleanInput, resourceTypeGeonode } from '~/utils/consulta';
 
 export const useFilteredResources = defineStore('filteredResources', () => {
   const storeConsulta = useConsultaStore();
-  const { data } = useAuth();
-  const userEmail = data.value?.user.email;
   const filters = reactive({
     inputSearch: null,
     owner: 'todos',
@@ -19,10 +16,17 @@ export const useFilteredResources = defineStore('filteredResources', () => {
   });
   return {
     filters,
-
+    /**
+     * Actualiza el valor de alguno de los filtros
+     * @param {String} filter
+     * @param {*} value
+     */
     updateFilter(filter, value) {
       filters[filter] = value;
     },
+    /**
+     * Regresa todos los filtros a su valor inicial
+     */
     resetAll() {
       filters.inputSearch = null;
       filters.owner = 'todos';
@@ -34,17 +38,19 @@ export const useFilteredResources = defineStore('filteredResources', () => {
       filters.sort = null;
       filters.queryParams = {};
     },
+    /**
+     * Regresa los filtros del modal de búsqueda avanzada a su valor original
+     */
     resetFilters() {
       filters.categories = [];
       filters.years = null;
       filters.institutions = null;
       filters.keywords = null;
     },
-
+    /**Construye queryparams a partir de los filtros */
     buildQueryParams(resourceType = storeConsulta.resourceType) {
       filters.resourceType = resourceType;
       const queryParams = { custom: 'true' };
-      // Agregamos lo necesario por tipo de recurso
       if (filters.resourceType !== 'all') {
         queryParams['filter{resource_type}'] = resourceTypeGeonode[filters.resourceType];
         if (filters.resourceType === 'dataLayer') {
@@ -57,16 +63,20 @@ export const useFilteredResources = defineStore('filteredResources', () => {
           queryParams['file_extension'] = ['pdf', 'txt'];
         }
       }
-      /*       if (filters.inputSearch !== null && filters.inputSearch.length > 0) {
+      /* if (filters.inputSearch !== null && filters.inputSearch.length > 0) {
         const wordsToSearch = filters.inputSearch.split(',').map((d) => cleanInput(d));
         queryParams['search_fields'] = ['title', 'abstract'];
         queryParams['search'] = wordsToSearch;
       } */
       if (filters.owner !== 'todos') {
-        if (filters.owner === 'misArchivos') {
-          queryParams['filter{owner.username}'] = userEmail;
+        if (filters.owner === 'privados') {
+          //queryParams['filter{owner.username}'] = userEmail;
+          queryParams['filter{is_published}'] = 'false';
+          queryParams['filter{is_approved}'] = 'false';
         }
-        // Agregar la logica para excluir un usuario
+        if (filters.owner === 'catalogo') {
+          queryParams['filter{is_published}'] = 'true';
+        }
       }
       if (filters.categories.length > 0) {
         queryParams['filter{category.identifier.in}'] = filters.categories;

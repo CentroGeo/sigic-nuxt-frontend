@@ -12,6 +12,11 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
     [resourceTypeDic.dataTable]: [],
     [resourceTypeDic.document]: [],
   });
+  const selectedResources = reactive({
+    [resourceTypeDic.dataLayer]: [],
+    [resourceTypeDic.dataTable]: [],
+    [resourceTypeDic.document]: [],
+  });
 
   const nthElementsPks = reactive({
     [resourceTypeDic.dataLayer]: [],
@@ -22,18 +27,35 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
   return {
     isLoading: ref(false),
     resources,
-
+    /**
+     * Función que regresa los recursos según el tipo de recurso con el que se está trabajando
+     * @param {String} resourceType
+     * @returns {Array}
+     */
     resourcesByType(resourceType = storeConsulta.resourceType) {
       return resources[resourceType];
     },
+    /**
+     * Función que regresa un array de pks correspondientes a los enésimos elementos de cada categoría
+     * @param {String} resourceType
+     * @returns {Array}
+     */
     nthElementsByType(resourceType = storeConsulta.resourceType) {
       return nthElementsPks[resourceType];
     },
-
+    /**
+     * Elimina todos los elementos de un tipo
+     * @param {String} resourceType
+     */
     resetByType(resourceType = storeConsulta.resourceType) {
       resources[resourceType] = [];
     },
-
+    /**
+     * Hace una petición por recursos especificando el número de página, el número de recursos y los query params que debe llevar
+     * @param {String} resourceType
+     * @param {Number} pageNum
+     * @param {Array} params
+     */
     async fillByCategory(resourceType = storeConsulta.resourceType, pageNum, params) {
       const { gnoxyFetch } = useGnoxyUrl();
       const queryParams = {
@@ -57,18 +79,40 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
       const data = res.resources;
       resources[resourceType] = [...resources[resourceType], ...data];
     },
-
+    /**
+     * Reescribe la lista de pks correspondientes a los enésimos elementos
+     * @param {String} resourceType
+     * @param {Array} pksList
+     */
     setNthElements(resourceType = storeConsulta.resourceType, pksList) {
       nthElementsPks[resourceType] = pksList;
     },
-
-    async fetchResourceByPk(pkToFind, resourceType = storeConsulta.resourceType) {
+    /**
+     * Solicita el recurso identificado por el pk
+     * @param {String} pkToFind
+     * @param {String} resourceType
+     */
+    async fetchResourceByPk(pkToFind) {
       const { gnoxyFetch } = useGnoxyUrl();
       const url = `${config.public.geonodeApi}/resources/${pkToFind}`;
       const res = await gnoxyFetch(url);
       // TODO: Si la petición falla porque el recurso es privado, eliminarlo de la store de seleccion
       const resource = await res.json();
-      resources[resourceType].push(resource.resource);
+      return resource.resource;
+    },
+
+    /**
+     * Solicita todos los recursos de una lista a partir de su pk
+     * @param {Array} pkToFind
+     * @param {String} resourceType
+     */
+    async fetchResourcesByPk(resourceType = storeConsulta.resourceType, pkListToFind) {
+      const lista = [];
+      for (const pk of pkListToFind) {
+        const resource = await this.fetchResourceByPk(pk);
+        lista.push(resource);
+      }
+      selectedResources[resourceType] = lista;
     },
 
     /**
@@ -78,7 +122,7 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
      * @returns {Object} ojeto de recursos de geonode.
      */
     findResource(pkToFind, resourceType = storeConsulta.resourceType) {
-      return resources[resourceType].find(({ pk }) => pk === pkToFind);
+      return selectedResources[resourceType].find(({ pk }) => pk === pkToFind);
     },
     /**
      * Devuelve una lista de recursos que coincidan con una lista de pks.
@@ -87,7 +131,7 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
      * @returns {Array<Object>} lista de ojetos de recursos de geonode.
      */
     findResources(pksToFind, resourceType = storeConsulta.resourceType) {
-      return resources[resourceType].filter(({ pk }) => pksToFind.includes(pk));
+      return selectedResources[resourceType].filter(({ pk }) => pksToFind.includes(pk));
     },
   };
 });

@@ -191,6 +191,7 @@ watch(selectedOwner, () => {
 watch(params, async () => {
   isLoading.value = true;
   totalResources.value = 0;
+  storeResources.resetByType();
   buildCategoriesDict();
   isLoading.value = false;
 });
@@ -222,7 +223,7 @@ onMounted(async () => {
           >
             <option value="todos">Todos los conjuntos de datos</option>
             <option value="catalogo">Archivos del catálogo</option>
-            <option value="misArchivos">Mis Archivos</option>
+            <option value="privados">Mis Archivos</option>
           </SisdaiSelector>
         </ClientOnly>
 

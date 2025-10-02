@@ -6,15 +6,9 @@ const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
 const storeSelected = useSelectedResources2Store();
 const { gnoxyFetch } = useGnoxyUrl();
-
 //const { findServer } = useGnoxyUrl();
 //const { gnoxyUrl } = useGnoxyUrl();
-const { data } = useAuth();
-const isLoggedIn = ref(data.value ? true : false);
-const userEmail = ref(data.value?.user.email);
-
 const emit = defineEmits(['opacidadClicked', 'descargaClicked', 'tablaClicked']);
-
 const props = defineProps({
   resourceElement: {
     type: Object,
@@ -184,9 +178,11 @@ async function updateFunctions() {
     }
   }
   if (
-    isLoggedIn.value &&
+    /* isLoggedIn.value &&
     resourceElement.value.owner.email === userEmail.value &&
-    !resourceElement.value.is_published
+    !resourceElement.value.is_published */
+    resourceElement.value.is_approved === false &&
+    resourceElement.value.is_published === false
   ) {
     // Se excluye el botón OWS para recursos privados
     buttons = buttons.filter((d) => d.label !== 'Vínculo OWS');

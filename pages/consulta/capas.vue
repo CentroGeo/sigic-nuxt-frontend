@@ -69,7 +69,7 @@ onMounted(async () => {
   // Para cuando hace el cambio de página
   if (storeSelected.pks.length > 0) {
     updateQueryParam(storeSelected.asQueryParam());
-    storeSelected.pks.forEach((pk) => storeResources.fetchResourceByPk(pk));
+    storeResources.fetchResourcesByPk(storeConsulta.resourceType, storeSelected.pks);
   }
 });
 
