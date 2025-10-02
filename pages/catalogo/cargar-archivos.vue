@@ -1,6 +1,8 @@
 <script setup>
 import SisdaiControlDeslizante from '@centrogeomx/sisdai-componentes/src/componentes/control-deslizante/SisdaiControlDeslizante.vue';
 
+const storeCatalogo = useCatalogoStore();
+
 definePageMeta({
   middleware: 'sidebase-auth',
   bodyAttrs: {
@@ -67,7 +69,7 @@ async function guardarArchivo(files) {
 </script>
 
 <template>
-  <UiLayoutPaneles>
+  <UiLayoutPaneles :estado-colapable="storeCatalogo.catalogoColapsado">
     <template #catalogo>
       <CatalogoListaMenuLateral />
     </template>

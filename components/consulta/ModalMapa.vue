@@ -19,7 +19,7 @@ const emit = defineEmits(['notifyDownload']);
 
 async function openLayerView() {
   useSelectedResources2Store().add(
-    new SelectedLayer({ uuid: props.selectedElement.uuid }),
+    new SelectedLayer({ pk: props.selectedElement.pk }),
     resourceTypeDic.dataLayer
   );
 

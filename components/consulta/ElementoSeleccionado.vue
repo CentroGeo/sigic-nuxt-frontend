@@ -14,12 +14,12 @@ const props = defineProps({
   resourceType: { type: String, required: true },
 });
 
-const resourceElement = computed(() => storeResources.findResource(props.selectedElement.uuid));
+const resourceElement = computed(() => storeResources.findResource(props.selectedElement.pk));
 const { data } = useAuth();
 const isLoggedIn = ref(data.value ? true : false);
 const userEmail = ref(data.value?.user.email);
-const goDown = () => storeSelected.changePosition(props.selectedElement.uuid, -1);
-const goUp = () => storeSelected.changePosition(props.selectedElement.uuid, +1);
+const goDown = () => storeSelected.changePosition(props.selectedElement.pk, -1);
+const goUp = () => storeSelected.changePosition(props.selectedElement.pk, +1);
 </script>
 
 <template>
@@ -52,7 +52,7 @@ const goUp = () => storeSelected.changePosition(props.selectedElement.uuid, +1);
             class="boton-pictograma boton-sin-contenedor-secundario"
             aria-label="Subir elemento"
             type="button"
-            :disabled="storeSelected.uuids.length === selectedElement.posicion + 1"
+            :disabled="storeSelected.pks.length === selectedElement.posicion + 1"
             @click="goUp"
           >
             <span class="pictograma-subir-capa pictograma-mediano" aria-hidden="true" />

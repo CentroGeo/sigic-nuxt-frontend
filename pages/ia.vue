@@ -30,11 +30,17 @@ onMounted(() => (document.querySelector('body').className = ''));
     </div>
   </div>
 </template>
-<style lang="scss">
+<style lang="scss" scoped>
 .modulo-ia {
+  --altura-consulta-esc: calc(100vh - 55px);
+  height: var(--altura-consulta-esc);
   gap: 0;
   .contenedor-contenido {
     flex: 1;
+    .columna-4,
+    .columna-12 {
+      height: var(--altura-consulta-esc);
+    }
   }
 }
 </style>

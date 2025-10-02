@@ -2,7 +2,7 @@ import SelectedResource, { fromQueryParam } from './SelectedResource';
 
 export default class SelectedLayer extends SelectedResource {
   constructor(options = {}) {
-    const vars = ['uuid', 'estilo', 'opacidad', 'visible', 'posicion'];
+    const vars = ['pk', 'estilo', 'opacidad', 'visible', 'posicion'];
     const _options = typeof options === 'string' ? fromQueryParam(options, vars) : options;
     super(_options);
 
@@ -11,7 +11,7 @@ export default class SelectedLayer extends SelectedResource {
   }
 
   get asQueryParam() {
-    return [this.uuid, this.estilo || '', this.opacidad, Number(this.visible)].join(',');
+    return [this.pk, this.estilo || '', this.opacidad, Number(this.visible)].join(',');
   }
 
   get opacidad() {

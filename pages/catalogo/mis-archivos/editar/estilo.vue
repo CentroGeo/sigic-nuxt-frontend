@@ -1,12 +1,14 @@
 <script setup>
 const { data } = useAuth();
+
 const route = useRoute();
+const selectedPk = route.query.data;
+const resourceType = route.query.type;
 
 const subidaExitosa = ref(false);
 const nombreSLD = ref('');
 
-const selectedPk = route.query.data;
-const resourceType = route.query.type;
+const storeCatalogo = useCatalogoStore();
 // Recuperamos la información completa del recurso
 const storeFetched = useFetchedResources2Store();
 storeFetched.checkFilling(resourceType);
@@ -40,7 +42,7 @@ async function guardarArchivo(files) {
 </script>
 
 <template>
-  <UiLayoutPaneles>
+  <UiLayoutPaneles :estado-colapable="storeCatalogo.catalogoColapsado">
     <template #catalogo>
       <CatalogoListaMenuLateral />
     </template>

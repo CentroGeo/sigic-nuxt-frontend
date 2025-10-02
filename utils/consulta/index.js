@@ -253,24 +253,10 @@ export async function defineGeomType(resource) {
  * @returns
  */
 export async function fetchDoc(url) {
-  //const extensionDict = { pdf: 'application/pdf', txt: 'text/plain' };
-  const { data } = useAuth();
-  const token = data.value?.accessToken;
-  let res;
-  if (token) {
-    res = await fetch(url, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-  } else {
-    res = await fetch(url);
-  }
-  if (!res.ok) {
-    throw new Error(`Fetchfailed: ${res.status}`);
-  }
+  const { gnoxyFetch } = useGnoxyUrl();
+  const res = await gnoxyFetch(url);
   const blob = await res.blob();
-  //console.log(blob);
   const newUrl = URL.createObjectURL(blob);
-  //console.log(newUrl);
   return newUrl;
 }
 

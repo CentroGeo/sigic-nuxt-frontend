@@ -135,14 +135,14 @@ function changeModal(to) {
           </button>
         </div>
 
-        <UiNumeroElementos :numero="storeSelected.uuids.length" :etiqueta="etiquetaElementos" />
+        <UiNumeroElementos :numero="storeSelected.pks.length" :etiqueta="etiquetaElementos" />
       </div>
     </div>
 
     <div class="m-x-2 m-y-1">
       <ConsultaElementoSeleccionado
         v-for="resource in storeSelected.sortedDescending()"
-        :key="`seleccion-${resource.uuid}`"
+        :key="`seleccion-${resource.pk}`"
         :selected-element="resource"
         :resource-type="resourceType"
         @open-opacity="(resource) => notifyOpacityChild(resource)"
@@ -166,7 +166,7 @@ function changeModal(to) {
       <ConsultaModalDescarga
         v-if="shownModal === 'downloadOne'"
         ref="downloadOneChild"
-        :key="`${modalResource.uuid}_${resourceType}`"
+        :key="`${modalResource.pk}_${resourceType}`"
         :resource-type="resourceType"
         :selected-element="modalResource"
       />
@@ -174,14 +174,14 @@ function changeModal(to) {
       <ConsultaModalOpacidad
         v-if="shownModal === 'opacityModal'"
         ref="opacityChild"
-        :key="`${modalResource.uuid}_${resourceType}`"
+        :key="`${modalResource.pk}_${resourceType}`"
         :selected-element="modalResource"
       />
 
       <ConsultaModalTabla
         v-if="shownModal === 'tablaModal'"
         ref="tablaChild"
-        :key="`${modalResource.uuid}_${resourceType}`"
+        :key="`${modalResource.pk}_${resourceType}`"
         :selected-element="modalResource"
         @notify-download="changeModal('downloadOne')"
       />
@@ -189,7 +189,7 @@ function changeModal(to) {
       <ConsultaModalMapa
         v-if="shownModal === 'mapModal'"
         ref="mapChild"
-        :key="`${modalResource.uuid}_${resourceType}`"
+        :key="`${modalResource.pk}_${resourceType}`"
         :selected-element="modalResource"
         @notify-download="changeModal('downloadOne')"
       />

@@ -3,10 +3,7 @@ import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/cam
 import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-
-const storeIA = useIAStore();
 
 /**
  * @typedef {Object} Props
@@ -20,7 +17,9 @@ const props = defineProps({
   textoBoton: { type: String, default: 'Texto botón' },
   etiquetaBusqueda: { type: String, default: undefined },
 });
-const { titulo, textoBoton, recursoLista, etiquetaBusqueda } = toRefs(props);
+const { titulo, textoBoton, etiquetaBusqueda } = toRefs(props);
+
+const storeIA = useIAStore();
 
 const nuevoChatModal = ref(null);
 const seleccionProyecto = ref('');
@@ -43,6 +42,23 @@ const catalogoFiltrado = ref(catalogo.value);
 
 const eliminarChatModal = ref(null);
 
+const listaProyectos = ref([]);
+const listaContextos = ref([]);
+
+const loadProjectList = async () => {
+  let arrayProjects = [];
+
+  // Consulta proyectos
+  arrayProjects = await storeIA.getProjectsList();
+
+  listaProyectos.value = arrayProjects;
+};
+
+const loadContexts = async (id) => {
+  //Consulta fuentes
+  listaContextos.value = await storeIA.getProjectContexts(id);
+};
+
 // Función para consultar lista de proyectos
 const loadChatsList = async () => {
   let arrayChats = [];
@@ -54,11 +70,18 @@ const loadChatsList = async () => {
   transformarHistorial(arrayChats);
 };
 
+/**
+ * Agrupa la lista del historial de chat por fecha y ordena de forma
+ * descendente, así como por id. Asignando el resultado al catálogo.
+ * @param {Array} historiales con la lista de chats
+ */
 function transformarHistorial(historiales) {
   const agrupadoPorFecha = {};
 
+  // agrupamos por fecha
   historiales.forEach((historial) => {
     const fechaISO = historial.credate_date;
+    // formatea a String la fecha de creación a la forma dd/mm/yyyy
     const fecha = new Date(fechaISO).toLocaleDateString('es-ES', {
       day: '2-digit',
       month: '2-digit',
@@ -66,6 +89,7 @@ function transformarHistorial(historiales) {
     });
 
     historial.context.forEach((contexto) => {
+      // obtenemos los items del chat
       const chatItem = {
         id: historial.id,
         titulo: historial.title || 'Chat ' + historial.id,
@@ -77,7 +101,6 @@ function transformarHistorial(historiales) {
       if (!agrupadoPorFecha[fecha]) {
         agrupadoPorFecha[fecha] = [];
       }
-
       agrupadoPorFecha[fecha].push(chatItem);
     });
   });
@@ -119,8 +142,13 @@ function openEditModal(title, chat_id) {
   idChat.value = chat_id;
 }
 
+watch(seleccionProyecto, (nv) => {
+  loadContexts(nv);
+});
+
 onMounted(() => {
   loadChatsList();
+  loadProjectList();
 });
 
 function openEliminarModal(chat_id) {
@@ -198,7 +226,7 @@ watch(
             <SisdaiCampoBusqueda
               class="m-y-3"
               :etiqueta="etiquetaBusqueda"
-              :catalogo="recursoLista"
+              :catalogo="catalogo"
               :catalogo-anidado="true"
               catalogo-anidado-propiedad-elementos="chat"
               propiedad-busqueda="titulo"
@@ -206,56 +234,59 @@ watch(
             />
           </ClientOnly>
 
-          <h6>Selecciona un chat para empezar a interactuar con el asistente.</h6>
+          <div class="overflowYAuto">
+            <h6>Selecciona un chat para empezar a interactuar con el asistente.</h6>
 
-          <ul class="lista-sin-estilo">
-            <li v-for="grupo in catalogoFiltrado" :id="grupo.id" :key="grupo.id">
-              <p class="fecha-grupo">
-                {{ grupo.fecha == fechaHoy ? 'Hoy' : grupo.fecha }}
-              </p>
+            <ul class="lista-sin-estilo">
+              <li v-for="grupo in catalogoFiltrado" :id="grupo.id" :key="grupo.id">
+                <p class="fecha-grupo">
+                  {{ grupo.fecha == fechaHoy ? 'Hoy' : grupo.fecha }}
+                </p>
 
-              <ul class="lista-sin-estilo">
-                <li v-for="chat in grupo.chat" :id="chat.id" :key="chat.id">
-                  <div class="tarjeta-chat p-3 borde borde-redondeado-20" @click="openChat(chat)">
-                    <h5 class="tarjeta-titulo m-t-0 m-b-2">
-                      {{ chat.titulo }}
-                    </h5>
-                    <p class="tarjeta-nombre-proyecto m-t-0 m-b-1">
-                      {{ chat.proyecto }}
-                    </p>
-                    <p class="tarjeta-nombre-contexto m-t-0 m-b-2">
-                      {{ chat.contexto }}
-                    </p>
+                <ul class="lista-sin-estilo">
+                  <li v-for="chat in grupo.chat" :id="chat.id" :key="chat.id">
+                    <div class="tarjeta-chat p-3 borde borde-redondeado-20" @click="openChat(chat)">
+                      <h5 class="tarjeta-titulo m-t-0 m-b-2">
+                        {{ chat.titulo }}
+                      </h5>
+                      <p class="tarjeta-nombre-proyecto m-t-0 m-b-1">
+                        {{ chat.proyecto }}
+                      </p>
+                      <p class="tarjeta-nombre-contexto m-t-0 m-b-2">
+                        {{ chat.contexto }}
+                      </p>
 
-                    <div class="flex flex-contenido-final">
-                      <div>
-                        <button
-                          class="boton-pictograma boton-sin-contenedor-secundario"
-                          aria-label="Editar chat"
-                          type="button"
-                          @click.stop="openEditModal(chat.titulo, chat.id)"
-                        >
-                          <span class="pictograma-editar" aria-hidden="true" />
-                        </button>
-                        <button
-                          class="boton-pictograma boton-sin-contenedor-secundario"
-                          aria-label="Remover chat"
-                          type="button"
-                          @click.stop="openEliminarModal(chat.id)"
-                        >
-                          <span class="pictograma-eliminar" aria-hidden="true" />
-                        </button>
+                      <div class="flex flex-contenido-final">
+                        <div>
+                          <button
+                            class="boton-pictograma boton-sin-contenedor-secundario"
+                            aria-label="Editar chat"
+                            type="button"
+                            @click.stop="openEditModal(chat.titulo, chat.id)"
+                          >
+                            <span class="pictograma-editar" aria-hidden="true" />
+                          </button>
+                          <button
+                            class="boton-pictograma boton-sin-contenedor-secundario"
+                            aria-label="Remover chat"
+                            type="button"
+                            @click.stop="openEliminarModal(chat.id)"
+                          >
+                            <span class="pictograma-eliminar" aria-hidden="true" />
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </li>
-              </ul>
-            </li>
-          </ul>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
   </div>
+
   <ClientOnly>
     <SisdaiModal ref="nuevoChatModal">
       <template #encabezado> <h2>Nuevo chat</h2> </template>
@@ -263,26 +294,32 @@ watch(
         <SisdaiSelector
           v-model="seleccionProyecto"
           etiqueta="Selecciona un proyecto"
-          texto_ayuda="Texto de ayuda."
+          :es_obligatorio="true"
         >
-          <option value="1">Opcion Uno</option>
-          <option value="2">Opcion Dos</option>
-          <option value="3">Opcion Tres</option>
+          <option v-for="value in listaProyectos" :key="value.id" :value="value.id">
+            {{ value.title }}
+          </option>
         </SisdaiSelector>
         <SisdaiSelector
+          v-if="seleccionProyecto !== ''"
           v-model="seleccionContexto"
           etiqueta="Selecciona un contexto"
-          texto_ayuda="Texto de ayuda."
+          :es_obligatorio="true"
         >
-          <option value="1">Opcion Uno</option>
-          <option value="2">Opcion Dos</option>
-          <option value="3">Opcion Tres</option>
+          <option v-for="value in listaContextos" :key="value.id" :value="value.id">
+            {{ value.title }}
+          </option>
         </SisdaiSelector>
       </template>
       <template #pie>
-        <button class="boton-primario boton-chico" aria-label="Iniciar chat" type="button">
+        <nuxt-link
+          class="boton boton-primario boton-chico"
+          aria-label="Iniciar chat"
+          type="button"
+          :to="`/ia/chat/dinamica?context_id=${seleccionContexto}`"
+        >
           Iniciar chat
-        </button>
+        </nuxt-link>
       </template>
     </SisdaiModal>
   </ClientOnly>
@@ -340,11 +377,11 @@ watch(
     </SisdaiModal>
   </ClientOnly>
 </template>
+
 <style lang="scss">
-.boton-listas {
-  width: 100%;
-  text-align: center;
-  display: inline-block;
+.overflowYAuto {
+  height: 65vh;
+  overflow-y: auto;
 }
 
 .tarjeta-chat {

@@ -121,13 +121,13 @@ async function callResources(categoria) {
 }
 
 function getNthElements() {
-  const nthElementsUuids = [];
+  const nthElementsPks = [];
   const categoriesList = Object.keys(categorizedResources.value);
   categoriesList.forEach((category) => {
     const nthIndex = categorizedResources.value[category].length - nthElement;
-    nthElementsUuids.push(categorizedResources.value[category][nthIndex]['uuid']);
+    nthElementsPks.push(categorizedResources.value[category][nthIndex]['pk']);
   });
-  return nthElementsUuids;
+  return nthElementsPks;
 }
 
 function groupResults() {

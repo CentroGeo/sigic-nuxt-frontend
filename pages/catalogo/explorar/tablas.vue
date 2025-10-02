@@ -1,10 +1,62 @@
 <script setup>
-// TODO: fix paginador
+// TODO: Reactivar filtrado
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-
 import { cleanInput, resourceTypeDic } from '~/utils/consulta';
 
-const storeFetched = useFetchedResources2Store();
+const storeCatalogo = useCatalogoStore();
+const storeResources = useResourcesCatalogoStore();
+const storeConsulta = useConsultaStore();
+const storeFilters = useFilteredResources();
+storeConsulta.resourceType = resourceTypeDic.dataTable;
+storeResources.getTotalResources(resourceTypeDic.dataTable);
+
+const totalReources = computed(() => storeResources.totalByType());
+const paginaActual = ref(0);
+const tamanioPagina = 10;
+const totalPags = computed(() => Math.ceil(totalReources.value / tamanioPagina));
+const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'acciones'];
+const resources = computed(() => storeResources.resourcesByType());
+const tableResources = ref([]);
+const modalFiltroAvanzado = ref(null);
+const isFilterActive = ref(false);
+const seleccionOrden = ref('');
+const inputSearch = computed({
+  get: () => storeFilters.filters.inputSearch,
+  set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
+});
+
+function updateResources() {
+  //filteredResources.value = nuevosRecursos;
+  // obteniendo datos por las props de la tabla
+  tableResources.value = resources.value.map((d) => ({
+    pk: d.pk,
+    titulo: d.title,
+    tipo_recurso: 'Datos tabulados',
+    categoria: d.category,
+    actualizacion: d.last_updated,
+    acciones: 'Ver, Descargar',
+    uuid: d.uuid,
+    recurso_completo: d,
+  }));
+}
+function fetchNewData() {
+  storeResources.resetByType();
+  storeResources.getResourcesByPage(
+    storeConsulta.resourceType,
+    paginaActual.value + 1,
+    tamanioPagina
+  );
+}
+fetchNewData();
+
+watch(paginaActual, () => {
+  fetchNewData();
+});
+
+watch(resources, () => {
+  updateResources();
+});
+/* const storeFetched = useFetchedResources2Store();
 const storeFilters = useFilteredResources();
 const storeConsulta = useConsultaStore();
 storeConsulta.resourceType = resourceTypeDic.dataTable;
@@ -68,11 +120,11 @@ onMounted(async () => {
   if (resourcesTablas.value.length !== 0) {
     updateResources(resourcesTablas.value);
   }
-});
+}); */
 </script>
 
 <template>
-  <UiLayoutPaneles>
+  <UiLayoutPaneles :estado-colapable="storeCatalogo.catalogoColapsado">
     <template #catalogo>
       <CatalogoListaMenuLateral />
     </template>
@@ -146,16 +198,15 @@ onMounted(async () => {
         </div>
 
         <div class="flex">
-          <h2>Tablas</h2>
-          <UiNumeroElementos :numero="tableResources.length" />
+          <h2>Datos tabulados</h2>
+          <UiNumeroElementos :numero="totalReources" />
         </div>
 
         <div class="flex">
           <div class="columna-16">
             <ClientOnly>
-              <!-- TODO: implementar paginador -->
               <UiTablaAccesibleV2 :variables="variables" :datos="tableResources" />
-              <UiPaginador :total-paginas="1" @cambio="1" />
+              <UiPaginador :total-paginas="totalPags" @cambio="paginaActual = $event" />
             </ClientOnly>
           </div>
         </div>
@@ -164,8 +215,8 @@ onMounted(async () => {
       <!-- Modal Búsqueda avanzada -->
       <ConsultaModalBusqueda
         ref="modalFiltroAvanzado"
-        @apply-filter="applyAdvancedFilter"
-        @reset-filter="resetAdvancedFilter"
+        @apply-filter="console.log('applyAdvancedFilter')"
+        @reset-filter="console.log('resetAdvancedFilter')"
       />
     </template>
   </UiLayoutPaneles>
