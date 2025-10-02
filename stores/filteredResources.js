@@ -1,11 +1,9 @@
 import { defineStore } from 'pinia';
 //import { cleanInput } from '~/utils/consulta';
-import { buildUrl, cleanInput, resourceTypeGeonode } from '~/utils/consulta';
+import { cleanInput, resourceTypeGeonode } from '~/utils/consulta';
 
 export const useFilteredResources = defineStore('filteredResources', () => {
   const storeConsulta = useConsultaStore();
-  const config = useRuntimeConfig();
-  const { gnoxyFetch } = useGnoxyUrl();
   //const { data } = useAuth();
   //const isLoggedIn = ref(data.value ? true : false);
   //const userEmail = data.value?.user.email;
@@ -18,8 +16,8 @@ export const useFilteredResources = defineStore('filteredResources', () => {
     keywords: null,
     resourceType: null,
     sort: null,
+    queryParams: {},
   });
-
   return {
     filters,
 
@@ -35,6 +33,7 @@ export const useFilteredResources = defineStore('filteredResources', () => {
       filters.keywords = null;
       filters.resourceType = null;
       filters.sort = null;
+      filters.queryParams = {};
     },
     resetFilters() {
       filters.categories = [];
@@ -42,11 +41,23 @@ export const useFilteredResources = defineStore('filteredResources', () => {
       filters.institutions = null;
       filters.keywords = null;
     },
-    async fetchFilteredData(resourceType = storeConsulta.resourceType) {
+
+    buildQueryParams(resourceType = storeConsulta.resourceType) {
       filters.resourceType = resourceType;
-      const queryParams = {};
+      const queryParams = { custom: 'true' };
+      // Agregamos lo necesario por tipo de recurso
       if (filters.resourceType !== 'all') {
         queryParams['filter{resource_type}'] = resourceTypeGeonode[filters.resourceType];
+        if (filters.resourceType === 'dataLayer') {
+          queryParams['extent_ne'] = '[-1,-1,0,0]';
+        }
+        if (filters.resourceType === 'dataTable') {
+          //queryParams['filter{subtype.in}'] = ['vector', 'remote'];
+          queryParams['filter{subtype.in}'] = 'vector';
+        }
+        /*if (filters.resourceType === 'document') {
+    queryParams['file_extension'] = ['pdf', 'txt'];
+  } */
       }
       /* if (filters.inputSearch !== null) {
         queryParams['search'] = filters.inputSearch;
@@ -72,11 +83,7 @@ export const useFilteredResources = defineStore('filteredResources', () => {
       }
       /*     if (filters.sort !== null) {
       } */
-
-      const url = buildUrl(`${config.public.geonodeUrl}/api/v2/resources`, queryParams);
-      const res = await gnoxyFetch(url);
-      const data = await res.json();
-      return data.resources;
+      filters.queryParams = queryParams;
     },
   };
 });

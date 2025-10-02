@@ -25,7 +25,6 @@ watch(() => storeSelected.asQueryParam(), updateQueryFromStore);
 
 onMounted(async () => {
   storeResources.resetByType(storeConsulta.resourceType);
-  storeResources.getTotalResources(storeConsulta.resourceType);
   storeSelected.addFromQueryParam(route.query.docs);
 
   // Para cuando hacemos el cambio de página

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { buildUrl, defineGeomType, resourceTypeDic, resourceTypeGeonode } from '~/utils/consulta';
+import { buildUrl, defineGeomType, resourceTypeDic } from '~/utils/consulta';
 
 export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => {
   const config = useRuntimeConfig();
@@ -7,11 +7,6 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
   /**
    * Almacenamiento reactivo de los recursos seleccionados.
    */
-  const totals = reactive({
-    [resourceTypeDic.dataLayer]: 0,
-    [resourceTypeDic.dataTable]: 0,
-    [resourceTypeDic.document]: 0,
-  });
   const resources = reactive({
     [resourceTypeDic.dataLayer]: [],
     [resourceTypeDic.dataTable]: [],
@@ -26,72 +21,26 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
 
   return {
     isLoading: ref(false),
-    totals,
     resources,
 
     resourcesByType(resourceType = storeConsulta.resourceType) {
       return resources[resourceType];
-    },
-    totalByType(resourceType = storeConsulta.resourceType) {
-      return totals[resourceType];
     },
     nthElementsByType(resourceType = storeConsulta.resourceType) {
       return nthElementsPks[resourceType];
     },
 
     resetByType(resourceType = storeConsulta.resourceType) {
-      totals[resourceType] = 0;
       resources[resourceType] = [];
     },
 
-    async getTotalResources(resourceType = storeConsulta.resourceType) {
-      const { gnoxyFetch } = useGnoxyUrl();
-      this.isLoading = true;
-      const queryParams = {
-        //custom: 'true',
-        'filter{resource_type}': resourceTypeGeonode[resourceType],
-        // TODO: Cambiar este valor por un 1
-        page_size: 1,
-      };
-      /* if (resourceType === 'dataLayer') {
-        queryParams['extent_ne'] = '[-1,-1,0,0]';
-      } */
-      if (resourceType === 'dataTable') {
-        queryParams['filter{subtype.in}'] = ['vector', 'remote'];
-      }
-      /* if (resourceType === 'document') {
-        queryParams['file_extension'] = ['pdf', 'txt'];
-      } */
-
-      const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
-      //console.log('La url generada: ', url);
-      const request = await gnoxyFetch(url.toString());
-      //console.log('La solicitud:', request);
-      const res = await request.json();
-      //console.log('La respuesta:', res);
-      totals[resourceType] = res.total;
-      this.isLoading = false;
-    },
-
-    async fillByCategory(resourceType = storeConsulta.resourceType, pageNum, category) {
+    async fillByCategory(resourceType = storeConsulta.resourceType, pageNum, params) {
       const { gnoxyFetch } = useGnoxyUrl();
       const queryParams = {
-        custom: 'true',
-        'filter{resource_type}': resourceTypeGeonode[resourceType],
-        'filter{category.identifier}': category,
         page: pageNum,
         page_size: 2,
+        ...params,
       };
-      if (resourceType === 'dataLayer') {
-        queryParams['extent_ne'] = '[-1,-1,0,0]';
-      }
-      if (resourceType === 'dataTable') {
-        //queryParams['filter{subtype.in}'] = ['vector', 'remote'];
-        queryParams['filter{subtype.in}'] = 'vector';
-      }
-      /* if (resourceType === 'document') {
-        queryParams['file_extension'] = ['pdf', 'txt'];
-      } */
       const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
       const request = await gnoxyFetch(url);
       const res = await request.json();

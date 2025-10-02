@@ -63,7 +63,6 @@ watch(
 );
 onMounted(async () => {
   storeResources.resetByType(storeConsulta.resourceType);
-  storeResources.getTotalResources(storeConsulta.resourceType);
   updateMapFromHash(route.hash?.slice(1));
   storeSelected.addFromQueryParam(route.query.capas);
 

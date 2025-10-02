@@ -1,7 +1,13 @@
 <script setup>
 // TODO: Quitar toda la logica para elementos sin categoria
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { buildUrl, categoriesInSpanish, cleanInput, resourceTypeGeonode } from '~/utils/consulta';
+import {
+  buildUrl,
+  categoriesInSpanish,
+  categoriesNames,
+  categoriesValues,
+  cleanInput,
+} from '~/utils/consulta';
 
 const config = useRuntimeConfig();
 const storeResources = useResourcesConsultaStore();
@@ -14,9 +20,10 @@ defineProps({
   titulo: { type: String, default: 'Título' },
   etiquetaElementos: { type: String, default: undefined },
 });
-const totalResources = computed(() => storeResources.totalByType());
-const isLoading = computed(() => storeResources.isLoading);
+const totalResources = ref(0);
+const isLoading = ref(true);
 const resources = computed(() => storeResources.resourcesByType());
+const params = computed(() => storeFilters.filters.queryParams);
 const selectedOwner = computed({
   get: () => storeFilters.filters.owner,
   set: (value) => storeFilters.updateFilter('owner', value),
@@ -26,7 +33,6 @@ const inputSearch = computed({
   set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
 });
 const nthElement = 1;
-//const storeFetched = useFetchedResources2Store();
 const isLoggedIn = ref(data.value ? true : false);
 const apiCategorias = `${config.public.geonodeApi}/facets/category`;
 const filteredResources = ref([]);
@@ -37,44 +43,20 @@ const modalFiltroAvanzado = ref(null);
 const isFilterActive = ref(false);
 
 async function fetchTotalByCategory(category) {
-  const queryParams = {
-    custom: 'true',
-    'filter{resource_type}': resourceTypeGeonode[storeConsulta.resourceType],
-    'filter{category.identifier}': category,
-  };
-  if (storeConsulta.resourceType === 'dataLayer') {
-    queryParams['extent_ne'] = '[-1,-1,0,0]';
-  }
-  if (storeConsulta.resourceType === 'dataTable') {
-    //queryParams['filter{subtype.in}'] = ['vector', 'remote'];
-    queryParams['filter{subtype.in}'] = 'vector';
-  }
-  /*if (storeConsulta.resourceType === 'document') {
-    queryParams['file_extension'] = ['pdf', 'txt'];
-  } */
-  const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
+  const preParams = params.value;
+  preParams['filter{category.identifier.in}'] = category;
+  const url = buildUrl(`${config.public.geonodeApi}/resources`, preParams);
   const request = await gnoxyFetch(url.toString());
   const res = await request.json();
   return res.total;
 }
 
 async function buildCategoriesDict() {
-  // Esta parte es para obtener todas las categorias
-  const request = await gnoxyFetch(apiCategorias);
-  const geonodeCategories = await request.json();
-  // Aquí creamos el diccionario de categorías
-
   categoriesDict.value = {};
-  if (!geonodeCategories) {
-    categoriesDict.value['Sin Clasificar'] = {
-      label: 'Sin Clasificar',
-      name: 'sinClasificar',
-      inSpanish: categoriesInSpanish['Sin Clasificar'],
-      total: totalResources.value,
-      page: 1,
-      isLoading: false,
-    };
-  } else {
+  // Esta parte es para obtener todas las categorias
+  if (!isFilterActive.value) {
+    const request = await gnoxyFetch(apiCategorias);
+    const geonodeCategories = await request.json();
     const results = await Promise.all(
       geonodeCategories.topics.items.map(async (d) => {
         const totalByCat = await fetchTotalByCategory(d.key);
@@ -91,15 +73,26 @@ async function buildCategoriesDict() {
         return totalByCat;
       })
     );
-    const totalWithCategory = results.reduce((a, b) => a + b, 0);
-    categoriesDict.value['Sin Clasificar'] = {
-      label: 'Sin Clasificar',
-      name: 'sinClasificar',
-      inSpanish: categoriesInSpanish['Sin Clasificar'],
-      total: totalResources.value - totalWithCategory,
-      page: 1,
-      isLoading: false,
-    };
+    totalResources.value = results.reduce((a, b) => a + b, 0);
+  } else {
+    const geonodeCategories = storeFilters.filters.categories;
+    const results = await Promise.all(
+      geonodeCategories.map(async (d) => {
+        const totalByCat = await fetchTotalByCategory(d);
+        if (totalByCat !== 0) {
+          categoriesDict.value[categoriesNames[d]] = {
+            label: categoriesNames[d],
+            name: d,
+            inSpanish: categoriesInSpanish[categoriesNames[d]],
+            total: totalByCat,
+            page: 1,
+            isLoading: false,
+          };
+        }
+        return totalByCat;
+      })
+    );
+    totalResources.value = results.reduce((a, b) => a + b, 0);
   }
 }
 
@@ -110,10 +103,12 @@ async function callResources(categoria) {
     ? categorizedResources.value[categoria].length
     : 0;
   if (total > count) {
+    const preParams = params.value;
+    preParams['filter{category.identifier.in}'] = categoriesValues[categoria];
     await storeResources.fillByCategory(
       storeConsulta.resourceType,
       categoriesDict.value[categoria].page,
-      categoriesDict.value[categoria].name
+      preParams
     );
     categoriesDict.value[categoria].page += 1;
   }
@@ -154,7 +149,6 @@ function groupResults() {
 }
 
 function updateResources(nuevosRecursos) {
-  //console.log('Los nuevos recursos', nuevosRecursos);
   filteredResources.value = nuevosRecursos;
   groupResults();
 }
@@ -180,131 +174,133 @@ async function fetchNewData(category) {
 async function applyAdvancedFilter() {
   isFilterActive.value = true;
   modalFiltroAvanzado.value.cerrarModalBusqueda();
-  //storeFilters.fetchFilteredData(storeConsulta.resourceType);
-  const newdata = await storeFilters.fetchFilteredData(storeConsulta.resourceType);
-  updateResources(newdata);
+  storeFilters.buildQueryParams();
 }
 
 function resetAdvancedFilter() {
   isFilterActive.value = false;
   storeFilters.resetFilters();
+  storeFilters.buildQueryParams();
   modalFiltroAvanzado.value.cerrarModalBusqueda();
-  updateResources(storeFilters.fetchFilteredData(storeConsulta.resourceType));
 }
-watch(totalResources, () => {
-  buildCategoriesDict();
-});
-onMounted(async () => {
-  storeFilters.resetAll();
-});
-
 /*
 watch([inputSearch, selectedOwner, resources], () => {
-  updateResources(storeFilters.filter(storeConsulta.resourceType));
+  storeFilters.buildQueryParams();
+});*/
+
+watch(params, async () => {
+  isLoading.value = true;
+  storeResources.resetByType();
+  const url = buildUrl(`${config.public.geonodeApi}/resources`, params.value);
+  const request = await gnoxyFetch(url.toString());
+  const res = await request.json();
+  filteredResources.value = res.resources;
+  buildCategoriesDict();
+  isLoading.value = false;
 });
 
 onMounted(async () => {
   storeFilters.resetAll();
+  storeFilters.buildQueryParams();
   if (resources.value.length !== 0) {
     updateResources(resources.value);
   }
-}); */
+});
 </script>
 
 <template>
   <div class="catalogo-layout">
     <div class="encabeado-catalogo">
       <p class="h4 fondo-color-acento p-3 m-0">{{ titulo }}</p>
+      <div v-if="isLoading">....Cargando</div>
+      <div v-else>
+        <div class="m-x-2 m-y-1">
+          <p v-if="!isLoggedIn" class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
 
-      <div class="m-x-2 m-y-1">
-        <p v-if="!isLoggedIn" class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
-
-        <ClientOnly>
-          <SisdaiSelector
-            v-if="isLoggedIn"
-            v-model="selectedOwner"
-            class="m-y-2"
-            etiqueta="Buscar en catálogo y tus archivos:"
-            instruccional="Selecciona los recursos por permisos"
-          >
-            <option value="todos">Todos los conjuntos de datos</option>
-            <option value="catalogo">Archivos del catálogo</option>
-            <option value="misArchivos">Mis Archivos</option>
-          </SisdaiSelector>
-        </ClientOnly>
-
-        <ClientOnly>
-          <div class="flex flex-contenido-centrado m-y-3">
-            <form class="campo-busqueda columna-12" @submit.prevent>
-              <label for="idunicobusqueda" class="a11y-solo-lectura"> Campo de búsqueda </label>
-              <input
-                id="input-busqueda-consulta"
-                v-model="inputSearch"
-                type="search"
-                class="campo-busqueda-entrada"
-                placeholder="Campo de búsqueda"
-              />
-
-              <button
-                aria-label="Borrar"
-                class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
-                type="button"
-                @click="storeFilters.updateFilter('inputSearch', '')"
-              >
-                <span aria-hidden="true" class="pictograma-cerrar" />
-              </button>
-
-              <button
-                aria-label="Buscar"
-                class="boton-primario boton-pictograma campo-busqueda-buscar"
-                type="button"
-              >
-                <span class="pictograma-buscar" aria-hidden="true" />
-              </button>
-            </form>
-
-            <button
-              type="button"
-              :class="
-                isFilterActive
-                  ? 'boton-primario boton-pictograma boton-grande'
-                  : 'boton-secundario boton-pictograma boton-grande'
-              "
-              aria-label="Filtro Avanzado"
-              @click="modalFiltroAvanzado.abrirModalBusqueda"
+          <ClientOnly>
+            <SisdaiSelector
+              v-if="isLoggedIn"
+              v-model="selectedOwner"
+              class="m-y-2"
+              etiqueta="Buscar en catálogo y tus archivos:"
+              instruccional="Selecciona los recursos por permisos"
             >
-              <span class="pictograma-filtro" aria-hidden="true" />
-            </button>
-          </div>
-        </ClientOnly>
-        <UiNumeroElementos :numero="totalResources" :etiqueta="etiquetaElementos" />
-      </div>
-    </div>
-    <div v-if="isLoading">....Cargando</div>
-    <div v-else>
-      <div v-for="category in Object.keys(categoriesDict)" :key="category" class="m-y-1">
-        <ConsultaElementoCategoria
-          :title="categoriesDict[category].inSpanish"
-          :tag="etiquetaElementos"
-          :number-elements="categoriesDict[category].total"
-          @click="setSelectedCategory(category)"
-        />
+              <option value="todos">Todos los conjuntos de datos</option>
+              <option value="catalogo">Archivos del catálogo</option>
+              <option value="misArchivos">Mis Archivos</option>
+            </SisdaiSelector>
+          </ClientOnly>
 
-        <div
-          v-for="(resource, index) in categorizedResources[category]"
-          :key="index"
-          class="contenedor-archivos"
-        >
-          <ConsultaElementoCatalogo
-            v-if="selectedCategories.includes(category)"
-            :key="index"
-            class="elemento-catalogo"
-            :catalogue-element="resource"
-            :resource-type="storeConsulta.resourceType"
-            @trigger-fetch="fetchNewData"
-          />
+          <ClientOnly>
+            <div class="flex flex-contenido-centrado m-y-3">
+              <form class="campo-busqueda columna-12" @submit.prevent>
+                <label for="idunicobusqueda" class="a11y-solo-lectura"> Campo de búsqueda </label>
+                <input
+                  id="input-busqueda-consulta"
+                  v-model="inputSearch"
+                  type="search"
+                  class="campo-busqueda-entrada"
+                  placeholder="Campo de búsqueda"
+                />
+
+                <button
+                  aria-label="Borrar"
+                  class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
+                  type="button"
+                  @click="storeFilters.updateFilter('inputSearch', '')"
+                >
+                  <span aria-hidden="true" class="pictograma-cerrar" />
+                </button>
+
+                <button
+                  aria-label="Buscar"
+                  class="boton-primario boton-pictograma campo-busqueda-buscar"
+                  type="button"
+                >
+                  <span class="pictograma-buscar" aria-hidden="true" />
+                </button>
+              </form>
+
+              <button
+                type="button"
+                :class="
+                  isFilterActive
+                    ? 'boton-primario boton-pictograma boton-grande'
+                    : 'boton-secundario boton-pictograma boton-grande'
+                "
+                aria-label="Filtro Avanzado"
+                @click="modalFiltroAvanzado.abrirModalBusqueda"
+              >
+                <span class="pictograma-filtro" aria-hidden="true" />
+              </button>
+            </div>
+          </ClientOnly>
+          <UiNumeroElementos :numero="totalResources" :etiqueta="etiquetaElementos" />
         </div>
-        <div v-if="categoriesDict[category].isLoading">....Cargando</div>
+        <div v-for="category in Object.keys(categoriesDict)" :key="category" class="m-y-1">
+          <ConsultaElementoCategoria
+            :title="categoriesDict[category].inSpanish"
+            :tag="etiquetaElementos"
+            :number-elements="categoriesDict[category].total"
+            @click="setSelectedCategory(category)"
+          />
+
+          <div
+            v-for="(resource, index) in categorizedResources[category]"
+            :key="index"
+            class="contenedor-archivos"
+          >
+            <ConsultaElementoCatalogo
+              v-if="selectedCategories.includes(category)"
+              :key="index"
+              class="elemento-catalogo"
+              :catalogue-element="resource"
+              :resource-type="storeConsulta.resourceType"
+              @trigger-fetch="fetchNewData"
+            />
+          </div>
+          <div v-if="categoriesDict[category].isLoading">....Cargando</div>
+        </div>
       </div>
     </div>
   </div>
