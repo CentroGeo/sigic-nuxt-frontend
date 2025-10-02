@@ -51,16 +51,20 @@ export const useFilteredResources = defineStore('filteredResources', () => {
     buildQueryParams(resourceType = storeConsulta.resourceType) {
       filters.resourceType = resourceType;
       const queryParams = { custom: 'true' };
-      if (filters.resourceType !== 'all') {
-        queryParams['filter{resource_type}'] = resourceTypeGeonode[filters.resourceType];
-        if (filters.resourceType === 'dataLayer') {
-          queryParams['extent_ne'] = '[-1,-1,0,0]';
-        }
-        if (filters.resourceType === 'dataTable') {
-          queryParams['filter{subtype.in}'] = ['vector', 'remote'];
-        }
-        if (filters.resourceType === 'document') {
-          queryParams['file_extension'] = ['pdf', 'txt'];
+      if (filters.resourceType !== 'all' && filters.resourceType !== undefined) {
+        if (filters.resourceType === 'remotes') {
+          queryParams['filter{subtype.in}'] = 'remote';
+        } else {
+          queryParams['filter{resource_type}'] = resourceTypeGeonode[filters.resourceType];
+          if (filters.resourceType === 'dataLayer') {
+            queryParams['extent_ne'] = '[-1,-1,0,0]';
+          }
+          if (filters.resourceType === 'dataTable') {
+            queryParams['filter{subtype.in}'] = ['vector', 'remote'];
+          }
+          if (filters.resourceType === 'document') {
+            queryParams['file_extension'] = ['pdf', 'txt'];
+          }
         }
       }
       /* if (filters.inputSearch !== null && filters.inputSearch.length > 0) {

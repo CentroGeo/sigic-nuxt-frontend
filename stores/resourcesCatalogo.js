@@ -76,32 +76,10 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
     resetBySection(section) {
       misArchivos[section] = [];
     },
-    async resourcesByType(resourceType = storeConsulta.resourceType) {
-      const { gnoxyFetch } = useGnoxyUrl();
-      this.isLoading = true;
-      const queryParams = {
-        custom: 'true',
-        'filter{resource_type}': resourceTypeGeonode[resourceType],
-        page_size: totals[resourceType],
-      };
-      if (resourceType === 'dataLayer') {
-        queryParams['extent_ne'] = '[-1,-1,0,0]';
-      }
-      if (resourceType === 'dataTable') {
-        //queryParams['filter{subtype.in}'] = ['vector', 'remote'];
-        queryParams['filter{subtype.in}'] = 'vector';
-      }
-      /*  if (resourceType === 'document') {
-        queryParams['file_extension'] = ['pdf', 'txt'];
-      } */
-
-      const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
-      const request = await gnoxyFetch(url.toString());
-      const res = await request.json();
-      resources[resourceType] = res.resources;
-      this.isLoading = false;
-      //return resources[resourceType];
+    resourcesByType(resourceType = storeConsulta.resourceType) {
+      return resources[resourceType];
     },
+
     async myResourcesByType(resourceType = storeConsulta.resourceType) {
       const { gnoxyFetch } = useGnoxyUrl();
       this.isLoading = true;
@@ -129,33 +107,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       this.isLoading = false;
       //return resources[resourceType];
     },
-    /**Hace una petición de solo 1 recurso para obtener el total de recursos y el último recurso */
-    async getTotalResources(resourceType = storeConsulta.resourceType) {
-      const { gnoxyFetch } = useGnoxyUrl();
-      this.isLoading = true;
-      const queryParams = {
-        custom: 'true',
-        'filter{resource_type}': resourceTypeGeonode[resourceType],
-        page_size: 100,
-      };
-      if (resourceType === 'dataLayer') {
-        queryParams['extent_ne'] = '[-1,-1,0,0]';
-      }
-      if (resourceType === 'dataTable') {
-        //queryParams['filter{subtype.in}'] = ['vector', 'remote'];
-        queryParams['filter{subtype.in}'] = 'vector';
-      }
-      /*  if (resourceType === 'document') {
-        queryParams['file_extension'] = ['pdf', 'txt'];
-      } */
 
-      const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
-      const request = await gnoxyFetch(url.toString());
-      const res = await request.json();
-      totals[resourceType] = res.total;
-      latestResources[resourceType] = res.resources[0];
-      this.isLoading = false;
-    },
     async getMyTotalResources(resourceType = storeConsulta.resourceType) {
       const { gnoxyFetch } = useGnoxyUrl();
       this.isLoading = true;
@@ -187,11 +139,11 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
      *
      * @param {*} section
      */
-    async getMyTotal(section) {
+    async getMyTotal(section, query) {
       const { gnoxyFetch } = useGnoxyUrl();
       this.isLoading = true;
       const queryParams = {
-        custom: 'true',
+        ...query,
         page_size: 100,
         'filter{owner.username}': userEmail,
       };
@@ -202,49 +154,16 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       totalMisArchivos[section] = res.total;
       this.isLoading = false;
     },
-    /**
-     *Hace una petición de recursos especificando la página y el número de recursos que se desea traer
-     * @param {Object} resourceType
-     * @param {Number} pageNum
-     * @param {Number} pageSize
-     */
-    async getResourcesByPage(resourceType = storeConsulta.resourceType, pageNum, pageSize) {
+
+    async getMyResourcesByPage(section, pageNum, pageSize, query) {
       const { gnoxyFetch } = useGnoxyUrl();
       this.isLoading = true;
       const queryParams = {
-        custom: 'true',
-        'filter{resource_type}': resourceTypeGeonode[resourceType],
-        page: pageNum,
-        page_size: pageSize,
-      };
-      if (resourceType === 'dataLayer') {
-        queryParams['extent_ne'] = '[-1,-1,0,0]';
-      }
-      if (resourceType === 'dataTable') {
-        //queryParams['filter{subtype.in}'] = ['vector', 'remote'];
-        queryParams['filter{subtype.in}'] = 'vector';
-      }
-      /*  if (resourceType === 'document') {
-        queryParams['file_extension'] = ['pdf', 'txt'];
-      } */
-
-      const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
-      const request = await gnoxyFetch(url.toString());
-      const res = await request.json();
-      resources[resourceType] = res.resources;
-      this.isLoading = false;
-    },
-
-    async getMyResourcesByPage(section, pageNum, pageSize) {
-      const { gnoxyFetch } = useGnoxyUrl();
-      this.isLoading = true;
-      const queryParams = {
-        custom: 'true',
+        ...query,
         page: pageNum,
         page_size: pageSize,
         'filter{owner.username}': userEmail,
       };
-
       const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
@@ -259,6 +178,44 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       misArchivos[section] = datum;
       this.isLoading = false;
     },
+
+    /**Hace una petición de solo 1 recurso para obtener el total de recursos y el último recurso */
+    async getTotalResources(resourceType = storeConsulta.resourceType, query) {
+      const { gnoxyFetch } = useGnoxyUrl();
+      this.isLoading = true;
+      const queryParams = {
+        page_size: 100,
+        ...query,
+      };
+      const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
+      const request = await gnoxyFetch(url.toString());
+      const res = await request.json();
+      totals[resourceType] = res.total;
+      latestResources[resourceType] = res.resources[0];
+      this.isLoading = false;
+    },
+    /**
+     *Hace una petición de recursos especificando la página y el número de recursos que se desea traer
+     * @param {Object} resourceType
+     * @param {Number} pageNum
+     * @param {Number} pageSize
+     */
+    async getResourcesByPage(resourceType = storeConsulta.resourceType, pageNum, pageSize, params) {
+      const { gnoxyFetch } = useGnoxyUrl();
+      this.isLoading = true;
+      const queryParams = {
+        page: pageNum,
+        page_size: pageSize,
+        ...params,
+      };
+
+      const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
+      const request = await gnoxyFetch(url.toString());
+      const res = await request.json();
+      resources[resourceType] = res.resources;
+      this.isLoading = false;
+    },
+
     /**
      * Devuelve un recursos que coincida con un uuid.
      * @param {String} uuid del catalogo a buscar.

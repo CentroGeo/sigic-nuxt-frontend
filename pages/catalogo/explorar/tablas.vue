@@ -1,19 +1,17 @@
 <script setup>
 // TODO: Reactivar filtrado
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { cleanInput, resourceTypeDic } from '~/utils/consulta';
+import { cleanInput } from '~/utils/consulta';
 
 const storeCatalogo = useCatalogoStore();
 const storeResources = useResourcesCatalogoStore();
 const storeConsulta = useConsultaStore();
 const storeFilters = useFilteredResources();
-storeConsulta.resourceType = resourceTypeDic.dataTable;
-storeResources.getTotalResources(resourceTypeDic.dataTable);
-
-const totalReources = computed(() => storeResources.totalByType());
+const params = computed(() => storeFilters.filters.queryParams);
+const totalResources = computed(() => storeResources.totalByType());
 const paginaActual = ref(0);
 const tamanioPagina = 10;
-const totalPags = computed(() => Math.ceil(totalReources.value / tamanioPagina));
+const totalPags = computed(() => Math.ceil(totalResources.value / tamanioPagina));
 const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'acciones'];
 const resources = computed(() => storeResources.resourcesByType());
 const tableResources = ref([]);
@@ -44,18 +42,47 @@ function fetchNewData() {
   storeResources.getResourcesByPage(
     storeConsulta.resourceType,
     paginaActual.value + 1,
-    tamanioPagina
+    tamanioPagina,
+    params.value
   );
 }
-fetchNewData();
+function applyAdvancedFilter() {
+  isFilterActive.value = true;
+  modalFiltroAvanzado.value.cerrarModalBusqueda();
+  storeFilters.buildQueryParams();
+}
+
+function resetAdvancedFilter() {
+  isFilterActive.value = false;
+  storeFilters.resetFilters();
+  modalFiltroAvanzado.value.cerrarModalBusqueda();
+  storeFilters.buildQueryParams();
+}
 
 watch(paginaActual, () => {
   fetchNewData();
 });
 
-watch(resources, () => {
-  updateResources();
+watch(params, () => {
+  paginaActual.value = 0;
+  fetchNewData();
 });
+
+watch(
+  resources,
+  () => {
+    updateResources();
+  },
+  { deep: true }
+);
+
+onMounted(async () => {
+  storeFilters.resetAll();
+  storeFilters.buildQueryParams();
+  storeResources.getTotalResources(storeConsulta.resourceType, params.value);
+  fetchNewData();
+});
+
 /* const storeFetched = useFetchedResources2Store();
 const storeFilters = useFilteredResources();
 const storeConsulta = useConsultaStore();
@@ -199,7 +226,7 @@ onMounted(async () => {
 
         <div class="flex">
           <h2>Datos tabulados</h2>
-          <UiNumeroElementos :numero="totalReources" />
+          <UiNumeroElementos :numero="totalResources" />
         </div>
 
         <div class="flex">
@@ -215,8 +242,8 @@ onMounted(async () => {
       <!-- Modal Búsqueda avanzada -->
       <ConsultaModalBusqueda
         ref="modalFiltroAvanzado"
-        @apply-filter="console.log('applyAdvancedFilter')"
-        @reset-filter="console.log('resetAdvancedFilter')"
+        @apply-filter="applyAdvancedFilter"
+        @reset-filter="resetAdvancedFilter"
       />
     </template>
   </UiLayoutPaneles>
