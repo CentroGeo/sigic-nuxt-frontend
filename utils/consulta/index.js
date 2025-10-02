@@ -400,6 +400,7 @@ export async function downloadMetadata(resource) {
  * @param {Stringy} featureTypes
  */
 export async function downloadWMS(resource, format, featureTypes) {
+  console.log('Se solicitó la descarga de:', resource);
   const { gnoxyFetch } = useGnoxyUrl();
   const config = useRuntimeConfig();
   const maxAttempts = 3;
@@ -434,6 +435,7 @@ export async function downloadWMS(resource, format, featureTypes) {
   url.search = new URLSearchParams(params).toString();
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
+      console.warn(`Vamos en el intento: ${attempt}.`);
       const res = await gnoxyFetch(url.toString());
       if (!res.ok) {
         throw new Error(`Download failed: ${res.status}`);

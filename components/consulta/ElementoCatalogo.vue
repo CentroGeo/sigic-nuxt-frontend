@@ -1,7 +1,6 @@
 <script setup>
 import { onMounted, onUnmounted, ref, toRefs } from 'vue';
 import { tooltipContent } from '~/utils/consulta';
-
 const storeSelected = useSelectedResources2Store();
 const storeConsulta = useConsultaStore();
 const storeResources = useResourcesConsultaStore();

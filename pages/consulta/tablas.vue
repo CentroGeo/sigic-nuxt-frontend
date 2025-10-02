@@ -36,11 +36,14 @@ watch(paginaActual, () => {
 });
 
 watch(
-  [() => selectedPk.value, () => storeResources.resourcesByType(resourceType)],
+  [
+    () => selectedPk.value,
+    () => storeResources.resourcesByType(resourceType),
+    storeResources.selectedResources[resourceType],
+  ],
   () => {
     selectedElement.value = storeResources.findResource(selectedPk.value);
     paginaActual.value = 0;
-    // console.log(selectedPk.value);
     fetchTable({
       paginaActual: paginaActual.value,
       tamanioPagina: tamanioPagina,

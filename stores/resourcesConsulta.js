@@ -27,6 +27,7 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
   return {
     isLoading: ref(false),
     resources,
+    selectedResources,
     /**
      * Función que regresa los recursos según el tipo de recurso con el que se está trabajando
      * @param {String} resourceType

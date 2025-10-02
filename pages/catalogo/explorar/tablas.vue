@@ -65,6 +65,7 @@ watch(paginaActual, () => {
 
 watch(params, () => {
   paginaActual.value = 0;
+  storeResources.getTotalResources(storeConsulta.resourceType, params.value);
   fetchNewData();
 });
 
