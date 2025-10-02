@@ -10,17 +10,14 @@ const props = defineProps({
   funcionDescarga: { type: Function, default: undefined },
 });
 const { titulo } = toRefs(props);
-
 const buttonTagDict = {
   dataLayer: 'mapa',
   dataTable: 'archivos',
   document: 'archivos',
 };
 // const route = useRoute();
-
 const shownModal = ref('ninguno');
 const modalResource = ref(null);
-
 const downloadAllChild = ref(null);
 const downloadOneChild = ref(null);
 const opacityChild = ref(null);
@@ -64,7 +61,6 @@ function notifyMapaChild(resource) {
   nextTick(() => {
     mapChild.value?.abrirModalMapa();
   });
-  // console.log(resource);
 }
 function notifyBorrarChild() {
   shownModal.value = 'borrarModal';

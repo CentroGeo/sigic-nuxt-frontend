@@ -1,10 +1,24 @@
 <script setup>
-import { resourceTypeDic } from '~/utils/consulta';
+import { resourceTypeDic, resourceTypeGeonode } from '~/utils/consulta';
 const storeResources = useResourcesCatalogoStore();
 const storeCatalogo = useCatalogoStore();
-storeResources.getTotalResources(resourceTypeDic.dataLayer);
-storeResources.getTotalResources(resourceTypeDic.dataTable);
-storeResources.getTotalResources(resourceTypeDic.document);
+function buildQueryParams(resourceType) {
+  const queryParams = { custom: 'true' };
+  queryParams['filter{resource_type}'] = resourceTypeGeonode[resourceType];
+  if (resourceType === 'dataLayer') {
+    queryParams['extent_ne'] = '[-1,-1,0,0]';
+  }
+  if (resourceType === 'dataTable') {
+    queryParams['filter{subtype.in}'] = ['vector', 'remote'];
+  }
+  if (resourceType === 'document') {
+    queryParams['file_extension'] = ['pdf', 'txt'];
+  }
+  return queryParams;
+}
+storeResources.getTotalResources(resourceTypeDic.dataLayer, buildQueryParams('dataLayer'));
+storeResources.getTotalResources(resourceTypeDic.dataTable, buildQueryParams('dataTable'));
+storeResources.getTotalResources(resourceTypeDic.document, buildQueryParams('document'));
 
 const types = ['dataLayer', 'dataTable', 'document'];
 const resourcesDict = computed(() => ({

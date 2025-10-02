@@ -26,10 +26,10 @@ const seleccionCampoCapa = ref('');
 const variables = ref([]);
 
 storeCatalogoResources.getMyTotalResources('dataLayer');
-storeCatalogoResources.myResourcesByType('dataLayer');
-const layerTotals = computed(() => storeCatalogoResources.myTotals['dataLayer']);
+storeCatalogoResources.getMyResourcesByType('dataLayer');
+const layerTotals = computed(() => storeCatalogoResources.myTotalsByType['dataLayer']);
 const seleccionCapaGeo = ref('');
-const layerResources = computed(() => storeCatalogoResources.myResources['dataLayer']);
+const layerResources = computed(() => storeCatalogoResources.myResourcesByType['dataLayer']);
 
 const seleccionCampoObjetivo = ref('');
 const varGeoLayer = ref([]);
@@ -211,6 +211,7 @@ onMounted(async () => {
                   </SisdaiSelector>
 
                   <p v-if="layerTotals === 0">...cargando capas</p>
+                  <!--Se desea incorporar paginación en el selector ?-->
                   <SisdaiSelector
                     v-if="layerTotals > 0"
                     v-model="seleccionCapaGeo"

@@ -1,20 +1,14 @@
 <script setup>
 import { SisdaiLeyendaWms } from '@centrogeomx/sisdai-mapas';
-import { findServer, getWMSserver, hasWMS } from '~/utils/consulta';
+import { findServer, hasWMS } from '~/utils/consulta';
 
 const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
 const storeSelected = useSelectedResources2Store();
 const { gnoxyFetch } = useGnoxyUrl();
-
 //const { findServer } = useGnoxyUrl();
 //const { gnoxyUrl } = useGnoxyUrl();
-const { data } = useAuth();
-const isLoggedIn = ref(data.value ? true : false);
-const userEmail = ref(data.value?.user.email);
-
 const emit = defineEmits(['opacidadClicked', 'descargaClicked', 'tablaClicked']);
-
 const props = defineProps({
   resourceElement: {
     type: Object,
@@ -41,7 +35,7 @@ const { resourceElement } = toRefs(props);
   }
   return url;
 } */
-function getWMSFeatureInfo(resource) {
+/* function getWMSFeatureInfo(resource) {
   const url = new URL(getWMSserver(resource));
   const pngObject = resource.links.find((link) => link.name === 'PNG');
   const pngLink = pngObject.url;
@@ -71,7 +65,7 @@ function getWMSFeatureInfo(resource) {
     info_format: 'application/json',
   });
   return url.href;
-}
+} */
 const actualButtons = ref({});
 const optionsButtons = ref([
   {
@@ -119,13 +113,10 @@ const optionsButtons = ref([
     },
   },
   {
-    //excludeFor: 'none'
     excludeFor: 'noTables',
-    label: 'Vínculo WMS',
-    //label: 'Vínculo WFS',
+    label: 'Vínculo OWS',
     pictogram: 'pictograma-enlace-externo',
-    globo: 'WMS',
-    //globo: 'WFS',
+    globo: 'OWS',
     action: async () => {
       // Este primer link es una petición GetMap
       //const objectWMSLink = resourceElement.value.links.find((link) => link.name === 'PNG');
@@ -133,10 +124,11 @@ const optionsButtons = ref([
       // Esta es la petición WFS
       //const wfsLink = getWFS(resourceElement.value);
       // Esta es la petición GetFeatureInfo
-      const wmsLink = getWMSFeatureInfo(resourceElement.value);
+      //const wmsLink = getWMSFeatureInfo(resourceElement.value);
+      const owsLink = `${config.public.geonodeUrl}/geoserver/${resourceElement.value.alternate.replace(':', '/')}/ows`;
       try {
-        await navigator.clipboard.writeText(wmsLink);
-        alert('Enlace copiado al portapapeles: ' + wmsLink);
+        await navigator.clipboard.writeText(owsLink);
+        alert('Enlace copiado al portapapeles: ' + owsLink);
       } catch (err) {
         console.error('Error al copiar: ', err);
       }
@@ -168,28 +160,32 @@ async function updateFunctions() {
     buttons = buttons.filter((d) => d.excludeFor !== 'noTables');
   }
   if (resourceElement.value.sourcetype === 'REMOTE') {
+    // Se excluye el botón de descargar para remotos
     buttons = buttons.filter((d) => d.excludeFor !== 'remotes');
-    /*         const resourceHasWMS = await hasWMS(
-      resourceElement.value,
-      'table',
-      config.public.geonodeUrl,
-    ); // Esta se llamaría para el WFS*/
-    const resourceHasWMS = await hasWMS(
+    // Se excluye el botón OWS para remotos
+    buttons = buttons.filter((d) => d.label !== 'Vínculo OWS');
+    const resourceHasWMS = await hasWMS(resourceElement.value, 'table');
+    // Esta se llamaría para el WFS*/
+    /*     const resourceHasWMS = await hasWMS(
       resourceElement.value,
       'table',
       config.public.geonodeUrl,
       'GetFeatureInfo'
-    );
+    );*/
+    // Se excluye el botón para ver tablas en caso de que el archivo remoto no permita consultar la tabla
     if (resourceHasWMS === false) {
       buttons = buttons.filter((d) => d.excludeFor !== 'noTables');
     }
   }
   if (
-    isLoggedIn.value &&
+    /* isLoggedIn.value &&
     resourceElement.value.owner.email === userEmail.value &&
-    !resourceElement.value.is_published
+    !resourceElement.value.is_published */
+    resourceElement.value.is_approved === false &&
+    resourceElement.value.is_published === false
   ) {
-    buttons = buttons.filter((d) => d.label !== 'Vínculo WMS');
+    // Se excluye el botón OWS para recursos privados
+    buttons = buttons.filter((d) => d.label !== 'Vínculo OWS');
   }
   actualButtons.value = buttons;
 }

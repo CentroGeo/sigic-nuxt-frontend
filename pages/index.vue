@@ -420,7 +420,7 @@ const capasMasRecientes = obtenerMasRecientes(resourceTypeDic.dataLayer);
                   <nuxt-link
                     class="boton boton-primario boton-chico"
                     aria-label="Ver capa en visualizador"
-                    :to="`/consulta/capas?capas=${capa.uuid}`"
+                    :to="`/consulta/capas?capas=${capa.pk}`"
                   >
                     Ver Capa en visualizador
                   </nuxt-link>

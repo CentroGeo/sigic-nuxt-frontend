@@ -76,7 +76,7 @@ defineExpose({
             :key="`${index}-category`"
             v-model="inputCategories"
             name="filtro-categoria"
-            :value="category"
+            :value="categoriesDict[category]"
             :etiqueta="categoriesInSpanish[category]"
             class="opcion-checkbox"
           />
