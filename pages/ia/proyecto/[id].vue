@@ -17,19 +17,36 @@ import {
 } from '~/utils/consulta';
 
 const config = useRuntimeConfig();
-const storeFetched = useFetchedResources2Store();
+// const storeFetched = useFetchedResources2Store();
 const storeFilters = useFilteredResources();
+const storeCatalogoResources = useResourcesCatalogoStore();
 
-storeFetched.checkFilling(resourceTypeDic.dataLayer);
-storeFetched.checkFilling(resourceTypeDic.dataTable);
-storeFetched.checkFilling(resourceTypeDic.document);
+storeCatalogoResources.getTotalResources(
+  resourceTypeDic.dataLayer,
+  storeFilters.buildQueryParams(resourceTypeDic.dataLayer)
+);
+// await storeCatalogoResources.getResourcesByType(resourceTypeDic.dataLayer);
+storeCatalogoResources.getTotalResources(
+  resourceTypeDic.dataTable,
+  storeFilters.buildQueryParams(resourceTypeDic.dataTable)
+);
+// await storeCatalogoResources.getResourcesByType(resourceTypeDic.dataTable);
+storeCatalogoResources.getTotalResources(
+  resourceTypeDic.document,
+  storeFilters.buildQueryParams(resourceTypeDic.document)
+);
+// await storeCatalogoResources.getResourcesByType(resourceTypeDic.document);
 
-const resources = computed(() => storeFetched.all);
+// storeFetched.checkFilling(resourceTypeDic.dataLayer);
+// storeFetched.checkFilling(resourceTypeDic.dataTable);
+// storeFetched.checkFilling(resourceTypeDic.document);
+
+// const resources = computed(() => storeFetched.all);
 const filteredResources = ref([]);
 const categorizedResources = ref({});
 
 const agregaCatalogoModal = ref(null);
-const botonRadioSeleccion = ref('capas');
+const botonRadioSeleccion = ref('dataLayer');
 
 const seleccionCatalogoModal = ref(null);
 const inputSearch = computed({
@@ -37,7 +54,12 @@ const inputSearch = computed({
   set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
 });
 const selectedCategoryResourcesLength = ref(0);
-const etiquetaRecursos = ref(botonRadioSeleccion.value);
+const dictTipoRecurso = {
+  dataLayer: 'capas',
+  dataTable: 'tablas',
+  document: 'documentos',
+};
+const etiquetaRecursos = ref(dictTipoRecurso[botonRadioSeleccion.value]);
 
 const recursosSeleccionados = ref([]);
 const buttons = ref([]);
@@ -116,6 +138,7 @@ function groupResults() {
   });
 }
 function updateResources(nuevosRecursos) {
+  // console.log(nuevosRecursos);
   filteredResources.value = nuevosRecursos;
   groupResults();
 }
@@ -123,23 +146,23 @@ function botonSiguiente() {
   agregaCatalogoModal.value?.cerrarModal();
   selectedCategoryResourcesLength.value = 0;
   recursosSeleccionados.value = [];
-  etiquetaRecursos.value = botonRadioSeleccion.value;
+  etiquetaRecursos.value = dictTipoRecurso[botonRadioSeleccion.value];
   seleccionCatalogoModal.value?.abrirModal();
 }
 function asignarEtiquetaRecursos() {
-  if (botonRadioSeleccion.value === 'capas') {
+  if (botonRadioSeleccion.value === 'dataLayer') {
     if (selectedCategoryResourcesLength.value === 1) {
       etiquetaRecursos.value = 'capa';
     } else {
       etiquetaRecursos.value = 'capas';
     }
-  } else if (botonRadioSeleccion.value === 'tablas') {
+  } else if (botonRadioSeleccion.value === 'dataTable') {
     if (selectedCategoryResourcesLength.value === 1) {
       etiquetaRecursos.value = 'tabla';
     } else {
       etiquetaRecursos.value = 'tablas';
     }
-  } else if (botonRadioSeleccion.value === 'documentos') {
+  } else if (botonRadioSeleccion.value === 'document') {
     if (selectedCategoryResourcesLength.value === 1) {
       etiquetaRecursos.value = 'documento';
     } else {
@@ -171,28 +194,45 @@ function cargarArchivosASubir() {
   archivosSeleccionados.value = [...archivosSeleccionados.value, ...nuevosArchivos];
 }
 
-watch([resources, inputSearch], () => {
-  updateResources(storeFilters.filter('all'));
+watch([inputSearch], async () => {
+  // updateResources(storeFilters.filter('all'));
+  // console.log(storeFilters.filters.resourceType);
+  // esto devuelve parámtros
+  // storeFilters.buildQueryParams(storeFilters.filters.resourceType)
+  // console.log('hay');
+  // storeCatalogoResources.getTotalResources(
+  //   botonRadioSeleccion.value,
+  //   storeFilters.buildQueryParams(botonRadioSeleccion.value)
+  // );
+  // await storeCatalogoResources.getResourcesByType(botonRadioSeleccion.value);
+  updateResources(storeCatalogoResources.resourcesByType2[botonRadioSeleccion.value]);
 });
-watch(botonRadioSeleccion, (nv) => {
+watch(botonRadioSeleccion, async (nv) => {
   categoriaSeleccionada.value = null;
+  // console.log(nv);
   storeFilters.filters.resourceType = nv;
-  updateResources(storeFilters.filter('all'));
+  // categorizedResources.value = {};
+  // await storeCatalogoResources.getResourcesByType(nv);
+  updateResources(storeCatalogoResources.resourcesByType2[nv]);
+  // updateResources(storeFilters.filter('all'));
+  // esto devuelve parámtros
+  // storeFilters.buildQueryParams(storeFilters.filters.resourceType)
+  // updateResources(storeFilters.buildQueryParams(nv));
 });
 watch(recursosSeleccionados, () => {
-  if (botonRadioSeleccion.value === 'capas') {
+  if (botonRadioSeleccion.value === 'dataLayer') {
     if (recursosSeleccionados.value.length === 1) {
       etiquetaRecursosSeleccionados.value = 'capa seleccionada';
     } else {
       etiquetaRecursosSeleccionados.value = 'capas seleccionadas';
     }
-  } else if (botonRadioSeleccion.value === 'tablas') {
+  } else if (botonRadioSeleccion.value === 'dataTable') {
     if (recursosSeleccionados.value.length === 1) {
       etiquetaRecursosSeleccionados.value = 'tabla seleccionada';
     } else {
       etiquetaRecursosSeleccionados.value = 'tablas seleccionadas';
     }
-  } else if (botonRadioSeleccion.value === 'documentos') {
+  } else if (botonRadioSeleccion.value === 'document') {
     if (recursosSeleccionados.value.length === 1) {
       etiquetaRecursosSeleccionados.value = 'documento seleccionada';
     } else {
@@ -218,9 +258,13 @@ const archivosEliminados = ref([]);
 onMounted(async () => {
   storeFilters.resetAll();
   storeFilters.filters.resourceType = botonRadioSeleccion.value;
-  if (resources.value.length !== 0) {
-    updateResources(resources.value);
-  }
+  await storeCatalogoResources.getResourcesByType(resourceTypeDic.dataLayer);
+  await storeCatalogoResources.getResourcesByType(resourceTypeDic.dataTable);
+  await storeCatalogoResources.getResourcesByType(resourceTypeDic.document);
+  updateResources(storeCatalogoResources.resourcesByType2[botonRadioSeleccion.value]);
+  // if (resources.value.length !== 0) {
+  //   // updateResources(resources.value);
+  // }
 
   if (route.params.id !== 'nuevo') {
     esEdicion.value = true;
@@ -274,7 +318,7 @@ const seleccionarCategoria = (categoria) => {
     } else {
       geomType.value = 'Otro';
     }
-    if (botonRadioSeleccion.value === 'capas') {
+    if (botonRadioSeleccion.value === 'dataLayer') {
       buttons.value.push({
         class: optionsDict[geomType.value].class,
         tooltipText: optionsDict[geomType.value].tooltipText,
@@ -382,6 +426,15 @@ const editarProyecto = async () => {
     console.log('Error al actualizar: ' + error.message);
   }
 };
+
+async function agregarFuentesCatalogo() {
+  agregaCatalogoModal.value?.abrirModal();
+  // storeCatalogoResources.getTotalResources(
+  //   resourceTypeDic.dataLayer,
+  //   storeFilters.buildQueryParams(resourceTypeDic.dataLayer)
+  // );
+  // await storeCatalogoResources.getResourcesByType(resourceTypeDic.dataLayer);
+}
 </script>
 
 <template>
@@ -445,7 +498,7 @@ const editarProyecto = async () => {
                 <button
                   class="boton-pictograma boton-primario m-r-2"
                   aria-label="Agregar fuentes del catalogo"
-                  @click="agregaCatalogoModal?.abrirModal()"
+                  @click="agregarFuentesCatalogo"
                 >
                   Agregar del catálogo
                   <span class="pictograma-agregar" aria-hidden="true" />
@@ -539,21 +592,21 @@ const editarProyecto = async () => {
                 <SisdaiBotonRadio
                   v-model="botonRadioSeleccion"
                   etiqueta="Capas geográficas"
-                  value="capas"
+                  value="dataLayer"
                   name="tipodefuente"
                   :es_obligatorio="true"
                 />
                 <SisdaiBotonRadio
                   v-model="botonRadioSeleccion"
                   etiqueta="Tabulados de datos"
-                  value="tablas"
+                  value="dataTable"
                   name="tipodefuente"
                   :es_obligatorio="true"
                 />
                 <SisdaiBotonRadio
                   v-model="botonRadioSeleccion"
                   etiqueta="Documentos"
-                  value="documentos"
+                  value="document"
                   name="tipodefuente"
                   :es_obligatorio="true"
                 />
@@ -569,7 +622,7 @@ const editarProyecto = async () => {
 
         <SisdaiModal ref="seleccionCatalogoModal" class="modal-grande">
           <template #encabezado>
-            <h2>Agregar {{ botonRadioSeleccion }} del catálogo</h2>
+            <h2>Agregar {{ dictTipoRecurso[botonRadioSeleccion] }} del catálogo</h2>
           </template>
           <template #cuerpo>
             <div class="p-r-2">
@@ -660,7 +713,7 @@ const editarProyecto = async () => {
                             :etiqueta="recurso.title"
                             :value="recurso"
                           />
-                          <div v-if="botonRadioSeleccion === 'capas'" class="icono">
+                          <div v-if="botonRadioSeleccion === 'dataLayer'" class="icono">
                             <span
                               class="m-r-1"
                               :class="[buttons[i]?.class, 'pictograma-mediano picto']"
@@ -700,7 +753,7 @@ const editarProyecto = async () => {
                           <div class="m-b-1">
                             {{ recurso.category.gn_description }}
                           </div>
-                          <div v-if="botonRadioSeleccion === 'capas'" class="icono">
+                          <div v-if="botonRadioSeleccion === 'dataLayer'" class="icono">
                             <span
                               class="m-r-1"
                               :class="[buttons[i]?.class, 'pictograma-mediano picto']"

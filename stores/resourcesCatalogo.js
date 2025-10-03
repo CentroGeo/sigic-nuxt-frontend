@@ -25,6 +25,11 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
     [resourceTypeDic.dataTable]: [],
     [resourceTypeDic.document]: [],
   });
+  const resourcesByType2 = reactive({
+    [resourceTypeDic.dataLayer]: [],
+    [resourceTypeDic.dataTable]: [],
+    [resourceTypeDic.document]: [],
+  });
   const myResourcesByType = reactive({
     [resourceTypeDic.dataLayer]: [],
     [resourceTypeDic.dataTable]: [],
@@ -50,6 +55,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
     totals,
     myTotalsByType,
     resources,
+    resourcesByType2,
     myResourcesByType,
     latestResources,
     misArchivos,
@@ -76,9 +82,9 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
     resetBySection(section) {
       misArchivos[section] = [];
     },
-    resourcesByType(resourceType = storeConsulta.resourceType) {
-      return resources[resourceType];
-    },
+    // resourcesByType(resourceType = storeConsulta.resourceType) {
+    //   return resources[resourceType];
+    // },
     /**
      * Trae el total los recursos vinculados a un usuario (yo), por tipo de recurso
      *      * Esto se usa para georreferenciación
@@ -140,6 +146,32 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
       myResourcesByType[resourceType] = res.resources;
+      this.isLoading = false;
+      //return resources[resourceType];
+    },
+    async getResourcesByType(resourceType = storeConsulta.resourceType) {
+      const { gnoxyFetch } = useGnoxyUrl();
+      this.isLoading = true;
+      const queryParams = {
+        custom: 'true',
+        'filter{resource_type}': resourceTypeGeonode[resourceType],
+        page_size: myTotalsByType[resourceType],
+      };
+      if (resourceType === 'dataLayer') {
+        queryParams['extent_ne'] = '[-1,-1,0,0]';
+      }
+      if (resourceType === 'dataTable') {
+        //queryParams['filter{subtype.in}'] = ['vector', 'remote'];
+        queryParams['filter{subtype.in}'] = 'vector';
+      }
+      /*  if (resourceType === 'document') {
+        queryParams['file_extension'] = ['pdf', 'txt'];
+      } */
+
+      const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
+      const request = await gnoxyFetch(url.toString());
+      const res = await request.json();
+      resourcesByType2[resourceType] = res.resources;
       this.isLoading = false;
       //return resources[resourceType];
     },

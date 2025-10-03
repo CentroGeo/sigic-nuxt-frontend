@@ -372,7 +372,6 @@ watch(
 
 <style lang="scss">
 .overflowYAuto {
-  // height: calc(93vh - 56px);
   height: var(--altura-consulta-esc);
   overflow-y: auto;
   .positionSticky {

@@ -85,7 +85,7 @@ const obtenerTipoArchivo = (nombre) => {
 
 /**
  * Agrega un recurso seleccionado al módulo de consulta y navega a la vista
- * @param resource del que se toma el uuid para la selección
+ * @param resource del que se toma el pk para la selección
  */
 async function openResourceView(resource) {
   // if (resource.tipo_recurso === 'Capa geográfica') {
@@ -110,9 +110,9 @@ async function openResourceView(resource) {
     await navigateTo('/consulta/documentos');
   } */
   if (resource.document_type === 'application/pdf') {
-    console.log('entró');
+    // TODO: utilizar pk dinámico
     useSelectedResources2Store().add(
-      new SelectedLayer({ uuid: 'bc9f595e-39f9-4951-bdd4-986e38c267ed' }),
+      new SelectedLayer({ pk: resource.geonode_id.toString() }),
       resourceTypeDic.document
     );
     await navigateTo('/consulta/documentos');
@@ -255,7 +255,6 @@ async function openResourceView(resource) {
               </thead>
               <tbody>
                 <tr v-for="archivo in arraySources" :key="archivo.id">
-                  <!-- <td class="p-3">{{ archivo.filename }}</td> -->
                   <td class="p-3">
                     <a @click="openResourceView(archivo)">{{ archivo.filename }}</a>
                   </td>
