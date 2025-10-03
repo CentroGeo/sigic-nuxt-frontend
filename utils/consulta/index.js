@@ -261,9 +261,10 @@ export async function fetchGeometryType(resource) {
     } catch {
       console.warn('Se está intentando una vez más');
     }
-    // Si fracasa en todos los intentos
-    return 'Error';
   }
+
+  // Si fracasa en todos los intentos
+  return 'Error';
 }
 
 /**
@@ -400,7 +401,7 @@ export async function downloadMetadata(resource) {
  * @param {Stringy} featureTypes
  */
 export async function downloadWMS(resource, format, featureTypes) {
-  console.log('Se solicitó la descarga de:', resource);
+  //console.log('Se solicitó la descarga de:', resource);
   const { gnoxyFetch } = useGnoxyUrl();
   const config = useRuntimeConfig();
   const maxAttempts = 3;
@@ -436,10 +437,11 @@ export async function downloadWMS(resource, format, featureTypes) {
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
       console.warn(`Vamos en el intento: ${attempt}.`);
-      const res = await gnoxyFetch(url.toString());
+      const res = await gnoxyFetch(`${url}`);
       if (!res.ok) {
         throw new Error(`Download failed: ${res.status}`);
       }
+      //console.log('Estamos aquí');
       const blob = await res.blob();
       const anchor = document.createElement('a');
       const downloadUrl = URL.createObjectURL(blob);

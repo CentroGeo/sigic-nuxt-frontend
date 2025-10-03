@@ -25,7 +25,10 @@ const hayMetaPendiente = computed(() =>
 );
 const modalFiltroAvanzado = ref(null);
 const isFilterActive = ref(false);
-const seleccionOrden = ref('');
+const seleccionOrden = computed({
+  get: () => storeFilters.filters.sort,
+  set: (value) => storeFilters.updateFilter('sort', value),
+});
 const seleccionTipoArchivo = ref('');
 const inputSearch = computed({
   get: () => storeFilters.filters.inputSearch,
@@ -82,7 +85,7 @@ function resetAdvancedFilter() {
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
 }
 
-watch(seleccionTipoArchivo, () => {
+watch([seleccionTipoArchivo, seleccionOrden], () => {
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
 });
 

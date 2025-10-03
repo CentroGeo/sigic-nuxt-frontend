@@ -51,7 +51,10 @@ const tableResources2 = ref([
 ]);
 const modalFiltroAvanzado = ref(null);
 const isFilterActive = ref(false);
-const seleccionOrden = ref('');
+const seleccionOrden = computed({
+  get: () => storeFilters.filters.sort,
+  set: (value) => storeFilters.updateFilter('sort', value),
+});
 const seleccionTipoArchivo = ref('');
 const inputSearch = computed({
   get: () => storeFilters.filters.inputSearch,

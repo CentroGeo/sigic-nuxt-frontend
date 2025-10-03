@@ -88,24 +88,20 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       const { gnoxyFetch } = useGnoxyUrl();
       this.isLoading = true;
       const queryParams = {
-        custom: 'true',
         'filter{resource_type}': resourceTypeGeonode[resourceType],
-        page_size: 100,
+        page_size: 1,
         'filter{owner.username}': userEmail,
       };
       if (resourceType === 'dataLayer') {
-        queryParams['extent_ne'] = '[-1,-1,0,0]';
+        queryParams['filter{has_geometry}'] = 'true';
       }
       if (resourceType === 'dataTable') {
-        //queryParams['filter{subtype.in}'] = ['vector', 'remote'];
-        queryParams['filter{subtype.in}'] = 'vector';
+        queryParams['filter{subtype.in}'] = ['vector', 'remote'];
       }
-      /*  if (resourceType === 'document') {
-        queryParams['file_extension'] = ['pdf', 'txt'];
-      } */
-
-      // Agregar toda la lógica de queryparams correspondientes por sección
-      const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
+      if (resourceType === 'document') {
+        queryParams['filter{extension}'] = ['pdf', 'txt'];
+      }
+      const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
       myTotalsByType[resourceType] = res.total;
@@ -120,23 +116,21 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       const { gnoxyFetch } = useGnoxyUrl();
       this.isLoading = true;
       const queryParams = {
-        custom: 'true',
         'filter{resource_type}': resourceTypeGeonode[resourceType],
         page_size: myTotalsByType[resourceType],
         'filter{owner.username}': userEmail,
       };
       if (resourceType === 'dataLayer') {
-        queryParams['extent_ne'] = '[-1,-1,0,0]';
+        queryParams['filter{has_geometry}'] = 'true';
       }
       if (resourceType === 'dataTable') {
-        //queryParams['filter{subtype.in}'] = ['vector', 'remote'];
-        queryParams['filter{subtype.in}'] = 'vector';
+        queryParams['filter{subtype.in}'] = ['vector', 'remote'];
       }
-      /*  if (resourceType === 'document') {
-        queryParams['file_extension'] = ['pdf', 'txt'];
-      } */
+      if (resourceType === 'document') {
+        queryParams['filter{extension}'] = ['pdf', 'txt'];
+      }
 
-      const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
+      const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
       myResourcesByType[resourceType] = res.resources;
@@ -155,11 +149,11 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       this.isLoading = true;
       const queryParams = {
         ...query,
-        page_size: 100,
+        page_size: 1,
         'filter{owner.username}': userEmail,
       };
       // Agregar toda la lógica de queryparams correspondientes por sección
-      const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
+      const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
       totalMisArchivos[section] = res.total;
@@ -181,7 +175,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
         page_size: pageSize,
         'filter{owner.username}': userEmail,
       };
-      const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
+      const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
       let datum;
@@ -201,10 +195,10 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       const { gnoxyFetch } = useGnoxyUrl();
       this.isLoading = true;
       const queryParams = {
-        page_size: 100,
+        page_size: 1,
         ...query,
       };
-      const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
+      const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
       totals[resourceType] = res.total;
@@ -226,7 +220,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
         ...params,
       };
 
-      const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
+      const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
       resources[resourceType] = res.resources;

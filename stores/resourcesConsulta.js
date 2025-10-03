@@ -4,6 +4,7 @@ import { buildUrl, defineGeomType, resourceTypeDic } from '~/utils/consulta';
 export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => {
   const config = useRuntimeConfig();
   const storeConsulta = useConsultaStore();
+  const storeSelected = useSelectedResources2Store();
   /**
    * Almacenamiento reactivo de los recursos seleccionados.
    */
@@ -64,7 +65,7 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
         page_size: 2,
         ...params,
       };
-      const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
+      const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
       const request = await gnoxyFetch(url);
       const res = await request.json();
 
@@ -95,11 +96,22 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
      */
     async fetchResourceByPk(pkToFind) {
       const { gnoxyFetch } = useGnoxyUrl();
-      const url = `${config.public.geonodeApi}/resources/${pkToFind}`;
-      const res = await gnoxyFetch(url);
+      const maxAttempts = 3;
+      const url = `${config.public.geonodeApi}/sigic-resources/${pkToFind}`;
       // TODO: Si la petición falla porque el recurso es privado, eliminarlo de la store de seleccion
-      const resource = await res.json();
-      return resource.resource;
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        try {
+          const res = await gnoxyFetch(url);
+          if (!res.ok) {
+            console.error(`Download failed: ${res.status}`);
+            return 'Error';
+          }
+          const resource = await res.json();
+          return resource.resource;
+        } catch {
+          console.warn(`Falló el intento ${attempt + 1}.`);
+        }
+      }
     },
 
     /**
@@ -111,7 +123,11 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
       const lista = [];
       for (const pk of pkListToFind) {
         const resource = await this.fetchResourceByPk(pk);
-        lista.push(resource);
+        if (resource !== 'Error') {
+          lista.push(resource);
+        } else {
+          storeSelected.removeByPk(pk);
+        }
       }
       selectedResources[resourceType] = lista;
     },

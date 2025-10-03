@@ -3,16 +3,16 @@ import { resourceTypeDic, resourceTypeGeonode } from '~/utils/consulta';
 const storeResources = useResourcesCatalogoStore();
 const storeCatalogo = useCatalogoStore();
 function buildQueryParams(resourceType) {
-  const queryParams = { custom: 'true' };
+  const queryParams = {};
   queryParams['filter{resource_type}'] = resourceTypeGeonode[resourceType];
   if (resourceType === 'dataLayer') {
-    queryParams['extent_ne'] = '[-1,-1,0,0]';
+    queryParams['filter{has_geometry}'] = 'true';
   }
   if (resourceType === 'dataTable') {
     queryParams['filter{subtype.in}'] = ['vector', 'remote'];
   }
   if (resourceType === 'document') {
-    queryParams['file_extension'] = ['pdf', 'txt'];
+    queryParams['filter{extension}'] = ['pdf', 'txt'];
   }
   return queryParams;
 }
