@@ -29,7 +29,6 @@ const contexto = ref(null);
 const archivosEliminados = ref([]);
 
 const config = useRuntimeConfig();
-const { data } = useAuth();
 const imagenPreview = ref(null);
 
 // Si necesitas reaccionar a cambios en el parámetro
@@ -263,27 +262,13 @@ function irAProyectos() {
   router.push('/ia/proyectos/');
 }
 
-async function cargarImagenDelContexto() {
-  const token = data.value?.accessToken;
-  const formData = new FormData();
-  formData.append('filename', contexto.value.context.image_type);
-
-  const response = await fetch(`${config.public.geonodeUrl}/sigic/ia/mediauploads/register`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    body: formData,
-  });
-
-  if (!response.ok) {
-    console.error(`Error cargando imagen para contexto ${route.params.id}`);
+function cargarImagenDelContexto() {
+  if (!contexto.value?.context?.image_type) {
+    console.error('No se encontró image_type en el contexto');
     return;
   }
 
-  const blob = await response.blob();
-  const imageUrl = URL.createObjectURL(blob);
-
+  const imageUrl = `${config.public.geonodeUrl}/uploaded/ia/uploads/contexts/${contexto.value.context.image_type}`;
   imagenPreview.value = imageUrl;
 }
 

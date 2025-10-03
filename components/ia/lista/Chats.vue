@@ -156,6 +156,18 @@ function openEliminarModal(chat_id) {
   idChat.value = chat_id;
 }
 
+const handleEdit = async () => {
+  try {
+    await storeIA.updateChat(tituloChat.value, idChat.value);
+    await loadChatsList();
+
+    editarChatModal.value?.cerrarModal();
+  } catch (err) {
+    console.error('Error al editar el chat.');
+    console.log(err);
+  }
+};
+
 const handleDelete = async () => {
   try {
     const chatId = idChat.value; // 🔸 Usamos el valor reactivo
@@ -303,10 +315,12 @@ watch(
           </nuxt-link>
         </template>
       </SisdaiModal>
+
       <SisdaiModal ref="editarChatModal">
         <template #encabezado>
           <h2>Editar título de chat</h2>
         </template>
+
         <template #cuerpo>
           <p>Ingresa el nuevo título del chat</p>
           <SisdaiCampoBase
@@ -317,6 +331,7 @@ watch(
             class="m-b-3"
           />
         </template>
+
         <template #pie>
           <button
             type="button"
@@ -325,22 +340,21 @@ watch(
           >
             Cerrar
           </button>
-          <button
-            type="button"
-            class="boton-primario boton-chico"
-            @click="storeIA.updateChat(tituloChat, idChat)"
-          >
+          <button type="button" class="boton-primario boton-chico" @click="handleEdit">
             Guardar
           </button>
         </template>
       </SisdaiModal>
+
       <SisdaiModal ref="eliminarChatModal">
         <template #encabezado>
           <h2>Eliminar chat</h2>
         </template>
+
         <template #cuerpo>
           <p>¿Desea eliminar este chat? Esta acción no se puede deshacer.</p>
         </template>
+
         <template #pie>
           <button
             type="button"

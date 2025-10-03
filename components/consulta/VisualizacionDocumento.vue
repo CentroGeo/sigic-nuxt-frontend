@@ -33,7 +33,9 @@ async function updateValues() {
   urlEmbebido.value = selectedElement.value.embed_url.replace('/embed', '/link');
   blobedUrl.value = await fetchDoc(urlEmbebido.value);
 }
-updateValues();
+if (selectedElement.value !== null) {
+  updateValues();
+}
 watch(selectedElement, (nv) => {
   (async () => {
     // console.log('cambio el pk');

@@ -21,6 +21,10 @@ export const useIAStore = defineStore('ia', {
       const { data } = useAuth();
       return data.value?.accessToken || null;
     },
+    userEmail: () => {
+      const { data } = useAuth();
+      return data.value?.user.email || null;
+    },
   },
   actions: {
     async crearProyecto(title, description, isPublic, archivos = []) {
@@ -52,6 +56,10 @@ export const useIAStore = defineStore('ia', {
         }
 
         const token = this.authToken;
+
+        const userEmail = this.userEmail;
+
+        formData.append('user_id', userEmail);
 
         // Usar XMLHttpRequest para monitorear progreso
         return new Promise((resolve, reject) => {
@@ -101,6 +109,9 @@ export const useIAStore = defineStore('ia', {
 
     async crearContexto(formData) {
       const token = this.authToken;
+      const userEmail = this.userEmail;
+
+      formData.append('user_id', userEmail);
       //this.existeContexto = true;
 
       console.log('crear crearContexto');
@@ -146,13 +157,17 @@ export const useIAStore = defineStore('ia', {
       //this.existeContexto = true;
       const token = this.authToken;
 
+      const userEmail = this.userEmail;
+
+      const formData = new FormData();
+      formData.append('user_id', userEmail);
+
       const response = await fetch(this.backend + '/direct/api/fileuploads/workspaces/admin', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({}),
+        body: formData,
       });
 
       if (!response.ok) {
@@ -208,15 +223,20 @@ export const useIAStore = defineStore('ia', {
 
     async getProjectContexts(project_id) {
       const token = this.authToken;
+
+      const userEmail = this.userEmail;
+
+      const formData = new FormData();
+      formData.append('user_id', userEmail);
+
       const response = await fetch(
         this.backend + '/direct/api/fileuploads/workspaces/admin/' + project_id + '/contexts',
         {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
           },
-          body: JSON.stringify({}),
+          body: formData,
         }
       );
 
@@ -250,13 +270,17 @@ export const useIAStore = defineStore('ia', {
       //this.existeContexto = true;
       console.log(user_id);
 
+      const userEmail = this.userEmail;
+
+      const formData = new FormData();
+      formData.append('user_id', userEmail);
+
       const response = await fetch(this.backend + '/direct/api/chat/history/getchats', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({}),
+        body: formData,
       });
 
       if (!response.ok) {
@@ -415,6 +439,10 @@ export const useIAStore = defineStore('ia', {
 
         const token = this.authToken;
 
+        const userEmail = this.userEmail;
+
+        formData.append('user_id', userEmail);
+
         return new Promise((resolve, reject) => {
           const xhr = new XMLHttpRequest();
 
@@ -464,6 +492,9 @@ export const useIAStore = defineStore('ia', {
     async actualizarContexto(formData, contexto_id) {
       try {
         const token = this.authToken;
+        const userEmail = this.userEmail;
+
+        formData.append('user_id', userEmail);
 
         const response = await fetch(
           this.backend + `/direct/api/fileuploads/workspaces/admin/contexts/edit/${contexto_id}`,

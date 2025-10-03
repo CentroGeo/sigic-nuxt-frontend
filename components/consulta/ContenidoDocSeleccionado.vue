@@ -3,7 +3,6 @@ import { resourceTypeDic } from '~/utils/consulta';
 
 const storeSelected = useSelectedResources2Store();
 const emit = defineEmits(['descargaClicked', 'mapaClicked']);
-
 const props = defineProps({
   groupName: { type: String, required: true },
   resourceElement: {
@@ -13,20 +12,16 @@ const props = defineProps({
   resourceType: { type: String, required: true },
 });
 const { groupName, resourceElement } = toRefs(props);
-
 const selectedResource = computed({
   get: () => storeSelected.lastVisible().pk,
   set: (newSelectedPk) => storeSelected.setOnlyOneVisible(newSelectedPk),
 });
 const hasGeometry = computed(() => {
   if (props.resourceType !== resourceTypeDic.dataTable) return false;
-
   if (resourceElement.value['extent'] === undefined) return false;
-
   const a = resourceElement.value.extent.coords.join(',');
   const b = [-1, -1, 0, 0].join(',');
   if (a === b) return false;
-
   return true;
 });
 </script>

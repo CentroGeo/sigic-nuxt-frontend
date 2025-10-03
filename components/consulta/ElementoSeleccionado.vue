@@ -5,7 +5,6 @@ import { categoriesInSpanish, resourceTypeDic, tooltipContent } from '~/utils/co
 const storeResources = useResourcesConsultaStore();
 const storeSelected = useSelectedResources2Store();
 const emit = defineEmits(['openOpacity', 'openDownload', 'openTabla', 'openMapa']);
-
 const props = defineProps({
   selectedElement: {
     type: Object,
@@ -15,9 +14,9 @@ const props = defineProps({
 });
 
 const resourceElement = computed(() => storeResources.findResource(props.selectedElement.pk));
-const { data } = useAuth();
-const isLoggedIn = ref(data.value ? true : false);
-const userEmail = ref(data.value?.user.email);
+//const { data } = useAuth();
+//const isLoggedIn = ref(data.value ? true : false);
+//const userEmail = ref(data.value?.user.email);
 const goDown = () => storeSelected.changePosition(props.selectedElement.pk, -1);
 const goUp = () => storeSelected.changePosition(props.selectedElement.pk, +1);
 </script>
@@ -72,9 +71,7 @@ const goUp = () => storeSelected.changePosition(props.selectedElement.pk, +1);
       </div>
       <div v-if="resourceElement">
         <div
-          v-if="
-            isLoggedIn && resourceElement.owner.email === userEmail && !resourceElement.is_published
-          "
+          v-if="resourceElement.is_approved === false && resourceElement.is_published === false"
           class="id-tag flex m-b-1 m-t-0"
         >
           <span class="pictograma-persona"></span>
