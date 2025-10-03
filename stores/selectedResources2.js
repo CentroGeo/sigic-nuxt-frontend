@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { reactive } from 'vue';
-import { resourceTypeDic } from '~/utils/consulta';
+import { arrayNewsOlds, resourceTypeDic } from '~/utils/consulta';
 import SelectedLayer from '~/utils/consulta/SelectedLayer';
 import SelectedResource from '~/utils/consulta/SelectedResource';
 
@@ -229,18 +229,3 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
     pks: computed(() => Object.keys(byResourceType())),
   };
 });
-
-/**
- * Devuelve las listas de elementos no encontrados en dos listas.
- * @param {Array<String>} list1
- * @param {Array<String>} list2
- * @returns {Object} objeto con dos propiedades:
- * - `news` -> elementos de list2 no entontrados en list1
- * - `olds` -> elementos de list1 no entontrados en list2
- */
-function arrayNewsOlds(list1, list2) {
-  const news = list2.filter((item) => !list1.includes(item));
-  const olds = list1.filter((item) => !list2.includes(item));
-
-  return { news, olds };
-}
