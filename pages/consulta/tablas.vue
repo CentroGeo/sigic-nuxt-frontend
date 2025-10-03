@@ -36,11 +36,14 @@ watch(paginaActual, () => {
 });
 
 watch(
-  [() => selectedPk.value, () => storeResources.resourcesByType(resourceType)],
+  [
+    () => selectedPk.value,
+    () => storeResources.resourcesByType(resourceType),
+    () => storeResources.selectedResources[resourceType],
+  ],
   () => {
     selectedElement.value = storeResources.findResource(selectedPk.value);
     paginaActual.value = 0;
-    // console.log(selectedPk.value);
     fetchTable({
       paginaActual: paginaActual.value,
       tamanioPagina: tamanioPagina,
@@ -64,13 +67,12 @@ watch(() => storeSelected.asQueryParam(), updateQueryParam);
 
 onMounted(async () => {
   storeResources.resetByType(storeConsulta.resourceType);
-  storeResources.getTotalResources(storeConsulta.resourceType);
   storeSelected.addFromQueryParam(route.query.tablas);
 
   // Para cuando hacemos el cambio de página
   if (storeSelected.pks.length > 0) {
     updateQueryParam(storeSelected.asQueryParam());
-    storeSelected.pks.forEach((pk) => storeResources.fetchResourceByPk(pk));
+    storeResources.fetchResourcesByPk(storeConsulta.resourceType, storeSelected.pks);
   }
 });
 </script>

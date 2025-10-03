@@ -11,9 +11,8 @@ definePageMeta({
 const storeResources = useResourcesCatalogoStore();
 const storeFilters = useFilteredResources();
 const storeCatalogo = useCatalogoStore();
-
 const section = 'disponibles';
-storeResources.getMyTotal(section);
+const params = computed(() => storeFilters.filters.queryParams);
 const totalResources = computed(() => storeResources.myTotalBySection(section));
 const resources = computed(() => storeResources.mineBySection(section));
 const tableResources = ref([]);
@@ -33,9 +32,9 @@ const inputSearch = computed({
   set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
 });
 
-const { data, status } = useAuth();
-console.log('data:', data.value);
-console.log('status:', status.value);
+// const { data, status } = useAuth();
+// console.log('data:', data.value);
+// console.log('status:', status.value);
 
 /**
  * Valida si el tipo de recurso es documento o dataset con geometría o no
@@ -65,18 +64,50 @@ function updateResources() {
     recurso_completo: d,
   }));
 }
+
 function fetchNewData() {
   storeResources.resetBySection(section);
-  storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina);
+  storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, params.value);
 }
-fetchNewData();
+function applyAdvancedFilter() {
+  isFilterActive.value = true;
+  modalFiltroAvanzado.value.cerrarModalBusqueda();
+  storeFilters.buildQueryParams(seleccionTipoArchivo.value);
+}
+
+function resetAdvancedFilter() {
+  isFilterActive.value = false;
+  storeFilters.resetFilters();
+  modalFiltroAvanzado.value.cerrarModalBusqueda();
+  storeFilters.buildQueryParams(seleccionTipoArchivo.value);
+}
+
+watch(seleccionTipoArchivo, () => {
+  storeFilters.buildQueryParams(seleccionTipoArchivo.value);
+});
 
 watch(paginaActual, () => {
   fetchNewData();
 });
 
-watch(resources, () => {
-  updateResources();
+watch(params, () => {
+  paginaActual.value = 0;
+  storeResources.getMyTotal(section, params.value);
+  fetchNewData();
+});
+watch(
+  resources,
+  () => {
+    updateResources();
+  },
+  { deep: true }
+);
+
+onMounted(async () => {
+  storeFilters.resetAll();
+  storeFilters.buildQueryParams(seleccionTipoArchivo.value);
+  storeResources.getMyTotal(section, params.value);
+  fetchNewData();
 });
 // TODO: fix paginador
 /* import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
@@ -208,11 +239,11 @@ onMounted(async () => {
           <div class="columna-4">
             <ClientOnly>
               <SisdaiSelector v-model="seleccionTipoArchivo" etiqueta="Tipo de archivo">
-                <option value="todes">Todos los archivos</option>
-                <option value="capas">Capas geográficas</option>
-                <option value="tablas">Datos tabulados</option>
-                <option value="documentos">Documentos</option>
-                <option value="remotas">Remotas</option>
+                <option value="all">Todos los archivos</option>
+                <option value="dataLayer">Capas geográficas</option>
+                <option value="dataTable">Datos tabulados</option>
+                <option value="document">Documentos</option>
+                <option value="remotes">Remotas</option>
               </SisdaiSelector>
             </ClientOnly>
           </div>
@@ -319,8 +350,8 @@ onMounted(async () => {
       <!-- Modal Búsqueda avanzada -->
       <ConsultaModalBusqueda
         ref="modalFiltroAvanzado"
-        @apply-filter="console.log('applyAdvancedFilter')"
-        @reset-filter="console.log('resetAdvancedFilter')"
+        @apply-filter="applyAdvancedFilter"
+        @reset-filter="resetAdvancedFilter"
       />
     </template>
   </UiLayoutPaneles>

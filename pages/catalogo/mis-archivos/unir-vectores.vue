@@ -1,46 +1,49 @@
 <script setup>
 import SisdaiCasillaVerificacion from '@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue';
+import SisdaiColapsableNavegacion from '@centrogeomx/sisdai-componentes/src/componentes/colapsable-navegacion/SisdaiColapsableNavegacion.vue';
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
-import { getWMSserver, hasWMS, resourceTypeDic } from '~/utils/consulta';
+import { fetchByPk } from '~/utils/catalogo';
+import { getWMSserver, hasWMS } from '~/utils/consulta';
 
 const { data } = useAuth();
 const token = data.value?.accessToken;
-const userEmail = data.value?.user.email;
+// const userEmail = data.value?.user.email;
 
 const route = useRoute();
 const selectedPk = route.query.data;
-const resourceType = route.query.type;
+// const type = route.query.type;
 
 const storeCatalogo = useCatalogoStore();
-// Recuperamos la información completa del recurso
-const storeFetched = useFetchedResources2Store();
-storeFetched.checkFilling(resourceType);
-const resourceToEdit = computed(() =>
-  storeFetched.byResourceType(resourceType).find(({ pk }) => pk === selectedPk)
-);
+const storeCatalogoResources = useResourcesCatalogoStore();
 
-const resourcesCapas = computed(
-  () =>
-    storeFetched
-      .byResourceType(resourceTypeDic.dataLayer)
-      .filter((resource) => resource.owner.email === userEmail) || {}
-);
+const editedResource = ref(undefined);
+
+const titleEditedResource = ref('');
 
 const seleccionCampoCapa = ref('');
-const seleccionCapaGeo = ref('');
-const seleccionCampoObjetivo = ref('');
-const campoUnidos = ref(false);
-const dict = ref({});
-const unionExitosa = ref(false);
-
 const variables = ref([]);
+
+storeCatalogoResources.getMyTotalResources('dataLayer');
+storeCatalogoResources.getMyResourcesByType('dataLayer');
+const layerTotals = computed(() => storeCatalogoResources.myTotalsByType['dataLayer']);
+const seleccionCapaGeo = ref('');
+const layerResources = computed(() => storeCatalogoResources.myResourcesByType['dataLayer']);
+
+const seleccionCampoObjetivo = ref('');
 const varGeoLayer = ref([]);
-const config = useRuntimeConfig();
-const proxy = `${config.public.geonodeUrl}/proxy/?url=`;
+const dict = ref({});
+
+const unionExitosa = ref(false);
+const validarCampos = ref(false);
+
+const modalUnionVectorial = ref(null);
+const masTiempo = ref(false);
 
 const obtenerVariables = async (resource) => {
-  // const url = new URL(`${config.public.geoserverUrl}/ows`);
+  const config = useRuntimeConfig();
+  const proxy = `${config.public.geonodeUrl}/proxy/?url=`;
   let url = '';
   if (!resource || resource.sourcetype !== 'REMOTE') {
     url = new URL(`${config.public.geonodeUrl}/gs/ows`);
@@ -59,7 +62,6 @@ const obtenerVariables = async (resource) => {
     outputFormat: 'application/json',
   }).toString();
 
-  // const res = await fetch(url);
   let res;
   if (resource.sourcetype === 'REMOTE') {
     res = await fetch(proxy + `${encodeURIComponent(url)}`);
@@ -69,27 +71,23 @@ const obtenerVariables = async (resource) => {
     res = await fetch(url.toString(), {
       headers: { Authorization: `Bearer ${token}` },
     });
-    //console.log(res);
   }
 
   const datas = await res.json();
   const atributos = datas.features.map((f) => f.properties);
   return Object.keys(atributos[0] || {});
 };
-variables.value = await obtenerVariables(resourceToEdit.value);
 
-watch(seleccionCapaGeo, (nv) => {
-  (async () => {
-    const filterPkResourcesCapas = resourcesCapas.value.filter((resource) => resource.pk === nv)[0];
-    // Tiene que estar publicada la capa geográfica
-    varGeoLayer.value = await obtenerVariables(filterPkResourcesCapas);
-
-    dict.value = Object.fromEntries(variables.value.map((d) => [d, false]));
-  })();
-});
+function limpiarCamposAUnir() {
+  dict.value = Object.fromEntries(variables.value.map((d) => [d, false]));
+}
 
 // TODO: unir vectores con el backend
 async function unirCampos() {
+  modalUnionVectorial.value.abrirModal();
+  setTimeout(() => {
+    masTiempo.value = true;
+  }, 2000);
   // armar columnas
   const columns = ref([]);
   Object.keys(dict.value).forEach((key) => {
@@ -103,17 +101,19 @@ async function unirCampos() {
     columns: columns.value,
     geo_layer: seleccionCapaGeo.value,
     geo_pivot: seleccionCampoObjetivo.value,
-    layer: resourceToEdit.value.pk,
+    layer: editedResource.value.pk,
     layer_pivot: seleccionCampoCapa.value,
     // token: data.value?.accessToken,
   });
+  // TODO: abrir modal de carga
+  // store.unionVectorialPendiente = true
   // await $fetch('/api/join', {
   //   method: 'POST',
   //   body: {
-  //     layer: resourceToEdit.value.pk,
-  //     geo_layer: resourceGeo.value.pk,
-  //     layer_pivot: seleccionCapa.value,
-  //     geo_pivot: seleccionCapaGeo.value,
+  //     layer: editedResource.value.pk,
+  //     geo_layer: seleccionCapaGeo.value,
+  //     layer_pivot: seleccionCampoCapa.value,
+  //     geo_pivot: seleccionCampoObjetivo.value,
   //     columns: columns.value,
   //     token: data.value?.accessToken,
   //   },
@@ -122,7 +122,6 @@ async function unirCampos() {
 }
 
 // para habilitar o deshabilitar el botón de unir campos
-const validarCampos = ref(true);
 watch([seleccionCampoCapa, seleccionCapaGeo, seleccionCampoObjetivo], ([n1, n2, n3]) => {
   // Si en los tres se ha seleccionado algo, habilita el botón
   if (!n1.trim() <= 0 && n2.trim() >= 1 && !n3.trim() <= 0) {
@@ -131,6 +130,31 @@ watch([seleccionCampoCapa, seleccionCapaGeo, seleccionCampoObjetivo], ([n1, n2, 
     validarCampos.value = true;
   }
 });
+
+watch(seleccionCapaGeo, (nv) => {
+  (async () => {
+    const filterPkResourcesCapas = layerResources.value.filter((resource) => resource.pk === nv)[0];
+    // Tiene que estar publicada la capa geográfica
+    varGeoLayer.value = await obtenerVariables(filterPkResourcesCapas);
+  })();
+});
+
+onMounted(async () => {
+  editedResource.value = await fetchByPk(selectedPk);
+  titleEditedResource.value = editedResource.value.title;
+  variables.value = await obtenerVariables(editedResource.value);
+  dict.value = Object.fromEntries(variables.value.map((d) => [d, false]));
+});
+
+// const resourceToEdit = computed(() =>
+//   storeFetched.byResourceType(type).find(({ pk }) => pk === selectedPk)
+// );
+// const resourcesCapas = computed(
+//   () =>
+//     storeFetched
+//       .byResourceType(resourceTypeDic.dataLayer)
+//       .filter((resource) => resource.owner.email === userEmail) || {}
+// );
 </script>
 
 <template>
@@ -153,13 +177,9 @@ watch([seleccionCampoCapa, seleccionCapaGeo, seleccionCampoObjetivo], ([n1, n2, 
           </div>
 
           <CatalogoMenuMisArchivos
-            :recurso="resourceToEdit"
+            :recurso="editedResource"
             :opciones="[
               { texto: 'Metadatos', ruta: '/catalogo/mis-archivos/editar/MetadatosBasicos' },
-              {
-                texto: 'Estilo',
-                ruta: '/catalogo/mis-archivos/editar/estilo',
-              },
               {
                 texto: 'Clave Geoestadística',
                 ruta: '/catalogo/mis-archivos/unir-vectores',
@@ -173,26 +193,16 @@ watch([seleccionCampoCapa, seleccionCapaGeo, seleccionCampoObjetivo], ([n1, n2, 
             visor de mapas y otras herramientas de análisis espacial dentro de SIGIC.
           </p>
 
-          <div
-            v-if="unionExitosa"
-            class="fondo-color-confirmacion texto-color-confirmacion borde borde-color-confirmacion borde-redondeado-16 p-x-2 m-t-2"
-          >
-            <p>
-              <span class="pictograma-aprobado" />
-              Se ha agregado el campo con éxito, ya puedes visualizar tu archivo como capa.
-            </p>
-          </div>
-
-          <!-- Formulario -->
           <div class="m-t-3">
-            <div class="flex">
+            <p v-if="titleEditedResource === ''">...cargando</p>
+            <div v-else class="flex">
               <div class="columna-16">
-                <h3>{{ resourceToEdit.title }}</h3>
+                <h3>{{ titleEditedResource }}</h3>
 
                 <ClientOnly>
-                  <!-- Selector de campo capa base -->
                   <SisdaiSelector
                     v-model="seleccionCampoCapa"
+                    class="m-b-2"
                     etiqueta="Tipo de Clave Geoestadística"
                   >
                     <option v-for="value in variables" :key="value" :value="value">
@@ -200,19 +210,19 @@ watch([seleccionCampoCapa, seleccionCapaGeo, seleccionCampoObjetivo], ([n1, n2, 
                     </option>
                   </SisdaiSelector>
 
-                  <!-- Selector de Capa geo -->
-                  <p v-if="resourcesCapas.length === 0">...cargando capas</p>
+                  <p v-if="layerTotals === 0">...cargando capas</p>
+                  <!--Se desea incorporar paginación en el selector ?-->
                   <SisdaiSelector
-                    v-if="resourcesCapas.length > 0"
+                    v-if="layerTotals > 0"
                     v-model="seleccionCapaGeo"
                     etiqueta="Capa objetivo"
+                    texto_ayuda="Capa a la que se agregarán las nuevas columnas"
                   >
-                    <option v-for="value in resourcesCapas" :key="value.pk" :value="value.pk">
+                    <option v-for="value in layerResources" :key="value.pk" :value="value.pk">
                       {{ value.title }}
                     </option>
                   </SisdaiSelector>
 
-                  <!-- Selector de campo Capa objetivo -->
                   <p v-if="seleccionCapaGeo.trim() >= 1 && varGeoLayer.length === 0">
                     ...cargando campos
                   </p>
@@ -220,31 +230,45 @@ watch([seleccionCampoCapa, seleccionCapaGeo, seleccionCampoObjetivo], ([n1, n2, 
                     v-if="varGeoLayer.length > 0"
                     v-model="seleccionCampoObjetivo"
                     etiqueta="Campo objetivo"
+                    texto_ayuda="Campo o columna que se utilizará para hacer la unión vectorial"
                   >
                     <option v-for="value in varGeoLayer" :key="value" :value="value">
                       {{ value }}
                     </option>
                   </SisdaiSelector>
-                </ClientOnly>
 
-                <ul class="lista-sin-estilo">
-                  <li>
-                    <ClientOnly>
-                      <SisdaiCasillaVerificacion
-                        v-if="varGeoLayer.length > 0"
-                        v-model="campoUnidos"
-                        etiqueta="Campos unidos"
-                      />
-                    </ClientOnly>
-                  </li>
-                  <ul v-if="campoUnidos" class="lista-sin-estilo borde">
-                    <li v-for="(value, key, index) in dict" :key="index" class="p-l-2">
-                      <ClientOnly>
-                        <SisdaiCasillaVerificacion v-model="dict[key]" :etiqueta="key" />
-                      </ClientOnly>
-                    </li>
-                  </ul>
-                </ul>
+                  <label for="idcolapnavcamposunidos">Campos a unir</label>
+                  <SisdaiColapsableNavegacion :colapsado="false">
+                    <template #encabezado> Selecciona las opciones que requieres </template>
+                    <template #contenido>
+                      <div class="columns columns-2">
+                        <div>
+                          <div v-for="(value, key, index) in dict" :key="index" class="">
+                            <ClientOnly>
+                              <SisdaiCasillaVerificacion
+                                v-model="dict[key]"
+                                name="idcolapnavcamposunidos"
+                                :etiqueta="key"
+                              />
+                            </ClientOnly>
+                          </div>
+
+                          <button
+                            class="boton-chico opcion-checkbox boton-secundario"
+                            aria-label="Limpiar selección"
+                            type="button"
+                            @click="limpiarCamposAUnir"
+                          >
+                            Limpiar selección
+                          </button>
+                        </div>
+                      </div>
+                    </template>
+                  </SisdaiColapsableNavegacion>
+                  <p aria-live="polite" class="formulario-ayuda" role="status">
+                    Elige los campos que quieres unir
+                  </p>
+                </ClientOnly>
               </div>
 
               <div class="columna-16">
@@ -280,6 +304,51 @@ watch([seleccionCampoCapa, seleccionCapaGeo, seleccionCampoObjetivo], ([n1, n2, 
           </div>
         </div>
       </main>
+      <ClientOnly>
+        <SisdaiModal ref="modalUnionVectorial">
+          <template #encabezado>
+            <h1 class="m-t-0 texto-tamanio-6">Procesando</h1>
+            <p v-if="masTiempo">
+              Esto puede tardar más de lo esperado. Puedes seguir navegando con la interfaz mientras
+              se completa.
+            </p>
+          </template>
+          <template #cuerpo>
+            <!-- TODO: loader sigic -->
+            <p>...cargando</p>
+          </template>
+          <template #pie>
+            <nuxt-link class="boton boton-primario" to="/catalogo/mis-archivos"
+              >Ir a mis archivos
+            </nuxt-link>
+            <button
+              type="button"
+              class="boton-secundario"
+              value="cancela"
+              @click="modalUnionVectorial.cerrarModal()"
+            >
+              Cancelar
+            </button>
+          </template>
+        </SisdaiModal>
+      </ClientOnly>
     </template>
   </UiLayoutPaneles>
 </template>
+
+<style lang="scss">
+.colapsable {
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  padding: 2px;
+  .colapsable-boton {
+    background-color: var(--fondo);
+    color: var(--color);
+  }
+}
+.colapsable.abierto {
+  .colapsable-contenedor {
+    padding: 8px;
+  }
+}
+</style>

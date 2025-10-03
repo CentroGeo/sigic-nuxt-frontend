@@ -63,19 +63,19 @@ function irARutaConQuery(recurso) {
 
 /**
  * Agrega un recurso seleccionado al módulo de consulta y navega a la vista
- * @param resource del que se toma el uuid para la selección
+ * @param resource del que se toma el pk para la selección
  */
 async function openResourceView(resource) {
   if (resource.tipo_recurso === 'Capa geográfica') {
     useSelectedResources2Store().add(
-      new SelectedLayer({ uuid: resource.uuid }),
+      new SelectedLayer({ pk: resource.pk }),
       resourceTypeDic.dataLayer
     );
     await navigateTo('/consulta/capas');
   }
   if (resource.tipo_recurso === 'Datos tabulados') {
     useSelectedResources2Store().add(
-      new SelectedLayer({ uuid: resource.uuid }),
+      new SelectedLayer({ pk: resource.pk }),
       resourceTypeDic.dataTable
     );
     await navigateTo('/consulta/tablas');
@@ -88,7 +88,7 @@ async function openResourceView(resource) {
   } */
   if (resource.tipo_recurso === 'Documentos') {
     useSelectedResources2Store().add(
-      new SelectedLayer({ uuid: resource.uuid }),
+      new SelectedLayer({ pk: resource.pk }),
       resourceTypeDic.document
     );
     await navigateTo('/consulta/documentos');
@@ -336,7 +336,7 @@ function notifyDownloadOneChild(resource) {
     <CatalogoModalPublicacion
       v-if="shownModal === 'releaseOne'"
       ref="releaseRequest"
-      :key="`${modalResource.uuid}_${resourceType}`"
+      :key="`${modalResource.pk}_${resourceType}`"
       :resource-type="resourceType"
       :selected-element="modalResource"
     />
@@ -344,7 +344,7 @@ function notifyDownloadOneChild(resource) {
     <ConsultaModalDescarga
       v-if="shownModal === 'downloadOne'"
       ref="downloadOneChild"
-      :key="`${modalResource.uuid}_${resourceType}`"
+      :key="`${modalResource.pk}_${resourceType}`"
       :resource-type="resourceType"
       :selected-element="modalResource"
     />

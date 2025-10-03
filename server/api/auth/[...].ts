@@ -1,9 +1,9 @@
 import { NuxtAuthHandler } from '#auth';
 import KeycloakProvider from 'next-auth/providers/keycloak';
 
-function isTokenExpired(expiresAt?: number): boolean {
+function isTokenExpired(expiresAt?: number, offset = 60_000): boolean {
   if (!expiresAt) return true;
-  return Date.now() >= expiresAt - 40;
+  return Date.now() >= expiresAt - offset;
 }
 
 export default NuxtAuthHandler({
@@ -24,13 +24,7 @@ export default NuxtAuthHandler({
 
   callbacks: {
     async jwt({ token, account }) {
-      if (token?.access_token) {
-        token.accessToken = token.access_token;
-        token.refreshToken = token.refresh_token;
-        token.idToken = token.id_token;
-      }
-
-      if (account?.access_token) {
+      if (account) {
         token.accessToken = account.access_token;
         token.refreshToken = account.refresh_token;
         token.idToken = account.id_token;
@@ -38,7 +32,6 @@ export default NuxtAuthHandler({
       }
 
       if (isTokenExpired(token.expires_at as number)) {
-        // console.log('ya expiró', token, account);
         try {
           const response = await fetch(
             `${process.env.KEYCLOAK_ISSUER}/protocol/openid-connect/token`,
@@ -61,19 +54,32 @@ export default NuxtAuthHandler({
           token.accessToken = refreshed.access_token;
           token.refreshToken = refreshed.refresh_token || token.refreshToken;
           token.expires_at = Date.now() + refreshed.expires_in * 1000;
-          //console.log('Refrescando token:', response, "token.expires_at:", token.expires_at)
+          // AQUI MANDAR UN HTTP POST A API DE IA AVISANDO QUE EL USUARIO ACTUALIZÓ SU TOKEN
+          // Y MANDAR SOLO EL accessToken Y ALGO QUE IDENTIFIQUE AL USUARIO (POR EJEMPLO SUB O EMAIL)
+          // PARA QUE LA API DE IA LO GUARDE EN MEMORIA O DONDE SEA Y LO USE PARA SUS PETICIONES
+          // A GEONODE
+          // fetch(`${process.env.NUXT_PUBLIC_IA_BACKEND_URL}/auth/update-token`, {
+          //   method: 'POST',
+          //   headers: { 'Content-Type': 'application/json' },
+          //   body: JSON.stringify({
+          //     accessToken: token.accessToken,
+          //     sub: token.sub, // o email, dependiendo de lo que quieras usar
+          //   }),
+          // });
         } catch (err) {
           console.error('Error refrescando token:', err);
           token.error = 'RefreshAccessTokenError';
         }
-        console.log('Nuevo tkn: ', token.refreshToken);
       }
 
       return token;
     },
 
     async session({ session, token }) {
+      // @ts-expect-error extendiendo Session con campos propios
       session.accessToken = token.accessToken;
+      // @ts-expect-error extendiendo Session con campos propios
+      session.error = token.error;
       return session;
     },
   },
