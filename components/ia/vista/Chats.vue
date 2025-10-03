@@ -354,7 +354,6 @@ const idAleatorioCD = generaIdAleatorio('controldeslizante-');
 <template>
   <div class="grid">
     <div class="columna-2" />
-
     <div class="columna-12">
       <div class="contenedor-chat">
         <div class="contenedor-chat-contenido">
@@ -433,7 +432,7 @@ const idAleatorioCD = generaIdAleatorio('controldeslizante-');
             </div>
           </div>
 
-          <div class="contenedor-area-texto">
+          <div class="contenedor-area-texto m-b-5">
             <form class="formulario-area-texto">
               <label :for="idAleatorio" class="a11y-solo-lectura"> Nombre de la etiqueta </label>
               <textarea
@@ -539,16 +538,17 @@ const idAleatorioCD = generaIdAleatorio('controldeslizante-');
 
 <style lang="scss">
 .contenedor-chat {
+  // height: calc(93vh - 56px);
   height: var(--altura-consulta-esc);
   .contenedor-chat-contenido {
     height: 100%;
     position: relative;
     .contenedor-log {
       position: absolute;
-      top: 0;
+      top: 24px;
       left: 0;
       right: 0;
-      height: calc(100% - 120px - 48px);
+      height: calc(100% - 120px - 88px);
       overflow-y: auto;
       .contenedor-log-contenido {
         display: flex;

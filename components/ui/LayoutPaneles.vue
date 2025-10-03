@@ -54,12 +54,21 @@ const route = useRoute();
 
 <style lang="scss" scoped>
 .contenedor-paneles {
-  // height: 100%;
+  // height: calc(93vh - 56px);
+  height: var(--altura-consulta-esc);
   gap: 0;
 
   .columna-4 {
     box-shadow: 4px 0 4px -5px var(--navegacion-primaria-sombra);
+    // height: calc(93vh - 56px);
+    height: var(--altura-consulta-esc);
     z-index: 1;
+  }
+  .columna-16,
+  .columna-12,
+  .columna-8 {
+    // height: calc(93vh - 56px);
+    height: var(--altura-consulta-esc);
   }
 }
 </style>

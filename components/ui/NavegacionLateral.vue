@@ -120,13 +120,15 @@ const estaLogueado = computed(() => status.value === 'authenticated');
   width: 48px;
   box-shadow: 4px 0 8px -4px var(--navegacion-primaria-sombra);
   z-index: 9997;
-  height: calc(100vh - 56px);
+  // height: calc(93vh - 56px);
+  height: var(--altura-consulta-esc);
   .nav-lateral-contenido {
     height: auto;
     position: sticky;
     top: 50px;
     .height-calc {
-      height: calc(100vh - 56px);
+      // height: calc(93vh - 56px);
+      height: var(--altura-consulta-esc);
     }
     ul {
       margin: 16px 0;

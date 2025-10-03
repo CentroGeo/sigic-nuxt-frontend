@@ -395,7 +395,7 @@ const editarProyecto = async () => {
     </template>
 
     <template #visualizador>
-      <main id="principal" class="contenedor m-b-10 p-t-3">
+      <main id="principal" class="contenedor m-b-10 p-t-3 overflowYAuto">
         <h2>Configuración de proyecto</h2>
         <div class="grid">
           <div class="columna-10">
@@ -507,7 +507,7 @@ const editarProyecto = async () => {
               </table>
             </div>
 
-            <div class="flex flex-contenido-final">
+            <div class="flex flex-contenido-final m-b-5">
               <NuxtLink
                 class="boton boton-chico boton-primario"
                 aria-label="Guardar proyecto"
@@ -751,6 +751,12 @@ const editarProyecto = async () => {
 </template>
 
 <style lang="scss">
+.overflowYAuto {
+  overflow-y: auto;
+  // height: calc(93vh - 56px);
+  height: var(--altura-consulta-esc);
+}
+
 .separador {
   width: 100%;
   height: 1px;

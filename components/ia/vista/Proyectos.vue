@@ -84,8 +84,8 @@ const obtenerTipoArchivo = (nombre) => {
 
 <template>
   <div>
-    <div v-if="proyecto">
-      <div class="grid">
+    <div v-if="proyecto" class="contenedor overflowYAuto">
+      <div class="grid p-t-3">
         <div class="columna-16">
           <div class="flex flex-contenido-separado proyecto-encabezado">
             <div class="flex proyecto-encabezado">
@@ -197,7 +197,7 @@ const obtenerTipoArchivo = (nombre) => {
           </div>
         </div>
       </div>
-      <div class="grid">
+      <div class="grid m-b-5">
         <div class="columna-16">
           <p class="separador borde-b" />
           <div class="flex flex-contenido-separado fuentes-encabezado">
@@ -243,6 +243,11 @@ const obtenerTipoArchivo = (nombre) => {
 </template>
 
 <style lang="scss">
+.overflowYAuto {
+  overflow-y: auto;
+  // height: calc(93vh - 56px);
+  height: var(--altura-consulta-esc);
+}
 .tarjeta {
   background-color: var(--fondo-neutro);
   .tarjeta-imagen {
