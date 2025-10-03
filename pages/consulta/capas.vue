@@ -1,6 +1,7 @@
 <script setup>
 import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
 import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
+import { lados } from '~/components/consulta/SelectorDivisionMapa.vue';
 import { findServer, resourceTypeDic } from '~/utils/consulta';
 
 const storeConsulta = useConsultaStore();
@@ -164,6 +165,14 @@ onMounted(async () => {
           @click-centrar="storeConsulta.resetMapExtent"
           @al-mover-vista="actualizarHashDesdeVista"
         >
+          <div
+            class="fondo-color-primario"
+            style="position: absolute; z-index: 2; right: 0; top: 160px; max-width: 250px"
+          >
+            <ConsultaSelectorDivisionMapa :lado="lados.derecha" />
+            <ConsultaSelectorDivisionMapa :lado="lados.izquierda" />
+          </div>
+
           <SisdaiCapaXyz :posicion="0" />
 
           <SisdaiCapaWms

@@ -53,7 +53,7 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
         newResource.posicion = this.list(resourceType).length;
       }
 
-      // Cuando no se agrega una capa
+      // Cuando no se agrega una capa (tablas y documentos)
       if (resourceType !== resourceTypeDic.dataLayer) {
         // Si el nuevo recurso tiene visibilidad, quitar visibiidad a los demás
         if (newResource.visible) {
