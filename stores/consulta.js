@@ -27,6 +27,6 @@ export const useConsultaStore = defineStore('consulta', () => {
       return this.divisionMapa !== undefined && typeof this.divisionMapa === typeof Number();
     },
 
-    contenedorSelectoresDivisionColapsado: ref(false),
+    contenedorSelectoresDivisionColapsado: ref(true),
   };
 });
