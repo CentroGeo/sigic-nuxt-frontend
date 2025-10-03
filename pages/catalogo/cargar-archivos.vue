@@ -16,20 +16,24 @@ const docs_files = ['.txt', '.pdf', '.xls', '.xlsx'];
 async function guardarArchivo(files) {
   const token = ref(data.value?.accessToken);
 
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-
-    // Agregar inmediatamente el archivo a la lista con estado pendiente
-    const archivo = reactive({
+  // 1. Primero agregamos todos a la lista como "pendientes"
+  const nuevosArchivos = Array.from(files).map((file) =>
+    reactive({
       nombre: file?.name,
       estatus: 'pendiente',
       mensaje: 'Cargando...',
-    });
-    archivosEnCarga.value.push(archivo);
+    })
+  );
 
+  archivosEnCarga.value.push(...nuevosArchivos);
+
+  // 2. Luego procesamos cada archivo en paralelo
+  nuevosArchivos.forEach(async (archivo, idx) => {
+    const file = files[idx];
     try {
       let response;
       let json;
+
       if (base_files.some((end) => file?.name.endsWith(end))) {
         const formData = new FormData();
         formData.append('base_file', file);
@@ -51,25 +55,23 @@ async function guardarArchivo(files) {
       } else {
         archivo.estatus = 'error_carga';
         archivo.mensaje = 'Formato no soportado';
-        continue;
+        return;
       }
 
       // Intentar parsear JSON
       try {
         json = await response.json();
-      } catch (e) {
+      } catch {
         json = null;
-        console.error(e);
       }
-      console.log(response);
+
       // Evaluar respuesta
       if (!response.ok) {
         archivo.estatus = 'error_carga';
         archivo.mensaje = `Error HTTP: ${response.status}`;
       } else if (json && json.success === false) {
-        // Caso: llegó a GeoNode pero no se almacenó... puede aplicar en zips que no sean shpfiles u otros
         archivo.estatus = 'error_carga';
-        archivo.mensaje = `El archivo se subió pero no se almacenó: ${json.errors?.join(', ') || 'error de importación'}`;
+        archivo.mensaje = `Subido pero no almacenado: ${json.errors?.join(', ') || 'error de importación'}`;
       } else {
         archivo.estatus = 'carga_finalizada';
         archivo.mensaje = 'Archivo cargado correctamente';
@@ -80,7 +82,7 @@ async function guardarArchivo(files) {
       archivo.mensaje = 'Error de red';
       console.error(error);
     }
-  }
+  });
 }
 </script>
 
