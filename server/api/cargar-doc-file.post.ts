@@ -48,7 +48,7 @@ export default defineEventHandler(async (event) => {
       body: formData as unknown as BodyInit,
     });
 
-    console.log('response status:', res.status);
+    console.log('response status:', res);
     const json = await res.json();
     console.log('json:', json);
     return json;

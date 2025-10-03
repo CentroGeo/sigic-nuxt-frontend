@@ -270,13 +270,17 @@ export const useIAStore = defineStore('ia', {
       //this.existeContexto = true;
       console.log(user_id);
 
+      const userEmail = this.userEmail;
+
+      const formData = new FormData();
+      formData.append('user_id', userEmail);
+
       const response = await fetch(this.backend + '/direct/api/chat/history/getchats', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({}),
+        body: formData,
       });
 
       if (!response.ok) {
