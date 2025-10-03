@@ -160,6 +160,7 @@ onMounted(async () => {
         <SisdaiMapa
           class="gema"
           :vista="vistaDelMapa"
+          :dividir="storeConsulta.divisionMapa"
           @click-centrar="storeConsulta.resetMapExtent"
           @al-mover-vista="actualizarHashDesdeVista"
         >
