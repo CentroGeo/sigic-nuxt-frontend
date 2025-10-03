@@ -129,7 +129,6 @@ function groupResults() {
   });
 }
 function updateResources(nuevosRecursos) {
-  // console.log(nuevosRecursos);
   filteredResources.value = nuevosRecursos;
   groupResults();
 }

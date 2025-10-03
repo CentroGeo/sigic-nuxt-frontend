@@ -82,9 +82,9 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
     resetBySection(section) {
       misArchivos[section] = [];
     },
-    // resourcesByType(resourceType = storeConsulta.resourceType) {
-    //   return resources[resourceType];
-    // },
+    resourcesByType(resourceType = storeConsulta.resourceType) {
+      return resources[resourceType];
+    },
     /**
      * Trae el total los recursos vinculados a un usuario (yo), por tipo de recurso
      *      * Esto se usa para georreferenciación
