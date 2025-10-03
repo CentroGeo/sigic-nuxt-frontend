@@ -8,7 +8,13 @@ function ladoContrario(lado) {
 </script>
 
 <script setup>
+const emits = defineEmits(['alAbrir']);
+
 const props = defineProps({
+  abierto: {
+    type: Boolean,
+    default: false,
+  },
   lado: {
     type: String,
     default: lados.derecho,
@@ -18,7 +24,6 @@ const props = defineProps({
 const storeResources = useResourcesConsultaStore();
 const storeSelected = useSelectedResources2Store();
 
-const estaAbierto = ref(true);
 const pksSeleccionados = computed({
   get() {
     return storeSelected
@@ -36,13 +41,13 @@ const pksSeleccionados = computed({
 </script>
 
 <template>
-  <div class="colapsable" :class="{ abierto: estaAbierto }">
+  <div class="colapsable m-1" :class="{ abierto: abierto }">
     <button
       class="colapsable-boton"
       :aria-controls="`colapsable-division-${lado}`"
-      :aria-expanded="estaAbierto"
+      :aria-expanded="abierto"
       type="button"
-      @click="estaAbierto = !estaAbierto"
+      @click="() => emits('alAbrir')"
     >
       Panel {{ lado }}
       <span :aria-hidden="true" class="pictograma-angulo-derecho" />
@@ -50,8 +55,8 @@ const pksSeleccionados = computed({
 
     <div
       :id="`colapsable-division-${lado}`"
-      class="colapsable-contenedor"
-      :aria-hidden="!estaAbierto"
+      class="colapsable-contenedor colapsable-division fondo-color-primario"
+      :aria-hidden="!abierto"
     >
       <ol>
         <li
@@ -72,3 +77,11 @@ const pksSeleccionados = computed({
     </div>
   </div>
 </template>
+
+<style lang="scss" scoped>
+.colapsable-contenedor.colapsable-division {
+  max-height: 200px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+</style>

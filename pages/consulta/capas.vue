@@ -146,6 +146,8 @@ onMounted(async () => {
 // );
 
 // api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
+// const contenedorSelectoresDivisionColapsado = ref(true);
+const selectorDivisionAbierto = ref(undefined);
 </script>
 
 <template>
@@ -166,11 +168,30 @@ onMounted(async () => {
           @al-mover-vista="actualizarHashDesdeVista"
         >
           <div
-            class="fondo-color-primario"
-            style="position: absolute; z-index: 2; right: 0; top: 160px; max-width: 250px"
+            class="selectores-division-contenedor fondo-color-neutro borde-redondeado-4"
+            :class="{
+              colapsado: !(
+                storeConsulta.contenedorSelectoresDivisionColapsado &&
+                storeConsulta.divisionMapaActivado()
+              ),
+            }"
           >
-            <ConsultaSelectorDivisionMapa :lado="lados.derecho" />
-            <ConsultaSelectorDivisionMapa :lado="lados.izquierdo" />
+            <ConsultaSelectorDivisionMapa
+              :abierto="selectorDivisionAbierto === lados.derecho"
+              :lado="lados.derecho"
+              @al-abrir="
+                selectorDivisionAbierto =
+                  selectorDivisionAbierto === lados.derecho ? undefined : lados.derecho
+              "
+            />
+            <ConsultaSelectorDivisionMapa
+              :abierto="selectorDivisionAbierto === lados.izquierdo"
+              :lado="lados.izquierdo"
+              @al-abrir="
+                selectorDivisionAbierto =
+                  selectorDivisionAbierto === lados.izquierdo ? undefined : lados.izquierdo
+              "
+            />
           </div>
 
           <SisdaiCapaXyz :posicion="0" />
@@ -186,7 +207,6 @@ onMounted(async () => {
             :visible="storeSelected.byPk(resource.pk).visible"
             :lado="storeSelected.byPk(resource.pk).lado"
           />
-          <!-- :lado="storeSelected.byPk(resource.pk).lado" -->
         </SisdaiMapa>
       </ClientOnly>
     </template>
@@ -202,3 +222,27 @@ onMounted(async () => {
     </template>
   </ConsultaLayoutPaneles>
 </template>
+
+<style lang="scss" scoped>
+.selectores-division-contenedor {
+  z-index: 2;
+  right: 0;
+  top: 160px;
+  position: absolute;
+
+  cursor: inherit;
+  pointer-events: inherit;
+  opacity: 1;
+  max-width: 260px;
+
+  &.colapsado {
+    cursor: default;
+    pointer-events: none;
+    opacity: 0;
+    max-width: 0;
+    transition:
+      opacity 0.27s ease,
+      max-width 0.27s ease;
+  }
+}
+</style>

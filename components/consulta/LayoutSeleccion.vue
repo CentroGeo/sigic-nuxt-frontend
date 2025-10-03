@@ -86,7 +86,7 @@ function changeModal(to) {
   }
 }
 
-const isOpen = ref(false);
+// const isOpen = ref(false);
 const storeConsulta = useConsultaStore();
 const dividirMapa = computed({
   get: () => storeConsulta.divisionMapaActivado(),
@@ -143,15 +143,21 @@ const dividirMapa = computed({
 
         <div v-if="resourceType === resourceTypeDic.dataLayer" class="flex m-y-3">
           <button
-            v-globo-informacion:derecha="isOpen ? 'Cerrar' : 'Abrir'"
+            v-globo-informacion:derecha="
+              storeConsulta.contenedorSelectoresDivisionColapsado ? 'Abrir' : 'Cerrar'
+            "
             type="button"
             class="boton-pictograma boton-con-contenedor-secundario"
-            :aria-label="isOpen ? 'Cerrar' : 'Abrir'"
+            :aria-label="storeConsulta.contenedorSelectoresDivisionColapsado ? 'Abrir' : 'Cerrar'"
             :disabled="!dividirMapa"
-            @click="isOpen = !isOpen"
+            style="align-self: center"
+            @click="
+              storeConsulta.contenedorSelectoresDivisionColapsado =
+                !storeConsulta.contenedorSelectoresDivisionColapsado
+            "
           >
             <span
-              :class="`pictograma-angulo-${isOpen ? 'derecho' : 'izquierdo'}`"
+              :class="`pictograma-angulo-${storeConsulta.contenedorSelectoresDivisionColapsado ? 'izquierdo' : 'derecho'}`"
               aria-hidden="true"
             />
           </button>

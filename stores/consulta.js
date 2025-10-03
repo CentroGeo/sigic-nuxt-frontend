@@ -26,5 +26,7 @@ export const useConsultaStore = defineStore('consulta', () => {
     divisionMapaActivado() {
       return this.divisionMapa !== undefined && typeof this.divisionMapa === typeof Number();
     },
+
+    contenedorSelectoresDivisionColapsado: ref(false),
   };
 });
