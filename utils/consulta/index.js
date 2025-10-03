@@ -545,6 +545,21 @@ export async function downloadRaster(resource) {
   throw new Error(`La descarga fracasó después de ${maxAttempts} intentos`);
 }
 
+/**
+ * Devuelve las listas de elementos no encontrados en dos listas.
+ * @param {Array<String>} list1
+ * @param {Array<String>} list2
+ * @returns {Object} objeto con dos propiedades:
+ * - `news` -> elementos de list2 no entontrados en list1
+ * - `olds` -> elementos de list1 no entontrados en list2
+ */
+export function arrayNewsOlds(list1, list2) {
+  const news = list2.filter((item) => !list1.includes(item));
+  const olds = list1.filter((item) => !list2.includes(item));
+
+  return { news, olds };
+}
+
 /* export async function downloadRaster(resource) {
   //const urlArray = resource.download_urls.filter((link) => link.url.includes('/assets/'));
   //const url = urlArray[0].url;
