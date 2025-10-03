@@ -87,7 +87,7 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .contenedor-embed {
-  max-height: calc(100vh - 52px);
+  max-height: calc(100vh - 112px);
   height: 100%;
 }
 .documento-embebido {

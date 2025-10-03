@@ -32,8 +32,7 @@ onMounted(() => (document.querySelector('body').className = ''));
 </template>
 <style lang="scss" scoped>
 .modulo-ia {
-  --altura-consulta-esc: calc(100vh - 55px);
-  // --altura-consulta-esc: calc(93vh - 56px);
+  --altura-consulta-esc: calc(100vh - 112px);
   height: var(--altura-consulta-esc);
   gap: 0;
   .contenedor-contenido {

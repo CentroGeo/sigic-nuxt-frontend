@@ -459,7 +459,6 @@ onBeforeUnmount(() => {
 <style lang="scss">
 .overflowYAuto {
   overflow-y: auto;
-  // height: calc(93vh - 56px);
   height: var(--altura-consulta-esc);
 }
 .crear {

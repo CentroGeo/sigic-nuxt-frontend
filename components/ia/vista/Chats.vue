@@ -538,7 +538,6 @@ const idAleatorioCD = generaIdAleatorio('controldeslizante-');
 
 <style lang="scss">
 .contenedor-chat {
-  // height: calc(93vh - 56px);
   height: var(--altura-consulta-esc);
   .contenedor-chat-contenido {
     height: 100%;
@@ -548,7 +547,7 @@ const idAleatorioCD = generaIdAleatorio('controldeslizante-');
       top: 24px;
       left: 0;
       right: 0;
-      height: calc(100% - 120px - 88px);
+      height: calc(100% - 120px - 112px);
       overflow-y: auto;
       .contenedor-log-contenido {
         display: flex;
