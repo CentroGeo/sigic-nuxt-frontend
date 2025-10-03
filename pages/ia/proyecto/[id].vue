@@ -17,7 +17,6 @@ import {
 } from '~/utils/consulta';
 
 const config = useRuntimeConfig();
-// const storeFetched = useFetchedResources2Store();
 const storeFilters = useFilteredResources();
 const storeCatalogoResources = useResourcesCatalogoStore();
 
@@ -25,23 +24,15 @@ storeCatalogoResources.getTotalResources(
   resourceTypeDic.dataLayer,
   storeFilters.buildQueryParams(resourceTypeDic.dataLayer)
 );
-// await storeCatalogoResources.getResourcesByType(resourceTypeDic.dataLayer);
 storeCatalogoResources.getTotalResources(
   resourceTypeDic.dataTable,
   storeFilters.buildQueryParams(resourceTypeDic.dataTable)
 );
-// await storeCatalogoResources.getResourcesByType(resourceTypeDic.dataTable);
 storeCatalogoResources.getTotalResources(
   resourceTypeDic.document,
   storeFilters.buildQueryParams(resourceTypeDic.document)
 );
-// await storeCatalogoResources.getResourcesByType(resourceTypeDic.document);
 
-// storeFetched.checkFilling(resourceTypeDic.dataLayer);
-// storeFetched.checkFilling(resourceTypeDic.dataTable);
-// storeFetched.checkFilling(resourceTypeDic.document);
-
-// const resources = computed(() => storeFetched.all);
 const filteredResources = ref([]);
 const categorizedResources = ref({});
 
@@ -195,29 +186,12 @@ function cargarArchivosASubir() {
 }
 
 watch([inputSearch], async () => {
-  // updateResources(storeFilters.filter('all'));
-  // console.log(storeFilters.filters.resourceType);
-  // esto devuelve parámtros
-  // storeFilters.buildQueryParams(storeFilters.filters.resourceType)
-  // console.log('hay');
-  // storeCatalogoResources.getTotalResources(
-  //   botonRadioSeleccion.value,
-  //   storeFilters.buildQueryParams(botonRadioSeleccion.value)
-  // );
-  // await storeCatalogoResources.getResourcesByType(botonRadioSeleccion.value);
   updateResources(storeCatalogoResources.resourcesByType2[botonRadioSeleccion.value]);
 });
 watch(botonRadioSeleccion, async (nv) => {
   categoriaSeleccionada.value = null;
-  // console.log(nv);
   storeFilters.filters.resourceType = nv;
-  // categorizedResources.value = {};
-  // await storeCatalogoResources.getResourcesByType(nv);
   updateResources(storeCatalogoResources.resourcesByType2[nv]);
-  // updateResources(storeFilters.filter('all'));
-  // esto devuelve parámtros
-  // storeFilters.buildQueryParams(storeFilters.filters.resourceType)
-  // updateResources(storeFilters.buildQueryParams(nv));
 });
 watch(recursosSeleccionados, () => {
   if (botonRadioSeleccion.value === 'dataLayer') {
@@ -262,9 +236,6 @@ onMounted(async () => {
   await storeCatalogoResources.getResourcesByType(resourceTypeDic.dataTable);
   await storeCatalogoResources.getResourcesByType(resourceTypeDic.document);
   updateResources(storeCatalogoResources.resourcesByType2[botonRadioSeleccion.value]);
-  // if (resources.value.length !== 0) {
-  //   // updateResources(resources.value);
-  // }
 
   if (route.params.id !== 'nuevo') {
     esEdicion.value = true;
@@ -426,15 +397,6 @@ const editarProyecto = async () => {
     console.log('Error al actualizar: ' + error.message);
   }
 };
-
-async function agregarFuentesCatalogo() {
-  agregaCatalogoModal.value?.abrirModal();
-  // storeCatalogoResources.getTotalResources(
-  //   resourceTypeDic.dataLayer,
-  //   storeFilters.buildQueryParams(resourceTypeDic.dataLayer)
-  // );
-  // await storeCatalogoResources.getResourcesByType(resourceTypeDic.dataLayer);
-}
 </script>
 
 <template>
@@ -498,7 +460,7 @@ async function agregarFuentesCatalogo() {
                 <button
                   class="boton-pictograma boton-primario m-r-2"
                   aria-label="Agregar fuentes del catalogo"
-                  @click="agregarFuentesCatalogo"
+                  @click="agregaCatalogoModal?.abrirModal()"
                 >
                   Agregar del catálogo
                   <span class="pictograma-agregar" aria-hidden="true" />
