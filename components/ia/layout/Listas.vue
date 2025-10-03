@@ -71,60 +71,59 @@ function seleccionarProyecto(proyecto) {
 
 <template>
   <div>
-    <!-- TODO: Colocar ListasProyectos -->
-    <div v-if="titulo == 'Proyectos'">
-      <div class="fondo-color-acento p-x-3 p-y-1">
-        <h5>{{ titulo }}</h5>
+    <div v-if="titulo == 'Proyectos'" class="overflowYAuto">
+      <div class="positionSticky">
+        <div class="fondo-color-acento p-x-3 p-y-1">
+          <h5>{{ titulo }}</h5>
+        </div>
+        <div class="p-x-3 p-t-3">
+          <nuxt-link
+            class="boton-listas boton boton-primario m-b-3"
+            aria-label="Nuevo proyecto"
+            to="/ia/proyecto/nuevo"
+          >
+            {{ textoBoton }}
+          </nuxt-link>
+          <ClientOnly>
+            <form class="campo-busqueda" @submit.prevent>
+              <input
+                id="idcampobusquedaialistas"
+                v-model="campoBusqueda"
+                class="campo-busqueda-entrada"
+                type="search"
+                :placeholder="etiquetaBusqueda"
+                :disabled="!storeIA.existenProyectos"
+              />
+              <button
+                v-if="campoBusqueda"
+                class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
+                aria-label="Borrar"
+                type="button"
+                :disabled="!storeIA.existenProyectos"
+                @click="removerBusqueda"
+              >
+                <span aria-hidden="true" class="pictograma-cerrar" />
+              </button>
+              <button
+                class="boton-primario boton-pictograma campo-busqueda-buscar"
+                aria-label="Buscar"
+                type="button"
+                :disabled="!storeIA.existenProyectos"
+              >
+                <span class="pictograma-buscar" aria-hidden="true" />
+              </button>
+            </form>
+          </ClientOnly>
+        </div>
       </div>
-      <div class="p-x-3 p-t-3">
-        <nuxt-link
-          class="boton-listas boton boton-primario m-b-3"
-          aria-label="Nuevo proyecto"
-          to="/ia/proyecto/nuevo"
-        >
-          {{ textoBoton }}
-        </nuxt-link>
-
-        <ClientOnly>
-          <form class="campo-busqueda" @submit.prevent>
-            <input
-              id="idcampobusquedaialistas"
-              v-model="campoBusqueda"
-              class="campo-busqueda-entrada"
-              type="search"
-              :placeholder="etiquetaBusqueda"
-              :disabled="!storeIA.existenProyectos"
-            />
-            <button
-              v-if="campoBusqueda"
-              class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
-              aria-label="Borrar"
-              type="button"
-              :disabled="!storeIA.existenProyectos"
-              @click="removerBusqueda"
-            >
-              <span aria-hidden="true" class="pictograma-cerrar" />
-            </button>
-            <button
-              class="boton-primario boton-pictograma campo-busqueda-buscar"
-              aria-label="Buscar"
-              type="button"
-              :disabled="!storeIA.existenProyectos"
-            >
-              <span class="pictograma-buscar" aria-hidden="true" />
-            </button>
-          </form>
-        </ClientOnly>
-        <p>
+      <div v-if="storeIA.existenProyectos">
+        <p class="m-x-3">
           {{
             storeIA.existenProyectos
               ? 'Selecciona un proyecto para ver su contenido.'
               : 'Cuando crees un proyecto, aparecerá en esta sección.'
           }}
         </p>
-      </div>
-
-      <div v-if="storeIA.existenProyectos">
         <ul class="lista-chats lista-sin-estilo">
           <li
             v-for="proyecto in catalogoFiltrado"
@@ -152,6 +151,17 @@ function seleccionarProyecto(proyecto) {
 </template>
 
 <style lang="scss">
+.overflowYAuto {
+  height: var(--altura-consulta-esc);
+  overflow-y: auto;
+  .positionSticky {
+    position: sticky;
+    top: 0;
+    background-color: var(--fondo);
+    padding-bottom: 8px;
+  }
+}
+
 .proyecto {
   cursor: pointer;
   border-left: var(--Escalas-Bordes-borde-8, 8px) solid transparent;

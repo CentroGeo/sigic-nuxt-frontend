@@ -5,7 +5,7 @@
     </template>
 
     <template #visualizador>
-      <main id="principal" class="m-b-10 p-t-3">
+      <main id="principal" class="m-b-10">
         <IaVistaChats :context-id="contextId" :chat-id="chatId" />
       </main>
     </template>

@@ -208,180 +208,178 @@ watch(
 <template>
   <div>
     <div v-if="storeIA.existenProyectos">
-      <div v-if="titulo == 'Chats'">
-        <div class="fondo-color-acento p-x-3 p-y-1">
-          <h5>{{ titulo }}</h5>
-        </div>
-        <div class="p-x-3 p-t-3">
-          <button
-            class="boton-listas boton boton-primario"
-            aria-label="Crear nuevo chat"
-            type="button"
-            @click="nuevoChatModal?.abrirModal()"
-          >
-            {{ textoBoton }}
-          </button>
-
-          <ClientOnly>
-            <SisdaiCampoBusqueda
-              class="m-y-3"
-              :etiqueta="etiquetaBusqueda"
-              :catalogo="catalogo"
-              :catalogo-anidado="true"
-              catalogo-anidado-propiedad-elementos="chat"
-              propiedad-busqueda="titulo"
-              @al-filtrar="(r) => (catalogoFiltrado = r)"
-            />
-          </ClientOnly>
-
-          <div class="overflowYAuto">
-            <h6>Selecciona un chat para empezar a interactuar con el asistente.</h6>
-
-            <ul class="lista-sin-estilo">
-              <li v-for="grupo in catalogoFiltrado" :id="grupo.id" :key="grupo.id">
-                <p class="fecha-grupo">
-                  {{ grupo.fecha == fechaHoy ? 'Hoy' : grupo.fecha }}
-                </p>
-
-                <ul class="lista-sin-estilo">
-                  <li v-for="chat in grupo.chat" :id="chat.id" :key="chat.id">
-                    <div class="tarjeta-chat p-3 borde borde-redondeado-20" @click="openChat(chat)">
-                      <h5 class="tarjeta-titulo m-t-0 m-b-2">
-                        {{ chat.titulo }}
-                      </h5>
-                      <p class="tarjeta-nombre-proyecto m-t-0 m-b-1">
-                        {{ chat.proyecto }}
-                      </p>
-                      <p class="tarjeta-nombre-contexto m-t-0 m-b-2">
-                        {{ chat.contexto }}
-                      </p>
-
-                      <div class="flex flex-contenido-final">
-                        <div>
-                          <button
-                            class="boton-pictograma boton-sin-contenedor-secundario"
-                            aria-label="Editar chat"
-                            type="button"
-                            @click.stop="openEditModal(chat.titulo, chat.id)"
-                          >
-                            <span class="pictograma-editar" aria-hidden="true" />
-                          </button>
-                          <button
-                            class="boton-pictograma boton-sin-contenedor-secundario"
-                            aria-label="Remover chat"
-                            type="button"
-                            @click.stop="openEliminarModal(chat.id)"
-                          >
-                            <span class="pictograma-eliminar" aria-hidden="true" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-                </ul>
-              </li>
-            </ul>
+      <div v-if="titulo == 'Chats'" class="overflowYAuto">
+        <div class="positionSticky">
+          <div class="fondo-color-acento p-x-3 p-y-1">
+            <h5>{{ titulo }}</h5>
+          </div>
+          <div class="p-x-3 p-t-3">
+            <button
+              class="boton-listas boton boton-primario"
+              aria-label="Crear nuevo chat"
+              type="button"
+              @click="nuevoChatModal?.abrirModal()"
+            >
+              {{ textoBoton }}
+            </button>
+            <ClientOnly>
+              <SisdaiCampoBusqueda
+                class="m-y-3"
+                :etiqueta="etiquetaBusqueda"
+                :catalogo="catalogo"
+                :catalogo-anidado="true"
+                catalogo-anidado-propiedad-elementos="chat"
+                propiedad-busqueda="titulo"
+                @al-filtrar="(r) => (catalogoFiltrado = r)"
+              />
+            </ClientOnly>
           </div>
         </div>
+        <h6 class="p-x-3">Selecciona un chat para empezar a interactuar con el asistente.</h6>
+        <ul class="lista-sin-estilo m-x-3">
+          <li v-for="grupo in catalogoFiltrado" :id="grupo.id" :key="grupo.id">
+            <p class="fecha-grupo">
+              {{ grupo.fecha == fechaHoy ? 'Hoy' : grupo.fecha }}
+            </p>
+            <ul class="lista-sin-estilo m-b-5">
+              <li v-for="chat in grupo.chat" :id="chat.id" :key="chat.id">
+                <div class="tarjeta-chat p-3 borde borde-redondeado-20" @click="openChat(chat)">
+                  <h5 class="tarjeta-titulo m-t-0 m-b-2">
+                    {{ chat.titulo }}
+                  </h5>
+                  <p class="tarjeta-nombre-proyecto m-t-0 m-b-1">
+                    {{ chat.proyecto }}
+                  </p>
+                  <p class="tarjeta-nombre-contexto m-t-0 m-b-2">
+                    {{ chat.contexto }}
+                  </p>
+                  <div class="flex flex-contenido-final">
+                    <div>
+                      <button
+                        class="boton-pictograma boton-sin-contenedor-secundario"
+                        aria-label="Editar chat"
+                        type="button"
+                        @click.stop="openEditModal(chat.titulo, chat.id)"
+                      >
+                        <span class="pictograma-editar" aria-hidden="true" />
+                      </button>
+                      <button
+                        class="boton-pictograma boton-sin-contenedor-secundario"
+                        aria-label="Remover chat"
+                        type="button"
+                        @click.stop="openEliminarModal(chat.id)"
+                      >
+                        <span class="pictograma-eliminar" aria-hidden="true" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </li>
+        </ul>
       </div>
     </div>
+    <ClientOnly>
+      <SisdaiModal ref="nuevoChatModal">
+        <template #encabezado> <h2>Nuevo chat</h2> </template>
+        <template #cuerpo>
+          <SisdaiSelector
+            v-model="seleccionProyecto"
+            etiqueta="Selecciona un proyecto"
+            :es_obligatorio="true"
+          >
+            <option v-for="value in listaProyectos" :key="value.id" :value="value.id">
+              {{ value.title }}
+            </option>
+          </SisdaiSelector>
+          <SisdaiSelector
+            v-if="seleccionProyecto !== ''"
+            v-model="seleccionContexto"
+            etiqueta="Selecciona un contexto"
+            :es_obligatorio="true"
+          >
+            <option v-for="value in listaContextos" :key="value.id" :value="value.id">
+              {{ value.title }}
+            </option>
+          </SisdaiSelector>
+        </template>
+        <template #pie>
+          <nuxt-link
+            class="boton boton-primario boton-chico"
+            aria-label="Iniciar chat"
+            type="button"
+            :to="`/ia/chat/dinamica?context_id=${seleccionContexto}`"
+          >
+            Iniciar chat
+          </nuxt-link>
+        </template>
+      </SisdaiModal>
+
+      <SisdaiModal ref="editarChatModal">
+        <template #encabezado>
+          <h2>Editar título de chat</h2>
+        </template>
+
+        <template #cuerpo>
+          <p>Ingresa el nuevo título del chat</p>
+          <SisdaiCampoBase
+            v-model="tituloChat"
+            etiqueta="Título del chat"
+            ejemplo="Escribe el título de tu chat"
+            :es_etiqueta_visible="false"
+            class="m-b-3"
+          />
+        </template>
+
+        <template #pie>
+          <button
+            type="button"
+            class="boton-secundario boton-chico"
+            @click="editarChatModal?.cerrarModal()"
+          >
+            Cerrar
+          </button>
+          <button type="button" class="boton-primario boton-chico" @click="handleEdit">
+            Guardar
+          </button>
+        </template>
+      </SisdaiModal>
+
+      <SisdaiModal ref="eliminarChatModal">
+        <template #encabezado>
+          <h2>Eliminar chat</h2>
+        </template>
+
+        <template #cuerpo>
+          <p>¿Desea eliminar este chat? Esta acción no se puede deshacer.</p>
+        </template>
+
+        <template #pie>
+          <button
+            type="button"
+            class="boton-secundario boton-chico"
+            @click="eliminarChatModal?.cerrarModal()"
+          >
+            No
+          </button>
+          <button type="button" class="boton-primario boton-chico" @click="handleDelete">Si</button>
+        </template>
+      </SisdaiModal>
+    </ClientOnly>
   </div>
-
-  <ClientOnly>
-    <SisdaiModal ref="nuevoChatModal">
-      <template #encabezado> <h2>Nuevo chat</h2> </template>
-      <template #cuerpo>
-        <SisdaiSelector
-          v-model="seleccionProyecto"
-          etiqueta="Selecciona un proyecto"
-          :es_obligatorio="true"
-        >
-          <option v-for="value in listaProyectos" :key="value.id" :value="value.id">
-            {{ value.title }}
-          </option>
-        </SisdaiSelector>
-        <SisdaiSelector
-          v-if="seleccionProyecto !== ''"
-          v-model="seleccionContexto"
-          etiqueta="Selecciona un contexto"
-          :es_obligatorio="true"
-        >
-          <option v-for="value in listaContextos" :key="value.id" :value="value.id">
-            {{ value.title }}
-          </option>
-        </SisdaiSelector>
-      </template>
-      <template #pie>
-        <nuxt-link
-          class="boton boton-primario boton-chico"
-          aria-label="Iniciar chat"
-          type="button"
-          :to="`/ia/chat/dinamica?context_id=${seleccionContexto}`"
-        >
-          Iniciar chat
-        </nuxt-link>
-      </template>
-    </SisdaiModal>
-  </ClientOnly>
-
-  <ClientOnly>
-    <SisdaiModal ref="editarChatModal">
-      <template #encabezado>
-        <h2>Editar título de chat</h2>
-      </template>
-
-      <template #cuerpo>
-        <p>Ingresa el nuevo título del chat</p>
-        <SisdaiCampoBase
-          v-model="tituloChat"
-          etiqueta="Título del chat"
-          ejemplo="Escribe el título de tu chat"
-          :es_etiqueta_visible="false"
-          class="m-b-3"
-        />
-      </template>
-
-      <template #pie>
-        <button
-          type="button"
-          class="boton-secundario boton-chico"
-          @click="editarChatModal?.cerrarModal()"
-        >
-          Cerrar
-        </button>
-        <button type="button" class="boton-primario boton-chico" @click="handleEdit">
-          Guardar
-        </button>
-      </template>
-    </SisdaiModal>
-
-    <SisdaiModal ref="eliminarChatModal">
-      <template #encabezado>
-        <h2>Eliminar chat</h2>
-      </template>
-
-      <template #cuerpo>
-        <p>¿Desea eliminar este chat? Esta acción no se puede deshacer.</p>
-      </template>
-
-      <template #pie>
-        <button
-          type="button"
-          class="boton-secundario boton-chico"
-          @click="eliminarChatModal?.cerrarModal()"
-        >
-          No
-        </button>
-        <button type="button" class="boton-primario boton-chico" @click="handleDelete">Si</button>
-      </template>
-    </SisdaiModal>
-  </ClientOnly>
 </template>
 
 <style lang="scss">
 .overflowYAuto {
-  height: 65vh;
+  height: var(--altura-consulta-esc);
   overflow-y: auto;
+  .positionSticky {
+    position: sticky;
+    top: 0;
+    background-color: var(--fondo);
+    padding-bottom: 8px;
+  }
 }
 
 .tarjeta-chat {

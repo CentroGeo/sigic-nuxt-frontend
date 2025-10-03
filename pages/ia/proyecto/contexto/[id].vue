@@ -290,7 +290,7 @@ onBeforeUnmount(() => {
     </template>
 
     <template #visualizador>
-      <main id="principal" class="contenedor m-b-10 p-t-3">
+      <main id="principal" class="contenedor m-b-10 p-t-3 overflowYAuto">
         <!-- Mensajes de feedback -->
         <!-- <div v-if="mensajeError" class="mensaje-error">
           {{ mensajeError }}
@@ -418,7 +418,7 @@ onBeforeUnmount(() => {
                 </tbody>
               </table>
             </div>
-            <div class="flex flex-contenido-final m-b-3">
+            <div class="flex flex-contenido-final m-b-10">
               <NuxtLink
                 class="boton boton-primario boton-chico"
                 aria-label="Guardar contexto"
@@ -442,6 +442,10 @@ onBeforeUnmount(() => {
 </template>
 
 <style lang="scss">
+.overflowYAuto {
+  overflow-y: auto;
+  height: var(--altura-consulta-esc);
+}
 .crear {
   &.contexto-encabezado {
     flex-direction: column;
