@@ -22,8 +22,4 @@ export default class SelectedLayer extends SelectedResource {
   set opacidad(valor) {
     this.opacidad_ = Number(valor);
   }
-
-  updateOpacity(value) {
-    this.opacidad = value;
-  }
 }

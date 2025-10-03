@@ -144,11 +144,11 @@ const dividirMapa = computed({
         <div v-if="resourceType === resourceTypeDic.dataLayer" class="flex m-y-3">
           <button
             v-globo-informacion:derecha="
-              storeConsulta.contenedorSelectoresDivisionColapsado ? 'Abrir' : 'Cerrar'
+              storeConsulta.contenedorSelectoresDivisionColapsado ? 'Cerrar' : 'Abrir'
             "
             type="button"
             class="boton-pictograma boton-con-contenedor-secundario"
-            :aria-label="storeConsulta.contenedorSelectoresDivisionColapsado ? 'Abrir' : 'Cerrar'"
+            :aria-label="storeConsulta.contenedorSelectoresDivisionColapsado ? 'Cerrar' : 'Abrir'"
             :disabled="!dividirMapa"
             style="align-self: center"
             @click="
@@ -157,7 +157,7 @@ const dividirMapa = computed({
             "
           >
             <span
-              :class="`pictograma-angulo-${storeConsulta.contenedorSelectoresDivisionColapsado ? 'izquierdo' : 'derecho'}`"
+              :class="`pictograma-angulo-${storeConsulta.contenedorSelectoresDivisionColapsado ? 'derecho' : 'izquierdo'}`"
               aria-hidden="true"
             />
           </button>
