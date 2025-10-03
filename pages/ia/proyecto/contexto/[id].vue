@@ -433,7 +433,7 @@ onBeforeUnmount(() => {
                 </tbody>
               </table>
             </div>
-            <div class="flex flex-contenido-final m-b-5">
+            <div class="flex flex-contenido-final m-b-10">
               <NuxtLink
                 class="boton boton-primario boton-chico"
                 aria-label="Guardar contexto"

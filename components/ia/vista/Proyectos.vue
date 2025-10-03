@@ -1,4 +1,6 @@
 <script setup>
+import { resourceTypeDic } from '~/utils/consulta';
+import SelectedLayer from '~/utils/consulta/SelectedLayer';
 const storeIA = useIAStore();
 
 const proyecto = computed(() => storeIA.proyectoSeleccionado);
@@ -80,6 +82,42 @@ const obtenerTipoArchivo = (nombre) => {
   };
   return tipos[extension] || extension.toUpperCase();
 };
+
+/**
+ * Agrega un recurso seleccionado al módulo de consulta y navega a la vista
+ * @param resource del que se toma el uuid para la selección
+ */
+async function openResourceView(resource) {
+  // if (resource.tipo_recurso === 'Capa geográfica') {
+  //   useSelectedResources2Store().add(
+  //     new SelectedLayer({ uuid: resource.uuid }),
+  //     resourceTypeDic.dataLayer
+  //   );
+  //   await navigateTo('/consulta/capas');
+  // }
+  // if (resource.tipo_recurso === 'Datos tabulados') {
+  //   useSelectedResources2Store().add(
+  //     new SelectedLayer({ uuid: resource.uuid }),
+  //     resourceTypeDic.dataTable
+  //   );
+  //   await navigateTo('/consulta/tablas');
+  // }
+  /* (resource.tipo_recurso === 'Documentos') {
+    useSelectedResources2Store().add(
+      new SelectedLayer({ uuid: resource.uuid }),
+      resourceTypeDic.document
+    );
+    await navigateTo('/consulta/documentos');
+  } */
+  if (resource.document_type === 'application/pdf') {
+    console.log('entró');
+    useSelectedResources2Store().add(
+      new SelectedLayer({ uuid: 'bc9f595e-39f9-4951-bdd4-986e38c267ed' }),
+      resourceTypeDic.document
+    );
+    await navigateTo('/consulta/documentos');
+  }
+}
 </script>
 
 <template>
@@ -204,7 +242,7 @@ const obtenerTipoArchivo = (nombre) => {
             <h4>Fuentes de información:</h4>
           </div>
 
-          <div v-if="arraySources.length > 0" class="tabla-archivos m-t-3">
+          <div v-if="arraySources.length > 0" class="tabla-archivos">
             <table class="tabla">
               <thead>
                 <tr>
@@ -217,7 +255,10 @@ const obtenerTipoArchivo = (nombre) => {
               </thead>
               <tbody>
                 <tr v-for="archivo in arraySources" :key="archivo.id">
-                  <td class="p-3">{{ archivo.filename }}</td>
+                  <!-- <td class="p-3">{{ archivo.filename }}</td> -->
+                  <td class="p-3">
+                    <a @click="openResourceView(archivo)">{{ archivo.filename }}</a>
+                  </td>
                   <td class="p-3 etiqueta-tabla">
                     <span class="p-x-1 p-y-minimo">{{ obtenerTipoArchivo(archivo.filename) }}</span>
                   </td>
