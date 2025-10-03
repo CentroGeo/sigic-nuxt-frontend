@@ -27,7 +27,7 @@ const hasGeometry = computed(() => {
 </script>
 
 <template>
-  <div>
+  <div v-if="resourceElement.title">
     <div>
       <input
         :id="resourceElement.pk"
@@ -73,6 +73,9 @@ const hasGeometry = computed(() => {
         <span class="pictograma-archivo-descargar" aria-hidden="true" />
       </button>
     </div>
+  </div>
+  <div v-else class="flex flex-contenido-centrado">
+    <img src="@/assets/gif/loader.gif" alt="...Cargando" height="50px" />
   </div>
 </template>
 

@@ -221,6 +221,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       };
 
       const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
+      console.log(url);
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
       resources[resourceType] = res.resources;

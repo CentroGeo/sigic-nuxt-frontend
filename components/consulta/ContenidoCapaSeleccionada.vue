@@ -196,7 +196,7 @@ watch(resourceElement, () => {
 </script>
 
 <template>
-  <div>
+  <div v-if="resourceElement.title">
     <div class="m-y-2">
       <SisdaiLeyendaWms
         :consulta="gnoxyFetch"
@@ -221,6 +221,9 @@ watch(resourceElement, () => {
         <span :class="button.pictogram" aria-hidden="true" />
       </button>
     </div>
+  </div>
+  <div v-else class="flex flex-contenido-centrado">
+    <img src="@/assets/gif/loader.gif" alt="...Cargando" height="50px" />
   </div>
 </template>
 

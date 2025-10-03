@@ -99,10 +99,10 @@ export const useFilteredResources = defineStore('filteredResources', () => {
       }
       if (filters.sort !== null) {
         if (filters.sort === 'fecha_ascendente') {
-          queryParams['sort[]'] = 'date';
+          queryParams['sort[]'] = 'last_updated';
         }
         if (filters.sort === 'fecha_descendente') {
-          queryParams['sort[]'] = '-date';
+          queryParams['sort[]'] = '-last_updated';
         }
         if (filters.sort === 'titulo') {
           queryParams['sort[]'] = 'title';

@@ -37,6 +37,7 @@ const isLoggedIn = ref(data.value ? true : false);
 const apiCategorias = `${config.public.geonodeApi}/facets/category`;
 const filteredResources = ref([]);
 const categoriesDict = ref({});
+const orderedCategories = ref([]);
 const categorizedResources = ref({});
 const selectedCategories = ref([]);
 const modalFiltroAvanzado = ref(null);
@@ -94,6 +95,9 @@ async function buildCategoriesDict() {
     );
     totalResources.value = results.reduce((a, b) => a + b, 0);
   }
+  orderedCategories.value = Object.keys(categoriesDict.value).sort((a, b) =>
+    categoriesInSpanish[a].localeCompare(categoriesInSpanish[b])
+  );
 }
 
 async function callResources(categoria) {
@@ -274,9 +278,11 @@ onMounted(async () => {
         </ClientOnly>
         <UiNumeroElementos :numero="totalResources" :etiqueta="etiquetaElementos" />
       </div>
-      <div v-if="isLoading">....Cargando</div>
+      <div v-if="isLoading" class="flex flex-contenido-centrado">
+        <img src="@/assets/gif/loader.gif" alt="...Cargando" height="60px" />
+      </div>
       <div v-else>
-        <div v-for="category in Object.keys(categoriesDict)" :key="category" class="m-y-1">
+        <div v-for="category in orderedCategories" :key="category" class="m-y-1">
           <ConsultaElementoCategoria
             :title="categoriesDict[category].inSpanish"
             :tag="etiquetaElementos"
@@ -298,7 +304,9 @@ onMounted(async () => {
               @trigger-fetch="fetchNewData"
             />
           </div>
-          <div v-if="categoriesDict[category].isLoading">....Cargando</div>
+          <div v-if="categoriesDict[category].isLoading" class="flex flex-contenido-centrado">
+            <img src="@/assets/gif/loader.gif" alt="...Cargando" height="40px" />
+          </div>
         </div>
       </div>
     </div>

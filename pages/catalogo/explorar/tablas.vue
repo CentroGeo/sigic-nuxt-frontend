@@ -1,11 +1,12 @@
 <script setup>
 // TODO: Reactivar filtrado
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { cleanInput } from '~/utils/consulta';
+import { cleanInput, resourceTypeDic } from '~/utils/consulta';
 
 const storeCatalogo = useCatalogoStore();
 const storeResources = useResourcesCatalogoStore();
 const storeConsulta = useConsultaStore();
+storeConsulta.resourceType = resourceTypeDic.dataTable;
 const storeFilters = useFilteredResources();
 const params = computed(() => storeFilters.filters.queryParams);
 const totalResources = computed(() => storeResources.totalByType());
