@@ -1,70 +1,88 @@
 <script setup>
-import SisdaiControlDeslizante from '@centrogeomx/sisdai-componentes/src/componentes/control-deslizante/SisdaiControlDeslizante.vue';
-
 const storeCatalogo = useCatalogoStore();
 
 definePageMeta({
   middleware: 'sidebase-auth',
-  bodyAttrs: {
-    class: '',
-  },
+  bodyAttrs: { class: '' },
 });
 
-const controlDeslizante = ref(null);
-const generaIdAleatorio = (el) => {
-  return el + Math.random().toString(36).substring(2);
-};
-const idAleatorioControlDes = generaIdAleatorio('controldeslizante-');
-
 const statusOk = ref(false);
-const pending = ref(false);
-
+const archivosEnCarga = ref([]);
 const { data } = useAuth();
 
-const dragNdDrop = ref(null);
-const base_files = ['.geojson', 'gpkg', '.xls', '.xlsx', '.zip', '.csv'];
-const docs_files = ['.txt', '.pdf'];
-
-const nombreArchivo = ref('Nombre del archivo');
+const base_files = ['.geojson', 'gpkg', '.zip', '.csv'];
+const docs_files = ['.txt', '.pdf', '.xls', '.xlsx'];
 
 async function guardarArchivo(files) {
   const token = ref(data.value?.accessToken);
-  nombreArchivo.value = file?.name;
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-    // Si el archivo pertenece a bases de datos o capas:
-    if (base_files.map((end) => file?.name.endsWith(end)).includes(true)) {
-      const formData = new FormData();
-      formData.append('base_file', file);
-      formData.append('token', token.value);
 
-      const response = await fetch('/api/cargar-base-file', {
-        method: 'POST',
-        body: formData,
-      });
+  // 1. Primero agregamos todos a la lista como "pendientes"
+  const nuevosArchivos = Array.from(files).map((file) =>
+    reactive({
+      nombre: file?.name,
+      estatus: 'pendiente',
+      mensaje: 'Cargando...',
+    })
+  );
 
-      if (!response.ok) {
-        throw new Error(`Error al cargar archivos: ${response.status}`);
-      }
-    }
-    // Si el archivo pertenece a documentos
-    else if (docs_files.map((end) => file?.name.endsWith(end)).includes(true)) {
-      const formData = new FormData();
-      formData.append('doc_file', file);
-      formData.append('token', token.value);
+  archivosEnCarga.value.push(...nuevosArchivos);
 
-      const response = await fetch('/api/cargar-doc-file', {
-        method: 'POST',
-        body: formData,
-      });
+  // 2. Luego procesamos cada archivo en paralelo
+  nuevosArchivos.forEach(async (archivo, idx) => {
+    const file = files[idx];
+    try {
+      let response;
+      let json;
 
-      if (!response.ok) {
-        throw new Error(`Error al cargar archivos: ${response.status}`);
+      if (base_files.some((end) => file?.name.endsWith(end))) {
+        const formData = new FormData();
+        formData.append('base_file', file);
+        formData.append('token', token.value);
+
+        response = await fetch('/api/cargar-base-file', {
+          method: 'POST',
+          body: formData,
+        });
+      } else if (docs_files.some((end) => file?.name.endsWith(end))) {
+        const formData = new FormData();
+        formData.append('doc_file', file);
+        formData.append('token', token.value);
+
+        response = await fetch('/api/cargar-doc-file', {
+          method: 'POST',
+          body: formData,
+        });
       } else {
+        archivo.estatus = 'error_carga';
+        archivo.mensaje = 'Formato no soportado';
+        return;
+      }
+
+      // Intentar parsear JSON
+      try {
+        json = await response.json();
+      } catch {
+        json = null;
+      }
+
+      // Evaluar respuesta
+      if (!response.ok) {
+        archivo.estatus = 'error_carga';
+        archivo.mensaje = `Error HTTP: ${response.status}`;
+      } else if (json && json.success === false) {
+        archivo.estatus = 'error_carga';
+        archivo.mensaje = `Subido pero no almacenado: ${json.errors?.join(', ') || 'error de importación'}`;
+      } else {
+        archivo.estatus = 'carga_finalizada';
+        archivo.mensaje = 'Archivo cargado correctamente';
         statusOk.value = true;
       }
+    } catch (error) {
+      archivo.estatus = 'error_carga';
+      archivo.mensaje = 'Error de red';
+      console.error(error);
     }
-  }
+  });
 }
 </script>
 
@@ -88,63 +106,34 @@ async function guardarArchivo(files) {
               @pasar-archivo="(i) => guardarArchivo(i)"
             />
           </ClientOnly>
+          <h2>Cargas</h2>
 
-          <div v-if="statusOk">
-            <h2>Cargas recientes</h2>
-            <div class="fondo-color-confirmacion p-3 borde-redondeado-16">
-              <div class="flex texto-color-confirmacion">
-                <span class="pictograma-aprobado" />
-                <b> Archivo cargado correctamente </b>
-              </div>
-
-              <p>{{ nombreArchivo }}</p>
-              <div class="texto-color-confirmacion">
-                <!-- <p class="m-b-0">Se detectaron 236 polígonos/líneas/puntos válidos</p>
-                <p class="m-t-0">Sistema de referencia EPSG:4326</p> -->
-              </div>
-
-              <div class="flex flex-contenido-separado">
-                <!-- <div>
-                  <nuxt-link to="/catalogo/mis-archivos/editar/metadatos"
-                    >Editar metadatos</nuxt-link
-                  >
-                </div>
-                <div>
-                  <nuxt-link to="/catalogo/mis-archivos/editar/estilo">Editar estilo</nuxt-link>
-                </div>
-                <div>
-                  <nuxt-link to="/catalogo/mis-archivos">Ver en mis archivos</nuxt-link>
-                </div> -->
-              </div>
-            </div>
-          </div>
-          <div v-if="pending">
-            <h2>Cargas pendientes</h2>
-            <div class="fondo-color-neutro p-3 borde-redondeado-16">
-              <div class="flex flex-contenido-separado">
-                <p class="flex-vertical-centrado">nombre de la capa.json</p>
+          <div v-for="(archivo, i) in archivosEnCarga" :key="i">
+            <div
+              class="p-3 borde-redondeado-16 m-y-3"
+              :class="{
+                'fondo-color-confirmacion': archivo.estatus == 'carga_finalizada',
+                'fondo-color-error': archivo.estatus == 'error_carga',
+                'fondo-color-neutro': archivo.estatus == 'pendiente',
+              }"
+            >
+              <div
+                :class="{
+                  'texto-color-confirmacion': archivo.estatus == 'carga_finalizada',
+                  'texto-color-error': archivo.estatus == 'error_carga',
+                }"
+              >
                 <div class="flex">
-                  <p class="borde borde-redondeado-8" style="padding: 4px">.json</p>
-                  <p class="flex-vertical-centrado">1MB</p>
+                  <span
+                    :class="{
+                      'pictograma-aprobado': archivo.estatus == 'carga_finalizada',
+                      'pictograma-alerta': archivo.estatus == 'error_carga',
+                    }"
+                  />
+                  <b> {{ archivo.mensaje }} </b>
                 </div>
-              </div>
-              <ClientOnly>
-                <SisdaiControlDeslizante
-                  :id="idAleatorioControlDes"
-                  ref="controlDeslizante"
-                  :val_min="0"
-                  :val_max="100"
-                  :val_entrada="90"
-                  step="10"
-                  @blur="false"
-                  @update:val_entrada="($event) => (controlDeslizante.valor_seleccionado = $event)"
-                />
-              </ClientOnly>
-              <div class="flex flex-contenido-inicio">
-                <label :for="idAleatorioControlDes"
-                  >{{ controlDeslizante?.valor_seleccionado < 100 ? 'Progreso' : 'Completado' }}
-                  {{ controlDeslizante?.valor_seleccionado }}%</label
-                >
+
+                <p>{{ archivo.nombre }}</p>
               </div>
             </div>
           </div>
