@@ -202,10 +202,11 @@ const selectorDivisionAbierto = ref(undefined);
             :capa="resource.alternate"
             :consulta="gnoxyFetch"
             :fuente="findServer(resource)"
+            :lado="storeSelected.byPk(resource.pk).lado"
+            :mosaicos="true"
             :opacidad="storeSelected.byPk(resource.pk).opacidad"
             :posicion="storeSelected.byPk(resource.pk).posicion + 1"
             :visible="storeSelected.byPk(resource.pk).visible"
-            :lado="storeSelected.byPk(resource.pk).lado"
           />
         </SisdaiMapa>
       </ClientOnly>

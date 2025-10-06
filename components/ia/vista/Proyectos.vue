@@ -1,4 +1,6 @@
 <script setup>
+import { resourceTypeDic } from '~/utils/consulta';
+import SelectedLayer from '~/utils/consulta/SelectedLayer';
 const storeIA = useIAStore();
 
 const proyecto = computed(() => storeIA.proyectoSeleccionado);
@@ -80,12 +82,48 @@ const obtenerTipoArchivo = (nombre) => {
   };
   return tipos[extension] || extension.toUpperCase();
 };
+
+/**
+ * Agrega un recurso seleccionado al módulo de consulta y navega a la vista
+ * @param resource del que se toma el pk para la selección
+ */
+async function openResourceView(resource) {
+  // if (resource.tipo_recurso === 'Capa geográfica') {
+  //   useSelectedResources2Store().add(
+  //     new SelectedLayer({ uuid: resource.uuid }),
+  //     resourceTypeDic.dataLayer
+  //   );
+  //   await navigateTo('/consulta/capas');
+  // }
+  // if (resource.tipo_recurso === 'Datos tabulados') {
+  //   useSelectedResources2Store().add(
+  //     new SelectedLayer({ uuid: resource.uuid }),
+  //     resourceTypeDic.dataTable
+  //   );
+  //   await navigateTo('/consulta/tablas');
+  // }
+  /* (resource.tipo_recurso === 'Documentos') {
+    useSelectedResources2Store().add(
+      new SelectedLayer({ uuid: resource.uuid }),
+      resourceTypeDic.document
+    );
+    await navigateTo('/consulta/documentos');
+  } */
+  if (resource.document_type === 'application/pdf') {
+    // TODO: utilizar pk dinámico
+    useSelectedResources2Store().add(
+      new SelectedLayer({ pk: resource.geonode_id.toString() }),
+      resourceTypeDic.document
+    );
+    await navigateTo('/consulta/documentos');
+  }
+}
 </script>
 
 <template>
   <div>
-    <div v-if="proyecto">
-      <div class="grid">
+    <div v-if="proyecto" class="contenedor overflowYAuto">
+      <div class="grid p-t-3">
         <div class="columna-16">
           <div class="flex flex-contenido-separado proyecto-encabezado">
             <div class="flex proyecto-encabezado">
@@ -197,14 +235,14 @@ const obtenerTipoArchivo = (nombre) => {
           </div>
         </div>
       </div>
-      <div class="grid">
+      <div class="grid m-b-5">
         <div class="columna-16">
           <p class="separador borde-b" />
           <div class="flex flex-contenido-separado fuentes-encabezado">
             <h4>Fuentes de información:</h4>
           </div>
 
-          <div v-if="arraySources.length > 0" class="tabla-archivos m-t-3">
+          <div v-if="arraySources.length > 0" class="tabla-archivos">
             <table class="tabla">
               <thead>
                 <tr>
@@ -217,7 +255,9 @@ const obtenerTipoArchivo = (nombre) => {
               </thead>
               <tbody>
                 <tr v-for="archivo in arraySources" :key="archivo.id">
-                  <td class="p-3">{{ archivo.filename }}</td>
+                  <td class="p-3">
+                    <a @click="openResourceView(archivo)">{{ archivo.filename }}</a>
+                  </td>
                   <td class="p-3 etiqueta-tabla">
                     <span class="p-x-1 p-y-minimo">{{ obtenerTipoArchivo(archivo.filename) }}</span>
                   </td>
@@ -243,6 +283,10 @@ const obtenerTipoArchivo = (nombre) => {
 </template>
 
 <style lang="scss">
+.overflowYAuto {
+  overflow-y: auto;
+  height: var(--altura-consulta-esc);
+}
 .tarjeta {
   background-color: var(--fondo-neutro);
   .tarjeta-imagen {

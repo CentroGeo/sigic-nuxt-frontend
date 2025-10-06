@@ -13,7 +13,7 @@ const storeIA = useIAStore();
     </template>
 
     <template #visualizador>
-      <main id="principal" class="contenedor m-b-10 p-t-3">
+      <main id="principal" class="">
         <IaLeyendaInicioVistas />
 
         <IaVistaProyectos v-if="storeIA.existenProyectos" />
