@@ -166,6 +166,8 @@ function removerRecursoSeleccionado(capa) {
     recursosSeleccionados.value.splice(index, 1);
   }
 }
+const archivosGeonode = ref([]);
+const archivosTabla = ref([]);
 function cargarArchivosASubir() {
   seleccionCatalogoModal?.value.cerrarModal();
   // TODO: fix tipo de archivo y archivo file para subir
@@ -176,12 +178,14 @@ function cargarArchivosASubir() {
     archivo: file, // Objeto File original
     categoria: 'Archivo',
     origen: 'Catálogo',
-    // download_url: file.download_url,
-    // embed_url: file.embed_url,
-    // pk: file.pk,
+    download_url: file.download_url,
+    embed_url: file.embed_url,
+    pk: file.pk,
   }));
+  console.log('nuevosArchivos', nuevosArchivos);
 
-  archivosSeleccionados.value = [...archivosSeleccionados.value, ...nuevosArchivos];
+  archivosGeonode.value = [...archivosGeonode.value, ...nuevosArchivos];
+  archivosTabla.value = [...archivosSeleccionados.value, ...archivosGeonode.value];
 }
 
 watch([inputSearch], async () => {
@@ -255,8 +259,10 @@ onMounted(async () => {
       categoria: 'Archivo',
       origen: 'Propio',
     }));
+    console.log('arraySources', arraySources);
 
     archivosSeleccionados.value = [...archivosSeleccionados.value, ...archivosBackend];
+    archivosTabla.value = [...archivosSeleccionados.value, ...archivosGeonode.value];
   }
 });
 
@@ -314,6 +320,7 @@ const manejarSeleccionArchivos = (event) => {
   }));
 
   archivosSeleccionados.value = [...archivosSeleccionados.value, ...nuevosArchivos];
+  archivosTabla.value = [...archivosSeleccionados.value, ...archivosGeonode.value];
   event.target.value = ''; // Resetear el input para permitir seleccionar el mismo archivo otra vez
 };
 
@@ -338,6 +345,8 @@ const obtenerTipoArchivo = (nombre) => {
 // Método para eliminar archivo de la lista
 const eliminarArchivo = (id) => {
   archivosSeleccionados.value = archivosSeleccionados.value.filter((archivo) => archivo.id !== id);
+  archivosGeonode.value = archivosGeonode.value.filter((archivo) => archivo.id !== id);
+  archivosTabla.value = [...archivosSeleccionados.value, ...archivosGeonode.value];
 
   archivosEliminados.value.push(id);
 };
@@ -356,7 +365,8 @@ const guardarProyecto = async () => {
       nombreProyecto.value,
       descripcionProyecto.value,
       visibilidadProyecto.value,
-      archivosSeleccionados.value
+      archivosSeleccionados.value,
+      archivosGeonode.value
     );
 
     // Notificación de éxito
@@ -388,7 +398,8 @@ const editarProyecto = async () => {
       visibilidadProyecto.value,
       archivosSeleccionados.value,
       archivosEliminados.value,
-      route.params.id
+      route.params.id,
+      archivosGeonode.value
     );
 
     navigateTo('/ia/proyectos');
@@ -498,7 +509,7 @@ const editarProyecto = async () => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="archivo in archivosSeleccionados" :key="archivo.id">
+                  <tr v-for="archivo in archivosTabla" :key="archivo.id">
                     <td class="p-3">{{ archivo.nombre }}</td>
                     <td class="p-3 etiqueta-tabla">
                       <span class="p-x-1 p-y-minimo">{{ archivo.tipo }}</span>

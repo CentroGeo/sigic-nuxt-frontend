@@ -27,7 +27,7 @@ export const useIAStore = defineStore('ia', {
     },
   },
   actions: {
-    async crearProyecto(title, description, isPublic, archivos = []) {
+    async crearProyecto(title, description, isPublic, archivos = [], archivosGeonode = []) {
       console.log('crear proyecto');
 
       // Activar estado de subida
@@ -48,6 +48,10 @@ export const useIAStore = defineStore('ia', {
         // Agregar archivos si existen
         archivos.forEach((archivo) => {
           formData.append(`archivos`, archivo.archivo);
+        });
+        // agregar archivos cuando son de geonode
+        archivosGeonode.forEach((archivo) => {
+          formData.append('archivos_geonode', archivo.pk);
         });
 
         // Log para depuración
@@ -407,7 +411,8 @@ export const useIAStore = defineStore('ia', {
       isPublic,
       archivos,
       archivosEliminados,
-      project_id
+      project_id,
+      archivosGeonode
     ) {
       this.isUploading = true;
       this.uploadProgress = 0;
@@ -426,6 +431,10 @@ export const useIAStore = defineStore('ia', {
         // Agregar archivos si existen
         archivos.forEach((archivo) => {
           formData.append('archivos', archivo.archivo);
+        });
+        // agregar archivos cuando son de geonode
+        archivosGeonode.forEach((archivo) => {
+          formData.append('archivos_geonode', archivo.pk);
         });
 
         if (archivosEliminados.length > 0) {
