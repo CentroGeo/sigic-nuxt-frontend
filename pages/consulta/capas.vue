@@ -63,14 +63,14 @@ watch(
   }
 );
 onMounted(async () => {
-  storeResources.resetByType(storeConsulta.resourceType);
   updateMapFromHash(route.hash?.slice(1));
+  storeResources.resetByType(storeConsulta.resourceType);
   storeSelected.addFromQueryParam(route.query.capas);
 
   // Para cuando hace el cambio de página
   if (storeSelected.pks.length > 0) {
-    updateQueryParam(storeSelected.asQueryParam());
     storeResources.fetchResourcesByPk(storeConsulta.resourceType, storeSelected.pks);
+    updateQueryParam(storeSelected.asQueryParam());
   }
 });
 
