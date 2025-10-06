@@ -23,9 +23,7 @@ defineExpose({
   abrirModalOpacidad,
 });
 
-watch(valorOpacidad, (nv) => {
-  storeSelected.byPk(selectedElement.value.pk).updateOpacity(nv / 100);
-});
+watch(valorOpacidad, (nv) => (storeSelected.byPk(selectedElement.value.pk).opacidad = nv / 100));
 </script>
 
 <template>

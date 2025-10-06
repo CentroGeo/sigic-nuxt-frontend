@@ -1,6 +1,7 @@
 <script setup>
 import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
 import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
+import { lados } from '@centrogeomx/sisdai-mapas/src/utiles/capa';
 import { findServer, resourceTypeDic } from '~/utils/consulta';
 
 const storeConsulta = useConsultaStore();
@@ -145,6 +146,8 @@ onMounted(async () => {
 // );
 
 // api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
+// const contenedorSelectoresDivisionColapsado = ref(true);
+const selectorDivisionAbierto = ref(undefined);
 </script>
 
 <template>
@@ -160,9 +163,37 @@ onMounted(async () => {
         <SisdaiMapa
           class="gema"
           :vista="vistaDelMapa"
+          :dividir="storeConsulta.divisionMapa"
           @click-centrar="storeConsulta.resetMapExtent"
           @al-mover-vista="actualizarHashDesdeVista"
         >
+          <div
+            class="selectores-division-contenedor fondo-color-neutro borde-redondeado-4"
+            :class="{
+              colapsado: !(
+                storeConsulta.contenedorSelectoresDivisionColapsado &&
+                storeConsulta.divisionMapaActivado()
+              ),
+            }"
+          >
+            <ConsultaSelectorDivisionMapa
+              :abierto="selectorDivisionAbierto === lados.derecho"
+              :lado="lados.derecho"
+              @al-abrir="
+                selectorDivisionAbierto =
+                  selectorDivisionAbierto === lados.derecho ? undefined : lados.derecho
+              "
+            />
+            <ConsultaSelectorDivisionMapa
+              :abierto="selectorDivisionAbierto === lados.izquierdo"
+              :lado="lados.izquierdo"
+              @al-abrir="
+                selectorDivisionAbierto =
+                  selectorDivisionAbierto === lados.izquierdo ? undefined : lados.izquierdo
+              "
+            />
+          </div>
+
           <SisdaiCapaXyz :posicion="0" />
 
           <SisdaiCapaWms
@@ -171,6 +202,8 @@ onMounted(async () => {
             :capa="resource.alternate"
             :consulta="gnoxyFetch"
             :fuente="findServer(resource)"
+            :lado="storeSelected.byPk(resource.pk).lado"
+            :mosaicos="true"
             :opacidad="storeSelected.byPk(resource.pk).opacidad"
             :posicion="storeSelected.byPk(resource.pk).posicion + 1"
             :visible="storeSelected.byPk(resource.pk).visible"
@@ -190,3 +223,27 @@ onMounted(async () => {
     </template>
   </ConsultaLayoutPaneles>
 </template>
+
+<style lang="scss" scoped>
+.selectores-division-contenedor {
+  z-index: 2;
+  right: 0;
+  top: 160px;
+  position: absolute;
+
+  cursor: inherit;
+  pointer-events: inherit;
+  opacity: 1;
+  max-width: 260px;
+
+  &.colapsado {
+    cursor: default;
+    pointer-events: none;
+    opacity: 0;
+    max-width: 0;
+    transition:
+      opacity 0.27s ease,
+      max-width 0.27s ease;
+  }
+}
+</style>

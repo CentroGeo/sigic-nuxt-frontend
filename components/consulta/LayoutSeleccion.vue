@@ -85,6 +85,16 @@ function changeModal(to) {
     notifyDownloadOneChild(modalResource.value);
   }
 }
+
+// const isOpen = ref(false);
+const storeConsulta = useConsultaStore();
+const dividirMapa = computed({
+  get: () => storeConsulta.divisionMapaActivado(),
+  set(nuevValor) {
+    if (nuevValor) storeConsulta.activarDivisionMapa();
+    else storeConsulta.desactivarDivisionMapa();
+  },
+});
 </script>
 
 <template>
@@ -98,7 +108,7 @@ function changeModal(to) {
         <div class="flex m-y-3">
           <button
             type="button"
-            class="boton-primario"
+            class="boton-primario boton-chico"
             aria-label="Descargar mapa"
             @click="
               resourceType === resourceTypeDic.dataLayer
@@ -129,6 +139,33 @@ function changeModal(to) {
           >
             <span class="pictograma-eliminar" aria-hidden="true" />
           </button>
+        </div>
+
+        <div v-if="resourceType === resourceTypeDic.dataLayer" class="flex m-y-3">
+          <button
+            v-globo-informacion:derecha="
+              storeConsulta.contenedorSelectoresDivisionColapsado ? 'Cerrar' : 'Abrir'
+            "
+            type="button"
+            class="boton-pictograma boton-con-contenedor-secundario"
+            :aria-label="storeConsulta.contenedorSelectoresDivisionColapsado ? 'Cerrar' : 'Abrir'"
+            :disabled="!dividirMapa"
+            style="align-self: center"
+            @click="
+              storeConsulta.contenedorSelectoresDivisionColapsado =
+                !storeConsulta.contenedorSelectoresDivisionColapsado
+            "
+          >
+            <span
+              :class="`pictograma-angulo-${storeConsulta.contenedorSelectoresDivisionColapsado ? 'derecho' : 'izquierdo'}`"
+              aria-hidden="true"
+            />
+          </button>
+
+          <div class="contendor-control-dividir">
+            <input id="control-dividir" v-model="dividirMapa" type="checkbox" />
+            <label for="control-dividir"> Dividir pantalla </label>
+          </div>
         </div>
 
         <UiNumeroElementos :numero="storeSelected.pks.length" :etiqueta="etiquetaElementos" />

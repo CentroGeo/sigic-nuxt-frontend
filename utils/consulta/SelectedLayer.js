@@ -8,6 +8,8 @@ export default class SelectedLayer extends SelectedResource {
 
     this.estilo = _options.estilo || undefined;
     this.opacidad = _options.opacidad || 1;
+
+    this.lado = undefined;
   }
 
   get asQueryParam() {
@@ -19,9 +21,5 @@ export default class SelectedLayer extends SelectedResource {
   }
   set opacidad(valor) {
     this.opacidad_ = Number(valor);
-  }
-
-  updateOpacity(value) {
-    this.opacidad = value;
   }
 }
