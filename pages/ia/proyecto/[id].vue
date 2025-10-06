@@ -106,6 +106,8 @@ const etiquetaRecursosSeleccionados = ref('');
 
 const archivosSeleccionados = ref([]);
 const categoriaSeleccionada = ref(null);
+const archivosGeonode = ref([]);
+const archivosTabla = ref([]);
 
 function groupResults() {
   categorizedResources.value = {};
@@ -166,8 +168,7 @@ function removerRecursoSeleccionado(capa) {
     recursosSeleccionados.value.splice(index, 1);
   }
 }
-const archivosGeonode = ref([]);
-const archivosTabla = ref([]);
+
 function cargarArchivosASubir() {
   seleccionCatalogoModal?.value.cerrarModal();
   // TODO: fix tipo de archivo y archivo file para subir
@@ -182,10 +183,11 @@ function cargarArchivosASubir() {
     embed_url: file.embed_url,
     pk: file.pk,
   }));
-  console.log('nuevosArchivos', nuevosArchivos);
 
   archivosGeonode.value = [...archivosGeonode.value, ...nuevosArchivos];
+  console.log('archivosGeonode.value', archivosGeonode.value);
   archivosTabla.value = [...archivosSeleccionados.value, ...archivosGeonode.value];
+  console.log('archivosTabla.value', archivosTabla.value);
 }
 
 watch([inputSearch], async () => {
@@ -259,10 +261,12 @@ onMounted(async () => {
       categoria: 'Archivo',
       origen: 'Propio',
     }));
-    console.log('arraySources', arraySources);
+    console.log('archivosBackend', archivosBackend);
 
     archivosSeleccionados.value = [...archivosSeleccionados.value, ...archivosBackend];
-    archivosTabla.value = [...archivosSeleccionados.value, ...archivosGeonode.value];
+    console.log('archivosSeleccionados.value', archivosSeleccionados.value);
+    archivosTabla.value = [...archivosSeleccionados.value, ...archivosBackend];
+    console.log('archivosTabla.value', archivosTabla.value);
   }
 });
 
@@ -320,7 +324,9 @@ const manejarSeleccionArchivos = (event) => {
   }));
 
   archivosSeleccionados.value = [...archivosSeleccionados.value, ...nuevosArchivos];
+  console.log('archivosSeleccionados.value', archivosSeleccionados.value);
   archivosTabla.value = [...archivosSeleccionados.value, ...archivosGeonode.value];
+  console.log('archivosTabla.value', archivosTabla.value);
   event.target.value = ''; // Resetear el input para permitir seleccionar el mismo archivo otra vez
 };
 
@@ -345,8 +351,11 @@ const obtenerTipoArchivo = (nombre) => {
 // Método para eliminar archivo de la lista
 const eliminarArchivo = (id) => {
   archivosSeleccionados.value = archivosSeleccionados.value.filter((archivo) => archivo.id !== id);
+  console.log('archivosSeleccionados.value', archivosSeleccionados.value);
   archivosGeonode.value = archivosGeonode.value.filter((archivo) => archivo.id !== id);
-  archivosTabla.value = [...archivosSeleccionados.value, ...archivosGeonode.value];
+  console.log('archivosGeonode.value', archivosGeonode.value);
+  archivosTabla.value = archivosTabla.value.filter((archivo) => archivo.id !== id);
+  console.log('archivosTabla.value', archivosTabla.value);
 
   archivosEliminados.value.push(id);
 };
@@ -496,7 +505,7 @@ const editarProyecto = async () => {
               </div>
             </div>
 
-            <div v-if="archivosSeleccionados.length > 0" class="tabla-archivos m-y-3">
+            <div v-if="archivosTabla.length > 0" class="tabla-archivos m-y-3">
               <h3>Archivos a subir</h3>
               <table class="tabla">
                 <thead>
