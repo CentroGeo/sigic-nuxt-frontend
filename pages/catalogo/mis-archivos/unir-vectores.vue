@@ -320,7 +320,7 @@ onMounted(async () => {
                 <figcaption class="texto-centrado">Uniendo capa</figcaption>
               </figure>
             </div>
-            <div class="flex flex-contenido-separado m-t-3">
+            <div class="flex flex-contenido-separado m-t-3 p-1">
               <div class="columna-8">
                 <button
                   type="button"
