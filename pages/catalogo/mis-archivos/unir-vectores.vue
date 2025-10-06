@@ -314,22 +314,31 @@ onMounted(async () => {
             </p>
           </template>
           <template #cuerpo>
-            <!-- TODO: loader sigic -->
-            <p>...cargando</p>
+            <div class="flex flex-contenido-centrado">
+              <figure>
+                <img src="/img/loader.gif" alt="Loader de SIGIC" />
+                <figcaption class="texto-centrado">Uniendo capa</figcaption>
+              </figure>
+            </div>
+            <div class="flex flex-contenido-separado m-t-3">
+              <div class="columna-8">
+                <button
+                  type="button"
+                  class="boton-secundario"
+                  value="cancela"
+                  @click="modalUnionVectorial.cerrarModal()"
+                >
+                  Cancelar
+                </button>
+              </div>
+              <div class="columna-8">
+                <nuxt-link class="boton boton-primario" to="/catalogo/mis-archivos"
+                  >Ir a mis archivos
+                </nuxt-link>
+              </div>
+            </div>
           </template>
-          <template #pie>
-            <nuxt-link class="boton boton-primario" to="/catalogo/mis-archivos"
-              >Ir a mis archivos
-            </nuxt-link>
-            <button
-              type="button"
-              class="boton-secundario"
-              value="cancela"
-              @click="modalUnionVectorial.cerrarModal()"
-            >
-              Cancelar
-            </button>
-          </template>
+          <template #pie> </template>
         </SisdaiModal>
       </ClientOnly>
     </template>
@@ -337,6 +346,16 @@ onMounted(async () => {
 </template>
 
 <style lang="scss">
+.modal-cuerpo {
+  // margin-top: 32px !important;
+  .flex {
+    .boton-secundario,
+    .boton-primario {
+      width: 100%;
+      display: inherit;
+    }
+  }
+}
 .colapsable {
   border: 1px solid var(--borde);
   border-radius: 8px;
