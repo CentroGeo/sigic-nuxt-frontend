@@ -176,12 +176,14 @@ function cargarArchivosASubir() {
     id: Date.now() + Math.random().toString(36).substr(2, 9),
     nombre: file.title,
     tipo: obtenerTipoArchivo(file.title),
-    archivo: file, // Objeto File original
+    // archivo: file, // Objeto File original
+    archivo: null,
     categoria: 'Archivo',
     origen: 'Catálogo',
     download_url: file.download_url,
     embed_url: file.embed_url,
     pk: file.pk,
+    uuid: file.uuid,
   }));
 
   archivosGeonode.value = [...archivosGeonode.value, ...nuevosArchivos];
@@ -265,7 +267,7 @@ onMounted(async () => {
 
     archivosSeleccionados.value = [...archivosSeleccionados.value, ...archivosBackend];
     console.log('archivosSeleccionados.value', archivosSeleccionados.value);
-    archivosTabla.value = [...archivosSeleccionados.value, ...archivosBackend];
+    archivosTabla.value = [...archivosSeleccionados.value];
     console.log('archivosTabla.value', archivosTabla.value);
   }
 });
@@ -369,7 +371,8 @@ const guardarProyecto = async () => {
       mensaje: 'Iniciando subida del proyecto...',
       duracion: 3000
     }); */
-
+    console.log('archivosSeleccionados.value', archivosSeleccionados.value);
+    console.log('archivosGeonode.value', archivosGeonode.value);
     await storeIA.crearProyecto(
       nombreProyecto.value,
       descripcionProyecto.value,
@@ -401,6 +404,8 @@ const guardarProyecto = async () => {
 
 const editarProyecto = async () => {
   try {
+    console.log('archivosSeleccionados.value', archivosSeleccionados.value);
+    console.log('archivosGeonode.value', archivosGeonode.value);
     await storeIA.actualizarProyecto(
       nombreProyecto.value,
       descripcionProyecto.value,
