@@ -8,6 +8,7 @@ const metaDescription =
 
 export default defineNuxtConfig({
   app: {
+    baseURL: process.env.NUXT_APP_BASE_URL || '/sigic/',
     head: {
       link: [
         {
@@ -60,10 +61,8 @@ export default defineNuxtConfig({
 
   auth: {
     isEnabled: true,
-    baseURL: `${baseUrl}/api/auth`,
-    // originEnvKey: 'NUXT_AUTH_ORIGIN',  // TODO: pendiente de definir
-
-    globalAppMiddleware: false, // protege todas las páginas por defecto
+    baseURL: `${baseUrl || 'http://localhost:3000/sigic'}/api/auth`,
+    globalAppMiddleware: false,
     provider: {
       type: 'authjs',
       trustHost: true,
@@ -80,11 +79,12 @@ export default defineNuxtConfig({
 
     // Variables públicas (disponibles también en el cliente)
     public: {
-      geonodeApi: process.env.NUXT_PUBLIC_GEONODE_API,
+      apiBase: `${process.env.NUXT_APP_BASE_URL || '/sigic/'}api`,
+      baseURL: process.env.NUXT_PUBLIC_BASE_URL || 'http://localhost:3000/sigic',
       geonodeUrl: process.env.NUXT_PUBLIC_GEONODE_URL,
+      geonodeApi: process.env.NUXT_PUBLIC_GEONODE_API,
       geoserverUrl: process.env.NUXT_PUBLIC_GEOSERVER_URL,
       iaBackendUrl: process.env.NUXT_PUBLIC_IA_BACKEND_URL,
-      baseURL: baseUrl,
       defaultPage: process.env.NUXT_PUBLIC_DEFAULT_PAGE,
       geonodeApiDefaultFilter: process.env.NUXT_PUBLIC_GEONODE_API_DEFAULT_FILTER || '',
       enableAuth: process.env.NUXT_PUBLIC_ENABLE_AUTH === 'true' || true,
@@ -96,6 +96,7 @@ export default defineNuxtConfig({
   },
 
   nitro: {
+    baseURL: process.env.NITRO_APP_BASE_URL || '/sigic/',
     // TODO: remover cuando catálogo se conecte con el backend
     storage: {
       fs: {

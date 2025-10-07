@@ -1,6 +1,6 @@
 services:
   sigic-frontend:
-    image: ghcr.io/centrogeo/sigic-nuxt-frontend:develop
+    image: sigic-frontend
     ports:
       - '3000:3000'
     restart: unless-stopped
@@ -24,3 +24,5 @@ services:
       NUXT_PUBLIC_ENABLE_CATALOGO_CARGA: ${NUXT_PUBLIC_ENABLE_CATALOGO_CARGA}
       NUXT_PUBLIC_ENABLE_CONSULTA: ${NUXT_PUBLIC_ENABLE_CONSULTA}
       NUXT_PUBLIC_ENABLE_IAA: ${NUXT_PUBLIC_ENABLE_IAA}
+
+
