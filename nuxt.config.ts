@@ -61,7 +61,7 @@ export default defineNuxtConfig({
 
   auth: {
     isEnabled: true,
-    baseURL: `${baseUrl || 'http://localhost:3000/sigic'}/api/auth`,
+    baseURL: `${baseUrl || 'http://localhost:3000'}/api/auth`,
     globalAppMiddleware: false,
     provider: {
       type: 'authjs',
@@ -79,8 +79,8 @@ export default defineNuxtConfig({
 
     // Variables públicas (disponibles también en el cliente)
     public: {
-      apiBase: `${process.env.NUXT_APP_BASE_URL || '/sigic/'}api`,
-      baseURL: process.env.NUXT_PUBLIC_BASE_URL || 'http://localhost:3000/sigic',
+      apiBase: `${process.env.NUXT_APP_BASE_URL || '/'}api`,
+      baseURL: process.env.NUXT_PUBLIC_BASE_URL || 'http://localhost:3000',
       geonodeUrl: process.env.NUXT_PUBLIC_GEONODE_URL,
       geonodeApi: process.env.NUXT_PUBLIC_GEONODE_API,
       geoserverUrl: process.env.NUXT_PUBLIC_GEOSERVER_URL,
