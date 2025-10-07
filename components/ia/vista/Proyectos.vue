@@ -17,8 +17,6 @@ const loadSources = async () => {
   //Consulta fuentes
   arraySources.value = await storeIA.getProjectSources(proyecto.value['id']);
 
-  //console.log(arraySources);
-
   //catalogo.value = arrayProjects;
   //catalogoFiltrado.value = arrayProjects;
 };
@@ -35,15 +33,12 @@ const loadContexts = async () => {
     storeIA.existeContexto = false;
   }
 
-  //console.log("contextos: ",contextos);
-
   //catalogo.value = arrayProjects;
   //catalogoFiltrado.value = arrayProjects;
 };
 
 //carga fuentes del proyecto inicialmente seleccionado
 /* onMounted(() => {
-  //console.log(proyecto.value)
   loadSources();
   loadContexts();
 }); */
@@ -61,7 +56,6 @@ watch(
 
 // Observador carga fuentes al cambiar de proyecto
 watch(proyecto, () => {
-  //console.log("Proyecto cambió:", nuevoProyecto);
   loadSources();
   loadContexts();
 });
@@ -257,6 +251,7 @@ async function openResourceView(resource) {
                 <tr v-for="archivo in arraySources" :key="archivo.id">
                   <td class="p-3">
                     <a @click="openResourceView(archivo)">{{ archivo.filename }}</a>
+                    <!-- <a :href="archivo.embed_url" target="_blank" rel="noopener noreferrer">{{ archivo.filename }}</a> -->
                   </td>
                   <td class="p-3 etiqueta-tabla">
                     <span class="p-x-1 p-y-minimo">{{ obtenerTipoArchivo(archivo.filename) }}</span>

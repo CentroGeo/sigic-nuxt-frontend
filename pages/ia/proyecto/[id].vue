@@ -171,7 +171,6 @@ function removerRecursoSeleccionado(capa) {
 
 function cargarArchivosASubir() {
   seleccionCatalogoModal?.value.cerrarModal();
-  // TODO: fix tipo de archivo y archivo file para subir
   const nuevosArchivos = recursosSeleccionados.value.map((file) => ({
     id: Date.now() + Math.random().toString(36).substr(2, 9),
     nombre: file.title,
@@ -187,9 +186,7 @@ function cargarArchivosASubir() {
   }));
 
   archivosGeonode.value = [...archivosGeonode.value, ...nuevosArchivos];
-  console.log('archivosGeonode.value', archivosGeonode.value);
   archivosTabla.value = [...archivosSeleccionados.value, ...archivosGeonode.value];
-  console.log('archivosTabla.value', archivosTabla.value);
 }
 
 watch([inputSearch], async () => {
@@ -262,13 +259,11 @@ onMounted(async () => {
       archivo: null,
       categoria: 'Archivo',
       origen: 'Propio',
+      // origen: archivo.origin ? 'Propio' : 'Catálogo',
     }));
-    console.log('archivosBackend', archivosBackend);
 
     archivosSeleccionados.value = [...archivosSeleccionados.value, ...archivosBackend];
-    console.log('archivosSeleccionados.value', archivosSeleccionados.value);
     archivosTabla.value = [...archivosSeleccionados.value];
-    console.log('archivosTabla.value', archivosTabla.value);
   }
 });
 
@@ -326,9 +321,8 @@ const manejarSeleccionArchivos = (event) => {
   }));
 
   archivosSeleccionados.value = [...archivosSeleccionados.value, ...nuevosArchivos];
-  console.log('archivosSeleccionados.value', archivosSeleccionados.value);
   archivosTabla.value = [...archivosSeleccionados.value, ...archivosGeonode.value];
-  console.log('archivosTabla.value', archivosTabla.value);
+
   event.target.value = ''; // Resetear el input para permitir seleccionar el mismo archivo otra vez
 };
 
@@ -353,11 +347,8 @@ const obtenerTipoArchivo = (nombre) => {
 // Método para eliminar archivo de la lista
 const eliminarArchivo = (id) => {
   archivosSeleccionados.value = archivosSeleccionados.value.filter((archivo) => archivo.id !== id);
-  console.log('archivosSeleccionados.value', archivosSeleccionados.value);
   archivosGeonode.value = archivosGeonode.value.filter((archivo) => archivo.id !== id);
-  console.log('archivosGeonode.value', archivosGeonode.value);
   archivosTabla.value = archivosTabla.value.filter((archivo) => archivo.id !== id);
-  console.log('archivosTabla.value', archivosTabla.value);
 
   archivosEliminados.value.push(id);
 };
@@ -371,8 +362,7 @@ const guardarProyecto = async () => {
       mensaje: 'Iniciando subida del proyecto...',
       duracion: 3000
     }); */
-    console.log('archivosSeleccionados.value', archivosSeleccionados.value);
-    console.log('archivosGeonode.value', archivosGeonode.value);
+
     await storeIA.crearProyecto(
       nombreProyecto.value,
       descripcionProyecto.value,
@@ -383,7 +373,7 @@ const guardarProyecto = async () => {
 
     // Notificación de éxito
     //alert("Proyecto guardado correctamente")
-    console.log('Proyecto guardado correctamente');
+
     /*    notificacion.mostrar({
       tipo: 'exito',
       mensaje: 'Proyecto guardado correctamente',
@@ -393,7 +383,7 @@ const guardarProyecto = async () => {
     navigateTo('/ia/proyectos');
   } catch (error) {
     //alert('Error al guardar: ' + error.message);
-    console.log('Error al guardar: ' + error.message);
+    console.error('Error al guardar: ' + error.message);
     /* notificacion.mostrar({
       tipo: 'error',
       mensaje: 'Error al guardar: ' + error.message,
@@ -404,8 +394,6 @@ const guardarProyecto = async () => {
 
 const editarProyecto = async () => {
   try {
-    console.log('archivosSeleccionados.value', archivosSeleccionados.value);
-    console.log('archivosGeonode.value', archivosGeonode.value);
     await storeIA.actualizarProyecto(
       nombreProyecto.value,
       descripcionProyecto.value,
@@ -418,7 +406,7 @@ const editarProyecto = async () => {
 
     navigateTo('/ia/proyectos');
   } catch (error) {
-    console.log('Error al actualizar: ' + error.message);
+    console.error('Error al actualizar: ' + error.message);
   }
 };
 </script>
