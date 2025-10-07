@@ -1,4 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import { defineNuxtConfig } from 'nuxt/config';
 
 const isDev = process.env.NODE_ENV !== 'production';
 const baseUrl = process.env.NUXT_PUBLIC_BASE_URL || 'http://localhost:3000';

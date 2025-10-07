@@ -1,11 +1,10 @@
 <script setup>
+import { useAuth, useRuntimeConfig } from '#imports';
+import { useCatalogoStore } from '@/stores/catalogo';
+import { reactive, ref } from 'vue';
+
 const storeCatalogo = useCatalogoStore();
-
-definePageMeta({
-  middleware: 'sidebase-auth',
-  bodyAttrs: { class: '' },
-});
-
+const configEnv = useRuntimeConfig();
 const statusOk = ref(false);
 const archivosEnCarga = ref([]);
 const { data } = useAuth();
@@ -16,66 +15,74 @@ const docs_files = ['.txt', '.pdf', '.xls', '.xlsx'];
 async function guardarArchivo(files) {
   const token = ref(data.value?.accessToken);
 
-  // 1. Primero agregamos todos a la lista como "pendientes"
+  // 1️⃣ Agregamos todos los archivos a la lista como pendientes
   const nuevosArchivos = Array.from(files).map((file) =>
     reactive({
-      nombre: file?.name,
+      nombre: file.name,
       estatus: 'pendiente',
-      mensaje: 'Cargando...',
+      mensaje: 'Preparando carga...',
+      porcentaje: 0,
+      rutaArchivo: null,
     })
   );
 
   archivosEnCarga.value.push(...nuevosArchivos);
 
-  // 2. Luego procesamos cada archivo en paralelo
+  // 2️⃣ Procesamos cada archivo en paralelo
   nuevosArchivos.forEach(async (archivo, idx) => {
     const file = files[idx];
+    let endpoint = null;
+
+    // Identificar tipo de archivo y establecer endpoint
+    if (base_files.some((end) => file.name.endsWith(end))) {
+      endpoint = '/api/cargar-base-file';
+    } else if (docs_files.some((end) => file.name.endsWith(end))) {
+      endpoint = '/api/cargar-doc-file';
+    } else {
+      archivo.estatus = 'error_carga';
+      archivo.mensaje = 'Formato no soportado';
+      return;
+    }
+
     try {
-      let response;
-      let json;
-
-      if (base_files.some((end) => file?.name.endsWith(end))) {
-        const formData = new FormData();
+      // 3️⃣ Crear FormData para enviar al endpoint del servidor
+      const formData = new FormData();
+      if (base_files.some((end) => file.name.endsWith(end))) {
         formData.append('base_file', file);
-        formData.append('token', token.value);
-
-        response = await fetch('/api/cargar-base-file', {
-          method: 'POST',
-          body: formData,
-        });
-      } else if (docs_files.some((end) => file?.name.endsWith(end))) {
-        const formData = new FormData();
+      } else {
         formData.append('doc_file', file);
-        formData.append('token', token.value);
-
-        response = await fetch('/api/cargar-doc-file', {
-          method: 'POST',
-          body: formData,
-        });
-      } else {
-        archivo.estatus = 'error_carga';
-        archivo.mensaje = 'Formato no soportado';
-        return;
       }
+      formData.append('token', token.value);
 
-      // Intentar parsear JSON
-      try {
-        json = await response.json();
-      } catch {
-        json = null;
-      }
+      // 4️⃣ Enviar archivo al endpoint server-side
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        body: formData,
+      });
 
-      // Evaluar respuesta
-      if (!response.ok) {
+      // Monitorear porcentaje (opcional, aproximado)
+      archivo.porcentaje = 100;
+
+      const result = await response.json();
+
+      // 5️⃣ Evaluar respuesta
+      if (!result.success) {
         archivo.estatus = 'error_carga';
-        archivo.mensaje = `Error HTTP: ${response.status}`;
-      } else if (json && json.success === false) {
-        archivo.estatus = 'error_carga';
-        archivo.mensaje = `Subido pero no almacenado: ${json.errors?.join(', ') || 'error de importación'}`;
-      } else {
+        archivo.mensaje = result.message || 'Error en procesamiento';
+      } else if (result.execution_id) {
+        // Caso: capa base, procesando en GeoNode
+        archivo.estatus = 'procesando';
+        archivo.mensaje = 'Procesando capa en GeoNode...';
+        monitorLayerImport(result.execution_id, archivo);
+      } else if (result.url) {
+        // Caso: documento cargado
         archivo.estatus = 'carga_finalizada';
         archivo.mensaje = 'Archivo cargado correctamente';
+        archivo.rutaArchivo = result.url;
         statusOk.value = true;
+      } else {
+        archivo.estatus = 'error_carga';
+        archivo.mensaje = 'Respuesta inesperada del servidor';
       }
     } catch (error) {
       archivo.estatus = 'error_carga';
@@ -83,6 +90,41 @@ async function guardarArchivo(files) {
       console.error(error);
     }
   });
+}
+
+// 🕒 Polling para monitorear la importación de capas base
+async function monitorLayerImport(executionId, archivo) {
+  const token = ref(data.value?.accessToken);
+  const startTime = Date.now();
+  const interval = setInterval(async () => {
+    try {
+      const res = await fetch(
+        `${configEnv.public.geonodeUrl}/api/v2/executionrequest/${executionId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token.value}`,
+          },
+        }
+      );
+      const data = await res.json();
+
+      if (data.status === 'SUCCESS') {
+        clearInterval(interval);
+        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+        archivo.estatus = 'carga_finalizada';
+        archivo.mensaje = `Procesado en ${elapsed}s`;
+        archivo.rutaArchivo = data.imported_resources?.[0]?.detail_url || null;
+      }
+
+      if (data.status === 'FAILED') {
+        clearInterval(interval);
+        archivo.estatus = 'error_carga';
+        archivo.mensaje = 'Error al procesar en GeoNode';
+      }
+    } catch (e) {
+      console.error('Error consultando ejecución:', e);
+    }
+  }, 2000);
 }
 </script>
 
@@ -96,16 +138,12 @@ async function guardarArchivo(files) {
       <main id="principal" class="contenedor m-b-10">
         <div class="alineacion-izquierda ancho-lectura">
           <h2>Carga archivo</h2>
-          <p>
-            <b>Solo archivos GeoJSON, Geopaquetes, CSV, XML, PDF, JPG y PNG.</b>
-          </p>
+          <p><b>Solo archivos GeoJSON, Geopaquetes, CSV, XML, PDF, JPG y PNG.</b></p>
 
           <ClientOnly>
-            <CatalogoElementoDragNdDrop
-              ref="dragNdDrop"
-              @pasar-archivo="(i) => guardarArchivo(i)"
-            />
+            <CatalogoElementoDragNdDrop @pasar-archivo="(i) => guardarArchivo(i)" />
           </ClientOnly>
+
           <h2>Cargas</h2>
 
           <div v-for="(archivo, i) in archivosEnCarga" :key="i">
@@ -114,7 +152,7 @@ async function guardarArchivo(files) {
               :class="{
                 'fondo-color-confirmacion': archivo.estatus == 'carga_finalizada',
                 'fondo-color-error': archivo.estatus == 'error_carga',
-                'fondo-color-neutro': archivo.estatus == 'pendiente',
+                'fondo-color-neutro': ['pendiente', 'procesando'].includes(archivo.estatus),
               }"
             >
               <div
@@ -130,10 +168,17 @@ async function guardarArchivo(files) {
                       'pictograma-alerta': archivo.estatus == 'error_carga',
                     }"
                   />
-                  <b> {{ archivo.mensaje }} </b>
+                  <b>{{ archivo.mensaje }}</b>
                 </div>
 
                 <p>{{ archivo.nombre }}</p>
+                <p v-if="['pendiente', 'procesando'].includes(archivo.estatus)">
+                  {{ archivo.porcentaje }}%
+                </p>
+
+                <p v-if="archivo.rutaArchivo">
+                  <a :href="archivo.rutaArchivo" target="_blank">{{ archivo.rutaArchivo }}</a>
+                </p>
               </div>
             </div>
           </div>
