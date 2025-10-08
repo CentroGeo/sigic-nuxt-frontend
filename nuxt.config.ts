@@ -2,10 +2,7 @@
 
 const isDev = process.env.NODE_ENV !== 'production';
 const appBase = (process.env.NUXT_APP_BASE_URL || '/').replace(/\/+$/, '/');
-const publicBase = process.env.NUXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-
-// 🔹 Combina dominio + subpath
-const fullBase = `${publicBase}${appBase.replace(/\/$/, '')}`;
+const authBase = process.env.AUTH_BASE_URL;
 
 const metaImg = 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg';
 const metaDescription =
@@ -72,29 +69,18 @@ export default defineNuxtConfig({
   auth: {
     debug: true,
     isEnabled: true,
-    baseURL: `${fullBase}/api/auth`,
-    originEnvKey: isDev ? undefined : 'NUXT_PUBLIC_BASE_URL',
+    baseURL: `${authBase}`,
+    originEnvKey: 'NUXT_AUTH_ORIGIN',
     globalAppMiddleware: false,
     provider: {
       type: 'authjs',
       trustHost: true,
       defaultProvider: 'keycloak',
     },
-    useSecureCookies: !isDev,
+
     sessionRefresh: {
       enablePeriodically: 300000,
       enableOnWindowFocus: true,
-    },
-    cookies: {
-      state: {
-        name: 'next-auth.state',
-        options: {
-          httpOnly: true,
-          sameSite: isDev ? 'lax' : 'none',
-          secure: !isDev,
-          path: '/',
-        },
-      },
     },
   },
 

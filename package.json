@@ -9,6 +9,7 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
+    "start": "nuxt start",
     "postinstall": "nuxt prepare",
     "reinstall": "npm run clean && npm i",
     "reinstall:ci": "npm run clean:ci && npm ci",
@@ -21,11 +22,11 @@
   "dependencies": {
     "@centrogeomx/sisdai-componentes": "^4.14.1",
     "@centrogeomx/sisdai-css": "^1.10.2",
-    "@centrogeomx/sisdai-mapas": "github:CentroGeo/sisdai-mapas#fix/wms-fetch",
+    "@centrogeomx/sisdai-mapas": "git+https://github.com/CentroGeo/sisdai-mapas.git#fix/wms-fetch",
     "@nuxt/image": "^1.10.0",
     "@nuxt/scripts": "^0.11.10",
     "@pinia/nuxt": "^0.11.1",
-    "@sidebase/nuxt-auth": "1.1.0",
+    "@sidebase/nuxt-auth": "1.0.2",
     "@unhead/vue": "^2.0.14",
     "@vueuse/nuxt": "^13.5.0",
     "dompurify": "^3.2.6",
@@ -56,5 +57,14 @@
     "*.{css,scss,js,jsx,md,ts,vue}": [
       "npm run format-lint"
     ]
+  },
+  "overrides": {
+    "h3": "1.8.2",
+    "nitropack": "2.9.7",
+    "unstorage": "1.10.2",
+    "db0": "0.1.4",
+    "@eslint/config-inspector": {
+      "h3": "1.8.2"
+    }
   }
 }

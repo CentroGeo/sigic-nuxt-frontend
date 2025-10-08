@@ -1,6 +1,6 @@
 import { NuxtAuthHandler } from '#auth';
 import KeycloakProvider from 'next-auth/providers/keycloak';
-// const isDev = process.env.NODE_ENV !== 'production';
+const isDev = process.env.NODE_ENV !== 'production';
 
 function isTokenExpired(expiresAt?: number, offset = 60_000): boolean {
   if (!expiresAt) return true;
@@ -21,6 +21,47 @@ export default NuxtAuthHandler({
 
   session: {
     strategy: 'jwt',
+  },
+
+  useSecureCookies: !isDev,
+
+  cookies: {
+    state: {
+      name: 'next-auth.state',
+      options: {
+        httpOnly: true,
+        sameSite: isDev ? 'lax' : 'none',
+        secure: !isDev,
+        path: '/',
+      },
+    },
+    pkceCodeVerifier: {
+      name: 'next-auth.pkce.code_verifier',
+      options: {
+        httpOnly: true,
+        sameSite: isDev ? 'lax' : 'none',
+        secure: !isDev,
+        path: '/',
+      },
+    },
+    callbackUrl: {
+      name: 'next-auth.callback-url',
+      options: {
+        httpOnly: true,
+        sameSite: isDev ? 'lax' : 'none',
+        secure: !isDev,
+        path: '/',
+      },
+    },
+    csrfToken: {
+      name: 'next-auth.csrf-token',
+      options: {
+        httpOnly: true,
+        sameSite: isDev ? 'lax' : 'none',
+        secure: !isDev,
+        path: '/',
+      },
+    },
   },
 
   callbacks: {
@@ -72,7 +113,6 @@ export default NuxtAuthHandler({
           token.error = 'RefreshAccessTokenError';
         }
       }
-
       return token;
     },
 
