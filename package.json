@@ -33,14 +33,14 @@
     "formidable": "^3.5.4",
     "marked": "^16.1.1",
     "next-auth": "~4.21.1",
-    "nuxt": "^3.17.7",
+    "nuxt": "^3.19.3",
     "pinia": "^3.0.3",
     "undici": "^7.10.0",
     "vue": "latest",
     "vue-router": "latest"
   },
   "devDependencies": {
-    "@nuxt/devtools": "^2.6.2",
+    "@nuxt/devtools": "^2.6.5",
     "@nuxt/eslint": "^1.7.0",
     "@nuxt/test-utils": "^3.19.2",
     "@types/formidable": "^3.4.5",
@@ -57,14 +57,5 @@
     "*.{css,scss,js,jsx,md,ts,vue}": [
       "npm run format-lint"
     ]
-  },
-  "overrides": {
-    "h3": "1.8.2",
-    "nitropack": "2.9.7",
-    "unstorage": "1.10.2",
-    "db0": "0.1.4",
-    "@eslint/config-inspector": {
-      "h3": "1.8.2"
-    }
   }
 }

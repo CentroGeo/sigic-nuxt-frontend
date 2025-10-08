@@ -70,7 +70,7 @@ export default defineNuxtConfig({
     debug: true,
     isEnabled: true,
     baseURL: `${authBase}`,
-    originEnvKey: 'NUXT_AUTH_ORIGIN',
+    // originEnvKey: 'NUXT_AUTH_ORIGIN',
     globalAppMiddleware: false,
     provider: {
       type: 'authjs',
@@ -86,7 +86,6 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     // Variables privadas (solo disponibles en el servidor, como tokens)
-    // authOrigin: process.env.NUXT_AUTH_ORIGIN,
     authSecret: process.env.NUXT_AUTH_SECRET,
     keycloakClientId: process.env.KEYCLOAK_CLIENT_ID,
     keycloakIssuer: process.env.KEYCLOAK_ISSUER,
