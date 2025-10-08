@@ -78,7 +78,7 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
         );
       }
 
-      const data = res.resources;
+      const data = res.resources.filter((d) => d.category);
       resources[resourceType] = [...resources[resourceType], ...data];
     },
     /**

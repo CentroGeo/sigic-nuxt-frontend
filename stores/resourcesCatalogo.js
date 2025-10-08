@@ -143,31 +143,32 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       this.isLoading = false;
       //return resources[resourceType];
     },
+    /**
+     *
+     * @param {Object} resourceType
+     */
     async getResourcesByType(resourceType = storeConsulta.resourceType) {
       const { gnoxyFetch } = useGnoxyUrl();
       this.isLoading = true;
       const queryParams = {
-        custom: 'true',
         'filter{resource_type}': resourceTypeGeonode[resourceType],
         page_size: myTotalsByType[resourceType],
       };
       if (resourceType === 'dataLayer') {
-        queryParams['extent_ne'] = '[-1,-1,0,0]';
+        queryParams['filter{has_geometry}'] = 'true';
       }
       if (resourceType === 'dataTable') {
-        //queryParams['filter{subtype.in}'] = ['vector', 'remote'];
-        queryParams['filter{subtype.in}'] = 'vector';
+        queryParams['filter{subtype.in}'] = ['vector', 'remote'];
       }
-      /*  if (resourceType === 'document') {
-        queryParams['file_extension'] = ['pdf', 'txt'];
-      } */
+      if (resourceType === 'document') {
+        queryParams['filter{extension}'] = ['pdf', 'txt'];
+      }
 
       const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
       resourcesByType2[resourceType] = res.resources;
       this.isLoading = false;
-      //return resources[resourceType];
     },
 
     /**
@@ -227,6 +228,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       const { gnoxyFetch } = useGnoxyUrl();
       this.isLoading = true;
       const queryParams = {
+        'sort[]': '-last_updated',
         page_size: 1,
         ...query,
       };
@@ -253,7 +255,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       };
 
       const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
-      console.log(url);
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
       resources[resourceType] = res.resources;

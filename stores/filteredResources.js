@@ -86,7 +86,7 @@ export const useFilteredResources = defineStore('filteredResources', () => {
         queryParams['filter{category.identifier.in}'] = filters.categories;
       }
       if (filters.years !== null && filters.years.length > 0) {
-        const yearList = filters.years.split(',');
+        const yearList = filters.years.split(',').map((d) => d.trim());
         queryParams['filter{year}'] = yearList;
       }
       if (filters.institutions !== null && filters.institutions.length > 0) {

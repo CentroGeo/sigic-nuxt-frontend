@@ -163,7 +163,8 @@ async function updateFunctions() {
     // Se excluye el botón de descargar para remotos
     buttons = buttons.filter((d) => d.excludeFor !== 'remotes');
     // Se excluye el botón OWS para remotos
-    buttons = buttons.filter((d) => d.label !== 'Vínculo OWS');
+    //buttons = buttons.filter((d) => d.label !== 'Vínculo OWS');
+    console.log(resourceElement.value);
     const resourceHasWMS = await hasWMS(resourceElement.value, 'table');
     // Esta se llamaría para el WFS*/
     /*     const resourceHasWMS = await hasWMS(
