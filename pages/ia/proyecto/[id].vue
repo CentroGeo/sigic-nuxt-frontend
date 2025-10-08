@@ -172,7 +172,8 @@ function removerRecursoSeleccionado(capa) {
 function cargarArchivosASubir() {
   seleccionCatalogoModal?.value.cerrarModal();
   const nuevosArchivos = recursosSeleccionados.value.map((file) => ({
-    id: Date.now() + Math.random().toString(36).substr(2, 9),
+    // id: Date.now() + Math.random().toString(36).substr(2, 9),
+    id: Math.floor(Math.random() * 1000000000000000000000),
     nombre: file.title,
     tipo: obtenerTipoArchivo(file.title),
     // archivo: file, // Objeto File original
@@ -183,6 +184,7 @@ function cargarArchivosASubir() {
     embed_url: file.embed_url,
     pk: file.pk,
     uuid: file.uuid,
+    category: 'Documento',
   }));
 
   archivosGeonode.value = [...archivosGeonode.value, ...nuevosArchivos];
@@ -261,6 +263,7 @@ onMounted(async () => {
       origen: 'Propio',
       // origen: archivo.origin ? 'Propio' : 'Catálogo',
     }));
+    // console.log('arraySources', arraySources);
 
     archivosSeleccionados.value = [...archivosSeleccionados.value, ...archivosBackend];
     archivosTabla.value = [...archivosSeleccionados.value];
@@ -312,7 +315,8 @@ const seleccionarCategoria = (categoria) => {
 // Método para manejar la selección de archivos
 const manejarSeleccionArchivos = (event) => {
   const nuevosArchivos = Array.from(event.target.files).map((file) => ({
-    id: Date.now() + Math.random().toString(36).substr(2, 9),
+    // id: Date.now() + Math.random().toString(36).substr(2, 9),
+    id: Math.floor(Math.random() * 1000000000000000000000),
     nombre: file.name,
     tipo: obtenerTipoArchivo(file.name),
     archivo: file, // Objeto File original

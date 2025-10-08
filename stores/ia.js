@@ -51,7 +51,10 @@ export const useIAStore = defineStore('ia', {
         });
         // agregar archivos cuando son de geonode
         archivosGeonode.forEach((archivo) => {
-          formData.append('archivos_geonode', archivo.pk);
+          formData.append(
+            'archivos_geonode',
+            JSON.stringify({ id: archivo.pk, category: archivo.category })
+          );
         });
 
         // Log para depuración
@@ -434,7 +437,10 @@ export const useIAStore = defineStore('ia', {
         });
         // agregar archivos cuando son de geonode
         archivosGeonode.forEach((archivo) => {
-          formData.append('archivos_geonode', archivo.pk);
+          formData.append(
+            'archivos_geonode',
+            JSON.stringify({ id: archivo.pk, category: archivo.category })
+          );
         });
 
         if (archivosEliminados.length > 0) {
