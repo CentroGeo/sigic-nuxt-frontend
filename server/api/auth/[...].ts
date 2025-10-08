@@ -1,6 +1,6 @@
 import { NuxtAuthHandler } from '#auth';
 import KeycloakProvider from 'next-auth/providers/keycloak';
-const isDev = process.env.NODE_ENV !== 'production';
+// const isDev = process.env.NODE_ENV !== 'production';
 
 function isTokenExpired(expiresAt?: number, offset = 60_000): boolean {
   if (!expiresAt) return true;
@@ -18,17 +18,6 @@ export default NuxtAuthHandler({
       clientSecret: process.env.KEYCLOAK_CLIENT_SECRET,
     }),
   ],
-
-  cookies: {
-    state: {
-      name: 'next-auth.state',
-      options: {
-        httpOnly: true,
-        sameSite: isDev ? 'lax' : 'none',
-        secure: !isDev,
-      },
-    },
-  },
 
   session: {
     strategy: 'jwt',

@@ -2,7 +2,10 @@
 
 const isDev = process.env.NODE_ENV !== 'production';
 const appBase = (process.env.NUXT_APP_BASE_URL || '/').replace(/\/+$/, '/');
-const origin = process.env.NUXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+const publicBase = process.env.NUXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+
+// 🔹 Combina dominio + subpath
+const fullBase = `${publicBase}${appBase.replace(/\/$/, '')}`;
 
 const metaImg = 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg';
 const metaDescription =
@@ -52,12 +55,6 @@ export default defineNuxtConfig({
   nitro: {
     baseURL: appBase,
     // TODO: remover cuando catálogo se conecte con el backend
-    storage: {
-      fs: {
-        driver: 'fs',
-        base: './public',
-      },
-    },
   },
 
   modules: [
@@ -73,28 +70,45 @@ export default defineNuxtConfig({
   css: ['@centrogeomx/sisdai-css/dist/sisdai.min.css'],
 
   auth: {
+    debug: true,
     isEnabled: true,
-    baseURL: '/api/auth',
-    originEnvKey: 'NUXT_PUBLIC_BASE_URL',
+    baseURL: `${fullBase}/api/auth`,
+    originEnvKey: isDev ? undefined : 'NUXT_PUBLIC_BASE_URL',
     globalAppMiddleware: false,
     provider: {
       type: 'authjs',
       trustHost: true,
       defaultProvider: 'keycloak',
     },
+    useSecureCookies: !isDev,
     sessionRefresh: {
       enablePeriodically: 300000,
       enableOnWindowFocus: true,
+    },
+    cookies: {
+      state: {
+        name: 'next-auth.state',
+        options: {
+          httpOnly: true,
+          sameSite: isDev ? 'lax' : 'none',
+          secure: !isDev,
+          path: '/',
+        },
+      },
     },
   },
 
   runtimeConfig: {
     // Variables privadas (solo disponibles en el servidor, como tokens)
+    // authOrigin: process.env.NUXT_AUTH_ORIGIN,
+    authSecret: process.env.NUXT_AUTH_SECRET,
+    keycloakClientId: process.env.KEYCLOAK_CLIENT_ID,
+    keycloakIssuer: process.env.KEYCLOAK_ISSUER,
+    keycloakClientSecret: process.env.KEYCLOAK_CLIENT_SECRET,
 
     // Variables públicas (disponibles también en el cliente)
     public: {
-      apiBase: `${appBase}api`,
-      baseURL: origin,
+      baseURL: process.env.NUXT_PUBLIC_BASE_URL,
       geonodeUrl: process.env.NUXT_PUBLIC_GEONODE_URL,
       geonodeApi: process.env.NUXT_PUBLIC_GEONODE_API,
       geoserverUrl: process.env.NUXT_PUBLIC_GEOSERVER_URL,
