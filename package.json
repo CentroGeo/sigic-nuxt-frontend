@@ -25,7 +25,7 @@
     "@nuxt/image": "^1.10.0",
     "@nuxt/scripts": "^0.11.10",
     "@pinia/nuxt": "^0.11.1",
-    "@sidebase/nuxt-auth": "^1.0.2",
+    "@sidebase/nuxt-auth": "^1.1.0",
     "@unhead/vue": "^2.0.14",
     "@vueuse/nuxt": "^13.5.0",
     "dompurify": "^3.2.6",

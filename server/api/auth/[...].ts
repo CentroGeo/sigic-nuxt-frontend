@@ -18,6 +18,17 @@ export default NuxtAuthHandler({
     }),
   ],
 
+  cookies: {
+    state: {
+      name: 'next-auth.state',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax', // evita bloqueo en flujo OAuth cross-domain
+        path: '/api/auth', // debe coincidir con tu callback
+      },
+    },
+  },
+
   session: {
     strategy: 'jwt',
   },

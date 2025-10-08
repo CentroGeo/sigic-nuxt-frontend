@@ -8,7 +8,7 @@ const metaDescription =
 
 export default defineNuxtConfig({
   app: {
-    baseURL: process.env.NUXT_APP_BASE_URL || '/sigic/',
+    baseURL: process.env.NUXT_APP_BASE_URL || '/',
     head: {
       link: [
         {
@@ -45,6 +45,17 @@ export default defineNuxtConfig({
   sourcemap: {
     server: isDev,
     client: isDev,
+  },
+
+  nitro: {
+    baseURL: process.env.NITRO_APP_BASE_URL || '/sigic/',
+    // TODO: remover cuando catálogo se conecte con el backend
+    storage: {
+      fs: {
+        driver: 'fs',
+        base: './public',
+      },
+    },
   },
 
   modules: [
@@ -92,17 +103,6 @@ export default defineNuxtConfig({
       enableCatalogoCarga: process.env.NUXT_PUBLIC_ENABLE_CATALOGO_CARGA === 'true' || true,
       enableConsulta: process.env.NUXT_PUBLIC_ENABLE_CONSULTA === 'true' || true,
       enableIaa: process.env.NUXT_PUBLIC_ENABLE_IAA === 'true' || true,
-    },
-  },
-
-  nitro: {
-    baseURL: process.env.NITRO_APP_BASE_URL || '/sigic/',
-    // TODO: remover cuando catálogo se conecte con el backend
-    storage: {
-      fs: {
-        driver: 'fs',
-        base: './public',
-      },
     },
   },
 
