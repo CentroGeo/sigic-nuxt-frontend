@@ -27,32 +27,6 @@ const {
   resource: selectedElement.value,
 });
 
-watch(paginaActual, () => {
-  fetchTable({
-    paginaActual: paginaActual.value,
-    tamanioPagina: tamanioPagina,
-    resource: selectedElement.value,
-  });
-});
-
-watch(
-  [
-    () => selectedPk.value,
-    () => storeResources.resourcesByType(resourceType),
-    () => storeResources.selectedResources[resourceType],
-  ],
-  () => {
-    selectedElement.value = storeResources.findResource(selectedPk.value);
-    paginaActual.value = 0;
-    fetchTable({
-      paginaActual: paginaActual.value,
-      tamanioPagina: tamanioPagina,
-      resource: selectedElement.value,
-    });
-  },
-  { deep: true }
-);
-
 /**
  * Actualiza el queryParam.
  * @param newQueryParam para asignar.
@@ -63,16 +37,43 @@ function updateQueryParam(tablas) {
     router.replace({ query: { tablas } });
   }
 }
+
+watch(paginaActual, () => {
+  fetchTable({
+    paginaActual: paginaActual.value,
+    tamanioPagina: tamanioPagina,
+    resource: selectedElement.value,
+  });
+});
+
 watch(() => storeSelected.asQueryParam(), updateQueryParam);
 
+watch(
+  [
+    () => selectedPk.value,
+    () => storeResources.resourcesByType(resourceType),
+    () => storeResources.selectedResources[resourceType],
+  ],
+  () => {
+    console.log('El selected pk', selectedPk.value);
+    selectedElement.value = storeResources.findResource(selectedPk.value);
+    paginaActual.value = 0;
+    fetchTable({
+      paginaActual: paginaActual.value,
+      tamanioPagina: tamanioPagina,
+      resource: selectedElement.value,
+    });
+  },
+  { deep: true }
+);
 onMounted(async () => {
   storeResources.resetByType(storeConsulta.resourceType);
   storeSelected.addFromQueryParam(route.query.tablas);
 
   // Para cuando hacemos el cambio de página
   if (storeSelected.pks.length > 0) {
-    updateQueryParam(storeSelected.asQueryParam());
     storeResources.fetchResourcesByPk(storeConsulta.resourceType, storeSelected.pks);
+    updateQueryParam(storeSelected.asQueryParam());
   }
 });
 </script>

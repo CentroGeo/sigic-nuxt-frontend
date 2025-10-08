@@ -1,5 +1,6 @@
 <script setup>
 import { resourceTypeDic } from '~/utils/consulta';
+import SelectedLayer from '~/utils/consulta/SelectedLayer';
 
 definePageMeta({ auth: false, key: 'inicio' });
 const { signIn } = useAuth();
@@ -121,6 +122,14 @@ const obtenerMasRecientes = (type) => {
 };
 
 const capasMasRecientes = obtenerMasRecientes(resourceTypeDic.dataLayer);
+
+async function updateSelection(newPk) {
+  storeSelected.add(new SelectedLayer({ pk: newPk }), 'dataLayer');
+
+  nextTick(async () => {
+    await navigateTo('/consulta/capas');
+  });
+}
 </script>
 <template>
   <div>
@@ -421,6 +430,7 @@ const capasMasRecientes = obtenerMasRecientes(resourceTypeDic.dataLayer);
                     class="boton boton-primario boton-chico"
                     aria-label="Ver capa en visualizador"
                     :to="`/consulta/capas?capas=${capa.pk}`"
+                    @click.prevent="updateSelection(capa.pk)"
                   >
                     Ver Capa en visualizador
                   </nuxt-link>
