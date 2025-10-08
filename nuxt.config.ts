@@ -1,14 +1,16 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
 const isDev = process.env.NODE_ENV !== 'production';
-const baseUrl = process.env.NUXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+const appBase = (process.env.NUXT_APP_BASE_URL || '/').replace(/\/+$/, '/');
+const origin = process.env.NUXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+
 const metaImg = 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg';
 const metaDescription =
   'Sistema Integral de Gestión de Información Científica. Integra, visualiza y aprovecha el conocimiento científico de México.';
 
 export default defineNuxtConfig({
   app: {
-    baseURL: process.env.NUXT_APP_BASE_URL || '/',
+    baseURL: appBase,
     head: {
       link: [
         {
@@ -48,7 +50,7 @@ export default defineNuxtConfig({
   },
 
   nitro: {
-    baseURL: process.env.NITRO_APP_BASE_URL || '/sigic/',
+    baseURL: appBase,
     // TODO: remover cuando catálogo se conecte con el backend
     storage: {
       fs: {
@@ -72,7 +74,8 @@ export default defineNuxtConfig({
 
   auth: {
     isEnabled: true,
-    baseURL: `${baseUrl || 'http://localhost:3000'}/api/auth`,
+    baseURL: '/api/auth',
+    originEnvKey: 'NUXT_PUBLIC_BASE_URL',
     globalAppMiddleware: false,
     provider: {
       type: 'authjs',
@@ -90,19 +93,19 @@ export default defineNuxtConfig({
 
     // Variables públicas (disponibles también en el cliente)
     public: {
-      apiBase: `${process.env.NUXT_APP_BASE_URL || '/'}api`,
-      baseURL: process.env.NUXT_PUBLIC_BASE_URL || 'http://localhost:3000',
+      apiBase: `${appBase}api`,
+      baseURL: origin,
       geonodeUrl: process.env.NUXT_PUBLIC_GEONODE_URL,
       geonodeApi: process.env.NUXT_PUBLIC_GEONODE_API,
       geoserverUrl: process.env.NUXT_PUBLIC_GEOSERVER_URL,
       iaBackendUrl: process.env.NUXT_PUBLIC_IA_BACKEND_URL,
       defaultPage: process.env.NUXT_PUBLIC_DEFAULT_PAGE,
       geonodeApiDefaultFilter: process.env.NUXT_PUBLIC_GEONODE_API_DEFAULT_FILTER || '',
-      enableAuth: process.env.NUXT_PUBLIC_ENABLE_AUTH === 'true' || true,
-      enableCatalogoVista: process.env.NUXT_PUBLIC_ENABLE_CATALOGO_VISTA === 'true' || true,
-      enableCatalogoCarga: process.env.NUXT_PUBLIC_ENABLE_CATALOGO_CARGA === 'true' || true,
-      enableConsulta: process.env.NUXT_PUBLIC_ENABLE_CONSULTA === 'true' || true,
-      enableIaa: process.env.NUXT_PUBLIC_ENABLE_IAA === 'true' || true,
+      enableAuth: process.env.NUXT_PUBLIC_ENABLE_AUTH === 'true',
+      enableCatalogoVista: process.env.NUXT_PUBLIC_ENABLE_CATALOGO_VISTA === 'true',
+      enableCatalogoCarga: process.env.NUXT_PUBLIC_ENABLE_CATALOGO_CARGA === 'true',
+      enableConsulta: process.env.NUXT_PUBLIC_ENABLE_CONSULTA === 'true',
+      enableIaa: process.env.NUXT_PUBLIC_ENABLE_IAA === 'true',
     },
   },
 
