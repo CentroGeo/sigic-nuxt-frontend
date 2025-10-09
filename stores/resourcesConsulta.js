@@ -100,6 +100,8 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
         } else {
           datum = res.resources;
         }
+      } else {
+        datum = res.resources;
       }
 
       // TODO: Agregar en los query params el filtrado para indicar que recursos con metadatos

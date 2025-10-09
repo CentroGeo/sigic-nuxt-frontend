@@ -201,6 +201,8 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
         } else {
           datum = res.resources;
         }
+      } else {
+        datum = res.resources;
       }
 
       myResourcesByType[resourceType] = datum;
@@ -254,6 +256,8 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
         } else {
           datum = res.resources;
         }
+      } else {
+        datum = res.resources;
       }
 
       resourcesByType2[resourceType] = datum;

@@ -298,23 +298,24 @@ export async function defineGeomType(resource) {
  * @returns
  */
 export async function fetchDoc(url) {
-  const { gnoxyFetch } = useGnoxyUrl();
-  const maxAttempts = 5;
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    try {
-      const res = await gnoxyFetch(url.toString());
-      if (!res.ok) {
-        return 'Error';
-      }
-      const blob = await res.blob();
-      const newUrl = URL.createObjectURL(blob);
-      return newUrl;
-    } catch {
-      console.warn('Se está intentando una vez más');
-    }
-    // Si fracasa en todos los intentos
-    return 'Error';
+  //const extensionDict = { pdf: 'application/pdf', txt: 'text/plain' };
+  const { data } = useAuth();
+  const token = data.value?.accessToken;
+  let res;
+  if (token) {
+    res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } else {
+    res = await fetch(url);
   }
+  if (!res.ok) {
+    throw new Error(`Fetchfailed: ${res.status}`);
+  }
+  const blob = await res.blob();
+  console.log(blob);
+  const newUrl = URL.createObjectURL(blob);
+  console.log(newUrl);
 }
 
 /**
