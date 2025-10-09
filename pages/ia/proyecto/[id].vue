@@ -228,6 +228,8 @@ const proyecto = ref(null);
 
 const archivosEliminados = ref([]);
 
+const loaderModal = ref(null);
+
 onMounted(async () => {
   storeFilters.resetAll();
   storeFilters.filters.resourceType = botonRadioSeleccion.value;
@@ -345,6 +347,7 @@ const eliminarArchivo = (id) => {
 // Función para guardar el proyecto
 const guardarProyecto = async () => {
   try {
+    loaderModal.value?.abrirModal();
     // Mostrar notificación de inicio
     /*     notificacion.mostrar({
       tipo: 'info',
@@ -362,6 +365,8 @@ const guardarProyecto = async () => {
     // Notificación de éxito
     //alert("Proyecto guardado correctamente")
     console.log('Proyecto guardado correctamente');
+
+    loaderModal.value?.cerrarModal();
     /*    notificacion.mostrar({
       tipo: 'exito',
       mensaje: 'Proyecto guardado correctamente',
@@ -382,6 +387,8 @@ const guardarProyecto = async () => {
 
 const editarProyecto = async () => {
   try {
+    loaderModal.value?.abrirModal();
+
     await storeIA.actualizarProyecto(
       nombreProyecto.value,
       descripcionProyecto.value,
@@ -390,6 +397,8 @@ const editarProyecto = async () => {
       archivosEliminados.value,
       route.params.id
     );
+
+    loaderModal.value?.cerrarModal();
 
     navigateTo('/ia/proyectos');
   } catch (error) {
@@ -758,6 +767,21 @@ const editarProyecto = async () => {
               Aceptar
             </button>
           </template>
+        </SisdaiModal>
+
+        <SisdaiModal ref="loaderModal">
+          <template #encabezado>
+            <h1 class="m-t-0 texto-tamanio-6">Procesando</h1>
+          </template>
+          <template #cuerpo>
+            <div class="flex flex-contenido-centrado">
+              <figure>
+                <img src="/img/loader.gif" alt="Loader de SIGIC" />
+                <figcaption class="texto-centrado">Indexando archivo</figcaption>
+              </figure>
+            </div>
+          </template>
+          <template #pie> </template>
         </SisdaiModal>
       </ClientOnly>
     </template>
