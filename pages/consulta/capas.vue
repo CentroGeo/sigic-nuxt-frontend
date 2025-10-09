@@ -63,6 +63,7 @@ watch(
   }
 );
 onMounted(async () => {
+  //console.log('Extension:', vistaDelMapa.value);
   updateMapFromHash(route.hash?.slice(1));
   storeResources.resetByType(storeConsulta.resourceType);
   storeSelected.addFromQueryParam(route.query.capas);

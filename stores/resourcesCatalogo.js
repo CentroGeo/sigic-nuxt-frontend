@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { buildUrl, resourceTypeDic, resourceTypeGeonode } from '~/utils/consulta';
+import { buildUrl, hasWMS, resourceTypeDic, resourceTypeGeonode } from '~/utils/consulta';
 
 export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => {
   const config = useRuntimeConfig();
@@ -87,7 +87,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
     },
     /**
      * Trae el total los recursos vinculados a un usuario (yo), por tipo de recurso
-     *      * Esto se usa para georreferenciación
+     * Esto se usa para georreferenciación
      * @param {String} resourceType
      */
     async getMyTotalResources(resourceType = storeConsulta.resourceType) {
@@ -111,6 +111,45 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
       myTotalsByType[resourceType] = res.total;
+      this.isLoading = false;
+    },
+
+    /**
+     * Obtiene el total de los recursos asociados a un usuario (yo), según si tienen metadatos o no
+     * Esto se usa en catalogo/misRecursos
+     * @param {String} section
+     * @param {Array} query
+     */
+    async getMyTotal(section, query) {
+      const { gnoxyFetch } = useGnoxyUrl();
+      this.isLoading = true;
+      const queryParams = {
+        ...query,
+        page_size: 1,
+        'filter{owner.username}': userEmail,
+      };
+      // Agregar toda la lógica de queryparams correspondientes por sección
+      const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
+      const request = await gnoxyFetch(url.toString());
+      const res = await request.json();
+      totalMisArchivos[section] = res.total;
+      this.isLoading = false;
+    },
+
+    /**Hace una petición de solo 1 recurso para obtener el total de recursos y el último recurso */
+    async getTotalResources(resourceType = storeConsulta.resourceType, query) {
+      const { gnoxyFetch } = useGnoxyUrl();
+      this.isLoading = true;
+      const queryParams = {
+        'sort[]': '-last_updated',
+        page_size: 1,
+        ...query,
+      };
+      const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
+      const request = await gnoxyFetch(url.toString());
+      const res = await request.json();
+      totals[resourceType] = res.total;
+      latestResources[resourceType] = res.resources[0];
       this.isLoading = false;
     },
     /**
@@ -139,7 +178,32 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
-      myResourcesByType[resourceType] = res.resources;
+
+      //En caso de que los recursos incluyan servicios remotos, revisamos su getCapabilities
+      let datum;
+      if (resourceType !== resourceTypeDic.document) {
+        const service = resourceType === resourceTypeDic.dataLayer ? 'map' : 'table';
+        const sourceTypes = res.resources.map((d) => d.sourcetype);
+        if (sourceTypes.includes('REMOTE')) {
+          // Revisamos si los servicios remotos permiten ver la capa y/o la tabla
+          const locals = res.resources.filter((resource) => resource.sourcetype === 'LOCAL');
+          let remotes = res.resources.filter((resource) => resource.sourcetype === 'REMOTE');
+          const filterRemotes = await Promise.all(
+            remotes.map(async (resource) => {
+              return {
+                resourceValue: resource,
+                resourceHasWms: await hasWMS(resource, service),
+              };
+            })
+          );
+          remotes = filterRemotes.filter((d) => d.resourceHasWms).map((d) => d.resourceValue);
+          datum = locals.concat(remotes);
+        } else {
+          datum = res.resources;
+        }
+      }
+
+      myResourcesByType[resourceType] = datum;
       this.isLoading = false;
       //return resources[resourceType];
     },
@@ -167,29 +231,32 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
-      resourcesByType2[resourceType] = res.resources;
-      this.isLoading = false;
-    },
 
-    /**
-     * Obtiene el total de los recursos asociados a un usuario (yo), según si tienen metadatos o no
-     * Esto se usa en catalogo/misRecursos
-     * @param {String} section
-     * @param {Array} query
-     */
-    async getMyTotal(section, query) {
-      const { gnoxyFetch } = useGnoxyUrl();
-      this.isLoading = true;
-      const queryParams = {
-        ...query,
-        page_size: 1,
-        'filter{owner.username}': userEmail,
-      };
-      // Agregar toda la lógica de queryparams correspondientes por sección
-      const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
-      const request = await gnoxyFetch(url.toString());
-      const res = await request.json();
-      totalMisArchivos[section] = res.total;
+      //En caso de que los recursos incluyan servicios remotos, revisamos su getCapabilities
+      let datum;
+      if (resourceType !== resourceTypeDic.document) {
+        const service = resourceType === resourceTypeDic.dataLayer ? 'map' : 'table';
+        const sourceTypes = res.resources.map((d) => d.sourcetype);
+        if (sourceTypes.includes('REMOTE')) {
+          // Revisamos si los servicios remotos permiten ver la capa y/o la tabla
+          const locals = res.resources.filter((resource) => resource.sourcetype === 'LOCAL');
+          let remotes = res.resources.filter((resource) => resource.sourcetype === 'REMOTE');
+          const filterRemotes = await Promise.all(
+            remotes.map(async (resource) => {
+              return {
+                resourceValue: resource,
+                resourceHasWms: await hasWMS(resource, service),
+              };
+            })
+          );
+          remotes = filterRemotes.filter((d) => d.resourceHasWms).map((d) => d.resourceValue);
+          datum = locals.concat(remotes);
+        } else {
+          datum = res.resources;
+        }
+      }
+
+      resourcesByType2[resourceType] = datum;
       this.isLoading = false;
     },
 
@@ -211,34 +278,20 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
-      let datum;
+
+      // TODO: Implementar en los queryparams si tiene metadatos pendientes o no
+      let data;
       if (section === 'disponibles') {
-        datum = res.resources.filter((d) => d.category !== null);
+        data = res.resources.filter((d) => d.category !== null);
       } else if (section === 'pendientes') {
-        datum = res.resources.filter((d) => d.category === null);
+        data = res.resources.filter((d) => d.category === null);
       } else {
-        datum = [];
+        data = [];
       }
-      misArchivos[section] = datum;
+      misArchivos[section] = data;
       this.isLoading = false;
     },
 
-    /**Hace una petición de solo 1 recurso para obtener el total de recursos y el último recurso */
-    async getTotalResources(resourceType = storeConsulta.resourceType, query) {
-      const { gnoxyFetch } = useGnoxyUrl();
-      this.isLoading = true;
-      const queryParams = {
-        'sort[]': '-last_updated',
-        page_size: 1,
-        ...query,
-      };
-      const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
-      const request = await gnoxyFetch(url.toString());
-      const res = await request.json();
-      totals[resourceType] = res.total;
-      latestResources[resourceType] = res.resources[0];
-      this.isLoading = false;
-    },
     /**
      *Hace una petición de recursos especificando la página y el número de recursos que se desea traer
      * @param {Object} resourceType
