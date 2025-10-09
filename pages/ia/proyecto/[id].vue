@@ -6,55 +6,26 @@ import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/cam
 import SisdaiCasilla from '@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 
-import {
-  categoriesInSpanish,
-  cleanInput,
-  fetchGeometryType,
-  getWMSserver,
-  hasWMS,
-  resourceTypeDic,
-  tooltipContent,
-} from '~/utils/consulta';
+import { buildUrl, categoriesInSpanish } from '~/utils/consulta';
 
 const config = useRuntimeConfig();
 const storeFilters = useFilteredResources();
-const storeCatalogoResources = useResourcesCatalogoStore();
+const storeResources = useResourcesIAStore();
+const { gnoxyFetch } = useGnoxyUrl();
 
-storeCatalogoResources.getTotalResources(
-  resourceTypeDic.dataLayer,
-  storeFilters.buildQueryParams(resourceTypeDic.dataLayer)
-);
-storeCatalogoResources.getTotalResources(
-  resourceTypeDic.dataTable,
-  storeFilters.buildQueryParams(resourceTypeDic.dataTable)
-);
-storeCatalogoResources.getTotalResources(
-  resourceTypeDic.document,
-  storeFilters.buildQueryParams(resourceTypeDic.document)
-);
-
-const filteredResources = ref([]);
-const categorizedResources = ref({});
+const resourceType = ref('dataLayer');
+const recursos = computed(() => storeResources.resources[resourceType.value]);
 
 const agregaCatalogoModal = ref(null);
-const botonRadioSeleccion = ref('dataLayer');
 
 const seleccionCatalogoModal = ref(null);
-const inputSearch = computed({
-  get: () => storeFilters.filters.inputSearch,
-  set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
-});
-const selectedCategoryResourcesLength = ref(0);
 const dictTipoRecurso = {
   dataLayer: 'capas',
   dataTable: 'tablas',
   document: 'documentos',
 };
-const etiquetaRecursos = ref(dictTipoRecurso[botonRadioSeleccion.value]);
 
 const recursosSeleccionados = ref([]);
-const buttons = ref([]);
-const geomType = ref(null);
 const optionsDict = {
   Point: { tooltipText: 'Capa de puntos', class: 'pictograma-capa-puntos' },
   MultiPoint: {
@@ -102,72 +73,63 @@ const optionsDict = {
     class: 'pictograma-alerta',
   },
 };
-const etiquetaRecursosSeleccionados = ref('');
 
 const archivosSeleccionados = ref([]);
 const categoriaSeleccionada = ref(null);
 const archivosGeonode = ref([]);
 const archivosTabla = ref([]);
 
-function groupResults() {
-  categorizedResources.value = {};
-  filteredResources.value.map((r) => {
-    if (r.category) {
-      const title = r.category.gn_description;
-      if (Object.keys(categorizedResources.value).includes(title)) {
-        categorizedResources.value[title].push(r);
-      } else {
-        categorizedResources.value[title] = [];
-        categorizedResources.value[title].push(r);
-      }
-    } else {
-      if (Object.keys(categorizedResources.value).includes('Sin Clasificar')) {
-        categorizedResources.value['Sin Clasificar'].push(r);
-      } else {
-        categorizedResources.value['Sin Clasificar'] = [];
-        categorizedResources.value['Sin Clasificar'].push(r);
-      }
-    }
-  });
+//
+const totalResources = ref(0);
+const params = computed(() => storeFilters.filters.queryParams);
+const apiCategorias = `${config.public.geonodeApi}/facets/category`;
+const categoriesDict = ref({});
+const totalCategoria = ref(0);
+const nthElement = 1;
+
+async function fetchTotalByCategory(category) {
+  const preParams = params.value;
+  preParams['filter{category.identifier.in}'] = category;
+  const url = buildUrl(`${config.public.geonodeApi}/resources`, preParams);
+  const request = await gnoxyFetch(url.toString());
+  const res = await request.json();
+  return res.total;
 }
-function updateResources(nuevosRecursos) {
-  filteredResources.value = nuevosRecursos;
-  groupResults();
+
+async function buildCategoriesDict() {
+  categoriesDict.value = {};
+  // Esta parte es para obtener todas las categorias
+  const request = await gnoxyFetch(apiCategorias);
+  const geonodeCategories = await request.json();
+  const results = await Promise.all(
+    geonodeCategories.topics.items.map(async (d) => {
+      const totalByCat = await fetchTotalByCategory(d.key);
+      if (totalByCat !== 0) {
+        categoriesDict.value[d.label] = {
+          label: d.label,
+          name: d.key,
+          inSpanish: categoriesInSpanish[d.label],
+          total: totalByCat,
+          page: 1,
+          isLoading: false,
+        };
+      }
+      return totalByCat;
+    })
+  );
+  totalResources.value = results.reduce((a, b) => a + b, 0);
 }
-function botonSiguiente() {
+
+async function botonSiguiente() {
   agregaCatalogoModal.value?.cerrarModal();
-  selectedCategoryResourcesLength.value = 0;
-  recursosSeleccionados.value = [];
-  etiquetaRecursos.value = dictTipoRecurso[botonRadioSeleccion.value];
   seleccionCatalogoModal.value?.abrirModal();
 }
-function asignarEtiquetaRecursos() {
-  if (botonRadioSeleccion.value === 'dataLayer') {
-    if (selectedCategoryResourcesLength.value === 1) {
-      etiquetaRecursos.value = 'capa';
-    } else {
-      etiquetaRecursos.value = 'capas';
-    }
-  } else if (botonRadioSeleccion.value === 'dataTable') {
-    if (selectedCategoryResourcesLength.value === 1) {
-      etiquetaRecursos.value = 'tabla';
-    } else {
-      etiquetaRecursos.value = 'tablas';
-    }
-  } else if (botonRadioSeleccion.value === 'document') {
-    if (selectedCategoryResourcesLength.value === 1) {
-      etiquetaRecursos.value = 'documento';
-    } else {
-      etiquetaRecursos.value = 'documentos';
-    }
-  }
-}
-function removerRecursoSeleccionado(capa) {
-  const index = recursosSeleccionados.value.indexOf(capa);
-  if (index > -1) {
-    recursosSeleccionados.value.splice(index, 1);
-  }
-}
+// function removerRecursoSeleccionado(capa) {
+//   const index = recursosSeleccionados.value.indexOf(capa);
+//   if (index > -1) {
+//     recursosSeleccionados.value.splice(index, 1);
+//   }
+// }
 
 function cargarArchivosASubir() {
   seleccionCatalogoModal?.value.cerrarModal();
@@ -191,34 +153,49 @@ function cargarArchivosASubir() {
   archivosTabla.value = [...archivosSeleccionados.value, ...archivosGeonode.value];
 }
 
-watch([inputSearch], async () => {
-  updateResources(storeCatalogoResources.resourcesByType2[botonRadioSeleccion.value]);
-});
-watch(botonRadioSeleccion, async (nv) => {
-  categoriaSeleccionada.value = null;
-  storeFilters.filters.resourceType = nv;
-  updateResources(storeCatalogoResources.resourcesByType2[nv]);
-});
-watch(recursosSeleccionados, () => {
-  if (botonRadioSeleccion.value === 'dataLayer') {
-    if (recursosSeleccionados.value.length === 1) {
-      etiquetaRecursosSeleccionados.value = 'capa seleccionada';
-    } else {
-      etiquetaRecursosSeleccionados.value = 'capas seleccionadas';
-    }
-  } else if (botonRadioSeleccion.value === 'dataTable') {
-    if (recursosSeleccionados.value.length === 1) {
-      etiquetaRecursosSeleccionados.value = 'tabla seleccionada';
-    } else {
-      etiquetaRecursosSeleccionados.value = 'tablas seleccionadas';
-    }
-  } else if (botonRadioSeleccion.value === 'document') {
-    if (recursosSeleccionados.value.length === 1) {
-      etiquetaRecursosSeleccionados.value = 'documento seleccionada';
-    } else {
-      etiquetaRecursosSeleccionados.value = 'documentos seleccionados';
-    }
+const seleccionarCategoria = async (categoria) => {
+  if (categoriaSeleccionada.value !== categoriesDict.value[categoria].label) {
+    totalCategoria.value = 0;
+    storeResources.resetByType(resourceType.value);
+    categoriaSeleccionada.value = categoriesDict.value[categoria].label;
+    storeFilters.updateFilter('categories', [categoriesDict.value[categoria].name]);
+    await storeFilters.buildQueryParams(resourceType.value);
+    await storeResources.fetchByCategory(resourceType.value, 1, params.value);
+    storeResources.setNthElements(resourceType.value, [
+      recursos.value[recursos.value.length - nthElement].pk,
+    ]);
+    console.log('storeResources.nthElementsPks', storeResources.nthElementsPks[resourceType.value]);
+    totalCategoria.value = categoriesDict.value[categoriaSeleccionada.value].total;
+    // console.log(recursos.value);
   }
+  // categoriaSeleccionada.value = categoriesDict.value[categoria].label;
+};
+
+watch(resourceType, async (nv) => {
+  storeFilters.buildQueryParams(nv);
+  await buildCategoriesDict();
+});
+
+watch(recursosSeleccionados, () => {
+  // if (botonRadioSeleccion.value === 'dataLayer') {
+  //   if (recursosSeleccionados.value.length === 1) {
+  //     etiquetaRecursosSeleccionados.value = 'capa seleccionada';
+  //   } else {
+  //     etiquetaRecursosSeleccionados.value = 'capas seleccionadas';
+  //   }
+  // } else if (botonRadioSeleccion.value === 'dataTable') {
+  //   if (recursosSeleccionados.value.length === 1) {
+  //     etiquetaRecursosSeleccionados.value = 'tabla seleccionada';
+  //   } else {
+  //     etiquetaRecursosSeleccionados.value = 'tablas seleccionadas';
+  //   }
+  // } else if (botonRadioSeleccion.value === 'document') {
+  //   if (recursosSeleccionados.value.length === 1) {
+  //     etiquetaRecursosSeleccionados.value = 'documento seleccionada';
+  //   } else {
+  //     etiquetaRecursosSeleccionados.value = 'documentos seleccionados';
+  //   }
+  // }
 });
 
 const storeIA = useIAStore();
@@ -236,12 +213,8 @@ const proyecto = ref(null);
 const archivosEliminados = ref([]);
 
 onMounted(async () => {
-  storeFilters.resetAll();
-  storeFilters.filters.resourceType = botonRadioSeleccion.value;
-  await storeCatalogoResources.getResourcesByType(resourceTypeDic.dataLayer);
-  await storeCatalogoResources.getResourcesByType(resourceTypeDic.dataTable);
-  await storeCatalogoResources.getResourcesByType(resourceTypeDic.document);
-  updateResources(storeCatalogoResources.resourcesByType2[botonRadioSeleccion.value]);
+  storeFilters.buildQueryParams(resourceType.value);
+  await buildCategoriesDict();
 
   if (route.params.id !== 'nuevo') {
     esEdicion.value = true;
@@ -269,48 +242,6 @@ onMounted(async () => {
     archivosTabla.value = [...archivosSeleccionados.value];
   }
 });
-
-const seleccionarCategoria = (categoria) => {
-  categoriaSeleccionada.value = categoria;
-  selectedCategoryResourcesLength.value =
-    categorizedResources.value[categoriaSeleccionada.value].length || 0;
-
-  asignarEtiquetaRecursos();
-
-  // revisamos el tipo de geometría que tiene el recurso
-  buttons.value = [];
-  categorizedResources.value[categoriaSeleccionada.value].map(async (e) => {
-    if (e.subtype === 'remote') {
-      const resourceHasWMS = await hasWMS(e, 'geometry', config.public.geonodeUrl);
-      if (resourceHasWMS) {
-        const server = getWMSserver(e);
-        geomType.value = await fetchGeometryType(e, server);
-      } else {
-        geomType.value = 'Remoto';
-      }
-    } else if (e.subtype === 'raster') {
-      // Si es raster
-      geomType.value = 'Raster';
-    } else if (e.subtype === 'vector') {
-      // Si es vectorial
-      // Solicitamos la geometría hasta que la tarjeta va a entrar a la vista
-      geomType.value = await fetchGeometryType(e, 'sigic');
-    } else {
-      geomType.value = 'Otro';
-    }
-    if (botonRadioSeleccion.value === 'dataLayer') {
-      buttons.value.push({
-        class: optionsDict[geomType.value].class,
-        tooltipText: optionsDict[geomType.value].tooltipText,
-      });
-    } else {
-      buttons.value.push({
-        class: 'pictograma-informacion',
-        tooltipText: tooltipContent(e),
-      });
-    }
-  });
-};
 
 // Método para manejar la selección de archivos
 const manejarSeleccionArchivos = (event) => {
@@ -568,21 +499,21 @@ const editarProyecto = async () => {
             <form @keydown.enter.prevent="botonSiguiente">
               <SisdaiGrupoBotonesRadio class="radio-catalogo" leyenda="" :es_vertical="true">
                 <SisdaiBotonRadio
-                  v-model="botonRadioSeleccion"
+                  v-model="resourceType"
                   etiqueta="Capas geográficas"
                   value="dataLayer"
                   name="tipodefuente"
                   :es_obligatorio="true"
                 />
                 <SisdaiBotonRadio
-                  v-model="botonRadioSeleccion"
+                  v-model="resourceType"
                   etiqueta="Tabulados de datos"
                   value="dataTable"
                   name="tipodefuente"
                   :es_obligatorio="true"
                 />
                 <SisdaiBotonRadio
-                  v-model="botonRadioSeleccion"
+                  v-model="resourceType"
                   etiqueta="Documentos"
                   value="document"
                   name="tipodefuente"
@@ -600,12 +531,12 @@ const editarProyecto = async () => {
 
         <SisdaiModal ref="seleccionCatalogoModal" class="modal-grande">
           <template #encabezado>
-            <h2>Agregar {{ dictTipoRecurso[botonRadioSeleccion] }} del catálogo</h2>
+            <h2>Agregar {{ dictTipoRecurso[resourceType] }} del catálogo</h2>
           </template>
           <template #cuerpo>
             <div class="p-r-2">
               <p>Explora el catálogo y selecciona fuentes de información para el proyecto</p>
-              <ClientOnly>
+              <!-- <ClientOnly>
                 <form class="campo-busqueda m-y-3" @submit.prevent>
                   <input
                     id="idcampobusquedaialistas"
@@ -630,34 +561,34 @@ const editarProyecto = async () => {
                     <span class="pictograma-buscar" aria-hidden="true" />
                   </button>
                 </form>
-              </ClientOnly>
+              </ClientOnly> -->
 
               <div class="flex flex-contenido-separado">
                 <div class="columna-5">
                   <div>
                     <UiNumeroElementos
-                      :numero="Object.keys(categorizedResources).length"
+                      :numero="Object.keys(categoriesDict).length"
                       etiqueta="Categorías"
                       class="m-b-3"
                     />
                     <ul
-                      v-if="Object.keys(categorizedResources).length !== 0"
+                      v-if="Object.keys(categoriesDict).length !== 0"
                       class="lista-sin-estilo"
                       style="overflow-y: auto"
                     >
                       <li
-                        v-for="categoria in Object.keys(categorizedResources)"
-                        :key="categoria + '-key'"
+                        v-for="categoria in Object.keys(categoriesDict)"
+                        :key="categoriesDict[categoria].name + '-key'"
                         class="m-y-0"
                       >
                         <button
                           class="categoria p-l-6 p-r-2 p-y-1"
                           :class="{
-                            seleccionada: categoria === categoriaSeleccionada,
+                            seleccionada: categoriesDict[categoria].label === categoriaSeleccionada,
                           }"
                           @click="seleccionarCategoria(categoria)"
                         >
-                          {{ categoriesInSpanish[categoria] }}
+                          {{ categoriesDict[categoria].inSpanish }}
                         </button>
                       </li>
                     </ul>
@@ -668,42 +599,34 @@ const editarProyecto = async () => {
                 <div class="columna-5">
                   <div>
                     <UiNumeroElementos
-                      :numero="
-                        categoriaSeleccionada !== 'Sin Clasificar'
-                          ? selectedCategoryResourcesLength
-                          : 0
-                      "
-                      :etiqueta="etiquetaRecursos"
+                      :numero="totalCategoria"
+                      :etiqueta="dictTipoRecurso[resourceType]"
                       class="m-b-3"
                     />
                     <ul class="lista-sin-estilo" style="overflow-y: auto">
-                      <li
-                        v-for="(recurso, i) in categorizedResources[categoriaSeleccionada]"
-                        :key="recurso.pk"
-                        class="m-y-0"
-                      >
-                        <div
-                          v-if="categoriaSeleccionada !== 'Sin Clasificar'"
-                          class="capa p-2 m-b-2 borde-redondeado-20"
-                        >
+                      <li v-for="recurso in recursos" :key="recurso.pk" class="m-y-0">
+                        <div class="capa p-2 m-b-2 borde-redondeado-20">
                           <SisdaiCasilla
                             v-model="recursosSeleccionados"
                             :etiqueta="recurso.title"
                             :value="recurso"
                           />
-                          <div v-if="botonRadioSeleccion === 'dataLayer'" class="icono">
+                          <div v-if="resourceType === 'dataLayer'" class="icono">
                             <span
                               class="m-r-1"
-                              :class="[buttons[i]?.class, 'pictograma-mediano picto']"
+                              :class="[
+                                optionsDict[recurso.geomType].class,
+                                'pictograma-mediano picto',
+                              ]"
                               aria-hidden="true"
                             />
-                            <span>{{ buttons[i]?.tooltipText }}</span>
+                            <span>{{ optionsDict[recurso.geomType].tooltipText }}</span>
                           </div>
                           <div v-else class="icono">
                             <span
-                              v-globo-informacion:derecha="buttons[i]?.tooltipText"
+                              v-globo-informacion:derecha="recurso.raw_abstract"
                               class="m-r-1"
-                              :class="[buttons[i]?.class, 'pictograma-mediano picto']"
+                              :class="['pictograma-informacion', 'pictograma-mediano picto']"
                               aria-hidden="true"
                             />
                           </div>
@@ -716,11 +639,11 @@ const editarProyecto = async () => {
                 <div class="columna-5">
                   <div>
                     <UiNumeroElementos
-                      :numero="recursosSeleccionados.length || 0"
-                      :etiqueta="etiquetaRecursosSeleccionados"
+                      :numero="0"
+                      :etiqueta="'etiquetaRecursosSeleccionados'"
                       class="m-b-3"
                     />
-                    <ul class="lista-sin-estilo" style="overflow-y: auto">
+                    <!--   <ul class="lista-sin-estilo" style="overflow-y: auto">
                       <li
                         v-for="(recurso, i) in recursosSeleccionados"
                         :key="recurso.id"
@@ -759,7 +682,7 @@ const editarProyecto = async () => {
                           </div>
                         </div>
                       </li>
-                    </ul>
+                    </ul>-->
                   </div>
                 </div>
               </div>
