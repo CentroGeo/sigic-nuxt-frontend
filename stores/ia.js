@@ -430,6 +430,7 @@ export const useIAStore = defineStore('ia', {
         formData.append('public', isPublic === 'publico' ? 'True' : 'False');
 
         console.log(archivos);
+        console.log(archivosGeonode);
 
         // Agregar archivos si existen
         archivos.forEach((archivo) => {

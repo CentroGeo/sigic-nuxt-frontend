@@ -3,7 +3,6 @@ import SisdaiAreaTexto from '@centrogeomx/sisdai-componentes/src/componentes/are
 import SisdaiGrupoBotonesRadio from '@centrogeomx/sisdai-componentes/src/componentes/boton-radio-grupo/SisdaiBotonesRadioGrupo.vue';
 import SisdaiBotonRadio from '@centrogeomx/sisdai-componentes/src/componentes/boton-radio/SisdaiBotonRadio.vue';
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
-import SisdaiCasilla from '@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 
 import { buildUrl, categoriesInSpanish } from '~/utils/consulta';
@@ -15,18 +14,16 @@ const { gnoxyFetch } = useGnoxyUrl();
 
 const resourceType = ref('dataLayer');
 const recursos = computed(() => storeResources.resources[resourceType.value]);
+const recursosSeleccionados = computed(() => storeResources.selectedResources[resourceType.value]);
 
 const agregaCatalogoModal = ref(null);
-
 const seleccionCatalogoModal = ref(null);
 const dictTipoRecurso = {
   dataLayer: 'capas',
   dataTable: 'tablas',
   document: 'documentos',
 };
-
-const recursosSeleccionados = ref([]);
-const optionsDict = {
+const geomDict = {
   Point: { tooltipText: 'Capa de puntos', class: 'pictograma-capa-puntos' },
   MultiPoint: {
     tooltipText: 'Capa de puntos',
@@ -79,7 +76,6 @@ const categoriaSeleccionada = ref(null);
 const archivosGeonode = ref([]);
 const archivosTabla = ref([]);
 
-//
 const totalResources = ref(0);
 const params = computed(() => storeFilters.filters.queryParams);
 const apiCategorias = `${config.public.geonodeApi}/facets/category`;
@@ -120,21 +116,30 @@ async function buildCategoriesDict() {
   totalResources.value = results.reduce((a, b) => a + b, 0);
 }
 
-async function botonSiguiente() {
-  agregaCatalogoModal.value?.cerrarModal();
-  seleccionCatalogoModal.value?.abrirModal();
+async function callResources(categoria) {
+  const total = categoriesDict.value[categoria]?.total;
+  const count = recursos.value.length;
+  if (total > count) {
+    const preParams = params.value;
+    categoriesDict.value[categoria].page += 1;
+    await storeResources.fetchByCategory(
+      resourceType.value,
+      categoriesDict.value[categoria].page,
+      preParams
+    );
+  }
 }
-// function removerRecursoSeleccionado(capa) {
-//   const index = recursosSeleccionados.value.indexOf(capa);
-//   if (index > -1) {
-//     recursosSeleccionados.value.splice(index, 1);
-//   }
-// }
 
-function cargarArchivosASubir() {
+async function fetchNewData() {
+  await callResources(categoriaSeleccionada.value);
+  storeResources.setNthElements(resourceType.value, [
+    recursos.value[recursos.value.length - nthElement].pk,
+  ]);
+}
+
+function cargarArchivosGeonode() {
   seleccionCatalogoModal?.value.cerrarModal();
   const nuevosArchivos = recursosSeleccionados.value.map((file) => ({
-    // id: Date.now() + Math.random().toString(36).substr(2, 9),
     id: Math.floor(Math.random() * 1000000000000000000000),
     nombre: file.title,
     tipo: obtenerTipoArchivo(file.title),
@@ -153,10 +158,11 @@ function cargarArchivosASubir() {
   archivosTabla.value = [...archivosSeleccionados.value, ...archivosGeonode.value];
 }
 
-const seleccionarCategoria = async (categoria) => {
+async function seleccionarCategoria(categoria) {
   if (categoriaSeleccionada.value !== categoriesDict.value[categoria].label) {
     totalCategoria.value = 0;
     storeResources.resetByType(resourceType.value);
+    categoriesDict.value[categoria].page = 1;
     categoriaSeleccionada.value = categoriesDict.value[categoria].label;
     storeFilters.updateFilter('categories', [categoriesDict.value[categoria].name]);
     await storeFilters.buildQueryParams(resourceType.value);
@@ -164,38 +170,16 @@ const seleccionarCategoria = async (categoria) => {
     storeResources.setNthElements(resourceType.value, [
       recursos.value[recursos.value.length - nthElement].pk,
     ]);
-    console.log('storeResources.nthElementsPks', storeResources.nthElementsPks[resourceType.value]);
     totalCategoria.value = categoriesDict.value[categoriaSeleccionada.value].total;
-    // console.log(recursos.value);
   }
-  // categoriaSeleccionada.value = categoriesDict.value[categoria].label;
-};
+}
 
-watch(resourceType, async (nv) => {
+watch(resourceType, async (nv, ov) => {
+  storeResources.resetSelectedByType(ov);
+  storeResources.resetByType(ov);
+  totalCategoria.value = 0;
   storeFilters.buildQueryParams(nv);
   await buildCategoriesDict();
-});
-
-watch(recursosSeleccionados, () => {
-  // if (botonRadioSeleccion.value === 'dataLayer') {
-  //   if (recursosSeleccionados.value.length === 1) {
-  //     etiquetaRecursosSeleccionados.value = 'capa seleccionada';
-  //   } else {
-  //     etiquetaRecursosSeleccionados.value = 'capas seleccionadas';
-  //   }
-  // } else if (botonRadioSeleccion.value === 'dataTable') {
-  //   if (recursosSeleccionados.value.length === 1) {
-  //     etiquetaRecursosSeleccionados.value = 'tabla seleccionada';
-  //   } else {
-  //     etiquetaRecursosSeleccionados.value = 'tablas seleccionadas';
-  //   }
-  // } else if (botonRadioSeleccion.value === 'document') {
-  //   if (recursosSeleccionados.value.length === 1) {
-  //     etiquetaRecursosSeleccionados.value = 'documento seleccionada';
-  //   } else {
-  //     etiquetaRecursosSeleccionados.value = 'documentos seleccionados';
-  //   }
-  // }
 });
 
 const storeIA = useIAStore();
@@ -412,7 +396,6 @@ const editarProyecto = async () => {
                   Agregar del catálogo
                   <span class="pictograma-agregar" aria-hidden="true" />
                 </button>
-                <!-- botón "Subir archivos" -->
                 <button
                   class="boton-pictograma boton-primario"
                   aria-label="Subir archivos"
@@ -421,7 +404,6 @@ const editarProyecto = async () => {
                   Subir archivos
                   <span class="pictograma-archivo-subir" aria-hidden="true" />
                 </button>
-                <!-- Input de archivo oculto -->
                 <input
                   ref="fileInput"
                   type="file"
@@ -496,7 +478,12 @@ const editarProyecto = async () => {
           </template>
           <template #cuerpo>
             <p>Selecciona el tipo de fuente de información que deseas agregar a tu proyecto</p>
-            <form @keydown.enter.prevent="botonSiguiente">
+            <form
+              @keydown.enter.prevent="
+                agregaCatalogoModal.cerrarModal();
+                seleccionCatalogoModal.abrirModal();
+              "
+            >
               <SisdaiGrupoBotonesRadio class="radio-catalogo" leyenda="" :es_vertical="true">
                 <SisdaiBotonRadio
                   v-model="resourceType"
@@ -523,7 +510,14 @@ const editarProyecto = async () => {
             </form>
           </template>
           <template #pie>
-            <button class="boton-primario boton-chico" type="button" @click="botonSiguiente">
+            <button
+              class="boton-primario boton-chico"
+              type="button"
+              @click="
+                agregaCatalogoModal.cerrarModal();
+                seleccionCatalogoModal.abrirModal();
+              "
+            >
               Siguiente
             </button>
           </template>
@@ -568,13 +562,14 @@ const editarProyecto = async () => {
                   <div>
                     <UiNumeroElementos
                       :numero="Object.keys(categoriesDict).length"
-                      etiqueta="Categorías"
+                      :etiqueta="
+                        Object.keys(categoriesDict).length === 1 ? 'Categoría' : 'Categorías'
+                      "
                       class="m-b-3"
                     />
                     <ul
-                      v-if="Object.keys(categoriesDict).length !== 0"
-                      class="lista-sin-estilo"
-                      style="overflow-y: auto"
+                      v-if="Object.keys(categoriesDict).length > 0"
+                      class="lista-sin-estilo overflowYAutoHeight"
                     >
                       <li
                         v-for="categoria in Object.keys(categoriesDict)"
@@ -600,37 +595,22 @@ const editarProyecto = async () => {
                   <div>
                     <UiNumeroElementos
                       :numero="totalCategoria"
-                      :etiqueta="dictTipoRecurso[resourceType]"
+                      :etiqueta="
+                        dictTipoRecurso[resourceType].charAt(0).toUpperCase() +
+                        (totalCategoria === 1
+                          ? dictTipoRecurso[resourceType].slice(1, -1)
+                          : dictTipoRecurso[resourceType].slice(1))
+                      "
                       class="m-b-3"
                     />
-                    <ul class="lista-sin-estilo" style="overflow-y: auto">
-                      <li v-for="recurso in recursos" :key="recurso.pk" class="m-y-0">
-                        <div class="capa p-2 m-b-2 borde-redondeado-20">
-                          <SisdaiCasilla
-                            v-model="recursosSeleccionados"
-                            :etiqueta="recurso.title"
-                            :value="recurso"
-                          />
-                          <div v-if="resourceType === 'dataLayer'" class="icono">
-                            <span
-                              class="m-r-1"
-                              :class="[
-                                optionsDict[recurso.geomType].class,
-                                'pictograma-mediano picto',
-                              ]"
-                              aria-hidden="true"
-                            />
-                            <span>{{ optionsDict[recurso.geomType].tooltipText }}</span>
-                          </div>
-                          <div v-else class="icono">
-                            <span
-                              v-globo-informacion:derecha="recurso.raw_abstract"
-                              class="m-r-1"
-                              :class="['pictograma-informacion', 'pictograma-mediano picto']"
-                              aria-hidden="true"
-                            />
-                          </div>
-                        </div>
+                    <ul class="lista-sin-estilo overflowYAutoHeight">
+                      <li v-for="(recurso, index) in recursos" :key="index" class="m-y-0">
+                        <IaElementoCatalogo
+                          :key="index"
+                          :catalogue-element="recurso"
+                          :resource-type="resourceType"
+                          @trigger-fetch="fetchNewData"
+                        />
                       </li>
                     </ul>
                   </div>
@@ -639,50 +619,61 @@ const editarProyecto = async () => {
                 <div class="columna-5">
                   <div>
                     <UiNumeroElementos
-                      :numero="0"
-                      :etiqueta="'etiquetaRecursosSeleccionados'"
+                      :numero="recursosSeleccionados.length"
+                      :etiqueta="
+                        dictTipoRecurso[resourceType].charAt(0).toUpperCase() +
+                        (resourceType === 'document'
+                          ? recursosSeleccionados.length === 1
+                            ? dictTipoRecurso[resourceType].slice(1, -1) + ' seleccionado'
+                            : dictTipoRecurso[resourceType].slice(1) + ' seleccionados'
+                          : recursosSeleccionados.length === 1
+                            ? dictTipoRecurso[resourceType].slice(1, -1) + ' seleccionada'
+                            : dictTipoRecurso[resourceType].slice(1) + ' seleccionadas')
+                      "
                       class="m-b-3"
                     />
-                    <!--   <ul class="lista-sin-estilo" style="overflow-y: auto">
+                    <ul class="lista-sin-estilo overflowYAutoHeight">
                       <li
-                        v-for="(recurso, i) in recursosSeleccionados"
-                        :key="recurso.id"
+                        v-for="(recurso, index) in recursosSeleccionados"
+                        :key="index"
                         class="m-y-0"
                       >
                         <div class="capa p-2 m-b-2 borde-redondeado-20">
-                          <h6 class="m-t-0 m-b-1">{{ recurso.title }}</h6>
+                          <p class="m-t-0 m-b-1">{{ recurso.title }}</p>
                           <div class="m-b-1">
-                            {{ recurso.category.gn_description }}
+                            {{ categoriesDict[recurso.category.gn_description]?.inSpanish }}
                           </div>
-                          <div v-if="botonRadioSeleccion === 'dataLayer'" class="icono">
+                          <div v-if="resourceType === 'dataLayer'" class="icono">
                             <span
                               class="m-r-1"
-                              :class="[buttons[i]?.class, 'pictograma-mediano picto']"
+                              :class="[
+                                geomDict[recurso.geomType].class,
+                                'pictograma-mediano picto',
+                              ]"
                               aria-hidden="true"
                             />
-                            <span>{{ buttons[i]?.tooltipText }}</span>
+                            <span>{{ geomDict[recurso.geomType].tooltipText }}</span>
                           </div>
                           <div v-else class="icono">
                             <span
-                              v-globo-informacion:derecha="buttons[i]?.tooltipText"
-                              class="m-r-1"
-                              :class="[buttons[i]?.class, 'pictograma-mediano picto']"
+                              v-globo-informacion:derecha="recurso.raw_abstract"
+                              class="pictograma-informacion pictograma-mediano picto m-r-1"
                               aria-hidden="true"
                             />
                           </div>
                           <div class="flex flex-contenido-final">
                             <button
                               class="boton-pictograma boton-sin-contenedor-secundario boton-chico"
-                              aria-label="Remover"
+                              aria-label="Remover recurso seleccionado"
                               type="button"
-                              @click="removerRecursoSeleccionado(recurso)"
+                              @click="storeResources.removeSelectedByPk(recurso.pk, resourceType)"
                             >
                               <span class="pictograma-eliminar" aria-hidden="true" />
                             </button>
                           </div>
                         </div>
                       </li>
-                    </ul>-->
+                    </ul>
                   </div>
                 </div>
               </div>
@@ -693,7 +684,7 @@ const editarProyecto = async () => {
               class="boton-primario boton-chico"
               type="button"
               :disabled="recursosSeleccionados.length === 0"
-              @click="cargarArchivosASubir"
+              @click="cargarArchivosGeonode"
             >
               Aceptar
             </button>
@@ -708,6 +699,10 @@ const editarProyecto = async () => {
 .overflowYAuto {
   overflow-y: auto;
   height: var(--altura-consulta-esc);
+}
+.overflowYAutoHeight {
+  overflow-y: auto;
+  height: 300px;
 }
 
 .separador {

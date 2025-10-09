@@ -37,6 +37,19 @@ export const useResourcesIAStore = defineStore('resourcesIA', () => {
     resourcesByType(resourceType = storeConsulta.resourceType) {
       return resources[resourceType];
     },
+    selectedByType(resourceType = storeConsulta.resourceType) {
+      return selectedResources[resourceType];
+    },
+    /**
+     * Elimina un recurso de la selección. Si elimina una tabla o doc seleccionado, reselecciona el primero.
+     * @param {String} pk del recurso a eliminar.
+     * @param {String} resourceType tipo de recurso a consultar.
+     */
+    removeSelectedByPk(pkToRemove, resourceType = storeConsulta.resourceType) {
+      selectedResources[resourceType] = selectedResources[resourceType].filter(
+        (resource) => resource.pk !== pkToRemove
+      );
+    },
     /**
      * Función que regresa un array de pks correspondientes a los enésimos elementos de cada categoría
      * @param {String} resourceType
@@ -51,6 +64,9 @@ export const useResourcesIAStore = defineStore('resourcesIA', () => {
      */
     resetByType(resourceType = storeConsulta.resourceType) {
       resources[resourceType] = [];
+    },
+    resetSelectedByType(resourceType = storeConsulta.resourceType) {
+      selectedResources[resourceType] = [];
     },
     /**
      * Hace una petición por recursos especificando el número de página, el número de recursos y los query params que debe llevar
