@@ -326,10 +326,15 @@ export async function downloadDocs(resource) {
   const { gnoxyFetch } = useGnoxyUrl();
   const maxAttempts = 5;
   const extension = resource.links?.find((link) => link.link_type === 'uploaded').extension;
-  const url = resource.download_url;
+  let url;
+  if (extension === 'pdf') {
+    url = resource.download_url;
+  } else {
+    url = resource.embed_url.replace('/embed', '/link');
+  }
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
-      const res = await gnoxyFetch(url.toString());
+      const res = await gnoxyFetch(url);
       if (!res.ok) {
         //throw new Error(`Falló la descarga: ${res.status}`);
         return 'Error';
