@@ -77,7 +77,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="contenedor-embed">
-    <embed
+    <iframe
       v-if="urlEmbebido"
       ref="embedRef"
       :src="blobedUrl"
