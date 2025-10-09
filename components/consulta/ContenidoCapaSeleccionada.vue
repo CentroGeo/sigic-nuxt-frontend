@@ -1,6 +1,6 @@
 <script setup>
 import { SisdaiLeyendaWms } from '@centrogeomx/sisdai-mapas';
-import { findServer, hasWMS } from '~/utils/consulta';
+import { findServer, getWMSserver, hasWMS } from '~/utils/consulta';
 
 const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
@@ -125,7 +125,13 @@ const optionsButtons = ref([
       //const wfsLink = getWFS(resourceElement.value);
       // Esta es la petición GetFeatureInfo
       //const wmsLink = getWMSFeatureInfo(resourceElement.value);
-      const owsLink = `${config.public.geonodeUrl}/geoserver/${resourceElement.value.alternate.replace(':', '/')}/ows`;
+      let server;
+      if (resourceElement.value.sourcetype === 'REMOTE') {
+        server = getWMSserver(resourceElement.value).split('/ows')[0];
+      } else {
+        server = `${config.public.geoserverUrl}`;
+      }
+      const owsLink = `${server}/${resourceElement.value.alternate.replace(':', '/')}/ows`;
       try {
         await navigator.clipboard.writeText(owsLink);
         alert('Enlace copiado al portapapeles: ' + owsLink);
@@ -164,7 +170,7 @@ async function updateFunctions() {
     buttons = buttons.filter((d) => d.excludeFor !== 'remotes');
     // Se excluye el botón OWS para remotos
     //buttons = buttons.filter((d) => d.label !== 'Vínculo OWS');
-    console.log(resourceElement.value);
+    //console.log(resourceElement.value);
     const resourceHasWMS = await hasWMS(resourceElement.value, 'table');
     // Esta se llamaría para el WFS*/
     /*     const resourceHasWMS = await hasWMS(

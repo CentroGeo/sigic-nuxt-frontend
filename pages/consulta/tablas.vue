@@ -55,7 +55,6 @@ watch(
     () => storeResources.selectedResources[resourceType],
   ],
   () => {
-    console.log('El selected pk', selectedPk.value);
     selectedElement.value = storeResources.findResource(selectedPk.value);
     paginaActual.value = 0;
     fetchTable({
