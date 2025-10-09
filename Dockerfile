@@ -21,9 +21,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY . .
 
-RUN touch package-lock.json && rm -rf package-lock.json
-
-RUN npm install
+RUN touch package-lock.json  \
+    && rm -rf package-lock.json  \
+    && npm install \
+    && sed -i 's|// *originEnvKey:|originEnvKey:|g' nuxt.config.ts
 
 RUN npm run build
 

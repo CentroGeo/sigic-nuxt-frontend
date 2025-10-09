@@ -1,13 +1,16 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
 const isDev = process.env.NODE_ENV !== 'production';
-const baseUrl = process.env.NUXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+const appBase = (process.env.NUXT_APP_BASE_URL || '/').replace(/\/+$/, '/');
+const authBase = process.env.AUTH_BASE_URL;
+
 const metaImg = 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg';
 const metaDescription =
   'Sistema Integral de Gestión de Información Científica. Integra, visualiza y aprovecha el conocimiento científico de México.';
 
 export default defineNuxtConfig({
   app: {
+    baseURL: appBase,
     head: {
       link: [
         {
@@ -46,6 +49,11 @@ export default defineNuxtConfig({
     client: isDev,
   },
 
+  nitro: {
+    baseURL: appBase,
+    // TODO: remover cuando catálogo se conecte con el backend
+  },
+
   modules: [
     '@pinia/nuxt',
     // "@nuxt/content",
@@ -59,16 +67,17 @@ export default defineNuxtConfig({
   css: ['@centrogeomx/sisdai-css/dist/sisdai.min.css'],
 
   auth: {
+    debug: true,
     isEnabled: true,
-    baseURL: `${baseUrl}/api/auth`,
-    // originEnvKey: 'NUXT_AUTH_ORIGIN',  // TODO: pendiente de definir
-
-    globalAppMiddleware: false, // protege todas las páginas por defecto
+    baseURL: `${authBase}`,
+    // originEnvKey: 'NUXT_AUTH_ORIGIN',
+    globalAppMiddleware: false,
     provider: {
       type: 'authjs',
       trustHost: true,
       defaultProvider: 'keycloak',
     },
+
     sessionRefresh: {
       enablePeriodically: 300000,
       enableOnWindowFocus: true,
@@ -77,31 +86,25 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     // Variables privadas (solo disponibles en el servidor, como tokens)
+    authSecret: process.env.NUXT_AUTH_SECRET,
+    keycloakClientId: process.env.KEYCLOAK_CLIENT_ID,
+    keycloakIssuer: process.env.KEYCLOAK_ISSUER,
+    keycloakClientSecret: process.env.KEYCLOAK_CLIENT_SECRET,
 
     // Variables públicas (disponibles también en el cliente)
     public: {
-      geonodeApi: process.env.NUXT_PUBLIC_GEONODE_API,
+      baseURL: process.env.NUXT_PUBLIC_BASE_URL,
       geonodeUrl: process.env.NUXT_PUBLIC_GEONODE_URL,
+      geonodeApi: process.env.NUXT_PUBLIC_GEONODE_API,
       geoserverUrl: process.env.NUXT_PUBLIC_GEOSERVER_URL,
       iaBackendUrl: process.env.NUXT_PUBLIC_IA_BACKEND_URL,
-      baseURL: baseUrl,
       defaultPage: process.env.NUXT_PUBLIC_DEFAULT_PAGE,
       geonodeApiDefaultFilter: process.env.NUXT_PUBLIC_GEONODE_API_DEFAULT_FILTER || '',
-      enableAuth: process.env.NUXT_PUBLIC_ENABLE_AUTH === 'true' || true,
-      enableCatalogoVista: process.env.NUXT_PUBLIC_ENABLE_CATALOGO_VISTA === 'true' || true,
-      enableCatalogoCarga: process.env.NUXT_PUBLIC_ENABLE_CATALOGO_CARGA === 'true' || true,
-      enableConsulta: process.env.NUXT_PUBLIC_ENABLE_CONSULTA === 'true' || true,
-      enableIaa: process.env.NUXT_PUBLIC_ENABLE_IAA === 'true' || true,
-    },
-  },
-
-  nitro: {
-    // TODO: remover cuando catálogo se conecte con el backend
-    storage: {
-      fs: {
-        driver: 'fs',
-        base: './public',
-      },
+      enableAuth: process.env.NUXT_PUBLIC_ENABLE_AUTH === 'true',
+      enableCatalogoVista: process.env.NUXT_PUBLIC_ENABLE_CATALOGO_VISTA === 'true',
+      enableCatalogoCarga: process.env.NUXT_PUBLIC_ENABLE_CATALOGO_CARGA === 'true',
+      enableConsulta: process.env.NUXT_PUBLIC_ENABLE_CONSULTA === 'true',
+      enableIaa: process.env.NUXT_PUBLIC_ENABLE_IAA === 'true',
     },
   },
 

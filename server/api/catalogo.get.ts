@@ -51,8 +51,9 @@ export default defineEventHandler(async (event) => {
     const { links, resources, total } = await response.json();
     allResults = allResults.concat(resources);
     endpoint = links.next;
+
     console.info('->', allResults.length, 'recuperados de', total);
-  } while (endpoint !== null && allResults.length < 120);
+  } while (endpoint);
 
   return { allResults };
 });
