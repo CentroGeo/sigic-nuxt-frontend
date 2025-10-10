@@ -50,6 +50,7 @@ const typeOptions = {
 watch(
   attrSet,
   (newVal) => {
+    //console.log(attrSet.value);
     sortedAttrs.value = newVal.sort((a, b) => a.display_order - b.display_order);
   },
   { deep: true }

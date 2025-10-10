@@ -84,5 +84,25 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
     updateAttr(attr, value) {
       metadata[attr] = value;
     },
+    buildRequestBody() {
+      const metaDict = { title: 'Centros de Investigacion' };
+      //const attrs = {};
+
+      /*       metadata.attribute_set
+        .filter((attribute) => attribute.description && attribute.attribute_label)
+        .forEach(
+          (attribute) =>
+            (attrs[`${attribute.pk}`] = {
+              description: attribute.description,
+              attribute_label: attribute.attribute_label,
+              visible: attribute.visible ? 'True' : 'False',
+              display_order: attribute.display_order,
+            })
+        ); */
+      //metaDict['attribute_set'] = attrs;
+      //console.log('Los metadatos:', metadata.attribute_set);
+      //console.log('El dict', metaDict);
+      return metaDict;
+    },
   };
 });

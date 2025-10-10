@@ -1,4 +1,7 @@
 <script setup>
+import { resourceTypeGeonode } from '~/utils/consulta';
+
+const storeMetadatos = useEditedMetadataStore();
 const props = defineProps({
   title: {
     type: String,
@@ -18,7 +21,7 @@ const props = defineProps({
   },
 });
 //const storeCatalogo = useCatalogoStore();
-//const { data } = useAuth();
+const { data } = useAuth();
 const cargaExitosa = ref(false);
 
 const rutas = ref({});
@@ -49,6 +52,19 @@ function irARutaConQuery(direccion) {
   });
 }
 
+async function updateMetadata() {
+  const requestBody = storeMetadatos.buildRequestBody();
+  //console.log(requestBody);
+  const token = data.value?.accessToken;
+  const response = await $fetch('/api/metadatos', {
+    method: 'POST',
+    headers: { token: token, resourceType: resourceTypeGeonode[props.tipo], pk: props.pk },
+    body: requestBody,
+  });
+  console.warn('La res:', response);
+  const router = useRouter();
+  router.go(0);
+}
 /**
  * Actualiza los metadatos con los valores del store
  */
@@ -66,7 +82,7 @@ function irARutaConQuery(direccion) {
     },
   });
   console.warn('response', response);
-  cargaExitosa.value = true; 
+  cargaExitosa.value = true;
 }*/
 </script>
 <template>
@@ -83,7 +99,9 @@ function irARutaConQuery(direccion) {
         Regresar
       </button>
       <!--<button class="boton-primario boton-chico" :disabled="false" @click="actualizaMetadatos()"> -->
-      <button class="boton-primario boton-chico" :disabled="false">Actualizar</button>
+      <button class="boton-primario boton-chico" :disabled="false" @click="updateMetadata">
+        Actualizar
+      </button>
       <button
         v-if="props.title !== lastButton"
         class="boton-primario boton-chico"
