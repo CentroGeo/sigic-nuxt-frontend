@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
    }), */
 
     if (!response.ok) {
-      throw new Error(`Error PATCH (${2}): ${response.status}`);
+      throw new Error(`Falló la edición de metadatos: ${response.status}`);
     }
     console.warn('response status:', response.status);
 
