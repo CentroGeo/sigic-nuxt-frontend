@@ -1,7 +1,11 @@
 <script setup>
-import { resourceTypeDic } from '~/utils/consulta';
-import SelectedLayer from '~/utils/consulta/SelectedLayer';
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+import { fetchDoc } from '~/utils/consulta';
+
 const storeIA = useIAStore();
+const storeResources = useResourcesIAStore();
+
+const documentoModal = ref(null);
 
 const proyecto = computed(() => storeIA.proyectoSeleccionado);
 const arraySources = ref([]);
@@ -77,25 +81,25 @@ const obtenerTipoArchivo = (nombre) => {
   return tipos[extension] || extension.toUpperCase();
 };
 
+const blobedUrl = ref();
+const extensionDocumento = ref();
+const blobeTitle = ref('');
 /**
- * Agrega un recurso seleccionado al módulo de consulta y navega a la vista
- * @param resource del que se toma el pk para la selección
+ * Abre un modal con la vista del documento embed
+ * @param resource del que se toma el pk para la visualización
  */
-async function openResourceView(resource) {
-  // if (resource.tipo_recurso === 'Capa geográfica') {
-  //   useSelectedResources2Store().add(
-  //     new SelectedLayer({ uuid: resource.uuid }),
-  //     resourceTypeDic.dataLayer
-  //   );
-  //   await navigateTo('/consulta/capas');
-  // }
-  // if (resource.tipo_recurso === 'Datos tabulados') {
-  //   useSelectedResources2Store().add(
-  //     new SelectedLayer({ uuid: resource.uuid }),
-  //     resourceTypeDic.dataTable
-  //   );
-  //   await navigateTo('/consulta/tablas');
-  // }
+async function openResourceViewEmbed(resource) {
+  const resourceByPk = await storeResources.fetchResourceByPk(resource.geonode_id);
+  if (resourceByPk.resource_type === 'document') {
+    const linkCargado = resourceByPk.links.find((link) => link.link_type === 'uploaded');
+    extensionDocumento.value = linkCargado.extension;
+    blobeTitle.value = resourceByPk.title;
+    const resourceEmbedURL = resourceByPk.embed_url.replace('/embed', '/link');
+    blobedUrl.value = await fetchDoc(resourceEmbedURL);
+    documentoModal.value.abrirModal();
+  } else {
+    console.warn('no es documento');
+  }
   /* (resource.tipo_recurso === 'Documentos') {
     useSelectedResources2Store().add(
       new SelectedLayer({ uuid: resource.uuid }),
@@ -103,14 +107,14 @@ async function openResourceView(resource) {
     );
     await navigateTo('/consulta/documentos');
   } */
-  if (resource.document_type === 'application/pdf') {
-    // TODO: utilizar pk dinámico
-    useSelectedResources2Store().add(
-      new SelectedLayer({ pk: resource.geonode_id.toString() }),
-      resourceTypeDic.document
-    );
-    await navigateTo('/consulta/documentos');
-  }
+  // if (resource.document_type === 'application/pdf') {
+  //   // TODO: utilizar pk dinámico
+  //   useSelectedResources2Store().add(
+  //     new SelectedLayer({ pk: resource.geonode_id.toString() }),
+  //     resourceTypeDic.document
+  //   );
+  //   await navigateTo('/consulta/documentos');
+  // }
 }
 </script>
 
@@ -242,31 +246,30 @@ async function openResourceView(resource) {
                 <tr>
                   <th class="p-x-3 p-y-2">Nombre</th>
                   <th class="p-x-3 p-y-2">Tipo de archivo</th>
-                  <!--         <th>Categoría</th>
-        <th>Origen</th>
-        <th>Acciones</th> -->
+                  <!-- <th>Categoría</th>
+                  <th>Origen</th>
+                  <th>Acciones</th> -->
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="archivo in arraySources" :key="archivo.id">
                   <td class="p-3">
-                    <a @click="openResourceView(archivo)">{{ archivo.filename }}</a>
-                    <!-- <a :href="archivo.embed_url" target="_blank" rel="noopener noreferrer">{{ archivo.filename }}</a> -->
+                    <a @click="openResourceViewEmbed(archivo)">{{ archivo.filename }}</a>
                   </td>
                   <td class="p-3 etiqueta-tabla">
                     <span class="p-x-1 p-y-minimo">{{ obtenerTipoArchivo(archivo.filename) }}</span>
                   </td>
-                  <!--         <td>{{ archivo.categoria }}</td>
-        <td>{{ archivo.origen }}</td> -->
-                  <!--         <td>
-          <button
-            class="boton-pictograma boton-sin-contenedor-secundario boton-chico"
-            aria-label="Eliminar archivo"
-            @click="eliminarArchivo(archivo.id)"
-          >
-            <span class="pictograma-eliminar" aria-hidden="true" />
-          </button>
-        </td> -->
+                  <!-- <td>{{ archivo.categoria }}</td>
+                  <td>{{ archivo.origen }}</td> -->
+                  <!-- <td>
+                    <button
+                      class="boton-pictograma boton-sin-contenedor-secundario boton-chico"
+                      aria-label="Eliminar archivo"
+                      @click="eliminarArchivo(archivo.id)"
+                    >
+                      <span class="pictograma-eliminar" aria-hidden="true" />
+                    </button>
+                  </td> -->
                 </tr>
               </tbody>
             </table>
@@ -274,10 +277,35 @@ async function openResourceView(resource) {
         </div>
       </div>
     </div>
+    <ClientOnly>
+      <SisdaiModal ref="documentoModal" class="modal-grande">
+        <template #encabezado>
+          <h2>{{ blobeTitle }}</h2>
+        </template>
+        <template #cuerpo>
+          <div class="contenedor-doc-embed">
+            <embed
+              ref="documentRef"
+              class="documento-embebido"
+              :src="blobedUrl"
+              :type="extensionDocumento === 'pdf' ? 'application/pdf' : 'text/plain'"
+            />
+          </div>
+        </template>
+        <template #pie> </template>
+      </SisdaiModal>
+    </ClientOnly>
   </div>
 </template>
 
 <style lang="scss">
+.contenedor-doc-embed {
+  height: calc(100vh - 112px);
+}
+.documento-embebido {
+  width: 100%;
+  height: 100%;
+}
 .overflowYAuto {
   overflow-y: auto;
   height: var(--altura-consulta-esc);
