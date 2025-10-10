@@ -146,7 +146,7 @@ async function monitorLayerImport(executionId, archivo) {
 
           <h2>Cargas</h2>
 
-          <div v-for="(archivo, i) in archivosEnCarga" :key="i">
+          <div v-for="(archivo, i) in archivosEnCarga" :key="i" class="tarjetitas-carga">
             <div
               class="p-3 borde-redondeado-16 m-y-3"
               :class="{
@@ -172,9 +172,14 @@ async function monitorLayerImport(executionId, archivo) {
                 </div>
 
                 <p>{{ archivo.nombre }}</p>
-                <p v-if="['pendiente', 'procesando'].includes(archivo.estatus)">
-                  {{ archivo.porcentaje }}%
-                </p>
+                <div
+                  v-if="['pendiente', 'procesando'].includes(archivo.estatus)"
+                  class="barra-progreso"
+                >
+                  <div class="progreso" :style="{ width: `${archivo.porcentaje}%` }">
+                    {{ archivo.porcentaje }}%
+                  </div>
+                </div>
 
                 <p v-if="archivo.rutaArchivo">
                   <a :href="archivo.rutaArchivo" target="_blank">{{ archivo.rutaArchivo }}</a>
@@ -187,3 +192,16 @@ async function monitorLayerImport(executionId, archivo) {
     </template>
   </UiLayoutPaneles>
 </template>
+
+<style lang="scss">
+div.tarjetitas-carga {
+  div.barra-progreso {
+    background: var(--color-neutro-2);
+    div.progreso {
+      background: var(--color-primario-1);
+      height: 4px;
+      border-radius: 4px;
+    }
+  }
+}
+</style>
