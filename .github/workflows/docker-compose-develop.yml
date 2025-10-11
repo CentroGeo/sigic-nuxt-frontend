@@ -131,6 +131,7 @@ jobs:
           echo "KEYCLOAK_CLIENT_ID=${{ secrets.KEYCLOAK_CLIENT_ID }}" >> .env
           echo "KEYCLOAK_CLIENT_SECRET=${{ secrets.KEYCLOAK_CLIENT_SECRET }}" >> .env
           echo "NUXT_AUTH_SECRET=${{ secrets.NUXT_AUTH_SECRET }}" >> .env
+          echo "NUXT_APP_BASE_URL=${{ vars.NUXT_APP_BASE_URL }}" >> .env
           echo "VIRTUAL_PORT=3000" >> .env
 
       - name: Docker Compose up
@@ -157,6 +158,7 @@ jobs:
           KEYCLOAK_CLIENT_ID: ${{ secrets.KEYCLOAK_CLIENT_ID }}
           KEYCLOAK_CLIENT_SECRET: ${{ secrets.KEYCLOAK_CLIENT_SECRET }}
           NUXT_AUTH_SECRET: ${{ secrets.NUXT_AUTH_SECRET }}
+          NUXT_APP_BASE_URL: ${{ vars.NUXT_APP_BASE_URL }}
           VIRTUAL_PORT: '3000'
 
       - name: Docker Cleanup
