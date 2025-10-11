@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libc6 \
     libstdc++6 \
     libsqlite3-dev \
+    vim \
     && rm -rf /var/lib/apt/lists/*
 
 COPY . .
