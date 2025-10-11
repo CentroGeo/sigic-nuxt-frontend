@@ -84,11 +84,17 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
     updateAttr(attr, value) {
       metadata[attr] = value;
     },
-    buildRequestBody() {
-      const metaDict = { title: 'Centros de Investigacion' };
-      //const attrs = {};
 
-      /*       metadata.attribute_set
+    getMetaField(field) {
+      return metadata[field];
+    },
+
+    buildRequestBody() {
+      // TODO: Generar todas las entradas para cada uno de los metadatos
+      const metaDict = { title: 'Centros de Investigacion', abstract: 'El abstract' };
+      const attrs = {};
+
+      metadata.attribute_set
         .filter((attribute) => attribute.description && attribute.attribute_label)
         .forEach(
           (attribute) =>
@@ -98,10 +104,8 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
               visible: attribute.visible ? 'True' : 'False',
               display_order: attribute.display_order,
             })
-        ); */
-      //metaDict['attribute_set'] = attrs;
-      //console.log('Los metadatos:', metadata.attribute_set);
-      //console.log('El dict', metaDict);
+        );
+      metaDict['attribute_set'] = attrs;
       return metaDict;
     },
   };

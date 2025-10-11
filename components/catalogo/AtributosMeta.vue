@@ -135,12 +135,11 @@ watch(
             </td>
             <td>
               <input
-                :id="`${datum['attr']}-checkbox`"
+                :id="`${datum['attribute']}-checkbox`"
                 v-model="datum['visible']"
                 type="checkbox"
-                :value="datum['visible']"
               />
-              <label :for="`${datum['Atributo']}-checkbox`">Visible</label>
+              <label :for="`${datum['attribute']}-checkbox`">Visible</label>
             </td>
           </tr>
         </tbody>
