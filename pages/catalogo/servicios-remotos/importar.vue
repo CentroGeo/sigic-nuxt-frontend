@@ -1,8 +1,6 @@
 <script setup>
 import SisdaiCasillaVerificacion from '@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue';
 
-const storeCatalogo = useCatalogoStore();
-
 definePageMeta({
   middleware: 'sidebase-auth',
   bodyAttrs: {
@@ -10,20 +8,14 @@ definePageMeta({
   },
 });
 
+const storeCatalogo = useCatalogoStore();
+
 const route = useRoute();
 const selectedId = route.query.id;
 const selectedTitle = route.query.title;
 const selectedUniqueIdentifier = route.query.unique_identifier;
 const selectedRemoteSourceType = route.query.remote_resource_type;
-const b = ref([]);
-for (let index = 0; index < selectedUniqueIdentifier.length; index++) {
-  b.value.push({
-    unique_identifier: selectedUniqueIdentifier[index],
-    remote_resource_type: selectedRemoteSourceType[index],
-  });
-}
 
-const casilla = ref('');
 const notShouldBeHarvested = ref([]);
 const dictTipoRecursoRemoto = {
   layers: 'Capas',
@@ -31,7 +23,8 @@ const dictTipoRecursoRemoto = {
 
 function importarRecursos() {
   // TODO: importar recursos al backend
-  console.warn('épale');
+  const harvestestToImport = notShouldBeHarvested.value.filter((d) => d.check === true);
+  console.warn('harvestestToImport', harvestestToImport);
   navigateTo({
     path: `/catalogo/servicios-remotos/${selectedId}`,
     query: {
@@ -43,7 +36,12 @@ function importarRecursos() {
   });
 }
 
-try {
+const totalReources = ref();
+const paginaActual = ref(0);
+const tamanioPagina = 10;
+const totalPags = computed(() => Math.ceil(totalReources.value / tamanioPagina));
+
+async function fetchData() {
   const { data } = useAuth();
   const token = data.value?.accessToken;
   const headers = ref({ Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' });
@@ -51,25 +49,46 @@ try {
   const configEnv = useRuntimeConfig();
   const baseUrl = configEnv.public.geonodeApi;
 
-  const page = ref(1);
-  // TODO: paginación de recursos
-  // const linksNext = ref(null);
-  const haverstableResources = ref([]);
-
   const response = await $fetch(
-    `${baseUrl}/harvesters/${selectedId}/harvestable-resources/?page=${page.value}`,
+    `${baseUrl}/harvesters/${selectedId}/harvestable-resources/?page=${paginaActual.value + 1}`,
     {
       method: 'GET',
       headers: headers.value,
     }
   );
   // console.log('response', response);
-  haverstableResources.value = response.harvestable_resources;
-  // console.log('haverstableResources.value', haverstableResources.value);
-  notShouldBeHarvested.value = haverstableResources.value.filter(
+  totalReources.value = response.total;
+  const haverstableResources = response.harvestable_resources;
+  // console.log('haverstableResources', haverstableResources);
+
+  // filtramos los que aún no están importados
+  const filteredNotShouldBeHarvested = haverstableResources.filter(
     (d) => d.should_be_harvested === false
   );
-  // console.log('notShouldBeHarvested.value', notShouldBeHarvested.value);
+  // console.log('notShouldBeHarvested', notShouldBeHarvested);
+
+  // agregamos la propiedad check para la casilla de verificación
+  notShouldBeHarvested.value = filteredNotShouldBeHarvested.map((d) => ({
+    last_updated: d.last_updated,
+    remote_resource_type: d.remote_resource_type,
+    should_be_harvested: d.should_be_harvested,
+    status: d.status,
+    title: d.title,
+    unique_identifier: d.unique_identifier,
+    check: false,
+  }));
+}
+
+async function fetchNewData() {
+  await fetchData();
+}
+
+watch(paginaActual, () => {
+  fetchNewData();
+});
+
+try {
+  await fetchData();
 } catch (err) {
   console.warn('Error en el streaming: ' + err);
 }
@@ -100,7 +119,7 @@ try {
                 <td>
                   <ClientOnly>
                     <SisdaiCasillaVerificacion
-                      v-model="casilla"
+                      v-model="value.check"
                       :etiqueta="value.unique_identifier"
                     />
                   </ClientOnly>
@@ -111,17 +130,20 @@ try {
               </tr>
             </tbody>
           </table>
-          <div class="flex flex-contenido-inicio m-t-3">
-            <button
-              class="boton-primario"
-              aria-label="Importar recursos de catálogo externo"
-              type="button"
-              @click="importarRecursos"
-            >
-              Importar recursos
-            </button>
-          </div>
         </form>
+        <ClientOnly>
+          <UiPaginador :total-paginas="totalPags" @cambio="paginaActual = $event" />
+        </ClientOnly>
+        <div class="flex flex-contenido-inicio m-t-3">
+          <button
+            class="boton-primario"
+            aria-label="Importar recursos de catálogo externo"
+            type="button"
+            @click="importarRecursos"
+          >
+            Importar recursos
+          </button>
+        </div>
       </main>
       <main v-else>...cargando</main>
     </template>

@@ -16,6 +16,8 @@ const selectedId = route.query.id;
 const selectedTitle = route.query.title;
 const selectedUniqueIdentifier = route.query.unique_identifier;
 const selectedRemoteSourceType = route.query.remote_resource_type;
+
+// armamos el objeto con los que ya están importados
 const b = ref([]);
 for (let index = 0; index < selectedUniqueIdentifier.length; index++) {
   b.value.push({
