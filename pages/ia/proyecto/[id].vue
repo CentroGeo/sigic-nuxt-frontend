@@ -260,6 +260,12 @@ onMounted(async () => {
 
     archivosSeleccionados.value = [...archivosSeleccionados.value, ...archivosBackend];
   }
+
+  window.addEventListener('keydown', preventEscape);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', preventEscape);
 });
 
 const seleccionarCategoria = (categoria) => {
@@ -405,6 +411,13 @@ const editarProyecto = async () => {
     console.log('Error al actualizar: ' + error.message);
   }
 };
+
+function preventEscape(event) {
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+}
 </script>
 
 <template>
@@ -769,7 +782,7 @@ const editarProyecto = async () => {
           </template>
         </SisdaiModal>
 
-        <SisdaiModal ref="loaderModal">
+        <SisdaiModal id="loaderModal" ref="loaderModal">
           <template #encabezado>
             <h1 class="m-t-0 texto-tamanio-6">Procesando</h1>
           </template>
@@ -903,5 +916,9 @@ const editarProyecto = async () => {
 .boton[disabled] {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+dialog#loaderModal.modal .modal-contenedor .modal-cerrar {
+  display: none;
 }
 </style>
