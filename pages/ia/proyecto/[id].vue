@@ -217,8 +217,7 @@ onMounted(async () => {
       tipo: obtenerTipoArchivo(archivo.filename),
       archivo: null,
       categoria: 'Archivo',
-      origen: 'Propio',
-      // origen: archivo.origin ? 'Propio' : 'Catálogo',
+      origen: archivo.geonode_type,
     }));
     // console.log('arraySources', arraySources);
 

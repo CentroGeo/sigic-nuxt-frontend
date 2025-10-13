@@ -89,6 +89,7 @@ const blobeTitle = ref('');
  * @param resource del que se toma el pk para la visualización
  */
 async function openResourceViewEmbed(resource) {
+  // console.log('resource', resource);
   const resourceByPk = await storeResources.fetchResourceByPk(resource.geonode_id);
   if (resourceByPk.resource_type === 'document') {
     const linkCargado = resourceByPk.links.find((link) => link.link_type === 'uploaded');
