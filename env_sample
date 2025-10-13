@@ -4,6 +4,7 @@ NODE_ENV=development
 KEYCLOAK_CLIENT_ID=sigic-nuxt-dev
 NUXT_PUBLIC_GEONODE_API=https://geonode.dev.geoint.mx/api/v2
 NUXT_PUBLIC_GEOSERVER_URL=https://geonode.dev.geoint.mx/geoserver
+NUXT_PUBLIC_IA_BACKEND_URL=https://sigic.ia.dev.geoint.mx
 NUXT_PUBLIC_BASE_URL=http://localhost:3000
 NUXT_AUTH_ORIGIN=http://localhost:3000
 KEYCLOAK_CLIENT_SECRET=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

@@ -58,6 +58,9 @@ const inputSearch = computed({
   set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
 });
 
+const { data } = useAuth();
+const userEmail = data.value.user.email;
+
 /**
  * Valida si el tipo de recurso es documento o dataset con geometría o no
  * @param recurso del catálogo

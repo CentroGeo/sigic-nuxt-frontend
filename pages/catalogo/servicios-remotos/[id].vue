@@ -16,6 +16,8 @@ const selectedId = route.query.id;
 const selectedTitle = route.query.title;
 const selectedUniqueIdentifier = route.query.unique_identifier;
 const selectedRemoteSourceType = route.query.remote_resource_type;
+
+// armamos el objeto con los que ya están importados
 const b = ref([]);
 for (let index = 0; index < selectedUniqueIdentifier.length; index++) {
   b.value.push({
@@ -81,6 +83,7 @@ try {
         filteredAlternateResources.value.push({
           title: d.title,
           abstract: d.abstract,
+          raw_abstract: d.raw_abstract,
           remote_resource_type: dd.remote_resource_type,
           uuid: d.uuid,
         });
@@ -129,7 +132,7 @@ try {
                 <td>
                   <nuxt-link @click="openResourceView(value)">{{ value.title }}</nuxt-link>
                 </td>
-                <td>{{ value.abstract }}</td>
+                <td>{{ value.raw_abstract }}</td>
                 <td>{{ dictTipoRecursoRemoto[value.remote_resource_type] }}</td>
               </tr>
             </tbody>

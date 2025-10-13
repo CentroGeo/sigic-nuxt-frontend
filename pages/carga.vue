@@ -23,7 +23,7 @@ async function subirArchivo() {
     const formData = new FormData();
     formData.append('title', titulo.value);
     formData.append('abstract', descripcion.value);
-    formData.append('base_file', archivo.value!);
+    if (archivo.value) formData.append('base_file', archivo.value);
     formData.append('token', token);
 
     await fetch('/api/subir', {
