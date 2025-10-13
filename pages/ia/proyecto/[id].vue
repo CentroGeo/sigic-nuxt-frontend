@@ -196,9 +196,18 @@ const proyecto = ref(null);
 
 const archivosEliminados = ref([]);
 
+const loaderModal = ref(null);
+const loaderTitle = ref('');
+const loaderMsg = ref('');
+
 onMounted(async () => {
   storeFilters.buildQueryParams(resourceType.value);
   await buildCategoriesDict();
+
+  loaderTitle.value = 'Cargando';
+  loaderMsg.value = 'Espere un momento';
+  await nextTick();
+  loaderModal.value?.abrirModal();
 
   if (route.params.id !== 'nuevo') {
     esEdicion.value = true;
@@ -224,6 +233,14 @@ onMounted(async () => {
     archivosSeleccionados.value = [...archivosSeleccionados.value, ...archivosBackend];
     archivosTabla.value = [...archivosSeleccionados.value];
   }
+
+  window.addEventListener('keydown', preventEscape);
+
+  loaderModal.value?.cerrarModal();
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', preventEscape);
 });
 
 // Método para manejar la selección de archivos
@@ -274,6 +291,9 @@ const eliminarArchivo = (id) => {
 // Función para guardar el proyecto
 const guardarProyecto = async () => {
   try {
+    loaderTitle.value = 'Procesando';
+    loaderMsg.value = 'Indexando archivo';
+    loaderModal.value?.abrirModal();
     // Mostrar notificación de inicio
     /*     notificacion.mostrar({
       tipo: 'info',
@@ -291,7 +311,9 @@ const guardarProyecto = async () => {
 
     // Notificación de éxito
     //alert("Proyecto guardado correctamente")
+    console.log('Proyecto guardado correctamente');
 
+    loaderModal.value?.cerrarModal();
     /*    notificacion.mostrar({
       tipo: 'exito',
       mensaje: 'Proyecto guardado correctamente',
@@ -312,6 +334,10 @@ const guardarProyecto = async () => {
 
 const editarProyecto = async () => {
   try {
+    loaderTitle.value = 'Procesando';
+    loaderMsg.value = 'Indexando archivo';
+    loaderModal.value?.abrirModal();
+
     await storeIA.actualizarProyecto(
       nombreProyecto.value,
       descripcionProyecto.value,
@@ -322,11 +348,20 @@ const editarProyecto = async () => {
       archivosGeonode.value
     );
 
+    loaderModal.value?.cerrarModal();
+
     navigateTo('/ia/proyectos');
   } catch (error) {
     console.error('Error al actualizar: ' + error.message);
   }
 };
+
+function preventEscape(event) {
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+}
 </script>
 
 <template>
@@ -689,6 +724,21 @@ const editarProyecto = async () => {
             </button>
           </template>
         </SisdaiModal>
+
+        <SisdaiModal id="loaderModal" ref="loaderModal">
+          <template #encabezado>
+            <h1 class="m-t-0 texto-tamanio-6">{{ loaderTitle }}</h1>
+          </template>
+          <template #cuerpo>
+            <div class="flex flex-contenido-centrado">
+              <figure>
+                <img src="/img/loader.gif" alt="Loader de SIGIC" />
+                <figcaption class="texto-centrado">{{ loaderMsg }}</figcaption>
+              </figure>
+            </div>
+          </template>
+          <template #pie> </template>
+        </SisdaiModal>
       </ClientOnly>
     </template>
   </UiLayoutPaneles>
@@ -813,5 +863,9 @@ const editarProyecto = async () => {
 .boton[disabled] {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+dialog#loaderModal.modal .modal-contenedor .modal-cerrar {
+  display: none;
 }
 </style>
