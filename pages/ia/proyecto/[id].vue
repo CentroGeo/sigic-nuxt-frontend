@@ -229,8 +229,15 @@ const proyecto = ref(null);
 const archivosEliminados = ref([]);
 
 const loaderModal = ref(null);
+const loaderTitle = ref('');
+const loaderMsg = ref('');
 
 onMounted(async () => {
+  loaderTitle.value = 'Cargando';
+  loaderMsg.value = 'Espere un momento';
+  await nextTick();
+  loaderModal.value?.abrirModal();
+
   storeFilters.resetAll();
   storeFilters.filters.resourceType = botonRadioSeleccion.value;
   await storeCatalogoResources.getResourcesByType(resourceTypeDic.dataLayer);
@@ -262,6 +269,8 @@ onMounted(async () => {
   }
 
   window.addEventListener('keydown', preventEscape);
+
+  loaderModal.value?.cerrarModal();
 });
 
 onBeforeUnmount(() => {
@@ -353,6 +362,8 @@ const eliminarArchivo = (id) => {
 // Función para guardar el proyecto
 const guardarProyecto = async () => {
   try {
+    loaderTitle.value = 'Procesando';
+    loaderMsg.value = 'Indexando archivo';
     loaderModal.value?.abrirModal();
     // Mostrar notificación de inicio
     /*     notificacion.mostrar({
@@ -393,6 +404,8 @@ const guardarProyecto = async () => {
 
 const editarProyecto = async () => {
   try {
+    loaderTitle.value = 'Procesando';
+    loaderMsg.value = 'Indexando archivo';
     loaderModal.value?.abrirModal();
 
     await storeIA.actualizarProyecto(
@@ -784,13 +797,13 @@ function preventEscape(event) {
 
         <SisdaiModal id="loaderModal" ref="loaderModal">
           <template #encabezado>
-            <h1 class="m-t-0 texto-tamanio-6">Procesando</h1>
+            <h1 class="m-t-0 texto-tamanio-6">{{ loaderTitle }}</h1>
           </template>
           <template #cuerpo>
             <div class="flex flex-contenido-centrado">
               <figure>
                 <img src="/img/loader.gif" alt="Loader de SIGIC" />
-                <figcaption class="texto-centrado">Indexando archivo</figcaption>
+                <figcaption class="texto-centrado">{{ loaderMsg }}</figcaption>
               </figure>
             </div>
           </template>
