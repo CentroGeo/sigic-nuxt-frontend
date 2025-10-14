@@ -4,8 +4,11 @@ FROM node:22 AS builder
 # Usa NODE_ENV para determinar si es dev o prod
 ARG NODE_ENV
 ARG NUXT_PUBLIC_BASE_URL
+ARG AUTH_BASE_URL
+
 ENV NODE_ENV=${NODE_ENV:-development}
 ENV NUXT_PUBLIC_BASE_URL=${NUXT_PUBLIC_BASE_URL:-http://localhost:3000}
+ENV AUTH_BASE_URL=${AUTH_BASE_URL:-/api/auth}
 
 WORKDIR /app
 
@@ -34,9 +37,12 @@ FROM node:22-slim
 
 # Usa NODE_ENV para determinar si es dev o prod
 ARG NODE_ENV
-ENV NODE_ENV=${NODE_ENV:-development}
 ARG NUXT_PUBLIC_BASE_URL
+ARG AUTH_BASE_URL
+
+ENV NODE_ENV=${NODE_ENV:-development}
 ENV NUXT_PUBLIC_BASE_URL=${NUXT_PUBLIC_BASE_URL:-http://localhost:3000}
+ENV AUTH_BASE_URL=${AUTH_BASE_URL:-/api/auth}
 
 WORKDIR /app
 
