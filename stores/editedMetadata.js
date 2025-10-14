@@ -91,11 +91,12 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
 
     buildRequestBody() {
       // TODO: Generar todas las entradas para cada uno de los metadatos
-      const metaDict = { title: 'Centros de Investigacion', abstract: 'El abstract' };
+      //const metaDict = { title: 'Centros de Investigacion', abstract: 'El abstract' };
+      const metaDict = {};
       const attrs = {};
       metadata.attribute_set.forEach((attribute) => {
         const object = {
-          visible: attribute.visible ? 'True' : 'False',
+          visible: attribute.visible,
           display_order: attribute.display_order,
         };
         if (attribute.description) {
