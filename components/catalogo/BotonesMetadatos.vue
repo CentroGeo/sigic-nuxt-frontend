@@ -1,4 +1,5 @@
 <script setup>
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import { resourceTypeGeonode } from '~/utils/consulta';
 
 const storeMetadatos = useEditedMetadataStore();
@@ -23,7 +24,7 @@ const props = defineProps({
 //const storeCatalogo = useCatalogoStore();
 const { data } = useAuth();
 const cargaExitosa = ref(false);
-
+const modalActualizar = ref(null);
 const rutas = ref({});
 const lastButton = ref('');
 const firstButton = 'MetadatosBasicos';
@@ -68,6 +69,7 @@ function validateAttributes(attribute_set) {
 }
 
 async function updateMetadata() {
+  modalActualizar.value?.abrirModal();
   const requestBody = storeMetadatos.buildRequestBody();
   const isMetaValid = validateAttributes(requestBody.attribute_set);
   if (isMetaValid) {
@@ -77,7 +79,9 @@ async function updateMetadata() {
       headers: { token: token, resourceType: resourceTypeGeonode[props.tipo], pk: props.pk },
       body: requestBody,
     });
+    //TODO: agregar manejo de errores
     console.warn('La res:', response);
+    modalActualizar.value?.cerrarModal();
     const router = useRouter();
     router.go(0);
   } else {
@@ -136,5 +140,21 @@ async function updateMetadata() {
     >
       <span class="pictograma-aprobado" /> cargados con éxito
     </p>
+
+    <ClientOnly>
+      <SisdaiModal ref="modalActualizar">
+        <template #encabezado>
+          <h1></h1>
+        </template>
+        <template #cuerpo>
+          <div class="flex m-y-2">
+            <div class="columna-4 flex-vertical-centrado">
+              <img src="/img/loader.gif" alt="...Cargando" />
+            </div>
+            <p class="columna-12">Actualizando información</p>
+          </div>
+        </template>
+      </SisdaiModal>
+    </ClientOnly>
   </div>
 </template>

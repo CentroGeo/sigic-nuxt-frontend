@@ -109,11 +109,18 @@ const typeOptions = {
             </td>
             <td>
               <ClientOnly>
-                <SisdaiCampoBase
+                <!-- <SisdaiCampoBase
                   :id="`display-order-${datum['pk']}`"
                   v-model="datum['display_order']"
-                  etiqueta=""
+                  :es_etiqueta_visible="false"
+                  :etiqueta="`display-order-${datum['pk']}`"
                   tipo="number"
+                  class="m-y-1"
+                /> -->
+                <input
+                  :id="`display-order-${datum['pk']}`"
+                  v-model="datum['display_order']"
+                  type="number"
                   class="m-y-1"
                 />
               </ClientOnly>
