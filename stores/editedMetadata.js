@@ -95,7 +95,7 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
       const attrs = {};
       metadata.attribute_set.forEach((attribute) => {
         const object = {
-          visible: attribute.visible,
+          visible: attribute.visible ? 'True' : 'False',
           display_order: attribute.display_order,
         };
         if (attribute.description) {

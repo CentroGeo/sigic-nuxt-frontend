@@ -24,11 +24,6 @@ const storeMetadatos = useEditedMetadataStore();
 await storeMetadatos.checkFilling(props.resourcePk, props.resourceType);
 const attrSet = computed(() => storeMetadatos.metadata.attribute_set);
 const sortedAttrs = ref(attrSet.value.sort((a, b) => a.display_order - b.display_order));
-for (let i = 0; i < sortedAttrs.value.length; i++) {
-  sortedAttrs.value[i]['index'] = i + 1;
-}
-
-console.log(sortedAttrs.value);
 
 const variables = {
   attribute: 'Atributo',

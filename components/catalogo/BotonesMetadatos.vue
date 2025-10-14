@@ -54,7 +54,7 @@ function irARutaConQuery(direccion) {
 
 function validateAttributes(attribute_set) {
   const attributeList = Object.keys(attribute_set);
-  const displayOrderList = attributeList.map((d) => attribute_set[d]['display_order']);
+  const displayOrderList = attributeList.map((d) => Number(attribute_set[d]['display_order']));
   const setList = Array.from(new Set(displayOrderList));
   //console.log(displayOrderList);
   //console.log(setList);

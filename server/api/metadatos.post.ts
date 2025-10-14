@@ -40,7 +40,7 @@ export default defineEventHandler(async (event) => {
       body: formData,
     });
 
-    console.log('La respuesta:', response);
+    //console.log('La respuesta:', response);
     if (!response.ok) {
       throw new Error(`Falló la edición de metadatos: ${response.status}`);
     }
