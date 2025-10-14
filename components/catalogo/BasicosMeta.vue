@@ -30,7 +30,7 @@ const props = defineProps({
 //const storeCatalogo = useCatalogoStore();
 const storeMetadatos = useEditedMetadataStore();
 storeMetadatos.checkFilling(props.resourcePk, props.resourceType);
-//const imagen = ref();
+const imagen = ref();
 const campoTitulo = computed({
   get: () => storeMetadatos.metadata.title,
   set: (value) => storeMetadatos.updateAttr('title', value),
