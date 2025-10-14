@@ -93,18 +93,19 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
       // TODO: Generar todas las entradas para cada uno de los metadatos
       const metaDict = { title: 'Centros de Investigacion', abstract: 'El abstract' };
       const attrs = {};
-
-      metadata.attribute_set
-        .filter((attribute) => attribute.description && attribute.attribute_label)
-        .forEach(
-          (attribute) =>
-            (attrs[`${attribute.pk}`] = {
-              description: attribute.description,
-              attribute_label: attribute.attribute_label,
-              visible: attribute.visible ? 'True' : 'False',
-              display_order: attribute.display_order,
-            })
-        );
+      metadata.attribute_set.forEach((attribute) => {
+        const object = {
+          visible: attribute.visible,
+          display_order: attribute.display_order,
+        };
+        if (attribute.description) {
+          object['description'] = attribute.description;
+        }
+        if (attribute.attribute_label) {
+          object['attribute_label'] = attribute.attribute_label;
+        }
+        attrs[`${attribute.pk}`] = object;
+      });
       metaDict['attribute_set'] = attrs;
       return metaDict;
     },

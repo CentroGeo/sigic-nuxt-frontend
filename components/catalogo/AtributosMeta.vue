@@ -21,9 +21,14 @@ const props = defineProps({
   },
 });
 const storeMetadatos = useEditedMetadataStore();
-storeMetadatos.checkFilling(props.resourcePk, props.resourceType);
+await storeMetadatos.checkFilling(props.resourcePk, props.resourceType);
 const attrSet = computed(() => storeMetadatos.metadata.attribute_set);
 const sortedAttrs = ref(attrSet.value.sort((a, b) => a.display_order - b.display_order));
+for (let i = 0; i < sortedAttrs.value.length; i++) {
+  sortedAttrs.value[i]['index'] = i + 1;
+}
+
+console.log(sortedAttrs.value);
 
 const variables = {
   attribute: 'Atributo',
@@ -47,14 +52,14 @@ const typeOptions = {
   IFRAME: 'type_iframe',
 };
 
-watch(
+/*watch(
   attrSet,
   (newVal) => {
-    //console.log(attrSet.value);
+    console.log(attrSet.value);
     sortedAttrs.value = newVal.sort((a, b) => a.display_order - b.display_order);
   },
   { deep: true }
-);
+); */
 </script>
 <template>
   <div>
@@ -86,7 +91,7 @@ watch(
             <td>
               <ClientOnly>
                 <SisdaiCampoBase
-                  :id="datum['attribute_label']"
+                  :id="`attribute-label-${datum['pk']}`"
                   v-model="datum['attribute_label']"
                   etiqueta=""
                   tipo="text"
@@ -98,7 +103,7 @@ watch(
             <td>
               <ClientOnly>
                 <SisdaiCampoBase
-                  :id="datum['description']"
+                  :id="`description-${datum['pk']}`"
                   v-model="datum['description']"
                   etiqueta=""
                   tipo="text"
@@ -110,12 +115,11 @@ watch(
             <td>
               <ClientOnly>
                 <SisdaiCampoBase
-                  :id="`${datum['display_order']}`"
-                  :v-model="datum['display_order']"
+                  :id="`display-order-${datum['pk']}`"
+                  v-model="datum['display_order']"
                   etiqueta=""
                   tipo="number"
                   class="m-y-1"
-                  :ejemplo="`${datum['display_order']}`"
                 />
               </ClientOnly>
             </td>
@@ -129,17 +133,16 @@ watch(
                   >
                     {{ type }}
                   </option>
-                  <option value="catalogo">Opcion 2</option>
                 </SisdaiSelector>
               </ClientOnly>
             </td>
             <td>
               <input
-                :id="`${datum['attribute']}-checkbox`"
+                :id="`visible-checkbox-${datum['pk']}`"
                 v-model="datum['visible']"
                 type="checkbox"
               />
-              <label :for="`${datum['attribute']}-checkbox`">Visible</label>
+              <label :for="`visible-checkbox-${datum['pk']}`">Visible</label>
             </td>
           </tr>
         </tbody>

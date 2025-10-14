@@ -10,15 +10,11 @@ export default defineEventHandler(async (event) => {
   const url = `${baseUrl}/${type}s/${pk}/`;
 
   const formData = new FormData();
-  console.log('El body:', body);
   const metaFileds = Object.keys(body);
-  console.log('Los campos:', metaFileds);
   metaFileds.forEach((field) => {
     if (typeof body[field] === 'string') {
-      console.log(field, 'Es string');
       formData.append(field, body[field]);
     } else {
-      console.log(field, 'No es string');
       formData.append(field, JSON.stringify(body[field]));
     }
   });
@@ -48,11 +44,7 @@ export default defineEventHandler(async (event) => {
     if (!response.ok) {
       throw new Error(`Falló la edición de metadatos: ${response.status}`);
     }
-    console.warn('response status:', response.status);
-
     const json = await response.json();
-    // console.warn("json:", json);
-
     return json;
   } catch (error) {
     console.error('Error al subir al GeoNode:', error);

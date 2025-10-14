@@ -52,18 +52,37 @@ function irARutaConQuery(direccion) {
   });
 }
 
+function validateAttributes(attribute_set) {
+  const attributeList = Object.keys(attribute_set);
+  const displayOrderList = attributeList.map((d) => attribute_set[d]['display_order']);
+  const setList = Array.from(new Set(displayOrderList));
+  //console.log(displayOrderList);
+  //console.log(setList);
+  if (displayOrderList.length !== setList.length) {
+    //console.log(false);
+    return false;
+  } else {
+    //console.log(true);
+    return true;
+  }
+}
+
 async function updateMetadata() {
   const requestBody = storeMetadatos.buildRequestBody();
-  //console.log(requestBody);
-  const token = data.value?.accessToken;
-  const response = await $fetch('/api/metadatos', {
-    method: 'POST',
-    headers: { token: token, resourceType: resourceTypeGeonode[props.tipo], pk: props.pk },
-    body: requestBody,
-  });
-  console.warn('La res:', response);
-  const router = useRouter();
-  router.go(0);
+  const isMetaValid = validateAttributes(requestBody.attribute_set);
+  if (isMetaValid) {
+    const token = data.value?.accessToken;
+    const response = await $fetch('/api/metadatos', {
+      method: 'POST',
+      headers: { token: token, resourceType: resourceTypeGeonode[props.tipo], pk: props.pk },
+      body: requestBody,
+    });
+    console.warn('La res:', response);
+    const router = useRouter();
+    router.go(0);
+  } else {
+    alert('Revisa la validez de los datos introducidos.');
+  }
 }
 /**
  * Actualiza los metadatos con los valores del store
