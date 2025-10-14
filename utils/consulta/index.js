@@ -518,17 +518,27 @@ export async function downloadRaster(resource) {
   const { gnoxyFetch } = useGnoxyUrl();
   const config = useRuntimeConfig();
   const maxAttempts = 3;
+  let error = '';
   const url = `${config.public.geonodeUrl}/datasets/${resource.alternate}/dataset_download`;
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
       const res = await gnoxyFetch(url.toString());
       if (!res.ok) {
-        throw new Error(`Download failed: ${res.status}`);
+        error = '';
+        const errorData = await res.text();
+        if (errorData.includes('Download Limits Exceeded')) {
+          error = 'DownloadLimitsExceeded';
+        } else {
+          error = 'undefinedError';
+        }
+        //throw new Error(`Download failed: ${res.status}`);
+        console.error(error);
+        return;
       }
       const blob = await res.blob();
       const anchor = document.createElement('a');
       const downloadUrl = URL.createObjectURL(blob);
-      anchor.href = URL.createObjectURL(downloadUrl);
+      anchor.href = downloadUrl;
       anchor.download = `${resource.title}.tiff`;
       anchor.style.display = 'none';
       document.body.appendChild(anchor);
