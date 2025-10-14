@@ -62,7 +62,7 @@ async function guardarArchivo(files) {
 
           <div class="flex">
             <div class="columna-16">
-              <h2 class="m-b-0">{{ resourceToEdit.title }}</h2>
+              <h2 class="m-b-0">{{ resourceToEdit?.title }}</h2>
 
               <CatalogoMenuMisArchivos
                 :recurso="resourceToEdit"

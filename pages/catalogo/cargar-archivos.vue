@@ -1,4 +1,6 @@
 <script setup>
+import { convertirBytes } from '~/utils/catalogo';
+
 import { useAuth, useRuntimeConfig } from '#imports';
 import { useCatalogoStore } from '@/stores/catalogo';
 import { reactive, ref } from 'vue';
@@ -8,32 +10,31 @@ const configEnv = useRuntimeConfig();
 const statusOk = ref(false);
 const archivosEnCarga = ref([]);
 const { data } = useAuth();
+//const { gnoxyFetch } = useGnoxyUrl();
 
-const base_files = ['.geojson', 'gpkg', '.zip', '.csv'];
+const base_files = ['.geojson', '.gpkg', '.zip', '.csv'];
 const docs_files = ['.txt', '.pdf', '.xls', '.xlsx'];
 
 async function guardarArchivo(files) {
   const token = ref(data.value?.accessToken);
 
-  // 1️⃣ Agregamos todos los archivos a la lista como pendientes
   const nuevosArchivos = Array.from(files).map((file) =>
     reactive({
       nombre: file.name,
+      extension: file.name.split('.').slice(-1)[0],
+      tamanio: convertirBytes(file.size),
       estatus: 'pendiente',
       mensaje: 'Preparando carga...',
-      porcentaje: 0,
-      rutaArchivo: null,
+      IdRutaArchivo: null,
     })
   );
 
   archivosEnCarga.value.push(...nuevosArchivos);
 
-  // 2️⃣ Procesamos cada archivo en paralelo
   nuevosArchivos.forEach(async (archivo, idx) => {
     const file = files[idx];
     let endpoint = null;
 
-    // Identificar tipo de archivo y establecer endpoint
     if (base_files.some((end) => file.name.endsWith(end))) {
       endpoint = '/api/cargar-base-file';
     } else if (docs_files.some((end) => file.name.endsWith(end))) {
@@ -45,7 +46,6 @@ async function guardarArchivo(files) {
     }
 
     try {
-      // 3️⃣ Crear FormData para enviar al endpoint del servidor
       const formData = new FormData();
       if (base_files.some((end) => file.name.endsWith(end))) {
         formData.append('base_file', file);
@@ -54,14 +54,10 @@ async function guardarArchivo(files) {
       }
       formData.append('token', token.value);
 
-      // 4️⃣ Enviar archivo al endpoint server-side
       const response = await fetch(endpoint, {
         method: 'POST',
         body: formData,
       });
-
-      // Monitorear porcentaje (opcional, aproximado)
-      archivo.porcentaje = 100;
 
       const result = await response.json();
 
@@ -76,10 +72,17 @@ async function guardarArchivo(files) {
         monitorLayerImport(result.execution_id, archivo);
       } else if (result.url) {
         // Caso: documento cargado
+
         archivo.estatus = 'carga_finalizada';
         archivo.mensaje = 'Archivo cargado correctamente';
-        archivo.rutaArchivo = result.url;
+        archivo.IdRutaArchivo = result.url.split('/').slice(-1)[0];
         statusOk.value = true;
+        /*const request = await gnoxyFetch(
+          `${configEnv.public.geonodeUrl}/api/v2/datasets/${archivo.IdRutaArchivo}`
+        );
+        const res = await request.json();
+
+        console.log(res);*/
       } else {
         archivo.estatus = 'error_carga';
         archivo.mensaje = 'Respuesta inesperada del servidor';
@@ -113,7 +116,7 @@ async function monitorLayerImport(executionId, archivo) {
         const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
         archivo.estatus = 'carga_finalizada';
         archivo.mensaje = `Procesado en ${elapsed}s`;
-        archivo.rutaArchivo = data.imported_resources?.[0]?.detail_url || null;
+        archivo.IdRutaArchivo = data.imported_resources?.[0]?.detail_url.split('/').slice(-1)[0];
       }
 
       if (data.status === 'FAILED') {
@@ -171,20 +174,49 @@ async function monitorLayerImport(executionId, archivo) {
                   <b>{{ archivo.mensaje }}</b>
                 </div>
 
-                <p>{{ archivo.nombre }}</p>
-                <div
-                  v-if="['pendiente', 'procesando'].includes(archivo.estatus)"
-                  class="barra-progreso"
-                >
-                  <div class="progreso" :style="{ width: `${archivo.porcentaje}%` }">
-                    {{ archivo.porcentaje }}%
+                <div class="flex flex-contenido-separado">
+                  <div class="flex-vertical-centrado">
+                    <p>
+                      <span
+                        v-if="['pendiente', 'procesando'].includes(archivo.estatus)"
+                        class="pictograma-de-carga-sigic"
+                      >
+                        <img src="/img/loader.gif" alt="cargando" class="color-invertir" />
+                      </span>
+                      {{ archivo.nombre }}
+                    </p>
+                  </div>
+                  <div class="flex">
+                    <p class="borde borde-redondeado-8" style="padding: 4px">
+                      .{{ archivo.extension }}
+                    </p>
+                    <p class="flex flex-vertical-centrado">
+                      {{ archivo.tamanio }}
+                    </p>
                   </div>
                 </div>
 
-                <p v-if="archivo.rutaArchivo">
-                  <a :href="archivo.rutaArchivo" target="_blank">{{ archivo.rutaArchivo }}</a>
-                </p>
+                <div v-if="archivo.IdRutaArchivo" class="flex flex-contenido-separado">
+                  <div>
+                    <NuxtLink
+                      :to="`/catalogo/mis-archivos/editar/MetadatosBasicos?data=${archivo.IdRutaArchivo}`"
+                      target="_blank"
+                      >Editar metadatos</NuxtLink
+                    >
+                  </div>
+                  <div v-if="['geojson', 'gpkg', 'zip'].includes(archivo.extension)">
+                    <NuxtLink
+                      :to="`/catalogo/mis-archivos/editar/estilo?data=${archivo.IdRutaArchivo}`"
+                    >
+                      Agregar un estilo (.sld)</NuxtLink
+                    >
+                  </div>
+                  <div>
+                    <NuxtLink to="/catalogo/mis-archivos"> Ver en Mis archivos</NuxtLink>
+                  </div>
+                </div>
               </div>
+              <div v-if="archivo.estatus == 'carga_finalizada'" class=""></div>
             </div>
           </div>
         </div>
@@ -192,16 +224,14 @@ async function monitorLayerImport(executionId, archivo) {
     </template>
   </UiLayoutPaneles>
 </template>
-
 <style lang="scss">
-div.tarjetitas-carga {
-  div.barra-progreso {
-    background: var(--color-neutro-2);
-    div.progreso {
-      background: var(--color-primario-1);
-      height: 4px;
-      border-radius: 4px;
-    }
+span.pictograma-de-carga-sigic {
+  display: inline-flex;
+  vertical-align: middle;
+  padding: 0.25em;
+  img {
+    height: 16px;
+    position: relative;
   }
 }
 </style>
