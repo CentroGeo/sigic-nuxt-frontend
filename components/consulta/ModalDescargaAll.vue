@@ -12,6 +12,8 @@ const modalDescargaAll = ref(null);
 const optionsList = ref(null);
 const selectedOption = ref();
 const tagTitle = ref();
+const isDownloadActive = ref(false);
+const hasDownloadFailed = ref(false);
 /* const includesRemote = computed(() =>
   storeResources
     .findResources(storeSelected.pks)
@@ -20,6 +22,8 @@ const tagTitle = ref();
 ); */
 
 function abrirModalDescargaAll() {
+  isDownloadActive.value = false;
+  hasDownloadFailed.value = false;
   modalDescargaAll.value?.abrirModal();
   optionsList.value = optionsDict[props.resourceType]['elements'];
   tagTitle.value = optionsDict[props.resourceType]['title'];
@@ -27,36 +31,62 @@ function abrirModalDescargaAll() {
 }
 
 async function downloadAllDataTables(format) {
+  isDownloadActive.value = true;
   const resourceList = storeResources.findResources(storeSelected.pks);
+  const downloadStatusDict = {};
+
   for (let i = 0; i < resourceList.length; i++) {
     if (resourceList[i].sourcetype !== 'REMOTE') {
-      await downloadNoGeometry(resourceList[i], format);
+      const status = await downloadNoGeometry(resourceList[i], format);
+      downloadStatusDict[resourceList[i].title] = status;
       await wait(1000);
     }
   }
-  modalDescargaAll.value?.cerrarModal();
+  const hasfailedDownloads = Object.values(downloadStatusDict).some((value) => value !== 'Ok');
+  if (hasfailedDownloads) {
+    hasDownloadFailed.value = true;
+  }
+  isDownloadActive.value = false;
+  //modalDescargaAll.value?.cerrarModal();
 }
 
 async function downloadAllDocs() {
+  isDownloadActive.value = true;
   const resourceList = storeResources.findResources(storeSelected.pks);
+  const downloadStatusDict = {};
   for (let i = 0; i < resourceList.length; i++) {
     if (resourceList[i].sourcetype !== 'REMOTE') {
-      downloadDocs(resourceList[i]);
+      const status = await downloadDocs(resourceList[i]);
+      downloadStatusDict[resourceList[i].title] = status;
       await wait(1000);
     }
   }
-  modalDescargaAll.value?.cerrarModal();
+  const hasfailedDownloads = Object.values(downloadStatusDict).some((value) => value !== 'Ok');
+  if (hasfailedDownloads) {
+    hasDownloadFailed.value = true;
+  }
+  isDownloadActive.value = false;
+  //modalDescargaAll.value?.cerrarModal();
 }
 
 async function downloadAllMetadata() {
+  isDownloadActive.value = true;
   const resourceList = storeResources.findResources(storeSelected.pks);
+  const downloadStatusDict = {};
   for (let i = 0; i < resourceList.length; i++) {
     if (resourceList[i].sourcetype !== 'REMOTE') {
-      await downloadMetadata(resourceList[i]);
+      const status = await downloadMetadata(resourceList[i]);
+      downloadStatusDict[resourceList[i].title] = status;
+
       await wait(1000);
     }
   }
-  modalDescargaAll.value?.cerrarModal();
+  const hasfailedDownloads = Object.values(downloadStatusDict).some((value) => value !== 'Ok');
+  if (hasfailedDownloads) {
+    hasDownloadFailed.value = true;
+  }
+  isDownloadActive.value = false;
+  //modalDescargaAll.value?.cerrarModal();
 }
 
 const optionsDict = {
@@ -136,6 +166,26 @@ defineExpose({
             </p>
           </div>
         </div>
+        <div v-if="isDownloadActive" class="flex m-y-2 borde-redondeado-16 contenedor-proceso">
+          <div class="columna-4 flex-vertical-centrado">
+            <img src="/img/loader.gif" alt="...Cargando" class="loader" />
+          </div>
+          <p class="columna-12">
+            Descarga en curso. El proceso está tardando más tiempo de lo habitual.
+          </p>
+        </div>
+        <div
+          v-if="hasDownloadFailed"
+          class="flex m-y-2 borde-redondeado-16 contenedor-fallo flex-contenido-centrado"
+        >
+          <div class="columna-3 flex-vertical-centrado">
+            <span class="pictograma-alerta pictograma-grande"></span>
+          </div>
+          <p class="columna-13">
+            No se pudo completar la descarga de argunos archivos. Verifica tu conexión a internet e
+            inténtalo de nuevo.
+          </p>
+        </div>
         <div v-for="option in optionsList" :key="option.label">
           <input
             :id="`download-option-${option.label}`"
@@ -180,5 +230,21 @@ defineExpose({
   p {
     color: var(--color-alerta-3);
   }
+}
+.contenedor-proceso {
+  border: solid 1px var(--texto-informacion);
+  gap: 8px;
+  background-color: var(--color-informativo-1);
+  color: var(--texto-informacion);
+}
+.contenedor-fallo {
+  gap: 0px;
+  border: solid 1px var(--texto-error);
+  background-color: var(--color-error-1);
+  color: var(--texto-error);
+}
+.loader {
+  max-height: 3em;
+  object-fit: scale-down;
 }
 </style>

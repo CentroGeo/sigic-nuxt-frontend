@@ -21,6 +21,7 @@ const selectedOption = ref();
 const tagTitle = ref();
 const isDownloadActive = ref(false);
 const hasDownloadFailed = ref(false);
+const downloadError = ref('Verifica tu conexión a internet e inténtalo de nuevo.');
 const docExtension = ref(
   resourceType.value === 'document'
     ? selectedElement.value.links.find((link) => link.link_type === 'uploaded').extension
@@ -36,6 +37,7 @@ function abrirModalDescarga() {
   selectedOption.value = optionsList.value.map((d) => d.label)[0];
   isDownloadActive.value = false;
   hasDownloadFailed.value = false;
+  downloadError.value = 'Verifica tu conexión a internet e inténtalo de nuevo.';
 }
 
 const layerOptions = {
@@ -119,6 +121,9 @@ async function descargarClicked() {
   const downloadStatus = await selectedFunction.action();
   if (downloadStatus === 'Error') {
     hasDownloadFailed.value = true;
+  } else if (downloadStatus === 'DownloadLimitsExceeded') {
+    hasDownloadFailed.value = true;
+    downloadError.value = 'El tamaño del archivo excede los límites de descarga permitidos.';
   }
   isDownloadActive.value = false;
 }
@@ -134,6 +139,23 @@ defineExpose({
       </template>
       <template #cuerpo>
         <p class="h5">{{ selectedElement.title }}</p>
+        <div v-if="isDownloadActive" class="flex m-y-2 borde-redondeado-16 contenedor-proceso">
+          <div class="columna-4 flex-vertical-centrado">
+            <img src="/img/loader.gif" alt="...Cargando" class="loader" />
+          </div>
+          <p class="columna-12">
+            Descarga en curso. El proceso está tardando más tiempo de lo habitual.
+          </p>
+        </div>
+        <div
+          v-if="hasDownloadFailed"
+          class="flex m-y-2 borde-redondeado-16 contenedor-fallo flex-contenido-centrado"
+        >
+          <div class="columna-3 flex-vertical-centrado">
+            <span class="pictograma-alerta pictograma-grande"></span>
+          </div>
+          <p class="columna-13">No se pudo completar la descarga. {{ downloadError }}</p>
+        </div>
         <div>
           <div v-for="option in optionsList" :key="option.label">
             <input
@@ -163,26 +185,6 @@ defineExpose({
               {{ option.label }}
             </button> 
           </div> -->
-          <div
-            v-if="isDownloadActive"
-            class="flex flex-contenido-centrado m-t-2"
-            style="gap: 8px; background-color: var(--color-alerta-1); padding: 0px 16px"
-          >
-            <p class="m-t-3 m-b-0">Espera un momento mientras procesamos tu descarga....</p>
-            <img
-              class="m-t-0 m-b-1"
-              src="@/assets/gif/loader.gif"
-              alt="...Cargando"
-              height="60px"
-            />
-          </div>
-          <div
-            v-if="hasDownloadFailed"
-            class="fondo-color-error texto-color-error m-t-3 m-b-0"
-            style="padding: 16px"
-          >
-            Lo sentimos, no se pudo descargar este archivo.
-          </div>
         </div>
       </template>
     </SisdaiModal>
@@ -201,10 +203,20 @@ defineExpose({
     color: var(--color-alerta-3);
   }
 }
-.prueba {
-  background-color: red;
+.contenedor-proceso {
+  border: solid 1px var(--texto-informacion);
+  gap: 8px;
+  background-color: var(--color-informativo-1);
+  color: var(--texto-informacion);
 }
-.prueba2 {
-  background-color: blue;
+.contenedor-fallo {
+  gap: 0px;
+  border: solid 1px var(--texto-error);
+  background-color: var(--color-error-1);
+  color: var(--texto-error);
+}
+.loader {
+  max-height: 3em;
+  object-fit: scale-down;
 }
 </style>
