@@ -14,6 +14,7 @@ const router = useRouter();
 storeConsulta.resourceType = resourceTypeDic.dataLayer;
 
 const vistaDelMapa = ref({ extension: storeConsulta.mapExtent });
+const attributos = reactive({});
 
 const linkExportaMapa = ref();
 function exportarMapa() {
@@ -75,26 +76,27 @@ onMounted(async () => {
   }
 });
 
-const attributos = reactive({});
 async function addAttribute(pk) {
   attributos[pk] = [];
-
+  const maxAttrs = 5;
   try {
     const { attributes } = await gnoxyFetch(
       `${config.public.geonodeApi}/datasets/${pk}/attribute_set`
     ).then((response) => response.json());
-    // console.log(attributes);
 
     const etiquetas = {};
-    const columnas = attributes
+    let columnas = attributes
       .filter((a) => a.visible)
       .sort((a, b) => a.display_order - b.display_order)
       .map(({ attribute, attribute_label }) => {
         etiquetas[attribute] = attribute_label || attribute;
         return attribute;
       });
-    // console.log(columnas);
 
+    // Limitamos el máximo de atributos visibles
+    if (columnas.length > maxAttrs) {
+      columnas = columnas.slice(0, maxAttrs);
+    }
     attributos[pk] = {
       params: {
         propertyName: columnas.join(','),
@@ -105,10 +107,9 @@ async function addAttribute(pk) {
           .map((columna) => `<p><b>${etiquetas[columna] || columna}</b>: ${data[columna]}</p>`)
           .join(''),
     };
-    // console.log(attributos[pk]);
   } catch (error) {
     console.error('Error en la búsqueda:', error);
-
+    /* 
     console.error(
       'Ocurrió un problema al realizar la búsqueda. Por favor, verifica tu conexión o intenta de nuevo más tarde.'
     );
@@ -117,7 +118,7 @@ async function addAttribute(pk) {
       console.error('Los parámetros de búsqueda no son válidos. Revisa los filtros ingresados.');
     } else if (error.response && error.response.status === 500) {
       console.error('El servidor encontró un problema. Intenta más tarde.');
-    }
+    } */
   }
 }
 
@@ -125,16 +126,20 @@ watch(
   () => storeSelected.resources[storeConsulta.resourceType],
   (nv_) => {
     //console.log(nv_);
+    //const selectedPks = Object.keys(nv_);
+    //const firstElement = selectedPks.filter((d) => nv_[d]['position_'] === 0);
+    //console.log('Aqui:', firstElement);
+    //addAttribute(firstElement);
     const arr1 = Object.keys(nv_);
     const arr2 = Object.keys(attributos);
-    //console.log(arr1, arr2);
     const nv = arr1.filter((item) => !arr2.includes(item));
     //console.log('Se agregó:', nv);
-    nv.forEach((r) => addAttribute(r));
-    //const ov = arr2.filter((item) => !arr1.includes(item));
+    const ov = arr2.filter((item) => !arr1.includes(item));
     //console.log('Se quitó:', ov);
-    //ov.forEach((resource) => delete attributos[resource]);
-    //console.log(attributos);
+    nv.forEach((r) => addAttribute(r));
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+    ov.forEach((resource) => delete attributos[resource]);
+    console.log(attributos);
     //console.log();
   },
   { deep: true }
