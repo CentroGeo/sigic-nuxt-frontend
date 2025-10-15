@@ -318,7 +318,30 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       resources[resourceType] = res.resources;
       this.isLoading = false;
     },
-
+    /**
+     * Traer la información de un solo recurso
+     * @param {*} pkToFind
+     * @returns
+     */
+    async fetchResourceByPk(pkToFind) {
+      const { gnoxyFetch } = useGnoxyUrl();
+      const maxAttempts = 3;
+      const url = `${config.public.geonodeApi}/sigic-resources/${pkToFind}`;
+      // TODO: Si la petición falla porque el recurso es privado, eliminarlo de la store de seleccion
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        try {
+          const res = await gnoxyFetch(url);
+          if (!res.ok) {
+            console.error(`Download failed: ${res.status}`);
+            return 'Error';
+          }
+          const resource = await res.json();
+          return resource.resource;
+        } catch {
+          console.warn(`Falló el intento ${attempt + 1}.`);
+        }
+      }
+    },
     /**
      * Devuelve un recursos que coincida con un uuid.
      * @param {String} uuid del catalogo a buscar.
