@@ -286,7 +286,7 @@ onMounted(async () => {
         <UiNumeroElementos :numero="totalResources" :etiqueta="etiquetaElementos" />
       </div>
       <div v-if="isLoading" class="flex flex-contenido-centrado">
-        <img src="@/assets/gif/loader.gif" alt="...Cargando" height="60px" />
+        <img src="/img/loader.gif" alt="...Cargando" height="60px" />
       </div>
       <div v-if="orderedCategories.length > 0 && !isLoading">
         <div v-for="category in orderedCategories" :key="category" class="m-y-1">
@@ -312,7 +312,7 @@ onMounted(async () => {
             />
           </div>
           <div v-if="categoriesDict[category]?.isLoading" class="flex flex-contenido-centrado">
-            <img src="@/assets/gif/loader.gif" alt="...Cargando" height="40px" />
+            <img src="/img/loader.gif" alt="...Cargando" height="40px" />
           </div>
         </div>
       </div>
