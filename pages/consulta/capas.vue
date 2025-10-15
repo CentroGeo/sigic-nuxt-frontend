@@ -15,7 +15,7 @@ storeConsulta.resourceType = resourceTypeDic.dataLayer;
 
 const vistaDelMapa = ref({ extension: storeConsulta.mapExtent });
 const attributos = reactive({});
-
+const topLayer = ref();
 const linkExportaMapa = ref();
 function exportarMapa() {
   exportarHTMLComoPNG(
@@ -103,6 +103,7 @@ async function addAttribute(pk) {
       },
       // attribute_label
       contenido: (data) =>
+        pk +
         columnas
           .map((columna) => `<p><b>${etiquetas[columna] || columna}</b>: ${data[columna]}</p>`)
           .join(''),
@@ -130,16 +131,16 @@ watch(
     //const firstElement = selectedPks.filter((d) => nv_[d]['position_'] === 0);
     //console.log('Aqui:', firstElement);
     //addAttribute(firstElement);
-    const arr1 = Object.keys(nv_);
-    const arr2 = Object.keys(attributos);
-    const nv = arr1.filter((item) => !arr2.includes(item));
+    const selectedPks = Object.keys(nv_);
+    const attributesPks = Object.keys(attributos);
+    topLayer.value = selectedPks.filter((d) => nv_[d]['position_'] === 0);
+    const nv = selectedPks.filter((item) => !attributesPks.includes(item));
     //console.log('Se agregó:', nv);
-    const ov = arr2.filter((item) => !arr1.includes(item));
-    //console.log('Se quitó:', ov);
+    //const ov = attributesPks.filter((item) => !selectedPks.includes(item));
+    //console.log('Se quitó:', ov);a
     nv.forEach((r) => addAttribute(r));
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-    ov.forEach((resource) => delete attributos[resource]);
-    console.log(attributos);
+    //ov.forEach((resource) => delete attributos[resource]);
+    //console.log(attributos);
     //console.log();
   },
   { deep: true }
@@ -198,7 +199,7 @@ const selectorDivisionAbierto = ref(undefined);
 
           <SisdaiCapaWms
             v-for="resource in storeResources.findResources(storeSelected.pks)"
-            :key="`wms-${resource.pk}`"
+            :key="`wms-${resource.pk}-${resource.position_}`"
             :capa="resource.alternate"
             :consulta="gnoxyFetch"
             :fuente="findServer(resource)"
@@ -207,7 +208,7 @@ const selectorDivisionAbierto = ref(undefined);
             :opacidad="storeSelected.byPk(resource.pk).opacidad"
             :posicion="storeSelected.byPk(resource.pk).posicion + 1"
             :visible="storeSelected.byPk(resource.pk).visible"
-            :cuadro-informativo="attributos[resource.pk]"
+            :cuadro-informativo="resource.subtype === 'raster' ? '' : attributos[resource.pk]"
           />
         </SisdaiMapa>
       </ClientOnly>
