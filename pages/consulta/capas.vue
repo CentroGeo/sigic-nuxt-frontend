@@ -7,6 +7,7 @@ import { findServer, resourceTypeDic } from '~/utils/consulta';
 const storeConsulta = useConsultaStore();
 const storeResources = useResourcesConsultaStore();
 const storeSelected = useSelectedResources2Store();
+const config = useRuntimeConfig();
 const { gnoxyFetch } = useGnoxyUrl();
 const route = useRoute();
 const router = useRouter();
@@ -74,76 +75,70 @@ onMounted(async () => {
   }
 });
 
-// const attributos = reactive({});
-// async function addAttribute(pk) {
-//   attributos[pk] = [];
+const attributos = reactive({});
+async function addAttribute(pk) {
+  attributos[pk] = [];
 
-//   try {
-//     const { attributes } = await fetch(
-//       `${config.public.geonodeApi}/datasets/${pk}/attribute_set`
-//     ).then((response) => response.json());
-//     // console.log(attributes);
+  try {
+    const { attributes } = await gnoxyFetch(
+      `${config.public.geonodeApi}/datasets/${pk}/attribute_set`
+    ).then((response) => response.json());
+    // console.log(attributes);
 
-//     const etiquetas = {};
-//     const columnas = attributes
-//       .filter((a) => a.visible)
-//       .sort((a, b) => a.display_order - b.display_order)
-//       .map(({ attribute, attribute_label }) => {
-//         etiquetas[attribute] = attribute_label || attribute;
-//         return attribute;
-//       });
-//     // console.log(columnas);
+    const etiquetas = {};
+    const columnas = attributes
+      .filter((a) => a.visible)
+      .sort((a, b) => a.display_order - b.display_order)
+      .map(({ attribute, attribute_label }) => {
+        etiquetas[attribute] = attribute_label || attribute;
+        return attribute;
+      });
+    // console.log(columnas);
 
-//     attributos[pk] = {
-//       params: {
-//         propertyName: columnas.join(','),
-//       },
-//       // attribute_label
-//       contenido: (data) =>
-//         columnas
-//           .map((columna) => `<p><b>${etiquetas[columna] || columna}</b>: ${data[columna]}</p>`)
-//           .join(''),
-//     };
-//     // console.log(attributos[pk]);
-//   } catch (error) {
-//     console.error('Error en la búsqueda:', error);
+    attributos[pk] = {
+      params: {
+        propertyName: columnas.join(','),
+      },
+      // attribute_label
+      contenido: (data) =>
+        columnas
+          .map((columna) => `<p><b>${etiquetas[columna] || columna}</b>: ${data[columna]}</p>`)
+          .join(''),
+    };
+    // console.log(attributos[pk]);
+  } catch (error) {
+    console.error('Error en la búsqueda:', error);
 
-//     console.error(
-//       'Ocurrió un problema al realizar la búsqueda. Por favor, verifica tu conexión o intenta de nuevo más tarde.'
-//     );
+    console.error(
+      'Ocurrió un problema al realizar la búsqueda. Por favor, verifica tu conexión o intenta de nuevo más tarde.'
+    );
 
-//     if (error.response && error.response.status === 400) {
-//       console.error('Los parámetros de búsqueda no son válidos. Revisa los filtros ingresados.');
-//     } else if (error.response && error.response.status === 500) {
-//       console.error('El servidor encontró un problema. Intenta más tarde.');
-//     }
-//   }
-// }
+    if (error.response && error.response.status === 400) {
+      console.error('Los parámetros de búsqueda no son válidos. Revisa los filtros ingresados.');
+    } else if (error.response && error.response.status === 500) {
+      console.error('El servidor encontró un problema. Intenta más tarde.');
+    }
+  }
+}
 
-// watch(
-//   () => storeSelected.selectedResources[resourceType],
-//   (nv_) => {
-//     randomNum.value += Math.random();
-
-//     const arr1 = nv_.map((r) => r.pk);
-//     const arr2 = Object.keys(attributos);
-//     // console.log(arr1, arr2);
-
-//     const nv = arr1.filter((item) => !arr2.includes(item));
-//     // console.log("Se agregó:", nv);
-//     nv.forEach((r) => addAttribute(r));
-
-//     //const ov = arr2.filter((item) => !arr1.includes(item));
-//     // console.log("Se quitó:", ov);
-
-//     //ov.forEach((resource) => delete attributos[resource]);
-
-//     // console.log(attributos);
-
-//     //console.log();
-//   },
-//   { deep: true }
-// );
+watch(
+  () => storeSelected.resources[storeConsulta.resourceType],
+  (nv_) => {
+    //console.log(nv_);
+    const arr1 = Object.keys(nv_);
+    const arr2 = Object.keys(attributos);
+    //console.log(arr1, arr2);
+    const nv = arr1.filter((item) => !arr2.includes(item));
+    //console.log('Se agregó:', nv);
+    nv.forEach((r) => addAttribute(r));
+    //const ov = arr2.filter((item) => !arr1.includes(item));
+    //console.log('Se quitó:', ov);
+    //ov.forEach((resource) => delete attributos[resource]);
+    //console.log(attributos);
+    //console.log();
+  },
+  { deep: true }
+);
 
 // api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
 // const contenedorSelectoresDivisionColapsado = ref(true);
@@ -207,6 +202,7 @@ const selectorDivisionAbierto = ref(undefined);
             :opacidad="storeSelected.byPk(resource.pk).opacidad"
             :posicion="storeSelected.byPk(resource.pk).posicion + 1"
             :visible="storeSelected.byPk(resource.pk).visible"
+            :cuadro-informativo="attributos[resource.pk]"
           />
         </SisdaiMapa>
       </ClientOnly>
