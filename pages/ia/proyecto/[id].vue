@@ -469,7 +469,9 @@ function preventEscape(event) {
                     </td>
                     <td class="p-3">{{ archivo.categoria }}</td>
                     <td class="p-3 etiqueta-tabla">
-                      <span class="p-x-1 p-y-minimo">{{ archivo.origen }}</span>
+                      <span class="p-x-1 p-y-minimo">{{
+                        archivo.origen === 'Catalogo' ? 'Catálogo' : archivo.origen
+                      }}</span>
                     </td>
                     <td class="p-x-3 p-y-1">
                       <button

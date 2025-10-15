@@ -91,16 +91,22 @@ const blobeTitle = ref('');
 async function openResourceViewEmbed(resource) {
   // console.log('resource', resource);
   const resourceByPk = await storeResources.fetchResourceByPk(resource.geonode_id);
-  if (resourceByPk.resource_type === 'document') {
-    const linkCargado = resourceByPk.links.find((link) => link.link_type === 'uploaded');
-    extensionDocumento.value = linkCargado.extension;
-    blobeTitle.value = resourceByPk.title;
-    const resourceEmbedURL = resourceByPk.embed_url.replace('/embed', '/link');
-    blobedUrl.value = await fetchDoc(resourceEmbedURL);
-    documentoModal.value.abrirModal();
+  // console.log('resourceByPk', resourceByPk);
+  if (resourceByPk !== undefined) {
+    if (resourceByPk?.resource_type === 'document') {
+      const linkCargado = resourceByPk.links.find((link) => link.link_type === 'uploaded');
+      extensionDocumento.value = linkCargado.extension;
+      blobeTitle.value = resourceByPk.title;
+      const resourceEmbedURL = resourceByPk.embed_url.replace('/embed', '/link');
+      blobedUrl.value = await fetchDoc(resourceEmbedURL);
+      documentoModal.value.abrirModal();
+    } else {
+      console.warn('no es documento');
+    }
   } else {
-    console.warn('no es documento');
+    console.warn(`El recurso ${resource.geonode_id} no está publicado`);
   }
+
   /* (resource.tipo_recurso === 'Documentos') {
     useSelectedResources2Store().add(
       new SelectedLayer({ uuid: resource.uuid }),
@@ -247,8 +253,8 @@ async function openResourceViewEmbed(resource) {
                 <tr>
                   <th class="p-x-3 p-y-2">Nombre</th>
                   <th class="p-x-3 p-y-2">Tipo de archivo</th>
-                  <!-- <th>Categoría</th>
                   <th>Origen</th>
+                  <!-- <th>Categoría</th>
                   <th>Acciones</th> -->
                 </tr>
               </thead>
@@ -260,8 +266,12 @@ async function openResourceViewEmbed(resource) {
                   <td class="p-3 etiqueta-tabla">
                     <span class="p-x-1 p-y-minimo">{{ obtenerTipoArchivo(archivo.filename) }}</span>
                   </td>
-                  <!-- <td>{{ archivo.categoria }}</td>
-                  <td>{{ archivo.origen }}</td> -->
+                  <td class="p-3 etiqueta-tabla">
+                    <span class="p-x-1 p-y-minimo">
+                      {{ archivo.geonode_type === 'Catalogo' ? 'Catálogo' : archivo.geonode_type }}
+                    </span>
+                  </td>
+                  <!-- <td>{{ archivo.categoria }}</td> -->
                   <!-- <td>
                     <button
                       class="boton-pictograma boton-sin-contenedor-secundario boton-chico"

@@ -394,6 +394,7 @@ onBeforeUnmount(() => {
                     <th class="checkbox-header p-x-3 p-y-2">Selección</th>
                     <th class="p-x-3 p-y-2">Nombre</th>
                     <th class="p-x-3 p-y-2">Tipo</th>
+                    <th class="p-x-3 p-y-2">Origen</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -413,6 +414,11 @@ onBeforeUnmount(() => {
                       <span class="p-x-1 p-y-minimo">{{
                         obtenerTipoArchivo(fuente.filename)
                       }}</span>
+                    </td>
+                    <td class="p-3 etiqueta-tabla">
+                      <span class="p-x-1 p-y-minimo">
+                        {{ fuente.geonode_type === 'Catalogo' ? 'Catálogo' : fuente.geonode_type }}
+                      </span>
                     </td>
                   </tr>
                 </tbody>
