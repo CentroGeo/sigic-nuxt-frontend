@@ -87,62 +87,6 @@ onMounted(async () => {
   storeResources.getTotalResources(storeConsulta.resourceType, params.value);
   fetchNewData();
 });
-//const tableResources = ref([]);
-/* const filteredResources = ref([]);
-const seleccionOrden = ref('');
-const inputSearch = computed({
-  get: () => storeFilters.filters.inputSearch,
-  set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
-});
-const modalFiltroAvanzado = ref(null);
-const isFilterActive = ref(false); */
-
-// obteniendo las variables keys para la tabla
-//const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'acciones'];
-
-/* function updateResources(nuevosRecursos) {
-  filteredResources.value = nuevosRecursos;
-  // obteniendo datos por las props de la tabla
-  tableResources.value = filteredResources.value.map((d) => ({
-    pk: d.pk,
-    titulo: d.title,
-    tipo_recurso: 'Capa geográfica',
-    categoria: d.category,
-    actualizacion: d.last_updated,
-    acciones: 'Ver, Descargar',
-    uuid: d.uuid,
-    recurso_completo: d,
-  }));
-} */
-
-/* function applyAdvancedFilter() {
-  isFilterActive.value = true;
-  modalFiltroAvanzado.value.cerrarModalBusqueda();
-  updateResources(storeFilters.filter());
-}
-
-function resetAdvancedFilter() {
-  isFilterActive.value = false;
-  storeFilters.resetFilters();
-  modalFiltroAvanzado.value.cerrarModalBusqueda();
-  updateResources(storeFilters.filter());
-}
-
-watch([resourcesCapas, inputSearch], () => {
-  updateResources(storeFilters.filter());
-});
-
-watch(seleccionOrden, (nv) => {
-  storeFilters.updateFilter('sort', nv);
-  updateResources(storeFilters.filter());
-});
-
-onMounted(async () => {
-  storeFilters.resetAll();
-  if (resourcesCapas.value.length !== 0) {
-    updateResources(resourcesCapas.value);
-  }
-}); */
 </script>
 
 <template>

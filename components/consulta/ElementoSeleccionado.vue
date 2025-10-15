@@ -1,7 +1,6 @@
 <script setup>
 import { categoriesInSpanish, resourceTypeDic, tooltipContent } from '~/utils/consulta';
 
-//const storeFetched = useFetchedResources2Store();
 const storeResources = useResourcesConsultaStore();
 const storeSelected = useSelectedResources2Store();
 const emit = defineEmits(['openOpacity', 'openDownload', 'openTabla', 'openMapa']);

@@ -20,12 +20,18 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
     [resourceTypeDic.dataTable]: 0,
     [resourceTypeDic.document]: 0,
   });
-  const resources = reactive({
+  const totalMisArchivos = reactive({
+    disponibles: 0,
+    pendientes: 0,
+    publicacion: 0,
+  });
+
+  const resourcesByType2 = reactive({
     [resourceTypeDic.dataLayer]: [],
     [resourceTypeDic.dataTable]: [],
     [resourceTypeDic.document]: [],
   });
-  const resourcesByType2 = reactive({
+  const resources = reactive({
     [resourceTypeDic.dataLayer]: [],
     [resourceTypeDic.dataTable]: [],
     [resourceTypeDic.document]: [],
@@ -44,11 +50,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
     disponibles: [],
     pendientes: [],
     publicacion: [],
-  });
-  const totalMisArchivos = reactive({
-    disponibles: 0,
-    pendientes: 0,
-    publicacion: 0,
   });
   return {
     isLoading: ref(false),

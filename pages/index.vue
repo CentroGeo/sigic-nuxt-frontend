@@ -1,5 +1,4 @@
 <script setup>
-import { resourceTypeDic } from '~/utils/consulta';
 import SelectedLayer from '~/utils/consulta/SelectedLayer';
 
 definePageMeta({ auth: false, key: 'inicio' });
@@ -114,14 +113,20 @@ onUnmounted(() => {
 });
 */
 // Capas recientes
-const storeFetched = useFetchedResources2Store();
-storeFetched.checkFilling(resourceTypeDic.dataLayer);
+const storeResources = useResourcesCatalogoStore();
+const storeSelected = useSelectedResources2Store();
+const params = {
+  'filter{resource_type}': 'dataset',
+  'filter{has_geometry}': 'true',
+  //'sort[]': 'last_updated',
+};
+storeResources.getResourcesByPage('dataLayer', 1, 4, params);
 
 const obtenerMasRecientes = (type) => {
-  return computed(() => storeFetched.byResourceType(type).slice(0, 4) || [{}]);
+  return computed(() => storeResources.resourcesByType(type) || [{}]);
 };
 
-const capasMasRecientes = obtenerMasRecientes(resourceTypeDic.dataLayer);
+const capasMasRecientes = obtenerMasRecientes('dataLayer');
 
 async function updateSelection(newPk) {
   storeSelected.add(new SelectedLayer({ pk: newPk }), 'dataLayer');

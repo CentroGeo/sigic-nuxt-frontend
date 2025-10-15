@@ -87,35 +87,6 @@ onMounted(async () => {
   storeResources.getTotalResources(storeConsulta.resourceType, params.value);
   fetchNewData();
 });
-
-/* function applyAdvancedFilter() {
-  isFilterActive.value = true;
-  modalFiltroAvanzado.value.cerrarModalBusqueda();
-  updateResources(storeFilters.filter());
-}
-
-function resetAdvancedFilter() {
-  isFilterActive.value = false;
-  storeFilters.resetFilters();
-  modalFiltroAvanzado.value.cerrarModalBusqueda();
-  updateResources(storeFilters.filter());
-}
-
-watch([resourcesTablas, inputSearch], () => {
-  updateResources(storeFilters.filter());
-});
-
-watch(seleccionOrden, (nv) => {
-  storeFilters.updateFilter('sort', nv);
-  updateResources(storeFilters.filter());
-});
-
-onMounted(async () => {
-  storeFilters.resetAll();
-  if (resourcesTablas.value.length !== 0) {
-    updateResources(resourcesTablas.value);
-  }
-}); */
 </script>
 
 <template>
