@@ -185,26 +185,6 @@ defineExpose({
               {{ option.label }}
             </button> 
           </div> -->
-          <!--           <div
-            v-if="isDownloadActive"
-            class="flex flex-contenido-centrado m-t-2"
-            style="gap: 8px; background-color: var(--color-alerta-1); padding: 0px 16px"
-          >
-            <p class="m-t-3 m-b-0">Espera un momento mientras procesamos tu descarga....</p>
-                     <img
-              class="m-t-0 m-b-1"
-              src="@/public/img/loader.gif"
-              alt="...Cargando"
-              height="60px"
-            /> 
-          </div> -->
-          <!--          <div
-            v-if="hasDownloadFailed"
-            class="fondo-color-error texto-color-error m-t-3 m-b-0"
-            style="padding: 16px"
-          >
-            Lo sentimos, no se pudo descargar este archivo.
-          </div> -->
         </div>
       </template>
     </SisdaiModal>

@@ -65,14 +65,15 @@ watch(
   }
 );
 onMounted(async () => {
-  storeResources.resetByType(storeConsulta.resourceType);
+  //console.log('Extension:', vistaDelMapa.value);
   updateMapFromHash(route.hash?.slice(1));
+  storeResources.resetByType(storeConsulta.resourceType);
   storeSelected.addFromQueryParam(route.query.capas);
 
   // Para cuando hace el cambio de página
   if (storeSelected.pks.length > 0) {
-    updateQueryParam(storeSelected.asQueryParam());
     storeResources.fetchResourcesByPk(storeConsulta.resourceType, storeSelected.pks);
+    updateQueryParam(storeSelected.asQueryParam());
   }
 });
 
@@ -204,7 +205,7 @@ const selectorDivisionAbierto = ref(undefined);
             :consulta="gnoxyFetch"
             :fuente="findServer(resource)"
             :lado="storeSelected.byPk(resource.pk).lado"
-            :mosaicos="true"
+            :mosaicos="false"
             :opacidad="storeSelected.byPk(resource.pk).opacidad"
             :posicion="storeSelected.byPk(resource.pk).posicion + 1"
             :visible="storeSelected.byPk(resource.pk).visible"

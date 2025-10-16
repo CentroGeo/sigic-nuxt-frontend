@@ -27,6 +27,17 @@ const {
   resource: selectedElement.value,
 });
 
+/**
+ * Actualiza el queryParam.
+ * @param newQueryParam para asignar.
+ */
+
+function updateQueryParam(tablas) {
+  if (tablas !== route.query.tablas) {
+    router.replace({ query: { tablas } });
+  }
+}
+
 watch(paginaActual, () => {
   fetchTable({
     paginaActual: paginaActual.value,
@@ -34,6 +45,8 @@ watch(paginaActual, () => {
     resource: selectedElement.value,
   });
 });
+
+watch(() => storeSelected.asQueryParam(), updateQueryParam);
 
 watch(
   [
@@ -52,27 +65,14 @@ watch(
   },
   { deep: true }
 );
-
-/**
- * Actualiza el queryParam.
- * @param newQueryParam para asignar.
- */
-
-function updateQueryParam(tablas) {
-  if (tablas !== route.query.tablas) {
-    router.replace({ query: { tablas } });
-  }
-}
-watch(() => storeSelected.asQueryParam(), updateQueryParam);
-
 onMounted(async () => {
   storeResources.resetByType(storeConsulta.resourceType);
   storeSelected.addFromQueryParam(route.query.tablas);
 
   // Para cuando hacemos el cambio de página
   if (storeSelected.pks.length > 0) {
-    updateQueryParam(storeSelected.asQueryParam());
     storeResources.fetchResourcesByPk(storeConsulta.resourceType, storeSelected.pks);
+    updateQueryParam(storeSelected.asQueryParam());
   }
 });
 </script>

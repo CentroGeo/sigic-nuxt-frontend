@@ -1,18 +1,22 @@
 <script setup>
 import { resourceTypeDic, resourceTypeGeonode } from '~/utils/consulta';
+import SelectedLayer from '~/utils/consulta/SelectedLayer';
+import SelectedResource from '~/utils/consulta/SelectedResource';
+
 const storeResources = useResourcesCatalogoStore();
 const storeCatalogo = useCatalogoStore();
+const storeSelected = useSelectedResources2Store();
 function buildQueryParams(resourceType) {
-  const queryParams = { custom: 'true' };
+  const queryParams = {};
   queryParams['filter{resource_type}'] = resourceTypeGeonode[resourceType];
   if (resourceType === 'dataLayer') {
-    queryParams['extent_ne'] = '[-1,-1,0,0]';
+    queryParams['filter{has_geometry}'] = 'true';
   }
   if (resourceType === 'dataTable') {
     queryParams['filter{subtype.in}'] = ['vector', 'remote'];
   }
   if (resourceType === 'document') {
-    queryParams['file_extension'] = ['pdf', 'txt'];
+    queryParams['filter{extension}'] = ['pdf', 'txt'];
   }
   return queryParams;
 }
@@ -53,54 +57,17 @@ const resourcesDict = computed(() => ({
     consultaLabel: 'Ver Documento en el Visualizador',
   },
 }));
-/* import { resourceTypeDic } from '~/utils/consulta';
-const storeFetched = useFetchedResources2Store();
-
-storeFetched.checkFilling(resourceTypeDic.dataLayer);
-storeFetched.checkFilling(resourceTypeDic.dataTable);
-storeFetched.checkFilling(resourceTypeDic.document);
-
-/**
- * Devuelve un número con el tamaño de recursos.
- * @param {String} type tipo de recursos a obtener el tamaño.
- * @returns {Number} número de recursos.
- */
-/*const obtenerLength = (type) => {
-  return computed(() => storeFetched.byResourceType(type).length || false);
-};
-
-const resourcesCapasLength = obtenerLength(resourceTypeDic.dataLayer);
-const resourcesTablasLength = obtenerLength(resourceTypeDic.dataTable);
-const resourcesDocumentosLength = obtenerLength(resourceTypeDic.document);
-
-/**
- * Devuelve un objeto con el recurso más reciente.
- * @param {String} type tipo de recursos a obtener más reciente.
- * @returns {Object} objeto de recursos más reciente.
- */
-/*const obtenerMasReciente = (type) => {
-  return computed(() => storeFetched.byResourceType(type)[0] || false);
-};
-
-const capaMasReciente = obtenerMasReciente(resourceTypeDic.dataLayer);
-const tablaMasReciente = obtenerMasReciente(resourceTypeDic.dataTable);
-const documentoMasReciente = obtenerMasReciente(resourceTypeDic.document);
-
-const formatearAbstract = (resource) => {
-  let formatedAbstract = 'Sin descripción';
-  if (resource?.raw_abstract) {
-    formatedAbstract = resource?.raw_abstract
-      .replace(/^<p>/, '')
-      .replace(/<\/p>$/, '')
-      .replace(/^<pre>/, '')
-      .replace(/<\/pre>$/, '');
+async function updateSelection(type) {
+  const currentPk = resourcesDict.value[type].latest.pk;
+  if (type === 'dataTable' || type === 'document') {
+    storeSelected.add(new SelectedResource({ pk: currentPk }), type);
+  } else {
+    storeSelected.add(new SelectedLayer({ pk: currentPk }), type);
   }
-  const content = `
-    <p style="text-overflow: ellipsis; overflow: hidden; height: 1.2em; white-space: nowrap; "
-      >${formatedAbstract}
-    </p>`;
-  return content;
-}; */
+  nextTick(async () => {
+    await navigateTo(resourcesDict.value[type].consultaTo);
+  });
+}
 </script>
 
 <template>
@@ -148,10 +115,8 @@ const formatearAbstract = (resource) => {
                     {{ resourcesDict[type].latest.title }}
                   </p>
                   <span v-if="resourcesDict[type].latest">
-                    <div>
-                      <p class="abstract">
-                        {{ resourcesDict[type].latest.raw_abstract }}
-                      </p>
+                    <div class="abstract m-b-2">
+                      {{ resourcesDict[type].latest.raw_abstract }}
                     </div>
                   </span>
                 </div>
@@ -160,6 +125,7 @@ const formatearAbstract = (resource) => {
                     class="boton boton-primario boton-chico"
                     aria-label="Ver capa en visualizador"
                     :to="resourcesDict[type].consultaTo"
+                    @click.prevent="updateSelection(type)"
                   >
                     {{ resourcesDict[type].consultaLabel }}
                   </nuxt-link>
@@ -174,9 +140,11 @@ const formatearAbstract = (resource) => {
 </template>
 <style>
 .abstract {
+  line-height: 1.4em;
+  /* Cuando era un párrafo generado programáticamente se usaba:
   text-overflow: ellipsis;
   overflow: hidden;
   height: 1.2em;
-  white-space: nowrap;
+  white-space: nowrap;*/
 }
 </style>

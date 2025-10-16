@@ -3,19 +3,20 @@ const { data } = useAuth();
 
 const route = useRoute();
 const selectedPk = route.query.data;
-const resourceType = route.query.type;
+//const resourceType = route.query.type;
 
 const subidaExitosa = ref(false);
 const nombreSLD = ref('');
 
 const storeCatalogo = useCatalogoStore();
 // Recuperamos la información completa del recurso
-const storeFetched = useFetchedResources2Store();
+/* const storeFetched = useFetchedResources2Store();
 storeFetched.checkFilling(resourceType);
 const resourceToEdit = computed(() =>
   storeFetched.byResourceType(resourceType).find(({ pk }) => pk === selectedPk)
-);
-
+); */
+const storeResources = useResourcesCatalogoStore();
+const resourceToEdit = computed(() => storeResources.fetchResourceByPk(selectedPk));
 //
 const dragNdDrop = ref(null);
 const style_files = ['.sld'];
