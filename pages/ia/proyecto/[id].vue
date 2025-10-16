@@ -482,7 +482,7 @@ function preventEscape(event) {
                     </td>
                     <td class="p-3 flex flex-contenido-centrado">
                       <p
-                        class="texto-centrado fondo-color-acento p-1 texto-color-acento borde borde-redondeado-12"
+                        class="texto-centrado fondo-color-acento p-1 m-0 texto-color-acento borde borde-redondeado-12"
                         style="width: max-content"
                       >
                         <span v-if="archivo.categoria === 'Documento'">
