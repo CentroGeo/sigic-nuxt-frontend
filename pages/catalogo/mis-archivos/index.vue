@@ -25,7 +25,10 @@ const hayMetaPendiente = computed(() =>
 );
 const modalFiltroAvanzado = ref(null);
 const isFilterActive = ref(false);
-const seleccionOrden = ref('');
+const seleccionOrden = computed({
+  get: () => storeFilters.filters.sort,
+  set: (value) => storeFilters.updateFilter('sort', value),
+});
 const seleccionTipoArchivo = ref('');
 const inputSearch = computed({
   get: () => storeFilters.filters.inputSearch,
@@ -82,7 +85,7 @@ function resetAdvancedFilter() {
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
 }
 
-watch(seleccionTipoArchivo, () => {
+watch([seleccionTipoArchivo, seleccionOrden], () => {
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
 });
 
@@ -109,122 +112,6 @@ onMounted(async () => {
   storeResources.getMyTotal(section, params.value);
   fetchNewData();
 });
-// TODO: fix paginador
-/* import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { cleanInput, resourceTypeDic } from '~/utils/consulta';
-
-definePageMeta({
-  middleware: 'sidebase-auth',
-  bodyAttrs: {
-    class: '',
-  },
-});
-
-// para filtar por los archivos de la usuaria
-const { data } = useAuth();
-const userEmail = data.value.user.email;
-
-const storeCatalogo = useCatalogoStore();
-const storeFetched = useFetchedResources2Store();
-const storeFilters = useFilteredResources();
-
-storeFetched.checkFilling(resourceTypeDic.dataLayer);
-storeFetched.checkFilling(resourceTypeDic.dataTable);
-storeFetched.checkFilling(resourceTypeDic.document);
-
-const recursos = computed(() => storeFetched.all);
-const filteredResources = ref([]);
-const tableResources = ref([]);
-const seleccionOrden = ref('');
-const seleccionTipoArchivo = ref('');
-const hayMetaPendiente = ref(false);
-
-const inputSearch = computed({
-  get: () => storeFilters.filters.inputSearch,
-  set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
-});
-const modalFiltroAvanzado = ref(null);
-const isFilterActive = ref(false);
-
-// obteniendo las variables keys para la tabla
-const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'acciones'];
-
-/**
- * Valida si el tipo de recurso es documento o dataset con geometría o no
- * @param recurso del catálogo
- * @returns {String} ya sea Documentos, Capa geográfica o Datos tabulados
- */
-/*function tipoRecurso(recurso) {
-  if (recurso.resource_type === 'document') {
-    return 'Documentos';
-  } else {
-    return isGeometricExtension(recurso.extent) ? 'Capa geográfica' : 'Datos tabulados';
-  }
-}
-
-function updateResources(nuevosRecursos) {
-  filteredResources.value = nuevosRecursos;
-
-  // filtro por logged in con email
-  filteredResources.value = filteredResources.value.filter(
-    (resource) => resource.owner.email === userEmail
-  );
-
-  // TODO: estándar oficial de metadatos mínimos requeridos
-  // abstract, title, keywords, category, año, institución
-  hayMetaPendiente.value =
-    filteredResources.value.filter((resource) => resource.raw_abstract === '').length > 0
-      ? true
-      : false;
-
-  // obteniendo datos por las props de la tabla
-  tableResources.value = filteredResources.value
-    .filter((resource) => resource.raw_abstract !== '')
-    .map((d) => ({
-      pk: d.pk,
-      titulo: d.title,
-      tipo_recurso: tipoRecurso(d),
-      categoria: d.category,
-      actualizacion: d.last_updated,
-      acciones: 'Editar, Ver, Descargar, Remover',
-      uuid: d.uuid,
-      resource_type: d.resource_type,
-      extent: d.extent,
-      recurso_completo: d,
-    }));
-}
-
-function applyAdvancedFilter() {
-  isFilterActive.value = true;
-  modalFiltroAvanzado.value.cerrarModalBusqueda();
-  updateResources(storeFilters.filter('all'));
-}
-function resetAdvancedFilter() {
-  isFilterActive.value = false;
-  storeFilters.resetFilters();
-  modalFiltroAvanzado.value.cerrarModalBusqueda();
-  updateResources(storeFilters.filter('all'));
-}
-
-watch([recursos, inputSearch], () => {
-  updateResources(storeFilters.filter('all'));
-});
-
-watch(seleccionOrden, (nv) => {
-  storeFilters.updateFilter('sort', nv);
-  updateResources(storeFilters.filter('all'));
-});
-watch(seleccionTipoArchivo, (nv) => {
-  storeFilters.filters.resourceType = nv;
-  updateResources(storeFilters.filter('all'));
-});
-
-onMounted(async () => {
-  storeFilters.resetAll();
-  if (recursos.value.length !== 0) {
-    updateResources(recursos.value);
-  }
-}); */
 </script>
 
 <template>

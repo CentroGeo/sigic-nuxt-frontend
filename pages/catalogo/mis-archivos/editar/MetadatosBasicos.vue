@@ -11,12 +11,6 @@ const editedResource = ref(undefined);
 onMounted(async () => {
   editedResource.value = await fetchByPk(selectedPk);
 });
-// Recuperamos la información completa del recurso
-/* const storeFetched = useFetchedResources2Store();
-storeFetched.checkFilling(type);
-const editedResource = computed(() =>
-  storeFetched.byResourceType(type).find(({ pk }) => pk === selectedPk)
-); */
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeCatalogo.catalogoColapsado">

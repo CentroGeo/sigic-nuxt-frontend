@@ -261,9 +261,10 @@ export async function fetchGeometryType(resource) {
     } catch {
       console.warn('Se está intentando una vez más');
     }
-    // Si fracasa en todos los intentos
-    return 'Error';
   }
+
+  // Si fracasa en todos los intentos
+  return 'Error';
 }
 
 /**
@@ -297,23 +298,32 @@ export async function defineGeomType(resource) {
  * @returns
  */
 export async function fetchDoc(url) {
-  const { gnoxyFetch } = useGnoxyUrl();
+  //const extensionDict = { pdf: 'application/pdf', txt: 'text/plain' };
+  const { data } = useAuth();
+  const token = data.value?.accessToken;
   const maxAttempts = 5;
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
-      const res = await gnoxyFetch(url.toString());
+      let res;
+      if (token) {
+        res = await fetch(url, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } else {
+        res = await fetch(url);
+      }
       if (!res.ok) {
-        return 'Error';
+        throw new Error(`Fetchfailed: ${res.status}`);
       }
       const blob = await res.blob();
       const newUrl = URL.createObjectURL(blob);
+      //window.open(newUrl);
       return newUrl;
     } catch {
       console.warn('Se está intentando una vez más');
     }
-    // Si fracasa en todos los intentos
-    return 'Error';
   }
+  return 'Error';
 }
 
 /**
@@ -444,11 +454,12 @@ export async function downloadWMS(resource, format, featureTypes) {
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
       console.warn(`Vamos en el intento: ${attempt}.`);
-      const res = await gnoxyFetch(url.toString());
+      const res = await gnoxyFetch(`${url}`);
       if (!res.ok) {
         //throw new Error(`Download failed: ${res.status}`);
         return 'Error';
       }
+      //console.log('Estamos aquí');
       const blob = await res.blob();
       const anchor = document.createElement('a');
       const downloadUrl = URL.createObjectURL(blob);

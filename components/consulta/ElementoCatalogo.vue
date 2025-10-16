@@ -17,9 +17,10 @@ const props = defineProps({
 const { catalogueElement } = toRefs(props);
 // Para hacer algo si es el enésimo elemento e incorporar el consumo de recursos paginados.
 const emit = defineEmits(['triggerFetch']);
-//const { data } = useAuth();
+const { data } = useAuth();
+const isLoggedIn = ref(data.value ? true : false);
+
 //console.log(data.value?.accessToken);
-//const isLoggedIn = ref(data.value ? true : false);
 //const userEmail = ref(data.value?.user.email);
 const nthElementsPks = computed(() => storeResources.nthElementsByType());
 const geomType = ref(catalogueElement.value.geomType ? catalogueElement.value.geomType : 'Otro');
@@ -149,7 +150,11 @@ onUnmounted(() => {
   <div :id="`elemento-${catalogueElement.pk}`" ref="rootEl" class="tarjeta-catalogo">
     <!--isLoggedIn && catalogueElement.owner.email === userEmail && !catalogueElement.is_published-->
     <div
-      v-if="catalogueElement.is_approved === false && catalogueElement.is_published === false"
+      v-if="
+        isLoggedIn &&
+        catalogueElement.is_approved === false &&
+        catalogueElement.is_published === false
+      "
       class="id-tag flex m-b-1 m-t-0"
     >
       <span class="pictograma-persona"></span>

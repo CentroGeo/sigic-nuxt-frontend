@@ -50,20 +50,20 @@ export const useFilteredResources = defineStore('filteredResources', () => {
     /**Construye queryparams a partir de los filtros */
     buildQueryParams(resourceType = storeConsulta.resourceType) {
       filters.resourceType = resourceType;
-      const queryParams = { custom: 'true' };
+      const queryParams = {};
       if (filters.resourceType !== 'all' && filters.resourceType !== undefined) {
         if (filters.resourceType === 'remotes') {
           queryParams['filter{subtype.in}'] = 'remote';
         } else {
           queryParams['filter{resource_type}'] = resourceTypeGeonode[filters.resourceType];
           if (filters.resourceType === 'dataLayer') {
-            queryParams['extent_ne'] = '[-1,-1,0,0]';
+            queryParams['filter{has_geometry}'] = 'true';
           }
           if (filters.resourceType === 'dataTable') {
             queryParams['filter{subtype.in}'] = ['vector', 'remote'];
           }
           if (filters.resourceType === 'document') {
-            queryParams['file_extension'] = ['pdf', 'txt'];
+            queryParams['filter{extension}'] = ['pdf', 'txt'];
           }
         }
       }
@@ -85,16 +85,32 @@ export const useFilteredResources = defineStore('filteredResources', () => {
       if (filters.categories.length > 0) {
         queryParams['filter{category.identifier.in}'] = filters.categories;
       }
-      /*if (filters.years !== null && filters.years.length > 0) {
+      if (filters.years !== null && filters.years.length > 0) {
+        const yearList = filters.years.split(',').map((d) => d.trim());
+        queryParams['filter{year}'] = yearList;
       }
       if (filters.institutions !== null && filters.institutions.length > 0) {
-      } */
-      if (filters.keywords !== null && filters.keywords.length > 0) {
-        const newKeywords = filters.keywords.split(',').map((d) => cleanInput(d));
-        queryParams['filter{keywords.name.in}'] = newKeywords;
+        const institutionList = filters.institutions.split(',').map((d) => cleanInput(d));
+        queryParams['filter{institution}'] = institutionList;
       }
-      /*if (filters.sort !== null) {
-      } */
+      if (filters.keywords !== null && filters.keywords.length > 0) {
+        const keywordsList = filters.keywords.split(',').map((d) => cleanInput(d));
+        queryParams['filter{keywords.name.in}'] = keywordsList;
+      }
+      if (filters.sort !== null) {
+        if (filters.sort === 'fecha_ascendente') {
+          queryParams['sort[]'] = 'last_updated';
+        }
+        if (filters.sort === 'fecha_descendente') {
+          queryParams['sort[]'] = '-last_updated';
+        }
+        if (filters.sort === 'titulo') {
+          queryParams['sort[]'] = 'title';
+        }
+        if (filters.sort === 'categoria') {
+          queryParams['sort[]'] = 'category';
+        }
+      }
       filters.queryParams = queryParams;
     },
   };

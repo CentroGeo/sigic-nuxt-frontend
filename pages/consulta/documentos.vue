@@ -29,8 +29,8 @@ onMounted(async () => {
 
   // Para cuando hacemos el cambio de página
   if (storeSelected.pks.length > 0) {
-    updateQueryFromStore(storeSelected.asQueryParam());
     storeResources.fetchResourcesByPk(storeConsulta.resourceType, storeSelected.pks);
+    updateQueryFromStore(storeSelected.asQueryParam());
   }
 });
 </script>
