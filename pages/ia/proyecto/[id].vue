@@ -86,7 +86,7 @@ const nthElement = 1;
 async function fetchTotalByCategory(category) {
   const preParams = params.value;
   preParams['filter{category.identifier.in}'] = category;
-  const url = buildUrl(`${config.public.geonodeApi}/resources`, preParams);
+  const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, preParams);
   const request = await gnoxyFetch(url.toString());
   const res = await request.json();
   return res.total;
