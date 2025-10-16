@@ -143,7 +143,7 @@ const loadSources = async () => {
   console.log(proyectoId.value);
   arraySources.value = await storeIA.getProjectSources(proyectoId.value);
 
-  console.log(arraySources.value);
+  // console.log(arraySources.value);
 
   // Limpiar selecciones al cambiar de proyecto
   fuentesSeleccionadas.value = [];
@@ -394,6 +394,7 @@ onBeforeUnmount(() => {
                     <th class="checkbox-header p-x-3 p-y-2">Selección</th>
                     <th class="p-x-3 p-y-2">Nombre</th>
                     <th class="p-x-3 p-y-2">Tipo</th>
+                    <th class="p-x-3 p-y-2">Categoría</th>
                     <th class="p-x-3 p-y-2">Origen</th>
                   </tr>
                 </thead>
@@ -414,6 +415,20 @@ onBeforeUnmount(() => {
                       <span class="p-x-1 p-y-minimo">{{
                         obtenerTipoArchivo(fuente.filename)
                       }}</span>
+                    </td>
+                    <td class="p-3 flex flex-contenido-centrado">
+                      <p
+                        class="texto-centrado fondo-color-acento p-1 texto-color-acento borde borde-redondeado-12"
+                        style="width: max-content"
+                      >
+                        <span v-if="fuente.geonode_category === 'Documento'">
+                          <span class="pictograma-documento" />{{ fuente.geonode_category }}
+                        </span>
+
+                        <span v-if="fuente.geonode_category === 'Tabla'">
+                          <span class="pictograma-tabla" />{{ fuente.geonode_category }}
+                        </span>
+                      </p>
                     </td>
                     <td class="p-3 etiqueta-tabla">
                       <span class="p-x-1 p-y-minimo">

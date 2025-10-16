@@ -253,9 +253,9 @@ async function openResourceViewEmbed(resource) {
                 <tr>
                   <th class="p-x-3 p-y-2">Nombre</th>
                   <th class="p-x-3 p-y-2">Tipo de archivo</th>
+                  <th>Categoría</th>
                   <th>Origen</th>
-                  <!-- <th>Categoría</th>
-                  <th>Acciones</th> -->
+                  <!-- <th>Acciones</th> -->
                 </tr>
               </thead>
               <tbody>
@@ -266,12 +266,25 @@ async function openResourceViewEmbed(resource) {
                   <td class="p-3 etiqueta-tabla">
                     <span class="p-x-1 p-y-minimo">{{ obtenerTipoArchivo(archivo.filename) }}</span>
                   </td>
+                  <td class="p-3 flex flex-contenido-centrado">
+                    <p
+                      class="texto-centrado fondo-color-acento p-1 texto-color-acento borde borde-redondeado-12"
+                      style="width: max-content"
+                    >
+                      <span v-if="archivo.geonode_category === 'Documento'">
+                        <span class="pictograma-documento" />{{ archivo.geonode_category }}
+                      </span>
+
+                      <span v-if="archivo.geonode_category === 'Tabla'">
+                        <span class="pictograma-tabla" />{{ archivo.geonode_category }}
+                      </span>
+                    </p>
+                  </td>
                   <td class="p-3 etiqueta-tabla">
                     <span class="p-x-1 p-y-minimo">
                       {{ archivo.geonode_type === 'Catalogo' ? 'Catálogo' : archivo.geonode_type }}
                     </span>
                   </td>
-                  <!-- <td>{{ archivo.categoria }}</td> -->
                   <!-- <td>
                     <button
                       class="boton-pictograma boton-sin-contenedor-secundario boton-chico"

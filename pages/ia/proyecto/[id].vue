@@ -139,19 +139,32 @@ async function fetchNewData() {
 
 function cargarArchivosGeonode() {
   seleccionCatalogoModal?.value.cerrarModal();
+  // console.log('recursosSeleccionados', recursosSeleccionados.value);
   const nuevosArchivos = recursosSeleccionados.value.map((file) => ({
     id: Math.floor(Math.random() * 1000000000000000000000),
     nombre: file.title,
     tipo: obtenerTipoArchivo(file.title),
     // archivo: file, // Objeto File original
     archivo: null,
-    categoria: 'Archivo',
+    categoria:
+      resourceType.value === 'document'
+        ? 'Documento'
+        : resourceType.value === 'dataLayer'
+          ? 'Capa'
+          : 'Tabla',
     origen: 'Catálogo',
     download_url: file.download_url,
     embed_url: file.embed_url,
     pk: file.pk,
     uuid: file.uuid,
-    category: 'Documento',
+    category:
+      resourceType.value === 'document'
+        ? 'Documento'
+        : resourceType.value === 'dataLayer'
+          ? 'Capa'
+          : 'Tabla',
+    alternate: file.alternate,
+    links_csv: file.links.filter((d) => d.extension === 'csv'), // para las tablas
   }));
 
   archivosGeonode.value = [...archivosGeonode.value, ...nuevosArchivos];
@@ -225,7 +238,7 @@ onMounted(async () => {
       nombre: archivo.filename,
       tipo: obtenerTipoArchivo(archivo.filename),
       archivo: null,
-      categoria: 'Archivo',
+      categoria: archivo.geonode_category,
       origen: archivo.geonode_type,
     }));
     // console.log('arraySources', arraySources);
@@ -467,7 +480,20 @@ function preventEscape(event) {
                     <td class="p-3 etiqueta-tabla">
                       <span class="p-x-1 p-y-minimo">{{ archivo.tipo }}</span>
                     </td>
-                    <td class="p-3">{{ archivo.categoria }}</td>
+                    <td class="p-3 flex flex-contenido-centrado">
+                      <p
+                        class="texto-centrado fondo-color-acento p-1 texto-color-acento borde borde-redondeado-12"
+                        style="width: max-content"
+                      >
+                        <span v-if="archivo.categoria === 'Documento'">
+                          <span class="pictograma-documento" />{{ archivo.categoria }}
+                        </span>
+
+                        <span v-if="archivo.categoria === 'Tabla'">
+                          <span class="pictograma-tabla" />{{ archivo.categoria }}
+                        </span>
+                      </p>
+                    </td>
                     <td class="p-3 etiqueta-tabla">
                       <span class="p-x-1 p-y-minimo">{{
                         archivo.origen === 'Catalogo' ? 'Catálogo' : archivo.origen
