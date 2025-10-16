@@ -18,7 +18,10 @@ const resources = computed(() => storeResources.resourcesByType());
 const tableResources = ref([]);
 const modalFiltroAvanzado = ref(null);
 const isFilterActive = ref(false);
-const seleccionOrden = ref('');
+const seleccionOrden = computed({
+  get: () => storeFilters.filters.sort,
+  set: (value) => storeFilters.updateFilter('sort', value),
+});
 const inputSearch = computed({
   get: () => storeFilters.filters.inputSearch,
   set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
@@ -62,7 +65,9 @@ function resetAdvancedFilter() {
 watch(paginaActual, () => {
   fetchNewData();
 });
-
+watch(seleccionOrden, () => {
+  storeFilters.buildQueryParams();
+});
 watch(params, () => {
   paginaActual.value = 0;
   storeResources.getTotalResources(storeConsulta.resourceType, params.value);
@@ -82,35 +87,6 @@ onMounted(async () => {
   storeResources.getTotalResources(storeConsulta.resourceType, params.value);
   fetchNewData();
 });
-
-/* function applyAdvancedFilter() {
-  isFilterActive.value = true;
-  modalFiltroAvanzado.value.cerrarModalBusqueda();
-  updateResources(storeFilters.filter());
-}
-
-function resetAdvancedFilter() {
-  isFilterActive.value = false;
-  storeFilters.resetFilters();
-  modalFiltroAvanzado.value.cerrarModalBusqueda();
-  updateResources(storeFilters.filter());
-}
-
-watch([resourcesTablas, inputSearch], () => {
-  updateResources(storeFilters.filter());
-});
-
-watch(seleccionOrden, (nv) => {
-  storeFilters.updateFilter('sort', nv);
-  updateResources(storeFilters.filter());
-});
-
-onMounted(async () => {
-  storeFilters.resetAll();
-  if (resourcesTablas.value.length !== 0) {
-    updateResources(resourcesTablas.value);
-  }
-}); */
 </script>
 
 <template>

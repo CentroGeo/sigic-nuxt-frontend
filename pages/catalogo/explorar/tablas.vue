@@ -1,11 +1,12 @@
 <script setup>
 // TODO: Reactivar filtrado
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { cleanInput } from '~/utils/consulta';
+import { cleanInput, resourceTypeDic } from '~/utils/consulta';
 
 const storeCatalogo = useCatalogoStore();
 const storeResources = useResourcesCatalogoStore();
 const storeConsulta = useConsultaStore();
+storeConsulta.resourceType = resourceTypeDic.dataTable;
 const storeFilters = useFilteredResources();
 const params = computed(() => storeFilters.filters.queryParams);
 const totalResources = computed(() => storeResources.totalByType());
@@ -17,7 +18,10 @@ const resources = computed(() => storeResources.resourcesByType());
 const tableResources = ref([]);
 const modalFiltroAvanzado = ref(null);
 const isFilterActive = ref(false);
-const seleccionOrden = ref('');
+const seleccionOrden = computed({
+  get: () => storeFilters.filters.sort,
+  set: (value) => storeFilters.updateFilter('sort', value),
+});
 const inputSearch = computed({
   get: () => storeFilters.filters.inputSearch,
   set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
@@ -62,13 +66,14 @@ function resetAdvancedFilter() {
 watch(paginaActual, () => {
   fetchNewData();
 });
-
+watch(seleccionOrden, () => {
+  storeFilters.buildQueryParams();
+});
 watch(params, () => {
   paginaActual.value = 0;
   storeResources.getTotalResources(storeConsulta.resourceType, params.value);
   fetchNewData();
 });
-
 watch(
   resources,
   () => {
@@ -83,72 +88,6 @@ onMounted(async () => {
   storeResources.getTotalResources(storeConsulta.resourceType, params.value);
   fetchNewData();
 });
-
-/* const storeFetched = useFetchedResources2Store();
-const storeFilters = useFilteredResources();
-const storeConsulta = useConsultaStore();
-storeConsulta.resourceType = resourceTypeDic.dataTable;
-//storeFilters.resourceType = 'dataTable';
-storeFetched.checkFilling(resourceTypeDic.dataTable);
-
-const resourcesTablas = computed(() => storeFetched.byResourceType(resourceTypeDic.dataTable));
-const filteredResources = ref([]);
-const tableResources = ref([]);
-const seleccionOrden = ref('');
-
-const inputSearch = computed({
-  get: () => storeFilters.filters.inputSearch,
-  set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
-});
-const modalFiltroAvanzado = ref(null);
-const isFilterActive = ref(false);
-
-// obteniendo las variables keys para la tabla
-const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'acciones'];
-
-function updateResources(nuevosRecursos) {
-  filteredResources.value = nuevosRecursos;
-  // obteniendo datos por las props de la tabla
-  tableResources.value = filteredResources.value.map((d) => ({
-    pk: d.pk,
-    titulo: d.title,
-    tipo_recurso: 'Datos tabulados',
-    categoria: d.category,
-    actualizacion: d.last_updated,
-    acciones: 'Ver, Descargar',
-    uuid: d.uuid,
-    recurso_completo: d,
-  }));
-}
-
-function applyAdvancedFilter() {
-  isFilterActive.value = true;
-  modalFiltroAvanzado.value.cerrarModalBusqueda();
-  updateResources(storeFilters.filter());
-}
-
-function resetAdvancedFilter() {
-  isFilterActive.value = false;
-  storeFilters.resetFilters();
-  modalFiltroAvanzado.value.cerrarModalBusqueda();
-  updateResources(storeFilters.filter());
-}
-
-watch([resourcesTablas, inputSearch], () => {
-  updateResources(storeFilters.filter());
-});
-
-watch(seleccionOrden, (nv) => {
-  storeFilters.updateFilter('sort', nv);
-  updateResources(storeFilters.filter());
-});
-
-onMounted(async () => {
-  storeFilters.resetAll();
-  if (resourcesTablas.value.length !== 0) {
-    updateResources(resourcesTablas.value);
-  }
-}); */
 </script>
 
 <template>

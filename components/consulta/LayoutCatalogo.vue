@@ -37,6 +37,7 @@ const isLoggedIn = ref(data.value ? true : false);
 const apiCategorias = `${config.public.geonodeApi}/facets/category`;
 const filteredResources = ref([]);
 const categoriesDict = ref({});
+const orderedCategories = ref([]);
 const categorizedResources = ref({});
 const selectedCategories = ref([]);
 const modalFiltroAvanzado = ref(null);
@@ -45,16 +46,17 @@ const isFilterActive = ref(false);
 async function fetchTotalByCategory(category) {
   const preParams = params.value;
   preParams['filter{category.identifier.in}'] = category;
-  const url = buildUrl(`${config.public.geonodeApi}/resources`, preParams);
-  const request = await gnoxyFetch(url.toString());
+  const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, preParams);
+  const request = await gnoxyFetch(url);
   const res = await request.json();
   return res.total;
 }
 
 async function buildCategoriesDict() {
   categoriesDict.value = {};
+  orderedCategories.value = [];
   // Esta parte es para obtener todas las categorias
-  if (!isFilterActive.value) {
+  if (storeFilters.filters.categories.length === 0) {
     const request = await gnoxyFetch(apiCategorias);
     const geonodeCategories = await request.json();
     const results = await Promise.all(
@@ -93,6 +95,13 @@ async function buildCategoriesDict() {
       })
     );
     totalResources.value = results.reduce((a, b) => a + b, 0);
+  }
+  if (Object.keys(categoriesDict.value).length > 0) {
+    orderedCategories.value = Object.keys(categoriesDict.value).sort((a, b) =>
+      categoriesInSpanish[a].localeCompare(categoriesInSpanish[b])
+    );
+  } else {
+    orderedCategories.value = [];
   }
 }
 
@@ -167,8 +176,10 @@ async function setSelectedCategory(categoria) {
 }
 
 async function fetchNewData(category) {
-  await callResources(category);
-  updateResources(resources.value);
+  if (categoriesDict.value[category].isLoading === false) {
+    await callResources(category);
+    updateResources(resources.value);
+  }
 }
 
 async function applyAdvancedFilter() {
@@ -274,13 +285,15 @@ onMounted(async () => {
         </ClientOnly>
         <UiNumeroElementos :numero="totalResources" :etiqueta="etiquetaElementos" />
       </div>
-      <div v-if="isLoading">....Cargando</div>
-      <div v-else>
-        <div v-for="category in Object.keys(categoriesDict)" :key="category" class="m-y-1">
+      <div v-if="isLoading" class="flex flex-contenido-centrado">
+        <img src="/img/loader.gif" alt="...Cargando" height="60px" />
+      </div>
+      <div v-if="orderedCategories.length > 0 && !isLoading">
+        <div v-for="category in orderedCategories" :key="category" class="m-y-1">
           <ConsultaElementoCategoria
-            :title="categoriesDict[category].inSpanish"
+            :title="categoriesDict[category]?.inSpanish"
             :tag="etiquetaElementos"
-            :number-elements="categoriesDict[category].total"
+            :number-elements="categoriesDict[category]?.total"
             @click="setSelectedCategory(category)"
           />
 
@@ -298,7 +311,9 @@ onMounted(async () => {
               @trigger-fetch="fetchNewData"
             />
           </div>
-          <div v-if="categoriesDict[category].isLoading">....Cargando</div>
+          <div v-if="categoriesDict[category]?.isLoading" class="flex flex-contenido-centrado">
+            <img src="/img/loader.gif" alt="...Cargando" height="40px" />
+          </div>
         </div>
       </div>
     </div>

@@ -1,4 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import { defineNuxtConfig } from 'nuxt/config';
 
 const isDev = process.env.NODE_ENV !== 'production';
 const appBase = (process.env.NUXT_APP_BASE_URL || '/').replace(/\/+$/, '/');

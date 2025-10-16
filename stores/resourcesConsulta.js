@@ -1,9 +1,10 @@
 import { defineStore } from 'pinia';
-import { buildUrl, defineGeomType, resourceTypeDic } from '~/utils/consulta';
+import { buildUrl, defineGeomType, hasWMS, resourceTypeDic } from '~/utils/consulta';
 
 export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => {
   const config = useRuntimeConfig();
   const storeConsulta = useConsultaStore();
+  const storeSelected = useSelectedResources2Store();
   /**
    * Almacenamiento reactivo de los recursos seleccionados.
    */
@@ -64,7 +65,7 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
         page_size: 2,
         ...params,
       };
-      const url = buildUrl(`${config.public.geonodeApi}/resources`, queryParams);
+      const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
       const request = await gnoxyFetch(url);
       const res = await request.json();
 
@@ -77,7 +78,35 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
         );
       }
 
-      const data = res.resources;
+      //En caso de que los recursos incluyan servicios remotos, revisamos su getCapabilities
+      let datum;
+      if (resourceType !== resourceTypeDic.document) {
+        const service = resourceType === resourceTypeDic.dataLayer ? 'map' : 'table';
+        const sourceTypes = res.resources.map((d) => d.sourcetype);
+        if (sourceTypes.includes('REMOTE')) {
+          // Revisamos si los servicios remotos permiten ver la capa y/o la tabla
+          const locals = res.resources.filter((resource) => resource.sourcetype === 'LOCAL');
+          let remotes = res.resources.filter((resource) => resource.sourcetype === 'REMOTE');
+          const filterRemotes = await Promise.all(
+            remotes.map(async (resource) => {
+              return {
+                resourceValue: resource,
+                resourceHasWms: await hasWMS(resource, service),
+              };
+            })
+          );
+          remotes = filterRemotes.filter((d) => d.resourceHasWms).map((d) => d.resourceValue);
+          datum = locals.concat(remotes);
+        } else {
+          datum = res.resources;
+        }
+      } else {
+        datum = res.resources;
+      }
+
+      // TODO: Agregar en los query params el filtrado para indicar que recursos con metadatos
+      // completos. Borrar la siguiente linea y cambiar data por datum
+      const data = datum.filter((d) => d.category);
       resources[resourceType] = [...resources[resourceType], ...data];
     },
     /**
@@ -95,11 +124,22 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
      */
     async fetchResourceByPk(pkToFind) {
       const { gnoxyFetch } = useGnoxyUrl();
-      const url = `${config.public.geonodeApi}/resources/${pkToFind}`;
-      const res = await gnoxyFetch(url);
+      const maxAttempts = 3;
+      const url = `${config.public.geonodeApi}/sigic-resources/${pkToFind}`;
       // TODO: Si la petición falla porque el recurso es privado, eliminarlo de la store de seleccion
-      const resource = await res.json();
-      return resource.resource;
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        try {
+          const res = await gnoxyFetch(url);
+          if (!res.ok) {
+            console.error(`Download failed: ${res.status}`);
+            return 'Error';
+          }
+          const resource = await res.json();
+          return resource.resource;
+        } catch {
+          console.warn(`Falló el intento ${attempt + 1}.`);
+        }
+      }
     },
 
     /**
@@ -109,9 +149,19 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
      */
     async fetchResourcesByPk(resourceType = storeConsulta.resourceType, pkListToFind) {
       const lista = [];
+      const resourcesPks = resources[resourceType].map((resource) => resource.pk);
       for (const pk of pkListToFind) {
-        const resource = await this.fetchResourceByPk(pk);
-        lista.push(resource);
+        if (resourcesPks.includes(pk)) {
+          const resource = resources[resourceType].find((resource) => resource.pk === pk);
+          lista.push(resource);
+        } else {
+          const resource = await this.fetchResourceByPk(pk);
+          if (resource !== 'Error') {
+            lista.push(resource);
+          } else {
+            storeSelected.removeByPk(pk);
+          }
+        }
       }
       selectedResources[resourceType] = lista;
     },

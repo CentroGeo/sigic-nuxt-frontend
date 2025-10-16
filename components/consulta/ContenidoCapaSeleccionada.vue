@@ -1,6 +1,6 @@
 <script setup>
 import { SisdaiLeyendaWms } from '@centrogeomx/sisdai-mapas';
-import { findServer, hasWMS } from '~/utils/consulta';
+import { findServer, getWMSserver, hasWMS } from '~/utils/consulta';
 
 const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
@@ -125,7 +125,13 @@ const optionsButtons = ref([
       //const wfsLink = getWFS(resourceElement.value);
       // Esta es la petición GetFeatureInfo
       //const wmsLink = getWMSFeatureInfo(resourceElement.value);
-      const owsLink = `${config.public.geonodeUrl}/geoserver/${resourceElement.value.alternate.replace(':', '/')}/ows`;
+      let server;
+      if (resourceElement.value.sourcetype === 'REMOTE') {
+        server = getWMSserver(resourceElement.value).split('/ows')[0];
+      } else {
+        server = `${config.public.geoserverUrl}`;
+      }
+      const owsLink = `${server}/${resourceElement.value.alternate.replace(':', '/')}/ows`;
       try {
         await navigator.clipboard.writeText(owsLink);
         alert('Enlace copiado al portapapeles: ' + owsLink);
@@ -163,7 +169,8 @@ async function updateFunctions() {
     // Se excluye el botón de descargar para remotos
     buttons = buttons.filter((d) => d.excludeFor !== 'remotes');
     // Se excluye el botón OWS para remotos
-    buttons = buttons.filter((d) => d.label !== 'Vínculo OWS');
+    //buttons = buttons.filter((d) => d.label !== 'Vínculo OWS');
+    //console.log(resourceElement.value);
     const resourceHasWMS = await hasWMS(resourceElement.value, 'table');
     // Esta se llamaría para el WFS*/
     /*     const resourceHasWMS = await hasWMS(
@@ -196,7 +203,7 @@ watch(resourceElement, () => {
 </script>
 
 <template>
-  <div>
+  <div v-if="resourceElement.title">
     <div class="m-y-2">
       <SisdaiLeyendaWms
         :consulta="gnoxyFetch"
@@ -221,6 +228,9 @@ watch(resourceElement, () => {
         <span :class="button.pictogram" aria-hidden="true" />
       </button>
     </div>
+  </div>
+  <div v-else class="flex flex-contenido-centrado">
+    <img src="/img/loader.gif" alt="...Cargando" height="50px" />
   </div>
 </template>
 

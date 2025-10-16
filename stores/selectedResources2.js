@@ -27,6 +27,7 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
   }
 
   return {
+    resources,
     /**
      * Vacía la selección de todos los recursos seleccionados.
      * Nota: La función $reset es necesaria para el uso adecuado del store en
