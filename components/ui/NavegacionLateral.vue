@@ -117,6 +117,7 @@ const estaLogueado = computed(() => status.value === 'authenticated');
 
 <style lang="scss" scoped>
 .nav-lateral {
+  --altura-consulta-esc: calc(100vh - 112px);
   width: 48px;
   box-shadow: 4px 0 8px -4px var(--navegacion-primaria-sombra);
   z-index: 9997;

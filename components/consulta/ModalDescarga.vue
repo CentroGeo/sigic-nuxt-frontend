@@ -19,6 +19,9 @@ const modalDescarga = ref(null);
 const optionsList = ref(null);
 const selectedOption = ref();
 const tagTitle = ref();
+const isDownloadActive = ref(false);
+const hasDownloadFailed = ref(false);
+const downloadError = ref('Verifica tu conexión a internet e inténtalo de nuevo.');
 const docExtension = ref(
   resourceType.value === 'document'
     ? selectedElement.value.links.find((link) => link.link_type === 'uploaded').extension
@@ -32,53 +35,42 @@ function abrirModalDescarga() {
   optionsList.value = optionsDict[resourceType.value]['elements'];
   tagTitle.value = optionsDict[resourceType.value]['title'];
   selectedOption.value = optionsList.value.map((d) => d.label)[0];
+  isDownloadActive.value = false;
+  hasDownloadFailed.value = false;
+  downloadError.value = 'Verifica tu conexión a internet e inténtalo de nuevo.';
 }
 
 const layerOptions = {
   raster: [
     {
       label: 'GeoTiff',
-      action: () => {
-        downloadRaster(selectedElement.value);
-      },
+      action: () => downloadRaster(selectedElement.value),
     },
     {
       label: 'Metadatos',
-      action: () => {
-        downloadMetadata(selectedElement.value);
-      },
+      action: () => downloadMetadata(selectedElement.value),
     },
   ],
   vector: [
     {
       label: 'GeoJson',
-      action: () => {
-        downloadWMS(selectedElement.value, 'geojson', 'all');
-      },
+      action: () => downloadWMS(selectedElement.value, 'geojson', 'all'),
     },
     {
       label: 'CSV',
-      action: () => {
-        downloadWMS(selectedElement.value, 'csv', 'all');
-      },
+      action: () => downloadWMS(selectedElement.value, 'csv', 'all'),
     },
     {
       label: 'GeoPackage',
-      action: () => {
-        downloadWMS(selectedElement.value, 'gpkg', 'all');
-      },
+      action: () => downloadWMS(selectedElement.value, 'gpkg', 'all'),
     },
     {
       label: 'KML',
-      action: () => {
-        downloadWMS(selectedElement.value, 'kml', 'all');
-      },
+      action: () => downloadWMS(selectedElement.value, 'kml', 'all'),
     },
     {
       label: 'Metadatos',
-      action: () => {
-        downloadMetadata(selectedElement.value);
-      },
+      action: () => downloadMetadata(selectedElement.value),
     },
   ],
   remote: [],
@@ -93,27 +85,19 @@ const optionsDict = {
     elements: [
       {
         label: 'CSV',
-        action: () => {
-          downloadNoGeometry(selectedElement.value, 'csv');
-        },
+        action: () => downloadNoGeometry(selectedElement.value, 'csv'),
       },
       {
         label: 'XLS',
-        action: () => {
-          downloadNoGeometry(selectedElement.value, 'xls');
-        },
+        action: () => downloadNoGeometry(selectedElement.value, 'xls'),
       },
       {
         label: 'XLSX',
-        action: () => {
-          downloadNoGeometry(selectedElement.value, 'xlsx');
-        },
+        action: () => downloadNoGeometry(selectedElement.value, 'xlsx'),
       },
       {
         label: 'Metadatos',
-        action: () => {
-          downloadMetadata(selectedElement.value);
-        },
+        action: () => downloadMetadata(selectedElement.value),
       },
     ],
   },
@@ -122,25 +106,26 @@ const optionsDict = {
     elements: [
       {
         label: docExtension.value === 'pdf' ? 'PDF' : 'TXT',
-        action: () => {
-          downloadDocs(selectedElement.value);
-        },
+        action: () => downloadDocs(selectedElement.value),
       },
       {
         label: 'Metadatos',
-        action: () => {
-          downloadMetadata(selectedElement.value);
-        },
+        action: () => downloadMetadata(selectedElement.value),
       },
     ],
   },
 };
-function descargarClicked() {
-  optionsList.value.map((d) => {
-    if (d.label === selectedOption.value) {
-      d.action();
-    }
-  });
+async function descargarClicked() {
+  isDownloadActive.value = true;
+  const selectedFunction = optionsList.value.find((d) => d.label === selectedOption.value);
+  const downloadStatus = await selectedFunction.action();
+  if (downloadStatus === 'Error') {
+    hasDownloadFailed.value = true;
+  } else if (downloadStatus === 'DownloadLimitsExceeded') {
+    hasDownloadFailed.value = true;
+    downloadError.value = 'El tamaño del archivo excede los límites de descarga permitidos.';
+  }
+  isDownloadActive.value = false;
 }
 defineExpose({
   abrirModalDescarga,
@@ -154,6 +139,23 @@ defineExpose({
       </template>
       <template #cuerpo>
         <p class="h5">{{ selectedElement.title }}</p>
+        <div v-if="isDownloadActive" class="flex m-y-2 borde-redondeado-16 contenedor-proceso">
+          <div class="columna-4 flex-vertical-centrado">
+            <img src="/img/loader.gif" alt="...Cargando" class="loader" />
+          </div>
+          <p class="columna-12">
+            Descarga en curso. El proceso está tardando más tiempo de lo habitual.
+          </p>
+        </div>
+        <div
+          v-if="hasDownloadFailed"
+          class="flex m-y-2 borde-redondeado-16 contenedor-fallo flex-contenido-centrado"
+        >
+          <div class="columna-3 flex-vertical-centrado">
+            <span class="pictograma-alerta pictograma-grande"></span>
+          </div>
+          <p class="columna-13">No se pudo completar la descarga. {{ downloadError }}</p>
+        </div>
         <div>
           <div v-for="option in optionsList" :key="option.label">
             <input
@@ -200,5 +202,21 @@ defineExpose({
   p {
     color: var(--color-alerta-3);
   }
+}
+.contenedor-proceso {
+  border: solid 1px var(--texto-informacion);
+  gap: 8px;
+  background-color: var(--color-informativo-1);
+  color: var(--texto-informacion);
+}
+.contenedor-fallo {
+  gap: 0px;
+  border: solid 1px var(--texto-error);
+  background-color: var(--color-error-1);
+  color: var(--texto-error);
+}
+.loader {
+  max-height: 3em;
+  object-fit: scale-down;
 }
 </style>

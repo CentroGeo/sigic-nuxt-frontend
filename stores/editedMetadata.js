@@ -84,5 +84,31 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
     updateAttr(attr, value) {
       metadata[attr] = value;
     },
+
+    getMetaField(field) {
+      return metadata[field];
+    },
+
+    buildRequestBody() {
+      // TODO: Generar todas las entradas para cada uno de los metadatos
+      //const metaDict = { title: 'Centros de Investigacion', abstract: 'El abstract' };
+      const metaDict = {};
+      const attrs = {};
+      metadata.attribute_set.forEach((attribute) => {
+        const object = {
+          visible: attribute.visible,
+          display_order: attribute.display_order,
+        };
+        if (attribute.description) {
+          object['description'] = attribute.description;
+        }
+        if (attribute.attribute_label) {
+          object['attribute_label'] = attribute.attribute_label;
+        }
+        attrs[`${attribute.pk}`] = object;
+      });
+      metaDict['attribute_set'] = attrs;
+      return metaDict;
+    },
   };
 });

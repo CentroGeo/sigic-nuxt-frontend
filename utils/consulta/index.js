@@ -261,9 +261,10 @@ export async function fetchGeometryType(resource) {
     } catch {
       console.warn('Se está intentando una vez más');
     }
-    // Si fracasa en todos los intentos
-    return 'Error';
   }
+
+  // Si fracasa en todos los intentos
+  return 'Error';
 }
 
 /**
@@ -297,23 +298,32 @@ export async function defineGeomType(resource) {
  * @returns
  */
 export async function fetchDoc(url) {
-  const { gnoxyFetch } = useGnoxyUrl();
+  //const extensionDict = { pdf: 'application/pdf', txt: 'text/plain' };
+  const { data } = useAuth();
+  const token = data.value?.accessToken;
   const maxAttempts = 5;
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
-      const res = await gnoxyFetch(url.toString());
+      let res;
+      if (token) {
+        res = await fetch(url, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } else {
+        res = await fetch(url);
+      }
       if (!res.ok) {
-        return 'Error';
+        throw new Error(`Fetchfailed: ${res.status}`);
       }
       const blob = await res.blob();
       const newUrl = URL.createObjectURL(blob);
+      //window.open(newUrl);
       return newUrl;
     } catch {
       console.warn('Se está intentando una vez más');
     }
-    // Si fracasa en todos los intentos
-    return 'Error';
   }
+  return 'Error';
 }
 
 /**
@@ -325,12 +335,18 @@ export async function downloadDocs(resource) {
   const { gnoxyFetch } = useGnoxyUrl();
   const maxAttempts = 5;
   const extension = resource.links?.find((link) => link.link_type === 'uploaded').extension;
-  const url = resource.download_url;
+  let url;
+  if (extension === 'pdf') {
+    url = resource.download_url;
+  } else {
+    url = resource.embed_url.replace('/embed', '/link');
+  }
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
-      const res = await gnoxyFetch(url.toString());
+      const res = await gnoxyFetch(url);
       if (!res.ok) {
-        throw new Error(`Falló la descarga: ${res.status}`);
+        //throw new Error(`Falló la descarga: ${res.status}`);
+        return 'Error';
       }
       const blob = await res.blob();
       const newUrl = URL.createObjectURL(blob);
@@ -341,11 +357,12 @@ export async function downloadDocs(resource) {
       anchor.click();
       document.body.removeChild(anchor);
       URL.revokeObjectURL(newUrl);
-      return;
+      return 'Ok';
     } catch {
       console.warn(`Falló el intento ${attempt + 1}.`);
     }
   }
+  return 'Error';
 }
 
 /**
@@ -371,7 +388,8 @@ export async function downloadMetadata(resource) {
     try {
       const res = await gnoxyFetch(api.toString());
       if (!res.ok) {
-        throw new Error(`Falló la descarga: ${res.status}`);
+        //throw new Error(`Falló la descarga: ${res.status}`);
+        return 'Error';
       }
       const dataBlob = await res.blob();
       const blobLink = URL.createObjectURL(dataBlob);
@@ -383,11 +401,12 @@ export async function downloadMetadata(resource) {
       anchor.click();
       document.body.removeChild(anchor);
       URL.revokeObjectURL(blobLink);
-      return;
+      return 'Ok';
     } catch {
       console.warn(`Falló el intento ${attempt + 1}.`);
     }
   }
+  return 'Error';
 }
 
 /**
@@ -400,7 +419,6 @@ export async function downloadMetadata(resource) {
  * @param {Stringy} featureTypes
  */
 export async function downloadWMS(resource, format, featureTypes) {
-  console.log('Se solicitó la descarga de:', resource);
   const { gnoxyFetch } = useGnoxyUrl();
   const config = useRuntimeConfig();
   const maxAttempts = 3;
@@ -436,10 +454,12 @@ export async function downloadWMS(resource, format, featureTypes) {
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
       console.warn(`Vamos en el intento: ${attempt}.`);
-      const res = await gnoxyFetch(url.toString());
+      const res = await gnoxyFetch(`${url}`);
       if (!res.ok) {
-        throw new Error(`Download failed: ${res.status}`);
+        //throw new Error(`Download failed: ${res.status}`);
+        return 'Error';
       }
+      //console.log('Estamos aquí');
       const blob = await res.blob();
       const anchor = document.createElement('a');
       const downloadUrl = URL.createObjectURL(blob);
@@ -451,11 +471,12 @@ export async function downloadWMS(resource, format, featureTypes) {
       anchor.click();
       document.body.removeChild(anchor);
       URL.revokeObjectURL(downloadUrl);
-      return;
+      return 'Ok';
     } catch {
       console.warn(`Falló el intento ${attempt + 1}.`);
     }
   }
+  return 'Error';
 }
 
 /**
@@ -507,7 +528,8 @@ export async function getFeatures(resource) {
 
 export async function downloadNoGeometry(resource, format) {
   const props = await getFeatures(resource);
-  downloadWMS(resource, format, props.join());
+  const downloadStatus = downloadWMS(resource, format, props.join());
+  return downloadStatus;
 }
 
 /**
@@ -518,29 +540,38 @@ export async function downloadRaster(resource) {
   const { gnoxyFetch } = useGnoxyUrl();
   const config = useRuntimeConfig();
   const maxAttempts = 3;
+  let error = 'Error';
   const url = `${config.public.geonodeUrl}/datasets/${resource.alternate}/dataset_download`;
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
       const res = await gnoxyFetch(url.toString());
       if (!res.ok) {
-        throw new Error(`Download failed: ${res.status}`);
+        const errorData = await res.text();
+        if (errorData.includes('Download Limits Exceeded')) {
+          error = 'DownloadLimitsExceeded';
+        } else {
+          error = 'Error';
+        }
+        //console.error(error);
+        return error;
       }
       const blob = await res.blob();
       const anchor = document.createElement('a');
       const downloadUrl = URL.createObjectURL(blob);
-      anchor.href = URL.createObjectURL(downloadUrl);
+      anchor.href = downloadUrl;
       anchor.download = `${resource.title}.tiff`;
       anchor.style.display = 'none';
       document.body.appendChild(anchor);
       anchor.click();
       document.body.removeChild(anchor);
       URL.revokeObjectURL(downloadUrl);
-      return;
+      return 'Ok';
     } catch {
       console.warn(`Falló el intento ${attempt + 1}.`);
     }
   }
-  throw new Error(`La descarga fracasó después de ${maxAttempts} intentos`);
+  console.warn(`La descarga fracasó después de ${maxAttempts} intentos`);
+  return error;
 }
 
 /**

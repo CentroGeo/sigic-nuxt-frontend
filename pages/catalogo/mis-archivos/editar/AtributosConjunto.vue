@@ -11,16 +11,6 @@ const editedResource = ref(undefined);
 onMounted(async () => {
   editedResource.value = await fetchByPk(selectedPk);
 });
-/* const typeDict = {
-  Documentos: 'document',
-  'Capa geográfica': 'dataLayer',
-  'Datos tabulados': 'dataTable',
-}; */
-// Recuperamos la información completa del recurso
-/* const storeFetched = useFetchedResources2Store();
-storeFetched.checkFilling(typeDict[type]);
-const resources = computed(() => storeFetched.byResourceType(typeDict[type]));
-const editedResource = computed(() => resources.value.find(({ pk }) => pk === selectedPk)); */
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeCatalogo.catalogoColapsado">

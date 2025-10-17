@@ -1,7 +1,6 @@
 <script setup>
 import { categoriesInSpanish, resourceTypeDic, tooltipContent } from '~/utils/consulta';
 
-//const storeFetched = useFetchedResources2Store();
 const storeResources = useResourcesConsultaStore();
 const storeSelected = useSelectedResources2Store();
 const emit = defineEmits(['openOpacity', 'openDownload', 'openTabla', 'openMapa']);
@@ -14,8 +13,8 @@ const props = defineProps({
 });
 
 const resourceElement = computed(() => storeResources.findResource(props.selectedElement.pk));
-//const { data } = useAuth();
-//const isLoggedIn = ref(data.value ? true : false);
+const { data } = useAuth();
+const isLoggedIn = ref(data.value ? true : false);
 //const userEmail = ref(data.value?.user.email);
 const goDown = () => storeSelected.changePosition(props.selectedElement.pk, -1);
 const goUp = () => storeSelected.changePosition(props.selectedElement.pk, +1);
@@ -71,7 +70,11 @@ const goUp = () => storeSelected.changePosition(props.selectedElement.pk, +1);
       </div>
       <div v-if="resourceElement">
         <div
-          v-if="resourceElement.is_approved === false && resourceElement.is_published === false"
+          v-if="
+            isLoggedIn &&
+            resourceElement.is_approved === false &&
+            resourceElement.is_published === false
+          "
           class="id-tag flex m-b-1 m-t-0"
         >
           <span class="pictograma-persona"></span>
