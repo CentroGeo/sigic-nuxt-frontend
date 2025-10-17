@@ -341,6 +341,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
           console.warn(`Falló el intento ${attempt + 1}.`);
         }
       }
+      return 'Error';
     },
     /**
      * Devuelve un recursos que coincida con un uuid.

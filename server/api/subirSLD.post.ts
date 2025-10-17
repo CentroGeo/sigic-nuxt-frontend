@@ -5,7 +5,6 @@ const configEnv = useRuntimeConfig();
 export default defineEventHandler(async (event) => {
   const baseUrl = configEnv.public.geonodeApi;
   const url = `${baseUrl}/upload/uploads/upload`;
-
   const form = formidable({ multiples: false });
 
   const data = await new Promise<{ fields: Fields; files: Files }>((resolve, reject) => {
@@ -62,21 +61,23 @@ export default defineEventHandler(async (event) => {
     }
     const json = await response.json();
     const executionID = json.execution_id;
-    const resStatus = await fetch(
-      `${baseUrl}/executionrequest?import&filter{source}=resource_file_upload&page=1&page_size=99999`,
-      {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${data.fields.token[0]}`,
-        },
-      }
-    );
-    const { requests } = await resStatus.json();
-    const current = requests.find((d) => d.exec_id === executionID);
-    const status = current.status; //puede ser running, finished y failed
-    console.warn(status);
-
-    return json;
+    let status = 'running';
+    do {
+      const resStatus = await fetch(
+        `${baseUrl}/executionrequest?import&filter{source}=resource_file_upload&page=1&page_size=99999`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${data.fields.token[0]}`,
+          },
+        }
+      );
+      const { requests } = await resStatus.json();
+      const current = requests.find((d) => d.exec_id === executionID);
+      status = current.status; //puede ser running, finished y failed
+      console.warn(status);
+    } while (status === 'running');
+    return status;
   } catch (error) {
     console.error('Error al subir al GeoNode:', error);
 
