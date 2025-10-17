@@ -5,7 +5,6 @@ const configEnv = useRuntimeConfig();
 export default defineEventHandler(async (event) => {
   const baseUrl = configEnv.public.geonodeApi;
   const url = `${baseUrl}/upload/uploads/upload`;
-
   const form = formidable({ multiples: false });
 
   const data = await new Promise<{ fields: Fields; files: Files }>((resolve, reject) => {
@@ -46,9 +45,10 @@ export default defineEventHandler(async (event) => {
   formData.append('permissions', JSON.stringify({}));
   formData.append('charset', 'undefined');
 
-  console.warn('formData', formData);
+  //console.warn('formData', formData);
 
   try {
+    // Esta primera peticion sube el archivo pero solo regresa un execution ID
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -56,18 +56,28 @@ export default defineEventHandler(async (event) => {
       },
       body: formData,
     });
-
-    // console.log('response', response)
-
     if (!response.ok) {
       throw new Error(`Error POST: ${response.status}`);
     }
-    // console.warn("response status:", response.status);
-
     const json = await response.json();
-    // console.warn('json:', json);
-
-    return json;
+    const executionID = json.execution_id;
+    let status = 'running';
+    do {
+      const resStatus = await fetch(
+        `${baseUrl}/executionrequest?import&filter{source}=resource_file_upload&page=1&page_size=99999`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${data.fields.token[0]}`,
+          },
+        }
+      );
+      const { requests } = await resStatus.json();
+      const current = requests.find((d) => d.exec_id === executionID);
+      status = current.status; //puede ser running, finished y failed
+      console.warn(status);
+    } while (status === 'running');
+    return status;
   } catch (error) {
     console.error('Error al subir al GeoNode:', error);
 
