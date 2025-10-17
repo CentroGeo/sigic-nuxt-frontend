@@ -16,8 +16,8 @@ const resourceToEdit = computed(() =>
   storeFetched.byResourceType(resourceType).find(({ pk }) => pk === selectedPk)
 ); */
 const storeResources = useResourcesCatalogoStore();
-const resourceToEdit = computed(() => storeResources.fetchResourceByPk(selectedPk));
-//
+const resourceToEdit = await storeResources.fetchResourceByPk(selectedPk);
+
 const dragNdDrop = ref(null);
 const style_files = ['.sld'];
 async function guardarArchivo(files) {
@@ -27,7 +27,7 @@ async function guardarArchivo(files) {
     // solo el primer elemento del arreglo
     nombreSLD.value = files[0].name;
     formData.append('base_file', files[0]);
-    formData.append('dataset_title', resourceToEdit.value.alternate);
+    formData.append('dataset_title', resourceToEdit.alternate);
     formData.append('token', data.value?.accessToken);
 
     const response = await $fetch('/api/subirSLD', {
