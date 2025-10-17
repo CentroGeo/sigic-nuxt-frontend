@@ -75,7 +75,7 @@ jobs:
           docker build --no-cache \
             --build-arg NODE_ENV=${{ steps.env.outputs.NODE_ENV }} \
             --build-arg NUXT_PUBLIC_APP_BASE_PATH=${{ steps.env.outputs.NUXT_PUBLIC_APP_BASE_PATH }} \
-            --build-arg NUXT_PUBLIC_AUTH_BASE_PATH=${{ steps.env.outputs.NUXT_PUBLIC_AUTH_BASE_PATH }} \
+            --build-arg NUXT_PUBLIC_AUTH_BASE_URL=${{ steps.env.outputs.NUXT_PUBLIC_AUTH_BASE_URL }} \
             --build-arg NUXT_PUBLIC_BASE_URL=${{ steps.env.outputs.NUXT_PUBLIC_BASE_URL }} \
             -t ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.branch }} \
             -t ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.sha }} \
@@ -128,7 +128,7 @@ jobs:
           echo "NUXT_PUBLIC_ENABLE_CONSULTA=${{ vars.NUXT_PUBLIC_ENABLE_CONSULTA }}" >> .env
           echo "NUXT_PUBLIC_ENABLE_IAA=${{ vars.NUXT_PUBLIC_ENABLE_IAA }}" >> .env
           echo "NUXT_AUTH_ORIGIN=${{ vars.NUXT_AUTH_ORIGIN }}" >> .env
-          echo "NUXT_PUBLIC_AUTH_BASE_PATH=${{ vars.NUXT_PUBLIC_AUTH_BASE_PATH }}" >> .env
+          echo "NUXT_PUBLIC_AUTH_BASE_URL=${{ vars.NUXT_PUBLIC_AUTH_BASE_URL }}" >> .env
           echo "KEYCLOAK_ISSUER=${{ vars.KEYCLOAK_ISSUER }}" >> .env
           echo "KEYCLOAK_CLIENT_ID=${{ secrets.KEYCLOAK_CLIENT_ID }}" >> .env
           echo "KEYCLOAK_CLIENT_SECRET=${{ secrets.KEYCLOAK_CLIENT_SECRET }}" >> .env
@@ -155,7 +155,7 @@ jobs:
           NUXT_PUBLIC_ENABLE_CONSULTA: ${{ vars.NUXT_PUBLIC_ENABLE_CONSULTA }}
           NUXT_PUBLIC_ENABLE_IAA: ${{ vars.NUXT_PUBLIC_ENABLE_IAA }}
           NUXT_AUTH_ORIGIN: ${{ vars.NUXT_AUTH_ORIGIN }}
-          NUXT_PUBLIC_AUTH_BASE_PATH: ${{ vars.NUXT_PUBLIC_AUTH_BASE_PATH }}
+          NUXT_PUBLIC_AUTH_BASE_URL: ${{ vars.NUXT_PUBLIC_AUTH_BASE_URL }}
           KEYCLOAK_ISSUER: ${{ vars.KEYCLOAK_ISSUER }}
           KEYCLOAK_CLIENT_ID: ${{ secrets.KEYCLOAK_CLIENT_ID }}
           KEYCLOAK_CLIENT_SECRET: ${{ secrets.KEYCLOAK_CLIENT_SECRET }}

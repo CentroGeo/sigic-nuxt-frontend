@@ -2,13 +2,8 @@
 
 const isDev = process.env.NODE_ENV !== 'production';
 const appBasePath = (process.env.NUXT_PUBLIC_APP_BASE_PATH || '/').replace(/\/+$/, '/');
-const authBasePath = process.env.NUXT_PUBLIC_AUTH_BASE_PATH;
-const authBaseUrl = isDev
-  ? `${process.env.NUXT_PUBLIC_BASE_URL}${appBasePath}${authBasePath}`
-  : `${appBasePath}${authBasePath}`;
+const authBaseUrl = process.env.NUXT_PUBLIC_AUTH_BASE_URL;
 const originEnvKey = isDev ? undefined : 'NUXT_AUTH_ORIGIN';
-console.log(isDev ? 'dev' : 'prod');
-console.log('originEnvKey:', originEnvKey);
 
 const metaImg = 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg';
 const metaDescription =
