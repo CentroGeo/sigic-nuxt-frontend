@@ -66,7 +66,7 @@ jobs:
             echo "NODE_ENV=production" >> "$GITHUB_OUTPUT"
             echo "NUXT_PUBLIC_BASE_URL=https://sigic.geoint.mx" >> "$GITHUB_OUTPUT"
           else
-            echo "NODE_ENV=development" >> "$GITHUB_OUTPUT"
+            echo "NODE_ENV=production" >> "$GITHUB_OUTPUT"
             echo "NUXT_PUBLIC_BASE_URL=https://sigic.dev.geoint.mx" >> "$GITHUB_OUTPUT"
           fi
 
@@ -74,6 +74,8 @@ jobs:
         run: |
           docker build --no-cache \
             --build-arg NODE_ENV=${{ steps.env.outputs.NODE_ENV }} \
+            --build-arg NUXT_APP_BASE_URL=${{ steps.env.outputs.NUXT_APP_BASE_URL }} \
+            --build-arg AUTH_BASE_URL=${{ steps.env.outputs.AUTH_BASE_URL }} \
             --build-arg NUXT_PUBLIC_BASE_URL=${{ steps.env.outputs.NUXT_PUBLIC_BASE_URL }} \
             -t ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.branch }} \
             -t ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.sha }} \
@@ -112,7 +114,7 @@ jobs:
 
       - name: Escribir archivo .env
         run: |
-          echo "NODE_ENV=development" >> .env
+          echo "NODE_ENV=production" >> .env
           echo "NUXT_PUBLIC_BASE_URL=${{ vars.NUXT_PUBLIC_BASE_URL }}" >> .env
           echo "NUXT_PUBLIC_GEONODE_URL=${{ vars.NUXT_PUBLIC_GEONODE_URL }}" >> .env
           echo "NUXT_PUBLIC_GEONODE_API=${{ vars.NUXT_PUBLIC_GEONODE_API }}" >> .env          
@@ -139,7 +141,7 @@ jobs:
           docker compose -f docker-compose-ghcr.yml down -v || true
           docker compose -f docker-compose-ghcr.yml up -d --force-recreate
         env:
-          NODE_ENV: 'development'
+          NODE_ENV: 'production'
           NUXT_PUBLIC_BASE_URL: ${{ vars.NUXT_PUBLIC_BASE_URL }}
           NUXT_PUBLIC_GEONODE_URL: ${{ vars.NUXT_PUBLIC_GEONODE_URL }}
           NUXT_PUBLIC_GEONODE_API: ${{ vars.NUXT_PUBLIC_GEONODE_API }}
