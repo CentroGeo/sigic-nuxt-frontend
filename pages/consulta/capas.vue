@@ -100,7 +100,6 @@ async function addAttribute(pk) {
           .join(''),
     };
   }
-  console.log('Los atributos:', attributos);
 }
 
 watch(
