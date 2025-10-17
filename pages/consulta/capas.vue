@@ -84,7 +84,8 @@ async function addAttribute(pk) {
       params: {
         propertyName: '',
       },
-      contenido: () => `${pk} No hay información disponible para esta capa`,
+      contenido: () =>
+        `<p style="font-weight: bold">${resource.title}</p> <p>No hay información disponible para esta capa</p>`,
     };
   } else {
     const { columnas, etiquetas } = await storeResources.fetchAttrs(pk);
@@ -93,7 +94,7 @@ async function addAttribute(pk) {
         propertyName: columnas.join(','),
       },
       contenido: (data) =>
-        pk +
+        `<p style="font-weight: bold">${resource.title}</p>` +
         columnas
           .map((columna) => `<p><b>${etiquetas[columna] || columna}</b>: ${data[columna]}</p>`)
           .join(''),
@@ -175,7 +176,7 @@ watch(
             :opacidad="storeSelected.byPk(resource.pk).opacidad"
             :posicion="storeSelected.byPk(resource.pk).posicion + 1"
             :visible="storeSelected.byPk(resource.pk).visible"
-            :cuadro-informativo="[resource.pk]"
+            :cuadro-informativo="attributos[resource.pk]"
           />
         </SisdaiMapa>
       </ClientOnly>
