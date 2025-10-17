@@ -27,8 +27,9 @@ COPY . .
 
 RUN touch package-lock.json  \
     && rm -rf package-lock.json  \
-    && npm install \
-    && sed -i 's|// *originEnvKey:|originEnvKey:|g' nuxt.config.ts
+    && npm install
+
+#    && sed -i 's|// *originEnvKey:|originEnvKey:|g' nuxt.config.ts
 
 RUN npm run build
 
