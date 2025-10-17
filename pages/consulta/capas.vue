@@ -2,20 +2,19 @@
 import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
 import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
 import { lados } from '@centrogeomx/sisdai-mapas/src/utiles/capa';
-import { findServer, resourceTypeDic } from '~/utils/consulta';
+import { arrayNewsOlds, findServer, resourceTypeDic } from '~/utils/consulta';
 
 const storeConsulta = useConsultaStore();
 const storeResources = useResourcesConsultaStore();
 const storeSelected = useSelectedResources2Store();
-const config = useRuntimeConfig();
 const { gnoxyFetch } = useGnoxyUrl();
 const route = useRoute();
 const router = useRouter();
 storeConsulta.resourceType = resourceTypeDic.dataLayer;
 
 const vistaDelMapa = ref({ extension: storeConsulta.mapExtent });
+const selectorDivisionAbierto = ref(undefined);
 const attributos = reactive({});
-const topLayer = ref();
 const linkExportaMapa = ref();
 function exportarMapa() {
   exportarHTMLComoPNG(
@@ -79,77 +78,44 @@ onMounted(async () => {
 
 async function addAttribute(pk) {
   attributos[pk] = [];
-  const maxAttrs = 5;
-  try {
-    const { attributes } = await gnoxyFetch(
-      `${config.public.geonodeApi}/datasets/${pk}/attribute_set`
-    ).then((response) => response.json());
-
-    const etiquetas = {};
-    let columnas = attributes
-      .filter((a) => a.visible)
-      .sort((a, b) => a.display_order - b.display_order)
-      .map(({ attribute, attribute_label }) => {
-        etiquetas[attribute] = attribute_label || attribute;
-        return attribute;
-      });
-
-    // Limitamos el máximo de atributos visibles
-    if (columnas.length > maxAttrs) {
-      columnas = columnas.slice(0, maxAttrs);
-    }
+  const resource = await storeResources.fetchResourceByPk(pk);
+  if (resource.sourcetype === 'REMOTE') {
+    attributos[pk] = {
+      params: {
+        propertyName: '',
+      },
+      contenido: () => `${pk} No hay información disponible para esta capa`,
+    };
+  } else {
+    const { columnas, etiquetas } = await storeResources.fetchAttrs(pk);
     attributos[pk] = {
       params: {
         propertyName: columnas.join(','),
       },
-      // attribute_label
       contenido: (data) =>
         pk +
         columnas
           .map((columna) => `<p><b>${etiquetas[columna] || columna}</b>: ${data[columna]}</p>`)
           .join(''),
     };
-  } catch (error) {
-    console.error('Error en la búsqueda:', error);
-    /* 
-    console.error(
-      'Ocurrió un problema al realizar la búsqueda. Por favor, verifica tu conexión o intenta de nuevo más tarde.'
-    );
-
-    if (error.response && error.response.status === 400) {
-      console.error('Los parámetros de búsqueda no son válidos. Revisa los filtros ingresados.');
-    } else if (error.response && error.response.status === 500) {
-      console.error('El servidor encontró un problema. Intenta más tarde.');
-    } */
   }
+  console.log('Los atributos:', attributos);
 }
 
 watch(
   () => storeSelected.resources[storeConsulta.resourceType],
   (nv_) => {
-    //console.log(nv_);
-    //const selectedPks = Object.keys(nv_);
-    //const firstElement = selectedPks.filter((d) => nv_[d]['position_'] === 0);
-    //console.log('Aqui:', firstElement);
-    //addAttribute(firstElement);
     const selectedPks = Object.keys(nv_);
     const attributesPks = Object.keys(attributos);
-    topLayer.value = selectedPks.filter((d) => nv_[d]['position_'] === 0);
-    const nv = selectedPks.filter((item) => !attributesPks.includes(item));
-    //console.log('Se agregó:', nv);
-    //const ov = attributesPks.filter((item) => !selectedPks.includes(item));
-    //console.log('Se quitó:', ov);a
-    nv.forEach((r) => addAttribute(r));
-    //ov.forEach((resource) => delete attributos[resource]);
-    //console.log(attributos);
-    //console.log();
+    const { news, olds } = arrayNewsOlds(attributesPks, selectedPks);
+    news.forEach((r) => addAttribute(r));
+    olds.forEach((resource) => delete attributos[resource]);
   },
   { deep: true }
 );
 
 // api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
 // const contenedorSelectoresDivisionColapsado = ref(true);
-const selectorDivisionAbierto = ref(undefined);
 </script>
 
 <template>
@@ -209,7 +175,7 @@ const selectorDivisionAbierto = ref(undefined);
             :opacidad="storeSelected.byPk(resource.pk).opacidad"
             :posicion="storeSelected.byPk(resource.pk).posicion + 1"
             :visible="storeSelected.byPk(resource.pk).visible"
-            :cuadro-informativo="resource.subtype === 'raster' ? '' : attributos[resource.pk]"
+            :cuadro-informativo="[resource.pk]"
           />
         </SisdaiMapa>
       </ClientOnly>
