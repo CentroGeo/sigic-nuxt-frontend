@@ -25,45 +25,6 @@ export default NuxtAuthHandler({
 
   useSecureCookies: !isDev,
 
-  cookies: {
-    state: {
-      name: 'next-auth.state',
-      options: {
-        httpOnly: true,
-        sameSite: isDev ? 'lax' : 'none',
-        secure: !isDev,
-        path: '/',
-      },
-    },
-    pkceCodeVerifier: {
-      name: 'next-auth.pkce.code_verifier',
-      options: {
-        httpOnly: true,
-        sameSite: isDev ? 'lax' : 'none',
-        secure: !isDev,
-        path: '/',
-      },
-    },
-    callbackUrl: {
-      name: 'next-auth.callback-url',
-      options: {
-        httpOnly: true,
-        sameSite: isDev ? 'lax' : 'none',
-        secure: !isDev,
-        path: '/',
-      },
-    },
-    csrfToken: {
-      name: 'next-auth.csrf-token',
-      options: {
-        httpOnly: true,
-        sameSite: isDev ? 'lax' : 'none',
-        secure: !isDev,
-        path: '/',
-      },
-    },
-  },
-
   callbacks: {
     async jwt({ token, account }) {
       if (account) {
