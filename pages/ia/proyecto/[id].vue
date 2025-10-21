@@ -5,7 +5,7 @@ import SisdaiBotonRadio from '@centrogeomx/sisdai-componentes/src/componentes/bo
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 
-import { buildUrl, categoriesInSpanish } from '~/utils/consulta';
+import { buildUrl, categoriesInSpanish, cleanInput } from '~/utils/consulta';
 
 const config = useRuntimeConfig();
 const storeFilters = useFilteredResources();
@@ -15,6 +15,10 @@ const { gnoxyFetch } = useGnoxyUrl();
 const resourceType = ref('dataLayer');
 const recursos = computed(() => storeResources.resources[resourceType.value]);
 const recursosSeleccionados = computed(() => storeResources.selectedResources[resourceType.value]);
+const inputSearch = computed({
+  get: () => storeFilters.filters.inputSearch,
+  set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
+});
 
 const agregaCatalogoModal = ref(null);
 const seleccionCatalogoModal = ref(null);
@@ -139,7 +143,7 @@ async function fetchNewData() {
 
 function cargarArchivosGeonode() {
   seleccionCatalogoModal?.value.cerrarModal();
-  // console.log('recursosSeleccionados', recursosSeleccionados.value);
+  console.log('recursosSeleccionados', recursosSeleccionados.value);
   const nuevosArchivos = recursosSeleccionados.value.map((file) => ({
     id: Math.floor(Math.random() * 1000000000000000000000),
     nombre: file.title,
@@ -178,7 +182,7 @@ async function seleccionarCategoria(categoria) {
     categoriesDict.value[categoria].page = 1;
     categoriaSeleccionada.value = categoriesDict.value[categoria].label;
     storeFilters.updateFilter('categories', [categoriesDict.value[categoria].name]);
-    await storeFilters.buildQueryParams(resourceType.value);
+    storeFilters.buildQueryParams(resourceType.value);
     await storeResources.fetchByCategory(resourceType.value, 1, params.value);
     storeResources.setNthElements(resourceType.value, [
       recursos.value[recursos.value.length - nthElement].pk,
@@ -373,6 +377,53 @@ function preventEscape(event) {
   if (event.key === 'Escape') {
     event.preventDefault();
     event.stopPropagation();
+  }
+}
+
+async function buscarRecurso() {
+  console.log('buscando recurso');
+
+  if (categoriaSeleccionada.value !== null && inputSearch.value !== null) {
+    // console.log('categoriaSeleccionada.value', categoriaSeleccionada.value);
+    // console.log('inputSearch.value', inputSearch.value);
+
+    totalCategoria.value = 0;
+    // console.log('resourceType.value', resourceType.value);
+    storeResources.resetByType(resourceType.value);
+    categoriesDict.value[categoriaSeleccionada.value].page = 1;
+    // console.log('categoriesDict.value', categoriesDict.value);
+    storeFilters.buildQueryParams(resourceType.value);
+    // console.log('storeFilters.filters.queryParams', storeFilters.filters.queryParams);
+    // console.log('params.value', params.value);
+    await storeResources.fetchByCategory(resourceType.value, 1, params.value);
+    // console.log('recursos.value', recursos.value);
+    storeResources.setNthElements(resourceType.value, [
+      recursos.value[recursos.value.length - nthElement].pk,
+    ]);
+    // console.log(
+    //   'categoriesDict.value[categoriaSeleccionada.value]',
+    //   categoriesDict.value[categoriaSeleccionada.value]
+    // );
+    // fix: acá no corresponde al total de recursos encontrados
+    totalCategoria.value = categoriesDict.value[categoriaSeleccionada.value].total;
+    // totalCategoria.value = storeResources.nthElementsPks[resourceType.value].length;
+  } else {
+    console.warn('falta seleccionar categoría y/o agregar texto de búsqueda');
+  }
+}
+
+async function removerBusqueda() {
+  storeFilters.updateFilter('inputSearch', '');
+  if (categoriaSeleccionada.value !== null && inputSearch.value === '') {
+    totalCategoria.value = 0;
+    storeResources.resetByType(resourceType.value);
+    categoriesDict.value[categoriaSeleccionada.value].page = 1;
+    storeFilters.buildQueryParams(resourceType.value);
+    await storeResources.fetchByCategory(resourceType.value, 1, params.value);
+    storeResources.setNthElements(resourceType.value, [
+      recursos.value[recursos.value.length - nthElement].pk,
+    ]);
+    totalCategoria.value = categoriesDict.value[categoriaSeleccionada.value].total;
   }
 }
 </script>
@@ -592,7 +643,7 @@ function preventEscape(event) {
           <template #cuerpo>
             <div class="p-r-2">
               <p>Explora el catálogo y selecciona fuentes de información para el proyecto</p>
-              <!-- <ClientOnly>
+              <ClientOnly>
                 <form class="campo-busqueda m-y-3" @submit.prevent>
                   <input
                     id="idcampobusquedaialistas"
@@ -605,7 +656,7 @@ function preventEscape(event) {
                     class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
                     aria-label="Borrar"
                     type="button"
-                    @click="storeFilters.updateFilter('inputSearch', '')"
+                    @click="removerBusqueda"
                   >
                     <span aria-hidden="true" class="pictograma-cerrar" />
                   </button>
@@ -613,11 +664,12 @@ function preventEscape(event) {
                     class="boton-primario boton-pictograma campo-busqueda-buscar"
                     aria-label="Buscar"
                     type="button"
+                    @click="buscarRecurso"
                   >
                     <span class="pictograma-buscar" aria-hidden="true" />
                   </button>
                 </form>
-              </ClientOnly> -->
+              </ClientOnly>
 
               <div class="flex flex-contenido-separado">
                 <div class="columna-5">

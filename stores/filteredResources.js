@@ -67,11 +67,11 @@ export const useFilteredResources = defineStore('filteredResources', () => {
           }
         }
       }
-      // if (filters.inputSearch !== null && filters.inputSearch.length > 0) {
-      //   const wordsToSearch = filters.inputSearch.split(',').map((d) => cleanInput(d));
-      //   queryParams['search_fields'] = ['title', 'abstract'];
-      //   queryParams['search'] = wordsToSearch;
-      // }
+      if (filters.inputSearch !== null && filters.inputSearch.length > 0) {
+        const wordsToSearch = filters.inputSearch.split(',').map((d) => cleanInput(d));
+        queryParams['search_fields'] = ['title', 'abstract'];
+        queryParams['search'] = wordsToSearch;
+      }
       if (filters.owner !== 'todos') {
         if (filters.owner === 'privados') {
           //queryParams['filter{owner.username}'] = userEmail;
