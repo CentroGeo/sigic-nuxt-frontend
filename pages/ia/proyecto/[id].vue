@@ -174,9 +174,10 @@ function cargarArchivosGeonode() {
   archivosGeonode.value = [...archivosGeonode.value, ...nuevosArchivos];
   archivosTabla.value = [...archivosSeleccionados.value, ...archivosGeonode.value];
 }
-
+const loaderRecursosModal = ref(false);
 async function seleccionarCategoria(categoria) {
   if (categoriaSeleccionada.value !== categoriesDict.value[categoria].label) {
+    loaderRecursosModal.value = true;
     totalCategoria.value = 0;
     storeResources.resetByType(resourceType.value);
     categoriesDict.value[categoria].page = 1;
@@ -188,6 +189,7 @@ async function seleccionarCategoria(categoria) {
       recursos.value[recursos.value.length - nthElement].pk,
     ]);
     totalCategoria.value = categoriesDict.value[categoriaSeleccionada.value].total;
+    loaderRecursosModal.value = false;
   }
 }
 
@@ -386,7 +388,7 @@ async function buscarRecurso() {
   if (categoriaSeleccionada.value !== null && inputSearch.value !== null) {
     // console.log('categoriaSeleccionada.value', categoriaSeleccionada.value);
     // console.log('inputSearch.value', inputSearch.value);
-
+    loaderRecursosModal.value = true;
     totalCategoria.value = 0;
     // console.log('resourceType.value', resourceType.value);
     storeResources.resetByType(resourceType.value);
@@ -400,6 +402,7 @@ async function buscarRecurso() {
     storeResources.setNthElements(resourceType.value, [
       recursos.value[recursos.value.length - nthElement].pk,
     ]);
+    loaderRecursosModal.value = false;
     // console.log(
     //   'categoriesDict.value[categoriaSeleccionada.value]',
     //   categoriesDict.value[categoriaSeleccionada.value]
@@ -415,6 +418,7 @@ async function buscarRecurso() {
 async function removerBusqueda() {
   storeFilters.updateFilter('inputSearch', '');
   if (categoriaSeleccionada.value !== null && inputSearch.value === '') {
+    loaderRecursosModal.value = true;
     totalCategoria.value = 0;
     storeResources.resetByType(resourceType.value);
     categoriesDict.value[categoriaSeleccionada.value].page = 1;
@@ -424,6 +428,7 @@ async function removerBusqueda() {
       recursos.value[recursos.value.length - nthElement].pk,
     ]);
     totalCategoria.value = categoriesDict.value[categoriaSeleccionada.value].total;
+    loaderRecursosModal.value = false;
   }
 }
 </script>
@@ -726,6 +731,10 @@ async function removerBusqueda() {
                           @trigger-fetch="fetchNewData"
                         />
                       </li>
+                      <figure v-if="loaderRecursosModal">
+                        <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
+                        <!-- <figcaption class="">{ { loaderMsg } }</figcaption> -->
+                      </figure>
                     </ul>
                   </div>
                 </div>
