@@ -82,7 +82,7 @@ const goUp = () => storeSelected.changePosition(props.selectedElement.pk, +1);
         </div>
         <div v-if="resourceElement.sourcetype === 'REMOTE'" class="id-tag flex m-b-1 m-t-0">
           <span class="pictograma-colaborar"></span>
-          Archivo remoto
+          Catálogo externo
         </div>
       </div>
 
@@ -92,7 +92,7 @@ const goUp = () => storeSelected.changePosition(props.selectedElement.pk, +1);
         @opacidad-clicked="emit('openOpacity', resourceElement)"
         @descarga-clicked="emit('openDownload', resourceElement)"
         @tabla-clicked="emit('openTabla', resourceElement)"
-        @ows-clicked="emit('openOWS')"
+        @ows-clicked="(link) => emit('openOWS', link)"
       />
 
       <ConsultaContenidoDocSeleccionado

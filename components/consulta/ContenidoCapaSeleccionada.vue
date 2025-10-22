@@ -6,8 +6,6 @@ const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
 const storeSelected = useSelectedResources2Store();
 const { gnoxyFetch } = useGnoxyUrl();
-//const { findServer } = useGnoxyUrl();
-//const { gnoxyUrl } = useGnoxyUrl();
 const emit = defineEmits(['opacidadClicked', 'descargaClicked', 'tablaClicked', 'owsClicked']);
 const props = defineProps({
   resourceElement: {
@@ -16,55 +14,6 @@ const props = defineProps({
   },
 });
 const { resourceElement } = toRefs(props);
-/* function getWFS(resource) {
-  let url;
-  if (resource.sourcetype === 'REMOTE') {
-    url = new URL(getWMSserver(resource));
-    url.search = new URLSearchParams({
-      service: 'WFS',
-      version: '1.0.0',
-      request: 'GetFeature',
-      typeName: resource.alternate,
-      outputFormat: 'application/json',
-    }).toString();
-    url = url.href;
-  } else {
-    const objectWFSLink = resourceElement.value.links.find((link) => link.name === 'GeoJSON');
-    url = objectWFSLink.url;
-  }
-  return url;
-} */
-/* function getWMSFeatureInfo(resource) {
-  const url = new URL(getWMSserver(resource));
-  const pngObject = resource.links.find((link) => link.name === 'PNG');
-  const pngLink = pngObject.url;
-  const paramsDict = {};
-  const paramsList = pngLink.replace(`${config.public.geoserverUrl}/ows?`, '').split('&');
-  paramsList.forEach((param) => {
-    const entry = param.split('=');
-    paramsDict[entry[0]] = entry[1];
-  });
-  const coords = resource.extent.coords;
-  const bboxRatio = (coords[3] - coords[1]) / (coords[2] - coords[0]);
-  const mapWidth = Math.round(paramsDict.width);
-  const mapHeight = Math.round(paramsDict.height * bboxRatio);
-  url.search = new URLSearchParams({
-    service: 'WMS',
-    version: '1.1.0',
-    request: 'GetFeatureInfo',
-    layers: resource.alternate,
-    styles: '',
-    srs: resource.extent.srid,
-    bbox: resource.extent.coords.join(','),
-    width: mapWidth,
-    height: mapHeight,
-    query_layers: resource.alternate,
-    x: Math.round(mapWidth / 2),
-    y: Math.round(mapHeight / 2),
-    info_format: 'application/json',
-  });
-  return url.href;
-} */
 const actualButtons = ref({});
 const optionsButtons = ref([
   {
@@ -211,8 +160,8 @@ async function shareOws() {
   } catch (err) {
     console.error('Error al copiar: ', err);
   } */
-  console.log(owsLink);
-  emit('owsClicked');
+  //console.log(owsLink);
+  emit('owsClicked', owsLink);
 }
 watch(resourceElement, () => {
   updateFunctions();
@@ -246,7 +195,11 @@ watch(resourceElement, () => {
       </button>
     </div>
     <div v-if="resourceElement.is_published === true" class="flex flex-contenido-centrado m-t-2">
-      <button type="button" class="boton-secundario boton-chico" @click="shareOws">
+      <button
+        type="button"
+        class="boton-secundario boton-chico columna-16 flex flex-contenido-centrado"
+        @click="shareOws"
+      >
         Enlace Open Web Services (OWS)
       </button>
     </div>

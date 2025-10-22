@@ -18,6 +18,7 @@ const buttonTagDict = {
 // const route = useRoute();
 const shownModal = ref('ninguno');
 const modalResource = ref(null);
+const owsLink = ref(null);
 const downloadAllChild = ref(null);
 const downloadOneChild = ref(null);
 const opacityChild = ref(null);
@@ -70,7 +71,8 @@ function notifyBorrarChild() {
   });
 }
 
-function notifyOWSChild() {
+function notifyOWSChild(link) {
+  owsLink.value = link;
   shownModal.value = 'owsModal';
   nextTick(() => {
     owsChild.value.abrirModalOWS();
@@ -236,7 +238,7 @@ const dividirMapa = computed({
         @notify-download="changeModal('downloadOne')"
       />
 
-      <ConsultaModalOWS v-if="shownModal === 'owsModal'" ref="owsChild" />
+      <ConsultaModalOWS v-if="shownModal === 'owsModal'" ref="owsChild" :ows-link="owsLink" />
     </div>
   </div>
 </template>
