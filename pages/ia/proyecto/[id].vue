@@ -180,10 +180,8 @@ function cargarArchivosGeonode() {
   // console.log('archivosTabla.value', archivosTabla.value);
 }
 
-// const loaderRecursosModal = ref(false);
 async function seleccionarCategoria(categoria) {
   if (categoriaSeleccionada.value !== categoriesDict.value[categoria].label) {
-    // loaderRecursosModal.value = true;
     // reseteando recursos filtrados por categoría y valores
     totalCategoria.value = 0;
     storeResources.resetByType(resourceType.value);
@@ -193,23 +191,14 @@ async function seleccionarCategoria(categoria) {
     storeFilters.updateFilter('categories', [categoriesDict.value[categoria].name]);
     // construyendo parámetros para la petición
     storeFilters.buildQueryParams(resourceType.value);
+    totalCategoria.value = categoriesDict.value[categoriaSeleccionada.value].total;
     // fetch de recursos paginados totales
     await storeResources.fetchByCategory(resourceType.value, 1, params.value);
     storeResources.setNthElements(resourceType.value, [
       recursos.value[recursos.value.length - nthElement].pk,
     ]);
-    totalCategoria.value = categoriesDict.value[categoriaSeleccionada.value].total;
-    // loaderRecursosModal.value = false;
   }
 }
-
-watch(resourceType, async (nv, ov) => {
-  storeResources.resetSelectedByType(ov);
-  storeResources.resetByType(ov);
-  totalCategoria.value = 0;
-  storeFilters.buildQueryParams(nv);
-  await buildCategoriesDict();
-});
 
 const storeIA = useIAStore();
 
@@ -230,9 +219,6 @@ const loaderTitle = ref('');
 const loaderMsg = ref('');
 
 onMounted(async () => {
-  storeFilters.buildQueryParams(resourceType.value);
-  await buildCategoriesDict();
-
   loaderTitle.value = 'Cargando';
   loaderMsg.value = 'Espere un momento';
   await nextTick();
@@ -394,10 +380,9 @@ function preventEscape(event) {
 
 const mensajeAyudaBuscador = ref('');
 async function buscarRecurso() {
-  if (categoriaSeleccionada.value !== null && inputSearch.value !== null) {
+  if (categoriaSeleccionada.value !== null) {
     // reseteando recursos filtrados por categoría y valores
     mensajeAyudaBuscador.value = '';
-    // loaderRecursosModal.value = true;
     totalCategoria.value = 0;
     storeResources.resetByType(resourceType.value);
     categoriesDict.value[categoriaSeleccionada.value].page = 1;
@@ -411,40 +396,44 @@ async function buscarRecurso() {
     storeResources.setNthElements(resourceType.value, [
       recursos.value[recursos.value.length - nthElement].pk,
     ]);
-
-    // loaderRecursosModal.value = false;
   } else {
-    console.warn('falta seleccionar categoría y/o agregar texto de búsqueda');
-    mensajeAyudaBuscador.value = 'Falta seleccionar categoría y/o agregar texto de búsqueda.';
+    mensajeAyudaBuscador.value = 'Falta seleccionar categoría.';
   }
 }
 
 async function removerBusqueda() {
   storeFilters.updateFilter('inputSearch', '');
   if (categoriaSeleccionada.value !== null && inputSearch.value === '') {
-    // loaderRecursosModal.value = true;
     totalCategoria.value = 0;
     storeResources.resetByType(resourceType.value);
     categoriesDict.value[categoriaSeleccionada.value].page = 1;
     // contruyendo parámetros
     storeFilters.buildQueryParams(resourceType.value);
+    totalCategoria.value = categoriesDict.value[categoriaSeleccionada.value].total;
     // fetch de recursos paginados totales
     await storeResources.fetchByCategory(resourceType.value, 1, params.value);
     storeResources.setNthElements(resourceType.value, [
       recursos.value[recursos.value.length - nthElement].pk,
     ]);
-    totalCategoria.value = categoriesDict.value[categoriaSeleccionada.value].total;
-    // loaderRecursosModal.value = false;
   }
 }
 
 function agregarFuentesCatalogo() {
   // limpiando recursos filtrados por categoría y seleccionados
+  storeFilters.updateFilter('inputSearch', '');
   categoriaSeleccionada.value = null;
   totalCategoria.value = 0;
   storeResources.resetByType(resourceType.value);
   storeResources.resetSelectedByType(resourceType.value);
   agregaCatalogoModal.value?.abrirModal();
+}
+
+async function siguenteAgregar() {
+  agregaCatalogoModal.value.cerrarModal();
+  seleccionCatalogoModal.value.abrirModal();
+  totalCategoria.value = 0;
+  storeFilters.buildQueryParams(resourceType.value);
+  await buildCategoriesDict();
 }
 </script>
 
@@ -611,12 +600,7 @@ function agregarFuentesCatalogo() {
           </template>
           <template #cuerpo>
             <p>Selecciona el tipo de fuente de información que deseas agregar a tu proyecto</p>
-            <form
-              @keydown.enter.prevent="
-                agregaCatalogoModal.cerrarModal();
-                seleccionCatalogoModal.abrirModal();
-              "
-            >
+            <form @keydown.enter.prevent="siguenteAgregar">
               <SisdaiGrupoBotonesRadio class="radio-catalogo" leyenda="" :es_vertical="true">
                 <SisdaiBotonRadio
                   v-model="resourceType"
@@ -643,14 +627,7 @@ function agregarFuentesCatalogo() {
             </form>
           </template>
           <template #pie>
-            <button
-              class="boton-primario boton-chico"
-              type="button"
-              @click="
-                agregaCatalogoModal.cerrarModal();
-                seleccionCatalogoModal.abrirModal();
-              "
-            >
+            <button class="boton-primario boton-chico" type="button" @click="siguenteAgregar">
               Siguiente
             </button>
           </template>
@@ -751,8 +728,14 @@ function agregarFuentesCatalogo() {
                         v-if="
                           categoriaSeleccionada && categoriesDict[categoriaSeleccionada].isLoading
                         "
+                        class="flex flex-contenido-centrado"
                       >
-                        <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
+                        <img
+                          class="color-invertir"
+                          src="/img/loader.gif"
+                          alt="Loader de SIGIC"
+                          height="64px"
+                        />
                         <!-- <figcaption class="">{ { loaderMsg } }</figcaption> -->
                       </figure>
                     </ul>
