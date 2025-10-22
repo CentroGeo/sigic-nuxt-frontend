@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { buildUrl, defineGeomType, hasWMS, resourceTypeDic } from '~/utils/consulta';
+import { buildUrl, defineGeomType, resourceTypeDic } from '~/utils/consulta';
 
 export const useResourcesIAStore = defineStore('resourcesIA', () => {
   const config = useRuntimeConfig();
@@ -75,7 +75,6 @@ export const useResourcesIAStore = defineStore('resourcesIA', () => {
      * @param {Array} params
      */
     async fetchByCategory(resourceType = storeConsulta.resourceType, pageNum, params) {
-      // console.log('params', params);
       const { gnoxyFetch } = useGnoxyUrl();
       const queryParams = {
         page: pageNum,
@@ -94,32 +93,7 @@ export const useResourcesIAStore = defineStore('resourcesIA', () => {
           })
         );
       }
-
-      //En caso de que los recursos incluyan servicios remotos, revisamos su getCapabilities
-      let datum;
-      if (resourceType !== resourceTypeDic.document) {
-        const service = resourceType === resourceTypeDic.dataLayer ? 'map' : 'table';
-        const sourceTypes = res.resources.map((d) => d.sourcetype);
-        if (sourceTypes.includes('REMOTE')) {
-          // Revisamos si los servicios remotos permiten ver la capa y/o la tabla
-          const locals = res.resources.filter((resource) => resource.sourcetype === 'LOCAL');
-          let remotes = res.resources.filter((resource) => resource.sourcetype === 'REMOTE');
-          const filterRemotes = await Promise.all(
-            remotes.map(async (resource) => {
-              return {
-                resourceValue: resource,
-                resourceHasWms: await hasWMS(resource, service),
-              };
-            })
-          );
-          remotes = filterRemotes.filter((d) => d.resourceHasWms).map((d) => d.resourceValue);
-          datum = locals.concat(remotes);
-        } else {
-          datum = res.resources;
-        }
-      } else {
-        datum = res.resources;
-      }
+      const datum = res.resources;
 
       // TODO: Agregar en los query params el filtrado para indicar que recursos con metadatos
       // completos. Borrar la siguiente linea y cambiar data por datum
@@ -185,54 +159,3 @@ export const useResourcesIAStore = defineStore('resourcesIA', () => {
     },
   };
 });
-
-/* async function validacionTemporal(resources, resourceType) {
-  const config = useRuntimeConfig();
-  const proxyURL = config.public.geonodeUrl;
-  let datum;
-
-  if (resourceType === resourceTypeDic.document) {
-    // Filtramos los txt y pdfs
-    datum = resources.filter((resource) =>
-      resource.links.some(
-        (link) =>
-          link.link_type === 'uploaded' &&
-          (link.name.endsWith('.pdf') || link.name.endsWith('.txt'))
-      )
-    );
-    return datum;
-  }
-  if (resourceType === resourceTypeDic.dataLayer) {
-    const noGeometryExtent = [-1, -1, 0, 0];
-    datum = resources.filter(
-      (resource) =>
-        !resource.extent.coords.every((value, index) => value === noGeometryExtent[index])
-    );
-
-    // Revisamos si los servicios remotos tienen tabla
-    const locals = datum.filter((resource) => resource.sourcetype === 'LOCAL');
-    let remotes = datum.filter((resource) => resource.sourcetype === 'REMOTE');
-    const filterRemotes = await Promise.all(
-      remotes.map(async (resource) => {
-        return { resourceValue: resource, resourceHasWms: await hasWMS(resource, 'map', proxyURL) };
-      })
-    );
-    remotes = filterRemotes.filter((d) => d.resourceHasWms).map((d) => d.resourceValue);
-    return locals.concat(remotes);
-  }
-  if (resourceType === resourceTypeDic.dataTable) {
-    // Revisamos si los servicios remotos tienen tabla
-    const locals = resources.filter((resource) => resource.sourcetype === 'LOCAL');
-    let remotes = resources.filter((resource) => resource.sourcetype === 'REMOTE');
-    const filterRemotes = await Promise.all(
-      remotes.map(async (resource) => {
-        return {
-          resourceValue: resource,
-          resourceHasWms: await hasWMS(resource, 'table', proxyURL),
-        };
-      })
-    );
-    remotes = filterRemotes.filter((d) => d.resourceHasWms).map((d) => d.resourceValue);
-    return locals.concat(remotes);
-  }
-} */

@@ -5,7 +5,7 @@ import SisdaiBotonRadio from '@centrogeomx/sisdai-componentes/src/componentes/bo
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 
-import { buildUrl, categoriesInSpanish, cleanInput } from '~/utils/consulta';
+import { buildUrl, categoriesInSpanish, categoriesValues, cleanInput } from '~/utils/consulta';
 
 const config = useRuntimeConfig();
 const storeFilters = useFilteredResources();
@@ -135,10 +135,14 @@ async function callResources(categoria) {
 }
 
 async function fetchNewData() {
-  await callResources(categoriaSeleccionada.value);
-  storeResources.setNthElements(resourceType.value, [
-    recursos.value[recursos.value.length - nthElement].pk,
-  ]);
+  if (totalCategoria.value > recursos.value.length) {
+    categoriesDict.value[categoriaSeleccionada.value].isLoading = true;
+    await callResources(categoriaSeleccionada.value);
+    storeResources.setNthElements(resourceType.value, [
+      recursos.value[recursos.value.length - nthElement].pk,
+    ]);
+    categoriesDict.value[categoriaSeleccionada.value].isLoading = false;
+  }
 }
 
 function cargarArchivosGeonode() {
@@ -176,10 +180,10 @@ function cargarArchivosGeonode() {
   // console.log('archivosTabla.value', archivosTabla.value);
 }
 
-const loaderRecursosModal = ref(false);
+// const loaderRecursosModal = ref(false);
 async function seleccionarCategoria(categoria) {
   if (categoriaSeleccionada.value !== categoriesDict.value[categoria].label) {
-    loaderRecursosModal.value = true;
+    // loaderRecursosModal.value = true;
     // reseteando recursos filtrados por categoría y valores
     totalCategoria.value = 0;
     storeResources.resetByType(resourceType.value);
@@ -195,7 +199,7 @@ async function seleccionarCategoria(categoria) {
       recursos.value[recursos.value.length - nthElement].pk,
     ]);
     totalCategoria.value = categoriesDict.value[categoriaSeleccionada.value].total;
-    loaderRecursosModal.value = false;
+    // loaderRecursosModal.value = false;
   }
 }
 
@@ -393,25 +397,22 @@ async function buscarRecurso() {
   if (categoriaSeleccionada.value !== null && inputSearch.value !== null) {
     // reseteando recursos filtrados por categoría y valores
     mensajeAyudaBuscador.value = '';
-    loaderRecursosModal.value = true;
+    // loaderRecursosModal.value = true;
     totalCategoria.value = 0;
     storeResources.resetByType(resourceType.value);
     categoriesDict.value[categoriaSeleccionada.value].page = 1;
     // contruyendo parámetros
     storeFilters.buildQueryParams(resourceType.value);
+    totalCategoria.value = await fetchTotalByCategory(
+      categoriesValues[categoriaSeleccionada.value]
+    );
     // fetch de recursos paginados filtrados
     await storeResources.fetchByCategory(resourceType.value, 1, params.value);
     storeResources.setNthElements(resourceType.value, [
       recursos.value[recursos.value.length - nthElement].pk,
     ]);
-    loaderRecursosModal.value = false;
-    // console.log(
-    //   'categoriesDict.value[categoriaSeleccionada.value]',
-    //   categoriesDict.value[categoriaSeleccionada.value]
-    // );
-    // fix: acá no corresponde al total de recursos encontrados
-    totalCategoria.value = categoriesDict.value[categoriaSeleccionada.value].total;
-    // totalCategoria.value = storeResources.nthElementsPks[resourceType.value].length;
+
+    // loaderRecursosModal.value = false;
   } else {
     console.warn('falta seleccionar categoría y/o agregar texto de búsqueda');
     mensajeAyudaBuscador.value = 'Falta seleccionar categoría y/o agregar texto de búsqueda.';
@@ -421,7 +422,7 @@ async function buscarRecurso() {
 async function removerBusqueda() {
   storeFilters.updateFilter('inputSearch', '');
   if (categoriaSeleccionada.value !== null && inputSearch.value === '') {
-    loaderRecursosModal.value = true;
+    // loaderRecursosModal.value = true;
     totalCategoria.value = 0;
     storeResources.resetByType(resourceType.value);
     categoriesDict.value[categoriaSeleccionada.value].page = 1;
@@ -433,7 +434,7 @@ async function removerBusqueda() {
       recursos.value[recursos.value.length - nthElement].pk,
     ]);
     totalCategoria.value = categoriesDict.value[categoriaSeleccionada.value].total;
-    loaderRecursosModal.value = false;
+    // loaderRecursosModal.value = false;
   }
 }
 
@@ -663,7 +664,7 @@ function agregarFuentesCatalogo() {
             <div class="p-r-2">
               <p>Explora el catálogo y selecciona fuentes de información para el proyecto</p>
               <ClientOnly>
-                <form class="campo-busqueda m-y-3" @submit.prevent>
+                <form class="campo-busqueda m-y-3" @submit.prevent="buscarRecurso">
                   <input
                     id="idcampobusquedaialistas"
                     v-model="inputSearch"
@@ -746,7 +747,11 @@ function agregarFuentesCatalogo() {
                           @trigger-fetch="fetchNewData"
                         />
                       </li>
-                      <figure v-if="loaderRecursosModal">
+                      <figure
+                        v-if="
+                          categoriaSeleccionada && categoriesDict[categoriaSeleccionada].isLoading
+                        "
+                      >
                         <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
                         <!-- <figcaption class="">{ { loaderMsg } }</figcaption> -->
                       </figure>

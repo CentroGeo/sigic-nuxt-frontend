@@ -60,7 +60,7 @@ export const useFilteredResources = defineStore('filteredResources', () => {
             queryParams['filter{has_geometry}'] = 'true';
           }
           if (filters.resourceType === 'dataTable') {
-            queryParams['filter{subtype.in}'] = ['vector', 'remote'];
+            queryParams['filter{subtype.in}'] = ['vector'];
           }
           if (filters.resourceType === 'document') {
             queryParams['filter{extension}'] = ['pdf', 'txt'];
