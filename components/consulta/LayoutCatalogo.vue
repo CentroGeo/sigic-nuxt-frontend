@@ -281,8 +281,10 @@ onMounted(async () => {
                   : 'boton-secundario boton-pictograma boton-grande'
               "
               aria-label="Filtro Avanzado"
+              style="position: relative"
               @click="modalFiltroAvanzado.abrirModalBusqueda"
             >
+              <div v-if="isFilterActive" class="circulo"></div>
               <span class="pictograma-filtro" aria-hidden="true" />
             </button>
           </div>
@@ -299,8 +301,8 @@ onMounted(async () => {
           >
             Enlace Open Web Services (OWS)
           </button>
-          <div class="flex flex-contenido-centrado">
-            <p class="columna-13" style="font-size: 1rem">
+          <div class="flex flex-contenido-separado">
+            <p class="columna-12" style="font-size: 1rem">
               Conecta un catálogo externo para ver sus datos
             </p>
             <nuxt-link
@@ -379,5 +381,16 @@ onMounted(async () => {
       border-bottom: solid 2px var(--color-neutro-3);
     }
   }
+}
+
+.circulo {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background-color: var(--color-informativo-2);
+  border-radius: 50%;
+  right: -4px;
+  top: -4px;
+  z-index: 1;
 }
 </style>
