@@ -1,6 +1,7 @@
 <script setup>
 import SisdaiAreaTexto from '@centrogeomx/sisdai-componentes/src/componentes/area-texto/SisdaiAreaTexto.vue';
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import { useRoute, useRouter } from 'vue-router';
 
 const storeIA = useIAStore();
@@ -30,6 +31,10 @@ const archivosEliminados = ref([]);
 
 const config = useRuntimeConfig();
 const imagenPreview = ref(null);
+
+const loaderModal = ref(null);
+const loaderTitle = ref('Guardando');
+const loaderMsg = ref('Espere un momento');
 
 // Si necesitas reaccionar a cambios en el parámetro
 watch(
@@ -86,6 +91,8 @@ const crearContexto = async () => {
     return;
   }
 
+  loaderModal.value?.abrirModal();
+
   console.log('proyecto:' + proyectoId.value);
   console.log(portadaContexto);
 
@@ -118,15 +125,14 @@ const crearContexto = async () => {
     mensajeExito.value = 'Contexto creado exitosamente';
     console.log('Contexto creado exitosamente');
 
-    // Redirigir después de 2 segundos (opcional)
-    setTimeout(() => {
-      navigateTo('/ia/proyectos');
-    }, 2000);
+    navigateTo('/ia/proyectos');
   } catch (error) {
     console.error('Error al crear contexto:', error);
     mensajeError.value = error.message || 'Ocurrió un error al crear el contexto';
   } finally {
     estaCargando.value = false;
+
+    loaderModal.value?.cerrarModal();
   }
 
   //storeIA.crearContexto(proyectoId.value);
@@ -169,6 +175,8 @@ const editarContexto = async () => {
     return;
   }
 
+  loaderModal.value?.abrirModal();
+
   // Preparar datos del formulario
   const formData = new FormData();
 
@@ -200,14 +208,13 @@ const editarContexto = async () => {
     mensajeExito.value = 'Contexto actualizado exitosamente';
     console.log('Contexto actualizado exitosamente');
 
-    setTimeout(() => {
-      navigateTo('/ia/proyectos');
-    }, 2000);
+    navigateTo('/ia/proyectos');
   } catch (error) {
     console.error('Error al editar contexto:', error);
     mensajeError.value = error.message || 'Ocurrió un error al editar el contexto';
   } finally {
     estaCargando.value = false;
+    loaderModal.value?.cerrarModal();
   }
 };
 
@@ -458,6 +465,22 @@ onBeforeUnmount(() => {
           </div>
         </div>
       </main>
+      <ClientOnly>
+        <SisdaiModal id="loaderModal" ref="loaderModal">
+          <template #encabezado>
+            <h1 class="m-t-0 texto-tamanio-6">{{ loaderTitle }}</h1>
+          </template>
+          <template #cuerpo>
+            <div class="flex flex-contenido-centrado">
+              <figure>
+                <img src="/img/loader.gif" alt="Loader de SIGIC" />
+                <figcaption class="texto-centrado">{{ loaderMsg }}</figcaption>
+              </figure>
+            </div>
+          </template>
+          <template #pie> </template>
+        </SisdaiModal>
+      </ClientOnly>
     </template>
   </UiLayoutPaneles>
 </template>

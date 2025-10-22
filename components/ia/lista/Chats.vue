@@ -318,11 +318,11 @@ watch(
 
       <SisdaiModal ref="editarChatModal">
         <template #encabezado>
-          <h2>Editar título de chat</h2>
+          <h4>Cambiar el nombre del chat</h4>
         </template>
 
         <template #cuerpo>
-          <p>Ingresa el nuevo título del chat</p>
+          <p class="texto-color-secundario m-b-1">Escribe un nuevo nombre para este chat.</p>
           <SisdaiCampoBase
             v-model="tituloChat"
             etiqueta="Título del chat"
@@ -338,7 +338,7 @@ watch(
             class="boton-secundario boton-chico"
             @click="editarChatModal?.cerrarModal()"
           >
-            Cerrar
+            Cancelar
           </button>
           <button type="button" class="boton-primario boton-chico" @click="handleEdit">
             Guardar
@@ -348,11 +348,14 @@ watch(
 
       <SisdaiModal ref="eliminarChatModal">
         <template #encabezado>
-          <h2>Eliminar chat</h2>
+          <h4>Eliminar chat</h4>
         </template>
 
         <template #cuerpo>
-          <p>¿Desea eliminar este chat? Esta acción no se puede deshacer.</p>
+          <p>
+            ¿Deseas eliminar este chat de forma permanente? Una vez eliminado, se borrará de la
+            memoria y no se podrá recuperar.
+          </p>
         </template>
 
         <template #pie>
@@ -361,9 +364,11 @@ watch(
             class="boton-secundario boton-chico"
             @click="eliminarChatModal?.cerrarModal()"
           >
-            No
+            Cancelar
           </button>
-          <button type="button" class="boton-primario boton-chico" @click="handleDelete">Si</button>
+          <button type="button" class="boton-primario boton-chico" @click="handleDelete">
+            Eliminar
+          </button>
         </template>
       </SisdaiModal>
     </ClientOnly>
