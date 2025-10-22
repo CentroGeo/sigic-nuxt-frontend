@@ -236,7 +236,9 @@ onMounted(async () => {
             instruccional="Selecciona los recursos por permisos"
           >
             <option value="todos">Todos los conjuntos de datos</option>
-            <option value="remotos">Catálogos externos</option>
+            <option v-if="storeConsulta.resourceType === 'dataLayer'" value="remotos">
+              Catálogos externos
+            </option>
             <option value="catalogo">Archivos del catálogo</option>
             <option value="privados">Mis Archivos</option>
           </SisdaiSelector>
