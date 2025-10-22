@@ -143,7 +143,7 @@ async function fetchNewData() {
 
 function cargarArchivosGeonode() {
   seleccionCatalogoModal?.value.cerrarModal();
-  console.log('recursosSeleccionados', recursosSeleccionados.value);
+  // console.log('recursosSeleccionados', recursosSeleccionados.value);
   const nuevosArchivos = recursosSeleccionados.value.map((file) => ({
     id: Math.floor(Math.random() * 1000000000000000000000),
     nombre: file.title,
@@ -173,17 +173,23 @@ function cargarArchivosGeonode() {
 
   archivosGeonode.value = [...archivosGeonode.value, ...nuevosArchivos];
   archivosTabla.value = [...archivosSeleccionados.value, ...archivosGeonode.value];
+  // console.log('archivosTabla.value', archivosTabla.value);
 }
+
 const loaderRecursosModal = ref(false);
 async function seleccionarCategoria(categoria) {
   if (categoriaSeleccionada.value !== categoriesDict.value[categoria].label) {
     loaderRecursosModal.value = true;
+    // reseteando recursos filtrados por categoría y valores
     totalCategoria.value = 0;
     storeResources.resetByType(resourceType.value);
     categoriesDict.value[categoria].page = 1;
     categoriaSeleccionada.value = categoriesDict.value[categoria].label;
+    // actualizando filtro por categoría
     storeFilters.updateFilter('categories', [categoriesDict.value[categoria].name]);
+    // construyendo parámetros para la petición
     storeFilters.buildQueryParams(resourceType.value);
+    // fetch de recursos paginados totales
     await storeResources.fetchByCategory(resourceType.value, 1, params.value);
     storeResources.setNthElements(resourceType.value, [
       recursos.value[recursos.value.length - nthElement].pk,
@@ -382,23 +388,19 @@ function preventEscape(event) {
   }
 }
 
+const mensajeAyudaBuscador = ref('');
 async function buscarRecurso() {
-  console.log('buscando recurso');
-
   if (categoriaSeleccionada.value !== null && inputSearch.value !== null) {
-    // console.log('categoriaSeleccionada.value', categoriaSeleccionada.value);
-    // console.log('inputSearch.value', inputSearch.value);
+    // reseteando recursos filtrados por categoría y valores
+    mensajeAyudaBuscador.value = '';
     loaderRecursosModal.value = true;
     totalCategoria.value = 0;
-    // console.log('resourceType.value', resourceType.value);
     storeResources.resetByType(resourceType.value);
     categoriesDict.value[categoriaSeleccionada.value].page = 1;
-    // console.log('categoriesDict.value', categoriesDict.value);
+    // contruyendo parámetros
     storeFilters.buildQueryParams(resourceType.value);
-    // console.log('storeFilters.filters.queryParams', storeFilters.filters.queryParams);
-    // console.log('params.value', params.value);
+    // fetch de recursos paginados filtrados
     await storeResources.fetchByCategory(resourceType.value, 1, params.value);
-    // console.log('recursos.value', recursos.value);
     storeResources.setNthElements(resourceType.value, [
       recursos.value[recursos.value.length - nthElement].pk,
     ]);
@@ -412,6 +414,7 @@ async function buscarRecurso() {
     // totalCategoria.value = storeResources.nthElementsPks[resourceType.value].length;
   } else {
     console.warn('falta seleccionar categoría y/o agregar texto de búsqueda');
+    mensajeAyudaBuscador.value = 'Falta seleccionar categoría y/o agregar texto de búsqueda.';
   }
 }
 
@@ -422,7 +425,9 @@ async function removerBusqueda() {
     totalCategoria.value = 0;
     storeResources.resetByType(resourceType.value);
     categoriesDict.value[categoriaSeleccionada.value].page = 1;
+    // contruyendo parámetros
     storeFilters.buildQueryParams(resourceType.value);
+    // fetch de recursos paginados totales
     await storeResources.fetchByCategory(resourceType.value, 1, params.value);
     storeResources.setNthElements(resourceType.value, [
       recursos.value[recursos.value.length - nthElement].pk,
@@ -430,6 +435,15 @@ async function removerBusqueda() {
     totalCategoria.value = categoriesDict.value[categoriaSeleccionada.value].total;
     loaderRecursosModal.value = false;
   }
+}
+
+function agregarFuentesCatalogo() {
+  // limpiando recursos filtrados por categoría y seleccionados
+  categoriaSeleccionada.value = null;
+  totalCategoria.value = 0;
+  storeResources.resetByType(resourceType.value);
+  storeResources.resetSelectedByType(resourceType.value);
+  agregaCatalogoModal.value?.abrirModal();
 }
 </script>
 
@@ -494,7 +508,7 @@ async function removerBusqueda() {
                 <button
                   class="boton-pictograma boton-primario m-r-2"
                   aria-label="Agregar fuentes del catalogo"
-                  @click="agregaCatalogoModal?.abrirModal()"
+                  @click="agregarFuentesCatalogo"
                 >
                   Agregar del catálogo
                   <span class="pictograma-agregar" aria-hidden="true" />
@@ -674,6 +688,7 @@ async function removerBusqueda() {
                     <span class="pictograma-buscar" aria-hidden="true" />
                   </button>
                 </form>
+                <p class="formulario-ayuda">{{ mensajeAyudaBuscador }}</p>
               </ClientOnly>
 
               <div class="flex flex-contenido-separado">
