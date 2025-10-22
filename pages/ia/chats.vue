@@ -1,18 +1,31 @@
 <script setup>
 const storeIA = useIAStore();
+
+const isLoading = ref(true);
+
+const loadProjects = async () => {
+  await storeIA.getProjectsList();
+  isLoading.value = false;
+};
+
+onMounted(() => {
+  loadProjects();
+});
 </script>
 
 <template>
   <UiLayoutPaneles>
     <template #catalogo>
-      <IaLeyendaInicioListas />
+      <template v-if="!isLoading">
+        <IaLeyendaInicioListas v-if="!storeIA.existenProyectos" />
 
-      <IaListaChats
-        v-if="storeIA.existenProyectos"
-        titulo="Chats"
-        texto-boton="Nuevo chat"
-        etiqueta-busqueda="Buscar chats"
-      />
+        <IaListaChats
+          v-else
+          titulo="Chats"
+          texto-boton="Nuevo chat"
+          etiqueta-busqueda="Buscar chats"
+        />
+      </template>
     </template>
 
     <template #visualizador>
@@ -21,8 +34,8 @@ const storeIA = useIAStore();
         class="contenedor m-b-10 p-t-3"
         :style="storeIA.existenProyectos ? 'height: var(--altura-consulta-esc);' : ''"
       >
-        <IaLeyendaInicioVistas v-if="!storeIA.existenProyectos" />
-        <p v-else>Selecciona un chat</p>
+        <IaLeyendaInicioVistas v-if="!isLoading && !storeIA.existenProyectos" />
+        <!-- <p v-else-if="!isLoading && storeIA.existenProyectos">Selecciona un chat</p> -->
       </main>
     </template>
   </UiLayoutPaneles>
