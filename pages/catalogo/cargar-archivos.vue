@@ -10,7 +10,7 @@ const configEnv = useRuntimeConfig();
 const statusOk = ref(false);
 const archivosEnCarga = ref([]);
 const { data } = useAuth();
-//const { gnoxyFetch } = useGnoxyUrl();
+const { gnoxyFetch } = useGnoxyUrl();
 
 const base_files = ['.geojson', '.gpkg', '.zip', '.csv'];
 const docs_files = ['.txt', '.pdf', '.xls', '.xlsx'];
@@ -26,6 +26,8 @@ async function guardarArchivo(files) {
       estatus: 'pendiente',
       mensaje: 'Preparando carga...',
       IdRutaArchivo: null,
+      numero_geometrias: null,
+      proyeccion: null,
     })
   );
 
@@ -77,12 +79,19 @@ async function guardarArchivo(files) {
         archivo.mensaje = 'Archivo cargado correctamente';
         archivo.IdRutaArchivo = result.url.split('/').slice(-1)[0];
         statusOk.value = true;
-        /*const request = await gnoxyFetch(
+        const request_geonode = await gnoxyFetch(
           `${configEnv.public.geonodeUrl}/api/v2/datasets/${archivo.IdRutaArchivo}`
         );
-        const res = await request.json();
+        const res_geonode = await request_geonode.json();
 
-        console.log(res);*/
+        const request_geoserver = await gnoxyFetch(
+          `${configEnv.public.geoserverUrl}/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=${res_geonode.dataset.alternate}&resultType=hits`
+        );
+        const proyeccion = res_geonode?.dataset?.srid;
+        const res_geoserver = await request_geoserver.text();
+        const match = res_geoserver.match(/numberOfFeatures="(\d+)"/);
+        archivo.numero_geometrias = match ? parseInt(match[1], 10) : null;
+        archivo.proyeccion = proyeccion;
       } else {
         archivo.estatus = 'error_carga';
         archivo.mensaje = 'Respuesta inesperada del servidor';
@@ -151,29 +160,14 @@ async function monitorLayerImport(executionId, archivo) {
 
           <div v-for="(archivo, i) in archivosEnCarga" :key="i" class="tarjetitas-carga">
             <div
-              class="p-3 borde-redondeado-16 m-y-3"
+              class="p-b-3 p-x-3 borde-redondeado-16 m-y-3"
               :class="{
                 'fondo-color-confirmacion': archivo.estatus == 'carga_finalizada',
                 'fondo-color-error': archivo.estatus == 'error_carga',
                 'fondo-color-neutro': ['pendiente', 'procesando'].includes(archivo.estatus),
               }"
             >
-              <div
-                :class="{
-                  'texto-color-confirmacion': archivo.estatus == 'carga_finalizada',
-                  'texto-color-error': archivo.estatus == 'error_carga',
-                }"
-              >
-                <div class="flex">
-                  <span
-                    :class="{
-                      'pictograma-aprobado': archivo.estatus == 'carga_finalizada',
-                      'pictograma-alerta': archivo.estatus == 'error_carga',
-                    }"
-                  />
-                  <b>{{ archivo.mensaje }}</b>
-                </div>
-
+              <div>
                 <div class="flex flex-contenido-separado">
                   <div class="flex-vertical-centrado">
                     <p>
@@ -195,24 +189,45 @@ async function monitorLayerImport(executionId, archivo) {
                     </p>
                   </div>
                 </div>
+                <div
+                  :class="{
+                    'texto-color-confirmacion': archivo.estatus == 'carga_finalizada',
+                    'texto-color-error': archivo.estatus == 'error_carga',
+                  }"
+                >
+                  <div class="flex">
+                    <span
+                      :class="{
+                        'pictograma-aprobado': archivo.estatus == 'carga_finalizada',
+                        'pictograma-alerta': archivo.estatus == 'error_carga',
+                      }"
+                    />
+                    <b>{{ archivo.mensaje }}</b>
+                  </div>
 
-                <div v-if="archivo.IdRutaArchivo" class="flex flex-contenido-separado">
-                  <div>
-                    <NuxtLink
-                      :to="`/catalogo/mis-archivos/editar/MetadatosBasicos?data=${archivo.IdRutaArchivo}`"
-                      target="_blank"
-                      >Editar metadatos</NuxtLink
-                    >
+                  <div v-if="archivo.numero_geometrias" class="nota">
+                    Se detectaron {{ archivo.numero_geometrias }} geometrías <br />
+                    Sistema de referencia {{ archivo.proyeccion }}
                   </div>
-                  <div v-if="['geojson', 'gpkg', 'zip'].includes(archivo.extension)">
-                    <NuxtLink
-                      :to="`/catalogo/mis-archivos/editar/estilo?data=${archivo.IdRutaArchivo}`"
-                    >
-                      Agregar un estilo (.sld)</NuxtLink
-                    >
-                  </div>
-                  <div>
-                    <NuxtLink to="/catalogo/mis-archivos"> Ver en Mis archivos</NuxtLink>
+
+                  <div v-if="archivo.IdRutaArchivo" class="flex flex-contenido-separado">
+                    <div>
+                      <NuxtLink
+                        :to="`/catalogo/mis-archivos/editar/MetadatosBasicos?data=${archivo.IdRutaArchivo}`"
+                        target="_blank"
+                        >Editar metadatos</NuxtLink
+                      >
+                    </div>
+                    <div v-if="['geojson', 'gpkg', 'zip'].includes(archivo.extension)">
+                      <NuxtLink
+                        :to="`/catalogo/mis-archivos/editar/estilo?data=${archivo.IdRutaArchivo}`"
+                      >
+                        Agregar un estilo (.sld)</NuxtLink
+                      >
+                    </div>
+                    <div>
+                      <NuxtLink to="/catalogo/mis-archivos"> Ver en Mis archivos</NuxtLink>
+                    </div>
                   </div>
                 </div>
               </div>

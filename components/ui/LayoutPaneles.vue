@@ -25,9 +25,7 @@ const route = useRoute();
       ${estadoColapable ? 'oculto' : 'columna-4'} 
       ${paneles === 2 && !route.path.includes('/ia/') ? 'menu-lateral-fondo' : ''}`"
     >
-      <slot name="catalogo">
-        <p>Panel catálogo</p>
-      </slot>
+      <slot name="catalogo"> </slot>
     </div>
 
     <div
