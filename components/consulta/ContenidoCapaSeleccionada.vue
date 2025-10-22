@@ -8,7 +8,7 @@ const storeSelected = useSelectedResources2Store();
 const { gnoxyFetch } = useGnoxyUrl();
 //const { findServer } = useGnoxyUrl();
 //const { gnoxyUrl } = useGnoxyUrl();
-const emit = defineEmits(['opacidadClicked', 'descargaClicked', 'tablaClicked']);
+const emit = defineEmits(['opacidadClicked', 'descargaClicked', 'tablaClicked', 'owsClicked']);
 const props = defineProps({
   resourceElement: {
     type: Object,
@@ -16,7 +16,6 @@ const props = defineProps({
   },
 });
 const { resourceElement } = toRefs(props);
-
 /* function getWFS(resource) {
   let url;
   if (resource.sourcetype === 'REMOTE') {
@@ -112,7 +111,7 @@ const optionsButtons = ref([
       emit('opacidadClicked');
     },
   },
-  {
+  /*   {
     excludeFor: 'noTables',
     label: 'Vínculo OWS',
     pictogram: 'pictograma-enlace-externo',
@@ -139,7 +138,7 @@ const optionsButtons = ref([
         console.error('Error al copiar: ', err);
       }
     },
-  },
+  }, */
   {
     excludeFor: 'none',
     label: 'Eliminar selección',
@@ -197,6 +196,24 @@ async function updateFunctions() {
   actualButtons.value = buttons;
 }
 updateFunctions();
+
+async function shareOws() {
+  let server;
+  if (resourceElement.value.sourcetype === 'REMOTE') {
+    server = getWMSserver(resourceElement.value).split('/ows')[0];
+  } else {
+    server = `${config.public.geoserverUrl}`;
+  }
+  const owsLink = `${server}/${resourceElement.value.alternate.replace(':', '/')}/ows`;
+  /*   try {
+    await navigator.clipboard.writeText(owsLink);
+    alert('Enlace copiado al portapapeles: ' + owsLink);
+  } catch (err) {
+    console.error('Error al copiar: ', err);
+  } */
+  console.log(owsLink);
+  emit('owsClicked');
+}
 watch(resourceElement, () => {
   updateFunctions();
 });
@@ -226,6 +243,11 @@ watch(resourceElement, () => {
         @click="button.action"
       >
         <span :class="button.pictogram" aria-hidden="true" />
+      </button>
+    </div>
+    <div v-if="resourceElement.is_published === true" class="flex flex-contenido-centrado m-t-2">
+      <button type="button" class="boton-secundario boton-chico" @click="shareOws">
+        Enlace Open Web Services (OWS)
       </button>
     </div>
   </div>

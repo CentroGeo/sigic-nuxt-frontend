@@ -25,6 +25,7 @@ const tablaChild = ref(null);
 const shareChild = ref(null);
 const mapChild = ref(null);
 const borrarChild = ref(null);
+const owsChild = ref(null);
 
 function notifyDownloadAllChild() {
   shownModal.value = 'downloadAll';
@@ -66,6 +67,13 @@ function notifyBorrarChild() {
   shownModal.value = 'borrarModal';
   nextTick(() => {
     borrarChild.value.abrirModalBorrarTodo();
+  });
+}
+
+function notifyOWSChild() {
+  shownModal.value = 'owsModal';
+  nextTick(() => {
+    owsChild.value.abrirModalOWS();
   });
 }
 function notifyShareChild() {
@@ -182,6 +190,7 @@ const dividirMapa = computed({
         @open-download="(resource) => notifyDownloadOneChild(resource)"
         @open-tabla="(resource) => notifyTablaChild(resource)"
         @open-mapa="(resource) => notifyMapaChild(resource)"
+        @open-o-w-s="notifyOWSChild"
       />
     </div>
 
@@ -226,6 +235,8 @@ const dividirMapa = computed({
         :selected-element="modalResource"
         @notify-download="changeModal('downloadOne')"
       />
+
+      <ConsultaModalOWS v-if="shownModal === 'owsModal'" ref="owsChild" />
     </div>
   </div>
 </template>

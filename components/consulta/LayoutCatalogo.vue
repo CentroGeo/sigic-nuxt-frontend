@@ -283,6 +283,25 @@ onMounted(async () => {
             </button>
           </div>
         </ClientOnly>
+        <div
+          v-if="storeConsulta.resourceType === 'dataLayer'"
+          class="flex flex-contenido-centrado"
+          style="gap: 0px"
+        >
+          <button type="button" class="boton-secundario boton-chico">
+            Enlace Open Web Services (OWS)
+          </button>
+          <div class="flex flex-contenido-centrado">
+            <p class="columna-12">Conecta un catálogo externo para ver sus datos</p>
+            <nuxt-link
+              class="boton-secundario boton-pictograma boton-grande"
+              style="align-self: center"
+              to="/catalogo/servicios-remotos/agregar"
+            >
+              <span aria-hidden="true" class="pictograma-flkt" />
+            </nuxt-link>
+          </div>
+        </div>
         <UiNumeroElementos :numero="totalResources" :etiqueta="etiquetaElementos" />
       </div>
       <div v-if="isLoading" class="flex flex-contenido-centrado">

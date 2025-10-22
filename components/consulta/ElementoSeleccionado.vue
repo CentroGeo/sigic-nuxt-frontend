@@ -3,7 +3,7 @@ import { categoriesInSpanish, resourceTypeDic, tooltipContent } from '~/utils/co
 
 const storeResources = useResourcesConsultaStore();
 const storeSelected = useSelectedResources2Store();
-const emit = defineEmits(['openOpacity', 'openDownload', 'openTabla', 'openMapa']);
+const emit = defineEmits(['openOpacity', 'openDownload', 'openTabla', 'openMapa', 'openOWS']);
 const props = defineProps({
   selectedElement: {
     type: Object,
@@ -92,6 +92,7 @@ const goUp = () => storeSelected.changePosition(props.selectedElement.pk, +1);
         @opacidad-clicked="emit('openOpacity', resourceElement)"
         @descarga-clicked="emit('openDownload', resourceElement)"
         @tabla-clicked="emit('openTabla', resourceElement)"
+        @ows-clicked="emit('openOWS')"
       />
 
       <ConsultaContenidoDocSeleccionado
