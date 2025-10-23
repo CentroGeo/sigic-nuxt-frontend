@@ -1,20 +1,27 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+import { wait } from '~/utils/consulta';
+
 const modalCompartir = ref(null);
 const route = useRoute();
 const config = useRuntimeConfig();
 const baseUrl = config.public.baseURL;
 const currentPath = computed(() => baseUrl + route.fullPath);
+const linkStatus = ref(false);
 async function copyToClipboard() {
   try {
     await navigator.clipboard.writeText(currentPath.value);
-    alert('Enlace copiado al portapapeles: ' + currentPath.value);
+    //alert('Enlace copiado al portapapeles: ' + currentPath.value);
+    linkStatus.value = true;
+    await wait(1000);
+    linkStatus.value = false;
   } catch (err) {
     console.error('Error al copiar: ', err);
   }
 }
 
 function abrirModalCompartir() {
+  linkStatus.value = false;
   modalCompartir.value?.abrirModal();
 }
 
@@ -91,6 +98,9 @@ defineExpose({
             </div>
           </div>
         </div>
+        <div v-if="linkStatus" class="m-y-1 borde-redondeado-8 contenedor-alerta">
+          <span class="pictograma-aprobado"></span> Enlace copiado con éxito
+        </div>
       </template>
     </SisdaiModal>
   </ClientOnly>
@@ -106,5 +116,14 @@ defineExpose({
   p {
     color: var(--color-alerta-3);
   }
+}
+.contenedor-alerta {
+  position: absolute;
+  top: -48px;
+  left: 20%;
+  background-color: var(--color-neutro-4);
+  color: var(--color-neutro-1);
+  padding: 0px 8px;
+  width: max-content;
 }
 </style>
