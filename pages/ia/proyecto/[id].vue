@@ -152,27 +152,10 @@ function cargarArchivosGeonode() {
     id: Math.floor(Math.random() * 1000000000000000000000),
     nombre: file.title,
     tipo: obtenerTipoArchivo(file.title),
-    // archivo: file, // Objeto File original
     archivo: null,
-    categoria:
-      resourceType.value === 'document'
-        ? 'Documento'
-        : resourceType.value === 'dataLayer'
-          ? 'Capa'
-          : 'Tabla',
     origen: 'Catálogo',
-    download_url: file.download_url,
-    embed_url: file.embed_url,
     pk: file.pk,
-    uuid: file.uuid,
-    category:
-      resourceType.value === 'document'
-        ? 'Documento'
-        : resourceType.value === 'dataLayer'
-          ? 'Capa'
-          : 'Tabla',
-    alternate: file.alternate,
-    links_csv: file.links.filter((d) => d.extension === 'csv'), // para las tablas
+    category: file.resource_type + 's',
   }));
 
   archivosGeonode.value = [...archivosGeonode.value, ...nuevosArchivos];
@@ -266,7 +249,7 @@ const manejarSeleccionArchivos = (event) => {
     nombre: file.name,
     tipo: obtenerTipoArchivo(file.name),
     archivo: file, // Objeto File original
-    categoria: 'Archivo',
+    category: 'documents',
     origen: 'Propio',
   }));
 
@@ -545,12 +528,12 @@ async function siguenteAgregar() {
                         class="texto-centrado fondo-color-acento p-1 m-0 texto-color-acento borde borde-redondeado-12"
                         style="width: max-content"
                       >
-                        <span v-if="archivo.categoria === 'Documento'">
-                          <span class="pictograma-documento" />{{ archivo.categoria }}
+                        <span v-if="archivo.category === 'documents'">
+                          <span class="pictograma-documento" />{{ archivo.category }}
                         </span>
 
-                        <span v-if="archivo.categoria === 'Tabla'">
-                          <span class="pictograma-tabla" />{{ archivo.categoria }}
+                        <span v-if="archivo.category === 'datasets'">
+                          <span class="pictograma-tabla" />{{ archivo.category }}
                         </span>
                       </p>
                     </td>
