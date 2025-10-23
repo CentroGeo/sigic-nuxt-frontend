@@ -1,5 +1,6 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+import { wait } from '~/utils/consulta';
 
 const props = defineProps({
   owsLink: {
@@ -23,6 +24,8 @@ async function copyLink() {
     await navigator.clipboard.writeText(props.owsLink);
     //alert('Enlace copiado al portapapeles: ' + props.owsLink);
     linkStatus.value = true;
+    await wait(1000);
+    linkStatus.value = false;
   } catch (err) {
     console.error('Error al copiar: ', err);
   }
@@ -44,12 +47,8 @@ defineExpose({
         <p>
           <span v-if="props.service === 'OWS'">Código Open Web Services (OWS).</span>
           <span v-if="props.service === 'CSW'">Código Catalogue Service for the Web (CSW).</span>
-
           Usalo para conectar el banco de datos de SIGIC en otros visores o servicios compatibles.
         </p>
-        <div v-if="linkStatus" class="m-y-1 borde-redondeado-8 contenedor-alerta">
-          <span class="pictograma-aprobado"></span> Enlace copiado con éxito
-        </div>
         <div class="flex borde-redondeado-8 contenedor-liga-ows">
           <p class="columna-14 m-y-1">
             {{ props.owsLink }}
@@ -80,6 +79,9 @@ defineExpose({
           >
             Copiar código
           </button>
+          <div v-if="linkStatus" class="m-y-1 m-x-2 borde-redondeado-8 contenedor-alerta">
+            <span class="pictograma-aprobado"></span> Enlace copiado con éxito
+          </div>
         </div>
       </template>
     </SisdaiModal>
@@ -103,7 +105,9 @@ defineExpose({
   padding: 0px 8px;
 }
 .contenedor-alerta {
-  background-color: var(--color-neutro-3);
+  position: absolute;
+  top: -40px;
+  background-color: var(--color-neutro-4);
   color: var(--color-neutro-1);
   padding: 0px 8px;
   width: max-content;
