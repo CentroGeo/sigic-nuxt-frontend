@@ -37,6 +37,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
     pendientes: [],
     publicacion: [],
   });
+
   const myTotalsByType = reactive({
     [resourceTypeDic.dataLayer]: 0,
     [resourceTypeDic.dataTable]: 0,

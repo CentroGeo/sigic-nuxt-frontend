@@ -14,6 +14,8 @@ const selectedOption = ref();
 const tagTitle = ref();
 const isDownloadActive = ref(false);
 const hasDownloadFailed = ref(false);
+const isDownloadSlow = ref(false);
+const timer = 7000;
 /* const includesRemote = computed(() =>
   storeResources
     .findResources(storeSelected.pks)
@@ -24,6 +26,7 @@ const hasDownloadFailed = ref(false);
 function abrirModalDescargaAll() {
   isDownloadActive.value = false;
   hasDownloadFailed.value = false;
+  isDownloadSlow.value = false;
   modalDescargaAll.value?.abrirModal();
   optionsList.value = optionsDict[props.resourceType]['elements'];
   tagTitle.value = optionsDict[props.resourceType]['title'];
@@ -34,7 +37,10 @@ async function downloadAllDataTables(format) {
   isDownloadActive.value = true;
   const resourceList = storeResources.findResources(storeSelected.pks);
   const downloadStatusDict = {};
-
+  //La siguiente línea se pone para agregar alerta si el proceso de descarga toma mas de n segundos
+  const slowProcessTimeout = setTimeout(() => {
+    isDownloadSlow.value = true;
+  }, timer);
   for (let i = 0; i < resourceList.length; i++) {
     if (resourceList[i].sourcetype !== 'REMOTE') {
       const status = await downloadNoGeometry(resourceList[i], format);
@@ -42,6 +48,10 @@ async function downloadAllDataTables(format) {
       await wait(1000);
     }
   }
+  // Si toma menos de n segundos, se interrumple el timer
+  clearTimeout(slowProcessTimeout);
+  isDownloadSlow.value = false;
+
   const hasfailedDownloads = Object.values(downloadStatusDict).some((value) => value !== 'Ok');
   if (hasfailedDownloads) {
     hasDownloadFailed.value = true;
@@ -54,6 +64,11 @@ async function downloadAllDocs() {
   isDownloadActive.value = true;
   const resourceList = storeResources.findResources(storeSelected.pks);
   const downloadStatusDict = {};
+  //La siguiente línea se pone para agregar alerta si el proceso de descarga toma mas de n segundos
+  const slowProcessTimeout = setTimeout(() => {
+    isDownloadSlow.value = true;
+  }, timer);
+
   for (let i = 0; i < resourceList.length; i++) {
     if (resourceList[i].sourcetype !== 'REMOTE') {
       const status = await downloadDocs(resourceList[i]);
@@ -61,6 +76,10 @@ async function downloadAllDocs() {
       await wait(1000);
     }
   }
+
+  // Si toma menos de n segundos, se interrumple el timer
+  clearTimeout(slowProcessTimeout);
+  isDownloadSlow.value = false;
   const hasfailedDownloads = Object.values(downloadStatusDict).some((value) => value !== 'Ok');
   if (hasfailedDownloads) {
     hasDownloadFailed.value = true;
@@ -73,14 +92,21 @@ async function downloadAllMetadata() {
   isDownloadActive.value = true;
   const resourceList = storeResources.findResources(storeSelected.pks);
   const downloadStatusDict = {};
+  //La siguiente línea se pone para agregar alerta si el proceso de descarga toma mas de n segundos
+  const slowProcessTimeout = setTimeout(() => {
+    isDownloadSlow.value = true;
+  }, timer);
   for (let i = 0; i < resourceList.length; i++) {
     if (resourceList[i].sourcetype !== 'REMOTE') {
       const status = await downloadMetadata(resourceList[i]);
       downloadStatusDict[resourceList[i].title] = status;
-
       await wait(1000);
     }
   }
+  // Si toma menos de n segundos, se interrumple el timer
+  clearTimeout(slowProcessTimeout);
+  isDownloadSlow.value = false;
+
   const hasfailedDownloads = Object.values(downloadStatusDict).some((value) => value !== 'Ok');
   if (hasfailedDownloads) {
     hasDownloadFailed.value = true;
@@ -171,7 +197,8 @@ defineExpose({
             <img src="/img/loader.gif" alt="...Cargando" class="loader" />
           </div>
           <p class="columna-12">
-            Descarga en curso. El proceso está tardando más tiempo de lo habitual.
+            Descarga en curso.
+            <span v-if="isDownloadSlow">El proceso está tardando más tiempo de lo habitual.</span>
           </p>
         </div>
         <div
