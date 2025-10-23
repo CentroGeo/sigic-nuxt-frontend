@@ -33,7 +33,7 @@ function updateResources() {
   tableResources.value = resources.value.map((d) => ({
     pk: d.pk,
     titulo: d.title,
-    tipo_recurso: 'Datos tabulados',
+    tipo_recurso: 'Datos Tabulados',
     categoria: d.category,
     actualizacion: d.last_updated,
     acciones: 'Ver, Descargar',

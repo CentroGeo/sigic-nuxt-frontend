@@ -26,16 +26,32 @@ const inputSearch = computed({
   get: () => storeFilters.filters.inputSearch,
   set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
 });
+
+function setActions(resource) {
+  if (resource.sourcetype === 'REMOTE') {
+    return 'Ver';
+  } else {
+    return 'Ver, Descargar';
+  }
+}
+
+function setTipoRecurso(resource) {
+  if (resource.sourcetype === 'REMOTE') {
+    return 'Capa Geográfica, Catálogo Externo';
+  } else {
+    return 'Capa Geográfica';
+  }
+}
 function updateResources() {
   //filteredResources.value = nuevosRecursos;
   // obteniendo datos por las props de la tabla
   tableResources.value = resources.value.map((d) => ({
     pk: d.pk,
     titulo: d.title,
-    tipo_recurso: 'Capa geográfica',
+    tipo_recurso: setTipoRecurso(d),
     categoria: d.category,
     actualizacion: d.last_updated,
-    acciones: 'Ver, Descargar',
+    acciones: setActions(d),
     uuid: d.uuid,
     recurso_completo: d,
   }));

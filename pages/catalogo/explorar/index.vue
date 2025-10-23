@@ -13,7 +13,7 @@ function buildQueryParams(resourceType) {
     queryParams['filter{has_geometry}'] = 'true';
   }
   if (resourceType === 'dataTable') {
-    queryParams['filter{subtype.in}'] = ['vector', 'remote'];
+    queryParams['filter{subtype.in}'] = ['vector'];
   }
   if (resourceType === 'document') {
     queryParams['filter{extension}'] = ['pdf', 'txt'];

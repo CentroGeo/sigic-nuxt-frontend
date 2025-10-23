@@ -178,25 +178,50 @@ function notifyDownloadOneChild(resource) {
             }}
 
             <!-- Tipo de recurso -->
-            <div
-              v-if="variable === 'tipo_recurso'"
-              class="texto-centrado fondo-color-acento p-1 texto-color-acento borde borde-redondeado-12"
-              style="width: max-content"
-            >
-              <span v-if="datum[variable] === 'Documentos'">
-                <span class="pictograma-documento"></span>
-                {{ datum[variable] }}
-              </span>
+            <div v-if="variable === 'tipo_recurso'" class="flex" style="gap: 8px">
+              <div
+                v-if="datum[variable] === 'Documentos'"
+                class="texto-centrado fondo-color-acento p-1 texto-color-acento borde borde-redondeado-12"
+                style="width: max-content"
+              >
+                <span>
+                  <span class="pictograma-documento"></span>
+                  {{ datum[variable] }}
+                </span>
+              </div>
 
-              <span v-if="datum[variable] === 'Datos tabulados'">
-                <span class="pictograma-tabla" />
-                {{ datum[variable] }}
-              </span>
+              <div
+                v-if="datum[variable] === 'Datos Tabulados'"
+                class="texto-centrado fondo-color-acento p-1 texto-color-acento borde borde-redondeado-12"
+                style="width: max-content"
+              >
+                <span>
+                  <span class="pictograma-tabla" />
+                  {{ datum[variable] }}
+                </span>
+              </div>
 
-              <span v-if="datum[variable] === 'Capa geográfica'">
-                <span class="pictograma-capas" />
-                {{ datum[variable] }}
-              </span>
+              <div
+                v-if="datum[variable].split(', ').includes('Capa Geográfica')"
+                class="texto-centrado fondo-color-acento p-1 texto-color-acento borde borde-redondeado-12"
+                style="width: max-content"
+              >
+                <span>
+                  <span class="pictograma-capas" />
+                  {{ 'Capa Geográfica' }}
+                </span>
+              </div>
+
+              <div
+                v-if="datum[variable].split(', ').includes('Catálogo Externo')"
+                class="texto-centrado fondo-color-acento p-1 texto-color-acento borde borde-redondeado-12"
+                style="width: max-content"
+              >
+                <span>
+                  <span class="pictograma-colaborar" />
+                  {{ 'Catálogo Externo' }}
+                </span>
+              </div>
             </div>
 
             <!-- Categoría -->
@@ -213,7 +238,59 @@ function notifyDownloadOneChild(resource) {
 
             <!-- Acciones -->
             <div v-if="variable === 'acciones'">
-              <div v-if="datum[variable] === 'Editar, Ver, Descargar, Remover'" class="flex-width">
+              <div class="flex-width">
+                <button
+                  v-if="datum[variable].split(', ').includes('Editar')"
+                  v-globo-informacion:izquierda="'Editar'"
+                  class="boton-pictograma boton-secundario"
+                  aria-label="Editar metadatos"
+                  type="button"
+                  @click="irARutaConQuery(datum)"
+                >
+                  <span class="pictograma-editar"></span>
+                </button>
+                <button
+                  v-if="datum[variable].split(', ').includes('Ver')"
+                  v-globo-informacion:izquierda="'Ver en visualizador'"
+                  class="boton-pictograma boton-secundario"
+                  aria-label="Ver en visualizador"
+                  type="button"
+                  @click="openResourceView(datum)"
+                >
+                  <span class="pictograma-previsualizar"></span>
+                </button>
+                <button
+                  v-if="datum[variable].split(', ').includes('Publicar')"
+                  v-globo-informacion:izquierda="'Publicar en catálogo'"
+                  class="boton-pictograma boton-secundario"
+                  aria-label="Publicar en catálogo"
+                  type="button"
+                  @click="notifyReleaseRequest(datum)"
+                >
+                  <span class="pictograma-ayuda"></span>
+                </button>
+                <button
+                  v-if="datum[variable].split(', ').includes('Descargar')"
+                  v-globo-informacion:izquierda="'Descargar'"
+                  class="boton-pictograma boton-secundario"
+                  aria-label="Descargar archivo"
+                  type="button"
+                  @click="notifyDownloadOneChild(datum)"
+                >
+                  <span class="pictograma-archivo-descargar"></span>
+                </button>
+                <button
+                  v-if="datum[variable].split(', ').includes('Remover')"
+                  v-globo-informacion:izquierda="'Remover'"
+                  class="boton-pictograma boton-secundario"
+                  aria-label="Remover archivo"
+                  type="button"
+                >
+                  <span class="pictograma-eliminar"></span>
+                </button>
+              </div>
+
+              <!--               <div v-if="datum[variable] === 'Editar, Ver, Descargar, Remover'" class="flex-width">
                 <button
                   v-globo-informacion:izquierda="'Editar'"
                   class="boton-pictograma boton-secundario"
@@ -297,7 +374,7 @@ function notifyDownloadOneChild(resource) {
                 >
                   <span class="pictograma-eliminar"></span>
                 </button>
-              </div>
+              </div> -->
             </div>
 
             <!-- Estatus -->
