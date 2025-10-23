@@ -123,7 +123,7 @@ async function descargarClicked() {
     hasDownloadFailed.value = true;
   } else if (downloadStatus === 'DownloadLimitsExceeded') {
     hasDownloadFailed.value = true;
-    downloadError.value = 'El tamaño del archivo excede los límites de descarga permitidos.';
+    downloadError.value = 'El archivo es muy pesado.';
   }
   isDownloadActive.value = false;
 }
