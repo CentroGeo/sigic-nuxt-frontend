@@ -1,8 +1,12 @@
 <script setup>
 import { fetchByPk } from '~/utils/catalogo';
-
+definePageMeta({
+  middleware: 'sidebase-auth',
+  bodyAttrs: {
+    class: '',
+  },
+});
 const storeCatalogo = useCatalogoStore();
-
 // Recuperamos información a partir de la url
 const route = useRoute();
 const selectedPk = route.query.data;

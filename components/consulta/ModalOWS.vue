@@ -6,6 +6,10 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  service: {
+    type: String,
+    default: '',
+  },
 });
 const linkStatus = ref(false);
 const modalOWS = ref(null);
@@ -33,12 +37,14 @@ defineExpose({
   <ClientOnly>
     <SisdaiModal ref="modalOWS">
       <template #encabezado>
-        <h1>Compartir acceso OWS</h1>
+        <h1>Compartir acceso {{ props.service }}</h1>
       </template>
 
       <template #cuerpo>
         <p>
-          <span>Código Open Web Services (OWS).</span>
+          <span v-if="props.service === 'OWS'">Código Open Web Services (OWS).</span>
+          <span v-if="props.service === 'CSW'">Código Catalogue Service for the Web (CSW).</span>
+
           Usalo para conectar el banco de datos de SIGIC en otros visores o servicios compatibles.
         </p>
         <div v-if="linkStatus" class="m-y-1 borde-redondeado-8 contenedor-alerta">

@@ -43,7 +43,7 @@ const selectedCategories = ref([]);
 const modalFiltroAvanzado = ref(null);
 const modalOWSglobal = ref(null);
 //https://geonode.dev.geoint.mx/gs/ows
-const sigicOWS = `${config.public.geoserverUrl}/ows`;
+const sigicOWS = `${config.public.baseURL}/catalogue/csw`;
 const isFilterActive = ref(false);
 
 async function fetchTotalByCategory(category) {
@@ -304,7 +304,7 @@ onMounted(async () => {
             class="boton-secundario columna-16 boton-chico flex flex-contenido-centrado"
             @click="modalOWSglobal.abrirModalOWS"
           >
-            Enlace Open Web Services (OWS)
+            Enlace Catalogue Service for the Web (CSW)
           </button>
           <div class="flex flex-contenido-separado">
             <p class="columna-12" style="font-size: 1rem">
@@ -369,7 +369,12 @@ onMounted(async () => {
     @reset-filter="resetAdvancedFilter"
   />
 
-  <ConsultaModalOWS ref="modalOWSglobal" key="modal-ows-global" :ows-link="sigicOWS" />
+  <ConsultaModalOWS
+    ref="modalOWSglobal"
+    key="modal-ows-global"
+    :ows-link="sigicOWS"
+    :service="'CSW'"
+  />
 </template>
 
 <style lang="scss" scoped>

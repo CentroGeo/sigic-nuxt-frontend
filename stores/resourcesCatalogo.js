@@ -6,6 +6,13 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
   const storeConsulta = useConsultaStore();
   const { data } = useAuth();
   const userEmail = data.value?.user.email;
+
+  // El recurso de cada tipo con actualización más reciente. Se muestran en catalogo/explorar
+  const latestResources = reactive({
+    [resourceTypeDic.dataLayer]: undefined,
+    [resourceTypeDic.dataTable]: undefined,
+    [resourceTypeDic.document]: undefined,
+  });
   // El número total de los recursos que se muestran en catalogo/explorar/resourceType
   const totals = reactive({
     [resourceTypeDic.dataLayer]: 0,
@@ -18,16 +25,22 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
     [resourceTypeDic.dataTable]: [],
     [resourceTypeDic.document]: [],
   });
-
-  const myTotalsByType = reactive({
-    [resourceTypeDic.dataLayer]: 0,
-    [resourceTypeDic.dataTable]: 0,
-    [resourceTypeDic.document]: 0,
-  });
+  // El número total de los recursos que se muestran en catalogo/mi-archivos
   const totalMisArchivos = reactive({
     disponibles: 0,
     pendientes: 0,
     publicacion: 0,
+  });
+  // Los recursos que se muestran en catalogo/mi-archivos
+  const misArchivos = reactive({
+    disponibles: [],
+    pendientes: [],
+    publicacion: [],
+  });
+  const myTotalsByType = reactive({
+    [resourceTypeDic.dataLayer]: 0,
+    [resourceTypeDic.dataTable]: 0,
+    [resourceTypeDic.document]: 0,
   });
 
   const resourcesByType2 = reactive({
@@ -41,16 +54,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
     [resourceTypeDic.dataTable]: [],
     [resourceTypeDic.document]: [],
   });
-  const latestResources = reactive({
-    [resourceTypeDic.dataLayer]: undefined,
-    [resourceTypeDic.dataTable]: undefined,
-    [resourceTypeDic.document]: undefined,
-  });
-  const misArchivos = reactive({
-    disponibles: [],
-    pendientes: [],
-    publicacion: [],
-  });
+
   return {
     isLoading: ref(false),
     totals,
@@ -120,15 +124,72 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       this.isLoading = false;
     },
 
-    mineBySection(section) {
-      return misArchivos[section];
-    },
+    // Regresa el total de los recursos que son míos. Puede estar disponibles, tener metadatos pendientes o estar en proceso de publicación.
+    // Esto se usa en catalogo/mis-archivos
     myTotalBySection(section) {
       return totalMisArchivos[section];
     },
-
+    // Regresa el total de los recursos que son míos. Puede estar disponibles, tener metadatos pendientes o estar en proceso de publicación.
+    // Esto se usa en catalogo/mis-archivos
+    mineBySection(section) {
+      return misArchivos[section];
+    },
+    // Limpia los recursos que se muestran en catalogo/mis-archivos. Puede estar disponibles, tener metadatos pendientes o estar en proceso de publicación.
+    // Esto se usa en catalogo/mis-archivos
     resetBySection(section) {
       misArchivos[section] = [];
+    },
+    /**
+     * Obtiene el total de los recursos asociados a un usuario (yo), según si tienen metadatos o no
+     * Esto se usa en catalogo/mis-archivos
+     * @param {String} section
+     * @param {Array} query
+     */
+    async getMyTotal(section, query) {
+      const { gnoxyFetch } = useGnoxyUrl();
+      this.isLoading = true;
+      const queryParams = {
+        ...query,
+        page_size: 1,
+        'filter{owner.username}': userEmail,
+      };
+      // Agregar toda la lógica de queryparams correspondientes por sección
+      const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
+      const request = await gnoxyFetch(url.toString());
+      const res = await request.json();
+      totalMisArchivos[section] = res.total;
+      this.isLoading = false;
+    },
+    /**
+     * Obtiene los recursos asociados a un usuario (yo), según si tienen metadatos o no
+     * Esto se usa en catalogo/mis-archivos
+     * @param {String} section
+     * @param {Array} query
+     */
+    async getMyResourcesByPage(section, pageNum, pageSize, query) {
+      const { gnoxyFetch } = useGnoxyUrl();
+      this.isLoading = true;
+      const queryParams = {
+        ...query,
+        page: pageNum,
+        page_size: pageSize,
+        'filter{owner.username}': userEmail,
+      };
+      const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
+      const request = await gnoxyFetch(url.toString());
+      const res = await request.json();
+
+      // TODO: Implementar en los queryparams si tiene metadatos pendientes o no
+      let data;
+      if (section === 'disponibles') {
+        data = res.resources.filter((d) => d.category !== null);
+      } else if (section === 'pendientes') {
+        data = res.resources.filter((d) => d.category === null);
+      } else {
+        data = [];
+      }
+      misArchivos[section] = data;
+      this.isLoading = false;
     },
 
     /**
@@ -158,28 +219,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
       myTotalsByType[resourceType] = res.total;
-      this.isLoading = false;
-    },
-
-    /**
-     * Obtiene el total de los recursos asociados a un usuario (yo), según si tienen metadatos o no
-     * Esto se usa en catalogo/misRecursos
-     * @param {String} section
-     * @param {Array} query
-     */
-    async getMyTotal(section, query) {
-      const { gnoxyFetch } = useGnoxyUrl();
-      this.isLoading = true;
-      const queryParams = {
-        ...query,
-        page_size: 1,
-        'filter{owner.username}': userEmail,
-      };
-      // Agregar toda la lógica de queryparams correspondientes por sección
-      const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
-      const request = await gnoxyFetch(url.toString());
-      const res = await request.json();
-      totalMisArchivos[section] = res.total;
       this.isLoading = false;
     },
 
@@ -241,38 +280,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       const res = await request.json();
 
       resourcesByType2[resourceType] = res.resources;
-      this.isLoading = false;
-    },
-
-    /**
-     * Obtiene los recursos asociados a un usuario (yo), según si tienen metadatos o no
-     * Esto se usa en catalogo/misRecursos
-     * @param {String} section
-     * @param {Array} query
-     */
-    async getMyResourcesByPage(section, pageNum, pageSize, query) {
-      const { gnoxyFetch } = useGnoxyUrl();
-      this.isLoading = true;
-      const queryParams = {
-        ...query,
-        page: pageNum,
-        page_size: pageSize,
-        'filter{owner.username}': userEmail,
-      };
-      const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
-      const request = await gnoxyFetch(url.toString());
-      const res = await request.json();
-
-      // TODO: Implementar en los queryparams si tiene metadatos pendientes o no
-      let data;
-      if (section === 'disponibles') {
-        data = res.resources.filter((d) => d.category !== null);
-      } else if (section === 'pendientes') {
-        data = res.resources.filter((d) => d.category === null);
-      } else {
-        data = [];
-      }
-      misArchivos[section] = data;
       this.isLoading = false;
     },
 

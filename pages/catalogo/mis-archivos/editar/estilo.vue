@@ -1,4 +1,10 @@
 <script setup>
+definePageMeta({
+  middleware: 'sidebase-auth',
+  bodyAttrs: {
+    class: '',
+  },
+});
 const storeCatalogo = useCatalogoStore();
 const storeResources = useResourcesCatalogoStore();
 const { data } = useAuth();
