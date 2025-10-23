@@ -162,7 +162,7 @@ onUnmounted(() => {
     </div>
     <div v-if="catalogueElement.sourcetype === 'REMOTE'" class="id-tag flex m-b-1 m-t-0">
       <span class="pictograma-colaborar"></span>
-      Archivo remoto
+      Catálogo externo
     </div>
 
     <div class="tarjeta-elemento">

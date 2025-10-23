@@ -56,7 +56,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
     totals,
     myTotalsByType,
     resources,
-    resourcesByType2,
     myResourcesByType,
     latestResources,
     misArchivos,

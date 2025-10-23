@@ -3,59 +3,27 @@ import SisdaiAreaTexto from '@centrogeomx/sisdai-componentes/src/componentes/are
 import SisdaiGrupoBotonesRadio from '@centrogeomx/sisdai-componentes/src/componentes/boton-radio-grupo/SisdaiBotonesRadioGrupo.vue';
 import SisdaiBotonRadio from '@centrogeomx/sisdai-componentes/src/componentes/boton-radio/SisdaiBotonRadio.vue';
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
-import SisdaiCasilla from '@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 
-import {
-  categoriesInSpanish,
-  cleanInput,
-  fetchGeometryType,
-  getWMSserver,
-  hasWMS,
-  resourceTypeDic,
-  tooltipContent,
-} from '~/utils/consulta';
+import { buildUrl, categoriesInSpanish } from '~/utils/consulta';
 
 const config = useRuntimeConfig();
 const storeFilters = useFilteredResources();
-const storeCatalogoResources = useResourcesCatalogoStore();
+const storeResources = useResourcesIAStore();
+const { gnoxyFetch } = useGnoxyUrl();
 
-storeCatalogoResources.getTotalResources(
-  resourceTypeDic.dataLayer,
-  storeFilters.buildQueryParams(resourceTypeDic.dataLayer)
-);
-storeCatalogoResources.getTotalResources(
-  resourceTypeDic.dataTable,
-  storeFilters.buildQueryParams(resourceTypeDic.dataTable)
-);
-storeCatalogoResources.getTotalResources(
-  resourceTypeDic.document,
-  storeFilters.buildQueryParams(resourceTypeDic.document)
-);
-
-const filteredResources = ref([]);
-const categorizedResources = ref({});
+const resourceType = ref('dataLayer');
+const recursos = computed(() => storeResources.resources[resourceType.value]);
+const recursosSeleccionados = computed(() => storeResources.selectedResources[resourceType.value]);
 
 const agregaCatalogoModal = ref(null);
-const botonRadioSeleccion = ref('dataLayer');
-
 const seleccionCatalogoModal = ref(null);
-const inputSearch = computed({
-  get: () => storeFilters.filters.inputSearch,
-  set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
-});
-const selectedCategoryResourcesLength = ref(0);
 const dictTipoRecurso = {
   dataLayer: 'capas',
   dataTable: 'tablas',
   document: 'documentos',
 };
-const etiquetaRecursos = ref(dictTipoRecurso[botonRadioSeleccion.value]);
-
-const recursosSeleccionados = ref([]);
-const buttons = ref([]);
-const geomType = ref(null);
-const optionsDict = {
+const geomDict = {
   Point: { tooltipText: 'Capa de puntos', class: 'pictograma-capa-puntos' },
   MultiPoint: {
     tooltipText: 'Capa de puntos',
@@ -102,116 +70,129 @@ const optionsDict = {
     class: 'pictograma-alerta',
   },
 };
-const etiquetaRecursosSeleccionados = ref('');
 
 const archivosSeleccionados = ref([]);
 const categoriaSeleccionada = ref(null);
+const archivosGeonode = ref([]);
+const archivosTabla = ref([]);
 
-function groupResults() {
-  categorizedResources.value = {};
-  filteredResources.value.map((r) => {
-    if (r.category) {
-      const title = r.category.gn_description;
-      if (Object.keys(categorizedResources.value).includes(title)) {
-        categorizedResources.value[title].push(r);
-      } else {
-        categorizedResources.value[title] = [];
-        categorizedResources.value[title].push(r);
+const totalResources = ref(0);
+const params = computed(() => storeFilters.filters.queryParams);
+const apiCategorias = `${config.public.geonodeApi}/facets/category`;
+const categoriesDict = ref({});
+const totalCategoria = ref(0);
+const nthElement = 1;
+
+async function fetchTotalByCategory(category) {
+  const preParams = params.value;
+  preParams['filter{category.identifier.in}'] = category;
+  const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, preParams);
+  const request = await gnoxyFetch(url.toString());
+  const res = await request.json();
+  return res.total;
+}
+
+async function buildCategoriesDict() {
+  categoriesDict.value = {};
+  // Esta parte es para obtener todas las categorias
+  const request = await gnoxyFetch(apiCategorias);
+  const geonodeCategories = await request.json();
+  const results = await Promise.all(
+    geonodeCategories.topics.items.map(async (d) => {
+      const totalByCat = await fetchTotalByCategory(d.key);
+      if (totalByCat !== 0) {
+        categoriesDict.value[d.label] = {
+          label: d.label,
+          name: d.key,
+          inSpanish: categoriesInSpanish[d.label],
+          total: totalByCat,
+          page: 1,
+          isLoading: false,
+        };
       }
-    } else {
-      if (Object.keys(categorizedResources.value).includes('Sin Clasificar')) {
-        categorizedResources.value['Sin Clasificar'].push(r);
-      } else {
-        categorizedResources.value['Sin Clasificar'] = [];
-        categorizedResources.value['Sin Clasificar'].push(r);
-      }
-    }
-  });
+      return totalByCat;
+    })
+  );
+  totalResources.value = results.reduce((a, b) => a + b, 0);
 }
-function updateResources(nuevosRecursos) {
-  filteredResources.value = nuevosRecursos;
-  groupResults();
-}
-function botonSiguiente() {
-  agregaCatalogoModal.value?.cerrarModal();
-  selectedCategoryResourcesLength.value = 0;
-  recursosSeleccionados.value = [];
-  etiquetaRecursos.value = dictTipoRecurso[botonRadioSeleccion.value];
-  seleccionCatalogoModal.value?.abrirModal();
-}
-function asignarEtiquetaRecursos() {
-  if (botonRadioSeleccion.value === 'dataLayer') {
-    if (selectedCategoryResourcesLength.value === 1) {
-      etiquetaRecursos.value = 'capa';
-    } else {
-      etiquetaRecursos.value = 'capas';
-    }
-  } else if (botonRadioSeleccion.value === 'dataTable') {
-    if (selectedCategoryResourcesLength.value === 1) {
-      etiquetaRecursos.value = 'tabla';
-    } else {
-      etiquetaRecursos.value = 'tablas';
-    }
-  } else if (botonRadioSeleccion.value === 'document') {
-    if (selectedCategoryResourcesLength.value === 1) {
-      etiquetaRecursos.value = 'documento';
-    } else {
-      etiquetaRecursos.value = 'documentos';
-    }
+
+async function callResources(categoria) {
+  const total = categoriesDict.value[categoria]?.total;
+  const count = recursos.value.length;
+  if (total > count) {
+    const preParams = params.value;
+    categoriesDict.value[categoria].page += 1;
+    await storeResources.fetchByCategory(
+      resourceType.value,
+      categoriesDict.value[categoria].page,
+      preParams
+    );
   }
 }
-function removerRecursoSeleccionado(capa) {
-  const index = recursosSeleccionados.value.indexOf(capa);
-  if (index > -1) {
-    recursosSeleccionados.value.splice(index, 1);
-  }
+
+async function fetchNewData() {
+  await callResources(categoriaSeleccionada.value);
+  storeResources.setNthElements(resourceType.value, [
+    recursos.value[recursos.value.length - nthElement].pk,
+  ]);
 }
-function cargarArchivosASubir() {
+
+function cargarArchivosGeonode() {
   seleccionCatalogoModal?.value.cerrarModal();
-  // TODO: fix tipo de archivo y archivo file para subir
+  // console.log('recursosSeleccionados', recursosSeleccionados.value);
   const nuevosArchivos = recursosSeleccionados.value.map((file) => ({
-    id: Date.now() + Math.random().toString(36).substr(2, 9),
+    id: Math.floor(Math.random() * 1000000000000000000000),
     nombre: file.title,
     tipo: obtenerTipoArchivo(file.title),
-    archivo: file, // Objeto File original
-    categoria: 'Archivo',
+    // archivo: file, // Objeto File original
+    archivo: null,
+    categoria:
+      resourceType.value === 'document'
+        ? 'Documento'
+        : resourceType.value === 'dataLayer'
+          ? 'Capa'
+          : 'Tabla',
     origen: 'Catálogo',
-    // download_url: file.download_url,
-    // embed_url: file.embed_url,
-    // pk: file.pk,
+    download_url: file.download_url,
+    embed_url: file.embed_url,
+    pk: file.pk,
+    uuid: file.uuid,
+    category:
+      resourceType.value === 'document'
+        ? 'Documento'
+        : resourceType.value === 'dataLayer'
+          ? 'Capa'
+          : 'Tabla',
+    alternate: file.alternate,
+    links_csv: file.links.filter((d) => d.extension === 'csv'), // para las tablas
   }));
 
-  archivosSeleccionados.value = [...archivosSeleccionados.value, ...nuevosArchivos];
+  archivosGeonode.value = [...archivosGeonode.value, ...nuevosArchivos];
+  archivosTabla.value = [...archivosSeleccionados.value, ...archivosGeonode.value];
 }
 
-watch([inputSearch], async () => {
-  updateResources(storeCatalogoResources.resourcesByType2[botonRadioSeleccion.value]);
-});
-watch(botonRadioSeleccion, async (nv) => {
-  categoriaSeleccionada.value = null;
-  storeFilters.filters.resourceType = nv;
-  updateResources(storeCatalogoResources.resourcesByType2[nv]);
-});
-watch(recursosSeleccionados, () => {
-  if (botonRadioSeleccion.value === 'dataLayer') {
-    if (recursosSeleccionados.value.length === 1) {
-      etiquetaRecursosSeleccionados.value = 'capa seleccionada';
-    } else {
-      etiquetaRecursosSeleccionados.value = 'capas seleccionadas';
-    }
-  } else if (botonRadioSeleccion.value === 'dataTable') {
-    if (recursosSeleccionados.value.length === 1) {
-      etiquetaRecursosSeleccionados.value = 'tabla seleccionada';
-    } else {
-      etiquetaRecursosSeleccionados.value = 'tablas seleccionadas';
-    }
-  } else if (botonRadioSeleccion.value === 'document') {
-    if (recursosSeleccionados.value.length === 1) {
-      etiquetaRecursosSeleccionados.value = 'documento seleccionada';
-    } else {
-      etiquetaRecursosSeleccionados.value = 'documentos seleccionados';
-    }
+async function seleccionarCategoria(categoria) {
+  if (categoriaSeleccionada.value !== categoriesDict.value[categoria].label) {
+    totalCategoria.value = 0;
+    storeResources.resetByType(resourceType.value);
+    categoriesDict.value[categoria].page = 1;
+    categoriaSeleccionada.value = categoriesDict.value[categoria].label;
+    storeFilters.updateFilter('categories', [categoriesDict.value[categoria].name]);
+    await storeFilters.buildQueryParams(resourceType.value);
+    await storeResources.fetchByCategory(resourceType.value, 1, params.value);
+    storeResources.setNthElements(resourceType.value, [
+      recursos.value[recursos.value.length - nthElement].pk,
+    ]);
+    totalCategoria.value = categoriesDict.value[categoriaSeleccionada.value].total;
   }
+}
+
+watch(resourceType, async (nv, ov) => {
+  storeResources.resetSelectedByType(ov);
+  storeResources.resetByType(ov);
+  totalCategoria.value = 0;
+  storeFilters.buildQueryParams(nv);
+  await buildCategoriesDict();
 });
 
 const storeIA = useIAStore();
@@ -233,17 +214,13 @@ const loaderTitle = ref('');
 const loaderMsg = ref('');
 
 onMounted(async () => {
+  storeFilters.buildQueryParams(resourceType.value);
+  await buildCategoriesDict();
+
   loaderTitle.value = 'Cargando';
   loaderMsg.value = 'Espere un momento';
   await nextTick();
   loaderModal.value?.abrirModal();
-
-  storeFilters.resetAll();
-  storeFilters.filters.resourceType = botonRadioSeleccion.value;
-  await storeCatalogoResources.getResourcesByType(resourceTypeDic.dataLayer);
-  await storeCatalogoResources.getResourcesByType(resourceTypeDic.dataTable);
-  await storeCatalogoResources.getResourcesByType(resourceTypeDic.document);
-  updateResources(storeCatalogoResources.resourcesByType2[botonRadioSeleccion.value]);
 
   if (route.params.id !== 'nuevo') {
     esEdicion.value = true;
@@ -261,11 +238,13 @@ onMounted(async () => {
       nombre: archivo.filename,
       tipo: obtenerTipoArchivo(archivo.filename),
       archivo: null,
-      categoria: 'Archivo',
-      origen: 'Propio',
+      categoria: archivo.geonode_category,
+      origen: archivo.geonode_type,
     }));
+    // console.log('arraySources', arraySources);
 
     archivosSeleccionados.value = [...archivosSeleccionados.value, ...archivosBackend];
+    archivosTabla.value = [...archivosSeleccionados.value];
   }
 
   window.addEventListener('keydown', preventEscape);
@@ -277,52 +256,11 @@ onBeforeUnmount(() => {
   window.removeEventListener('keydown', preventEscape);
 });
 
-const seleccionarCategoria = (categoria) => {
-  categoriaSeleccionada.value = categoria;
-  selectedCategoryResourcesLength.value =
-    categorizedResources.value[categoriaSeleccionada.value].length || 0;
-
-  asignarEtiquetaRecursos();
-
-  // revisamos el tipo de geometría que tiene el recurso
-  buttons.value = [];
-  categorizedResources.value[categoriaSeleccionada.value].map(async (e) => {
-    if (e.subtype === 'remote') {
-      const resourceHasWMS = await hasWMS(e, 'geometry', config.public.geonodeUrl);
-      if (resourceHasWMS) {
-        const server = getWMSserver(e);
-        geomType.value = await fetchGeometryType(e, server);
-      } else {
-        geomType.value = 'Remoto';
-      }
-    } else if (e.subtype === 'raster') {
-      // Si es raster
-      geomType.value = 'Raster';
-    } else if (e.subtype === 'vector') {
-      // Si es vectorial
-      // Solicitamos la geometría hasta que la tarjeta va a entrar a la vista
-      geomType.value = await fetchGeometryType(e, 'sigic');
-    } else {
-      geomType.value = 'Otro';
-    }
-    if (botonRadioSeleccion.value === 'dataLayer') {
-      buttons.value.push({
-        class: optionsDict[geomType.value].class,
-        tooltipText: optionsDict[geomType.value].tooltipText,
-      });
-    } else {
-      buttons.value.push({
-        class: 'pictograma-informacion',
-        tooltipText: tooltipContent(e),
-      });
-    }
-  });
-};
-
 // Método para manejar la selección de archivos
 const manejarSeleccionArchivos = (event) => {
   const nuevosArchivos = Array.from(event.target.files).map((file) => ({
-    id: Date.now() + Math.random().toString(36).substr(2, 9),
+    // id: Date.now() + Math.random().toString(36).substr(2, 9),
+    id: Math.floor(Math.random() * 1000000000000000000000),
     nombre: file.name,
     tipo: obtenerTipoArchivo(file.name),
     archivo: file, // Objeto File original
@@ -331,6 +269,8 @@ const manejarSeleccionArchivos = (event) => {
   }));
 
   archivosSeleccionados.value = [...archivosSeleccionados.value, ...nuevosArchivos];
+  archivosTabla.value = [...archivosSeleccionados.value, ...archivosGeonode.value];
+
   event.target.value = ''; // Resetear el input para permitir seleccionar el mismo archivo otra vez
 };
 
@@ -355,6 +295,8 @@ const obtenerTipoArchivo = (nombre) => {
 // Método para eliminar archivo de la lista
 const eliminarArchivo = (id) => {
   archivosSeleccionados.value = archivosSeleccionados.value.filter((archivo) => archivo.id !== id);
+  archivosGeonode.value = archivosGeonode.value.filter((archivo) => archivo.id !== id);
+  archivosTabla.value = archivosTabla.value.filter((archivo) => archivo.id !== id);
 
   archivosEliminados.value.push(id);
 };
@@ -376,7 +318,8 @@ const guardarProyecto = async () => {
       nombreProyecto.value,
       descripcionProyecto.value,
       visibilidadProyecto.value,
-      archivosSeleccionados.value
+      archivosSeleccionados.value,
+      archivosGeonode.value
     );
 
     // Notificación de éxito
@@ -393,7 +336,7 @@ const guardarProyecto = async () => {
     navigateTo('/ia/proyectos');
   } catch (error) {
     //alert('Error al guardar: ' + error.message);
-    console.log('Error al guardar: ' + error.message);
+    console.error('Error al guardar: ' + error.message);
     /* notificacion.mostrar({
       tipo: 'error',
       mensaje: 'Error al guardar: ' + error.message,
@@ -414,14 +357,15 @@ const editarProyecto = async () => {
       visibilidadProyecto.value,
       archivosSeleccionados.value,
       archivosEliminados.value,
-      route.params.id
+      route.params.id,
+      archivosGeonode.value
     );
 
     loaderModal.value?.cerrarModal();
 
     navigateTo('/ia/proyectos');
   } catch (error) {
-    console.log('Error al actualizar: ' + error.message);
+    console.error('Error al actualizar: ' + error.message);
   }
 };
 
@@ -499,7 +443,6 @@ function preventEscape(event) {
                   Agregar del catálogo
                   <span class="pictograma-agregar" aria-hidden="true" />
                 </button>
-                <!-- botón "Subir archivos" -->
                 <button
                   class="boton-pictograma boton-primario"
                   aria-label="Subir archivos"
@@ -508,7 +451,6 @@ function preventEscape(event) {
                   Subir archivos
                   <span class="pictograma-archivo-subir" aria-hidden="true" />
                 </button>
-                <!-- Input de archivo oculto -->
                 <input
                   ref="fileInput"
                   type="file"
@@ -520,7 +462,7 @@ function preventEscape(event) {
               </div>
             </div>
 
-            <div v-if="archivosSeleccionados.length > 0" class="tabla-archivos m-y-3">
+            <div v-if="archivosTabla.length > 0" class="tabla-archivos m-y-3">
               <h3>Archivos a subir</h3>
               <table class="tabla">
                 <thead>
@@ -533,14 +475,29 @@ function preventEscape(event) {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="archivo in archivosSeleccionados" :key="archivo.id">
+                  <tr v-for="archivo in archivosTabla" :key="archivo.id">
                     <td class="p-3">{{ archivo.nombre }}</td>
                     <td class="p-3 etiqueta-tabla">
                       <span class="p-x-1 p-y-minimo">{{ archivo.tipo }}</span>
                     </td>
-                    <td class="p-3">{{ archivo.categoria }}</td>
+                    <td class="p-3 flex flex-contenido-centrado">
+                      <p
+                        class="texto-centrado fondo-color-acento p-1 texto-color-acento borde borde-redondeado-12"
+                        style="width: max-content"
+                      >
+                        <span v-if="archivo.categoria === 'Documento'">
+                          <span class="pictograma-documento" />{{ archivo.categoria }}
+                        </span>
+
+                        <span v-if="archivo.categoria === 'Tabla'">
+                          <span class="pictograma-tabla" />{{ archivo.categoria }}
+                        </span>
+                      </p>
+                    </td>
                     <td class="p-3 etiqueta-tabla">
-                      <span class="p-x-1 p-y-minimo">{{ archivo.origen }}</span>
+                      <span class="p-x-1 p-y-minimo">{{
+                        archivo.origen === 'Catalogo' ? 'Catálogo' : archivo.origen
+                      }}</span>
                     </td>
                     <td class="p-x-3 p-y-1">
                       <button
@@ -583,24 +540,29 @@ function preventEscape(event) {
           </template>
           <template #cuerpo>
             <p>Selecciona el tipo de fuente de información que deseas agregar a tu proyecto</p>
-            <form @keydown.enter.prevent="botonSiguiente">
+            <form
+              @keydown.enter.prevent="
+                agregaCatalogoModal.cerrarModal();
+                seleccionCatalogoModal.abrirModal();
+              "
+            >
               <SisdaiGrupoBotonesRadio class="radio-catalogo" leyenda="" :es_vertical="true">
                 <SisdaiBotonRadio
-                  v-model="botonRadioSeleccion"
+                  v-model="resourceType"
                   etiqueta="Capas geográficas"
                   value="dataLayer"
                   name="tipodefuente"
                   :es_obligatorio="true"
                 />
                 <SisdaiBotonRadio
-                  v-model="botonRadioSeleccion"
+                  v-model="resourceType"
                   etiqueta="Tabulados de datos"
                   value="dataTable"
                   name="tipodefuente"
                   :es_obligatorio="true"
                 />
                 <SisdaiBotonRadio
-                  v-model="botonRadioSeleccion"
+                  v-model="resourceType"
                   etiqueta="Documentos"
                   value="document"
                   name="tipodefuente"
@@ -610,7 +572,14 @@ function preventEscape(event) {
             </form>
           </template>
           <template #pie>
-            <button class="boton-primario boton-chico" type="button" @click="botonSiguiente">
+            <button
+              class="boton-primario boton-chico"
+              type="button"
+              @click="
+                agregaCatalogoModal.cerrarModal();
+                seleccionCatalogoModal.abrirModal();
+              "
+            >
               Siguiente
             </button>
           </template>
@@ -618,12 +587,12 @@ function preventEscape(event) {
 
         <SisdaiModal ref="seleccionCatalogoModal" class="modal-grande">
           <template #encabezado>
-            <h2>Agregar {{ dictTipoRecurso[botonRadioSeleccion] }} del catálogo</h2>
+            <h2>Agregar {{ dictTipoRecurso[resourceType] }} del catálogo</h2>
           </template>
           <template #cuerpo>
             <div class="p-r-2">
               <p>Explora el catálogo y selecciona fuentes de información para el proyecto</p>
-              <ClientOnly>
+              <!-- <ClientOnly>
                 <form class="campo-busqueda m-y-3" @submit.prevent>
                   <input
                     id="idcampobusquedaialistas"
@@ -648,34 +617,35 @@ function preventEscape(event) {
                     <span class="pictograma-buscar" aria-hidden="true" />
                   </button>
                 </form>
-              </ClientOnly>
+              </ClientOnly> -->
 
               <div class="flex flex-contenido-separado">
                 <div class="columna-5">
                   <div>
                     <UiNumeroElementos
-                      :numero="Object.keys(categorizedResources).length"
-                      etiqueta="Categorías"
+                      :numero="Object.keys(categoriesDict).length"
+                      :etiqueta="
+                        Object.keys(categoriesDict).length === 1 ? 'Categoría' : 'Categorías'
+                      "
                       class="m-b-3"
                     />
                     <ul
-                      v-if="Object.keys(categorizedResources).length !== 0"
-                      class="lista-sin-estilo"
-                      style="overflow-y: auto"
+                      v-if="Object.keys(categoriesDict).length > 0"
+                      class="lista-sin-estilo overflowYAutoHeight"
                     >
                       <li
-                        v-for="categoria in Object.keys(categorizedResources)"
-                        :key="categoria + '-key'"
+                        v-for="categoria in Object.keys(categoriesDict)"
+                        :key="categoriesDict[categoria].name + '-key'"
                         class="m-y-0"
                       >
                         <button
                           class="categoria p-l-6 p-r-2 p-y-1"
                           :class="{
-                            seleccionada: categoria === categoriaSeleccionada,
+                            seleccionada: categoriesDict[categoria].label === categoriaSeleccionada,
                           }"
                           @click="seleccionarCategoria(categoria)"
                         >
-                          {{ categoriesInSpanish[categoria] }}
+                          {{ categoriesDict[categoria].inSpanish }}
                         </button>
                       </li>
                     </ul>
@@ -686,46 +656,23 @@ function preventEscape(event) {
                 <div class="columna-5">
                   <div>
                     <UiNumeroElementos
-                      :numero="
-                        categoriaSeleccionada !== 'Sin Clasificar'
-                          ? selectedCategoryResourcesLength
-                          : 0
+                      :numero="totalCategoria"
+                      :etiqueta="
+                        dictTipoRecurso[resourceType].charAt(0).toUpperCase() +
+                        (totalCategoria === 1
+                          ? dictTipoRecurso[resourceType].slice(1, -1)
+                          : dictTipoRecurso[resourceType].slice(1))
                       "
-                      :etiqueta="etiquetaRecursos"
                       class="m-b-3"
                     />
-                    <ul class="lista-sin-estilo" style="overflow-y: auto">
-                      <li
-                        v-for="(recurso, i) in categorizedResources[categoriaSeleccionada]"
-                        :key="recurso.pk"
-                        class="m-y-0"
-                      >
-                        <div
-                          v-if="categoriaSeleccionada !== 'Sin Clasificar'"
-                          class="capa p-2 m-b-2 borde-redondeado-20"
-                        >
-                          <SisdaiCasilla
-                            v-model="recursosSeleccionados"
-                            :etiqueta="recurso.title"
-                            :value="recurso"
-                          />
-                          <div v-if="botonRadioSeleccion === 'dataLayer'" class="icono">
-                            <span
-                              class="m-r-1"
-                              :class="[buttons[i]?.class, 'pictograma-mediano picto']"
-                              aria-hidden="true"
-                            />
-                            <span>{{ buttons[i]?.tooltipText }}</span>
-                          </div>
-                          <div v-else class="icono">
-                            <span
-                              v-globo-informacion:derecha="buttons[i]?.tooltipText"
-                              class="m-r-1"
-                              :class="[buttons[i]?.class, 'pictograma-mediano picto']"
-                              aria-hidden="true"
-                            />
-                          </div>
-                        </div>
+                    <ul class="lista-sin-estilo overflowYAutoHeight">
+                      <li v-for="(recurso, index) in recursos" :key="index" class="m-y-0">
+                        <IaElementoCatalogo
+                          :key="index"
+                          :catalogue-element="recurso"
+                          :resource-type="resourceType"
+                          @trigger-fetch="fetchNewData"
+                        />
                       </li>
                     </ul>
                   </div>
@@ -734,43 +681,54 @@ function preventEscape(event) {
                 <div class="columna-5">
                   <div>
                     <UiNumeroElementos
-                      :numero="recursosSeleccionados.length || 0"
-                      :etiqueta="etiquetaRecursosSeleccionados"
+                      :numero="recursosSeleccionados.length"
+                      :etiqueta="
+                        dictTipoRecurso[resourceType].charAt(0).toUpperCase() +
+                        (resourceType === 'document'
+                          ? recursosSeleccionados.length === 1
+                            ? dictTipoRecurso[resourceType].slice(1, -1) + ' seleccionado'
+                            : dictTipoRecurso[resourceType].slice(1) + ' seleccionados'
+                          : recursosSeleccionados.length === 1
+                            ? dictTipoRecurso[resourceType].slice(1, -1) + ' seleccionada'
+                            : dictTipoRecurso[resourceType].slice(1) + ' seleccionadas')
+                      "
                       class="m-b-3"
                     />
-                    <ul class="lista-sin-estilo" style="overflow-y: auto">
+                    <ul class="lista-sin-estilo overflowYAutoHeight">
                       <li
-                        v-for="(recurso, i) in recursosSeleccionados"
-                        :key="recurso.id"
+                        v-for="(recurso, index) in recursosSeleccionados"
+                        :key="index"
                         class="m-y-0"
                       >
                         <div class="capa p-2 m-b-2 borde-redondeado-20">
-                          <h6 class="m-t-0 m-b-1">{{ recurso.title }}</h6>
+                          <p class="m-t-0 m-b-1">{{ recurso.title }}</p>
                           <div class="m-b-1">
-                            {{ recurso.category.gn_description }}
+                            {{ categoriesDict[recurso.category.gn_description]?.inSpanish }}
                           </div>
-                          <div v-if="botonRadioSeleccion === 'dataLayer'" class="icono">
+                          <div v-if="resourceType === 'dataLayer'" class="icono">
                             <span
                               class="m-r-1"
-                              :class="[buttons[i]?.class, 'pictograma-mediano picto']"
+                              :class="[
+                                geomDict[recurso.geomType].class,
+                                'pictograma-mediano picto',
+                              ]"
                               aria-hidden="true"
                             />
-                            <span>{{ buttons[i]?.tooltipText }}</span>
+                            <span>{{ geomDict[recurso.geomType].tooltipText }}</span>
                           </div>
                           <div v-else class="icono">
                             <span
-                              v-globo-informacion:derecha="buttons[i]?.tooltipText"
-                              class="m-r-1"
-                              :class="[buttons[i]?.class, 'pictograma-mediano picto']"
+                              v-globo-informacion:derecha="recurso.raw_abstract"
+                              class="pictograma-informacion pictograma-mediano picto m-r-1"
                               aria-hidden="true"
                             />
                           </div>
                           <div class="flex flex-contenido-final">
                             <button
                               class="boton-pictograma boton-sin-contenedor-secundario boton-chico"
-                              aria-label="Remover"
+                              aria-label="Remover recurso seleccionado"
                               type="button"
-                              @click="removerRecursoSeleccionado(recurso)"
+                              @click="storeResources.removeSelectedByPk(recurso.pk, resourceType)"
                             >
                               <span class="pictograma-eliminar" aria-hidden="true" />
                             </button>
@@ -788,7 +746,7 @@ function preventEscape(event) {
               class="boton-primario boton-chico"
               type="button"
               :disabled="recursosSeleccionados.length === 0"
-              @click="cargarArchivosASubir"
+              @click="cargarArchivosGeonode"
             >
               Aceptar
             </button>
@@ -818,6 +776,10 @@ function preventEscape(event) {
 .overflowYAuto {
   overflow-y: auto;
   height: var(--altura-consulta-esc);
+}
+.overflowYAutoHeight {
+  overflow-y: auto;
+  height: 300px;
 }
 
 .separador {

@@ -81,6 +81,9 @@ export const useFilteredResources = defineStore('filteredResources', () => {
         if (filters.owner === 'catalogo') {
           queryParams['filter{is_published}'] = 'true';
         }
+        if (filters.owner === 'remotos') {
+          queryParams['filter{subtype.in}'] = 'remote';
+        }
       }
       if (filters.categories.length > 0) {
         queryParams['filter{category.identifier.in}'] = filters.categories;
