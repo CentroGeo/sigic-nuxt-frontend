@@ -34,7 +34,7 @@ const inputSearch = computed({
 });
 const nthElement = 1;
 const isLoggedIn = ref(data.value ? true : false);
-const apiCategorias = `${config.public.geonodeApi}/facets/category`;
+const apiCategorias = `${config.public.geonodeApi}/facets/category?page_size=30`;
 const filteredResources = ref([]);
 const categoriesDict = ref({});
 const orderedCategories = ref([]);

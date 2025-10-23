@@ -60,34 +60,6 @@ const optionsButtons = ref([
       emit('opacidadClicked');
     },
   },
-  /*   {
-    excludeFor: 'noTables',
-    label: 'Vínculo OWS',
-    pictogram: 'pictograma-enlace-externo',
-    globo: 'OWS',
-    action: async () => {
-      // Este primer link es una petición GetMap
-      //const objectWMSLink = resourceElement.value.links.find((link) => link.name === 'PNG');
-      //const wmsLink = objectWMSLink.url;
-      // Esta es la petición WFS
-      //const wfsLink = getWFS(resourceElement.value);
-      // Esta es la petición GetFeatureInfo
-      //const wmsLink = getWMSFeatureInfo(resourceElement.value);
-      let server;
-      if (resourceElement.value.sourcetype === 'REMOTE') {
-        server = getWMSserver(resourceElement.value).split('/ows')[0];
-      } else {
-        server = `${config.public.geoserverUrl}`;
-      }
-      const owsLink = `${server}/${resourceElement.value.alternate.replace(':', '/')}/ows`;
-      try {
-        await navigator.clipboard.writeText(owsLink);
-        alert('Enlace copiado al portapapeles: ' + owsLink);
-      } catch (err) {
-        console.error('Error al copiar: ', err);
-      }
-    },
-  }, */
   {
     excludeFor: 'none',
     label: 'Eliminar selección',
@@ -116,29 +88,13 @@ async function updateFunctions() {
   if (resourceElement.value.sourcetype === 'REMOTE') {
     // Se excluye el botón de descargar para remotos
     buttons = buttons.filter((d) => d.excludeFor !== 'remotes');
-    // Se excluye el botón OWS para remotos
-    //buttons = buttons.filter((d) => d.label !== 'Vínculo OWS');
-    //console.log(resourceElement.value);
     const resourceHasWMS = await hasWMS(resourceElement.value, 'table');
-    // Esta se llamaría para el WFS*/
-    /*     const resourceHasWMS = await hasWMS(
-      resourceElement.value,
-      'table',
-      config.public.geonodeUrl,
-      'GetFeatureInfo'
-    );*/
     // Se excluye el botón para ver tablas en caso de que el archivo remoto no permita consultar la tabla
     if (resourceHasWMS === false) {
       buttons = buttons.filter((d) => d.excludeFor !== 'noTables');
     }
   }
-  if (
-    /* isLoggedIn.value &&
-    resourceElement.value.owner.email === userEmail.value &&
-    !resourceElement.value.is_published */
-    resourceElement.value.is_approved === false &&
-    resourceElement.value.is_published === false
-  ) {
+  if (resourceElement.value.is_approved === false && resourceElement.value.is_published === false) {
     // Se excluye el botón OWS para recursos privados
     buttons = buttons.filter((d) => d.label !== 'Vínculo OWS');
   }
@@ -154,13 +110,6 @@ async function shareOws() {
     server = `${config.public.geoserverUrl}`;
   }
   const owsLink = `${server}/${resourceElement.value.alternate.replace(':', '/')}/ows`;
-  /*   try {
-    await navigator.clipboard.writeText(owsLink);
-    alert('Enlace copiado al portapapeles: ' + owsLink);
-  } catch (err) {
-    console.error('Error al copiar: ', err);
-  } */
-  //console.log(owsLink);
   emit('owsClicked', owsLink);
 }
 watch(resourceElement, () => {

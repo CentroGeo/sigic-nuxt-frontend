@@ -78,7 +78,7 @@ const archivosTabla = ref([]);
 
 const totalResources = ref(0);
 const params = computed(() => storeFilters.filters.queryParams);
-const apiCategorias = `${config.public.geonodeApi}/facets/category`;
+const apiCategorias = `${config.public.geonodeApi}/facets/category?page_size=30`;
 const categoriesDict = ref({});
 const totalCategoria = ref(0);
 const nthElement = 1;

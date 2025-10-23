@@ -69,7 +69,7 @@ watch([paginaActual], () => {
         </div>
       </template>
 
-      <template #pie>
+      <template v-if="props.selectedElement.sourcetype !== 'REMOTE'" #pie>
         <button
           type="button"
           class="boton-con-contenedor-secundario boton-grande ancho"

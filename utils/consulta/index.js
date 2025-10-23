@@ -36,7 +36,7 @@ export const categoriesInSpanish = {
 export const categoriesNames = {
   biota: 'Biota',
   boundaries: 'Boundaries',
-  climatologyMeteorologyAtmosphete: 'Climatology Meteorology Atmosphere',
+  climatologyMeteorologyAtmosphere: 'Climatology Meteorology Atmosphere',
   economy: 'Economy',
   elevation: 'Elevation',
   environment: 'Environment',

@@ -12,12 +12,6 @@ const user = data.value?.user.email || 'Sin sesion';
 const dragNdDrop = ref(null);
 const style_files = ['.sld'];
 const isLoading = ref(false);
-// Recuperamos la información completa del recurso
-/* const storeFetched = useFetchedResources2Store();
-storeFetched.checkFilling(resourceType);
-const resourceToEdit = computed(() =>
-  storeFetched.byResourceType(resourceType).find(({ pk }) => pk === selectedPk)
-); */
 
 async function guardarArchivo(files) {
   // solo uno o el primer archivo
