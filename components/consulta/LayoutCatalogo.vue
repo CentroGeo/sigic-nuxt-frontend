@@ -208,6 +208,7 @@ watch(params, async () => {
   isLoading.value = true;
   totalResources.value = 0;
   storeResources.resetByType();
+  selectedCategories.value = [];
   await buildCategoriesDict();
   isLoading.value = false;
 });
@@ -321,7 +322,7 @@ onMounted(async () => {
         <UiNumeroElementos :numero="totalResources" :etiqueta="etiquetaElementos" />
       </div>
       <div v-if="isLoading" class="flex flex-contenido-centrado">
-        <img src="/img/loader.gif" alt="...Cargando" height="60px" />
+        <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="60px" />
       </div>
       <div v-if="orderedCategories.length > 0 && !isLoading">
         <div v-for="category in orderedCategories" :key="category" class="m-y-1">
@@ -350,7 +351,12 @@ onMounted(async () => {
             v-if="categoriesDict[category]?.isLoading && selectedCategories.includes(category)"
             class="flex flex-contenido-centrado"
           >
-            <img src="/img/loader.gif" alt="...Cargando" height="40px" />
+            <img
+              class="color-invertir m-y-2"
+              src="/img/loader.gif"
+              alt="...Cargando"
+              height="40px"
+            />
           </div>
         </div>
       </div>
