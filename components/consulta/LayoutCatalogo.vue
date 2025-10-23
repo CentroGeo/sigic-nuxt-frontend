@@ -109,12 +109,12 @@ async function buildCategoriesDict() {
 }
 
 async function callResources(categoria) {
-  categoriesDict.value[categoria].isLoading = true;
   const total = categoriesDict.value[categoria].total;
   const count = categorizedResources.value[categoria]
     ? categorizedResources.value[categoria].length
     : 0;
-  if (total > count) {
+  if (total > count && selectedCategories.value.includes(categoria)) {
+    categoriesDict.value[categoria].isLoading = true;
     const preParams = params.value;
     preParams['filter{category.identifier.in}'] = categoriesValues[categoria];
     await storeResources.fillByCategory(
@@ -123,8 +123,8 @@ async function callResources(categoria) {
       preParams
     );
     categoriesDict.value[categoria].page += 1;
+    categoriesDict.value[categoria].isLoading = false;
   }
-  categoriesDict.value[categoria].isLoading = false;
 }
 
 function getNthElements() {
@@ -168,6 +168,8 @@ function updateResources(nuevosRecursos) {
 async function setSelectedCategory(categoria) {
   if (selectedCategories.value.includes(categoria)) {
     selectedCategories.value = selectedCategories.value.filter((c) => c !== categoria);
+    //categoriesDict.value[categoria].page = 1;
+    //categoriesDict.value[categoria].isLoading = false;
   } else {
     selectedCategories.value.push(categoria);
   }
@@ -206,7 +208,7 @@ watch(params, async () => {
   isLoading.value = true;
   totalResources.value = 0;
   storeResources.resetByType();
-  buildCategoriesDict();
+  await buildCategoriesDict();
   isLoading.value = false;
 });
 
@@ -344,7 +346,10 @@ onMounted(async () => {
               @trigger-fetch="fetchNewData"
             />
           </div>
-          <div v-if="categoriesDict[category]?.isLoading" class="flex flex-contenido-centrado">
+          <div
+            v-if="categoriesDict[category]?.isLoading && selectedCategories.includes(category)"
+            class="flex flex-contenido-centrado"
+          >
             <img src="/img/loader.gif" alt="...Cargando" height="40px" />
           </div>
         </div>
