@@ -14,12 +14,18 @@ const contextos = ref([]);
 
 const config = useRuntimeConfig();
 
+const dictCategoria = {
+  datasets: 'Datos tabulados',
+  documents: 'Documentos',
+};
+
 // Función para cargar las fuentesl proyecto
 const loadSources = async () => {
   //arraySources = [];
 
   //Consulta fuentes
   arraySources.value = await storeIA.getProjectSources(proyecto.value['id']);
+  // console.log('arraySources.value', arraySources.value);
 
   //catalogo.value = arrayProjects;
   //catalogoFiltrado.value = arrayProjects;
@@ -273,12 +279,21 @@ async function openResourceViewEmbed(resource) {
                       class="texto-centrado fondo-color-acento p-1 m-0 texto-color-acento borde borde-redondeado-12"
                       style="width: max-content"
                     >
+                      <!-- fix: esta es cuando ya están arriba en propio -->
                       <span v-if="archivo.geonode_category === 'Documento'">
-                        <span class="pictograma-documento" />{{ archivo.geonode_category }}
+                        <!-- propio -->
+                        <span class="pictograma-documento" />{{ archivo.geonode_category }}s
                       </span>
-
-                      <span v-if="archivo.geonode_category === 'Tabla'">
-                        <span class="pictograma-tabla" />{{ archivo.geonode_category }}
+                      <span v-if="archivo.geonode_category === 'documents'">
+                        <!-- catalogo -->
+                        <span class="pictograma-documento" />{{
+                          dictCategoria[archivo.geonode_category]
+                        }}
+                      </span>
+                      <span v-if="archivo.geonode_category === 'datasets'">
+                        <span class="pictograma-tabla" />{{
+                          dictCategoria[archivo.geonode_category]
+                        }}
                       </span>
                     </p>
                   </td>

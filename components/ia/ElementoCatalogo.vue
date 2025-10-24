@@ -27,53 +27,53 @@ const capasSeleccionadas = computed({
 // Para hacer algo si es el enésimo elemento e incorporar el consumo de recursos paginados.
 const emit = defineEmits(['triggerFetch']);
 const nthElementsPks = computed(() => storeResources.nthElementsByType(resourceType.value));
-const geomDict = {
-  Point: { tooltipText: 'Capa de puntos', class: 'pictograma-capa-puntos' },
-  MultiPoint: {
-    tooltipText: 'Capa de puntos',
-    class: 'pictograma-capa-puntos',
-  },
-  Polygon: {
-    tooltipText: 'Capa de poligonos',
-    class: 'pictograma-capa-poligono',
-  },
-  MultiPolygon: {
-    tooltipText: 'Capa de poligonos',
-    class: 'pictograma-capa-poligono',
-  },
-  LineString: {
-    tooltipText: 'Capa de lineas',
-    class: 'pictograma-capa-lineas',
-  },
-  LinearRing: {
-    tooltipText: 'Capa de lineas',
-    class: 'pictograma-capa-lineas',
-  },
-  MultiLineString: {
-    tooltipText: 'Capa de lineas',
-    class: 'pictograma-capa-lineas',
-  },
-  GeometryCollection: {
-    tooltipText: 'Colección de geometrías',
-    class: 'pictograma-capa-poligono',
-  },
-  Raster: {
-    tooltipText: 'Raster',
-    class: 'pictograma-capas',
-  },
-  Otro: {
-    tooltipText: 'Indefinido',
-    class: 'pictograma-flkt',
-  },
-  Remoto: {
-    tooltipText: 'Capa remota',
-    class: 'pictograma-colaborar',
-  },
-  Error: {
-    tooltipText: 'No se pudo recuperar la información',
-    class: 'pictograma-alerta',
-  },
-};
+// const geomDict = {
+//   Point: { tooltipText: 'Capa de puntos', class: 'pictograma-capa-puntos' },
+//   MultiPoint: {
+//     tooltipText: 'Capa de puntos',
+//     class: 'pictograma-capa-puntos',
+//   },
+//   Polygon: {
+//     tooltipText: 'Capa de poligonos',
+//     class: 'pictograma-capa-poligono',
+//   },
+//   MultiPolygon: {
+//     tooltipText: 'Capa de poligonos',
+//     class: 'pictograma-capa-poligono',
+//   },
+//   LineString: {
+//     tooltipText: 'Capa de lineas',
+//     class: 'pictograma-capa-lineas',
+//   },
+//   LinearRing: {
+//     tooltipText: 'Capa de lineas',
+//     class: 'pictograma-capa-lineas',
+//   },
+//   MultiLineString: {
+//     tooltipText: 'Capa de lineas',
+//     class: 'pictograma-capa-lineas',
+//   },
+//   GeometryCollection: {
+//     tooltipText: 'Colección de geometrías',
+//     class: 'pictograma-capa-poligono',
+//   },
+//   Raster: {
+//     tooltipText: 'Raster',
+//     class: 'pictograma-capas',
+//   },
+//   Otro: {
+//     tooltipText: 'Indefinido',
+//     class: 'pictograma-flkt',
+//   },
+//   Remoto: {
+//     tooltipText: 'Capa remota',
+//     class: 'pictograma-colaborar',
+//   },
+//   Error: {
+//     tooltipText: 'No se pudo recuperar la información',
+//     class: 'pictograma-alerta',
+//   },
+// };
 // Para triggerear la función de observar
 let observer;
 const rootEl = ref();
@@ -119,15 +119,15 @@ onUnmounted(() => {
         :etiqueta="catalogueElement.title"
         :value="catalogueElement"
       />
-      <div v-if="resourceType === 'dataLayer'" class="icono">
+      <!-- <div v-if="resourceType === 'dataLayer'" class="icono">
         <span
           class="m-r-1"
           :class="[geomDict[catalogueElement.geomType].class, 'pictograma-mediano picto']"
           aria-hidden="true"
         />
         <span>{{ geomDict[catalogueElement.geomType].tooltipText }}</span>
-      </div>
-      <div v-else class="icono">
+      </div> -->
+      <div class="icono">
         <span
           v-globo-informacion:derecha="catalogueElement.raw_abstract"
           class="m-r-1"

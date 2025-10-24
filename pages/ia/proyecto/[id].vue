@@ -12,13 +12,14 @@ const storeFilters = useFilteredResources();
 const storeResources = useResourcesIAStore();
 const { gnoxyFetch } = useGnoxyUrl();
 
-const resourceType = ref('dataLayer');
+const resourceType = ref('dataTable');
 const recursos = computed(() => storeResources.resources[resourceType.value]);
 const recursosSeleccionados = computed(() => storeResources.selectedResources[resourceType.value]);
 const inputSearch = computed({
   get: () => storeFilters.filters.inputSearch,
   set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
 });
+const mensajeAyudaBuscador = ref('');
 
 const agregaCatalogoModal = ref(null);
 const seleccionCatalogoModal = ref(null);
@@ -27,53 +28,57 @@ const dictTipoRecurso = {
   dataTable: 'tablas',
   document: 'documentos',
 };
-const geomDict = {
-  Point: { tooltipText: 'Capa de puntos', class: 'pictograma-capa-puntos' },
-  MultiPoint: {
-    tooltipText: 'Capa de puntos',
-    class: 'pictograma-capa-puntos',
-  },
-  Polygon: {
-    tooltipText: 'Capa de poligonos',
-    class: 'pictograma-capa-poligono',
-  },
-  MultiPolygon: {
-    tooltipText: 'Capa de poligonos',
-    class: 'pictograma-capa-poligono',
-  },
-  LineString: {
-    tooltipText: 'Capa de lineas',
-    class: 'pictograma-capa-lineas',
-  },
-  LinearRing: {
-    tooltipText: 'Capa de lineas',
-    class: 'pictograma-capa-lineas',
-  },
-  MultiLineString: {
-    tooltipText: 'Capa de lineas',
-    class: 'pictograma-capa-lineas',
-  },
-  GeometryCollection: {
-    tooltipText: 'Colección de geometrías',
-    class: 'pictograma-capa-poligono',
-  },
-  Raster: {
-    tooltipText: 'Raster',
-    class: 'pictograma-capas',
-  },
-  Otro: {
-    tooltipText: 'Indefinido',
-    class: 'pictograma-flkt',
-  },
-  Remoto: {
-    tooltipText: 'Capa remota',
-    class: 'pictograma-colaborar',
-  },
-  Error: {
-    tooltipText: 'No se pudo recuperar la información',
-    class: 'pictograma-alerta',
-  },
+const dictCategoria = {
+  datasets: 'Datos tabulados',
+  documents: 'Documentos',
 };
+// const geomDict = {
+//   Point: { tooltipText: 'Capa de puntos', class: 'pictograma-capa-puntos' },
+//   MultiPoint: {
+//     tooltipText: 'Capa de puntos',
+//     class: 'pictograma-capa-puntos',
+//   },
+//   Polygon: {
+//     tooltipText: 'Capa de poligonos',
+//     class: 'pictograma-capa-poligono',
+//   },
+//   MultiPolygon: {
+//     tooltipText: 'Capa de poligonos',
+//     class: 'pictograma-capa-poligono',
+//   },
+//   LineString: {
+//     tooltipText: 'Capa de lineas',
+//     class: 'pictograma-capa-lineas',
+//   },
+//   LinearRing: {
+//     tooltipText: 'Capa de lineas',
+//     class: 'pictograma-capa-lineas',
+//   },
+//   MultiLineString: {
+//     tooltipText: 'Capa de lineas',
+//     class: 'pictograma-capa-lineas',
+//   },
+//   GeometryCollection: {
+//     tooltipText: 'Colección de geometrías',
+//     class: 'pictograma-capa-poligono',
+//   },
+//   Raster: {
+//     tooltipText: 'Raster',
+//     class: 'pictograma-capas',
+//   },
+//   Otro: {
+//     tooltipText: 'Indefinido',
+//     class: 'pictograma-flkt',
+//   },
+//   Remoto: {
+//     tooltipText: 'Capa remota',
+//     class: 'pictograma-colaborar',
+//   },
+//   Error: {
+//     tooltipText: 'No se pudo recuperar la información',
+//     class: 'pictograma-alerta',
+//   },
+// };
 
 const archivosSeleccionados = ref([]);
 const categoriaSeleccionada = ref(null);
@@ -151,7 +156,7 @@ function cargarArchivosGeonode() {
   const nuevosArchivos = recursosSeleccionados.value.map((file) => ({
     id: Math.floor(Math.random() * 1000000000000000000000),
     nombre: file.title,
-    tipo: obtenerTipoArchivo(file.title),
+    tipo: file.resource_type === 'dataset' ? 'CSV' : obtenerTipoArchivo(file.title),
     archivo: null,
     origen: 'Catálogo',
     pk: file.pk,
@@ -223,13 +228,14 @@ onMounted(async () => {
       nombre: archivo.filename,
       tipo: obtenerTipoArchivo(archivo.filename),
       archivo: null,
-      categoria: archivo.geonode_category,
+      category: archivo.geonode_category,
       origen: archivo.geonode_type,
     }));
     // console.log('arraySources', arraySources);
 
     archivosSeleccionados.value = [...archivosSeleccionados.value, ...archivosBackend];
     archivosTabla.value = [...archivosSeleccionados.value];
+    // console.log('archivosTabla.value', archivosTabla.value);
   }
 
   window.addEventListener('keydown', preventEscape);
@@ -361,7 +367,6 @@ function preventEscape(event) {
   }
 }
 
-const mensajeAyudaBuscador = ref('');
 async function buscarRecurso() {
   if (categoriaSeleccionada.value !== null) {
     // reseteando recursos filtrados por categoría y valores
@@ -415,6 +420,7 @@ async function siguenteAgregar() {
   agregaCatalogoModal.value.cerrarModal();
   seleccionCatalogoModal.value.abrirModal();
   totalCategoria.value = 0;
+  storeResources.resetSelectedByType(resourceType.value);
   storeFilters.buildQueryParams(resourceType.value);
   await buildCategoriesDict();
 }
@@ -528,12 +534,17 @@ async function siguenteAgregar() {
                         class="texto-centrado fondo-color-acento p-1 m-0 texto-color-acento borde borde-redondeado-12"
                         style="width: max-content"
                       >
-                        <span v-if="archivo.category === 'documents'">
-                          <span class="pictograma-documento" />{{ archivo.category }}
+                        <!-- fix: al entrar en configurar proyecto en propio -->
+                        <span v-if="archivo.category === 'Documento'">
+                          <!-- propio -->
+                          <span class="pictograma-documento" />{{ archivo.category }}s
                         </span>
-
+                        <span v-if="archivo.category === 'documents'">
+                          <!-- catalogo -->
+                          <span class="pictograma-documento" />{{ dictCategoria[archivo.category] }}
+                        </span>
                         <span v-if="archivo.category === 'datasets'">
-                          <span class="pictograma-tabla" />{{ archivo.category }}
+                          <span class="pictograma-tabla" />{{ dictCategoria[archivo.category] }}
                         </span>
                       </p>
                     </td>
@@ -585,13 +596,13 @@ async function siguenteAgregar() {
             <p>Selecciona el tipo de fuente de información que deseas agregar a tu proyecto</p>
             <form @keydown.enter.prevent="siguenteAgregar">
               <SisdaiGrupoBotonesRadio class="radio-catalogo" leyenda="" :es_vertical="true">
-                <SisdaiBotonRadio
+                <!-- <SisdaiBotonRadio
                   v-model="resourceType"
                   etiqueta="Capas geográficas"
                   value="dataLayer"
                   name="tipodefuente"
                   :es_obligatorio="true"
-                />
+                /> -->
                 <SisdaiBotonRadio
                   v-model="resourceType"
                   etiqueta="Tabulados de datos"
@@ -752,7 +763,7 @@ async function siguenteAgregar() {
                           <div class="m-b-1">
                             {{ categoriesDict[recurso.category.gn_description]?.inSpanish }}
                           </div>
-                          <div v-if="resourceType === 'dataLayer'" class="icono">
+                          <!-- <div v-if="resourceType === 'dataLayer'" class="icono">
                             <span
                               class="m-r-1"
                               :class="[
@@ -762,8 +773,8 @@ async function siguenteAgregar() {
                               aria-hidden="true"
                             />
                             <span>{{ geomDict[recurso.geomType].tooltipText }}</span>
-                          </div>
-                          <div v-else class="icono">
+                          </div> -->
+                          <div class="icono">
                             <span
                               v-globo-informacion:derecha="recurso.raw_abstract"
                               class="pictograma-informacion pictograma-mediano picto m-r-1"

@@ -36,6 +36,11 @@ const loaderModal = ref(null);
 const loaderTitle = ref('Guardando');
 const loaderMsg = ref('Espere un momento');
 
+const dictCategoria = {
+  datasets: 'Datos tabulados',
+  documents: 'Documentos',
+};
+
 // Si necesitas reaccionar a cambios en el parámetro
 watch(
   () => route.query.proyecto_id,
@@ -428,12 +433,16 @@ onBeforeUnmount(() => {
                         class="texto-centrado fondo-color-acento p-1 m-0 texto-color-acento borde borde-redondeado-12"
                         style="width: max-content"
                       >
-                        <span v-if="fuente.geonode_category === 'Documento'">
-                          <span class="pictograma-documento" />{{ fuente.geonode_category }}
+                        <span v-if="fuente.geonode_category === 'documents'">
+                          <span class="pictograma-documento" />{{
+                            dictCategoria[fuente.geonode_category]
+                          }}
                         </span>
 
-                        <span v-if="fuente.geonode_category === 'Tabla'">
-                          <span class="pictograma-tabla" />{{ fuente.geonode_category }}
+                        <span v-if="fuente.geonode_category === 'datasets'">
+                          <span class="pictograma-tabla" />{{
+                            dictCategoria[fuente.geonode_category]
+                          }}
                         </span>
                       </p>
                     </td>
