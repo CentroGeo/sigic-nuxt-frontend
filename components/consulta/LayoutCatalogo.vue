@@ -41,6 +41,9 @@ const orderedCategories = ref([]);
 const categorizedResources = ref({});
 const selectedCategories = ref([]);
 const modalFiltroAvanzado = ref(null);
+const modalOWSglobal = ref(null);
+//https://geonode.dev.geoint.mx/gs/ows
+const sigicOWS = `${config.public.geoserverUrl}/ows`;
 const isFilterActive = ref(false);
 
 async function fetchTotalByCategory(category) {
@@ -233,6 +236,9 @@ onMounted(async () => {
             instruccional="Selecciona los recursos por permisos"
           >
             <option value="todos">Todos los conjuntos de datos</option>
+            <option v-if="storeConsulta.resourceType === 'dataLayer'" value="remotos">
+              Catálogos externos
+            </option>
             <option value="catalogo">Archivos del catálogo</option>
             <option value="privados">Mis Archivos</option>
           </SisdaiSelector>
@@ -277,12 +283,39 @@ onMounted(async () => {
                   : 'boton-secundario boton-pictograma boton-grande'
               "
               aria-label="Filtro Avanzado"
+              style="position: relative"
               @click="modalFiltroAvanzado.abrirModalBusqueda"
             >
+              <div v-if="isFilterActive" class="circulo"></div>
               <span class="pictograma-filtro" aria-hidden="true" />
             </button>
           </div>
         </ClientOnly>
+        <div
+          v-if="storeConsulta.resourceType === 'dataLayer'"
+          class="flex flex-contenido-centrado"
+          style="gap: 0px"
+        >
+          <button
+            type="button"
+            class="boton-secundario columna-16 boton-chico flex flex-contenido-centrado"
+            @click="modalOWSglobal.abrirModalOWS"
+          >
+            Enlace Open Web Services (OWS)
+          </button>
+          <div class="flex flex-contenido-separado">
+            <p class="columna-12" style="font-size: 1rem">
+              Conecta un catálogo externo para ver sus datos
+            </p>
+            <nuxt-link
+              class="boton-secundario boton-pictograma boton-grande"
+              style="align-self: center"
+              to="/catalogo/servicios-remotos/agregar"
+            >
+              <span aria-hidden="true" class="pictograma-colaborar" />
+            </nuxt-link>
+          </div>
+        </div>
         <UiNumeroElementos :numero="totalResources" :etiqueta="etiquetaElementos" />
       </div>
       <div v-if="isLoading" class="flex flex-contenido-centrado">
@@ -324,6 +357,8 @@ onMounted(async () => {
     @apply-filter="applyAdvancedFilter"
     @reset-filter="resetAdvancedFilter"
   />
+
+  <ConsultaModalOWS ref="modalOWSglobal" key="modal-ows-global" :ows-link="sigicOWS" />
 </template>
 
 <style lang="scss" scoped>
@@ -348,5 +383,16 @@ onMounted(async () => {
       border-bottom: solid 2px var(--color-neutro-3);
     }
   }
+}
+
+.circulo {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background-color: var(--color-informativo-2);
+  border-radius: 50%;
+  right: -4px;
+  top: -4px;
+  z-index: 1;
 }
 </style>
