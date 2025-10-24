@@ -34,7 +34,7 @@ const imagenPreview = ref(null);
 
 const loaderModal = ref(null);
 const loaderTitle = ref('Guardando');
-const loaderMsg = ref('Espere un momento');
+const loaderMsg = ref('Espera mientras se cargan tus archivos');
 
 // Si necesitas reaccionar a cambios en el parámetro
 watch(
