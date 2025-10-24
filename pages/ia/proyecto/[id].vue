@@ -32,53 +32,6 @@ const dictCategoria = {
   datasets: 'Datos tabulados',
   documents: 'Documentos',
 };
-// const geomDict = {
-//   Point: { tooltipText: 'Capa de puntos', class: 'pictograma-capa-puntos' },
-//   MultiPoint: {
-//     tooltipText: 'Capa de puntos',
-//     class: 'pictograma-capa-puntos',
-//   },
-//   Polygon: {
-//     tooltipText: 'Capa de poligonos',
-//     class: 'pictograma-capa-poligono',
-//   },
-//   MultiPolygon: {
-//     tooltipText: 'Capa de poligonos',
-//     class: 'pictograma-capa-poligono',
-//   },
-//   LineString: {
-//     tooltipText: 'Capa de lineas',
-//     class: 'pictograma-capa-lineas',
-//   },
-//   LinearRing: {
-//     tooltipText: 'Capa de lineas',
-//     class: 'pictograma-capa-lineas',
-//   },
-//   MultiLineString: {
-//     tooltipText: 'Capa de lineas',
-//     class: 'pictograma-capa-lineas',
-//   },
-//   GeometryCollection: {
-//     tooltipText: 'Colección de geometrías',
-//     class: 'pictograma-capa-poligono',
-//   },
-//   Raster: {
-//     tooltipText: 'Raster',
-//     class: 'pictograma-capas',
-//   },
-//   Otro: {
-//     tooltipText: 'Indefinido',
-//     class: 'pictograma-flkt',
-//   },
-//   Remoto: {
-//     tooltipText: 'Capa remota',
-//     class: 'pictograma-colaborar',
-//   },
-//   Error: {
-//     tooltipText: 'No se pudo recuperar la información',
-//     class: 'pictograma-alerta',
-//   },
-// };
 
 const archivosSeleccionados = ref([]);
 const categoriaSeleccionada = ref(null);
@@ -596,13 +549,6 @@ async function siguenteAgregar() {
             <p>Selecciona el tipo de fuente de información que deseas agregar a tu proyecto</p>
             <form @keydown.enter.prevent="siguenteAgregar">
               <SisdaiGrupoBotonesRadio class="radio-catalogo" leyenda="" :es_vertical="true">
-                <!-- <SisdaiBotonRadio
-                  v-model="resourceType"
-                  etiqueta="Capas geográficas"
-                  value="dataLayer"
-                  name="tipodefuente"
-                  :es_obligatorio="true"
-                /> -->
                 <SisdaiBotonRadio
                   v-model="resourceType"
                   etiqueta="Tabulados de datos"

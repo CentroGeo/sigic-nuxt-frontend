@@ -5,7 +5,7 @@ import { fetchDoc } from '~/utils/consulta';
 const storeIA = useIAStore();
 const storeResources = useResourcesIAStore();
 
-const documentoModal = ref(null);
+const modalDocumento = ref(null);
 
 const proyecto = computed(() => storeIA.proyectoSeleccionado);
 const arraySources = ref([]);
@@ -87,47 +87,59 @@ const obtenerTipoArchivo = (nombre) => {
   return tipos[extension] || extension.toUpperCase();
 };
 
-const blobedUrl = ref();
+const blobedUrl = ref('');
 const extensionDocumento = ref();
 const blobeTitle = ref('');
+const cargandoRecurso = ref(true);
+const loaderVisModal = ref('');
+const modalTableResource = ref();
 /**
  * Abre un modal con la vista del documento embed
  * @param resource del que se toma el pk para la visualización
  */
 async function openResourceViewEmbed(resource) {
+  loaderVisModal.value = 'Cargando recurso';
+  cargandoRecurso.value = true;
+  blobedUrl.value = '';
+  blobeTitle.value = '';
+  modalDocumento.value.abrirModal();
   // console.log('resource', resource);
   const resourceByPk = await storeResources.fetchResourceByPk(resource.geonode_id);
   // console.log('resourceByPk', resourceByPk);
   if (resourceByPk !== undefined) {
-    if (resourceByPk?.resource_type === 'document') {
-      const linkCargado = resourceByPk.links.find((link) => link.link_type === 'uploaded');
-      extensionDocumento.value = linkCargado.extension;
-      blobeTitle.value = resourceByPk.title;
-      const resourceEmbedURL = resourceByPk.embed_url.replace('/embed', '/link');
-      blobedUrl.value = await fetchDoc(resourceEmbedURL);
-      documentoModal.value.abrirModal();
-    } else {
-      console.warn('no es documento');
-    }
+    blobeTitle.value = resourceByPk.title;
+    const linkCargado = resourceByPk.links.find((link) => link.link_type === 'uploaded');
+    extensionDocumento.value = linkCargado.extension;
+    const resourceEmbedURL = resourceByPk.embed_url.replace('/embed', '/link');
+    blobedUrl.value = await fetchDoc(resourceEmbedURL);
+    cargandoRecurso.value = false;
   } else {
-    console.warn(`El recurso ${resource.geonode_id} no está publicado`);
+    loaderVisModal.value = `El recurso ${resource.geonode_id} no está publicado`;
   }
+}
 
-  /* (resource.tipo_recurso === 'Documentos') {
-    useSelectedResources2Store().add(
-      new SelectedLayer({ uuid: resource.uuid }),
-      resourceTypeDic.document
-    );
-    await navigateTo('/consulta/documentos');
-  } */
-  // if (resource.document_type === 'application/pdf') {
-  //   // TODO: utilizar pk dinámico
-  //   useSelectedResources2Store().add(
-  //     new SelectedLayer({ pk: resource.geonode_id.toString() }),
-  //     resourceTypeDic.document
-  //   );
-  //   await navigateTo('/consulta/documentos');
-  // }
+const loaderFullScreen = ref(false);
+const tablaChild = ref(null);
+const shownModal = ref('');
+/**
+ * Abre un modal con la vista del tabla de atributos
+ * @param resource del que se toma el pk para la visualización
+ */
+async function openResourceViewTable(resource) {
+  // console.log('resource', resource);
+  loaderFullScreen.value = true;
+  const resourceByPk = await storeResources.fetchResourceByPk(resource.geonode_id);
+  // console.log('resourceByPk', resourceByPk);
+  shownModal.value = 'tablaModal';
+  nextTick(() => {
+    tablaChild.value?.abrirModalTabla();
+  });
+  loaderFullScreen.value = false;
+  if (resourceByPk !== undefined) {
+    modalTableResource.value = resourceByPk;
+  } else {
+    loaderVisModal.value = `El recurso ${resource.geonode_id} no está publicado`;
+  }
 }
 </script>
 
@@ -269,7 +281,14 @@ async function openResourceViewEmbed(resource) {
               <tbody>
                 <tr v-for="archivo in arraySources" :key="archivo.id">
                   <td class="p-3">
-                    <a @click="openResourceViewEmbed(archivo)">{{ archivo.filename }}</a>
+                    <a
+                      @click="
+                        obtenerTipoArchivo(archivo.filename) === 'PDF'
+                          ? openResourceViewEmbed(archivo)
+                          : openResourceViewTable(archivo)
+                      "
+                      >{{ archivo.filename }}</a
+                    >
                   </td>
                   <td class="p-3 etiqueta-tabla">
                     <span class="p-x-1 p-y-minimo">{{ obtenerTipoArchivo(archivo.filename) }}</span>
@@ -318,13 +337,28 @@ async function openResourceViewEmbed(resource) {
         </div>
       </div>
     </div>
+    <div v-if="loaderFullScreen">
+      <div class="loaderFullScreen"></div>
+      <div class="logoLoader">
+        <figure>
+          <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
+          <!-- <figcaption class="texto-centrado">Cargando recurso</figcaption> -->
+        </figure>
+      </div>
+    </div>
     <ClientOnly>
-      <SisdaiModal ref="documentoModal" class="modal-grande">
+      <SisdaiModal ref="modalDocumento" class="modal-grande">
         <template #encabezado>
           <h2>{{ blobeTitle }}</h2>
         </template>
         <template #cuerpo>
-          <div class="contenedor-doc-embed">
+          <div v-if="cargandoRecurso" class="flex flex-contenido-centrado">
+            <figure>
+              <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
+              <figcaption class="texto-centrado">{{ loaderVisModal }}</figcaption>
+            </figure>
+          </div>
+          <div v-else class="contenedor-doc-embed">
             <embed
               ref="documentRef"
               class="documento-embebido"
@@ -335,11 +369,36 @@ async function openResourceViewEmbed(resource) {
         </template>
         <template #pie> </template>
       </SisdaiModal>
+
+      <IaModalTabla
+        v-if="shownModal === 'tablaModal'"
+        ref="tablaChild"
+        :key="`${modalTableResource?.pk}_${modalTableResource?.resource_type}`"
+        :selected-element="modalTableResource"
+        tamanio-modal="modal-grande"
+      />
     </ClientOnly>
   </div>
 </template>
 
 <style lang="scss">
+.loaderFullScreen {
+  position: absolute;
+  background-color: var(--opacidad-ligero);
+  height: calc(100vh + 576px);
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  z-index: 9999;
+}
+.logoLoader {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 9999;
+}
 .contenedor-doc-embed {
   height: calc(100vh - 112px);
 }
