@@ -40,7 +40,7 @@ const archivosTabla = ref([]);
 
 const totalResources = ref(0);
 const params = computed(() => storeFilters.filters.queryParams);
-const apiCategorias = `${config.public.geonodeApi}/facets/category`;
+const apiCategorias = `${config.public.geonodeApi}/facets/category?page_size=30`;
 const categoriesDict = ref({});
 const totalCategoria = ref(0);
 const nthElement = 1;
@@ -161,7 +161,7 @@ const loaderMsg = ref('');
 
 onMounted(async () => {
   loaderTitle.value = 'Cargando';
-  loaderMsg.value = 'Espere un momento';
+  loaderMsg.value = 'Espera mientras se cargan tus archivos';
   await nextTick();
   loaderModal.value?.abrirModal();
 

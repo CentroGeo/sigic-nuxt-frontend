@@ -33,7 +33,7 @@ function updateResources() {
   tableResources.value = resources.value.map((d) => ({
     pk: d.pk,
     titulo: d.title,
-    tipo_recurso: 'Datos tabulados',
+    tipo_recurso: 'Datos Tabulados',
     categoria: d.category,
     actualizacion: d.last_updated,
     acciones: 'Ver, Descargar',
@@ -173,7 +173,11 @@ onMounted(async () => {
           <div class="columna-16">
             <ClientOnly>
               <UiTablaAccesibleV2 :variables="variables" :datos="tableResources" />
-              <UiPaginador :total-paginas="totalPags" @cambio="paginaActual = $event" />
+              <UiPaginador
+                :pagina-parent="paginaActual"
+                :total-paginas="totalPags"
+                @cambio="paginaActual = $event"
+              />
             </ClientOnly>
           </div>
         </div>

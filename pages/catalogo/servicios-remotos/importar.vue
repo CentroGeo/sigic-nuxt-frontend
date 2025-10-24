@@ -132,7 +132,11 @@ try {
           </table>
         </form>
         <ClientOnly>
-          <UiPaginador :total-paginas="totalPags" @cambio="paginaActual = $event" />
+          <UiPaginador
+            :pagina-parent="paginaActual"
+            :total-paginas="totalPags"
+            @cambio="paginaActual = $event"
+          />
         </ClientOnly>
         <div class="flex flex-contenido-inicio m-t-3">
           <button

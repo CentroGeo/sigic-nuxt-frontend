@@ -91,6 +91,7 @@ onMounted(async () => {
       <div v-else>
         <div class="contenedor-tabla">
           <UiPaginador
+            :pagina-parent="paginaActual"
             :total-paginas="Math.ceil(totalFeatures / tamanioPagina)"
             @cambio="paginaActual = $event"
           />

@@ -1,5 +1,9 @@
 <script setup>
 const props = defineProps({
+  paginaParent: {
+    type: Number,
+    default: 0,
+  },
   totalPaginas: {
     type: Number,
     default: 1,
@@ -7,13 +11,16 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['cambio']);
-
-const pagina = ref(0);
+//const pagina = ref(0);
+const pagina = computed({
+  get: () => props.paginaParent,
+  set: (value) => emit('cambio', value),
+});
 
 // Emitimos cada que cambia internamente
-watch(pagina, (nuevaPagina) => {
+/* watch(pagina, (nuevaPagina) => {
   emit('cambio', nuevaPagina);
-});
+}); */
 
 const irAPagina = (nueva) => {
   pagina.value = Math.min(Math.max(0, nueva), props.totalPaginas - 1);

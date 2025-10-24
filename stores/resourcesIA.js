@@ -93,6 +93,8 @@ export const useResourcesIAStore = defineStore('resourcesIA', () => {
           })
         );
       }
+
+      //En caso de que los recursos incluyan servicios remotos, revisamos su getCapabilities
       const datum = res.resources;
 
       // TODO: Agregar en los query params el filtrado para indicar que recursos con metadatos

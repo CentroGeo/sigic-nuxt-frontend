@@ -158,11 +158,11 @@ onUnmounted(() => {
       class="id-tag flex m-b-1 m-t-0"
     >
       <span class="pictograma-persona"></span>
-      Mis archivos
+      Mis Archivos
     </div>
     <div v-if="catalogueElement.sourcetype === 'REMOTE'" class="id-tag flex m-b-1 m-t-0">
       <span class="pictograma-colaborar"></span>
-      Catálogo externo
+      Catálogo Externo
     </div>
 
     <div class="tarjeta-elemento">

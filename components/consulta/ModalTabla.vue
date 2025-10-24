@@ -62,6 +62,7 @@ watch([paginaActual], () => {
       <template #cuerpo>
         <div class="contenedor-tabla">
           <UiPaginador
+            :pagina-parent="paginaActual"
             :total-paginas="Math.ceil(totalFeatures / tamanioPagina)"
             @cambio="paginaActual = $event"
           />
@@ -69,7 +70,7 @@ watch([paginaActual], () => {
         </div>
       </template>
 
-      <template #pie>
+      <template v-if="props.selectedElement.sourcetype !== 'REMOTE'" #pie>
         <button
           type="button"
           class="boton-con-contenedor-secundario boton-grande ancho"

@@ -77,6 +77,7 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
       });
     },
     async checkFilling(pk, resource_type) {
+      console.log('Store:', resource_type);
       if (!metadata.pk || metadata.pk !== pk) {
         await this.fill(pk, resource_type);
       }

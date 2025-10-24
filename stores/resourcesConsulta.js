@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { buildUrl, defineGeomType, hasWMS, resourceTypeDic } from '~/utils/consulta';
+import { buildUrl, defineGeomType, resourceTypeDic } from '~/utils/consulta';
 
 export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => {
   const config = useRuntimeConfig();
@@ -77,32 +77,7 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
           })
         );
       }
-
-      //En caso de que los recursos incluyan servicios remotos, revisamos su getCapabilities
-      let datum;
-      if (resourceType !== resourceTypeDic.document) {
-        const service = resourceType === resourceTypeDic.dataLayer ? 'map' : 'table';
-        const sourceTypes = res.resources.map((d) => d.sourcetype);
-        if (sourceTypes.includes('REMOTE')) {
-          // Revisamos si los servicios remotos permiten ver la capa y/o la tabla
-          const locals = res.resources.filter((resource) => resource.sourcetype === 'LOCAL');
-          let remotes = res.resources.filter((resource) => resource.sourcetype === 'REMOTE');
-          const filterRemotes = await Promise.all(
-            remotes.map(async (resource) => {
-              return {
-                resourceValue: resource,
-                resourceHasWms: await hasWMS(resource, service),
-              };
-            })
-          );
-          remotes = filterRemotes.filter((d) => d.resourceHasWms).map((d) => d.resourceValue);
-          datum = locals.concat(remotes);
-        } else {
-          datum = res.resources;
-        }
-      } else {
-        datum = res.resources;
-      }
+      const datum = res.resources;
 
       // TODO: Agregar en los query params el filtrado para indicar que recursos con metadatos
       // completos. Borrar la siguiente linea y cambiar data por datum
@@ -131,7 +106,7 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
         try {
           const res = await gnoxyFetch(url);
           if (!res.ok) {
-            console.error(`Download failed: ${res.status}`);
+            console.error(`Resource fetch failed: ${res.status}`);
             return 'Error';
           }
           const resource = await res.json();

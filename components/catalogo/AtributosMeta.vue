@@ -149,6 +149,13 @@ const typeOptions = {
           </tr>
         </tbody>
       </table>
+      <div
+        v-else-if="sortedAttrs.length === 0"
+        class="contenedor ancho-lectura borde-redondeado-16 texto-color-error fondo-color-error p-3 m-3 flex flex-contenido-centrado"
+      >
+        <span class="pictograma-alerta" />
+        <b> Este recurso no permite la edición de su tabla de atributos.</b>
+      </div>
 
       <p v-else>...Cargando</p>
       <CatalogoBotonesMetadatos

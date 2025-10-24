@@ -34,7 +34,7 @@ const imagenPreview = ref(null);
 
 const loaderModal = ref(null);
 const loaderTitle = ref('Guardando');
-const loaderMsg = ref('Espere un momento');
+const loaderMsg = ref('Espera mientras se cargan tus archivos');
 
 const dictCategoria = {
   datasets: 'Datos tabulados',

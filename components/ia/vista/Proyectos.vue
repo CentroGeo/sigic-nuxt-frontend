@@ -66,8 +66,10 @@ watch(
 
 // Observador carga fuentes al cambiar de proyecto
 watch(proyecto, () => {
-  loadSources();
-  loadContexts();
+  if (proyecto.value?.id) {
+    loadSources();
+    loadContexts();
+  }
 });
 
 const obtenerTipoArchivo = (nombre) => {
@@ -141,6 +143,33 @@ async function openResourceViewTable(resource) {
     loaderVisModal.value = `El recurso ${resource.geonode_id} no está publicado`;
   }
 }
+
+const eliminarModal = ref(null);
+const eliminarLabel = ref('proyecto');
+const delete_id = ref(null);
+
+function openEliminarModal(element_id, type) {
+  eliminarLabel.value = type;
+  eliminarModal.value?.abrirModal();
+
+  delete_id.value = element_id;
+}
+
+const handleDelete = async () => {
+  console.log(eliminarLabel.value);
+  console.log(delete_id.value);
+  if (eliminarLabel.value === 'contexto') {
+    await storeIA.eliminarContexto(delete_id.value);
+
+    loadContexts();
+  } else {
+    await storeIA.eliminarProyecto(delete_id.value);
+
+    storeIA.triggerProjectReload();
+  }
+
+  eliminarModal.value?.cerrarModal();
+};
 </script>
 
 <template>
@@ -169,7 +198,7 @@ async function openResourceViewTable(resource) {
               </nuxt-link>
               <button
                 class="boton boton-secundario boton-chico"
-                @click="storeIA.eliminarProyecto(proyecto.id)"
+                @click="openEliminarModal(proyecto.id, 'proyecto')"
               >
                 Eliminar proyecto
               </button>
@@ -237,7 +266,7 @@ async function openResourceViewTable(resource) {
                     <nuxt-link
                       class="boton-secundario boton-chico"
                       type="button"
-                      @click="storeIA.eliminarContexto(contexto.id)"
+                      @click="openEliminarModal(contexto.id, 'contexto')"
                     >
                       Eliminar contexto
                       <span class="pictograma-eliminar" aria-hidden="true" />
@@ -377,6 +406,31 @@ async function openResourceViewTable(resource) {
         :selected-element="modalTableResource"
         tamanio-modal="modal-grande"
       />
+      <SisdaiModal ref="eliminarModal">
+        <template #encabezado>
+          <h4>Eliminar {{ eliminarLabel }}</h4>
+        </template>
+
+        <template #cuerpo>
+          <p>
+            ¿Deseas eliminar este {{ eliminarLabel }} de forma permanente? Una vez eliminado, se
+            borrará de la memoria y no se podrá recuperar.
+          </p>
+        </template>
+
+        <template #pie>
+          <button
+            type="button"
+            class="boton-secundario boton-chico"
+            @click="eliminarModal?.cerrarModal()"
+          >
+            Cancelar
+          </button>
+          <button type="button" class="boton-primario boton-chico" @click="handleDelete">
+            Eliminar
+          </button>
+        </template>
+      </SisdaiModal>
     </ClientOnly>
   </div>
 </template>

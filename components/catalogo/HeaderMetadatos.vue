@@ -22,7 +22,11 @@ const titleValue = ref();
 //**Esta función lo que hace es determinar los valores de hasSLD, tabla sin geometría
 // y agregar la vista de edición de Atributos del conjunto para capas vectoriales*/
 function updateValues() {
-  if (props.resource.subtype !== 'raster' && props.resource.resource_type !== 'document') {
+  if (
+    props.resource.subtype !== 'raster' &&
+    props.resource.resource_type !== 'document' &&
+    props.resource.sourcetype !== 'REMOTE'
+  ) {
     titleOptions.value['Atributos del Conjunto de Datos'] = {
       nombre: 'AtributosConjunto',
       valor: 4,
