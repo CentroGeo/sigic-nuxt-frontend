@@ -22,14 +22,14 @@ const tableResources = ref([]);
 const tableResources2 = ref([
   {
     titulo: 'Capas lago texcoco',
-    tipo_recurso: 'Capa geográfica',
+    tipo_recurso: 'Capa Geográfica',
     categoria: { gn_description: 'Environment' },
     actualizacion: '22 sep 2025',
     estatus: 'Pendiente',
   },
   {
     titulo: 'Flora_fauna_texcoco',
-    tipo_recurso: 'Datos tabulados',
+    tipo_recurso: 'Datos Tabulados',
     categoria: { gn_description: 'Environment' },
     actualizacion: '22 sep 2025',
     estatus: 'En revisión',
@@ -43,7 +43,7 @@ const tableResources2 = ref([
   },
   {
     titulo: 'Agua balance hídrico',
-    tipo_recurso: 'Capa geográfica',
+    tipo_recurso: 'Capa Geográfica',
     categoria: { gn_description: 'Environment' },
     actualizacion: '22 sep 2025',
     estatus: 'No aceptado',
