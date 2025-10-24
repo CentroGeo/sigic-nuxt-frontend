@@ -187,7 +187,11 @@ onMounted(async () => {
           <div class="columna - 16">
             <ClientOnly>
               <UiTablaAccesibleV2 :variables="variables" :datos="tableResources" />
-              <UiPaginador :total-paginas="totalPags" @cambio="paginaActual = $event" />
+              <UiPaginador
+                :pagina-parent="paginaActual"
+                :total-paginas="totalPags"
+                @cambio="paginaActual = $event"
+              />
             </ClientOnly>
           </div>
         </div>

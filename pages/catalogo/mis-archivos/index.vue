@@ -63,6 +63,8 @@ function tipoRecurso(recurso) {
 function setActions(recurso) {
   if (recurso.sourcetype === 'REMOTE') {
     return 'Editar, Ver, Publicar, Remover';
+  } else if (recurso.is_published === true) {
+    return 'Ver, Descargar';
   } else {
     return 'Editar, Ver, Publicar, Descargar, Remover';
   }
@@ -249,7 +251,11 @@ onMounted(async () => {
             <!-- TODO: implementar paginador -->
             <ClientOnly>
               <UiTablaAccesibleV2 :variables="variables" :datos="tableResources" />
-              <UiPaginador :total-paginas="totalPags" @cambio="paginaActual = $event" />
+              <UiPaginador
+                :pagina-parent="paginaActual"
+                :total-paginas="totalPags"
+                @cambio="paginaActual = $event"
+              />
             </ClientOnly>
           </div>
         </div>

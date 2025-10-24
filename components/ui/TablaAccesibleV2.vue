@@ -16,9 +16,8 @@ const props = defineProps({
     default: '',
   },
 });
-
+const { data } = useAuth();
 const idAleatorio = 'id-' + Math.random().toString(36).substring(2);
-
 const shownModal = ref('ninguno');
 const modalResource = ref(null);
 const downloadOneChild = ref(null);
@@ -48,6 +47,7 @@ function irARutaConQuery(recurso) {
       : isGeometricExtension(recurso.extent)
         ? 'dataLayer'
         : 'dataTable';
+
   navigateTo({
     path: '/catalogo/mis-archivos/editar/MetadatosBasicos',
     query: { data: recurso.pk, type: tipoRecurso },
@@ -66,14 +66,17 @@ function irARutaConQuery(recurso) {
  * @param resource del que se toma el pk para la selección
  */
 async function openResourceView(resource) {
-  if (resource.tipo_recurso === 'Capa geográfica') {
+  if (
+    resource.tipo_recurso === 'Capa Geográfica' ||
+    resource.tipo_recurso === 'Capa Geográfica, Catálogo Externo'
+  ) {
     useSelectedResources2Store().add(
       new SelectedLayer({ pk: resource.pk }),
       resourceTypeDic.dataLayer
     );
     await navigateTo('/consulta/capas');
   }
-  if (resource.tipo_recurso === 'Datos tabulados') {
+  if (resource.tipo_recurso === 'Datos Tabulados') {
     useSelectedResources2Store().add(
       new SelectedLayer({ pk: resource.pk }),
       resourceTypeDic.dataTable
@@ -116,8 +119,10 @@ function formatearFecha(fecha) {
 function tipoRecurso(recurso) {
   if (recurso.tipo_recurso === 'Documentos') {
     return 'document';
+  } else if (recurso.tipo_recurso === 'Capa Geográfica, Catálogo Externo') {
+    return 'Capa Geográfica';
   } else {
-    return recurso.tipo_recurso === 'Capa geográfica' ? 'dataLayer' : 'dataTable';
+    return recurso.tipo_recurso === 'Capa Geográfica' ? 'dataLayer' : 'dataTable';
   }
 }
 
@@ -137,6 +142,19 @@ function notifyDownloadOneChild(resource) {
   nextTick(() => {
     downloadOneChild.value?.abrirModalDescarga();
   });
+}
+
+async function deleteResource(resource) {
+  console.warn('borrar:', resource);
+  const token = data.value?.accessToken;
+  const response = await $fetch('/api/delete-resource', {
+    method: 'DELETE',
+    headers: { token: token, pk: resource.pk },
+  });
+  //TODO: agregar manejo de errores
+  console.warn('La res:', response);
+  const router = useRouter();
+  router.go(0);
 }
 </script>
 
@@ -285,6 +303,7 @@ function notifyDownloadOneChild(resource) {
                   class="boton-pictograma boton-secundario"
                   aria-label="Remover archivo"
                   type="button"
+                  @click="deleteResource(datum)"
                 >
                   <span class="pictograma-eliminar"></span>
                 </button>

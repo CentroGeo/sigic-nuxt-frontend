@@ -62,6 +62,7 @@ watch([paginaActual], () => {
       <template #cuerpo>
         <div class="contenedor-tabla">
           <UiPaginador
+            :pagina-parent="paginaActual"
             :total-paginas="Math.ceil(totalFeatures / tamanioPagina)"
             @cambio="paginaActual = $event"
           />
