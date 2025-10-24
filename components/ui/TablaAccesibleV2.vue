@@ -1,5 +1,6 @@
 <script setup>
-import { categoriesInSpanish, resourceTypeDic } from '~/utils/consulta';
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+import { categoriesInSpanish, resourceTypeDic, wait } from '~/utils/consulta';
 import SelectedLayer from '~/utils/consulta/SelectedLayer';
 /**
  * @typedef {Object} Props
@@ -16,14 +17,17 @@ const props = defineProps({
     default: '',
   },
 });
-const { data } = useAuth();
+//const { data } = useAuth();
 const idAleatorio = 'id-' + Math.random().toString(36).substring(2);
 const shownModal = ref('ninguno');
 const modalResource = ref(null);
 const downloadOneChild = ref(null);
 const releaseRequest = ref(null);
 const resourceType = ref('');
-
+const modalEliminar = ref(null);
+const resourceToDeleteTitle = ref('');
+const resourceToDeletePk = ref(null);
+const isBeingDeleted = ref(false);
 // diccionario para colocar acentos
 const dictTable = ref({
   pk: 'pk',
@@ -143,16 +147,29 @@ function notifyDownloadOneChild(resource) {
     downloadOneChild.value?.abrirModalDescarga();
   });
 }
+function notifyDeleteResource(resource) {
+  resourceToDeleteTitle.value = resource.titulo;
+  resourceToDeletePk.value = resource.pk;
+  isBeingDeleted.value = false;
+  modalEliminar.value?.abrirModal();
+}
 
-async function deleteResource(resource) {
-  console.warn('borrar:', resource);
-  const token = data.value?.accessToken;
+function cancelarEliminar() {
+  modalEliminar.value?.cerrarModal();
+}
+
+async function confirmarEliminar() {
+  isBeingDeleted.value = true;
+  /*   const token = data.value?.accessToken;
   const response = await $fetch('/api/delete-resource', {
     method: 'DELETE',
-    headers: { token: token, pk: resource.pk },
+    headers: { token: token, pk: resourceToDeletePk.value },
   });
   //TODO: agregar manejo de errores
-  console.warn('La res:', response);
+  console.warn('La res:', response);*/
+  await wait(3000);
+  isBeingDeleted.value = false;
+  modalEliminar.value?.cerrarModal();
   const router = useRouter();
   router.go(0);
 }
@@ -303,7 +320,7 @@ async function deleteResource(resource) {
                   class="boton-pictograma boton-secundario"
                   aria-label="Remover archivo"
                   type="button"
-                  @click="deleteResource(datum)"
+                  @click="notifyDeleteResource(datum)"
                 >
                   <span class="pictograma-eliminar"></span>
                 </button>
@@ -444,6 +461,39 @@ async function deleteResource(resource) {
       :resource-type="resourceType"
       :selected-element="modalResource"
     />
+
+    <ClientOnly>
+      <SisdaiModal ref="modalEliminar">
+        <template #encabezado>
+          <h1>¿Deseas eliminar {{ resourceToDeleteTitle }}?</h1>
+        </template>
+        <template #cuerpo>
+          <div class="flex m-y-2 flex-contenido-centrado">
+            <div class="contenedor flex flex-contenido-centrado">
+              <button
+                type="button"
+                class="boton-secundario"
+                :disabled="isBeingDeleted"
+                @click="cancelarEliminar"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                class="boton-primario"
+                :disabled="isBeingDeleted"
+                @click="confirmarEliminar"
+              >
+                Eliminar
+              </button>
+            </div>
+            <div v-if="isBeingDeleted" class="columna-3 color-invertir">
+              <img src="/img/loader.gif" alt="...Cargando" />
+            </div>
+          </div>
+        </template>
+      </SisdaiModal>
+    </ClientOnly>
   </div>
 </template>
 
