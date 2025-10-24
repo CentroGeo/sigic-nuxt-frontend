@@ -218,7 +218,7 @@ onMounted(async () => {
   await buildCategoriesDict();
 
   loaderTitle.value = 'Cargando';
-  loaderMsg.value = 'Espere un momento';
+  loaderMsg.value = 'Espera mientras se cargan tus archivos';
   await nextTick();
   loaderModal.value?.abrirModal();
 
