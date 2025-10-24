@@ -67,6 +67,13 @@ function seleccionarProyecto(proyecto) {
     router.push(`/ia/proyecto/${idSeleccionado}`);
   }
 }
+
+watch(
+  () => storeIA.projectsVersion,
+  () => {
+    loadProjectList();
+  }
+);
 </script>
 
 <template>

@@ -15,6 +15,7 @@ export const useIAStore = defineStore('ia', {
     contextoSeleccionado: null,
     backend: useRuntimeConfig().public.iaBackendUrl,
     chatsVersion: 0,
+    projectsVersion: 0,
   }),
   getters: {
     authToken: () => {
@@ -189,6 +190,7 @@ export const useIAStore = defineStore('ia', {
         this.existenProyectos = true;
       } else {
         this.proyectoSeleccionado = null;
+        this.existenProyectos = false;
       }
 
       //console.log('Proyectos:', data);
@@ -641,6 +643,9 @@ export const useIAStore = defineStore('ia', {
     },
     clearChatActual() {
       this.chatActual = null;
+    },
+    triggerProjectReload() {
+      this.projectsVersion++;
     },
   },
 });
