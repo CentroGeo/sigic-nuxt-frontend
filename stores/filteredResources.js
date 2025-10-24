@@ -51,6 +51,7 @@ export const useFilteredResources = defineStore('filteredResources', () => {
     buildQueryParams(resourceType = storeConsulta.resourceType) {
       filters.resourceType = resourceType;
       const queryParams = {};
+      // Agregamos queryparams correspondientes al tipo de recurso
       if (filters.resourceType !== 'all' && filters.resourceType !== undefined) {
         if (filters.resourceType === 'remotes') {
           queryParams['filter{subtype.in}'] = 'remote';
@@ -60,18 +61,22 @@ export const useFilteredResources = defineStore('filteredResources', () => {
             queryParams['filter{has_geometry}'] = 'true';
           }
           if (filters.resourceType === 'dataTable') {
-            queryParams['filter{subtype.in}'] = ['vector', 'remote'];
+            queryParams['filter{subtype.in}'] = ['vector'];
           }
           if (filters.resourceType === 'document') {
             queryParams['filter{extension}'] = ['pdf', 'txt'];
           }
         }
       }
-      // if (filters.inputSearch !== null && filters.inputSearch.length > 0) {
-      //   const wordsToSearch = filters.inputSearch.split(',').map((d) => cleanInput(d));
-      //   queryParams['search_fields'] = ['title', 'abstract'];
-      //   queryParams['search'] = wordsToSearch;
-      // }
+
+      // Agregamos queryparams para buscar por palabras en los campos de title y abstract
+      if (filters.inputSearch !== null && filters.inputSearch.length > 0) {
+        const wordsToSearch = filters.inputSearch.split(',').map((d) => cleanInput(d));
+        queryParams['search_fields'] = ['title', 'abstract'];
+        queryParams['search'] = wordsToSearch;
+      }
+
+      // Agregamos queryparams para buscar según propietario
       if (filters.owner !== 'todos') {
         if (filters.owner === 'privados') {
           //queryParams['filter{owner.username}'] = userEmail;
@@ -85,21 +90,31 @@ export const useFilteredResources = defineStore('filteredResources', () => {
           queryParams['filter{subtype.in}'] = 'remote';
         }
       }
+
+      // Agregamos queryparams para buscar por categoria
       if (filters.categories.length > 0) {
         queryParams['filter{category.identifier.in}'] = filters.categories;
       }
+
+      // Agregamos queryparams para filtrar por año
       if (filters.years !== null && filters.years.length > 0) {
         const yearList = filters.years.split(',').map((d) => d.trim());
         queryParams['filter{year}'] = yearList;
       }
+
+      // Agregamos query params para buscar por institución
       if (filters.institutions !== null && filters.institutions.length > 0) {
         const institutionList = filters.institutions.split(',').map((d) => cleanInput(d));
         queryParams['filter{institution}'] = institutionList;
       }
+
+      // Agregamos queryparams para filtrar por keywords
       if (filters.keywords !== null && filters.keywords.length > 0) {
         const keywordsList = filters.keywords.split(',').map((d) => cleanInput(d));
         queryParams['filter{keywords.name.in}'] = keywordsList;
       }
+
+      // Agregamos queryparams para ordenar
       if (filters.sort !== null) {
         if (filters.sort === 'fecha_ascendente') {
           queryParams['sort[]'] = 'last_updated';
@@ -114,6 +129,7 @@ export const useFilteredResources = defineStore('filteredResources', () => {
           queryParams['sort[]'] = 'category';
         }
       }
+      // Actualizamos los queryparams
       filters.queryParams = queryParams;
     },
   };

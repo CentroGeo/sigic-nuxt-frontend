@@ -1,7 +1,6 @@
 <script setup>
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { cleanInput } from '~/utils/consulta';
-
 definePageMeta({
   middleware: 'sidebase-auth',
   bodyAttrs: {
@@ -13,6 +12,12 @@ const storeFilters = useFilteredResources();
 const storeCatalogo = useCatalogoStore();
 const section = 'pendientes';
 const params = computed(() => storeFilters.filters.queryParams);
+const hayMetaPendiente = computed(() =>
+  storeResources.myTotalBySection('pendientes') > 0 ? true : false
+);
+const haySolicitudesDeAprobacion = computed(() =>
+  storeResources.myTotalBySection('publicacion') > 0 ? true : false
+);
 const totalResources = computed(() => storeResources.myTotalBySection(section));
 const resources = computed(() => storeResources.mineBySection(section));
 const tableResources = ref([]);
@@ -38,11 +43,15 @@ const inputSearch = computed({
  * @returns {String} ya sea Documentos, Capa geográfica o Datos tabulados
  */
 function tipoRecurso(recurso) {
+  let tipo;
   if (recurso.resource_type === 'document') {
-    return 'Documentos';
+    tipo = 'Documentos';
+  } else if (recurso.sourcetype === 'REMOTE') {
+    tipo = 'Capa Geográfica, Catálogo Externo';
   } else {
-    return isGeometricExtension(recurso.extent) ? 'Capa geográfica' : 'Datos tabulados';
+    tipo = isGeometricExtension(recurso.extent) ? 'Capa Geográfica' : 'Datos Tabulados';
   }
+  return tipo;
 }
 function updateResources() {
   //filteredResources.value = nuevosRecursos;
@@ -102,7 +111,9 @@ watch(
 onMounted(async () => {
   storeFilters.resetAll();
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
-  storeResources.getMyTotal(section, params.value);
+  storeResources.getMyTotal('disponibles', params.value);
+  storeResources.getMyTotal('pendientes', params.value);
+  storeResources.getMyTotal('publicacion', params.value);
   fetchNewData();
 });
 </script>
@@ -115,6 +126,7 @@ onMounted(async () => {
 
     <template #visualizador>
       <main class="contenedor m-b-10 m-t-3">
+        <!--Controles de filtros-->
         <div class="flex">
           <div class="columna-4">
             <ClientOnly>
@@ -195,12 +207,12 @@ onMounted(async () => {
             {
               texto: 'Metadatos pendientes',
               ruta: '/catalogo/mis-archivos/metadatos-pendientes',
-              notificacion: true,
+              notificacion: hayMetaPendiente,
             },
             {
               texto: 'Solicitudes de publicación',
               ruta: '/catalogo/mis-archivos/solicitudes-publicacion',
-              notificacion: true,
+              notificacion: haySolicitudesDeAprobacion,
             },
           ]"
         />
@@ -218,7 +230,11 @@ onMounted(async () => {
             <!-- TODO: implementar paginador -->
             <ClientOnly>
               <UiTablaAccesibleV2 :variables="variables" :datos="tableResources" />
-              <UiPaginador :total-paginas="totalPags" @cambio="paginaActual = $event" />
+              <UiPaginador
+                :pagina-parent="paginaActual"
+                :total-paginas="totalPags"
+                @cambio="paginaActual = $event"
+              />
             </ClientOnly>
           </div>
         </div>

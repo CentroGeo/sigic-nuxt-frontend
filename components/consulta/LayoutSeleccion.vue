@@ -210,7 +210,7 @@ const dividirMapa = computed({
       <ConsultaModalDescarga
         v-if="shownModal === 'downloadOne'"
         ref="downloadOneChild"
-        :key="`${modalResource.pk}_${resourceType}`"
+        :key="`descarga_${modalResource.pk}_${resourceType}`"
         :resource-type="resourceType"
         :selected-element="modalResource"
       />
@@ -218,14 +218,14 @@ const dividirMapa = computed({
       <ConsultaModalOpacidad
         v-if="shownModal === 'opacityModal'"
         ref="opacityChild"
-        :key="`${modalResource.pk}_${resourceType}`"
+        :key="`opacidad_${modalResource.pk}_${resourceType}`"
         :selected-element="modalResource"
       />
 
       <ConsultaModalTabla
         v-if="shownModal === 'tablaModal'"
         ref="tablaChild"
-        :key="`${modalResource.pk}_${resourceType}`"
+        :key="`tabla_${modalResource.pk}_${resourceType}`"
         :selected-element="modalResource"
         @notify-download="changeModal('downloadOne')"
       />
@@ -233,12 +233,18 @@ const dividirMapa = computed({
       <ConsultaModalMapa
         v-if="shownModal === 'mapModal'"
         ref="mapChild"
-        :key="`${modalResource.pk}_${resourceType}`"
+        :key="`mapa_${modalResource.pk}_${resourceType}`"
         :selected-element="modalResource"
         @notify-download="changeModal('downloadOne')"
       />
 
-      <ConsultaModalOWS v-if="shownModal === 'owsModal'" ref="owsChild" :ows-link="owsLink" />
+      <ConsultaModalOWS
+        v-if="shownModal === 'owsModal'"
+        ref="owsChild"
+        :key="`ows_${owsLink}`"
+        :ows-link="owsLink"
+        :service="'OWS'"
+      />
     </div>
   </div>
 </template>

@@ -39,7 +39,11 @@ const rutasSinAtributos = {
   UbicacionLicencias: { siguiente: 'MetadatosOpcionales', anterior: 'MetadatosBasicos' },
   MetadatosOpcionales: { siguiente: undefined, anterior: 'UbicacionLicencias' },
 };
-if (props.resource.subtype === 'vector' && props.resource.resource_type === 'dataset') {
+if (
+  props.resource.resource_type === 'dataset' &&
+  props.resource.subtype === 'vector' &&
+  props.resource.sourcetype !== 'REMOTE'
+) {
   rutas.value = rutasConAtributos;
   lastButton.value = 'AtributosConjunto';
 } else {

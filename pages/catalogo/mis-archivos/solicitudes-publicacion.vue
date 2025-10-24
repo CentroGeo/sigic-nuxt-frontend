@@ -22,14 +22,14 @@ const tableResources = ref([]);
 const tableResources2 = ref([
   {
     titulo: 'Capas lago texcoco',
-    tipo_recurso: 'Capa geográfica',
+    tipo_recurso: 'Capa Geográfica',
     categoria: { gn_description: 'Environment' },
     actualizacion: '22 sep 2025',
     estatus: 'Pendiente',
   },
   {
     titulo: 'Flora_fauna_texcoco',
-    tipo_recurso: 'Datos tabulados',
+    tipo_recurso: 'Datos Tabulados',
     categoria: { gn_description: 'Environment' },
     actualizacion: '22 sep 2025',
     estatus: 'En revisión',
@@ -43,7 +43,7 @@ const tableResources2 = ref([
   },
   {
     titulo: 'Agua balance hídrico',
-    tipo_recurso: 'Capa geográfica',
+    tipo_recurso: 'Capa Geográfica',
     categoria: { gn_description: 'Environment' },
     actualizacion: '22 sep 2025',
     estatus: 'No aceptado',
@@ -70,12 +70,25 @@ const userEmail = data.value.user.email;
  * @returns {String} ya sea Documentos, Capa geográfica o Datos tabulados
  */
 function tipoRecurso(recurso) {
+  let tipo;
   if (recurso.resource_type === 'document') {
-    return 'Documentos';
+    tipo = 'Documentos';
+  } else if (recurso.sourcetype === 'REMOTE') {
+    tipo = 'Capa Geográfica, Catálogo Externo';
   } else {
-    return isGeometricExtension(recurso.extent) ? 'Capa geográfica' : 'Datos tabulados';
+    tipo = isGeometricExtension(recurso.extent) ? 'Capa Geográfica' : 'Datos Tabulados';
+  }
+  return tipo;
+}
+
+function setActions(recurso) {
+  if (recurso.sourcetype === 'REMOTE') {
+    return 'Editar, Ver, Remover';
+  } else {
+    return 'Editar, Ver, Descargar, Remover';
   }
 }
+
 function updateResources() {
   //filteredResources.value = nuevosRecursos;
   // obteniendo datos por las props de la tabla
@@ -88,7 +101,8 @@ function updateResources() {
       tipo_recurso: tipoRecurso(d),
       categoria: d.category,
       actualizacion: d.last_updated,
-      acciones: 'Editar, Ver, Descargar, Remover',
+      //acciones: 'Editar, Ver, Descargar, Remover',
+      acciones: setActions(d),
       uuid: d.uuid,
       resource_type: d.resource_type,
       recurso_completo: d,
@@ -245,6 +259,7 @@ onMounted(async () => {
 
     <template #visualizador>
       <main class="contenedor m-b-10 m-t-3">
+        <!--Controles de filtros-->
         <div class="flex">
           <div class="columna-4">
             <ClientOnly>
@@ -375,7 +390,11 @@ onMounted(async () => {
             <!-- TODO: implementar paginador -->
             <ClientOnly>
               <UiTablaAccesibleV2 :variables="variables" :datos="tableResources2" />
-              <UiPaginador :total-paginas="totalPags" @cambio="paginaActual = $event" />
+              <UiPaginador
+                :pagina-parent="paginaActual"
+                :total-paginas="totalPags"
+                @cambio="paginaActual = $event"
+              />
             </ClientOnly>
           </div>
         </div>

@@ -1,5 +1,6 @@
 <script setup>
-import { categoriesInSpanish, resourceTypeDic } from '~/utils/consulta';
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+import { categoriesInSpanish, resourceTypeDic, wait } from '~/utils/consulta';
 import SelectedLayer from '~/utils/consulta/SelectedLayer';
 /**
  * @typedef {Object} Props
@@ -16,15 +17,17 @@ const props = defineProps({
     default: '',
   },
 });
-
+//const { data } = useAuth();
 const idAleatorio = 'id-' + Math.random().toString(36).substring(2);
-
 const shownModal = ref('ninguno');
 const modalResource = ref(null);
 const downloadOneChild = ref(null);
 const releaseRequest = ref(null);
 const resourceType = ref('');
-
+const modalEliminar = ref(null);
+const resourceToDeleteTitle = ref('');
+const resourceToDeletePk = ref(null);
+const isBeingDeleted = ref(false);
 // diccionario para colocar acentos
 const dictTable = ref({
   pk: 'pk',
@@ -48,6 +51,7 @@ function irARutaConQuery(recurso) {
       : isGeometricExtension(recurso.extent)
         ? 'dataLayer'
         : 'dataTable';
+
   navigateTo({
     path: '/catalogo/mis-archivos/editar/MetadatosBasicos',
     query: { data: recurso.pk, type: tipoRecurso },
@@ -66,14 +70,17 @@ function irARutaConQuery(recurso) {
  * @param resource del que se toma el pk para la selección
  */
 async function openResourceView(resource) {
-  if (resource.tipo_recurso === 'Capa geográfica') {
+  if (
+    resource.tipo_recurso === 'Capa Geográfica' ||
+    resource.tipo_recurso === 'Capa Geográfica, Catálogo Externo'
+  ) {
     useSelectedResources2Store().add(
       new SelectedLayer({ pk: resource.pk }),
       resourceTypeDic.dataLayer
     );
     await navigateTo('/consulta/capas');
   }
-  if (resource.tipo_recurso === 'Datos tabulados') {
+  if (resource.tipo_recurso === 'Datos Tabulados') {
     useSelectedResources2Store().add(
       new SelectedLayer({ pk: resource.pk }),
       resourceTypeDic.dataTable
@@ -116,8 +123,10 @@ function formatearFecha(fecha) {
 function tipoRecurso(recurso) {
   if (recurso.tipo_recurso === 'Documentos') {
     return 'document';
+  } else if (recurso.tipo_recurso === 'Capa Geográfica, Catálogo Externo') {
+    return 'Capa Geográfica';
   } else {
-    return recurso.tipo_recurso === 'Capa geográfica' ? 'dataLayer' : 'dataTable';
+    return recurso.tipo_recurso === 'Capa Geográfica' ? 'dataLayer' : 'dataTable';
   }
 }
 
@@ -137,6 +146,32 @@ function notifyDownloadOneChild(resource) {
   nextTick(() => {
     downloadOneChild.value?.abrirModalDescarga();
   });
+}
+function notifyDeleteResource(resource) {
+  resourceToDeleteTitle.value = resource.titulo;
+  resourceToDeletePk.value = resource.pk;
+  isBeingDeleted.value = false;
+  modalEliminar.value?.abrirModal();
+}
+
+function cancelarEliminar() {
+  modalEliminar.value?.cerrarModal();
+}
+
+async function confirmarEliminar() {
+  isBeingDeleted.value = true;
+  /*   const token = data.value?.accessToken;
+  const response = await $fetch('/api/delete-resource', {
+    method: 'DELETE',
+    headers: { token: token, pk: resourceToDeletePk.value },
+  });
+  //TODO: agregar manejo de errores
+  console.warn('La res:', response);*/
+  await wait(3000);
+  isBeingDeleted.value = false;
+  modalEliminar.value?.cerrarModal();
+  const router = useRouter();
+  router.go(0);
 }
 </script>
 
@@ -178,25 +213,50 @@ function notifyDownloadOneChild(resource) {
             }}
 
             <!-- Tipo de recurso -->
-            <div
-              v-if="variable === 'tipo_recurso'"
-              class="texto-centrado fondo-color-acento p-1 texto-color-acento borde borde-redondeado-12"
-              style="width: max-content"
-            >
-              <span v-if="datum[variable] === 'Documentos'">
-                <span class="pictograma-documento"></span>
-                {{ datum[variable] }}
-              </span>
+            <div v-if="variable === 'tipo_recurso'" class="flex" style="gap: 8px">
+              <div
+                v-if="datum[variable] === 'Documentos'"
+                class="texto-centrado fondo-color-acento p-1 texto-color-acento borde borde-redondeado-12"
+                style="width: max-content"
+              >
+                <span>
+                  <span class="pictograma-documento"></span>
+                  {{ datum[variable] }}
+                </span>
+              </div>
 
-              <span v-if="datum[variable] === 'Datos tabulados'">
-                <span class="pictograma-tabla" />
-                {{ datum[variable] }}
-              </span>
+              <div
+                v-if="datum[variable] === 'Datos Tabulados'"
+                class="texto-centrado fondo-color-acento p-1 texto-color-acento borde borde-redondeado-12"
+                style="width: max-content"
+              >
+                <span>
+                  <span class="pictograma-tabla" />
+                  {{ datum[variable] }}
+                </span>
+              </div>
 
-              <span v-if="datum[variable] === 'Capa geográfica'">
-                <span class="pictograma-capas" />
-                {{ datum[variable] }}
-              </span>
+              <div
+                v-if="datum[variable].split(', ').includes('Capa Geográfica')"
+                class="texto-centrado fondo-color-acento p-1 texto-color-acento borde borde-redondeado-12"
+                style="width: max-content"
+              >
+                <span>
+                  <span class="pictograma-capas" />
+                  {{ 'Capa Geográfica' }}
+                </span>
+              </div>
+
+              <div
+                v-if="datum[variable].split(', ').includes('Catálogo Externo')"
+                class="texto-centrado fondo-color-acento p-1 texto-color-acento borde borde-redondeado-12"
+                style="width: max-content"
+              >
+                <span>
+                  <span class="pictograma-colaborar" />
+                  {{ 'Catálogo Externo' }}
+                </span>
+              </div>
             </div>
 
             <!-- Categoría -->
@@ -213,7 +273,60 @@ function notifyDownloadOneChild(resource) {
 
             <!-- Acciones -->
             <div v-if="variable === 'acciones'">
-              <div v-if="datum[variable] === 'Editar, Ver, Descargar, Remover'" class="flex-width">
+              <div class="flex-width">
+                <button
+                  v-if="datum[variable].split(', ').includes('Editar')"
+                  v-globo-informacion:izquierda="'Editar'"
+                  class="boton-pictograma boton-secundario"
+                  aria-label="Editar metadatos"
+                  type="button"
+                  @click="irARutaConQuery(datum)"
+                >
+                  <span class="pictograma-editar"></span>
+                </button>
+                <button
+                  v-if="datum[variable].split(', ').includes('Ver')"
+                  v-globo-informacion:izquierda="'Ver en visualizador'"
+                  class="boton-pictograma boton-secundario"
+                  aria-label="Ver en visualizador"
+                  type="button"
+                  @click="openResourceView(datum)"
+                >
+                  <span class="pictograma-previsualizar"></span>
+                </button>
+                <button
+                  v-if="datum[variable].split(', ').includes('Publicar')"
+                  v-globo-informacion:izquierda="'Publicar en catálogo'"
+                  class="boton-pictograma boton-secundario"
+                  aria-label="Publicar en catálogo"
+                  type="button"
+                  @click="notifyReleaseRequest(datum)"
+                >
+                  <span class="pictograma-ayuda"></span>
+                </button>
+                <button
+                  v-if="datum[variable].split(', ').includes('Descargar')"
+                  v-globo-informacion:izquierda="'Descargar'"
+                  class="boton-pictograma boton-secundario"
+                  aria-label="Descargar archivo"
+                  type="button"
+                  @click="notifyDownloadOneChild(datum)"
+                >
+                  <span class="pictograma-archivo-descargar"></span>
+                </button>
+                <button
+                  v-if="datum[variable].split(', ').includes('Remover')"
+                  v-globo-informacion:izquierda="'Remover'"
+                  class="boton-pictograma boton-secundario"
+                  aria-label="Remover archivo"
+                  type="button"
+                  @click="notifyDeleteResource(datum)"
+                >
+                  <span class="pictograma-eliminar"></span>
+                </button>
+              </div>
+
+              <!--               <div v-if="datum[variable] === 'Editar, Ver, Descargar, Remover'" class="flex-width">
                 <button
                   v-globo-informacion:izquierda="'Editar'"
                   class="boton-pictograma boton-secundario"
@@ -297,7 +410,7 @@ function notifyDownloadOneChild(resource) {
                 >
                   <span class="pictograma-eliminar"></span>
                 </button>
-              </div>
+              </div> -->
             </div>
 
             <!-- Estatus -->
@@ -348,6 +461,39 @@ function notifyDownloadOneChild(resource) {
       :resource-type="resourceType"
       :selected-element="modalResource"
     />
+
+    <ClientOnly>
+      <SisdaiModal ref="modalEliminar">
+        <template #encabezado>
+          <h1>¿Deseas eliminar {{ resourceToDeleteTitle }}?</h1>
+        </template>
+        <template #cuerpo>
+          <div class="flex m-y-2 flex-contenido-centrado">
+            <div class="contenedor flex flex-contenido-centrado">
+              <button
+                type="button"
+                class="boton-secundario"
+                :disabled="isBeingDeleted"
+                @click="cancelarEliminar"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                class="boton-primario"
+                :disabled="isBeingDeleted"
+                @click="confirmarEliminar"
+              >
+                Eliminar
+              </button>
+            </div>
+            <div v-if="isBeingDeleted" class="columna-3 color-invertir">
+              <img src="/img/loader.gif" alt="...Cargando" />
+            </div>
+          </div>
+        </template>
+      </SisdaiModal>
+    </ClientOnly>
   </div>
 </template>
 

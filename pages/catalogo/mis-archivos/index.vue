@@ -13,6 +13,12 @@ const storeFilters = useFilteredResources();
 const storeCatalogo = useCatalogoStore();
 const section = 'disponibles';
 const params = computed(() => storeFilters.filters.queryParams);
+const hayMetaPendiente = computed(() =>
+  storeResources.myTotalBySection('pendientes') > 0 ? true : false
+);
+const haySolicitudesDeAprobacion = computed(() =>
+  storeResources.myTotalBySection('publicacion') > 0 ? true : false
+);
 const totalResources = computed(() => storeResources.myTotalBySection(section));
 const resources = computed(() => storeResources.mineBySection(section));
 const tableResources = ref([]);
@@ -20,9 +26,7 @@ const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion',
 const paginaActual = ref(0);
 const tamanioPagina = 10;
 const totalPags = computed(() => Math.ceil(totalResources.value / tamanioPagina));
-const hayMetaPendiente = computed(() =>
-  storeResources.myTotalBySection('pendientes') > 0 ? true : false
-);
+
 const modalFiltroAvanzado = ref(null);
 const isFilterActive = ref(false);
 const seleccionOrden = computed({
@@ -45,10 +49,24 @@ const inputSearch = computed({
  * @returns {String} ya sea Documentos, Capa geográfica o Datos tabulados
  */
 function tipoRecurso(recurso) {
+  let tipo;
   if (recurso.resource_type === 'document') {
-    return 'Documentos';
+    tipo = 'Documentos';
+  } else if (recurso.sourcetype === 'REMOTE') {
+    tipo = 'Capa Geográfica, Catálogo Externo';
   } else {
-    return isGeometricExtension(recurso.extent) ? 'Capa geográfica' : 'Datos tabulados';
+    tipo = isGeometricExtension(recurso.extent) ? 'Capa Geográfica' : 'Datos Tabulados';
+  }
+  return tipo;
+}
+
+function setActions(recurso) {
+  if (recurso.sourcetype === 'REMOTE') {
+    return 'Editar, Ver, Publicar, Remover';
+  } else if (recurso.is_published === true) {
+    return 'Ver, Descargar';
+  } else {
+    return 'Editar, Ver, Publicar, Descargar, Remover';
   }
 }
 function updateResources() {
@@ -60,7 +78,8 @@ function updateResources() {
     tipo_recurso: tipoRecurso(d),
     categoria: d.category,
     actualizacion: d.last_updated,
-    acciones: 'Editar, Ver, Descargar, Remover',
+    //acciones: 'Editar, Ver, Publicar, Descargar, Remover',
+    acciones: setActions(d),
     uuid: d.uuid,
     resource_type: d.resource_type,
     extent: d.extent,
@@ -109,7 +128,10 @@ watch(
 onMounted(async () => {
   storeFilters.resetAll();
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
-  storeResources.getMyTotal(section, params.value);
+  storeResources.getMyTotal('disponibles', params.value);
+  storeResources.getMyTotal('pendientes', params.value);
+  storeResources.getMyTotal('publicacion', params.value);
+
   fetchNewData();
 });
 </script>
@@ -122,6 +144,7 @@ onMounted(async () => {
 
     <template #visualizador>
       <main class="contenedor m-b-10 m-t-3">
+        <!--Controles de filtros-->
         <div class="flex">
           <div class="columna-4">
             <ClientOnly>
@@ -207,7 +230,7 @@ onMounted(async () => {
             {
               texto: 'Solicitudes de publicación',
               ruta: '/catalogo/mis-archivos/solicitudes-publicacion',
-              notificacion: false,
+              notificacion: haySolicitudesDeAprobacion,
             },
           ]"
         />
@@ -228,7 +251,11 @@ onMounted(async () => {
             <!-- TODO: implementar paginador -->
             <ClientOnly>
               <UiTablaAccesibleV2 :variables="variables" :datos="tableResources" />
-              <UiPaginador :total-paginas="totalPags" @cambio="paginaActual = $event" />
+              <UiPaginador
+                :pagina-parent="paginaActual"
+                :total-paginas="totalPags"
+                @cambio="paginaActual = $event"
+              />
             </ClientOnly>
           </div>
         </div>

@@ -21,6 +21,7 @@ const selectedOption = ref();
 const tagTitle = ref();
 const isDownloadActive = ref(false);
 const hasDownloadFailed = ref(false);
+const isDownloadSlow = ref(false);
 const downloadError = ref('Verifica tu conexión a internet e inténtalo de nuevo.');
 const docExtension = ref(
   resourceType.value === 'document'
@@ -36,6 +37,7 @@ function abrirModalDescarga() {
   tagTitle.value = optionsDict[resourceType.value]['title'];
   selectedOption.value = optionsList.value.map((d) => d.label)[0];
   isDownloadActive.value = false;
+  isDownloadSlow.value = false;
   hasDownloadFailed.value = false;
   downloadError.value = 'Verifica tu conexión a internet e inténtalo de nuevo.';
 }
@@ -118,12 +120,23 @@ const optionsDict = {
 async function descargarClicked() {
   isDownloadActive.value = true;
   const selectedFunction = optionsList.value.find((d) => d.label === selectedOption.value);
+
+  //La siguiente línea se pone para agregar alerta si el proceso de descarga toma mas de 3 segundos
+  const slowProcessTimeout = setTimeout(() => {
+    isDownloadSlow.value = true;
+  }, 3000);
+
   const downloadStatus = await selectedFunction.action();
+
+  // Si toma menos de 3 segundos, se interrumple el timer
+  clearTimeout(slowProcessTimeout);
+  isDownloadSlow.value = false;
+
   if (downloadStatus === 'Error') {
     hasDownloadFailed.value = true;
   } else if (downloadStatus === 'DownloadLimitsExceeded') {
     hasDownloadFailed.value = true;
-    downloadError.value = 'El tamaño del archivo excede los límites de descarga permitidos.';
+    downloadError.value = 'El archivo es muy pesado.';
   }
   isDownloadActive.value = false;
 }
@@ -144,7 +157,8 @@ defineExpose({
             <img src="/img/loader.gif" alt="...Cargando" class="loader" />
           </div>
           <p class="columna-12">
-            Descarga en curso. El proceso está tardando más tiempo de lo habitual.
+            Descarga en curso.
+            <span v-if="isDownloadSlow">El proceso está tardando más tiempo de lo habitual.</span>
           </p>
         </div>
         <div

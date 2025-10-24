@@ -34,7 +34,7 @@ const inputSearch = computed({
 });
 const nthElement = 1;
 const isLoggedIn = ref(data.value ? true : false);
-const apiCategorias = `${config.public.geonodeApi}/facets/category`;
+const apiCategorias = `${config.public.geonodeApi}/facets/category?page_size=30`;
 const filteredResources = ref([]);
 const categoriesDict = ref({});
 const orderedCategories = ref([]);
@@ -43,7 +43,7 @@ const selectedCategories = ref([]);
 const modalFiltroAvanzado = ref(null);
 const modalOWSglobal = ref(null);
 //https://geonode.dev.geoint.mx/gs/ows
-const sigicOWS = `${config.public.geoserverUrl}/ows`;
+const sigicOWS = `${config.public.baseURL}/catalogue/csw`;
 const isFilterActive = ref(false);
 
 async function fetchTotalByCategory(category) {
@@ -109,12 +109,12 @@ async function buildCategoriesDict() {
 }
 
 async function callResources(categoria) {
-  categoriesDict.value[categoria].isLoading = true;
   const total = categoriesDict.value[categoria].total;
   const count = categorizedResources.value[categoria]
     ? categorizedResources.value[categoria].length
     : 0;
-  if (total > count) {
+  if (total > count && selectedCategories.value.includes(categoria)) {
+    categoriesDict.value[categoria].isLoading = true;
     const preParams = params.value;
     preParams['filter{category.identifier.in}'] = categoriesValues[categoria];
     await storeResources.fillByCategory(
@@ -123,8 +123,8 @@ async function callResources(categoria) {
       preParams
     );
     categoriesDict.value[categoria].page += 1;
+    categoriesDict.value[categoria].isLoading = false;
   }
-  categoriesDict.value[categoria].isLoading = false;
 }
 
 function getNthElements() {
@@ -168,6 +168,8 @@ function updateResources(nuevosRecursos) {
 async function setSelectedCategory(categoria) {
   if (selectedCategories.value.includes(categoria)) {
     selectedCategories.value = selectedCategories.value.filter((c) => c !== categoria);
+    //categoriesDict.value[categoria].page = 1;
+    //categoriesDict.value[categoria].isLoading = false;
   } else {
     selectedCategories.value.push(categoria);
   }
@@ -206,7 +208,8 @@ watch(params, async () => {
   isLoading.value = true;
   totalResources.value = 0;
   storeResources.resetByType();
-  buildCategoriesDict();
+  selectedCategories.value = [];
+  await buildCategoriesDict();
   isLoading.value = false;
 });
 
@@ -301,7 +304,7 @@ onMounted(async () => {
             class="boton-secundario columna-16 boton-chico flex flex-contenido-centrado"
             @click="modalOWSglobal.abrirModalOWS"
           >
-            Enlace Open Web Services (OWS)
+            Enlace Catalogue Service for the Web (CSW)
           </button>
           <div class="flex flex-contenido-separado">
             <p class="columna-12" style="font-size: 1rem">
@@ -319,7 +322,7 @@ onMounted(async () => {
         <UiNumeroElementos :numero="totalResources" :etiqueta="etiquetaElementos" />
       </div>
       <div v-if="isLoading" class="flex flex-contenido-centrado">
-        <img src="/img/loader.gif" alt="...Cargando" height="60px" />
+        <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="60px" />
       </div>
       <div v-if="orderedCategories.length > 0 && !isLoading">
         <div v-for="category in orderedCategories" :key="category" class="m-y-1">
@@ -344,8 +347,16 @@ onMounted(async () => {
               @trigger-fetch="fetchNewData"
             />
           </div>
-          <div v-if="categoriesDict[category]?.isLoading" class="flex flex-contenido-centrado">
-            <img src="/img/loader.gif" alt="...Cargando" height="40px" />
+          <div
+            v-if="categoriesDict[category]?.isLoading && selectedCategories.includes(category)"
+            class="flex flex-contenido-centrado"
+          >
+            <img
+              class="color-invertir m-y-2"
+              src="/img/loader.gif"
+              alt="...Cargando"
+              height="40px"
+            />
           </div>
         </div>
       </div>
@@ -358,7 +369,12 @@ onMounted(async () => {
     @reset-filter="resetAdvancedFilter"
   />
 
-  <ConsultaModalOWS ref="modalOWSglobal" key="modal-ows-global" :ows-link="sigicOWS" />
+  <ConsultaModalOWS
+    ref="modalOWSglobal"
+    key="modal-ows-global"
+    :ows-link="sigicOWS"
+    :service="'CSW'"
+  />
 </template>
 
 <style lang="scss" scoped>
