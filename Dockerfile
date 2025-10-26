@@ -2,14 +2,7 @@
 FROM node:22 AS builder
 
 ARG NODE_ENV
-ARG NUXT_PUBLIC_APP_BASE_PATH
-ARG NUXT_PUBLIC_BASE_URL
-ARG NUXT_PUBLIC_AUTH_BASE_URL
-
 ENV NODE_ENV=${NODE_ENV:-production}
-ENV NUXT_PUBLIC_APP_BASE_PATH=${NUXT_PUBLIC_APP_BASE_PATH:-/}
-ENV NUXT_PUBLIC_BASE_URL=${NUXT_PUBLIC_BASE_URL:-http://localhost:3000}
-ENV NUXT_PUBLIC_AUTH_BASE_URL=${NUXT_PUBLIC_AUTH_BASE_URL:-api/auth}
 
 WORKDIR /app
 
@@ -29,8 +22,6 @@ RUN touch package-lock.json  \
     && rm -rf package-lock.json  \
     && npm install --include=dev
 
-#    && sed -i 's|// *originEnvKey:|originEnvKey:|g' nuxt.config.ts
-
 RUN npm run build
 
 
@@ -38,14 +29,7 @@ RUN npm run build
 FROM node:22-slim
 
 ARG NODE_ENV
-ARG NUXT_PUBLIC_APP_BASE_PATH
-ARG NUXT_PUBLIC_BASE_URL
-ARG NUXT_PUBLIC_AUTH_BASE_URL
-
 ENV NODE_ENV=${NODE_ENV:-production}
-ENV NUXT_PUBLIC_APP_BASE_PATH=${NUXT_PUBLIC_APP_BASE_PATH:-/}
-ENV NUXT_PUBLIC_BASE_URL=${NUXT_PUBLIC_BASE_URL:-http://localhost:3000}
-ENV NUXT_PUBLIC_AUTH_BASE_URL=${NUXT_PUBLIC_AUTH_BASE_URL:-api/auth}
 
 WORKDIR /app
 
