@@ -109,8 +109,6 @@ watch(
     const attributesPks = Object.keys(attributos);
     const { news, olds } = arrayNewsOlds(attributesPks, selectedPks);
     news.forEach((r) => addAttribute(r));
-    // este disable lo puse temporalmente para evitar el error de dynamic delete pero hay que revisarlo bien
-    /* eslint-disable @typescript-eslint/no-dynamic-delete */
     olds.forEach((resource) => delete attributos[resource]);
   },
   { deep: true }
