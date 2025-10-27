@@ -447,7 +447,9 @@ export const useIAStore = defineStore('ia', {
         });
 
         if (archivosEliminados.length > 0) {
-          formData.append('delete_files[]', archivosEliminados);
+          archivosEliminados.forEach((element) => {
+            formData.append('delete_files[]', element);
+          });
         }
 
         // Log para depuración
