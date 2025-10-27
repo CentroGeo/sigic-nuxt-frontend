@@ -116,7 +116,7 @@ async function openResourceViewEmbed(resource) {
     blobedUrl.value = await fetchDoc(resourceEmbedURL);
     cargandoRecurso.value = false;
   } else {
-    loaderVisModal.value = `El recurso ${resource.geonode_id} no está publicado`;
+    loaderVisModal.value = `El recurso '${resource.filename}'' no está publicado`;
   }
 }
 
@@ -143,7 +143,7 @@ async function openResourceViewTable(resource) {
     modalTableResource.value = resourceByPk;
   } else {
     modalTableResource.value = {};
-    loaderVisModal.value = `El recurso ${resource.geonode_id} no está publicado`;
+    loaderVisModal.value = `El recurso '${resource.filename}' no está publicado`;
   }
 }
 

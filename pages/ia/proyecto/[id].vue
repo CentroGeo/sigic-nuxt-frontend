@@ -121,9 +121,12 @@ function cargarArchivosGeonode() {
   // console.log('archivosTabla.value', archivosTabla.value);
 }
 
+const recursosCargando = ref(false);
 async function seleccionarCategoria(categoria) {
   if (categoriaSeleccionada.value !== categoriesDict.value[categoria].label) {
     // reseteando recursos filtrados por categoría y valores
+    recursosCargando.value = true;
+    storeFilters.updateFilter('inputSearch', '');
     totalCategoria.value = 0;
     storeResources.resetByType(resourceType.value);
     categoriesDict.value[categoria].page = 1;
@@ -133,11 +136,13 @@ async function seleccionarCategoria(categoria) {
     // construyendo parámetros para la petición
     storeFilters.buildQueryParams(resourceType.value);
     totalCategoria.value = categoriesDict.value[categoriaSeleccionada.value].total;
+
     // fetch de recursos paginados totales
     await storeResources.fetchByCategory(resourceType.value, 1, params.value);
     storeResources.setNthElements(resourceType.value, [
       recursos.value[recursos.value.length - nthElement].pk,
     ]);
+    recursosCargando.value = false;
   }
 }
 
@@ -323,6 +328,7 @@ function preventEscape(event) {
 async function buscarRecurso() {
   if (categoriaSeleccionada.value !== null) {
     // reseteando recursos filtrados por categoría y valores
+    recursosCargando.value = true;
     mensajeAyudaBuscador.value = '';
     totalCategoria.value = 0;
     storeResources.resetByType(resourceType.value);
@@ -337,6 +343,7 @@ async function buscarRecurso() {
     storeResources.setNthElements(resourceType.value, [
       recursos.value[recursos.value.length - nthElement].pk,
     ]);
+    recursosCargando.value = false;
   } else {
     mensajeAyudaBuscador.value = 'Falta seleccionar categoría.';
   }
@@ -345,6 +352,7 @@ async function buscarRecurso() {
 async function removerBusqueda() {
   storeFilters.updateFilter('inputSearch', '');
   if (categoriaSeleccionada.value !== null && inputSearch.value === '') {
+    recursosCargando.value = true;
     totalCategoria.value = 0;
     storeResources.resetByType(resourceType.value);
     categoriesDict.value[categoriaSeleccionada.value].page = 1;
@@ -356,6 +364,7 @@ async function removerBusqueda() {
     storeResources.setNthElements(resourceType.value, [
       recursos.value[recursos.value.length - nthElement].pk,
     ]);
+    recursosCargando.value = false;
   }
 }
 
@@ -373,6 +382,7 @@ async function siguenteAgregar() {
   agregaCatalogoModal.value.cerrarModal();
   seleccionCatalogoModal.value.abrirModal();
   totalCategoria.value = 0;
+  storeResources.resetByType(resourceType.value);
   storeResources.resetSelectedByType(resourceType.value);
   storeFilters.buildQueryParams(resourceType.value);
   await buildCategoriesDict();
@@ -639,7 +649,17 @@ async function siguenteAgregar() {
                         </button>
                       </li>
                     </ul>
-                    <p v-else>...cargando</p>
+                    <div v-else class="flex flex-contenido-centrado">
+                      <figure class="">
+                        <img
+                          class="color-invertir"
+                          src="/img/loader.gif"
+                          alt="Loader de SIGIC"
+                          height="128px"
+                        />
+                        <figcaption class="texto-centrado">Cargando categorías</figcaption>
+                      </figure>
+                    </div>
                   </div>
                 </div>
 
@@ -655,6 +675,17 @@ async function siguenteAgregar() {
                       "
                       class="m-b-3"
                     />
+                    <div v-if="recursosCargando" class="flex flex-contenido-centrado">
+                      <figure class="">
+                        <img
+                          class="color-invertir"
+                          src="/img/loader.gif"
+                          alt="Loader de SIGIC"
+                          height="128px"
+                        />
+                        <figcaption class="texto-centrado">Cargando recursos</figcaption>
+                      </figure>
+                    </div>
                     <ul class="lista-sin-estilo overflowYAutoHeight">
                       <li v-for="(recurso, index) in recursos" :key="index" class="m-y-0">
                         <IaElementoCatalogo

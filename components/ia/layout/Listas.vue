@@ -33,7 +33,7 @@ const loadProjectList = async () => {
   // Consulta proyectos
   arrayProjects = await storeIA.getProjectsList();
 
-  catalogo.value = arrayProjects;
+  catalogo.value = arrayProjects.reverse();
   catalogoFiltrado.value = arrayProjects;
 };
 

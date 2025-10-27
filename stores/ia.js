@@ -186,7 +186,7 @@ export const useIAStore = defineStore('ia', {
       this.proyectos = data;
 
       if (data.length > 0) {
-        this.proyectoSeleccionado = data[0];
+        this.proyectoSeleccionado = data[data.length - 1];
         this.existenProyectos = true;
       } else {
         this.proyectoSeleccionado = null;
