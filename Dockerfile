@@ -20,6 +20,7 @@ COPY . .
 
 RUN touch package-lock.json  \
     && rm -rf package-lock.json  \
+    && npm install git+https://github.com/CentroGeo/sisdai-mapas.git#fix/wms-fetch --save \
     && npm install --include=dev
 
 RUN npm run build
