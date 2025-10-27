@@ -18,10 +18,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY . .
 
-RUN touch package-lock.json
-RUN rm -rf package-lock.json
-RUN npm install git+https://github.com/CentroGeo/sisdai-mapas.git#fix/wms-fetch --save
-RUN npm install --include=dev
+# 🔧 Romper herencia de submódulo solo si se especifica
+ARG IS_NUXT_SUBMODULE
+RUN if [ "$IS_NUXT_SUBMODULE" = "true" ]; then \
+      echo "⚙️  Removing Git metadata (submodule context detected)"; \
+      rm -rf .git .gitmodules; \
+    else \
+      echo "✅ Keeping Git metadata (standalone mode)"; \
+    fi
+
+RUN touch package-lock.json  \
+    && npm cache clean --force \
+    && rm -rf package-lock.json  \
+    && npm install git+https://github.com/CentroGeo/sisdai-mapas.git#fix/wms-fetch --save \
+    && npm install --include=dev
 
 RUN npm run build
 
