@@ -94,7 +94,7 @@ const extensionDocumento = ref();
 const blobeTitle = ref('');
 const cargandoRecurso = ref(true);
 const loaderVisModal = ref('');
-const modalTableResource = ref();
+const modalTableResource = ref({});
 /**
  * Abre un modal con la vista del documento embed
  * @param resource del que se toma el pk para la visualización
@@ -129,6 +129,8 @@ const shownModal = ref('');
  */
 async function openResourceViewTable(resource) {
   // console.log('resource', resource);
+  loaderVisModal.value = 'Cargando recurso';
+
   loaderFullScreen.value = true;
   const resourceByPk = await storeResources.fetchResourceByPk(resource.geonode_id);
   // console.log('resourceByPk', resourceByPk);
@@ -140,6 +142,7 @@ async function openResourceViewTable(resource) {
   if (resourceByPk !== undefined) {
     modalTableResource.value = resourceByPk;
   } else {
+    modalTableResource.value = {};
     loaderVisModal.value = `El recurso ${resource.geonode_id} no está publicado`;
   }
 }
@@ -404,7 +407,7 @@ const handleDelete = async () => {
         ref="tablaChild"
         :key="`${modalTableResource?.pk}_${modalTableResource?.resource_type}`"
         :selected-element="modalTableResource"
-        tamanio-modal="modal-grande"
+        :mensaje-modal="loaderVisModal"
       />
       <SisdaiModal ref="eliminarModal">
         <template #encabezado>

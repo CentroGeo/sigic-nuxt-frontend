@@ -6,6 +6,10 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  mensajeModal: {
+    type: String,
+    default: '',
+  },
 });
 
 const modalTabla = ref(null);
@@ -50,11 +54,12 @@ watch([paginaActual], () => {
         <div v-if="datos.length === 0" class="flex flex-contenido-centrado">
           <figure>
             <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
-            <figcaption class="texto-centrado">Cargando recurso</figcaption>
+            <figcaption class="texto-centrado">{{ mensajeModal }}</figcaption>
           </figure>
         </div>
         <div v-else class="contenedor-tabla">
           <UiPaginador
+            :pagina-parent="paginaActual"
             :total-paginas="Math.ceil(totalFeatures / tamanioPagina)"
             @cambio="paginaActual = $event"
           />
