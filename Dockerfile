@@ -18,10 +18,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY . .
 
-RUN touch package-lock.json  \
-    && rm -rf package-lock.json  \
-    && npm install git+https://github.com/CentroGeo/sisdai-mapas.git#fix/wms-fetch --save \
-    && npm install --include=dev
+RUN touch package-lock.json
+RUN rm -rf package-lock.json
+RUN npm install git+https://github.com/CentroGeo/sisdai-mapas.git#fix/wms-fetch --save
+RUN npm install --include=dev
 
 RUN npm run build
 
