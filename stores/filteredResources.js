@@ -135,7 +135,7 @@ export const useFilteredResources = defineStore('filteredResources', () => {
       }
       // Actualizamos los queryparams
       filters.queryParams = queryParams;
-      console.log(filters.queryParams);
+      //console.log(filters.queryParams);
     },
   };
 });
