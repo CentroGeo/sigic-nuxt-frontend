@@ -50,7 +50,9 @@ RUN if [ "$IS_NUXT_SUBMODULE" = "true" ]; then \
 
 RUN touch package-lock.json  \
     && rm -rf package-lock.json  \
-    && npm install https://github.com/CentroGeo/sisdai-mapas.git#fix/wms-fetch --save \
+    && git config --global url."https://github.com/".insteadOf git@github.com: \
+    && git config --global url."https://".insteadOf ssh:// \
+    && npm install git+https://github.com/CentroGeo/sisdai-mapas.git#fix/wms-fetch --save \
     && npm install --include=dev
 
 RUN npm run build
