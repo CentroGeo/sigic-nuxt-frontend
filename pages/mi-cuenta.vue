@@ -50,6 +50,7 @@ if (route.path === '/mi-cuenta') {
 
 <style lang="scss" scoped>
 .menu-mis-archivos {
+  gap: 0;
   border-bottom: var(--boton-secundario-deshabilitado-borde) 1px solid;
 }
 a {
@@ -59,7 +60,20 @@ a {
   position: relative;
   color: var(--texto-secundario);
   font-weight: 600;
-
+  border-radius: 0;
+  &::after {
+    content: '';
+    position: absolute;
+    left: calc(50%);
+    top: calc(100%);
+    width: 0px;
+    height: 4px;
+    border-radius: 2px 2px 0px 0px;
+    background-color: var(--boton-primario-borde);
+    text-align: center;
+    margin: -4px auto 0;
+    transition: all 0.2s;
+  }
   &.router-link-active.router-link-exact-active {
     &::after {
       content: '';
@@ -67,17 +81,13 @@ a {
       left: calc(50% - 16px);
       top: calc(100% - 3px);
       width: 32px;
-      height: 4px;
-      padding-bottom: 4px;
-      border-radius: 2px 2px 0px 0px;
-      background-color: var(--boton-primario-borde);
-      text-align: center;
-      margin: -4px auto 0;
+      height: 8px;
     }
   }
   &:hover,
   &:focus {
     background-color: var(--boton-secundario-cursor-fondo);
+    text-decoration: none;
     // background-color: transparent;
   }
 }
