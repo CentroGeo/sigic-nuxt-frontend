@@ -67,8 +67,8 @@ export default defineNuxtConfig({
   css: ['@centrogeomx/sisdai-css/dist/sisdai.min.css'],
 
   auth: {
-    debug: true,
-    isEnabled: true,
+    debug: process.env.NODE_ENV !== 'production',
+    isEnabled: process.env.NUXT_PUBLIC_ENABLE_AUTH === 'true',
     baseURL: process.env.NUXT_PUBLIC_AUTH_BASE_URL,
     originEnvKey: process.env.NODE_ENV === 'production' ? 'NUXT_AUTH_ORIGIN' : undefined,
     globalAppMiddleware: false,
