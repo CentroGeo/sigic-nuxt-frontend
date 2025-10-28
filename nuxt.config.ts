@@ -70,7 +70,6 @@ export default defineNuxtConfig({
     debug: process.env.NODE_ENV !== 'production',
     isEnabled: true,
     baseURL: process.env.NUXT_PUBLIC_AUTH_BASE_URL,
-    originEnvKey: process.env.NODE_ENV === 'production' ? 'NUXT_AUTH_ORIGIN' : undefined,
     globalAppMiddleware: false,
     provider: {
       type: 'authjs',
