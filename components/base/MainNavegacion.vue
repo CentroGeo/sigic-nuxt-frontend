@@ -1,7 +1,7 @@
 <script setup>
 import SisdaiNavegacionPrincipal from '@centrogeomx/sisdai-componentes/src/componentes/navegacion-principal/SisdaiNavegacionPrincipal.vue';
 
-const { status, signIn, signOut } = useAuth();
+const { status, signIn } = useAuth();
 const route = useRoute();
 const config = useRuntimeConfig();
 
@@ -10,10 +10,6 @@ async function iniciarSesion() {
     // A dónde volver después del login
     callbackUrl: route.fullPath,
   });
-}
-
-async function cerrarSesion() {
-  await signOut({ callbackUrl: route.fullPath });
 }
 
 const mostrarInicio = computed(() => !config.public.defaultPage);
@@ -67,15 +63,9 @@ const mostrarAuth = computed(() => config.public.enableAuth);
         <NuxtLink class="nav-hipervinculo" to="/ia">Análisis Inteligencia Artificial</NuxtLink>
       </li>
       <li v-if="mostrarAuth">
-        <button
-          v-if="status === 'authenticated'"
-          aria-label="Cerrar sesión"
-          type="button"
-          class="boton-secundario btn-inicio-sesion"
-          @click="cerrarSesion"
+        <NuxtLink v-if="status === 'authenticated'" class="nav-hipervinculo" to="/mi-cuenta"
+          >Mi cuenta</NuxtLink
         >
-          Cerrar sesión
-        </button>
 
         <button
           v-else
@@ -92,20 +82,6 @@ const mostrarAuth = computed(() => config.public.enableAuth);
 </template>
 
 <style lang="scss">
-button.boton-secundario.btn-inicio-sesion {
-  box-shadow: none;
-  color: var(--navegacion-primaria-color);
-  font-weight: 400;
-  font-size: 0.875rem;
-
-  border-radius: 0;
-  &:hover {
-    background-color: var(--navegacion-primaria-cursor-fondo);
-  }
-  &:active {
-    box-shadow: inset 0 -4px 0 0 var(--navegacion-primaria-activo-borde);
-  }
-}
 body[data-tema='oscuro'] {
   img.color-invertir {
     filter: grayscale(1) brightness(100);

@@ -22,7 +22,7 @@
   "dependencies": {
     "@centrogeomx/sisdai-componentes": "^4.14.1",
     "@centrogeomx/sisdai-css": "^1.10.2",
-    "@centrogeomx/sisdai-mapas": "git+https://github.com/CentroGeo/sisdai-mapas.git#fix/wms-fetch",
+    "@centrogeomx/sisdai-mapas": "github:CentroGeo/sisdai-mapas#fix/wms-fetch",
     "@nuxt/image": "^1.10.0",
     "@nuxt/scripts": "^0.11.10",
     "@pinia/nuxt": "^0.11.1",
