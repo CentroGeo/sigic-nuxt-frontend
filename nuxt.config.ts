@@ -107,12 +107,8 @@ export default defineNuxtConfig({
       enableCatalogoCarga: process.env.NUXT_PUBLIC_ENABLE_CATALOGO_CARGA === 'true',
       enableConsulta: process.env.NUXT_PUBLIC_ENABLE_CONSULTA === 'true',
       enableIaa: process.env.NUXT_PUBLIC_ENABLE_IAA === 'true',
+      enableLevantamiento: process.env.NUXT_PUBLIC_ENABLE_LEVANTAMIENTO === 'true',
     },
-  },
-
-  devServer: {
-    // TODO: remover, solo se utiliza cuando se levanta el chat-front del módulo de IA
-    // port: 3001
   },
 
   vite: {
