@@ -2,7 +2,9 @@
 import { defineNuxtConfig } from 'nuxt/config';
 
 const isDev = process.env.NODE_ENV !== 'production';
-const appBasePath = (process.env.NUXT_PUBLIC_APP_BASE_PATH || '/').replace(/\/+$/, '/');
+const appBasePath = (process.env.NUXT_PUBLIC_APP_BASE_PATH || '/').replace(/\/?$/, '/');
+const authBaseUrl = process.env.NUXT_PUBLIC_AUTH_BASE_URL;
+const originEnvKey = isDev ? undefined : 'NUXT_AUTH_ORIGIN';
 const basePath = appBasePath.replace(/\/+$/, '');
 
 const metaImg = 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg';
@@ -68,10 +70,10 @@ export default defineNuxtConfig({
   css: ['@centrogeomx/sisdai-css/dist/sisdai.min.css'],
 
   auth: {
-    debug: true,
+    debug: !isDev,
     isEnabled: true,
-    baseURL: process.env.NUXT_PUBLIC_AUTH_BASE_URL,
-    originEnvKey: isDev ? undefined : 'NUXT_AUTH_ORIGIN',
+    baseURL: authBaseUrl,
+    originEnvKey: originEnvKey,
     globalAppMiddleware: false,
     provider: {
       type: 'authjs',
