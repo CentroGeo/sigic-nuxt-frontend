@@ -50,9 +50,9 @@ defineExpose({
           Usalo para conectar el banco de datos de SIGIC en otros visores o servicios compatibles.
         </p>
         <div class="flex borde-redondeado-8 contenedor-liga-ows">
-          <p class="columna-14 m-y-1">
+          <div class="columna-14 m-y-1 ows-container">
             {{ props.owsLink }}
-          </p>
+          </div>
           <button
             aria-label="Copiar liga OWS"
             class="boton-primario boton-pictograma boton-chico m-y-1"
@@ -111,5 +111,9 @@ defineExpose({
   color: var(--color-neutro-1);
   padding: 0px 8px;
   width: max-content;
+}
+.ows-container {
+  overflow-wrap: break-word;
+  white-space: normal;
 }
 </style>

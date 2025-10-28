@@ -85,10 +85,23 @@ export const categoriesValues = {
  */
 export function cleanInput(input) {
   return input
+    .trim()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    .trim()
     .toLowerCase();
+}
+
+/**
+ * Formatea el para keuwords
+ * @param {String} input
+ * @returns {String} El input formateado
+ */
+export function unaccentUppercase(input) {
+  return input
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase();
 }
 
 /**
