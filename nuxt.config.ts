@@ -2,7 +2,7 @@
 import { defineNuxtConfig } from 'nuxt/config';
 
 const isDev = process.env.NODE_ENV !== 'production';
-const appBasePath = (process.env.NUXT_PUBLIC_APP_BASE_PATH || '/').replace(/\/+$/, '/');
+const appBasePath = (process.env.NUXT_PUBLIC_APP_BASE_PATH || '/').replace(/\/?$/, '/');
 
 const metaImg = 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg';
 const metaDescription =
@@ -70,6 +70,7 @@ export default defineNuxtConfig({
     debug: process.env.NODE_ENV !== 'production',
     isEnabled: true,
     baseURL: process.env.NUXT_PUBLIC_AUTH_BASE_URL,
+    originEnvKey: process.env.NUXT_AUTH_ORIGIN ? 'NUXT_AUTH_ORIGIN' : undefined,
     globalAppMiddleware: false,
     provider: {
       type: 'authjs',
@@ -89,6 +90,7 @@ export default defineNuxtConfig({
     keycloakClientId: process.env.KEYCLOAK_CLIENT_ID,
     keycloakIssuer: process.env.KEYCLOAK_ISSUER,
     keycloakClientSecret: process.env.KEYCLOAK_CLIENT_SECRET,
+    authOrigin: process.env.NUXT_AUTH_ORIGIN,
 
     // Variables públicas (disponibles también en el cliente)
     public: {
