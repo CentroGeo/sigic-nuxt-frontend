@@ -83,7 +83,11 @@ export const useFilteredResources = defineStore('filteredResources', () => {
           queryParams['filter{is_published}'] = 'false';
           queryParams['filter{is_approved}'] = 'false';
         }
-        if (filters.owner === 'catalogo') {
+        if (filters.owner === 'catalogo' && filters.resourceType === 'dataLayer') {
+          queryParams['filter{is_published}'] = 'true';
+          queryParams['filter{subtype.in}'] = ['vector', 'raster'];
+        }
+        if (filters.owner === 'catalogo' && filters.resourceType !== 'dataLayer') {
           queryParams['filter{is_published}'] = 'true';
         }
         if (filters.owner === 'remotos') {
