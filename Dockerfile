@@ -34,7 +34,7 @@ COPY package*.json ./
 # --- limpiar npm cache ---
 RUN npm cache clean --force
 
-# --- copiar todo el código ---
+# --- copiar el código ---
 COPY . .
 
 # --- aplicar borrado sólo si el flag está activo ---
