@@ -48,7 +48,8 @@ RUN if [ "$IS_NUXT_SUBMODULE" = "true" ]; then \
       rm -rf .git .gitmodules; \
     fi
 
-RUN npm install --include=dev
+RUN npm install https://github.com/CentroGeo/sisdai-mapas.git#fix/wms-fetch --save \
+ && npm install --include=dev
 
 RUN npm run build
 
