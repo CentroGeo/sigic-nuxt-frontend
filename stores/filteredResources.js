@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { cleanInput, resourceTypeGeonode } from '~/utils/consulta';
+import { cleanInput, resourceTypeGeonode, unaccentUppercase } from '~/utils/consulta';
 
 export const useFilteredResources = defineStore('filteredResources', () => {
   const storeConsulta = useConsultaStore();
@@ -114,7 +114,7 @@ export const useFilteredResources = defineStore('filteredResources', () => {
 
       // Agregamos queryparams para filtrar por keywords
       if (filters.keywords !== null && filters.keywords.length > 0) {
-        const keywordsList = filters.keywords.split(',').map((d) => cleanInput(d));
+        const keywordsList = filters.keywords.split(',').map((d) => unaccentUppercase(d));
         queryParams['filter{keywords.name.in}'] = keywordsList;
       }
 
@@ -135,6 +135,7 @@ export const useFilteredResources = defineStore('filteredResources', () => {
       }
       // Actualizamos los queryparams
       filters.queryParams = queryParams;
+      console.log(filters.queryParams);
     },
   };
 });
