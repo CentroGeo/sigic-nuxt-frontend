@@ -14,7 +14,7 @@ storeConsulta.resourceType = resourceTypeDic.dataLayer;
 
 const vistaDelMapa = ref({ extension: storeConsulta.mapExtent });
 const selectorDivisionAbierto = ref(undefined);
-const attributos = reactive({});
+const attributes = ref({});
 const linkExportaMapa = ref();
 function exportarMapa() {
   exportarHTMLComoPNG(
@@ -77,10 +77,10 @@ onMounted(async () => {
 });
 
 async function addAttribute(pk) {
-  attributos[pk] = [];
+  attributes.value[pk] = [];
   const resource = await storeResources.fetchResourceByPk(pk);
   if (resource.sourcetype === 'REMOTE') {
-    attributos[pk] = {
+    attributes.value[pk] = {
       params: {
         propertyName: '',
       },
@@ -89,7 +89,7 @@ async function addAttribute(pk) {
     };
   } else {
     const { columnas, etiquetas } = await storeResources.fetchAttrs(pk);
-    attributos[pk] = {
+    attributes.value[pk] = {
       params: {
         propertyName: columnas.join(','),
       },
@@ -106,10 +106,11 @@ watch(
   () => storeSelected.resources[storeConsulta.resourceType],
   (nv_) => {
     const selectedPks = Object.keys(nv_);
-    const attributesPks = Object.keys(attributos);
+    const attributesPks = Object.keys(attributes.value);
     const { news, olds } = arrayNewsOlds(attributesPks, selectedPks);
-    news.forEach((r) => addAttribute(r));
-    olds.forEach((resource) => delete attributos[resource]);
+    news.forEach(async (r) => await addAttribute(r));
+    olds.forEach((resource) => delete attributes.value[resource]);
+    console.log('atributos:', attributes.value);
   },
   { deep: true }
 );
@@ -175,7 +176,7 @@ watch(
             :opacidad="storeSelected.byPk(resource.pk).opacidad"
             :posicion="storeSelected.byPk(resource.pk).posicion + 1"
             :visible="storeSelected.byPk(resource.pk).visible"
-            :cuadro-informativo="attributos[resource.pk]"
+            :cuadro-informativo="attributes[resource.pk]"
           />
         </SisdaiMapa>
       </ClientOnly>
