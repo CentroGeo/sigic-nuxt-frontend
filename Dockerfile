@@ -1,12 +1,18 @@
 # 🏗️ Build stage
 FROM node:22 AS builder
 
+# Build-time arguments (usados por Nuxt en build)
 ARG NODE_ENV
-ENV NODE_ENV=${NODE_ENV:-production}
+ARG NUXT_PUBLIC_APP_BASE_PATH
+ARG NUXT_PUBLIC_AUTH_BASE_URL
+ARG NUXT_PUBLIC_BASE_URL
 
-# --- declarar el flag de entorno ---
-ARG IS_NUXT_SUBMODULE
-ENV IS_NUXT_SUBMODULE=${IS_NUXT_SUBMODULE:-true}
+# Set environment for build & runtime
+ENV NODE_ENV=${NODE_ENV:-production}
+ENV NUXT_PUBLIC_APP_BASE_PATH=${NUXT_PUBLIC_APP_BASE_PATH:-/}
+ENV NUXT_PUBLIC_AUTH_BASE_URL=${NUXT_PUBLIC_AUTH_BASE_URL:-api/auth}
+ENV NUXT_PUBLIC_BASE_URL=${NUXT_PUBLIC_BASE_URL:-http://localhost:3000}
+
 
 WORKDIR /app
 
@@ -53,8 +59,17 @@ RUN npm run build
 # 🚀 Final stage
 FROM node:22-slim
 
+# Build-time arguments (usados por Nuxt en build)
 ARG NODE_ENV
+ARG NUXT_PUBLIC_APP_BASE_PATH
+ARG NUXT_PUBLIC_AUTH_BASE_URL
+ARG NUXT_PUBLIC_BASE_URL
+
+# Set environment for build & runtime
 ENV NODE_ENV=${NODE_ENV:-production}
+ENV NUXT_PUBLIC_APP_BASE_PATH=${NUXT_PUBLIC_APP_BASE_PATH:-/}
+ENV NUXT_PUBLIC_AUTH_BASE_URL=${NUXT_PUBLIC_AUTH_BASE_URL:-api/auth}
+ENV NUXT_PUBLIC_BASE_URL=${NUXT_PUBLIC_BASE_URL:-http://localhost:3000}
 
 WORKDIR /app
 
