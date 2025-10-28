@@ -22,6 +22,7 @@ definePageMeta({
         class="m-y-2"
         etiqueta="Contraseña actual"
         ejemplo="Introduce tu contraseña actual"
+        tipo="password"
         :es_obligatorio="false"
         :es_etiqueta_visible="true"
       />
@@ -29,6 +30,7 @@ definePageMeta({
         class="m-y-2"
         etiqueta="Contraseña nueva"
         ejemplo="Introduce la contraseña nueva"
+        tipo="password"
         :es_obligatorio="false"
         :es_etiqueta_visible="true"
       />
@@ -41,6 +43,62 @@ definePageMeta({
         Puedes conectar tus cuentas para facilitar el inicio de sesión y mantener sincronizada tu
         información profesional.
       </p>
+      <div class="tarjeta m-y-3">
+        <div class="tarjeta-cuerpo">
+          <div class="flex flex-contenido-separado">
+            <div class="flex-vertical-centrado">Google</div>
+            <div class="flex">
+              <span
+                class="flex flex-vertical-centrado texto-color-confirmacion fondo-color-confirmacion borde borde-color-confirmacion borde-redondeado-4 p-x-1"
+                >Vinculada</span
+              >
+              <button class="boton-chico boton-secundario">Desvincular</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tarjeta m-y-3">
+        <div class="tarjeta-cuerpo">
+          <div class="flex flex-contenido-separado">
+            <div class="flex-vertical-centrado">Rizoma</div>
+            <div class="flex">
+              <span
+                class="flex flex-vertical-centrado texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-4 p-x-1"
+                >No vinculada</span
+              >
+              <button class="boton-chico boton-primario">Conectar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tarjeta m-y-3">
+        <div class="tarjeta-cuerpo">
+          <div class="flex flex-contenido-separado">
+            <div class="flex-vertical-centrado">ORCID</div>
+            <div class="flex">
+              <span
+                class="flex flex-vertical-centrado texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-4 p-x-1"
+                >No vinculada</span
+              >
+              <button class="boton-chico boton-primario">Conectar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tarjeta m-y-3">
+        <div class="tarjeta-cuerpo">
+          <div class="flex flex-contenido-separado">
+            <div class="flex-vertical-centrado">GitHub</div>
+            <div class="flex">
+              <span
+                class="flex flex-vertical-centrado texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-4 p-x-1"
+                >No vinculada</span
+              >
+              <button class="boton-chico boton-primario">Conectar</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
