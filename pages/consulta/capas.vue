@@ -65,6 +65,9 @@ watch(
 );
 onMounted(async () => {
   //console.log('Extension:', vistaDelMapa.value);
+  if (route.fullPath.includes('derecho') || route.fullPath.includes('izquierdo')) {
+    storeConsulta.activarDivisionMapa();
+  }
   updateMapFromHash(route.hash?.slice(1));
   storeResources.resetByType(storeConsulta.resourceType);
   storeSelected.addFromQueryParam(route.query.capas);
