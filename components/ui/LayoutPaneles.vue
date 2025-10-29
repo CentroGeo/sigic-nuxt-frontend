@@ -64,6 +64,7 @@ const route = useRoute();
   .columna-12,
   .columna-8 {
     height: var(--altura-consulta-esc);
+    overflow: auto;
   }
 }
 </style>

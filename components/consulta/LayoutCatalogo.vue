@@ -168,8 +168,6 @@ function updateResources(nuevosRecursos) {
 async function setSelectedCategory(categoria) {
   if (selectedCategories.value.includes(categoria)) {
     selectedCategories.value = selectedCategories.value.filter((c) => c !== categoria);
-    //categoriesDict.value[categoria].page = 1;
-    //categoriesDict.value[categoria].isLoading = false;
   } else {
     selectedCategories.value.push(categoria);
   }
@@ -206,9 +204,10 @@ watch(selectedOwner, () => {
 
 watch(params, async () => {
   isLoading.value = true;
-  totalResources.value = 0;
   storeResources.resetByType();
+  totalResources.value = 0;
   selectedCategories.value = [];
+  categorizedResources.value = {};
   await buildCategoriesDict();
   isLoading.value = false;
 });

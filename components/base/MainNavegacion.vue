@@ -16,6 +16,7 @@ const mostrarInicio = computed(() => !config.public.defaultPage);
 const mostrarCatalogo = computed(() => config.public.enableCatalogoVista);
 const mostrarConsulta = computed(() => config.public.enableConsulta);
 const mostrarIaa = computed(() => config.public.enableIaa);
+const mostrarLevantamiento = computed(() => config.public.enableLevantamiento);
 const mostrarAuth = computed(() => config.public.enableAuth);
 </script>
 
@@ -61,6 +62,9 @@ const mostrarAuth = computed(() => config.public.enableAuth);
       </li>
       <li v-if="mostrarIaa">
         <NuxtLink class="nav-hipervinculo" to="/ia">Análisis Inteligencia Artificial</NuxtLink>
+      </li>
+      <li v-if="mostrarLevantamiento">
+        <NuxtLink class="nav-hipervinculo" to="/levantamiento">Levantamiento</NuxtLink>
       </li>
       <li v-if="mostrarAuth">
         <NuxtLink v-if="status === 'authenticated'" class="nav-hipervinculo" to="/mi-cuenta"

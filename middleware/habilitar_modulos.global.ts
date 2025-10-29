@@ -20,6 +20,7 @@ interface FeatureFlags {
   enableCatalogoCarga: boolean;
   enableConsulta: boolean;
   enableIaa: boolean;
+  enableLevantamiento: boolean;
 }
 
 export default defineNuxtRouteMiddleware((to) => {
@@ -44,6 +45,9 @@ export default defineNuxtRouteMiddleware((to) => {
 
     // --- IAA (y sus internas) ---
     '/ia': flags.enableAuth && flags.enableIaa,
+
+    // --- Levantamiento (y sus internas) ---
+    '/levantamiento': flags.enableAuth && flags.enableLevantamiento,
   };
 
   for (const [prefix, allowed] of Object.entries(rules)) {
