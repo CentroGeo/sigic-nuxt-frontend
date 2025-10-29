@@ -57,6 +57,10 @@ function updateQueryParam(capas) {
   }
 }
 
+/**
+ * Obtiene el attribute set de un recurso a partir del pk del mismo
+ * @param pk
+ */
 async function addAttribute(pk) {
   const maxAttrs = 5;
   const resource = await gnoxyFetch(`https://geonode.dev.geoint.mx/api/v2/datasets/${pk}`);
@@ -76,13 +80,19 @@ async function addAttribute(pk) {
   }
 }
 
+/**
+ * Crea la información del cuadro de información
+ * @param url
+ * @param alternate
+ * @param title
+ * @param sourcetype
+ */
 async function buildLayerInfo(url, alternate, title, sourcetype) {
   if (sourcetype === 'REMOTE') {
     return `<p style="margin-bottom: 8px;">${title}</p> <p>No hay información disponible para esta capa.</p>`;
   } else {
     const res = await gnoxyFetch(url);
     if (!res.ok) {
-      //throw new Error(`Download failed: ${res.status}`);
       return `<p style="margin-bottom: 8px;">${title}</p> <p>No hay información disponible para esta capa.</p>`;
     }
     const data = await res.json();
