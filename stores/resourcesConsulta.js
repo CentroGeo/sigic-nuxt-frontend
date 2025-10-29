@@ -159,37 +159,5 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
     findResources(pksToFind, resourceType = storeConsulta.resourceType) {
       return selectedResources[resourceType].filter(({ pk }) => pksToFind.includes(pk));
     },
-
-    async fetchAttrs(pk) {
-      const config = useRuntimeConfig();
-      const { gnoxyFetch } = useGnoxyUrl();
-      const maxAttrs = 5;
-      const etiquetas = {};
-      let columnas = [];
-      try {
-        const res = await gnoxyFetch(`${config.public.geonodeApi}/datasets/${pk}/attribute_set`);
-        if (!res.ok) {
-          console.error(res.status);
-          return;
-        }
-        const { attributes } = await res.json();
-        columnas = attributes
-          .filter((a) => a.visible)
-          .sort((a, b) => a.display_order - b.display_order)
-          .map(({ attribute, attribute_label }) => {
-            etiquetas[attribute] = attribute_label || attribute;
-            return attribute;
-          });
-
-        // Limitamos el máximo de atributos visibles
-        if (columnas.length > maxAttrs) {
-          columnas = columnas.slice(0, maxAttrs);
-        }
-        return { columnas, etiquetas };
-      } catch {
-        console.error('Error');
-      }
-      return;
-    },
   };
 });

@@ -7,6 +7,7 @@ import { arrayNewsOlds, findServer, resourceTypeDic } from '~/utils/consulta';
 const storeConsulta = useConsultaStore();
 const storeResources = useResourcesConsultaStore();
 const storeSelected = useSelectedResources2Store();
+const config = useRuntimeConfig();
 const { gnoxyFetch } = useGnoxyUrl();
 const route = useRoute();
 const router = useRouter();
@@ -63,20 +64,24 @@ function updateQueryParam(capas) {
  */
 async function addAttribute(pk) {
   const maxAttrs = 5;
-  const resource = await gnoxyFetch(`https://geonode.dev.geoint.mx/api/v2/datasets/${pk}`);
+  const resource = await gnoxyFetch(`${config.public.geonodeApi}/datasets/${pk}`);
   const res = await resource.json();
-  let visibleAttrs = res.dataset.attribute_set
-    .filter((a) => a.visible)
-    .sort((a, b) => a.display_order - b.display_order);
-
-  // Limitamos el máximo de atributos visibles
-  if (visibleAttrs.length > maxAttrs) {
-    visibleAttrs = visibleAttrs.slice(0, maxAttrs);
-  }
-  if (visibleAttrs.length > 0) {
-    attributes.value[res.dataset.alternate] = visibleAttrs;
-  } else {
+  if (!res.ok) {
     attributes.value[res.dataset.alternate] = [];
+  } else {
+    let visibleAttrs = res.dataset.attribute_set
+      .filter((a) => a.visible)
+      .sort((a, b) => a.display_order - b.display_order);
+
+    // Limitamos el máximo de atributos visibles
+    if (visibleAttrs.length > maxAttrs) {
+      visibleAttrs = visibleAttrs.slice(0, maxAttrs);
+    }
+    if (visibleAttrs.length > 0) {
+      attributes.value[res.dataset.alternate] = visibleAttrs;
+    } else {
+      attributes.value[res.dataset.alternate] = [];
+    }
   }
 }
 
@@ -90,14 +95,17 @@ async function addAttribute(pk) {
 async function buildLayerInfo(url, alternate, title, sourcetype) {
   if (sourcetype === 'REMOTE') {
     return `<p style="margin-bottom: 8px;">${title}</p> <p>No hay información disponible para esta capa.</p>`;
+    //return undefined;
   } else {
     const res = await gnoxyFetch(url);
     if (!res.ok) {
       return `<p style="margin-bottom: 8px;">${title}</p> <p>No hay información disponible para esta capa.</p>`;
+      //return undefined;
     }
     const data = await res.json();
-    if (data.features.length === 0) {
+    if (data.features.length === 0 || attributes.value.length === 0) {
       return `<p style="margin-bottom: 8px;">${title}</p> <p>No hay información disponible para este punto.</p>`;
+      //return undefined;
     } else {
       const propiedades = data.features[0].properties;
       const match = attributes.value[alternate].map(({ attribute, attribute_label }) => {
@@ -196,7 +204,7 @@ onMounted(async () => {
           </div>
 
           <SisdaiCapaXyz :posicion="0" />
-
+          <!---->
           <SisdaiCapaWms
             v-for="resource in storeResources.findResources(storeSelected.pks)"
             :key="`wms-${resource.pk}-${resource.position_}`"
