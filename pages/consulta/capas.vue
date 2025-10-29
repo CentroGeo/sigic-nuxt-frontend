@@ -65,19 +65,22 @@ function updateQueryParam(capas) {
 async function addAttribute(pk) {
   const maxAttrs = 5;
   const resource = await gnoxyFetch(`${config.public.geonodeApi}/datasets/${pk}`);
-  const res = await resource.json();
-  if (!res.ok) {
-    attributes.value[res.dataset.alternate] = [];
+  //console.log(resource);
+  if (!resource.ok) {
+    console.error('Error en la peticion de atributos');
+    return;
   } else {
+    const res = await resource.json();
+    //console.log(res);
     let visibleAttrs = res.dataset.attribute_set
       .filter((a) => a.visible)
       .sort((a, b) => a.display_order - b.display_order);
 
     // Limitamos el máximo de atributos visibles
-    if (visibleAttrs.length > maxAttrs) {
-      visibleAttrs = visibleAttrs.slice(0, maxAttrs);
-    }
     if (visibleAttrs.length > 0) {
+      if (visibleAttrs.length > maxAttrs) {
+        visibleAttrs = visibleAttrs.slice(0, maxAttrs);
+      }
       attributes.value[res.dataset.alternate] = visibleAttrs;
     } else {
       attributes.value[res.dataset.alternate] = [];
@@ -103,7 +106,7 @@ async function buildLayerInfo(url, alternate, title, sourcetype) {
       //return undefined;
     }
     const data = await res.json();
-    if (data.features.length === 0 || attributes.value.length === 0) {
+    if (data.features.length === 0) {
       return `<p style="margin-bottom: 8px;">${title}</p> <p>No hay información disponible para este punto.</p>`;
       //return undefined;
     } else {
