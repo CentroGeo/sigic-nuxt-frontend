@@ -1,6 +1,6 @@
 <script setup>
 import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
-import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
+//import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
 import { lados } from '@centrogeomx/sisdai-mapas/src/utiles/capa';
 import { arrayNewsOlds, findServer, resourceTypeDic } from '~/utils/consulta';
 
@@ -17,10 +17,11 @@ const selectorDivisionAbierto = ref(undefined);
 const attributes = ref({});
 const linkExportaMapa = ref();
 function exportarMapa() {
-  exportarHTMLComoPNG(
+  console.warn('La funcion de exportar mapa no está en esta rama');
+  /*   exportarHTMLComoPNG(
     document.querySelectorAll('.mapa .ol-viewport').item(0),
     linkExportaMapa.value
-  );
+  ); */
 }
 
 /**
@@ -55,6 +56,53 @@ function updateQueryParam(capas) {
     router.replace({ query: { capas }, hash: route.hash });
   }
 }
+
+async function addAttribute(pk) {
+  const maxAttrs = 5;
+  const resource = await gnoxyFetch(`https://geonode.dev.geoint.mx/api/v2/datasets/${pk}`);
+  const res = await resource.json();
+  let visibleAttrs = res.dataset.attribute_set
+    .filter((a) => a.visible)
+    .sort((a, b) => a.display_order - b.display_order);
+
+  // Limitamos el máximo de atributos visibles
+  if (visibleAttrs.length > maxAttrs) {
+    visibleAttrs = visibleAttrs.slice(0, maxAttrs);
+  }
+  if (visibleAttrs.length > 0) {
+    attributes.value[res.dataset.alternate] = visibleAttrs;
+  } else {
+    attributes.value[res.dataset.alternate] = [];
+  }
+}
+async function cuadroAsincrono(url, alternate, title) {
+  const r = await gnoxyFetch(url);
+  const data = await r.json();
+  const propiedades = data.features[0].properties;
+  const match = attributes.value[alternate].map(({ attribute, attribute_label }) => {
+    if (attribute_label) {
+      return `<li class="m-0">${attribute_label}: ${propiedades[attribute]}</li>`;
+    } else {
+      return `<li class="m-0">${attribute}: ${propiedades[attribute]}</li>`;
+    }
+  });
+  return `<p style="margin-bottom: 8px;">${title}</p> <ol style="margin-top: 8px">${match.join(
+    ''
+  )}</ol>`;
+}
+watch(
+  () => storeSelected.resources[storeConsulta.resourceType],
+  (nv_) => {
+    const selectedPks = Object.keys(nv_);
+    const attributesPks = Object.keys(attributes.value);
+    const { news, olds } = arrayNewsOlds(attributesPks, selectedPks);
+    news.forEach(async (r) => await addAttribute(r));
+    olds.forEach((resource) => delete attributes.value[resource]);
+    //console.log('atributos:', attributes.value);
+  },
+  { deep: true }
+);
+
 watch(() => storeSelected.asQueryParam(), updateQueryParam);
 watch(
   () => storeConsulta.mapExtent,
@@ -75,45 +123,6 @@ onMounted(async () => {
     updateQueryParam(storeSelected.asQueryParam());
   }
 });
-
-async function addAttribute(pk) {
-  attributes.value[pk] = [];
-  const resource = await storeResources.fetchResourceByPk(pk);
-  if (resource.sourcetype === 'REMOTE') {
-    attributes.value[pk] = {
-      params: {
-        propertyName: '',
-      },
-      contenido: () =>
-        `<p style="font-weight: bold">${resource.title}</p> <p>No hay información disponible para esta capa</p>`,
-    };
-  } else {
-    const { columnas, etiquetas } = await storeResources.fetchAttrs(pk);
-    attributes.value[pk] = {
-      params: {
-        propertyName: columnas.join(','),
-      },
-      contenido: (data) =>
-        `<p style="font-weight: bold">${resource.title}</p>` +
-        columnas
-          .map((columna) => `<p><b>${etiquetas[columna] || columna}</b>: ${data[columna]}</p>`)
-          .join(''),
-    };
-  }
-}
-
-watch(
-  () => storeSelected.resources[storeConsulta.resourceType],
-  (nv_) => {
-    const selectedPks = Object.keys(nv_);
-    const attributesPks = Object.keys(attributes.value);
-    const { news, olds } = arrayNewsOlds(attributesPks, selectedPks);
-    news.forEach(async (r) => await addAttribute(r));
-    olds.forEach((resource) => delete attributes.value[resource]);
-    console.log('atributos:', attributes.value);
-  },
-  { deep: true }
-);
 
 // api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
 // const contenedorSelectoresDivisionColapsado = ref(true);
@@ -176,7 +185,7 @@ watch(
             :opacidad="storeSelected.byPk(resource.pk).opacidad"
             :posicion="storeSelected.byPk(resource.pk).posicion + 1"
             :visible="storeSelected.byPk(resource.pk).visible"
-            :cuadro-informativo="attributes[resource.pk]"
+            :cuadro-informativo="(url) => cuadroAsincrono(url, resource.alternate, resource.title)"
           />
         </SisdaiMapa>
       </ClientOnly>
