@@ -23,28 +23,28 @@ const tableResources2 = ref([
   {
     titulo: 'Capas lago texcoco',
     tipo_recurso: 'Capa Geográfica',
-    categoria: { gn_description: 'Environment' },
+    categoria: { identifier: 'environment', gn_description: 'Environment' },
     actualizacion: '22 sep 2025',
     estatus: 'Pendiente',
   },
   {
     titulo: 'Flora_fauna_texcoco',
     tipo_recurso: 'Datos Tabulados',
-    categoria: { gn_description: 'Environment' },
+    categoria: { identifier: 'environment', gn_description: 'Environment' },
     actualizacion: '22 sep 2025',
     estatus: 'En revisión',
   },
   {
     titulo: 'Pueblos originarios Texcoco',
     tipo_recurso: 'Documentos',
-    categoria: { gn_description: 'Environment' },
+    categoria: { identifier: 'environment', gn_description: 'Environment' },
     actualizacion: '22 sep 2025',
     estatus: 'Publicado',
   },
   {
     titulo: 'Agua balance hídrico',
     tipo_recurso: 'Capa Geográfica',
-    categoria: { gn_description: 'Environment' },
+    categoria: { identifier: 'environment', gn_description: 'Environment' },
     actualizacion: '22 sep 2025',
     estatus: 'No aceptado',
   },
@@ -249,6 +249,54 @@ onMounted(async () => {
     updateResources(recursos.value);
   }
 }); */
+//
+// const { data } = useAuth();
+const dictEstatus = {
+  pending: 'Pendiente',
+  published: 'Publicado',
+  rejected: 'Rechazado',
+};
+/**
+ * Formatea la fecha del recurso a esta forma: dd/mm/aaaa
+ * @param fecha de actualización del recurso
+ * @returns {Date} objeto con la fecha
+ */
+function formatearFecha(fecha) {
+  return new Date(fecha).toLocaleDateString('es-ES', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+const token = data.value?.accessToken;
+const configEnv = useRuntimeConfig();
+const baseUrl = configEnv.public.geonodeUrl;
+// const baseUrl = 'http://10.2.102.177';
+const headers = ref({ Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' });
+try {
+  // petición a los recursos con solicitud de publicación
+  const response = await $fetch(`${baseUrl}/sigic/requests/`, {
+    method: 'GET',
+    headers: headers.value,
+  });
+  // console.log('response', response);
+  const respuestaSolicitud = response.map((d) => ({
+    titulo: d.resource_title,
+    tipo_recurso: 'Documentos',
+    categoria: { identifier: 'farming', gn_description: 'Farming' },
+    actualizacion: formatearFecha(d.updated_at),
+    estatus: dictEstatus[d.status],
+  }));
+  // console.log('respuestaSolicitud', respuestaSolicitud);
+  tableResources2.value = [...respuestaSolicitud, ...tableResources2.value];
+  // tableResources2.value.push(respuestaSolicitud);
+
+  // console.log('tableResources', tableResources.value);
+  // console.log('tableResources2', tableResources2.value);
+} catch (error) {
+  console.error(error);
+}
 </script>
 
 <template>

@@ -148,16 +148,34 @@ const optionsDict = {
   },
 };
 
-function confirmarSolicitud(cerrarModal) {
+async function confirmarSolicitud(cerrarModal) {
   if (cerrarModal === 'modalPublica3') {
     modalPublica3.value.cerrarModal();
   } else {
     modalPublica4.value.cerrarModal();
   }
   console.warn('confirmada');
-  navigateTo({
-    path: '/catalogo/mis-archivos/solicitudes-publicacion',
-  });
+  try {
+    const { data } = useAuth();
+    const token = data.value?.accessToken;
+    const configEnv = useRuntimeConfig();
+    const baseUrl = configEnv.public.geonodeUrl;
+    // const baseUrl = 'http://10.2.102.177';
+    const headers = ref({ Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' });
+    const id = selectedElement.value.pk;
+    // petición para enviar el recurso a la solicitud
+    await fetch(`${baseUrl}/sigic/requests/`, {
+      method: 'POST',
+      headers: headers.value,
+      body: JSON.stringify({ resource: id }),
+    });
+
+    navigateTo({
+      path: '/catalogo/mis-archivos/solicitudes-publicacion',
+    });
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 defineExpose({
