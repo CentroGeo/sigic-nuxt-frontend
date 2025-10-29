@@ -65,10 +65,10 @@ function updateQueryParam(capas) {
 async function addAttribute(pk) {
   const maxAttrs = 5;
   const resource = await gnoxyFetch(`${config.public.geonodeApi}/datasets/${pk}`);
-  //console.log(resource);
   if (!resource.ok) {
-    console.error('Error en la peticion de atributos');
-    return;
+    //console.error('Error en la peticion de atributos');
+    const alternateTitle = storeResources.findResource(pk, 'dataLayer')['alternate'];
+    attributes.value[alternateTitle] = [];
   } else {
     const res = await resource.json();
     //console.log(res);
