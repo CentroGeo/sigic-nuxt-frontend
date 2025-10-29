@@ -75,7 +75,7 @@ async function addAttribute(pk) {
     attributes.value[res.dataset.alternate] = [];
   }
 }
-async function cuadroAsincrono(url, alternate, title) {
+async function buildLayerInfo(url, alternate, title) {
   const r = await gnoxyFetch(url);
   const data = await r.json();
   const propiedades = data.features[0].properties;
@@ -185,7 +185,7 @@ onMounted(async () => {
             :opacidad="storeSelected.byPk(resource.pk).opacidad"
             :posicion="storeSelected.byPk(resource.pk).posicion + 1"
             :visible="storeSelected.byPk(resource.pk).visible"
-            :cuadro-informativo="(url) => cuadroAsincrono(url, resource.alternate, resource.title)"
+            :cuadro-informativo="(url) => buildLayerInfo(url, resource.alternate, resource.title)"
           />
         </SisdaiMapa>
       </ClientOnly>
