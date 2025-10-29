@@ -75,21 +75,35 @@ async function addAttribute(pk) {
     attributes.value[res.dataset.alternate] = [];
   }
 }
-async function buildLayerInfo(url, alternate, title) {
-  const r = await gnoxyFetch(url);
-  const data = await r.json();
-  const propiedades = data.features[0].properties;
-  const match = attributes.value[alternate].map(({ attribute, attribute_label }) => {
-    if (attribute_label) {
-      return `<li class="m-0">${attribute_label}: ${propiedades[attribute]}</li>`;
-    } else {
-      return `<li class="m-0">${attribute}: ${propiedades[attribute]}</li>`;
+
+async function buildLayerInfo(url, alternate, title, sourcetype) {
+  if (sourcetype === 'REMOTE') {
+    return `<p style="margin-bottom: 8px;">${title}</p> <p>No hay información disponible para esta capa.</p>`;
+  } else {
+    const res = await gnoxyFetch(url);
+    if (!res.ok) {
+      //throw new Error(`Download failed: ${res.status}`);
+      return `<p style="margin-bottom: 8px;">${title}</p> <p>No hay información disponible para esta capa.</p>`;
     }
-  });
-  return `<p style="margin-bottom: 8px;">${title}</p> <ol style="margin-top: 8px">${match.join(
-    ''
-  )}</ol>`;
+    const data = await res.json();
+    if (data.features.length === 0) {
+      return `<p style="margin-bottom: 8px;">${title}</p> <p>No hay información disponible para este punto.</p>`;
+    } else {
+      const propiedades = data.features[0].properties;
+      const match = attributes.value[alternate].map(({ attribute, attribute_label }) => {
+        if (attribute_label) {
+          return `<li class="m-0">${attribute_label}: ${propiedades[attribute]}</li>`;
+        } else {
+          return `<li class="m-0">${attribute}: ${propiedades[attribute]}</li>`;
+        }
+      });
+      return `<p style="margin-bottom: 8px;">${title}</p> <ol style="margin-top: 8px">${match.join(
+        ''
+      )}</ol>`;
+    }
+  }
 }
+
 watch(
   () => storeSelected.resources[storeConsulta.resourceType],
   (nv_) => {
@@ -185,7 +199,9 @@ onMounted(async () => {
             :opacidad="storeSelected.byPk(resource.pk).opacidad"
             :posicion="storeSelected.byPk(resource.pk).posicion + 1"
             :visible="storeSelected.byPk(resource.pk).visible"
-            :cuadro-informativo="(url) => buildLayerInfo(url, resource.alternate, resource.title)"
+            :cuadro-informativo="
+              (url) => buildLayerInfo(url, resource.alternate, resource.title, resource.sourcetype)
+            "
           />
         </SisdaiMapa>
       </ClientOnly>
