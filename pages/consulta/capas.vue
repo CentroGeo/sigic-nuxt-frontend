@@ -122,7 +122,6 @@ watch(
     const { news, olds } = arrayNewsOlds(attributesPks, selectedPks);
     news.forEach(async (r) => await addAttribute(r));
     olds.forEach((resource) => delete attributes.value[resource]);
-    //console.log('atributos:', attributes.value);
   },
   { deep: true }
 );

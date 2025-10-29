@@ -82,6 +82,7 @@ defineExpose({
           />
           <button
             class="boton-chico opcion-checkbox boton-secundario"
+            aria-label="Limpiar Selección"
             @click="storeFilters.updateFilter('categories', [])"
           >
             Limpiar selección
@@ -123,8 +124,18 @@ defineExpose({
 
       <template #pie>
         <div class="contenedor-botones flex flex-contenido-centrado">
-          <button class="boton-chico boton-primario" @click="emit('applyFilter')">Buscar</button>
-          <button class="boton-chico boton-secundario" @click="emit('resetFilter')">
+          <button
+            class="boton-chico boton-primario"
+            aria-label="Buscar"
+            @click="emit('applyFilter')"
+          >
+            Buscar
+          </button>
+          <button
+            class="boton-chico boton-secundario"
+            aria-label="Restablecer filtros"
+            @click="emit('resetFilter')"
+          >
             Restablecer filtros
           </button>
         </div>
