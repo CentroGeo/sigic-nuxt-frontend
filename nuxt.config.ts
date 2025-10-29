@@ -54,7 +54,7 @@ export default defineNuxtConfig({
 
   nitro: {
     baseURL: appBasePath,
-    // TODO: remover cuando catálogo se conecte con el backend
+    devProxy: {},
   },
 
   modules: [
