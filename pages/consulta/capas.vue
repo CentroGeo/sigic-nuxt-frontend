@@ -11,7 +11,7 @@ const { gnoxyFetch } = useGnoxyUrl();
 const route = useRoute();
 const router = useRouter();
 storeConsulta.resourceType = resourceTypeDic.dataLayer;
-
+const isSwipeActive = computed(() => storeConsulta.divisionMapaActivado());
 const vistaDelMapa = ref({ extension: storeConsulta.mapExtent });
 const selectorDivisionAbierto = ref(undefined);
 const attributos = reactive({});
@@ -116,6 +116,11 @@ watch(
   },
   { deep: true }
 );
+watch(isSwipeActive, (nv) => {
+  if (nv === false) {
+    storeSelected.pks.forEach((pk) => storeSelected.byPk(pk).resetLado());
+  }
+});
 
 // api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
 // const contenedorSelectoresDivisionColapsado = ref(true);
