@@ -21,7 +21,4 @@ module.exports = {
     'prettier/prettier': 'error',
     '@typescript-eslint/no-dynamic-delete': 'off',
   },
-  globals: {
-    useLevantamientoStore: 'readonly',
-  },
 };
