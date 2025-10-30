@@ -2,11 +2,11 @@
 import { defineNuxtConfig } from 'nuxt/config';
 
 const isDev = process.env.NODE_ENV !== 'production';
-const appBasePath = (process.env.NUXT_PUBLIC_APP_BASE_PATH || '/').replace(/\/?$/, '/');
+const appBasePath = process.env.NUXT_PUBLIC_APP_BASE_PATH || '/';
+const basePath = appBasePath.replace(/\/+$/, '');
+const origin = process.env.NUXT_PUBLIC_BASE_URL;
 const authBaseUrl = process.env.NUXT_PUBLIC_AUTH_BASE_URL;
 const originEnvKey = isDev ? undefined : 'NUXT_AUTH_ORIGIN';
-const origin = process.env.NUXT_PUBLIC_BASE_URL;
-const basePath = appBasePath.replace(/\/+$/, '');
 
 const metaImg = 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg';
 const metaDescription =
@@ -55,7 +55,6 @@ export default defineNuxtConfig({
 
   nitro: {
     baseURL: appBasePath,
-    devProxy: {},
   },
 
   modules: [
