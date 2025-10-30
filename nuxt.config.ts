@@ -2,7 +2,7 @@
 import { defineNuxtConfig } from 'nuxt/config';
 
 const isDev = process.env.NODE_ENV !== 'production';
-const appBasePath = process.env.NUXT_PUBLIC_APP_BASE_PATH || '';
+const appBasePath = process.env.NUXT_PUBLIC_APP_BASE_PATH || '/';
 const basePath = appBasePath.replace(/\/+$/, '');
 const origin = process.env.NUXT_PUBLIC_BASE_URL;
 const authBaseUrl = process.env.NUXT_PUBLIC_AUTH_BASE_URL;
