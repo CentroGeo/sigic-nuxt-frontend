@@ -434,7 +434,7 @@ async function confirmarEliminar() {
                 {{ datum[variable] }}
               </div>
               <div
-                v-if="datum[variable] === 'No aceptado'"
+                v-if="datum[variable] === 'Rechazado'"
                 class="texto-color-error texto-centrado fondo-color-error borde borde-color-error borde-redondeado-8 p-1"
               >
                 {{ datum[variable] }}

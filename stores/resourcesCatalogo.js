@@ -198,7 +198,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       // console.log('getMyResourcesByPageurl', url);
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
-
       // TODO: Implementar en los queryparams si tiene metadatos pendientes o no
       let data;
       if (section === 'disponibles') {
@@ -206,7 +205,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       } else if (section === 'pendientes') {
         data = res.resources.filter((d) => d.category === null);
       } else {
-        // data = res.requests;
+        //data = res.requests;
         data = [
           {
             pk: 1,
