@@ -1,4 +1,5 @@
 <script setup>
+import { useRouter } from 'vue-router';
 import Formulario from './formulario.vue';
 import InformacionGeneral from './informacion-general.vue';
 import Participantes from './participantes.vue';
@@ -18,6 +19,8 @@ const opcionesMenu = [
   { texto: 'Formulario', key: 'formulario' },
 ];
 
+const router = useRouter();
+
 const componenteActual = computed(() => {
   switch (subrutaActual.value) {
     case 'informacion-general':
@@ -32,6 +35,10 @@ const componenteActual = computed(() => {
       return InformacionGeneral;
   }
 });
+
+function irAMisProyectos() {
+  router.push('/levantamiento/proyectos/mis-proyectos');
+}
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeLevantamiento.catalogoColapsado">
@@ -40,7 +47,22 @@ const componenteActual = computed(() => {
     </template>
 
     <template #visualizador>
-      <main id="principal" class="contenedor m-b-10 m-t-3">
+      <main class="mis-proyectos-levantamiento contenedor m-b-10 m-t-3">
+        <div class="grid m-b-3">
+          <div class="columna-16 flex regresar mis-proyectos-encabezado">
+            <div class="boton-regresar">
+              <button
+                class="boton-pictograma boton-sin-contenedor-secundario m-r-2"
+                aria-label="Regresar a proyectos"
+                type="button"
+                @click="irAMisProyectos"
+              >
+                <span class="pictograma-flecha-izquierda" aria-hidden="true" />
+              </button>
+              Mis proyectos
+            </div>
+          </div>
+        </div>
         <div class="flex">
           <LevantamientoMenuProyectos
             v-model:subruta="subrutaActual"
@@ -55,11 +77,9 @@ const componenteActual = computed(() => {
           </button>
         </div>
 
-        <div class="flex">
+        <div class="flex mis-proyectos-contenedor">
           <div class="columna-4"></div>
-          <div class="columna-8">
-            <component :is="componenteActual" />
-          </div>
+          <component :is="componenteActual" />
           <div class="columna-4"></div>
         </div>
       </main>
@@ -68,10 +88,36 @@ const componenteActual = computed(() => {
 </template>
 
 <style scoped lang="scss">
+.regresar {
+  &.mis-proyectos-encabezado {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0px;
+
+    .boton-regresar {
+      display: flex;
+      align-items: center;
+      font-size: var(--Tipos-Tamao-Prrafos-Texto-alto, 20px);
+      font-style: normal;
+      font-weight: 400;
+      line-height: var(--Tipos-Interlineado-Prrafos-Texto-alto, 30px);
+    }
+  }
+}
+
 .menu-proyectos {
   flex: 1;
 }
 .boton-guardar-cambios-proyecto {
   align-self: center;
+}
+
+.mis-proyectos-levantamiento {
+  display: flex;
+  flex-direction: column;
+}
+
+.mis-proyectos-contenedor {
+  flex: 1;
 }
 </style>

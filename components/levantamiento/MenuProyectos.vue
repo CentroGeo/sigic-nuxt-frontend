@@ -4,10 +4,10 @@
  * - opciones: lista de opciones de menú [{ texto, key }]
  * - subruta: el valor actual de la subruta seleccionada
  */
-/* const props = defineProps({
+const props = defineProps({
   opciones: { type: Array, default: () => [] },
   subruta: String,
-}); */
+});
 
 const emit = defineEmits(['update:subruta']);
 
@@ -20,13 +20,13 @@ function irASubruta(key) {
 <template>
   <div class="menu-mis-archivos p-b-3">
     <div class="flex">
-      <template v-for="value in opciones" :key="value.key">
+      <template v-for="value in props.opciones" :key="value.key">
         <div>
           <button class="boton-secundario header-link" type="button" @click="irASubruta(value.key)">
             {{ value.texto }}
           </button>
 
-          <div :class="subruta === value.key ? 'borde-enlace-activo' : ''"></div>
+          <div :class="props.subruta === value.key ? 'borde-enlace-activo' : ''"></div>
         </div>
       </template>
     </div>
