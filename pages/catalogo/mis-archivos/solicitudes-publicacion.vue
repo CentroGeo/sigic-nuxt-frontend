@@ -11,44 +11,85 @@ const storeResources = useResourcesCatalogoStore();
 const storeFilters = useFilteredResources();
 const storeCatalogo = useCatalogoStore();
 const section = 'publicacion';
+const params = computed(() => storeFilters.filters.queryParams);
 storeResources.getMyTotal(section);
 const totalResources = computed(() => storeResources.myTotalBySection(section));
-const resources = computed(() => storeResources.mineBySection(section));
+// const resources = computed(() => storeResources.mineBySection(section));
+const resources = ref([
+  {
+    pk: 1,
+    resource: {
+      pk: 3,
+      title: 'Centros de Investigacion',
+      category: { identifier: 'environment', gn_description: 'Environment' },
+      resource_type: 'dataset',
+      is_published: false,
+    },
+    owner: {
+      pk: 1000,
+      username: 'admin',
+      email: 'None',
+    },
+    reviewer: null,
+    status: 'rejected',
+    created_at: '2025-10-23T22:35:37.339134Z',
+    updated_at: '2025-10-23T22:46:03.837752Z',
+  },
+  {
+    pk: 2,
+    resource: {
+      pk: 6,
+      title: '395-Texto del artículo-815-3-10-20190124.pdf',
+      category: { identifier: 'environment', gn_description: 'Environment' },
+      resource_type: 'document',
+      is_published: false,
+    },
+    owner: {
+      pk: 1004,
+      username: 'psp.etorres@centrogeo.edu.mx',
+      email: '',
+    },
+    reviewer: null,
+    status: 'pending',
+    created_at: '2025-10-29T18:45:50.087381Z',
+    updated_at: '2025-10-29T18:45:50.087463Z',
+  },
+]);
 const variables = ['titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'estatus'];
 const paginaActual = ref(0);
 const tamanioPagina = 10;
 const totalPags = computed(() => Math.ceil(totalResources.value / tamanioPagina));
 const tableResources = ref([]);
-const tableResources2 = ref([
-  {
-    titulo: 'Capas lago texcoco',
-    tipo_recurso: 'Capa Geográfica',
-    categoria: { gn_description: 'Environment' },
-    actualizacion: '22 sep 2025',
-    estatus: 'Pendiente',
-  },
-  {
-    titulo: 'Flora_fauna_texcoco',
-    tipo_recurso: 'Datos Tabulados',
-    categoria: { gn_description: 'Environment' },
-    actualizacion: '22 sep 2025',
-    estatus: 'En revisión',
-  },
-  {
-    titulo: 'Pueblos originarios Texcoco',
-    tipo_recurso: 'Documentos',
-    categoria: { gn_description: 'Environment' },
-    actualizacion: '22 sep 2025',
-    estatus: 'Publicado',
-  },
-  {
-    titulo: 'Agua balance hídrico',
-    tipo_recurso: 'Capa Geográfica',
-    categoria: { gn_description: 'Environment' },
-    actualizacion: '22 sep 2025',
-    estatus: 'No aceptado',
-  },
-]);
+// const tableResources2 = ref([
+//   {
+//     titulo: 'Capas lago texcoco',
+//     tipo_recurso: 'Capa Geográfica',
+//     categoria: { identifier: 'environment', gn_description: 'Environment' },
+//     actualizacion: '22 sep 2025',
+//     estatus: 'Pendiente',
+//   },
+//   {
+//     titulo: 'Flora_fauna_texcoco',
+//     tipo_recurso: 'Datos Tabulados',
+//     categoria: { identifier: 'environment', gn_description: 'Environment' },
+//     actualizacion: '22 sep 2025',
+//     estatus: 'En revisión',
+//   },
+//   {
+//     titulo: 'Pueblos originarios Texcoco',
+//     tipo_recurso: 'Documentos',
+//     categoria: { identifier: 'environment', gn_description: 'Environment' },
+//     actualizacion: '22 sep 2025',
+//     estatus: 'Publicado',
+//   },
+//   {
+//     titulo: 'Agua balance hídrico',
+//     tipo_recurso: 'Capa Geográfica',
+//     categoria: { identifier: 'environment', gn_description: 'Environment' },
+//     actualizacion: '22 sep 2025',
+//     estatus: 'No aceptado',
+//   },
+// ]);
 const modalFiltroAvanzado = ref(null);
 const isFilterActive = ref(false);
 const seleccionOrden = computed({
@@ -81,46 +122,71 @@ function tipoRecurso(recurso) {
   return tipo;
 }
 
-function setActions(recurso) {
-  if (recurso.sourcetype === 'REMOTE') {
-    return 'Editar, Ver, Remover';
-  } else {
-    return 'Editar, Ver, Descargar, Remover';
-  }
+// function setActions(recurso) {
+//   if (recurso.sourcetype === 'REMOTE') {
+//     return 'Editar, Ver, Remover';
+//   } else {
+//     return 'Editar, Ver, Descargar, Remover';
+//   }
+// }
+
+const dictEstatus = {
+  pending: 'Pendiente',
+  published: 'Publicado',
+  rejected: 'Rechazado',
+};
+/**
+ * Formatea la fecha del recurso a esta forma: dd/mm/aaaa
+ * @param fecha de actualización del recurso
+ * @returns {Date} objeto con la fecha
+ */
+function formatearFecha(fecha) {
+  return new Date(fecha).toLocaleDateString('es-ES', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
 }
 
 function updateResources() {
-  //filteredResources.value = nuevosRecursos;
-  // obteniendo datos por las props de la tabla
-  // TODO: enviar solo los recursos que son candidatos a publicarse
   tableResources.value = resources.value
-    .filter((resource) => resource.owner.email === userEmail)
+    .filter((resource) => resource.owner.username === userEmail)
     .map((d) => ({
-      pk: d.pk,
-      titulo: d.title,
-      tipo_recurso: tipoRecurso(d),
-      categoria: d.category,
-      actualizacion: d.last_updated,
-      //acciones: 'Editar, Ver, Descargar, Remover',
-      acciones: setActions(d),
-      uuid: d.uuid,
-      resource_type: d.resource_type,
-      recurso_completo: d,
+      titulo: d.resource.title,
+      tipo_recurso: tipoRecurso(d.resource.resource_type),
+      categoria: d.resource.category,
+      actualizacion: formatearFecha(d.updated_at),
+      estatus: dictEstatus[d.status],
     }));
+  // console.log('tableResources', tableResources.value);
 }
 
-/* function fetchNewData() {
+async function fetchNewData() {
   storeResources.resetBySection(section);
-  storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina);
+  await storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina);
+  // console.log('resources', resources.value);
 }
 fetchNewData();
 
 watch(paginaActual, () => {
   fetchNewData();
-}); */
+});
 
-watch(resources, () => {
-  updateResources();
+watch(
+  resources,
+  () => {
+    updateResources();
+  },
+  { deep: true }
+);
+
+onMounted(async () => {
+  storeFilters.resetAll();
+  storeFilters.buildQueryParams('all');
+  storeResources.getMyTotal('disponibles', params.value);
+  storeResources.getMyTotal('pendientes', params.value);
+  storeResources.getMyTotal('publicacion', {});
+  fetchNewData();
 });
 /* // TODO: fix paginador
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
@@ -249,6 +315,37 @@ onMounted(async () => {
     updateResources(recursos.value);
   }
 }); */
+//
+// const { data } = useAuth();
+
+// const token = data.value?.accessToken;
+// const configEnv = useRuntimeConfig();
+// const baseUrl = configEnv.public.geonodeUrl;
+// // const baseUrl = 'http://10.2.102.177';
+// const headers = ref({ Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' });
+// try {
+//   // petición a los recursos con solicitud de publicación
+//   const response = await $fetch(`${baseUrl}/sigic/requests/`, {
+//     method: 'GET',
+//     headers: headers.value,
+//   });
+//   // console.log('response', response);
+//   const respuestaSolicitud = response.map((d) => ({
+//     titulo: d.resource_title,
+//     tipo_recurso: 'Documentos',
+//     categoria: { identifier: 'farming', gn_description: 'Farming' },
+//     actualizacion: formatearFecha(d.updated_at),
+//     estatus: dictEstatus[d.status],
+//   }));
+//   // console.log('respuestaSolicitud', respuestaSolicitud);
+//   tableResources2.value = [...respuestaSolicitud, ...tableResources2.value];
+//   // tableResources2.value.push(respuestaSolicitud);
+
+//   // console.log('tableResources', tableResources.value);
+//   // console.log('tableResources2', tableResources2.value);
+// } catch (error) {
+//   console.error(error);
+// }
 </script>
 
 <template>
@@ -359,7 +456,7 @@ onMounted(async () => {
             las correciones necesarias.
           </p>
           <h2>Solicitudes de publicación</h2>
-          <UiNumeroElementos :numero="tableResources2.length" />
+          <UiNumeroElementos :numero="totalResources" />
         </div>
         <p>
           En esta tabla se muestran los archivos enviados para revisión antes de publicarse en el
@@ -389,7 +486,7 @@ onMounted(async () => {
           <div class="columna-16">
             <!-- TODO: implementar paginador -->
             <ClientOnly>
-              <UiTablaAccesibleV2 :variables="variables" :datos="tableResources2" />
+              <UiTablaAccesibleV2 :variables="variables" :datos="tableResources" />
               <UiPaginador
                 :pagina-parent="paginaActual"
                 :total-paginas="totalPags"
