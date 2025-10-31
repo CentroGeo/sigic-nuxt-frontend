@@ -148,17 +148,27 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
      */
     async getMyTotal(section, query) {
       const { gnoxyFetch } = useGnoxyUrl();
+      const endpoint = section === 'publicacion' ? '/sigic/requests/' : '/api/v2/sigic-resources/';
       this.isLoading = true;
-      const queryParams = {
-        ...query,
-        page_size: 1,
-        'filter{owner.username}': userEmail,
-      };
+      const queryParams =
+        section === 'publicacion'
+          ? {}
+          : {
+              ...query,
+              page_size: 1,
+              'filter{owner.username}': userEmail,
+            };
       // Agregar toda la lógica de queryparams correspondientes por sección
-      const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
-      const request = await gnoxyFetch(url.toString());
-      const res = await request.json();
-      totalMisArchivos[section] = res.total;
+      const url = buildUrl(`${config.public.geonodeUrl}${endpoint}`, queryParams);
+      // console.log('getMyTotalurl', url);
+      if (section !== 'publicacion') {
+        const request = await gnoxyFetch(url.toString());
+        const res = await request.json();
+        totalMisArchivos[section] = res.total;
+      } else {
+        totalMisArchivos[section] = 2;
+      }
+
       this.isLoading = false;
     },
     /**
@@ -169,14 +179,23 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
      */
     async getMyResourcesByPage(section, pageNum, pageSize, query) {
       const { gnoxyFetch } = useGnoxyUrl();
+      const endpoint = section === 'publicacion' ? '/sigic/requests/' : '/api/v2/sigic-resources/';
+
       this.isLoading = true;
-      const queryParams = {
-        ...query,
-        page: pageNum,
-        page_size: pageSize,
-        'filter{owner.username}': userEmail,
-      };
-      const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
+      const queryParams =
+        section === 'publicacion'
+          ? {
+              page: pageNum,
+              page_size: pageSize,
+            }
+          : {
+              ...query,
+              page: pageNum,
+              page_size: pageSize,
+              'filter{owner.username}': userEmail,
+            };
+      const url = buildUrl(`${config.public.geonodeUrl}${endpoint}`, queryParams);
+      // console.log('getMyResourcesByPageurl', url);
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
 
@@ -187,7 +206,47 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       } else if (section === 'pendientes') {
         data = res.resources.filter((d) => d.category === null);
       } else {
-        data = [];
+        // data = res.requests;
+        data = [
+          {
+            pk: 1,
+            resource: {
+              pk: 3,
+              title: 'Centros de Investigacion',
+              category: { identifier: 'environment', gn_description: 'Environment' },
+              resource_type: 'dataset',
+              is_published: false,
+            },
+            owner: {
+              pk: 1000,
+              username: 'admin',
+              email: 'None',
+            },
+            reviewer: null,
+            status: 'rejected',
+            created_at: '2025-10-23T22:35:37.339134Z',
+            updated_at: '2025-10-23T22:46:03.837752Z',
+          },
+          {
+            pk: 2,
+            resource: {
+              pk: 6,
+              title: '395-Texto del artículo-815-3-10-20190124.pdf',
+              category: { identifier: 'environment', gn_description: 'Environment' },
+              resource_type: 'document',
+              is_published: false,
+            },
+            owner: {
+              pk: 1004,
+              username: 'psp.etorres@centrogeo.edu.mx',
+              email: '',
+            },
+            reviewer: null,
+            status: 'pending',
+            created_at: '2025-10-29T18:45:50.087381Z',
+            updated_at: '2025-10-29T18:45:50.087463Z',
+          },
+        ];
       }
       misArchivos[section] = data;
       this.isLoading = false;
