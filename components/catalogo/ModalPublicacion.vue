@@ -167,7 +167,7 @@ async function confirmarSolicitud(cerrarModal) {
     await fetch(`${baseUrl}/sigic/requests/`, {
       method: 'POST',
       headers: headers.value,
-      body: JSON.stringify({ resource: id }),
+      body: JSON.stringify({ resource_pk: id }),
     });
 
     navigateTo({

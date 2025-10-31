@@ -12,16 +12,13 @@ const storeFilters = useFilteredResources();
 const storeCatalogo = useCatalogoStore();
 const section = 'publicacion';
 const params = computed(() => storeFilters.filters.queryParams);
-storeResources.getMyTotal(section);
 const totalResources = computed(() => storeResources.myTotalBySection(section));
 const resources = computed(() => storeResources.mineBySection(section));
+const tableResources = ref([]);
 const variables = ['titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'estatus'];
 const paginaActual = ref(0);
 const tamanioPagina = 10;
 const totalPags = computed(() => Math.ceil(totalResources.value / tamanioPagina));
-await storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina);
-
-const tableResources = ref([]);
 const modalFiltroAvanzado = ref(null);
 const isFilterActive = ref(false);
 const seleccionOrden = computed({
@@ -75,6 +72,7 @@ function formatearFecha(fecha) {
 }
 
 function updateResources() {
+  // obteniendo datos por las props de la tabla
   tableResources.value = resources.value.map((d) => {
     return {
       titulo: d.resource.title,
@@ -86,14 +84,14 @@ function updateResources() {
   });
 }
 
-async function fetchNewData() {
+function fetchNewData() {
   storeResources.resetBySection(section);
-  await storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina);
+  storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, params.value);
 }
 
-/* watch(paginaActual, () => {
+watch(paginaActual, () => {
   fetchNewData();
-}); */
+});
 
 watch(
   resources,
@@ -105,11 +103,11 @@ watch(
 
 onMounted(async () => {
   storeFilters.resetAll();
-  storeFilters.buildQueryParams('all');
+  storeFilters.buildQueryParams(seleccionTipoArchivo.value);
   storeResources.getMyTotal('disponibles', params.value);
   storeResources.getMyTotal('pendientes', params.value);
-  storeResources.getMyTotal('publicacion', {});
-  await fetchNewData();
+  storeResources.getMyTotal('publicacion', params.value);
+  fetchNewData();
 });
 </script>
 
