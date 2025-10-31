@@ -160,7 +160,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
             };
       // Agregar toda la lógica de queryparams correspondientes por sección
       const url = buildUrl(`${config.public.geonodeUrl}${endpoint}`, queryParams);
-      // console.log('getMyTotalurl', url);
       if (section !== 'publicacion') {
         const request = await gnoxyFetch(url.toString());
         const res = await request.json();
@@ -195,7 +194,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
               'filter{owner.username}': userEmail,
             };
       const url = buildUrl(`${config.public.geonodeUrl}${endpoint}`, queryParams);
-      // console.log('getMyResourcesByPageurl', url);
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
       // TODO: Implementar en los queryparams si tiene metadatos pendientes o no
@@ -231,7 +229,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
             resource: {
               pk: 6,
               title: '395-Texto del artículo-815-3-10-20190124.pdf',
-              category: { identifier: 'environment', gn_description: 'Environment' },
+              category: { identifier: 'farming', gn_description: 'Farming' },
               resource_type: 'document',
               is_published: false,
             },

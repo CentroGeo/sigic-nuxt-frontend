@@ -22,36 +22,6 @@ const totalPags = computed(() => Math.ceil(totalResources.value / tamanioPagina)
 await storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina);
 
 const tableResources = ref([]);
-// const tableResources2 = ref([
-//   {
-//     titulo: 'Capas lago texcoco',
-//     tipo_recurso: 'Capa Geográfica',
-//     categoria: { identifier: 'environment', gn_description: 'Environment' },
-//     actualizacion: '22 sep 2025',
-//     estatus: 'Pendiente',
-//   },
-//   {
-//     titulo: 'Flora_fauna_texcoco',
-//     tipo_recurso: 'Datos Tabulados',
-//     categoria: { identifier: 'environment', gn_description: 'Environment' },
-//     actualizacion: '22 sep 2025',
-//     estatus: 'En revisión',
-//   },
-//   {
-//     titulo: 'Pueblos originarios Texcoco',
-//     tipo_recurso: 'Documentos',
-//     categoria: { identifier: 'environment', gn_description: 'Environment' },
-//     actualizacion: '22 sep 2025',
-//     estatus: 'Publicado',
-//   },
-//   {
-//     titulo: 'Agua balance hídrico',
-//     tipo_recurso: 'Capa Geográfica',
-//     categoria: { identifier: 'environment', gn_description: 'Environment' },
-//     actualizacion: '22 sep 2025',
-//     estatus: 'No aceptado',
-//   },
-// ]);
 const modalFiltroAvanzado = ref(null);
 const isFilterActive = ref(false);
 const seleccionOrden = computed({
@@ -63,9 +33,6 @@ const inputSearch = computed({
   get: () => storeFilters.filters.inputSearch,
   set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
 });
-
-//const { data } = useAuth();
-//const userEmail = data.value.user.email;
 
 /**
  * Valida si el tipo de recurso es documento o dataset con geometría o no
@@ -117,14 +84,11 @@ function updateResources() {
       estatus: dictEstatus[d.status],
     };
   });
-
-  console.log('tableResources', tableResources.value);
 }
 
 async function fetchNewData() {
   storeResources.resetBySection(section);
   await storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina);
-  // console.log('resources', resources.value);
 }
 
 /* watch(paginaActual, () => {
@@ -134,7 +98,6 @@ async function fetchNewData() {
 watch(
   resources,
   () => {
-    //console.log('cambiaron los recursos');
     updateResources();
   },
   { deep: true }
@@ -147,7 +110,6 @@ onMounted(async () => {
   storeResources.getMyTotal('pendientes', params.value);
   storeResources.getMyTotal('publicacion', {});
   await fetchNewData();
-  //console.log('En mounted', resources.value);
 });
 </script>
 
@@ -287,7 +249,6 @@ onMounted(async () => {
 
         <div v-else class="flex">
           <div class="columna-16">
-            <!-- TODO: implementar paginador -->
             <ClientOnly>
               <UiTablaAccesibleV2 :variables="variables" :datos="tableResources" />
               <UiPaginador
