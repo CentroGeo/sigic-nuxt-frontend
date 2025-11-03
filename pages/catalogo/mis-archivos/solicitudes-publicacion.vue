@@ -38,17 +38,12 @@ const inputSearch = computed({
  */
 function tipoRecurso(recurso) {
   let tipo;
-  /*   if (recurso.resource_type === 'document') {
+  if (recurso.resource_type === 'document') {
     tipo = 'Documentos';
   } else if (recurso.sourcetype === 'REMOTE') {
     tipo = 'Capa Geográfica, Catálogo Externo';
   } else {
     tipo = isGeometricExtension(recurso.extent) ? 'Capa Geográfica' : 'Datos Tabulados';
-  } */
-  if (recurso === 'document') {
-    tipo = 'Documentos';
-  } else {
-    tipo = 'Capa Geográfica';
   }
   return tipo;
 }
@@ -76,7 +71,7 @@ function updateResources() {
   tableResources.value = resources.value.map((d) => {
     return {
       titulo: d.resource.title,
-      tipo_recurso: tipoRecurso(d.resource.resource_type),
+      tipo_recurso: tipoRecurso(d.resource),
       categoria: d.resource.category,
       actualizacion: formatearFecha(d.updated_at),
       estatus: dictEstatus[d.status],
