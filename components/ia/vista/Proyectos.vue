@@ -94,7 +94,7 @@ const extensionDocumento = ref();
 const blobeTitle = ref('');
 const cargandoRecurso = ref(true);
 const loaderVisModal = ref('');
-const modalTableResource = ref({});
+
 /**
  * Abre un modal con la vista del documento embed
  * @param resource del que se toma el pk para la visualización
@@ -121,30 +121,23 @@ async function openResourceViewEmbed(resource) {
 }
 
 const loaderFullScreen = ref(false);
-const tablaChild = ref(null);
-const shownModal = ref('');
 /**
  * Abre un modal con la vista del tabla de atributos
  * @param resource del que se toma el pk para la visualización
  */
+const modalTableResourcePk = ref('');
+const modalT = ref(null);
+const tableTitle = ref('');
+const isDataTableReading = ref(false);
 async function openResourceViewTable(resource) {
-  // console.log('resource', resource);
-  loaderVisModal.value = 'Cargando recurso';
+  tableTitle.value = '';
+  modalTableResourcePk.value = resource.geonode_id;
 
-  loaderFullScreen.value = true;
-  const resourceByPk = await storeResources.fetchResourceByPk(resource.geonode_id);
-  // console.log('resourceByPk', resourceByPk);
-  shownModal.value = 'tablaModal';
   nextTick(() => {
-    tablaChild.value?.abrirModalTabla();
+    modalT.value?.abrirModal();
   });
-  loaderFullScreen.value = false;
-  if (resourceByPk !== undefined) {
-    modalTableResource.value = resourceByPk;
-  } else {
-    modalTableResource.value = {};
-    loaderVisModal.value = `El recurso '${resource.filename}' no está publicado`;
-  }
+  const resourceByPk = await storeResources.fetchResourceByPk(resource.geonode_id);
+  tableTitle.value = resourceByPk.title;
 }
 
 const eliminarModal = ref(null);
@@ -402,13 +395,25 @@ const handleDelete = async () => {
         <template #pie> </template>
       </SisdaiModal>
 
-      <IaModalTabla
-        v-if="shownModal === 'tablaModal'"
-        ref="tablaChild"
-        :key="`${modalTableResource?.pk}_${modalTableResource?.resource_type}`"
-        :selected-element="modalTableResource"
-        :mensaje-modal="loaderVisModal"
-      />
+      <SisdaiModal v-if="modalTableResourcePk" ref="modalT" class="modal-grande">
+        <template #encabezado>
+          <h2>{{ isDataTableReading ? tableTitle : '' }}</h2>
+        </template>
+        <template #cuerpo>
+          <div v-if="!isDataTableReading" class="flex flex-contenido-centrado">
+            <figure>
+              <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
+              <figcaption class="texto-centrado">Cargando tabla</figcaption>
+            </figure>
+          </div>
+          <IaModalTabla
+            :selected-element-pk="modalTableResourcePk"
+            @tabla-cargada="isDataTableReading = true"
+          />
+        </template>
+        <template #pie> </template>
+      </SisdaiModal>
+
       <SisdaiModal ref="eliminarModal">
         <template #encabezado>
           <h4>Eliminar {{ eliminarLabel }}</h4>
