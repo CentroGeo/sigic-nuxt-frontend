@@ -1,11 +1,7 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
-import { fetchDoc } from '~/utils/consulta';
 
 const storeIA = useIAStore();
-const storeResources = useResourcesIAStore();
-
-const modalDocumento = ref(null);
 
 const proyecto = computed(() => storeIA.proyectoSeleccionado);
 const arraySources = ref([]);
@@ -89,55 +85,57 @@ const obtenerTipoArchivo = (nombre) => {
   return tipos[extension] || extension.toUpperCase();
 };
 
-const blobedUrl = ref('');
-const extensionDocumento = ref();
-const blobeTitle = ref('');
-const cargandoRecurso = ref(true);
-const loaderVisModal = ref('');
+const resourceFilename = ref('');
+const modalNoPublico = ref(null);
 
+const modalDocumento = ref(null);
+const blobeTitle = ref('');
+const modalDocResourcePk = ref();
+const isDocumentoReading = ref(false);
 /**
  * Abre un modal con la vista del documento embed
  * @param resource del que se toma el pk para la visualización
  */
 async function openResourceViewEmbed(resource) {
-  loaderVisModal.value = 'Cargando recurso';
-  cargandoRecurso.value = true;
-  blobedUrl.value = '';
-  blobeTitle.value = '';
-  modalDocumento.value.abrirModal();
-  // console.log('resource', resource);
-  const resourceByPk = await storeResources.fetchResourceByPk(resource.geonode_id);
-  // console.log('resourceByPk', resourceByPk);
-  if (resourceByPk !== undefined) {
-    blobeTitle.value = resourceByPk.title;
-    const linkCargado = resourceByPk.links.find((link) => link.link_type === 'uploaded');
-    extensionDocumento.value = linkCargado.extension;
-    const resourceEmbedURL = resourceByPk.embed_url.replace('/embed', '/link');
-    blobedUrl.value = await fetchDoc(resourceEmbedURL);
-    cargandoRecurso.value = false;
+  blobeTitle.value = resource.filename;
+  modalDocResourcePk.value = resource.geonode_id;
+
+  if (modalDocResourcePk.value !== 0) {
+    nextTick(() => {
+      modalDocumento.value?.abrirModal();
+    });
   } else {
-    loaderVisModal.value = `El recurso '${resource.filename}'' no está publicado`;
+    isDocumentoReading.value = false;
+    resourceFilename.value = resource.filename;
+    modalNoPublico.value?.abrirModal();
+
+    console.warn(`El recurso "${resource.filename}" no está público.`);
   }
 }
 
-const loaderFullScreen = ref(false);
+const modalTabla = ref(null);
+const tableTitle = ref('');
+const modalTableResourcePk = ref('');
+const isDataTableReading = ref(false);
 /**
  * Abre un modal con la vista del tabla de atributos
  * @param resource del que se toma el pk para la visualización
  */
-const modalTableResourcePk = ref('');
-const modalT = ref(null);
-const tableTitle = ref('');
-const isDataTableReading = ref(false);
 async function openResourceViewTable(resource) {
-  tableTitle.value = '';
+  tableTitle.value = resource.filename;
   modalTableResourcePk.value = resource.geonode_id;
 
-  nextTick(() => {
-    modalT.value?.abrirModal();
-  });
-  const resourceByPk = await storeResources.fetchResourceByPk(resource.geonode_id);
-  tableTitle.value = resourceByPk.title;
+  if (modalTableResourcePk.value !== 0) {
+    nextTick(() => {
+      modalTabla.value?.abrirModal();
+    });
+  } else {
+    isDataTableReading.value = false;
+    resourceFilename.value = resource.filename;
+    modalNoPublico.value?.abrirModal();
+
+    console.warn(`El recurso "${resource.filename}" no está público.`);
+  }
 }
 
 const eliminarModal = ref(null);
@@ -362,40 +360,26 @@ const handleDelete = async () => {
         </div>
       </div>
     </div>
-    <div v-if="loaderFullScreen">
-      <div class="loaderFullScreen"></div>
-      <div class="logoLoader">
-        <figure>
-          <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
-          <!-- <figcaption class="texto-centrado">Cargando recurso</figcaption> -->
-        </figure>
-      </div>
-    </div>
     <ClientOnly>
-      <SisdaiModal ref="modalDocumento" class="modal-grande">
+      <SisdaiModal v-if="modalDocResourcePk" ref="modalDocumento" class="modal-grande">
         <template #encabezado>
-          <h2>{{ blobeTitle }}</h2>
+          <h2>{{ isDocumentoReading ? blobeTitle : '' }}</h2>
         </template>
         <template #cuerpo>
-          <div v-if="cargandoRecurso" class="flex flex-contenido-centrado">
+          <div v-if="!isDocumentoReading" class="flex flex-contenido-centrado">
             <figure>
               <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
-              <figcaption class="texto-centrado">{{ loaderVisModal }}</figcaption>
+              <figcaption class="texto-centrado">Cargando documento</figcaption>
             </figure>
           </div>
-          <div v-else class="contenedor-doc-embed">
-            <embed
-              ref="documentRef"
-              class="documento-embebido"
-              :src="blobedUrl"
-              :type="extensionDocumento === 'pdf' ? 'application/pdf' : 'text/plain'"
-            />
-          </div>
+          <IaDocFuentesInfo
+            :selected-element-pk="modalDocResourcePk"
+            @doc-cargado="isDocumentoReading = true"
+          />
         </template>
         <template #pie> </template>
       </SisdaiModal>
-
-      <SisdaiModal v-if="modalTableResourcePk" ref="modalT" class="modal-grande">
+      <SisdaiModal v-if="modalTableResourcePk" ref="modalTabla" class="modal-grande">
         <template #encabezado>
           <h2>{{ isDataTableReading ? tableTitle : '' }}</h2>
         </template>
@@ -406,10 +390,28 @@ const handleDelete = async () => {
               <figcaption class="texto-centrado">Cargando tabla</figcaption>
             </figure>
           </div>
-          <IaModalTabla
+          <IaTablaFuentesInfo
             :selected-element-pk="modalTableResourcePk"
             @tabla-cargada="isDataTableReading = true"
           />
+        </template>
+        <template #pie> </template>
+      </SisdaiModal>
+
+      <SisdaiModal ref="modalNoPublico">
+        <template #encabezado>
+          <h2>{{ '' }}</h2>
+        </template>
+        <template #cuerpo>
+          <p
+            class="fondo-color-alerta texto-color-alerta borde borde-color-alerta borde-redondeado-8 p-3"
+          >
+            El recurso <b class="texto-peso-600">"{{ resourceFilename }}"</b> no está público en
+            geonode.
+            <nuxt-link to="/catalogo/mis-archivos/metadatos-pendientes"
+              >Ver en mis archivos</nuxt-link
+            >
+          </p>
         </template>
         <template #pie> </template>
       </SisdaiModal>
@@ -444,30 +446,6 @@ const handleDelete = async () => {
 </template>
 
 <style lang="scss">
-.loaderFullScreen {
-  position: absolute;
-  background-color: var(--opacidad-ligero);
-  height: calc(100vh + 576px);
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  margin: auto;
-  z-index: 9999;
-}
-.logoLoader {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  z-index: 9999;
-}
-.contenedor-doc-embed {
-  height: calc(100vh - 112px);
-}
-.documento-embebido {
-  width: 100%;
-  height: 100%;
-}
 .overflowYAuto {
   overflow-y: auto;
   height: var(--altura-consulta-esc);

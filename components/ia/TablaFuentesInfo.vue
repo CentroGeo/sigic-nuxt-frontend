@@ -39,15 +39,13 @@ watch(datos, () => {
 </script>
 
 <template>
-  <div>
-    <div v-if="datos.length !== 0" class="contenedor-tabla">
-      <UiPaginador
-        :pagina-parent="paginaActual"
-        :total-paginas="Math.ceil(totalFeatures / tamanioPagina)"
-        @cambio="paginaActual = $event"
-      />
-      <UiTablaAccesible :variables="variables" :datos="datos" />
-    </div>
+  <div v-if="datos.length !== 0" class="contenedor-tabla">
+    <UiPaginador
+      :pagina-parent="paginaActual"
+      :total-paginas="Math.ceil(totalFeatures / tamanioPagina)"
+      @cambio="paginaActual = $event"
+    />
+    <UiTablaAccesible :variables="variables" :datos="datos" />
   </div>
 </template>
 
