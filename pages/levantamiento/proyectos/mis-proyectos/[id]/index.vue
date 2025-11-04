@@ -77,10 +77,10 @@ function irAMisProyectos() {
           </button>
         </div>
 
-        <div class="flex mis-proyectos-contenedor">
-          <div class="columna-4"></div>
+        <div class="flex mis-proyectos-contenedor flex-contenido-centrado">
+          <div :class="subrutaActual === 'participantes' ? 'columna-3' : 'columna-4'"></div>
           <component :is="componenteActual" />
-          <div class="columna-4"></div>
+          <div :class="subrutaActual === 'participantes' ? 'columna-3' : 'columna-4'"></div>
         </div>
       </main>
     </template>
