@@ -1,45 +1,32 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+import { formatDate } from '~/utils/levantamiento';
+
 definePageMeta({
   middleware: 'auth',
 });
 
 const storeLevantamiento = useLevantamientoStore();
 
-/**
- * Formatea la fecha a la forma dd/mm/yyy 00:00 AM
- * @param date objeto tipo fecha a formatear
- */
-function formatDate(date) {
-  const formatter = ref();
-  formatter.value = new Intl.DateTimeFormat('es-MX', {
-    hour: '2-digit',
-    minute: '2-digit',
-    // second: '2-digit',
-  });
-  const formattedTime = formatter.value.format(date);
-  formatter.value = new Intl.DateTimeFormat('es-MX', { dateStyle: 'short' });
-  const formattedDate = formatter.value.format(date);
-  return `${formattedDate} ${formattedTime}`;
-}
-
-const aportes = ref([
+const aprobados = ref([
   {
     id: 0,
     thumbnail_img: 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/kale-1.jpg',
     title: 'Título del aporte',
     update_date: formatDate(new Date()),
+    status: 'Aprobado',
   },
   {
     id: 1,
     thumbnail_img: 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/kale-1.jpg',
     title: 'Título del aporte',
     update_date: formatDate(new Date()),
+    status: 'Aprobado',
   },
 ]);
 
-const modalRemoverAporte = ref(null);
 const modalEditarAporte = ref(null);
+const modalRemoverAporte = ref(null);
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeLevantamiento.catalogoColapsado">
@@ -75,45 +62,55 @@ const modalEditarAporte = ref(null);
           ]"
         />
 
-        <div class="flex">
-          <h2>Aportes aprobados</h2>
-          <UiNumeroElementos :numero="0" />
-        </div>
-        <!-- Buscador -->
-        <div class="contenedor-aportes">
-          <div class="grid">
-            <div v-for="value in aportes" :key="value.id" class="columna-5">
-              <div class="tarjeta" style="position: relative">
-                <img class="tarjeta-imagen" alt="" :srcset="value.thumbnail_img" />
+        <div class="grid">
+          <div class="columna-16">
+            <div class="flex">
+              <h2>Aportes aprobados</h2>
+              <UiNumeroElementos :numero="0" />
+            </div>
+          </div>
+          <div class="columna-8">
+            <!-- Buscador -->
+          </div>
+          <div class="columna-16">
+            <div class="contenedor-aprobados">
+              <div class="grid">
+                <div v-for="value in aprobados" :key="value.id" class="columna-5">
+                  <div class="tarjeta" style="position: relative">
+                    <img class="tarjeta-imagen" alt="" :srcset="value.thumbnail_img" />
 
-                <div class="tarjeta-cuerpo">
-                  <p class="tarjeta-etiqueta">Aporte creado en:</p>
-                  <p class="tarjeta-titulo">{{ value.title }}</p>
-                  <p>{{ value.update_date }}</p>
-                </div>
+                    <div class="tarjeta-cuerpo">
+                      <p class="tarjeta-etiqueta">Aporte creado en:</p>
+                      <p class="tarjeta-titulo">{{ value.title }}</p>
+                      <p>{{ value.update_date }}</p>
+                    </div>
 
-                <div class="tarjeta-pie">
-                  <button
-                    class="boton-primario boton-chico texto-centrado tarjeta-pie-boton"
-                    type="button"
-                    @click="modalEditarAporte.abrirModal()"
-                  >
-                    Editar aporte
-                  </button>
-                  <button
-                    class="boton-secundario boton-chico texto-centrado tarjeta-pie-boton"
-                    type="button"
-                    @click="modalRemoverAporte.abrirModal()"
-                  >
-                    Eliminar aporte
-                  </button>
+                    <div class="tarjeta-pie">
+                      <div class="flex" style="row-gap: 8px">
+                        <button
+                          class="boton-primario boton-chico texto-centrado tarjeta-pie-boton"
+                          type="button"
+                          @click="modalEditarAporte.abrirModal()"
+                        >
+                          Editar aporte
+                        </button>
+                        <button
+                          class="boton-secundario boton-chico texto-centrado tarjeta-pie-boton"
+                          type="button"
+                          @click="modalRemoverAporte.abrirModal()"
+                        >
+                          Eliminar aporte
+                        </button>
+                      </div>
+                    </div>
+                    <p
+                      class="fondo-color-confirmacion texto-color-confirmacion borde borde-color-confirmacion borde-redondeado-8 p-1"
+                      style="position: absolute; top: 0; right: 24px"
+                    >
+                      {{ value.status }}
+                    </p>
+                  </div>
                 </div>
-                <p
-                  class="fondo-color-confirmacion texto-color-confirmacion borde borde-color-confirmacion borde-redondeado-8 p-1"
-                  style="position: absolute; top: 0; right: 24px"
-                >
-                  Aprobado
-                </p>
               </div>
             </div>
           </div>
