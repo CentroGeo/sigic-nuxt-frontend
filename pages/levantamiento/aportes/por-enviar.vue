@@ -39,7 +39,7 @@ const storeLevantamiento = useLevantamientoStore();
         />
 
         <div class="flex">
-          <h2>Aportes en revisión</h2>
+          <h2>Aportes por enviar</h2>
           <UiNumeroElementos :numero="0" />
         </div>
       </main>

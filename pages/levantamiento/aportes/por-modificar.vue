@@ -14,27 +14,32 @@ const storeLevantamiento = useLevantamientoStore();
       <main id="principal" class="contenedor m-b-10 m-t-3">
         <LevantamientoMenuSecundario
           :opciones="[
-            { texto: 'Todos los aportes', ruta: '/levantamiento/aportes' },
-            {
-              texto: 'Aprobados',
-              ruta: '/levantamiento/aportes/aprobados',
-              notificacion: false,
-            },
+            { texto: 'Aprobados', ruta: '/levantamiento/aportes' },
             {
               texto: 'Por modificar',
               ruta: '/levantamiento/aportes/por-modificar',
-              notificacion: true,
+              notificacion: false,
             },
             {
               texto: 'En revisión',
               ruta: '/levantamiento/aportes/en-revision',
               notificacion: true,
             },
+            {
+              texto: 'Por enviar',
+              ruta: '/levantamiento/aportes/por-enviar',
+              notificacion: true,
+            },
+            {
+              texto: 'Rechazados',
+              ruta: '/levantamiento/aportes/rechazados',
+              notificacion: false,
+            },
           ]"
         />
 
         <div class="flex">
-          <h2>Por modificar</h2>
+          <h2>Aportes por modificar</h2>
           <UiNumeroElementos :numero="0" />
         </div>
       </main>
