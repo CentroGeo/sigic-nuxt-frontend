@@ -12,6 +12,11 @@ const route = useRoute();
 const router = useRouter();
 storeConsulta.resourceType = resourceTypeDic.dataLayer;
 const isSwipeActive = computed(() => storeConsulta.divisionMapaActivado());
+const swipePosition = computed({
+  get: () => storeConsulta.divisionMapa,
+  set: (nv) => (storeConsulta.divisionMapa = nv),
+});
+
 const vistaDelMapa = ref({ extension: storeConsulta.mapExtent });
 const selectorDivisionAbierto = ref(undefined);
 const attributos = reactive({});
@@ -122,6 +127,8 @@ watch(isSwipeActive, (nv) => {
   }
 });
 
+watch(swipePosition, () => console.log(swipePosition.value), { deep: true });
+
 // api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
 // const contenedorSelectoresDivisionColapsado = ref(true);
 </script>
@@ -137,9 +144,9 @@ watch(isSwipeActive, (nv) => {
 
       <ClientOnly>
         <SisdaiMapa
+          v-model:dividir="swipePosition"
           class="gema"
           :vista="vistaDelMapa"
-          :dividir="storeConsulta.divisionMapa"
           @click-centrar="storeConsulta.resetMapExtent"
           @al-mover-vista="actualizarHashDesdeVista"
         >
