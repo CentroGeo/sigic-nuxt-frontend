@@ -100,7 +100,7 @@ export default defineNuxtConfig({
     public: {
       baseURL: process.env.NUXT_PUBLIC_BASE_URL || 'http://localhost:3000',
       basePath: basePath,
-      iAModel: process.env.NUXT_PUBLIC_IA_MODEL || 'deepseek-r1',
+      iAModel: process.env.NUXT_PUBLIC_OLLAMA_MODEL || 'deepseek-r1',
       geonodeUrl: process.env.NUXT_PUBLIC_GEONODE_URL || 'https://geonode.dev.geoint.mx',
       geonodeApi: process.env.NUXT_PUBLIC_GEONODE_API || 'https://geonode.dev.geoint.mx/api/v2',
       geoserverUrl:
