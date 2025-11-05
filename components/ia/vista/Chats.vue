@@ -175,7 +175,8 @@ const submitMensaje = async () => {
     //context_id: parseInt(contextId),
     context_id: contextID.value,
     //context_id: 9,
-    model: 'deepseek-r1',
+    // model: 'deepseek-r1',
+    model: 'qwen2:1.5b',
     //model: "llama3.1",
     messages: [
       {
