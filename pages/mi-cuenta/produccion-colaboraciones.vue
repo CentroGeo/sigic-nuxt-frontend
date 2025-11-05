@@ -39,13 +39,34 @@ const lista_colaboraciones = ref([
     enlace: 'https://colaboraciones.ejemplo.com/mx/programa-restauracion-manglares',
   },
 ]);
+
+const proyectoModal = ref(null);
+const proyectoSeleccionado = ref({});
+const tipoRecurso = ref('proyecto');
+function openEditModal(proyecto, tipo) {
+  proyectoSeleccionado.value = proyecto;
+  tipoRecurso.value = tipo;
+  //console.log(proyectoSeleccionado.value);
+  nextTick(() => {
+    proyectoModal.value.abrirModalProyecto();
+  });
+}
 </script>
 <template>
   <div>
     <h2>Producción y colaboraciones</h2>
     <div class="p-x-7">
-      <h3>Proyectos y fondos SECIHTI</h3>
-
+      <div class="flex flex-contenido-separado">
+        <h3>Proyectos y fondos SECIHTI</h3>
+        <button
+          type="button"
+          class="boton-secundario boton-chico"
+          style="height: fit-content; align-self: center"
+          @click="openEditModal({}, 'proyecto')"
+        >
+          Agregar proyecto +
+        </button>
+      </div>
       <MiCuentaProductosTarjeta
         v-for="(proyecto, i) in lista_proyectos"
         :key="i"
@@ -53,8 +74,21 @@ const lista_colaboraciones = ref([
         :rol="proyecto.rol"
         :anio_periodo="proyecto.anio_periodo"
         :enlace="proyecto.enlace"
+        @editar-clicked="openEditModal(proyecto, 'proyecto')"
+        @eliminar-clicked="console.log('eliminar')"
       ></MiCuentaProductosTarjeta>
-      <h3>Publicaciones</h3>
+
+      <div class="flex flex-contenido-separado">
+        <h3>Publicaciones</h3>
+        <button
+          type="button"
+          class="boton-secundario boton-chico"
+          style="height: fit-content; align-self: center"
+          @click="openEditModal({}, 'publicación')"
+        >
+          Agregar publicación +
+        </button>
+      </div>
       <MiCuentaProductosTarjeta
         v-for="(proyecto, i) in lista_publicaciones"
         :key="i"
@@ -62,8 +96,21 @@ const lista_colaboraciones = ref([
         :medio="proyecto.medio"
         :anio_periodo="proyecto.anio_periodo"
         :enlace="proyecto.enlace"
+        @editar-clicked="openEditModal(proyecto, 'publicación')"
+        @eliminar-clicked="console.log('eliminar')"
       ></MiCuentaProductosTarjeta>
-      <h3>Colaboraciones</h3>
+
+      <div class="flex flex-contenido-separado">
+        <h3>Colaboraciones</h3>
+        <button
+          type="button"
+          class="boton-secundario boton-chico"
+          style="height: fit-content; align-self: center"
+          @click="openEditModal({}, 'colaboración')"
+        >
+          Agregar colaboración +
+        </button>
+      </div>
       <MiCuentaProductosTarjeta
         v-for="(proyecto, i) in lista_colaboraciones"
         :key="i"
@@ -72,7 +119,15 @@ const lista_colaboraciones = ref([
         :anio_periodo="proyecto.anio_periodo"
         :instituciones="proyecto.instituciones"
         :enlace="proyecto.enlace"
+        @editar-clicked="openEditModal(proyecto, 'colaboración')"
+        @eliminar-clicked="console.log('eliminar')"
       ></MiCuentaProductosTarjeta>
     </div>
+    <MiCuentaModalProyecto
+      ref="proyectoModal"
+      :key="`modal_${proyectoSeleccionado ? proyectoSeleccionado.titulo : '0'}`"
+      :proyecto="proyectoSeleccionado"
+      :tipo="tipoRecurso"
+    ></MiCuentaModalProyecto>
   </div>
 </template>
