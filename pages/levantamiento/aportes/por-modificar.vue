@@ -7,6 +7,10 @@ definePageMeta({
 });
 
 const storeLevantamiento = useLevantamientoStore();
+
+const router = useRouter();
+const route = useRoute();
+
 const notificacion = ref(true);
 
 const porModificar = ref([
@@ -28,6 +32,28 @@ const porModificar = ref([
 
 const modalMensajes = ref(null);
 const modalRemoverAporte = ref(null);
+
+const aporteSeleccionado = ref({});
+/**
+ * Asigna el aporte seleccionado y navega a la vista de editar
+ * @param aporte del que se va a editar
+ */
+function editarAporte(aporte) {
+  aporteSeleccionado.value = aporte;
+  irAEditarAporte();
+}
+/**
+ * Navega a la vista de editar con los querys de título y ruta previa
+ */
+function irAEditarAporte() {
+  router.push({
+    path: `/levantamiento/aportes/editar/${aporteSeleccionado.value.id}`,
+    query: {
+      title: aporteSeleccionado.value.title,
+      previous_path: route.path,
+    },
+  });
+}
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeLevantamiento.catalogoColapsado">
@@ -116,13 +142,13 @@ const modalRemoverAporte = ref(null);
 
                     <div class="tarjeta-pie">
                       <div class="flex" style="row-gap: 8px">
-                        <!-- <button
+                        <button
                           class="boton-primario boton-chico texto-centrado tarjeta-pie-boton"
                           type="button"
-                          @click="modalEditarAporte.abrirModal()"
+                          @click="editarAporte(value)"
                         >
                           Editar aporte
-                        </button> -->
+                        </button>
                         <button
                           class="boton-secundario boton-chico texto-centrado tarjeta-pie-boton"
                           type="button"
@@ -152,6 +178,7 @@ const modalRemoverAporte = ref(null);
           </div>
         </div>
       </main>
+
       <ClientOnly>
         <SisdaiModal ref="modalMensajes">
           <template #encabezado> <h2>Modificaciones pendientes</h2> </template>

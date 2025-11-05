@@ -8,6 +8,9 @@ definePageMeta({
 
 const storeLevantamiento = useLevantamientoStore();
 
+const router = useRouter();
+const route = useRoute();
+
 const porEnviar = ref([
   {
     id: 0,
@@ -26,6 +29,28 @@ const porEnviar = ref([
 ]);
 
 const modalRemoverAporte = ref(null);
+
+const aporteSeleccionado = ref({});
+/**
+ * Asigna el aporte seleccionado y navega a la vista de editar
+ * @param aporte del que se va a editar
+ */
+function editarAporte(aporte) {
+  aporteSeleccionado.value = aporte;
+  irAEditarAporte();
+}
+/**
+ * Navega a la vista de editar con los querys de título y ruta previa
+ */
+function irAEditarAporte() {
+  router.push({
+    path: `/levantamiento/aportes/editar/${aporteSeleccionado.value.id}`,
+    query: {
+      title: aporteSeleccionado.value.title,
+      previous_path: route.path,
+    },
+  });
+}
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeLevantamiento.catalogoColapsado">
@@ -93,13 +118,13 @@ const modalRemoverAporte = ref(null);
                         >
                           Enviar a revisión
                         </button> -->
-                        <!-- <button
+                        <button
                           class="boton-secundario boton-chico texto-centrado tarjeta-pie-boton"
                           type="button"
-                          @click="modalEditarAporte.abrirModal()"
+                          @click="editarAporte(value)"
                         >
                           Editar aporte
-                        </button> -->
+                        </button>
                         <button
                           class="boton-secundario boton-chico texto-centrado tarjeta-pie-boton"
                           type="button"
@@ -116,6 +141,7 @@ const modalRemoverAporte = ref(null);
           </div>
         </div>
       </main>
+
       <ClientOnly>
         <SisdaiModal ref="modalRemoverAporte">
           <template #encabezado> <h2>Eliminar aporte</h2> </template>

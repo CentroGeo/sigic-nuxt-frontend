@@ -8,6 +8,9 @@ definePageMeta({
 
 const storeLevantamiento = useLevantamientoStore();
 
+const router = useRouter();
+const route = useRoute();
+
 const aprobados = ref([
   {
     id: 0,
@@ -27,6 +30,30 @@ const aprobados = ref([
 
 const modalEditarAporte = ref(null);
 const modalRemoverAporte = ref(null);
+
+const aporteSeleccionado = ref({});
+/**
+ * Abre el modal de editar aporte y asigna el aporte seleccionado
+ * @param aporte del que se va a editar
+ */
+function editarAporte(aporte) {
+  modalEditarAporte.value?.abrirModal();
+  aporteSeleccionado.value = aporte;
+}
+/**
+ * Cierra el modal de editar aporte y navega a la vista de editar
+ * con los querys de título y ruta previa
+ */
+function irAEditarAporte() {
+  modalEditarAporte.value?.cerrarModal();
+  router.push({
+    path: `/levantamiento/aportes/editar/${aporteSeleccionado.value.id}`,
+    query: {
+      title: aporteSeleccionado.value.title,
+      previous_path: route.path,
+    },
+  });
+}
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeLevantamiento.catalogoColapsado">
@@ -85,12 +112,12 @@ const modalRemoverAporte = ref(null);
                       <p>{{ value.update_date }}</p>
                     </div>
 
-                    <div class="tarjeta-pie">
+                    <div class="tarjeta-pie" style="display: block">
                       <div class="flex" style="row-gap: 8px">
                         <button
                           class="boton-primario boton-chico texto-centrado tarjeta-pie-boton"
                           type="button"
-                          @click="modalEditarAporte.abrirModal()"
+                          @click="editarAporte(value)"
                         >
                           Editar aporte
                         </button>
@@ -116,6 +143,7 @@ const modalRemoverAporte = ref(null);
           </div>
         </div>
       </main>
+
       <ClientOnly>
         <SisdaiModal ref="modalEditarAporte">
           <template #encabezado> <h2>Editar aporte</h2> </template>
@@ -132,6 +160,9 @@ const modalRemoverAporte = ref(null);
               @click="modalEditarAporte.cerrarModal()"
             >
               Cancelar
+            </button>
+            <button class="boton-primario boton-chico" type="button" @click="irAEditarAporte()">
+              Continuar con la edición
             </button>
           </template>
         </SisdaiModal>
