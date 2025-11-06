@@ -1,9 +1,11 @@
 <script setup>
-// import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+
 import SisdaiBotonesRadioGrupo from '@centrogeomx/sisdai-componentes/src/componentes/boton-radio-grupo/SisdaiBotonesRadioGrupo.vue';
 import SisdaiBotonRadio from '@centrogeomx/sisdai-componentes/src/componentes/boton-radio/SisdaiBotonRadio.vue';
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 
+// import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
 import { SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
 
 definePageMeta({
@@ -12,7 +14,9 @@ definePageMeta({
 
 const storeLevantamiento = useLevantamientoStore();
 
+const router = useRouter();
 const route = useRoute();
+
 const title = computed(() => route.query.title);
 const previous_path = computed(() => route.query.previous_path);
 
@@ -52,6 +56,7 @@ function obtenerRutaAnterior() {
     }
   }
 }
+const modalRegresar = ref(null);
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeLevantamiento.catalogoColapsado">
@@ -63,7 +68,7 @@ function obtenerRutaAnterior() {
       <main id="principal" class="m-t-4">
         <div class="contenedor">
           <div class="flex">
-            <nuxt-link :to="previous_path" aria-label="Regresar a aportes">
+            <nuxt-link aria-label="Regresar a aportes" @click="modalRegresar.abrirModal()">
               <span
                 class="pictograma-flecha-izquierda pictograma-mediano texto-color-acento m-r-2"
                 aria-hidden="true"
@@ -226,6 +231,24 @@ function obtenerRutaAnterior() {
           </div>
         </div>
       </main>
+
+      <ClientOnly>
+        <SisdaiModal ref="modalRegresar">
+          <template #encabezado> <h2>Guardar cambios</h2> </template>
+          <template #cuerpo>
+            <p>¿Deseas guardar los cambios realizados en tu aporte y enviar de nuevo a revisión?</p>
+          </template>
+          <template #pie>
+            <button
+              class="boton-secundario boton-chico"
+              type="button"
+              @click="router.push(previous_path)"
+            >
+              Regresar sin guardar
+            </button>
+          </template>
+        </SisdaiModal>
+      </ClientOnly>
     </template>
   </UiLayoutPaneles>
 </template>
