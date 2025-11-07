@@ -1,5 +1,6 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { formatDate } from '~/utils/levantamiento';
 
 definePageMeta({
@@ -54,6 +55,9 @@ function irAEditarAporte() {
     },
   });
 }
+
+const modalCrearAporte = ref(null);
+const seleccionProyectos = ref('');
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeLevantamiento.catalogoColapsado">
@@ -96,46 +100,71 @@ function irAEditarAporte() {
               <UiNumeroElementos :numero="0" />
             </div>
           </div>
-          <div class="columna-8">
-            <!-- Buscador -->
-          </div>
           <div class="columna-16">
-            <div class="contenedor-aprobados">
-              <div class="grid">
-                <div v-for="value in aprobados" :key="value.id" class="columna-5">
-                  <div class="tarjeta" style="position: relative">
-                    <img class="tarjeta-imagen" alt="" :srcset="value.thumbnail_img" />
+            <div class="flex flex-contenido-centrado">
+              <div class="columna-8 flex-vertical-centrado" style="height: 58vh">
+                <div class="fondo-color-acento borde-redondeado-16 texto-centrado p-b-3">
+                  <span
+                    class="pictograma-documento texto-color-acento texto-tamanio-8 m-t-1"
+                  ></span>
+                  <h3 class="texto-color-acento m-t-0">Empieza a realizar aportes</h3>
+                  <p>Cuando tus aportes sean aprobados podrás verlos en esta sección</p>
+                  <button
+                    class="boton-primario boton-chico"
+                    type="button"
+                    @click="modalCrearAporte.abrirModal()"
+                  >
+                    Crear un aporte
+                    <span class="pictograma-agregar" aria-hidden="true"></span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-if="false" class="columna-16">
+            <div class="grid">
+              <div class="columna-8">
+                <!-- Buscador -->
+              </div>
+              <div class="columna-16">
+                <div class="contenedor-aprobados">
+                  <div class="grid">
+                    <div v-for="value in aprobados" :key="value.id" class="columna-5">
+                      <div class="tarjeta" style="position: relative">
+                        <img class="tarjeta-imagen" alt="" :srcset="value.thumbnail_img" />
 
-                    <div class="tarjeta-cuerpo">
-                      <p class="tarjeta-etiqueta">Aporte creado en:</p>
-                      <p class="tarjeta-titulo">{{ value.title }}</p>
-                      <p>{{ value.update_date }}</p>
-                    </div>
+                        <div class="tarjeta-cuerpo">
+                          <p class="tarjeta-etiqueta">Aporte creado en:</p>
+                          <p class="tarjeta-titulo">{{ value.title }}</p>
+                          <p>{{ value.update_date }}</p>
+                        </div>
 
-                    <div class="tarjeta-pie" style="display: block">
-                      <div class="flex" style="row-gap: 8px">
-                        <button
-                          class="boton-primario boton-chico texto-centrado tarjeta-pie-boton"
-                          type="button"
-                          @click="editarAporte(value)"
+                        <div class="tarjeta-pie" style="display: block">
+                          <div class="flex" style="row-gap: 8px">
+                            <button
+                              class="boton-primario boton-chico texto-centrado tarjeta-pie-boton"
+                              type="button"
+                              @click="editarAporte(value)"
+                            >
+                              Editar aporte
+                            </button>
+                            <button
+                              class="boton-secundario boton-chico texto-centrado tarjeta-pie-boton"
+                              type="button"
+                              @click="modalRemoverAporte.abrirModal()"
+                            >
+                              Eliminar aporte
+                            </button>
+                          </div>
+                        </div>
+                        <p
+                          class="fondo-color-confirmacion texto-color-confirmacion borde borde-color-confirmacion borde-redondeado-8 p-1"
+                          style="position: absolute; top: 0; right: 24px"
                         >
-                          Editar aporte
-                        </button>
-                        <button
-                          class="boton-secundario boton-chico texto-centrado tarjeta-pie-boton"
-                          type="button"
-                          @click="modalRemoverAporte.abrirModal()"
-                        >
-                          Eliminar aporte
-                        </button>
+                          {{ value.status }}
+                        </p>
                       </div>
                     </div>
-                    <p
-                      class="fondo-color-confirmacion texto-color-confirmacion borde borde-color-confirmacion borde-redondeado-8 p-1"
-                      style="position: absolute; top: 0; right: 24px"
-                    >
-                      {{ value.status }}
-                    </p>
                   </div>
                 </div>
               </div>
@@ -145,6 +174,35 @@ function irAEditarAporte() {
       </main>
 
       <ClientOnly>
+        <SisdaiModal ref="modalCrearAporte">
+          <template #encabezado> <h2>Selecciona un proyecto</h2> </template>
+          <template #cuerpo>
+            <ClientOnly>
+              <SisdaiSelector
+                v-model="seleccionProyectos"
+                etiqueta="Proyectos disponibles"
+                :es_obligatorio="true"
+              >
+                <option value="1">Opcion Uno</option>
+                <option value="2">Opcion Dos</option>
+                <option value="3">Opcion Tres</option>
+              </SisdaiSelector>
+            </ClientOnly>
+          </template>
+          <template #pie>
+            <button
+              class="boton-secundario boton-chico"
+              type="button"
+              @click="modalCrearAporte.cerrarModal()"
+            >
+              Regresar
+            </button>
+            <!-- <button class="boton-primario boton-chico" type="button"">
+              Siguiente
+            </button> -->
+          </template>
+        </SisdaiModal>
+
         <SisdaiModal ref="modalEditarAporte">
           <template #encabezado> <h2>Editar aporte</h2> </template>
           <template #cuerpo>
