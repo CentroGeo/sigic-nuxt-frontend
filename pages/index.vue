@@ -9,109 +9,7 @@ async function iniciarSesion() {
     callbackUrl: '/', // A dónde volver después del login
   });
 }
-/*
-const route = useRoute();
 
-useHead({
-  script: [
-    {
-      key: 'gobmx-script',
-      src: 'https://framework-gb.cdn.gob.mx/gm/v3/assets/js/gobmx.js',
-      defer: true,
-    },
-  ],
-});
-watch(
-  () => route.fullPath,
-  (newPath) => {
-    if (newPath === '/') {
-      nextTick(() => {
-        document.body.classList.add('solo-en-index');
-        if (!document?.querySelector('link[href*="framework-gb.cdn.gob.mx"]')) {
-          const link = document?.createElement('link');
-          link.rel = 'stylesheet';
-          link.href = 'https://framework-gb.cdn.gob.mx/gm/v3/assets/styles/main.css';
-          document?.head.insertBefore(link, document.head.firstChild);
-        }
-      });
-    } else {
-      document.body.classList.remove('solo-en-index');
-    }
-  },
-  { immediate: true }
-);
-onMounted(() => {
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = 'https://framework-gb.cdn.gob.mx/gm/v3/assets/styles/main.css';
-  document.head.insertBefore(link, document.head.firstChild);
-  if (route.path === '/') {
-    document.body.classList.add('solo-en-index');
-  }
-});
-
-onUnmounted(() => {
-  document.body.classList.remove('solo-en-index');
-
-  const agregadasPorFrameworkGogHead = [...document.head.children].filter(
-    (el) =>
-      (el.outerHTML.includes('framework-gb.cdn.gob.mx') && !el.outerHTML.includes('favicon.ico')) ||
-      el.outerHTML.includes('ajax.googleapis.com/ajax/libs/webfont')
-  );
-  const agregadasPorFrameworkGogBody = [...document.body.children].filter(
-    (el) =>
-      el.outerHTML.includes('framework-gb.cdn.gob.mx') ||
-      el.innerHTML.includes('framework-gb.cdn.gob.mx') ||
-      el.outerHTML.includes('https://cdn.jsdelivr.net/npm') ||
-      el.innerHTML.includes('https://cdn.jsdelivr.net/npm')
-  );
-  agregadasPorFrameworkGogHead.forEach((el) => el.remove());
-  agregadasPorFrameworkGogBody.forEach((el) => el.remove());
-  document.querySelector('body').className = '';
-  document.querySelectorAll('div.pace').forEach((el) => el.remove());
-
-  if (window.jQuery) {
-    $(window).off('resize');
-    try {
-      delete window.$;
-      delete window.jQuery;
-    } catch {
-      window.$ = undefined;
-      window.jQuery = undefined;
-    }
-  }
-
-  const vars_window = [
-    'Pace',
-    'Modernizr',
-    '_addEvent',
-    '_events',
-    '_myLib',
-    '$gmx',
-    'html5',
-    'yepnope',
-    '$',
-    'jQuery',
-    'uidEvent',
-    'bootstrap',
-    'MX',
-    'urlEmail',
-    'getParseURL',
-    'WebFont',
-    'FloatingUICore',
-    'FloatingUIDOM',
-  ];
-  for (const el of vars_window) {
-    if (Object.prototype.hasOwnProperty.call(window, el)) {
-      try {
-        Reflect.deleteProperty(window, el);
-      } catch {
-        window[el] = undefined;
-      }
-    }
-  }
-});
-*/
 // Capas recientes
 const storeResources = useResourcesCatalogoStore();
 const storeSelected = useSelectedResources2Store();
@@ -140,11 +38,17 @@ async function updateSelection(newPk) {
   <div>
     <main id="principal">
       <div class="portada portada-secundaria">
-        <img
+        <video
+          aria-hidden="true"
+          role="presentation"
           class="portada-imagen"
-          src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/godo.jpg"
-          alt=""
-        />
+          autoplay=""
+          loop=""
+          playsinline=""
+          muted=""
+        >
+          <source src="/inicio/Portada_SIGIC_1_1.mp4" type="video/mp4" />
+        </video>
 
         <div class="portada-degradado">
           <div class="portada-cuerpo">
@@ -176,11 +80,7 @@ async function updateSelection(newPk) {
           <div class="flex">
             <div class="columna-8">
               <div class="tarjeta tarjeta-horizontal">
-                <img
-                  alt=""
-                  class="tarjeta-imagen"
-                  src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/pekibb.jpg"
-                />
+                <img alt="" class="tarjeta-imagen" src="/inicio/tarjeta_visualiza.png" />
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-titulo">Visualiza información territorial</p>
                   <p>
@@ -197,11 +97,7 @@ async function updateSelection(newPk) {
             </div>
             <div class="columna-8">
               <div class="tarjeta tarjeta-horizontal">
-                <img
-                  alt=""
-                  class="tarjeta-imagen"
-                  src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/pekibb.jpg"
-                />
+                <img alt="" class="tarjeta-imagen" src="/inicio/tarjeta_analiza.png" />
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-titulo">Analiza con Inteligencia Artificial</p>
                   <p>
@@ -218,11 +114,7 @@ async function updateSelection(newPk) {
             </div>
             <div class="columna-8">
               <div class="tarjeta tarjeta-horizontal">
-                <img
-                  alt=""
-                  class="tarjeta-imagen"
-                  src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/pekibb.jpg"
-                />
+                <img alt="" class="tarjeta-imagen" src="/inicio/tarjeta_explora.png" />
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-titulo">Explora los recursos disponibles</p>
                   <p>
@@ -239,11 +131,7 @@ async function updateSelection(newPk) {
             </div>
             <div class="columna-8">
               <div class="tarjeta tarjeta-horizontal">
-                <img
-                  class="tarjeta-imagen"
-                  alt=""
-                  src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/pekibb.jpg"
-                />
+                <img class="tarjeta-imagen" alt="" src="/inicio/tarjeta_usa.png" />
                 <div class="tarjeta-cuerpo">
                   <p class="tarjeta-titulo">Usa tu propia información</p>
                   <p>
@@ -273,7 +161,7 @@ async function updateSelection(newPk) {
                 <img
                   loading="lazy"
                   class="borde-redondeado-20"
-                  src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/kale-3.jpg"
+                  src="/inicio/imagenexplorar.png"
                   alt=""
                 />
               </picture>
@@ -288,7 +176,7 @@ async function updateSelection(newPk) {
                 <img
                   loading="lazy"
                   class="borde-redondeado-20"
-                  src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/kale-3.jpg"
+                  src="/inicio/imagenexplorar.png"
                   alt=""
                 />
               </picture>
@@ -297,23 +185,13 @@ async function updateSelection(newPk) {
           <div class="flex m-y-5-esc m-y-0-mov">
             <div class="columna-8">
               <picture>
-                <img
-                  loading="lazy"
-                  class="oculto-mov"
-                  src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/calamidad-3.jpg"
-                  alt=""
-                />
+                <img loading="lazy" class="oculto-mov" src="/inicio/imagenprofundizar.png" alt="" />
               </picture>
             </div>
             <div class="columna-8 flex-vertical-centrado">
               <h3 class="texto-color-acento">Profundizar en temas con ayuda de la IA</h3>
               <picture>
-                <img
-                  loading="lazy"
-                  class="oculto-esc"
-                  src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/calamidad-3.jpg"
-                  alt=""
-                />
+                <img loading="lazy" class="oculto-esc" src="/inicio/imagenprofundizar.png" alt="" />
               </picture>
               <p>
                 Organiza la información en proyectos temáticos y analiza tus datos mediante
@@ -330,7 +208,7 @@ async function updateSelection(newPk) {
                 <img
                   loading="lazy"
                   class="borde-redondeado-20"
-                  src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/perro-3.jpg"
+                  src="/inicio/imagenaprovechar.png"
                   alt=""
                 />
               </picture>
@@ -345,7 +223,7 @@ async function updateSelection(newPk) {
                 <img
                   loading="lazy"
                   class="borde-redondeado-20"
-                  src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/perro-3.jpg"
+                  src="/inicio/imagenaprovechar.png"
                   alt=""
                 />
               </picture>
@@ -354,23 +232,13 @@ async function updateSelection(newPk) {
           <div class="flex m-y-5-esc m-y-0-mov">
             <div class="columna-8">
               <picture>
-                <img
-                  loading="lazy"
-                  class="oculto-mov"
-                  src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/asha.jpg"
-                  alt=""
-                />
+                <img loading="lazy" class="oculto-mov" src="/inicio/imagentener.png" alt="" />
               </picture>
             </div>
             <div class="columna-8 flex-vertical-centrado">
               <h3 class="texto-color-acento">Tener tu información ordenada y disponible</h3>
               <picture>
-                <img
-                  loading="lazy"
-                  class="oculto-esc"
-                  src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/asha.jpg"
-                  alt=""
-                />
+                <img loading="lazy" class="oculto-esc" src="/inicio/imagentener.png" alt="" />
               </picture>
               <p>
                 Accede fácilmente a todos tus archivos personales o a datos públicos desde un solo
@@ -388,7 +256,7 @@ async function updateSelection(newPk) {
                 <img
                   loading="lazy"
                   class="borde-redondeado-20"
-                  src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/kale-2.jpg"
+                  src="/inicio/imagencompartir.png"
                   alt=""
                 />
               </picture>
@@ -403,7 +271,7 @@ async function updateSelection(newPk) {
                 <img
                   loading="lazy"
                   class="borde-redondeado-20"
-                  src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/kale-2.jpg"
+                  src="/inicio/imagencompartir.png"
                   alt=""
                 />
               </picture>
