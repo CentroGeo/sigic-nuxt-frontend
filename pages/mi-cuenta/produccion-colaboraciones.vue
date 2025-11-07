@@ -1,4 +1,6 @@
 <script setup>
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+
 definePageMeta({
   middleware: 'auth',
 });
@@ -41,15 +43,30 @@ const lista_colaboraciones = ref([
 ]);
 
 const proyectoModal = ref(null);
+const statusModal = ref(null);
 const proyectoSeleccionado = ref({});
 const tipoRecurso = ref('proyecto');
-function openEditModal(proyecto, tipo) {
+const tipoAccion = ref('crear');
+function capitalizeFirstLetter(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+function openEditModal(proyecto, tipo, accion) {
+  tipoAccion.value = accion;
   proyectoSeleccionado.value = proyecto;
   tipoRecurso.value = tipo;
   //console.log(proyectoSeleccionado.value);
   nextTick(() => {
     proyectoModal.value.abrirModalProyecto();
   });
+}
+
+function notificarStatus() {
+  statusModal.value?.abrirModal();
+}
+
+function agregarNuevo() {
+  statusModal.value?.cerrarModal();
+  openEditModal({}, tipoRecurso.value, 'crear');
 }
 </script>
 <template>
@@ -62,7 +79,7 @@ function openEditModal(proyecto, tipo) {
           type="button"
           class="boton-secundario boton-chico"
           style="height: fit-content; align-self: center"
-          @click="openEditModal({}, 'proyecto')"
+          @click="openEditModal({}, 'proyecto', 'crear')"
         >
           Agregar proyecto +
         </button>
@@ -74,7 +91,7 @@ function openEditModal(proyecto, tipo) {
         :rol="proyecto.rol"
         :anio_periodo="proyecto.anio_periodo"
         :enlace="proyecto.enlace"
-        @editar-clicked="openEditModal(proyecto, 'proyecto')"
+        @editar-clicked="openEditModal(proyecto, 'proyecto', 'editar')"
         @eliminar-clicked="console.log('eliminar')"
       ></MiCuentaProductosTarjeta>
 
@@ -84,7 +101,7 @@ function openEditModal(proyecto, tipo) {
           type="button"
           class="boton-secundario boton-chico"
           style="height: fit-content; align-self: center"
-          @click="openEditModal({}, 'publicación')"
+          @click="openEditModal({}, 'publicación', 'crear')"
         >
           Agregar publicación +
         </button>
@@ -96,7 +113,7 @@ function openEditModal(proyecto, tipo) {
         :medio="proyecto.medio"
         :anio_periodo="proyecto.anio_periodo"
         :enlace="proyecto.enlace"
-        @editar-clicked="openEditModal(proyecto, 'publicación')"
+        @editar-clicked="openEditModal(proyecto, 'publicación', 'editar')"
         @eliminar-clicked="console.log('eliminar')"
       ></MiCuentaProductosTarjeta>
 
@@ -106,7 +123,7 @@ function openEditModal(proyecto, tipo) {
           type="button"
           class="boton-secundario boton-chico"
           style="height: fit-content; align-self: center"
-          @click="openEditModal({}, 'colaboración')"
+          @click="openEditModal({}, 'colaboración', 'crear')"
         >
           Agregar colaboración +
         </button>
@@ -119,15 +136,55 @@ function openEditModal(proyecto, tipo) {
         :anio_periodo="proyecto.anio_periodo"
         :instituciones="proyecto.instituciones"
         :enlace="proyecto.enlace"
-        @editar-clicked="openEditModal(proyecto, 'colaboración')"
+        @editar-clicked="openEditModal(proyecto, 'colaboración', 'editar')"
         @eliminar-clicked="console.log('eliminar')"
       ></MiCuentaProductosTarjeta>
     </div>
+
     <MiCuentaModalProyecto
       ref="proyectoModal"
       :key="`modal_${proyectoSeleccionado ? proyectoSeleccionado.titulo : '0'}`"
       :proyecto="proyectoSeleccionado"
       :tipo="tipoRecurso"
+      @-proyecto-guardado="notificarStatus"
     ></MiCuentaModalProyecto>
+
+    <ClientOnly>
+      <SisdaiModal ref="statusModal">
+        <template #encabezado>
+          <h1>
+            {{ capitalizeFirstLetter(tipoRecurso) }}
+            {{ tipoAccion === 'crear' ? 'Guardad' : 'Editad'
+            }}{{ tipoRecurso === 'proyecto' ? 'o' : 'a' }}
+          </h1>
+        </template>
+        <template #cuerpo>
+          <p v-if="tipoAccion === 'crear'">
+            {{ tipoRecurso === 'proyecto' ? 'Este' : 'Esta' }} {{ tipoRecurso }} ha sido añadido a
+            tu cuenta.
+          </p>
+          <p v-if="tipoAccion === 'editar'">La información se editó correctamente.</p>
+        </template>
+        <template #pie>
+          <button
+            type="button"
+            class="boton-chico boton-con-contenedor-secundario ancho"
+            @click="statusModal.cerrarModal"
+          >
+            Cerrar
+          </button>
+          <button type="button" class="boton-chico boton-primario ancho" @click="agregarNuevo">
+            Agregar {{ tipoRecurso === 'proyecto' ? 'nuevo' : 'nueva' }} {{ tipoRecurso }}
+          </button>
+        </template>
+      </SisdaiModal>
+    </ClientOnly>
   </div>
 </template>
+<style lang="scss" scoped>
+.ancho {
+  width: 50%;
+  display: flex;
+  justify-content: center; /* horizontal center */
+}
+</style>
