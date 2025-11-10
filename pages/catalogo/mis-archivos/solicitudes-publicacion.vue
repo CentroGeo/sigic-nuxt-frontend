@@ -31,6 +31,10 @@ const inputSearch = computed({
   set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
 });
 
+const hayMetaPendiente = computed(() =>
+  storeResources.myTotalBySection('pendientes') > 0 ? true : false
+);
+
 /**
  * Valida si el tipo de recurso es documento o dataset con geometría o no
  * @param recurso del catálogo
@@ -188,19 +192,18 @@ onMounted(async () => {
             </div>
           </div>
         </div>
-
         <CatalogoMenuMisArchivos
           :opciones="[
             { texto: 'Disponibles', ruta: '/catalogo/mis-archivos' },
             {
               texto: 'Metadatos pendientes',
               ruta: '/catalogo/mis-archivos/metadatos-pendientes',
-              notificacion: true,
+              notificacion: hayMetaPendiente,
             },
             {
               texto: 'Solicitudes de publicación',
               ruta: '/catalogo/mis-archivos/solicitudes-publicacion',
-              notificacion: true,
+              notificacion: totalResources > 0,
             },
           ]"
         />

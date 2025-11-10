@@ -40,7 +40,7 @@ onMounted(async () => {
           :resource="editedResource"
           :resource-type="type"
           :resource-pk="selectedPk"
-        ></CatalogoAtributosMeta>
+        />
       </main>
       <main v-else>
         <p>...cargando</p>

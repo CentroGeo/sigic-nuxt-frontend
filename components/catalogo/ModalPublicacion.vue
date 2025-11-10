@@ -1,14 +1,8 @@
 <script setup>
-import {
-  downloadDocs,
-  downloadMetadata,
-  downloadNoGeometry,
-  downloadRaster,
-  downloadWMS,
-} from '@/utils/consulta';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
+
 const props = defineProps({
   resourceType: { type: String, required: true },
   selectedElement: {
@@ -22,139 +16,52 @@ const seleccionVarDisponibles = ref(selectedElement.value.alternate);
 const config = useRuntimeConfig();
 const extentMap = ref(undefined);
 
-const modalDescarga = ref(null);
-const modalPublica1 = ref(null);
-const modalPublica2 = ref(null);
-const modalPublica3 = ref(null);
-const modalPublica4 = ref(null);
+const modalPublica = ref(null);
+const modalPublicaBasicos = ref(null);
+const modalPublicaUbicacion = ref(null);
+const modalPublicaOpcionales = ref(null);
+const modalPublicaAtributos = ref(null);
 
-const optionsList = ref(null);
-const selectedOption = ref();
 const tagTitle = ref();
-const docExtension = ref(
-  resourceType.value === 'document'
-    ? selectedElement.value.links.find((link) => link.link_type === 'uploaded').extension
-    : 'No aplica'
-);
-const layerType = ref(
-  resourceType.value === 'dataLayer' ? selectedElement.value.subtype : 'No aplica'
-);
-function abrirModalDescarga() {
-  modalDescarga.value?.abrirModal();
-  optionsList.value = optionsDict[resourceType.value]['elements'];
-  tagTitle.value = optionsDict[resourceType.value]['title'];
-  selectedOption.value = optionsList.value.map((d) => d.label)[0];
-}
 
-const layerOptions = {
-  raster: [
-    {
-      label: 'GeoTiff',
-      action: () => {
-        downloadRaster(selectedElement.value);
-      },
-    },
-    {
-      label: 'Metadatos',
-      action: () => {
-        downloadMetadata(selectedElement.value);
-      },
-    },
-  ],
-  vector: [
-    {
-      label: 'GeoJson',
-      action: () => {
-        downloadWMS(selectedElement.value, 'geojson', 'all');
-      },
-    },
-    {
-      label: 'CSV',
-      action: () => {
-        downloadWMS(selectedElement.value, 'csv', 'all');
-      },
-    },
-    {
-      label: 'GeoPackage',
-      action: () => {
-        downloadWMS(selectedElement.value, 'gpkg', 'all');
-      },
-    },
-    {
-      label: 'KML',
-      action: () => {
-        downloadWMS(selectedElement.value, 'kml', 'all');
-      },
-    },
-    {
-      label: 'Metadatos',
-      action: () => {
-        downloadMetadata(selectedElement.value);
-      },
-    },
-  ],
-  remote: [],
+const alertaModal = {
+  titulo: 'Verifica antes de publicar',
+  contenido:
+    'Revisa que el documento y sus metadatos sean correctos antes de enviarlo a aprobación para ser publicado en el Catálogo de SIGIC público.',
+  css: 'texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-4 p-1',
 };
+
 const optionsDict = {
   dataLayer: {
     title: 'capa',
-    elements: layerOptions[layerType.value],
   },
   dataTable: {
     title: 'archivo',
-    elements: [
-      {
-        label: 'CSV',
-        action: () => {
-          downloadNoGeometry(selectedElement.value, 'csv');
-        },
-      },
-      {
-        label: 'XLS',
-        action: () => {
-          downloadNoGeometry(selectedElement.value, 'xls');
-        },
-      },
-      {
-        label: 'XLSX',
-        action: () => {
-          downloadNoGeometry(selectedElement.value, 'xlsx');
-        },
-      },
-      {
-        label: 'Metadatos',
-        action: () => {
-          downloadMetadata(selectedElement.value);
-        },
-      },
-    ],
   },
   document: {
     title: 'documento',
-    elements: [
-      {
-        label: docExtension.value === 'pdf' ? 'PDF' : 'TXT',
-        action: () => {
-          downloadDocs(selectedElement.value);
-        },
-      },
-      {
-        label: 'Metadatos',
-        action: () => {
-          downloadMetadata(selectedElement.value);
-        },
-      },
-    ],
   },
 };
 
+function abrirModalDescarga() {
+  modalPublica.value?.abrirModal();
+  tagTitle.value = optionsDict[resourceType.value]['title'];
+}
+
+/**
+ * Confirma la solicitud de publicación, cierra los modales, realiza la
+ * petición al endpoint de sigic/requests y navega a las solicitudes
+ * @param {String} cerrarModal  la opción del modal a cerrar
+ */
 async function confirmarSolicitud(cerrarModal) {
-  if (cerrarModal === 'modalPublica3') {
-    modalPublica3.value.cerrarModal();
+  if (cerrarModal === 'modalPublicaOpcionales') {
+    modalPublicaOpcionales.value.cerrarModal();
   } else {
-    modalPublica4.value.cerrarModal();
+    modalPublicaAtributos.value.cerrarModal();
   }
-  console.warn('confirmada');
+  const id = selectedElement.value.pk;
+  console.warn(`solicitud ${id} confirmada`);
+
   try {
     const { data } = useAuth();
     const token = data.value?.accessToken;
@@ -162,7 +69,7 @@ async function confirmarSolicitud(cerrarModal) {
     const baseUrl = configEnv.public.geonodeUrl;
     // const baseUrl = 'http://10.2.102.177';
     const headers = ref({ Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' });
-    const id = selectedElement.value.pk;
+
     // petición para enviar el recurso a la solicitud
     await fetch(`${baseUrl}/sigic/requests/`, {
       method: 'POST',
@@ -182,30 +89,28 @@ defineExpose({
   abrirModalDescarga,
 });
 </script>
+
 <template>
   <ClientOnly>
-    <SisdaiModal ref="modalDescarga">
+    <SisdaiModal ref="modalPublica" class="modal-grande">
       <template #encabezado>
-        <p class="m-t-0 m-b-1" style="color: transparent">a</p>
-        <div
-          class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-4 p-1"
-        >
-          <strong class="m-0 texto-peso-600">Verifica antes de publicar</strong>
-          <p class="m-0">
-            Revisa que el documento y sus metadatos sean correctos antes de enviarlo a aprobación
-            para ser publicado en el Catálogo de SIGIC público.
-          </p>
-        </div>
-        <h1 class="m-t-3">{{ selectedElement.title }}</h1>
+        <p style="color: transparent">.</p>
       </template>
-
       <template #cuerpo>
+        <div :class="alertaModal.css">
+          <strong class="m-0 texto-peso-600">{{ alertaModal.titulo }}</strong>
+          <p class="m-0">{{ alertaModal.contenido }}</p>
+        </div>
+
+        <h2 class="m-t-3">{{ selectedElement.title }}</h2>
+
         <div class="modal-alto-cuerpo">
           <div v-if="tagTitle === 'capa'">
             <ClientOnly>
               <SisdaiSelector
                 v-model="seleccionVarDisponibles"
                 class="m-b-1"
+                style="display: none"
                 etiqueta="Variables disponibles para visualizar"
               >
                 <option value="1">variable</option>
@@ -225,7 +130,7 @@ defineExpose({
 
           <div class="flex flex-contenido-separado m-t-3">
             <div class="columna-8 texto-centrado">
-              <button type="button" class="boton-secundario" @click="modalDescarga.cerrarModal()">
+              <button type="button" class="boton-secundario" @click="modalPublica.cerrarModal()">
                 Cancelar
               </button>
             </div>
@@ -234,8 +139,8 @@ defineExpose({
                 type="button"
                 class="boton-primario texto-centrado"
                 @click="
-                  modalDescarga.cerrarModal();
-                  modalPublica1.abrirModal();
+                  modalPublica.cerrarModal();
+                  modalPublicaBasicos.abrirModal();
                 "
               >
                 Siguiente
@@ -246,21 +151,16 @@ defineExpose({
       </template>
     </SisdaiModal>
 
-    <SisdaiModal ref="modalPublica1">
+    <SisdaiModal ref="modalPublicaBasicos" class="modal-grande">
       <template #encabezado>
-        <p class="m-t-0 m-b-1" style="color: transparent">a</p>
-        <div
-          class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-4 p-1"
-        >
-          <strong class="m-0 texto-peso-600">Verifica antes de publicar</strong>
-          <p class="m-0">
-            Revisa que el documento y sus metadatos sean correctos antes de enviarlo a aprobación
-            para ser publicado en el Catálogo de SIGIC público.
-          </p>
-        </div>
+        <p style="color: transparent">.</p>
       </template>
-
       <template #cuerpo>
+        <div :class="alertaModal.css">
+          <strong class="m-0 texto-peso-600">{{ alertaModal.titulo }}</strong>
+          <p class="m-0">{{ alertaModal.contenido }}</p>
+        </div>
+
         <CatalogoBasicosMeta
           :recurso="selectedElement"
           :resource-pk="selectedElement.pk"
@@ -274,8 +174,8 @@ defineExpose({
               type="button"
               class="boton-secundario"
               @click="
-                modalPublica1.cerrarModal();
-                modalDescarga.abrirModal();
+                modalPublicaBasicos.cerrarModal();
+                modalPublica.abrirModal();
               "
             >
               Regresar
@@ -286,8 +186,8 @@ defineExpose({
               type="button"
               class="boton-primario texto-centrado"
               @click="
-                modalPublica1.cerrarModal();
-                modalPublica2.abrirModal();
+                modalPublicaBasicos.cerrarModal();
+                modalPublicaUbicacion.abrirModal();
               "
             >
               Siguiente
@@ -297,21 +197,16 @@ defineExpose({
       </template>
     </SisdaiModal>
 
-    <SisdaiModal ref="modalPublica2">
+    <SisdaiModal ref="modalPublicaUbicacion" class="modal-grande">
       <template #encabezado>
-        <p class="m-t-0 m-b-1" style="color: transparent">a</p>
-        <div
-          class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-4 p-1"
-        >
-          <strong class="m-0 texto-peso-600">Verifica antes de publicar</strong>
-          <p class="m-0">
-            Revisa que el documento y sus metadatos sean correctos antes de enviarlo a aprobación
-            para ser publicado en el Catálogo de SIGIC público.
-          </p>
-        </div>
+        <p style="color: transparent">.</p>
       </template>
-
       <template #cuerpo>
+        <div :class="alertaModal.css">
+          <strong class="m-0 texto-peso-600">{{ alertaModal.titulo }}</strong>
+          <p class="m-0">{{ alertaModal.contenido }}</p>
+        </div>
+
         <CatalogoUbicacionMeta
           :recurso="selectedElement"
           :resource-pk="selectedElement.pk"
@@ -325,8 +220,8 @@ defineExpose({
               type="button"
               class="boton-secundario"
               @click="
-                modalPublica2.cerrarModal();
-                modalPublica1.abrirModal();
+                modalPublicaUbicacion.cerrarModal();
+                modalPublicaBasicos.abrirModal();
               "
             >
               Regresar
@@ -337,8 +232,8 @@ defineExpose({
               type="button"
               class="boton-primario texto-centrado"
               @click="
-                modalPublica2.cerrarModal();
-                modalPublica3.abrirModal();
+                modalPublicaUbicacion.cerrarModal();
+                modalPublicaOpcionales.abrirModal();
               "
             >
               Siguiente
@@ -348,20 +243,16 @@ defineExpose({
       </template>
     </SisdaiModal>
 
-    <SisdaiModal ref="modalPublica3">
+    <SisdaiModal ref="modalPublicaOpcionales" class="modal-grande">
       <template #encabezado>
-        <p class="m-t-0 m-b-1" style="color: transparent">a</p>
-        <div
-          class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-4 p-1"
-        >
-          <strong class="m-0 texto-peso-600">Verifica antes de publicar</strong>
-          <p class="m-0">
-            Revisa que el documento y sus metadatos sean correctos antes de enviarlo a aprobación
-            para ser publicado en el Catálogo de SIGIC público.
-          </p>
-        </div>
+        <p style="color: transparent">.</p>
       </template>
       <template #cuerpo>
+        <div :class="alertaModal.css">
+          <strong class="m-0 texto-peso-600">{{ alertaModal.titulo }}</strong>
+          <p class="m-0">{{ alertaModal.contenido }}</p>
+        </div>
+
         <CatalogoOpcionalesMeta
           :recurso="selectedElement"
           :resource-pk="selectedElement.pk"
@@ -375,8 +266,8 @@ defineExpose({
               type="button"
               class="boton-secundario"
               @click="
-                modalPublica3.cerrarModal();
-                modalPublica2.abrirModal();
+                modalPublicaOpcionales.cerrarModal();
+                modalPublicaUbicacion.abrirModal();
               "
             >
               Regresar
@@ -387,7 +278,7 @@ defineExpose({
               v-if="tagTitle !== 'capa'"
               type="button"
               class="boton-primario texto-centrado"
-              @click="confirmarSolicitud('modalPublica3')"
+              @click="confirmarSolicitud('modalPublicaOpcionales')"
             >
               Confirmar
             </button>
@@ -397,8 +288,8 @@ defineExpose({
               type="button"
               class="boton-primario texto-centrado"
               @click="
-                modalPublica3.cerrarModal();
-                modalPublica4.abrirModal();
+                modalPublicaOpcionales.cerrarModal();
+                modalPublicaAtributos.abrirModal();
               "
             >
               Siguiente
@@ -408,20 +299,16 @@ defineExpose({
       </template>
     </SisdaiModal>
 
-    <SisdaiModal ref="modalPublica4">
+    <SisdaiModal ref="modalPublicaAtributos" class="modal-grande">
       <template #encabezado>
-        <p class="m-t-0 m-b-1" style="color: transparent">a</p>
-        <div
-          class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-4 p-1"
-        >
-          <strong class="m-0 texto-peso-600">Verifica antes de publicar</strong>
-          <p class="m-0">
-            Revisa que el documento y sus metadatos sean correctos antes de enviarlo a aprobación
-            para ser publicado en el Catálogo de SIGIC público.
-          </p>
-        </div>
+        <p style="color: transparent">.</p>
       </template>
       <template #cuerpo>
+        <div :class="alertaModal.css">
+          <strong class="m-0 texto-peso-600">{{ alertaModal.titulo }}</strong>
+          <p class="m-0">{{ alertaModal.contenido }}</p>
+        </div>
+
         <CatalogoAtributosMeta
           :recurso="selectedElement"
           :resource-pk="selectedElement.pk"
@@ -435,8 +322,8 @@ defineExpose({
               type="button"
               class="boton-secundario"
               @click="
-                modalPublica4.cerrarModal();
-                modalPublica3.abrirModal();
+                modalPublicaAtributos.cerrarModal();
+                modalPublicaOpcionales.abrirModal();
               "
             >
               Regresar
@@ -446,7 +333,7 @@ defineExpose({
             <button
               type="button"
               class="boton-primario texto-centrado"
-              @click="confirmarSolicitud('modalPublica4')"
+              @click="confirmarSolicitud('modalPublicaAtributos')"
             >
               Confirmar
             </button>
@@ -456,10 +343,8 @@ defineExpose({
     </SisdaiModal>
   </ClientOnly>
 </template>
+
 <style lang="scss" scoped>
-.modal-alto-cuerpo {
-  max-height: 320px;
-}
 .boton-secundario,
 .boton-primario {
   width: 100%;

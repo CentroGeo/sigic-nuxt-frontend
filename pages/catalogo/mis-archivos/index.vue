@@ -244,9 +244,9 @@ onMounted(async () => {
           <UiNumeroElementos :numero="totalResources" />
         </div>
         <p>En esta tabla se muestran los archivos disponibles para su consulta y uso.</p>
+
         <div class="flex">
           <div class="columna-16">
-            <!-- TODO: implementar paginador -->
             <ClientOnly>
               <UiTablaAccesibleV2 :variables="variables" :datos="tableResources" />
               <UiPaginador

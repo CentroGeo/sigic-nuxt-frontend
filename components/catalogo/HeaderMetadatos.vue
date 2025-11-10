@@ -38,8 +38,6 @@ function updateValues() {
 updateValues();
 </script>
 <template>
-  <h2 class="m-b-0">{{ props.resource.title }}</h2>
-
   <CatalogoMenuMisArchivos
     v-if="!props.excludeLinks"
     :recurso="props.resource"
@@ -59,26 +57,35 @@ updateValues();
     ]"
   />
 
-  <h2 class="m-t-0">Metadatos</h2>
-  <div style="display: flex; gap: 4px">
-    <div
-      v-for="option in Object.keys(titleOptions)"
-      :key="`boton-${option}-${titleOptions[option]}`"
-      class="borde borde-grosor-2"
-      :style="{
-        width: Object.keys(titleOptions).length > 2 ? '33.33%' : '25%',
-        borderColor:
-          titleValue >= titleOptions[option]['valor']
-            ? 'var(--color-primario-1)'
-            : 'var(--color-neutro-2)',
-      }"
-    ></div>
+  <div class="positionSticky">
+    <h2>Metadatos</h2>
+    <div style="display: flex; gap: 4px">
+      <div
+        v-for="option in Object.keys(titleOptions)"
+        :key="`boton-${option}-${titleOptions[option]}`"
+        class="borde borde-grosor-2"
+        :style="{
+          width: Object.keys(titleOptions).length > 2 ? '33.33%' : '25%',
+          borderColor:
+            titleValue >= titleOptions[option]['valor']
+              ? 'var(--color-primario-1)'
+              : 'var(--color-neutro-2)',
+        }"
+      ></div>
+    </div>
+    <ol :start="titleOptions[props.title]['valor']">
+      <li class="p-b-1">{{ props.title }}</li>
+    </ol>
   </div>
-  <ol :start="titleOptions[props.title]['valor']">
-    <li>{{ props.title }}</li>
-  </ol>
 </template>
 <style lang="scss" scoped>
+.positionSticky {
+  // solo debe verse en el modal de publicar no en la vista de editar
+  position: sticky;
+  top: 0;
+  background-color: var(--fondo);
+  z-index: 9;
+}
 .contenedor {
   background-color: pink;
 }
