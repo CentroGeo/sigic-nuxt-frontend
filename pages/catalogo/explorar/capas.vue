@@ -145,7 +145,7 @@ onMounted(async () => {
                       class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
                       aria-label="Borrar"
                       type="button"
-                      @click="storeFilters.updateFilter('inputSearch', '')"
+                      @click="storeFilters.updateFilter('inputSearch', inputSearch)"
                     >
                       <span aria-hidden="true" class="pictograma-cerrar" />
                     </button>
@@ -154,6 +154,7 @@ onMounted(async () => {
                       class="boton-primario boton-pictograma campo-busqueda-buscar"
                       aria-label="Buscar"
                       type="button"
+                      @click="storeFilters.buildQueryParams"
                     >
                       <span class="pictograma-buscar" aria-hidden="true" />
                     </button>

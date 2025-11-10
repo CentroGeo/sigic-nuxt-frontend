@@ -178,6 +178,7 @@ onMounted(async () => {
                       class="boton-primario boton-pictograma campo-busqueda-buscar"
                       aria-label="Buscar"
                       type="button"
+                      @click="storeFilters.buildQueryParams"
                     >
                       <span class="pictograma-buscar" aria-hidden="true" />
                     </button>
