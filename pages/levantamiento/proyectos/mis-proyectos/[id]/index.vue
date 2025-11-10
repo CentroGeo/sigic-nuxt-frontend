@@ -2,8 +2,7 @@
 import { useRouter } from 'vue-router';
 import Formulario from './formulario.vue';
 import InformacionGeneral from './informacion-general.vue';
-import Participantes from './participantes.vue';
-import Permisos from './permisos.vue';
+import Participantes from './participantes-permisos.vue';
 
 definePageMeta({
   middleware: 'auth',
@@ -14,8 +13,7 @@ const subrutaActual = ref('informacion-general');
 
 const opcionesMenu = [
   { texto: 'Información general', key: 'informacion-general' },
-  { texto: 'Participantes', key: 'participantes' },
-  { texto: 'Permisos', key: 'permisos' },
+  { texto: 'Participantes y permisos', key: 'participantes-permisos' },
   { texto: 'Formulario', key: 'formulario' },
 ];
 
@@ -25,10 +23,8 @@ const componenteActual = computed(() => {
   switch (subrutaActual.value) {
     case 'informacion-general':
       return InformacionGeneral;
-    case 'participantes':
+    case 'participantes-permisos':
       return Participantes;
-    case 'permisos':
-      return Permisos;
     case 'formulario':
       return Formulario;
     default:
@@ -79,19 +75,11 @@ function irAMisProyectos() {
 
         <div class="flex mis-proyectos-contenedor flex-contenido-centrado">
           <div
-            :class="
-              subrutaActual === 'participantes' || subrutaActual === 'permisos'
-                ? 'columna-3'
-                : 'columna-4'
-            "
+            :class="subrutaActual === 'participantes-permisos' ? 'columna-3' : 'columna-4'"
           ></div>
           <component :is="componenteActual" />
           <div
-            :class="
-              subrutaActual === 'participantes' || subrutaActual === 'permisos'
-                ? 'columna-3'
-                : 'columna-4'
-            "
+            :class="subrutaActual === 'participantes-permisos' ? 'columna-3' : 'columna-4'"
           ></div>
         </div>
       </main>

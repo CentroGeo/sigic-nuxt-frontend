@@ -10,7 +10,8 @@ const elementosPrivacidad = [
     name: 'privacidad',
     value: 'publico',
     label: 'Proyecto público',
-    description: 'Cualquier persona con el enlace puede participar',
+    description:
+      'Cualquier persona puede encontrar el proyecto o cualquier persona con el enlace puede participar',
   },
   {
     name: 'privacidad',
@@ -22,13 +23,33 @@ const elementosPrivacidad = [
 
 const privacidadSeleccionada = ref('publico');
 
-const enlaceProyecto = ref('https://sigic.secihti.gob.mx/proyecto/34759');
+const permisos = [
+  {
+    value: 'administrar',
+    label: 'Administrar',
+    description: 'Control total del proyecto, gestión de usuarios y configuración',
+  },
+  {
+    value: 'revisar',
+    label: 'Revisar',
+    description: 'Puede revisar, comentar y aprobar cambios en el proyecto',
+  },
+  {
+    value: 'participar',
+    label: 'Participar',
+    description: 'Puede contribuir activamente con aportes de información',
+  },
+  {
+    value: 'ver',
+    label: 'Solo ver',
+    description: 'Solo puede visualizar el contenido sin realizar cambios',
+  },
+];
 
-const participantesAgregados = ref([
-  'crovelo@centrogeo.edu.mx',
-  'osanchez@centrogeo.edu.mx',
-  'msosa@centrogeo.edu.mx',
-]);
+const usuariosAsignados = [
+  { email: 'persona_usuaria@centrogeo.edu.mx', permiso: 'Revisar', fecha: '17/10/2025' },
+  { email: 'persona_usuaria@centrogeo.edu.mx', permiso: 'Administrar', fecha: '17/10/2025' },
+];
 </script>
 
 <template>
@@ -66,46 +87,39 @@ const participantesAgregados = ref([
       </template>
     </div>
     <div v-if="privacidadSeleccionada === 'publico'">
-      <div class="privacidad-mensaje p-x-3 p-y-2 borde-redondeado-20 m-b-3">
+      <div
+        class="privacidad-mensaje p-x-3 p-y-2 borde borde-color-alerta borde-redondeado-20 m-b-3 fondo-color-alerta texto-color-alerta"
+      >
         <div class="flex mensaje-contenido">
           <div class="mensaje-titulo m-b-1">
-            <span class="pictograma-aprobado" />
-            <b class="m-l-1">Proyecto abierto </b>
+            <span class="pictograma-alerta" />
+            <b class="m-l-1">Los proyectos públicos requieren aprobación</b>
           </div>
-          <div>
-            Este proyecto es público. Cualquier persona lo puede encontrar en la sección “Proyectos
-            públicos” o acceder a él mediante el enlace de invitación.
+          <div class="texto-tamanio-2">
+            Al hacer público un proyecto será visible para todas las personas, con el fin de
+            asegurar el correcto funcionamiento del proyecto y la calidad de los aportes, un
+            proyecto configurado como “público” debe ser aprobado por un administrador
           </div>
         </div>
       </div>
-      <div class="m-b-3 flex privacidad-acciones">
-        <div class="privacidad-input">
-          <label class="m-b-1" for="enlaceProyecto">Enlace del proyecto</label>
-          <input
-            id="enlaceProyecto"
-            v-model="enlaceProyecto"
-            type="text"
-            name="enlaceProyecto"
-            disabled
-          />
-        </div>
-        <button class="boton-primario boton boton-chico">Copiar</button>
-      </div>
-      <div class="flex privacidad-acciones">
-        <div class="privacidad-input">
-          <SisdaiCampoBase
-            v-model="nombreProyecto"
-            etiqueta="Enviar enlace por correo"
-            ejemplo="Ingresa un correo electrónico"
-            :es_etiqueta_visible="true"
-          />
-        </div>
-        <button class="boton-primario boton boton-chico">Enviar</button>
+      <div class="flex flex-contenido-final">
+        <button class="boton-primario boton-chico" aria-label="Guardar Cambios">
+          Solicitar aprobación
+        </button>
       </div>
     </div>
 
-    <div v-else>
+    <div>
       <h6>Invita por correo electrónico</h6>
+      <p>Asigna los niveles de acceso y edición de cada persona usuaria en el proyecto.</p>
+      <div class="grid m-b-3">
+        <template v-for="permiso in permisos" :key="permiso.value">
+          <div class="columna-4 permiso-container p-2 borde-redondeado-8 fondo-color-neutro">
+            <span class="m-b-minimo texto-tamanio-3">{{ permiso.label }}</span>
+            <span class="texto-tamanio-2">{{ permiso.description }}</span>
+          </div>
+        </template>
+      </div>
       <form class="m-b-3">
         <ClientOnly>
           <div class="flex privacidad-acciones m-b-3">
@@ -133,24 +147,32 @@ const participantesAgregados = ref([
             class="m-b-3"
           />
         </ClientOnly>
-        <button class="boton-primario boton boton-chico">Enviar invitación</button>
+        <div class="flex flex-contenido-final">
+          <button class="boton-primario boton boton-chico">Enviar invitación</button>
+        </div>
       </form>
       <div>
-        <h6>Participantes agregados</h6>
-        <div class="flex participantes-agregados">
+        <h6>Permisos asignados</h6>
+        <div class="flex usuarios-asignados">
           <div
-            v-for="participante in participantesAgregados"
-            :key="participante"
-            class="correo-participante borde-redondeado-8 fondo-color-acento borde borde-color-acento p-x-1 p-y-minimo"
+            v-for="usuario in usuariosAsignados"
+            :key="usuario.email"
+            class="correo-participante borde-redondeado-8 fondo-color-acento p-2 flex flex-contenido-separado"
           >
-            {{ participante }}
-            <button
-              class="boton-pictograma boton-sin-contenedor-primario"
-              aria-label="Acción a realizar"
-              type="button"
-            >
-              <span class="pictograma-cerrar" aria-hidden="true" />
-            </button>
+            <div>
+              <div class="m-b-minimo texto-tamanio-3 asignado-email">{{ usuario.email }}</div>
+              <div class="flex">
+                <span
+                  class="p-x-1 p-y-minimo borde borde-color-acento borde-redondeado-8 texto-color-secundario"
+                  >{{ usuario.permiso }}</span
+                >
+                <span class="asignado-fecha texto-tamanio-2">Asignado el {{ usuario.fecha }}</span>
+              </div>
+            </div>
+            <div class="flex">
+              <button class="boton-secundario boton boton-chico">Cambiar permiso</button>
+              <button class="boton-secundario boton boton-chico">Eliminar</button>
+            </div>
           </div>
         </div>
       </div>
@@ -164,13 +186,23 @@ const participantesAgregados = ref([
 }
 
 .privacidad-mensaje {
-  border: 1px solid #19439c;
-  background: #ecf2ff;
   gap: 0;
-  color: #19439c;
 
   .mensaje-contenido {
     gap: 0;
+  }
+}
+
+.permiso-container {
+  display: flex;
+  flex-direction: column;
+
+  .texto-tamanio-3 {
+    font-weight: 500;
+  }
+
+  .texto-tamanio-2 {
+    font-weight: 400;
   }
 }
 
@@ -184,13 +216,19 @@ const participantesAgregados = ref([
   }
 }
 
-.participantes-agregados {
+.usuarios-asignados {
   flex-direction: column;
 
-  .correo-participante {
-    width: fit-content;
-    display: flex;
-    align-items: center;
+  button {
+    align-self: center;
   }
+}
+
+.asignado-email {
+  font-weight: 500;
+}
+
+.asignado-fecha {
+  align-self: flex-end;
 }
 </style>
