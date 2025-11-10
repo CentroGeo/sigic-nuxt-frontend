@@ -1,6 +1,6 @@
 <script setup>
 import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
-import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
+import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/src/utiles';
 import { lados } from '@centrogeomx/sisdai-mapas/src/utiles/capa';
 import { arrayNewsOlds, findServer, resourceTypeDic } from '~/utils/consulta';
 
@@ -186,7 +186,7 @@ watch(swipePosition, () => console.log(swipePosition.value), { deep: true });
             :consulta="gnoxyFetch"
             :fuente="findServer(resource)"
             :lado="storeSelected.byPk(resource.pk).lado"
-            :mosaicos="false"
+            :mosaicos="true"
             :opacidad="storeSelected.byPk(resource.pk).opacidad"
             :posicion="storeSelected.byPk(resource.pk).posicion + 1"
             :visible="storeSelected.byPk(resource.pk).visible"
