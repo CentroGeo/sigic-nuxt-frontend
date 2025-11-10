@@ -8,14 +8,26 @@ defineProps({
 
   enlace: { type: String, default: '' },
 });
+
+const emit = defineEmits(['EditarClicked', 'EliminarClicked']);
 </script>
 <template>
   <div class="tarjeta m-y-4">
     <div class="tarjeta-cuerpo">
       <div class="flex flex-contenido-final">
-        <button class="boton-pictograma boton-secundario" aria-label="Editar " type="button">
+        <button
+          class="boton-pictograma boton-secundario"
+          aria-label="Editar "
+          type="button"
+          @click="emit('EditarClicked')"
+        >
           <span class="pictograma-editar"></span></button
-        ><button class="boton-pictograma boton-secundario" aria-label="Remover" type="button">
+        ><button
+          class="boton-pictograma boton-secundario"
+          aria-label="Remover"
+          type="button"
+          @click="emit('EliminarClicked')"
+        >
           <span class="pictograma-eliminar"></span>
         </button>
       </div>
