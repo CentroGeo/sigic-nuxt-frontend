@@ -41,7 +41,7 @@ const lista_colaboraciones = ref([
     enlace: 'https://colaboraciones.ejemplo.com/mx/programa-restauracion-manglares',
   },
 ]);
-
+const modalEliminar = ref();
 const proyectoModal = ref(null);
 const statusModal = ref(null);
 const proyectoSeleccionado = ref({});
@@ -92,7 +92,7 @@ function agregarNuevo() {
         :anio_periodo="proyecto.anio_periodo"
         :enlace="proyecto.enlace"
         @editar-clicked="openEditModal(proyecto, 'proyecto', 'editar')"
-        @eliminar-clicked="console.log('eliminar')"
+        @eliminar-clicked="modalEliminar.abrirModal()"
       ></MiCuentaProductosTarjeta>
 
       <div class="flex flex-contenido-separado">
@@ -114,7 +114,7 @@ function agregarNuevo() {
         :anio_periodo="proyecto.anio_periodo"
         :enlace="proyecto.enlace"
         @editar-clicked="openEditModal(proyecto, 'publicación', 'editar')"
-        @eliminar-clicked="console.log('eliminar')"
+        @eliminar-clicked="modalEliminar.abrirModal()"
       ></MiCuentaProductosTarjeta>
 
       <div class="flex flex-contenido-separado">
@@ -137,7 +137,7 @@ function agregarNuevo() {
         :instituciones="proyecto.instituciones"
         :enlace="proyecto.enlace"
         @editar-clicked="openEditModal(proyecto, 'colaboración', 'editar')"
-        @eliminar-clicked="console.log('eliminar')"
+        @eliminar-clicked="modalEliminar.abrirModal()"
       ></MiCuentaProductosTarjeta>
     </div>
 
@@ -175,6 +175,30 @@ function agregarNuevo() {
           </button>
           <button type="button" class="boton-chico boton-primario ancho" @click="agregarNuevo">
             Agregar {{ tipoRecurso === 'proyecto' ? 'nuevo' : 'nueva' }} {{ tipoRecurso }}
+          </button>
+        </template>
+      </SisdaiModal>
+      <SisdaiModal ref="modalEliminar">
+        <template #encabezado>
+          <h1>Eliminar proyecto</h1>
+        </template>
+        <template #cuerpo>
+          <p>¿Confirmas que deseas eliminar este proyecto? Esta acción no se puede deshacer.</p>
+        </template>
+        <template #pie>
+          <button
+            type="button"
+            class="boton-chico boton-con-contenedor-secundario ancho"
+            @click="modalEliminar.cerrarModal"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="boton-chico boton-con-contenedor-primario ancho boton-primario"
+            @click="modalEliminar.cerrarModal"
+          >
+            Eliminar
           </button>
         </template>
       </SisdaiModal>

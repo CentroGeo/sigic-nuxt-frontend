@@ -1,4 +1,6 @@
 <script setup>
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+
 definePageMeta({
   middleware: 'auth',
 });
@@ -6,6 +8,7 @@ definePageMeta({
 const { status, signOut } = useAuth();
 const route = useRoute();
 const router = useRouter();
+const modalConfirmarCierre = ref();
 async function cerrarSesion() {
   // Cierra sesión y redirige al inicio
   await signOut({ callbackUrl: '/' });
@@ -18,15 +21,51 @@ if (route.path === '/mi-cuenta') {
 
 <template>
   <div class="contenedor ancho-lectura">
+    <SisdaiModal ref="modalConfirmarCierre">
+      <template #encabezado>
+        <p class="h4">¿Confirmas que deseas cerrar sesión?</p>
+        <p></p>
+      </template>
+      <template #cuerpo>
+        <p>
+          Si cierras sesión, tendrás que volver a ingresar tu correo y contraseña para acceder
+          nuevamente.
+        </p>
+      </template>
+      <template #pie>
+        <div class="flex flex-contenido-centrado contenedor contenedor-botones">
+          <div class="columna-8">
+            <button
+              aria-label="Cancelar"
+              type="button"
+              class="boton-secundario texto-centrado"
+              @click="modalConfirmarCierre.cerrarModal()"
+            >
+              <span class="flex">Cancelar</span>
+            </button>
+          </div>
+          <div class="columna-8">
+            <button
+              v-if="status === 'authenticated'"
+              aria-label="Cerrar sesión"
+              type="button"
+              class="boton-primario texto-centrado"
+              @click="cerrarSesion"
+            >
+              <span class="flex">Cerrar sesión</span>
+            </button>
+          </div>
+        </div>
+      </template>
+    </SisdaiModal>
     <div class="flex flex-contenido-separado">
       <div class="flex"><h1>Mi Cuenta</h1></div>
       <div class="flex-vertical-centrado">
         <button
-          v-if="status === 'authenticated'"
           aria-label="Cerrar sesión"
           type="button"
-          class="boton-secundario m-t-3"
-          @click="cerrarSesion"
+          class="boton-secundario m-t-3 texto-centrado"
+          @click="modalConfirmarCierre.abrirModal()"
         >
           Cerrar sesión
         </button>
@@ -89,6 +128,14 @@ a {
     background-color: var(--boton-secundario-cursor-fondo);
     text-decoration: none;
     // background-color: transparent;
+  }
+}
+.contenedor-botones {
+  button {
+    width: 100%;
+    span {
+      margin: auto;
+    }
   }
 }
 </style>
