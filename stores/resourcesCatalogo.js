@@ -93,6 +93,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
         'sort[]': '-last_updated',
         page_size: 1,
         ...query,
+        'filter{complete_metadata}': true,
       };
       const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
       const request = await gnoxyFetch(url.toString());
@@ -115,6 +116,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       const queryParams = {
         page: pageNum,
         page_size: pageSize,
+        'filter{complete_metadata}': true,
         ...params,
       };
 
@@ -154,6 +156,12 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
         page_size: 1,
         'filter{owner.username}': userEmail,
       };
+
+      if (section === 'disponibles') {
+        queryParams['filter{complete_metadata}'] = 'true';
+      } else if (section === 'pendientes') {
+        queryParams['filter{complete_metadata}'] = 'false';
+      }
       // Agregar toda la lógica de queryparams correspondientes por sección
       const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
       const request = await gnoxyFetch(url.toString());
@@ -176,12 +184,17 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
         page_size: pageSize,
         'filter{owner.username}': userEmail,
       };
+      if (section === 'disponibles') {
+        queryParams['filter{complete_metadata}'] = 'true';
+      } else if (section === 'pendientes') {
+        queryParams['filter{complete_metadata}'] = 'false';
+      }
       const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
 
       // TODO: Implementar en los queryparams si tiene metadatos pendientes o no
-      let data;
+      /*     let data;
       if (section === 'disponibles') {
         data = res.resources.filter((d) => d.category !== null);
       } else if (section === 'pendientes') {
@@ -189,7 +202,8 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       } else {
         data = [];
       }
-      misArchivos[section] = data;
+      misArchivos[section] = data; */
+      misArchivos[section] = res.resources;
       this.isLoading = false;
     },
 
