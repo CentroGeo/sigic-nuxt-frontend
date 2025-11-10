@@ -1,6 +1,7 @@
 <script setup>
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { cleanInput } from '~/utils/consulta';
+
 definePageMeta({
   middleware: 'sidebase-auth',
   bodyAttrs: {
@@ -219,7 +220,7 @@ onMounted(async () => {
 
         <div class="flex">
           <h2>Todos los archivos pendientes</h2>
-          <UiNumeroElementos :numero="tableResources.length" />
+          <UiNumeroElementos :numero="totalResources" />
         </div>
         <p>
           Aquí se listan los archivos pendientes de metadatos. Complétalos para poder usuarlos; al
