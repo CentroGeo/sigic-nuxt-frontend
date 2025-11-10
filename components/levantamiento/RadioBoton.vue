@@ -24,7 +24,10 @@ const idAleatorio = generaIdAleatorio();
 </script>
 
 <template>
-  <div class="flex radio-container sin-hover p-x-3 p-y-2" @click="emit('update:modelValue', value)">
+  <div
+    class="flex radio-container sin-hover p-x-3 p-y-2 fondo-color-neutro"
+    @click="emit('update:modelValue', value)"
+  >
     <input
       :id="`${idAleatorio}-radio`"
       type="radio"
@@ -46,7 +49,6 @@ const idAleatorio = generaIdAleatorio();
   flex-direction: column;
   gap: 0;
   border-radius: 20px;
-  background-color: #f5f5f5;
   cursor: pointer;
 
   &.sin-hover {
@@ -60,10 +62,6 @@ const idAleatorio = generaIdAleatorio();
       border-color: transparent !important;
       box-shadow: none;
     }
-  }
-
-  span {
-    color: #000;
   }
 }
 </style>
