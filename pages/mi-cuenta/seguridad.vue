@@ -8,7 +8,7 @@ definePageMeta({
 <template>
   <div>
     <h2>Seguridad</h2>
-    <div class="p-x-7">
+    <div class="p-x-7 p-b-5">
       <h3>Cambiar contraseña</h3>
       <p>
         Elige una nueva contraseña para tu cuenta. Es posible que se cierre tu sesión en otros
@@ -97,6 +97,18 @@ definePageMeta({
               <button class="boton-chico boton-primario">Conectar</button>
             </div>
           </div>
+        </div>
+      </div>
+      <div class="tarjeta m-y-3 fondo-color-informacion texto-color-informacion">
+        <div class="tarjeta-cuerpo">
+          <p class="nota-titulo texto-color-informacion">
+            <span class="pictograma-informacion" /> Información sobre las cuentas vinculadas
+          </p>
+
+          <p class="nota texto-color-informacion">
+            Si desvinculas alguna cuenta, podrás seguir accediendo con tu usuario y contraseña del
+            SIGIC, sin embargo, dejarás de poder iniciar sesión con esa plataforma vinculada.
+          </p>
         </div>
       </div>
     </div>
