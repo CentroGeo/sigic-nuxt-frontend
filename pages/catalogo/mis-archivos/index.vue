@@ -105,7 +105,10 @@ function resetAdvancedFilter() {
   modalFiltroAvanzado.value.cerrarModalBusqueda();
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
 }
-
+function resetSearch() {
+  storeFilters.updateFilter('inputSearch', '');
+  storeFilters.buildQueryParams();
+}
 watch([seleccionTipoArchivo, seleccionOrden], () => {
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
 });
@@ -188,7 +191,7 @@ onMounted(async () => {
                       class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
                       aria-label="Borrar"
                       type="button"
-                      @click="storeFilters.updateFilter('inputSearch', '')"
+                      @click="resetSearch"
                     >
                       <span aria-hidden="true" class="pictograma-cerrar" />
                     </button>

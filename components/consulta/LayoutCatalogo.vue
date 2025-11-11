@@ -198,6 +198,10 @@ function resetAdvancedFilter() {
   storeFilters.buildQueryParams();
   modalFiltroAvanzado.value.cerrarModalBusqueda();
 }
+function resetSearch() {
+  storeFilters.updateFilter('inputSearch', '');
+  storeFilters.buildQueryParams();
+}
 
 watch(selectedOwner, () => {
   storeFilters.buildQueryParams();
@@ -263,7 +267,7 @@ onMounted(async () => {
                 aria-label="Borrar"
                 class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
                 type="button"
-                @click="storeFilters.updateFilter('inputSearch', '')"
+                @click="resetSearch"
               >
                 <span aria-hidden="true" class="pictograma-cerrar" />
               </button>

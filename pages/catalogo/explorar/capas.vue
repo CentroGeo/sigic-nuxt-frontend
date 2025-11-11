@@ -71,6 +71,11 @@ function applyAdvancedFilter() {
   storeFilters.buildQueryParams();
 }
 
+function resetSearch() {
+  storeFilters.updateFilter('inputSearch', '');
+  storeFilters.buildQueryParams();
+}
+
 function resetAdvancedFilter() {
   isFilterActive.value = false;
   storeFilters.resetFilters();
@@ -145,7 +150,7 @@ onMounted(async () => {
                       class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
                       aria-label="Borrar"
                       type="button"
-                      @click="storeFilters.updateFilter('inputSearch', inputSearch)"
+                      @click="resetSearch"
                     >
                       <span aria-hidden="true" class="pictograma-cerrar" />
                     </button>
