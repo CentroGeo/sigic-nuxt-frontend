@@ -22,9 +22,9 @@ function buildQueryParams(resourceType) {
   }
   return queryParams;
 }
-await storeResources.getTotalResources(resourceTypeDic.dataLayer, buildQueryParams('dataLayer'));
-await storeResources.getTotalResources(resourceTypeDic.dataTable, buildQueryParams('dataTable'));
-await storeResources.getTotalResources(resourceTypeDic.document, buildQueryParams('document'));
+storeResources.getTotalResources(resourceTypeDic.dataLayer, buildQueryParams('dataLayer'));
+storeResources.getTotalResources(resourceTypeDic.dataTable, buildQueryParams('dataTable'));
+storeResources.getTotalResources(resourceTypeDic.document, buildQueryParams('document'));
 
 const types = ['dataLayer', 'dataTable', 'document'];
 const resourcesDict = computed(() => ({
@@ -60,7 +60,6 @@ const resourcesDict = computed(() => ({
   },
 }));
 
-console.log(resourcesDict.value);
 async function updateSelection(type) {
   const currentPk = resourcesDict.value[type].latest.pk;
   if (type === 'dataTable' || type === 'document') {
