@@ -6,6 +6,7 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
     idNavegacionLateral: 'navegacionlateral-' + Math.random().toString(36).substring(2),
     existenProyectos: ref(false),
     existenParticipantes: ref(false),
+    existeFormulario: ref(false),
 
     alternarCatalogoColapsable() {
       this.catalogoColapsado = !this.catalogoColapsado;
@@ -13,6 +14,10 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
 
     alternarParticipantes() {
       this.existenParticipantes = !this.existenParticipantes;
+    },
+
+    alternarFormulario() {
+      this.existeFormulario = !this.existeFormulario;
     },
   };
 });

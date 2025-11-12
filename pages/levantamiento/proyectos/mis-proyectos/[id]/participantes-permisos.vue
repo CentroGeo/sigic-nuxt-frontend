@@ -65,7 +65,7 @@ const usuariosAsignados = [
     <div class="texto-centrado">
       <button
         class="boton-primario boton boton-chico"
-        aria-label="Crear nuevo proyecto"
+        aria-label="Agregar participantes"
         @click="storeLevantamiento.alternarParticipantes"
       >
         Agregar participantes

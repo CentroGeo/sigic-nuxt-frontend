@@ -9,7 +9,8 @@ definePageMeta({
 });
 
 const storeLevantamiento = useLevantamientoStore();
-const subrutaActual = ref('informacion-general');
+//const subrutaActual = ref('informacion-general');
+const subrutaActual = ref('formulario');
 
 const opcionesMenu = [
   { texto: 'Información general', key: 'informacion-general' },
@@ -75,10 +76,14 @@ function irAMisProyectos() {
 
         <div class="flex mis-proyectos-contenedor flex-contenido-centrado">
           <div
+            v-if="subrutaActual !== 'formulario'"
             :class="subrutaActual === 'participantes-permisos' ? 'columna-3' : 'columna-4'"
           ></div>
+
           <component :is="componenteActual" />
+
           <div
+            v-if="subrutaActual !== 'formulario'"
             :class="subrutaActual === 'participantes-permisos' ? 'columna-3' : 'columna-4'"
           ></div>
         </div>
