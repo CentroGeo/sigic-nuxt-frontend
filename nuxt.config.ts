@@ -2,7 +2,9 @@
 import { defineNuxtConfig } from 'nuxt/config';
 
 const isDev = process.env.NODE_ENV !== 'production';
-const appBasePath = (process.env.NUXT_PUBLIC_APP_BASE_PATH || '/').replace(/\/+$/, '/');
+const appBasePath = process.env.NUXT_PUBLIC_APP_BASE_PATH || '/';
+const basePath = appBasePath.replace(/\/+$/, '');
+const origin = process.env.NUXT_PUBLIC_BASE_URL;
 const authBaseUrl = process.env.NUXT_PUBLIC_AUTH_BASE_URL;
 const originEnvKey = isDev ? undefined : 'NUXT_AUTH_ORIGIN';
 
@@ -53,7 +55,6 @@ export default defineNuxtConfig({
 
   nitro: {
     baseURL: appBasePath,
-    // TODO: remover cuando catálogo se conecte con el backend
   },
 
   modules: [
@@ -69,10 +70,12 @@ export default defineNuxtConfig({
   css: ['@centrogeomx/sisdai-css/dist/sisdai.min.css'],
 
   auth: {
-    debug: true,
+    debug: !isDev,
     isEnabled: true,
     baseURL: authBaseUrl,
     originEnvKey: originEnvKey,
+    basePath: basePath,
+    origin: origin,
     globalAppMiddleware: false,
     provider: {
       type: 'authjs',
@@ -95,12 +98,15 @@ export default defineNuxtConfig({
 
     // Variables públicas (disponibles también en el cliente)
     public: {
-      baseURL: process.env.NUXT_PUBLIC_BASE_URL,
-      geonodeUrl: process.env.NUXT_PUBLIC_GEONODE_URL,
-      geonodeApi: process.env.NUXT_PUBLIC_GEONODE_API,
-      geoserverUrl: process.env.NUXT_PUBLIC_GEOSERVER_URL,
-      iaBackendUrl: process.env.NUXT_PUBLIC_IA_BACKEND_URL,
-      defaultPage: process.env.NUXT_PUBLIC_DEFAULT_PAGE,
+      baseURL: process.env.NUXT_PUBLIC_BASE_URL || 'http://localhost:3000',
+      basePath: basePath,
+      ollamaModel: process.env.NUXT_PUBLIC_OLLAMA_MODEL || 'deepseek-r1',
+      geonodeUrl: process.env.NUXT_PUBLIC_GEONODE_URL || 'https://geonode.dev.geoint.mx',
+      geonodeApi: process.env.NUXT_PUBLIC_GEONODE_API || 'https://geonode.dev.geoint.mx/api/v2',
+      geoserverUrl:
+        process.env.NUXT_PUBLIC_GEOSERVER_URL || 'https://geonode.dev.geoint.mx/geoserver',
+      iaBackendUrl: process.env.NUXT_PUBLIC_IA_BACKEND_URL || 'https://sigic.ia.dev.geoint.mx/llmb',
+      defaultPage: process.env.NUXT_PUBLIC_DEFAULT_PAGE || '/',
       geonodeApiDefaultFilter: process.env.NUXT_PUBLIC_GEONODE_API_DEFAULT_FILTER || '',
       enableAuth: process.env.NUXT_PUBLIC_ENABLE_AUTH === 'true',
       enableCatalogoVista: process.env.NUXT_PUBLIC_ENABLE_CATALOGO_VISTA === 'true',

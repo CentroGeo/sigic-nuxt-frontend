@@ -14,11 +14,11 @@ module.exports = {
     ecmaVersion: 2022,
     sourceType: 'module',
   },
-
   rules: {
     'require-jsdoc': 'off',
     'valid-jsdoc': 'off',
     'max-len': ['error', { code: 100 }],
     'prettier/prettier': 'error',
+    '@typescript-eslint/no-dynamic-delete': 'off',
   },
 };
