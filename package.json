@@ -51,7 +51,8 @@
     "eslint-plugin-prettier": "^5.5.3",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.5",
-    "prettier": "^3.6.2"
+    "prettier": "^3.6.2",
+    "yargs": "^18.0.0"
   },
   "lint-staged": {
     "*.{css,scss,js,jsx,md,ts,vue}": [
