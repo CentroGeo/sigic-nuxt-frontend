@@ -1,6 +1,6 @@
 <script setup>
 import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
-import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
+import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/src/utiles';
 import { lados } from '@centrogeomx/sisdai-mapas/src/utiles/capa';
 import { arrayNewsOlds, findServer, resourceTypeDic } from '~/utils/consulta';
 

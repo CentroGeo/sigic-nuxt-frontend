@@ -12,7 +12,7 @@ async function iniciarSesion() {
   });
 }
 const basePath = config.public.basePath || '';
-const mostrarInicio = computed(() => !config.public.defaultPage);
+const mostrarInicio = computed(() => config.public.defaultPage);
 const mostrarCatalogo = computed(() => config.public.enableCatalogoVista);
 const mostrarConsulta = computed(() => config.public.enableConsulta);
 const mostrarIaa = computed(() => config.public.enableIaa);
