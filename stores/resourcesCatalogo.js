@@ -97,7 +97,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
-      totals[resourceType] = 0; // res.total;
+      totals[resourceType] = res.total;
       latestResources[resourceType] = res.resources[0];
       this.isLoading = false;
     },

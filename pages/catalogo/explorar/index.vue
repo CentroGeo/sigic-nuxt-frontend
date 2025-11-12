@@ -59,6 +59,7 @@ const resourcesDict = computed(() => ({
     consultaLabel: 'Ver Documento en el Visualizador',
   },
 }));
+
 async function updateSelection(type) {
   const currentPk = resourcesDict.value[type].latest.pk;
   if (type === 'dataTable' || type === 'document') {
