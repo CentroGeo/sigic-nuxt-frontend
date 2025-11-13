@@ -1,6 +1,6 @@
 <script setup>
 import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
-import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
+import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/src/utiles';
 import { lados } from '@centrogeomx/sisdai-mapas/src/utiles/capa';
 import { arrayNewsOlds, findServer, resourceTypeDic } from '~/utils/consulta';
 
@@ -12,6 +12,7 @@ const route = useRoute();
 const router = useRouter();
 storeConsulta.resourceType = resourceTypeDic.dataLayer;
 const isSwipeActive = computed(() => storeConsulta.divisionMapaActivado());
+
 const vistaDelMapa = ref({ extension: storeConsulta.mapExtent });
 const selectorDivisionAbierto = ref(undefined);
 const attributos = reactive({});
@@ -28,11 +29,18 @@ function exportarMapa() {
  * @param param vista del mapa
  */
 function actualizarHashDesdeVista({ acercamiento, centro }) {
-  const hash = `#vista=${acercamiento.toFixed(0)}/${centro[1].toFixed(4)}/${centro[0].toFixed(4)}`;
+  const hash = `#vista=${acercamiento.toFixed(0)}/${centro[1].toFixed(4)}/${centro[0].toFixed(4)}/${isSwipeActive.value}`;
 
   if (hash !== route.hash) {
     router.replace({ query: route.query, hash });
   }
+}
+
+function actualizarSwipeEnHash() {
+  const hashList = route.hash.split('/');
+  hashList[3] = isSwipeActive.value;
+  const newHash = hashList.join('/');
+  router.replace({ query: route.query, hash: newHash });
 }
 
 /**
@@ -42,9 +50,14 @@ function actualizarHashDesdeVista({ acercamiento, centro }) {
 function updateMapFromHash(hashVista) {
   if (hashVista === '') return;
 
-  const [acercamiento, latitud, longitud] = hashVista.split('=')[1].split('/');
+  const [acercamiento, latitud, longitud, swipe] = hashVista.split('=')[1].split('/');
   storeConsulta.mapExtent = undefined;
   vistaDelMapa.value = { acercamiento, centro: [longitud, latitud] };
+  if (swipe === 'true') {
+    storeConsulta.activarDivisionMapa();
+  } else {
+    storeConsulta.desactivarDivisionMapa();
+  }
 }
 /**
  * Actualiza el queryParam.
@@ -55,6 +68,12 @@ function updateQueryParam(capas) {
     router.replace({ query: { capas }, hash: route.hash });
   }
 }
+watch(isSwipeActive, (nv) => {
+  actualizarSwipeEnHash();
+  if (nv === false) {
+    storeSelected.pks.forEach((pk) => storeSelected.byPk(pk).resetLado());
+  }
+});
 watch(() => storeSelected.asQueryParam(), updateQueryParam);
 watch(
   () => storeConsulta.mapExtent,
@@ -65,9 +84,6 @@ watch(
 );
 onMounted(async () => {
   //console.log('Extension:', vistaDelMapa.value);
-  if (route.fullPath.includes('derecho') || route.fullPath.includes('izquierdo')) {
-    storeConsulta.activarDivisionMapa();
-  }
   updateMapFromHash(route.hash?.slice(1));
   storeResources.resetByType(storeConsulta.resourceType);
   storeSelected.addFromQueryParam(route.query.capas);
@@ -116,11 +132,6 @@ watch(
   },
   { deep: true }
 );
-watch(isSwipeActive, (nv) => {
-  if (nv === false) {
-    storeSelected.pks.forEach((pk) => storeSelected.byPk(pk).resetLado());
-  }
-});
 
 // api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
 // const contenedorSelectoresDivisionColapsado = ref(true);
@@ -179,7 +190,7 @@ watch(isSwipeActive, (nv) => {
             :consulta="gnoxyFetch"
             :fuente="findServer(resource)"
             :lado="storeSelected.byPk(resource.pk).lado"
-            :mosaicos="false"
+            :mosaicos="true"
             :opacidad="storeSelected.byPk(resource.pk).opacidad"
             :posicion="storeSelected.byPk(resource.pk).posicion + 1"
             :visible="storeSelected.byPk(resource.pk).visible"

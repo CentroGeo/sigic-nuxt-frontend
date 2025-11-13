@@ -118,9 +118,9 @@ onMounted(async () => {
           <div class="columna-8">
             <ClientOnly>
               <SisdaiSelector v-model="seleccionOrden" etiqueta="Ordenar por">
-                <option value="fecha_descendente">Recién agregados</option>
                 <option value="titulo">Título</option>
                 <option value="categoria">Categoría</option>
+                <option value="fecha_descendente">Más reciente</option>
                 <option value="fecha_ascendente">Más antiguo</option>
               </SisdaiSelector>
             </ClientOnly>
