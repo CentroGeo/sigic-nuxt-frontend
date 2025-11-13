@@ -1,19 +1,11 @@
 <script setup>
 definePageMeta({
-  middleware: 'auth',
+  middleware: ['auth', 'redireccionar-modulo-levantamiento'],
 });
-
-const route = useRoute();
-const router = useRouter();
-
-if (route.path === '/levantamiento') {
-  router.push('/levantamiento/proyectos');
-}
-
-const ruta = '/levantamiento';
-
 const storeLevantamiento = useLevantamientoStore();
+const ruta = '/levantamiento';
 </script>
+
 <template>
   <div class="modulo-levantamiento flex">
     <UiNavegacionLateral
@@ -24,7 +16,7 @@ const storeLevantamiento = useLevantamientoStore();
           globo: 'Proyectos',
         },
         {
-          pictograma: 'pictograma-ayuda',
+          pictograma: 'pictograma-grupo',
           ruta: `${ruta}/aportes`,
           globo: 'Aportes',
         },
@@ -38,6 +30,7 @@ const storeLevantamiento = useLevantamientoStore();
     </div>
   </div>
 </template>
+
 <style lang="scss" scoped>
 .modulo-levantamiento {
   --altura-consulta-esc: calc(100vh - 112px);

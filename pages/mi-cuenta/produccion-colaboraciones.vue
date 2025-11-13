@@ -1,4 +1,6 @@
 <script setup>
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+
 definePageMeta({
   middleware: 'auth',
 });
@@ -39,13 +41,49 @@ const lista_colaboraciones = ref([
     enlace: 'https://colaboraciones.ejemplo.com/mx/programa-restauracion-manglares',
   },
 ]);
+const modalEliminar = ref();
+const proyectoModal = ref(null);
+const statusModal = ref(null);
+const proyectoSeleccionado = ref({});
+const tipoRecurso = ref('proyecto');
+const tipoAccion = ref('crear');
+function capitalizeFirstLetter(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+function openEditModal(proyecto, tipo, accion) {
+  tipoAccion.value = accion;
+  proyectoSeleccionado.value = proyecto;
+  tipoRecurso.value = tipo;
+  //console.log(proyectoSeleccionado.value);
+  nextTick(() => {
+    proyectoModal.value.abrirModalProyecto();
+  });
+}
+
+function notificarStatus() {
+  statusModal.value?.abrirModal();
+}
+
+function agregarNuevo() {
+  statusModal.value?.cerrarModal();
+  openEditModal({}, tipoRecurso.value, 'crear');
+}
 </script>
 <template>
   <div>
     <h2>Producción y colaboraciones</h2>
     <div class="p-x-7">
-      <h3>Proyectos y fondos SECIHTI</h3>
-
+      <div class="flex flex-contenido-separado">
+        <h3>Proyectos y fondos SECIHTI</h3>
+        <button
+          type="button"
+          class="boton-secundario boton-chico"
+          style="height: fit-content; align-self: center"
+          @click="openEditModal({}, 'proyecto', 'crear')"
+        >
+          Agregar proyecto +
+        </button>
+      </div>
       <MiCuentaProductosTarjeta
         v-for="(proyecto, i) in lista_proyectos"
         :key="i"
@@ -53,8 +91,21 @@ const lista_colaboraciones = ref([
         :rol="proyecto.rol"
         :anio_periodo="proyecto.anio_periodo"
         :enlace="proyecto.enlace"
+        @editar-clicked="openEditModal(proyecto, 'proyecto', 'editar')"
+        @eliminar-clicked="modalEliminar.abrirModal()"
       ></MiCuentaProductosTarjeta>
-      <h3>Publicaciones</h3>
+
+      <div class="flex flex-contenido-separado">
+        <h3>Publicaciones</h3>
+        <button
+          type="button"
+          class="boton-secundario boton-chico"
+          style="height: fit-content; align-self: center"
+          @click="openEditModal({}, 'publicación', 'crear')"
+        >
+          Agregar publicación +
+        </button>
+      </div>
       <MiCuentaProductosTarjeta
         v-for="(proyecto, i) in lista_publicaciones"
         :key="i"
@@ -62,8 +113,21 @@ const lista_colaboraciones = ref([
         :medio="proyecto.medio"
         :anio_periodo="proyecto.anio_periodo"
         :enlace="proyecto.enlace"
+        @editar-clicked="openEditModal(proyecto, 'publicación', 'editar')"
+        @eliminar-clicked="modalEliminar.abrirModal()"
       ></MiCuentaProductosTarjeta>
-      <h3>Colaboraciones</h3>
+
+      <div class="flex flex-contenido-separado">
+        <h3>Colaboraciones</h3>
+        <button
+          type="button"
+          class="boton-secundario boton-chico"
+          style="height: fit-content; align-self: center"
+          @click="openEditModal({}, 'colaboración', 'crear')"
+        >
+          Agregar colaboración +
+        </button>
+      </div>
       <MiCuentaProductosTarjeta
         v-for="(proyecto, i) in lista_colaboraciones"
         :key="i"
@@ -72,7 +136,79 @@ const lista_colaboraciones = ref([
         :anio_periodo="proyecto.anio_periodo"
         :instituciones="proyecto.instituciones"
         :enlace="proyecto.enlace"
+        @editar-clicked="openEditModal(proyecto, 'colaboración', 'editar')"
+        @eliminar-clicked="modalEliminar.abrirModal()"
       ></MiCuentaProductosTarjeta>
     </div>
+
+    <MiCuentaModalProyecto
+      ref="proyectoModal"
+      :key="`modal_${proyectoSeleccionado ? proyectoSeleccionado.titulo : '0'}`"
+      :proyecto="proyectoSeleccionado"
+      :tipo="tipoRecurso"
+      @-proyecto-guardado="notificarStatus"
+    ></MiCuentaModalProyecto>
+
+    <ClientOnly>
+      <SisdaiModal ref="statusModal">
+        <template #encabezado>
+          <h1>
+            {{ capitalizeFirstLetter(tipoRecurso) }}
+            {{ tipoAccion === 'crear' ? 'Guardad' : 'Editad'
+            }}{{ tipoRecurso === 'proyecto' ? 'o' : 'a' }}
+          </h1>
+        </template>
+        <template #cuerpo>
+          <p v-if="tipoAccion === 'crear'">
+            {{ tipoRecurso === 'proyecto' ? 'Este' : 'Esta' }} {{ tipoRecurso }} ha sido añadido a
+            tu cuenta.
+          </p>
+          <p v-if="tipoAccion === 'editar'">La información se editó correctamente.</p>
+        </template>
+        <template #pie>
+          <button
+            type="button"
+            class="boton-chico boton-con-contenedor-secundario ancho"
+            @click="statusModal.cerrarModal"
+          >
+            Cerrar
+          </button>
+          <button type="button" class="boton-chico boton-primario ancho" @click="agregarNuevo">
+            Agregar {{ tipoRecurso === 'proyecto' ? 'nuevo' : 'nueva' }} {{ tipoRecurso }}
+          </button>
+        </template>
+      </SisdaiModal>
+      <SisdaiModal ref="modalEliminar">
+        <template #encabezado>
+          <h1>Eliminar proyecto</h1>
+        </template>
+        <template #cuerpo>
+          <p>¿Confirmas que deseas eliminar este proyecto? Esta acción no se puede deshacer.</p>
+        </template>
+        <template #pie>
+          <button
+            type="button"
+            class="boton-chico boton-con-contenedor-secundario ancho"
+            @click="modalEliminar.cerrarModal"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="boton-chico boton-con-contenedor-primario ancho boton-primario"
+            @click="modalEliminar.cerrarModal"
+          >
+            Eliminar
+          </button>
+        </template>
+      </SisdaiModal>
+    </ClientOnly>
   </div>
 </template>
+<style lang="scss" scoped>
+.ancho {
+  width: 50%;
+  display: flex;
+  justify-content: center; /* horizontal center */
+}
+</style>
