@@ -9,8 +9,7 @@ definePageMeta({
 });
 
 const storeLevantamiento = useLevantamientoStore();
-//const subrutaActual = ref('informacion-general');
-const subrutaActual = ref('formulario');
+const subrutaActual = ref('informacion-general');
 
 const opcionesMenu = [
   { texto: 'Información general', key: 'informacion-general' },

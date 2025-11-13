@@ -1,8 +1,22 @@
 <script setup>
+import SisdaiAreaTexto from '@centrogeomx/sisdai-componentes/src/componentes/area-texto/SisdaiAreaTexto.vue';
+import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
+import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
+
 definePageMeta({
   middleware: 'auth',
 });
+
 const storeLevantamiento = useLevantamientoStore();
+
+const modalCrearProyecto = ref(null);
+
+const handleCrearProyecto = () => {
+  storeLevantamiento.guardarProyecto();
+  modalCrearProyecto.value.cerrarModal();
+};
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeLevantamiento.catalogoColapsado">
@@ -30,9 +44,15 @@ const storeLevantamiento = useLevantamientoStore();
 
         <div class="flex titulo-contenido-levantamiento m-b-3">
           <h2>Mis proyectos</h2>
-          <UiNumeroElementos :numero="0" etiqueta="Proyectos" />
+          <UiNumeroElementos
+            :numero="storeLevantamiento.obtenerTotalProyectos()"
+            etiqueta="Proyectos"
+          />
         </div>
-        <div class="flex texto-centrado contenido-levantamiento">
+        <div
+          v-if="!storeLevantamiento.existenProyectos"
+          class="flex texto-centrado contenido-levantamiento"
+        >
           <div class="columna-4"></div>
           <div class="columna-8 fondo-color-acento p-2 borde-redondeado-8">
             <span class="pictograma-documento pictograma-grande texto-color-acento"></span>
@@ -44,19 +64,111 @@ const storeLevantamiento = useLevantamientoStore();
               formulario para empezar a recibir aportes
             </p>
             <div class="texto-centrado">
-              <NuxtLink
+              <button
                 class="boton-primario boton-pictograma"
-                aria-label="Crear nuevo proyecto"
-                to="/levantamiento/proyectos/mis-proyectos/nuevo"
+                @click="modalCrearProyecto.abrirModal()"
               >
                 Crear un proyecto
                 <span class="pictograma-agregar" aria-hidden="true" />
-              </NuxtLink>
+              </button>
             </div>
           </div>
           <div class="columna-4"></div>
         </div>
+        <div v-else>
+          <div class="grid m-b-3">
+            <div class="columna-8">
+              <ClientOnly>
+                <label for="buscadoravanzado">Buscador</label>
+                <SisdaiCampoBusqueda etiqueta="" />
+              </ClientOnly>
+            </div>
+            <div class="columna-8 flex flex-contenido-final">
+              <button
+                class="boton-primario boton-pictograma boton-crear-proyecto"
+                @click="modalCrearProyecto.abrirModal()"
+              >
+                Crear un proyecto
+                <span class="pictograma-agregar" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+          <div class="grid">
+            <div
+              v-for="proyecto in storeLevantamiento.proyectos"
+              :key="proyecto.id"
+              class="columna-4 fondo-color-neutro p-3 borde-redondeado-20"
+            >
+              <img class="icono-proyecto m-b-minimo" src="/img/icono_sigic.png" />
+              <div class="m-b-minimo">{{ proyecto.nombre }}</div>
+              <div class="m-b-minimo">{{ proyecto.institucion }}</div>
+              <div class="m-b-minimo">{{ proyecto.autor }}</div>
+              <UiNumeroElementos :numero="proyecto.aportes" etiqueta="Aportes" />
+            </div>
+          </div>
+        </div>
       </main>
+
+      <ClientOnly>
+        <SisdaiModal ref="modalCrearProyecto" class="modal-grande">
+          <template #encabezado> <h3>Nuevo proyecto</h3> </template>
+          <template #cuerpo>
+            <div class="p-3">
+              <ClientOnly>
+                <SisdaiCampoBase
+                  etiqueta="Nombre del proyecto"
+                  ejemplo="Escribe el nombre de tu proyecto"
+                  :es_etiqueta_visible="true"
+                  :es_obligatorio="false"
+                  class="m-b-2"
+                />
+                <SisdaiSelector etiqueta="Institución a la que pertenece" class="m-b-2">
+                  <option value="1">Opcion Uno</option>
+                  <option value="2">Opcion Dos</option>
+                  <option value="3">Opcion Tres</option>
+                </SisdaiSelector>
+                <SisdaiSelector etiqueta="Categoría del proyecto" class="m-b-2">
+                  <option value="1">Opcion Uno</option>
+                  <option value="2">Opcion Dos</option>
+                  <option value="3">Opcion Tres</option>
+                </SisdaiSelector>
+                <SisdaiAreaTexto
+                  etiqueta="Objetivo del proyecto"
+                  ejemplo="Describe brevemente tu proyecto"
+                  :es_etiqueta_visible="true"
+                  :es_obligatorio="false"
+                  class="m-b-2"
+                />
+                <SisdaiAreaTexto
+                  etiqueta="Instrucciones para participantes"
+                  ejemplo="Describe brevemente tu proyecto"
+                  :es_etiqueta_visible="true"
+                  :es_obligatorio="false"
+                  class="m-b-2"
+                />
+                <label>Imagen de identificación del proyecto</label>
+                <IaElementoDragNdDrop
+                  ref="dragNdDrop"
+                  :imagen-inicial="imagenPreview"
+                  @pasar-archivo="(i) => guardarArchivo(i)"
+                />
+              </ClientOnly>
+            </div>
+          </template>
+          <template #pie>
+            <button class="boton-primario boton-chico" type="button" @click="handleCrearProyecto">
+              Crear proyecto
+            </button>
+            <button
+              class="boton-secundario boton-chico"
+              type="button"
+              @click="modalCrearProyecto.cerrarModal()"
+            >
+              Regresar
+            </button>
+          </template>
+        </SisdaiModal>
+      </ClientOnly>
     </template>
   </UiLayoutPaneles>
 </template>
@@ -73,5 +185,14 @@ const storeLevantamiento = useLevantamientoStore();
 .contenido-levantamiento {
   flex: 1;
   align-items: center;
+}
+
+.boton-crear-proyecto {
+  align-self: flex-end;
+}
+
+.icono-proyecto {
+  width: 40px;
+  height: 40px;
 }
 </style>

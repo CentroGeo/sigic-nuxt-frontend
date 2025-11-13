@@ -7,6 +7,7 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
     existenProyectos: ref(false),
     existenParticipantes: ref(false),
     existeFormulario: ref(false),
+    proyectos: ref([]),
 
     alternarCatalogoColapsable() {
       this.catalogoColapsado = !this.catalogoColapsado;
@@ -18,6 +19,23 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
 
     alternarFormulario() {
       this.existeFormulario = !this.existeFormulario;
+    },
+
+    guardarProyecto() {
+      const proyecto = {
+        id: this.proyectos.length + 1,
+        nombre: 'Mapa de puntos de basura acumulada',
+        institucion: 'CentroGeo',
+        autor: 'César Rovelo',
+        aportes: 0,
+      };
+
+      this.proyectos.push(proyecto);
+      this.existenProyectos = true;
+    },
+
+    obtenerTotalProyectos() {
+      return this.proyectos.length;
     },
   };
 });
