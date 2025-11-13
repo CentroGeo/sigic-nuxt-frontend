@@ -98,27 +98,35 @@ async function unirCampos() {
 
   // body: validar que esos campos se puedan unir
   console.warn('body', {
-    columns: columns.value,
-    geo_layer: seleccionCapaGeo.value,
-    geo_pivot: seleccionCampoObjetivo.value,
-    layer: editedResource.value.pk,
+    layer: +editedResource.value.pk,
+    geo_layer: +seleccionCapaGeo.value,
     layer_pivot: seleccionCampoCapa.value,
-    // token: data.value?.accessToken,
+    geo_pivot: seleccionCampoObjetivo.value,
+    columns: columns.value,
   });
-  // TODO: abrir modal de carga
-  // store.unionVectorialPendiente = true
-  // await $fetch('/api/join', {
-  //   method: 'POST',
-  //   body: {
-  //     layer: editedResource.value.pk,
-  //     geo_layer: seleccionCapaGeo.value,
-  //     layer_pivot: seleccionCampoCapa.value,
-  //     geo_pivot: seleccionCampoObjetivo.value,
-  //     columns: columns.value,
-  //     token: data.value?.accessToken,
-  //   },
-  // });
-  unionExitosa.value = true;
+
+  try {
+    const config = useRuntimeConfig();
+    const url = config.public.geonodeApi;
+    const token = data.value?.accessToken;
+    const body = {
+      layer: +editedResource.value.pk,
+      geo_layer: +seleccionCapaGeo.value,
+      layer_pivot: seleccionCampoCapa.value,
+      geo_pivot: seleccionCampoObjetivo.value,
+      columns: columns.value,
+      token: token,
+    };
+    await $fetch(`${url}/sigic/sigic_georeference/join`, {
+      method: 'POST',
+      // headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+
+    unionExitosa.value = true;
+  } catch (error) {
+    console.error('Error al unir capas: ', error);
+  }
 }
 
 // para habilitar o deshabilitar el botón de unir campos
