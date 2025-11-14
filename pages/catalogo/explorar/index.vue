@@ -6,6 +6,8 @@ import SelectedResource from '~/utils/consulta/SelectedResource';
 const storeResources = useResourcesCatalogoStore();
 const storeCatalogo = useCatalogoStore();
 const storeSelected = useSelectedResources2Store();
+const config = useRuntimeConfig();
+const basePath = config.public.basePath;
 function buildQueryParams(resourceType) {
   const queryParams = {};
   queryParams['filter{resource_type}'] = resourceTypeGeonode[resourceType];
@@ -31,7 +33,7 @@ const resourcesDict = computed(() => ({
     total: storeResources.totalByType('dataLayer'),
     latest: storeResources.latestByType('dataLayer'),
     to: '/catalogo/explorar/capas',
-    img: '/img/thumbnail-capas.png',
+    img: `${basePath}/img/thumbnail-capas.png`,
     keyword: 'capas',
     consultaTo: '/consulta/capas',
     consultaLabel: 'Ver Capa en el Visualizador',
@@ -41,7 +43,7 @@ const resourcesDict = computed(() => ({
     total: storeResources.totalByType('dataTable'),
     latest: storeResources.latestByType('dataTable'),
     to: '/catalogo/explorar/tablas',
-    img: '/img/thumbnail-tablas.png',
+    img: `${basePath}/img/thumbnail-tablas.png`,
     keyword: 'datos tabulados',
     consultaTo: '/consulta/tablas',
     consultaLabel: 'Ver Archivo en el Visualizador',
@@ -51,12 +53,13 @@ const resourcesDict = computed(() => ({
     total: storeResources.totalByType('document'),
     latest: storeResources.latestByType('document'),
     to: '/catalogo/explorar/documentos',
-    img: '/img/thumbnail-docs.png',
+    img: `${basePath}/img/thumbnail-docs.png`,
     keyword: 'documentos',
     consultaTo: '/consulta/documentos',
     consultaLabel: 'Ver Documento en el Visualizador',
   },
 }));
+
 async function updateSelection(type) {
   const currentPk = resourcesDict.value[type].latest.pk;
   if (type === 'dataTable' || type === 'document') {

@@ -11,8 +11,8 @@ async function iniciarSesion() {
     callbackUrl: route.fullPath,
   });
 }
-
-const mostrarInicio = computed(() => !config.public.defaultPage);
+const basePath = config.public.basePath || '';
+const mostrarInicio = computed(() => config.public.defaultPage);
 const mostrarCatalogo = computed(() => config.public.enableCatalogoVista);
 const mostrarConsulta = computed(() => config.public.enableConsulta);
 const mostrarIaa = computed(() => config.public.enableIaa);
@@ -32,7 +32,7 @@ const mostrarAuth = computed(() => config.public.enableAuth);
           class="nav-hiperviculo-logo"
         >
           <img
-            :src="`/img/logo_secihiti.svg`"
+            :src="`${basePath}/img/logo_secihiti.svg`"
             class="nav-logo color-invertir"
             alt="SECIHITI"
             height="36"
@@ -40,7 +40,7 @@ const mostrarAuth = computed(() => config.public.enableAuth);
         </a>
         <NuxtLink to="/" rel="noopener noreferrer" class="nav-hiperviculo-logo">
           <img
-            :src="`/img/logo_sigic.svg`"
+            :src="`${basePath}/img/logo_sigic.svg`"
             class="nav-logo color-invertir"
             alt="SIGIC"
             height="36"

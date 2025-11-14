@@ -38,9 +38,9 @@ async function guardarArchivo(files) {
     let endpoint = null;
 
     if (base_files.some((end) => file.name.endsWith(end))) {
-      endpoint = '/api/cargar-base-file';
+      endpoint = `${configEnv.public.basePath}/api/cargar-base-file`;
     } else if (docs_files.some((end) => file.name.endsWith(end))) {
-      endpoint = '/api/cargar-doc-file';
+      endpoint = `${configEnv.public.basePath}/api/cargar-doc-file`;
     } else {
       archivo.estatus = 'error_carga';
       archivo.mensaje = 'Formato no soportado';
