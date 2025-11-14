@@ -120,7 +120,7 @@ const usuariosAsignados = [
           </div>
         </template>
       </div>
-      <form class="m-b-3">
+      <div class="m-b-3">
         <ClientOnly>
           <div class="flex privacidad-acciones m-b-3">
             <div class="privacidad-input">
@@ -150,7 +150,7 @@ const usuariosAsignados = [
         <div class="flex flex-contenido-final">
           <button class="boton-primario boton boton-chico">Enviar invitación</button>
         </div>
-      </form>
+      </div>
       <div>
         <h6>Permisos asignados</h6>
         <div class="flex usuarios-asignados">

@@ -65,7 +65,10 @@ const storeLevantamiento = useLevantamientoStore();
             >
               Ver proyecto
             </NuxtLink>
-            <button class="boton-secundario boton-chico boton-accion-proyecto m-b-1" type="button">
+            <button
+              class="boton-secundario boton-chico boton-accion-proyecto fondo-color-primario m-b-1"
+              type="button"
+            >
               Aportar
             </button>
           </div>

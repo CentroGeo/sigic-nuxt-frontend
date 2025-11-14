@@ -12,6 +12,8 @@ const props = defineProps({
   indice: { type: Number, default: 0 },
 });
 
+const imagenAporte = ref(null);
+
 const emit = defineEmits(['update:pregunta', 'eliminar', 'mover']);
 
 function actualizarPregunta(campo, valor) {
@@ -28,6 +30,10 @@ function subirPregunta() {
 
 function bajarPregunta() {
   emit('mover', { indice: props.indice, direccion: 'abajo' });
+}
+
+async function guardarArchivo(archivo) {
+  imagenAporte.value = archivo;
 }
 </script>
 
@@ -91,7 +97,16 @@ function bajarPregunta() {
         </button>
       </div>
     </div>
-    <div v-else></div>
+    <div v-else>
+      <div class="m-b-2 texto-peso-500">{{ props.indice + 1 }}. {{ props.pregunta.pregunta }}</div>
+      <IaElementoDragNdDrop
+        ref="dragNdDrop"
+        class="m-b-2"
+        :imagen-inicial="imagenPreview"
+        @pasar-archivo="(i) => guardarArchivo(i)"
+      />
+      <div v-if="props.pregunta.obligatorio">Obligatoria*</div>
+    </div>
   </div>
 </template>
 

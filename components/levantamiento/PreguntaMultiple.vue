@@ -145,7 +145,24 @@ function agregarOpcion() {
         </button>
       </div>
     </div>
-    <div v-else></div>
+    <div v-else>
+      <div class="m-b-2 texto-peso-500">{{ props.indice + 1 }}. {{ props.pregunta.pregunta }}</div>
+      <div class="m-b-1 texto-color-secundario texto-peso-500">
+        {{ props.pregunta.instrucciones }}
+      </div>
+      <p class="borde-b borde-color-secundario m-y-2" />
+      <div class="grupo-categoria flex p-1">
+        <SisdaiCasilla
+          v-for="(opcion, index) in props.pregunta.opciones"
+          :key="index"
+          name="opcion"
+          :value="opcion"
+          :etiqueta="opcion"
+          class="opcion-checkbox"
+        />
+      </div>
+      <div v-if="props.pregunta.obligatorio">Obligatoria*</div>
+    </div>
   </div>
 </template>
 
@@ -156,5 +173,11 @@ function agregarOpcion() {
 
 .boton-eliminar-opcion {
   align-self: flex-end;
+}
+
+.grupo-categoria {
+  flex-direction: column;
+  border-radius: 8px;
+  gap: 0px;
 }
 </style>

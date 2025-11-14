@@ -114,15 +114,15 @@ const handleCrearProyecto = () => {
                 Configurar proyecto
               </NuxtLink>
               <button
-                class="boton-secundario boton-chico boton-accion-proyecto m-b-1"
+                class="boton-secundario boton-chico boton-accion-proyecto m-b-1 fondo-color-primario"
                 disabled
                 type="button"
               >
                 Aportar
               </button>
               <button
-                class="boton-secundario boton-chico boton-accion-proyecto"
-                type="button m-b-1"
+                class="boton-secundario boton-chico boton-accion-proyecto m-b-1 fondo-color-primario"
+                type="button"
               >
                 Eliminar proyecto
               </button>

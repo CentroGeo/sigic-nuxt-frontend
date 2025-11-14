@@ -1,4 +1,6 @@
 <script setup>
+import SisdaiBotonesRadioGrupo from '@centrogeomx/sisdai-componentes/src/componentes/boton-radio-grupo/SisdaiBotonesRadioGrupo.vue';
+import SisdaiBotonRadio from '@centrogeomx/sisdai-componentes/src/componentes/boton-radio/SisdaiBotonRadio.vue';
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiCasilla from '@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue';
 
@@ -145,7 +147,23 @@ function agregarOpcion() {
         </button>
       </div>
     </div>
-    <div v-else></div>
+    <div v-else>
+      <div class="m-b-2 texto-peso-500">{{ props.indice + 1 }}. {{ props.pregunta.pregunta }}</div>
+      <div class="m-b-1 texto-color-secundario texto-peso-500">
+        {{ props.pregunta.instrucciones }}
+      </div>
+      <p class="borde-b borde-color-secundario m-y-2" />
+      <SisdaiBotonesRadioGrupo leyenda="" :es_vertical="true">
+        <SisdaiBotonRadio
+          v-for="(opcion, index) in props.pregunta.opciones"
+          :key="index"
+          :etiqueta="opcion"
+          :value="opcion"
+          name="opcion"
+        />
+      </SisdaiBotonesRadioGrupo>
+      <div v-if="props.pregunta.obligatorio">Obligatoria*</div>
+    </div>
   </div>
 </template>
 

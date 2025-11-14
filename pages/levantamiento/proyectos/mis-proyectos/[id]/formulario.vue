@@ -1,4 +1,6 @@
 <script setup>
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+
 const storeLevantamiento = useLevantamientoStore();
 
 const tipoPreguntas = [
@@ -10,6 +12,7 @@ const tipoPreguntas = [
 ];
 
 const preguntas = ref([]);
+const modalPrevisualizacion = ref(null);
 
 const agregarPregunta = (tipo) => {
   const basePregunta = {
@@ -91,7 +94,7 @@ function handleMoverPregunta({ indice, direccion }) {
         <div class="flex flex-vertical-centrado flex-contenido-centrado acciones-agregar-pregunta">
           <template v-for="tipo in tipoPreguntas" :key="tipo.id">
             <button
-              class="boton-chico boton-secundario flex flex-contenido-separado"
+              class="boton-chico boton-secundario fondo-color-primario flex flex-contenido-separado"
               @click="agregarPregunta(tipo)"
             >
               {{ tipo.label }}
@@ -103,11 +106,12 @@ function handleMoverPregunta({ indice, direccion }) {
           <button
             class="boton-primario boton boton-chico texto-centrado flex flex-contenido-centrado"
             aria-label="Previsualizar"
+            @click="modalPrevisualizacion.abrirModal()"
           >
             Previsualizar
           </button>
           <button
-            class="boton-secundario boton boton-chico flex flex-contenido-centrado"
+            class="boton-secundario boton boton-chico fondo-color-primario flex flex-contenido-centrado"
             aria-label="Regresar"
           >
             Regresar
@@ -164,6 +168,48 @@ function handleMoverPregunta({ indice, direccion }) {
         </div>
       </div>
     </div>
+
+    <ClientOnly>
+      <SisdaiModal ref="modalPrevisualizacion" class="modal-previsualizacion">
+        <template #encabezado> <h3>Visualización de formulario</h3> </template>
+        <template #cuerpo>
+          <div class="fondo-color-acento borde-redondeado-20 p-3">
+            <div v-for="(pregunta, index) in preguntas" :key="index">
+              <levantamiento-pregunta-abierta
+                v-if="pregunta.tipo === 'abierta'"
+                :pregunta="pregunta"
+                :es-edicion="false"
+                :indice="index"
+              />
+              <levantamiento-pregunta-unica
+                v-if="pregunta.tipo === 'unica'"
+                :pregunta="pregunta"
+                :es-edicion="false"
+                :indice="index"
+              />
+              <levantamiento-pregunta-multiple
+                v-if="pregunta.tipo === 'multiple'"
+                :pregunta="pregunta"
+                :es-edicion="false"
+                :indice="index"
+              />
+              <levantamiento-pregunta-condicional
+                v-if="pregunta.tipo === 'condicional'"
+                :pregunta="pregunta"
+                :es-edicion="false"
+                :indice="index"
+              />
+              <levantamiento-pregunta-multimedia
+                v-if="pregunta.tipo === 'multimedia'"
+                :pregunta="pregunta"
+                :es-edicion="false"
+                :indice="index"
+              />
+            </div>
+          </div>
+        </template>
+      </SisdaiModal>
+    </ClientOnly>
   </div>
 </template>
 
@@ -178,5 +224,9 @@ function handleMoverPregunta({ indice, direccion }) {
 
 .acciones-agregar-pregunta {
   gap: 8px;
+}
+
+.modal-previsualizacion {
+  max-width: 40%;
 }
 </style>

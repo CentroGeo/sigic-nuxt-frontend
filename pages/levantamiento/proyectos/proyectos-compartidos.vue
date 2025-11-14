@@ -73,7 +73,7 @@ const storeLevantamiento = useLevantamientoStore();
           class="texto-color-informacion fondo-color-informacion borde-redondeado-20 borde borde-color-informacion p-3 m-b-3"
         >
           <div class="m-b-1 flex flex-contenido-separado">
-            <p class="m-0 texto-peso-500 titulo-notificaciones">
+            <p class="m-0 titulo-notificaciones">
               <span class="pictograma-informacion" />
               <span class="m-l-1">Notificaciones</span>
             </p>
@@ -113,7 +113,10 @@ const storeLevantamiento = useLevantamientoStore();
             >
               Ver proyecto
             </NuxtLink>
-            <button class="boton-secundario boton-chico boton-accion-proyecto m-b-1" type="button">
+            <button
+              class="boton-secundario boton-chico boton-accion-proyecto fondo-color-primario m-b-1"
+              type="button"
+            >
               Aportar
             </button>
           </div>
@@ -151,6 +154,7 @@ const storeLevantamiento = useLevantamientoStore();
 .titulo-notificaciones {
   display: flex;
   align-items: center;
+  font-weight: 500;
 }
 
 .notificacion-proyecto {

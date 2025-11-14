@@ -1,4 +1,6 @@
 <script setup>
+import SisdaiBotonesRadioGrupo from '@centrogeomx/sisdai-componentes/src/componentes/boton-radio-grupo/SisdaiBotonesRadioGrupo.vue';
+import SisdaiBotonRadio from '@centrogeomx/sisdai-componentes/src/componentes/boton-radio/SisdaiBotonRadio.vue';
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiCasilla from '@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue';
 
@@ -63,6 +65,15 @@ function agregarCondicion(indice, tipo) {
 
   nuevasOpciones[indice] = { ...opcionActual };
   emit('update:pregunta', { ...props.pregunta, opciones: nuevasOpciones });
+}
+
+const opcionSeleccionada = ref({});
+
+function handleChangeRadio(e) {
+  const selected = e.target.value;
+  const optSelected = props.pregunta.opciones.find((opt) => opt.opcion === selected);
+  console.log(optSelected);
+  opcionSeleccionada.value = optSelected;
 }
 </script>
 
@@ -199,7 +210,52 @@ function agregarCondicion(indice, tipo) {
         </button>
       </div>
     </div>
-    <div v-else></div>
+    <div v-else>
+      <div class="m-b-2 texto-peso-500">{{ props.indice + 1 }}. {{ props.pregunta.pregunta }}</div>
+      <div class="m-b-1 texto-color-secundario texto-peso-500">
+        {{ props.pregunta.instrucciones }}
+      </div>
+      <p class="borde-b borde-color-secundario m-y-2" />
+      <SisdaiBotonesRadioGrupo leyenda="" :es_vertical="true">
+        <SisdaiBotonRadio
+          v-for="(opcion, index) in props.pregunta.opciones"
+          :key="index"
+          :etiqueta="opcion.opcion"
+          :value="opcion.opcion"
+          name="opcion"
+          @change="handleChangeRadio"
+        />
+      </SisdaiBotonesRadioGrupo>
+      <p class="borde-b borde-color-secundario m-y-2" />
+      <div v-if="opcionSeleccionada.tipoCondicion === 'abierta'">
+        <div class="m-b-2 texto-peso-500">{{ opcionSeleccionada.subpregunta.pregunta }}</div>
+        <div class="m-b-1 texto-color-secundario texto-peso-500">
+          {{ opcionSeleccionada.subpregunta.instrucciones }}
+        </div>
+        <SisdaiCampoBase
+          class="m-b-2"
+          etiqueta="Respuesta"
+          ejemplo="Responde la pregunta"
+          :es_etiqueta_visible="false"
+        />
+      </div>
+      <div v-if="opcionSeleccionada.tipoCondicion === 'opcion'">
+        <div class="m-b-2 texto-peso-500">{{ opcionSeleccionada.subpregunta.pregunta }}</div>
+        <div class="m-b-1 texto-color-secundario texto-peso-500">
+          {{ opcionSeleccionada.subpregunta.instrucciones }}
+        </div>
+        <SisdaiBotonesRadioGrupo leyenda="" :es_vertical="true">
+          <SisdaiBotonRadio
+            v-for="(opcion, index) in opcionSeleccionada.subpregunta.opciones"
+            :key="index"
+            :etiqueta="opcion"
+            :value="opcion"
+            name="opcion"
+          />
+        </SisdaiBotonesRadioGrupo>
+      </div>
+      <div v-if="props.pregunta.obligatorio">Obligatoria*</div>
+    </div>
   </div>
 </template>
 
