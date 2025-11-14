@@ -8,6 +8,36 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
     existenParticipantes: ref(false),
     existeFormulario: ref(false),
     proyectos: ref([]),
+    proyectosPublicos: ref([
+      {
+        id: 1,
+        nombre: 'Registro de arte urbano en la ciudad de Mérida, Yucatán',
+        institucion: 'Nombre de institución',
+        autor: 'Nombre de autoría',
+        aportes: 16,
+      },
+      {
+        id: 2,
+        nombre: 'Mapa de puntos de basura acumulada',
+        institucion: 'Nombre de institución',
+        autor: 'Nombre de autoría',
+        aportes: 16,
+      },
+      {
+        id: 3,
+        nombre: 'Registro de cruces peatonales peligrosos',
+        institucion: 'Nombre de institución',
+        autor: 'Nombre de autoría',
+        aportes: 33,
+      },
+      {
+        id: 4,
+        nombre: 'Censo de luminarias en la colonia Jardines del Horizonte',
+        institucion: 'Nombre de institución',
+        autor: 'Nombre de autoría',
+        aportes: 121,
+      },
+    ]),
 
     alternarCatalogoColapsable() {
       this.catalogoColapsado = !this.catalogoColapsado;
@@ -36,6 +66,10 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
 
     obtenerTotalProyectos() {
       return this.proyectos.length;
+    },
+
+    obtenerTotalProyectosPublicos() {
+      return this.proyectosPublicos.length;
     },
   };
 });

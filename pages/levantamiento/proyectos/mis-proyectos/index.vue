@@ -100,10 +100,32 @@ const handleCrearProyecto = () => {
               class="columna-4 fondo-color-neutro p-3 borde-redondeado-20"
             >
               <img class="icono-proyecto m-b-minimo" src="/img/icono_sigic.png" />
-              <div class="m-b-minimo">{{ proyecto.nombre }}</div>
-              <div class="m-b-minimo">{{ proyecto.institucion }}</div>
-              <div class="m-b-minimo">{{ proyecto.autor }}</div>
+              <div class="m-b-minimo texto-tamanio-4 nombre-proyecto">
+                <b>{{ proyecto.nombre }}</b>
+              </div>
+              <div class="m-b-minimo texto-color-secundario">{{ proyecto.institucion }}</div>
+              <div class="m-b-minimo texto-color-secundario">{{ proyecto.autor }}</div>
               <UiNumeroElementos :numero="proyecto.aportes" etiqueta="Aportes" />
+              <NuxtLink
+                class="boton boton-primario boton-chico boton-accion-proyecto m-b-1"
+                aria-label="Configurar proyecto"
+                :to="`/levantamiento/proyectos/mis-proyectos/${proyecto.id}`"
+              >
+                Configurar proyecto
+              </NuxtLink>
+              <button
+                class="boton-secundario boton-chico boton-accion-proyecto m-b-1"
+                disabled
+                type="button"
+              >
+                Aportar
+              </button>
+              <button
+                class="boton-secundario boton-chico boton-accion-proyecto"
+                type="button m-b-1"
+              >
+                Eliminar proyecto
+              </button>
             </div>
           </div>
         </div>
@@ -178,6 +200,17 @@ const handleCrearProyecto = () => {
   flex-direction: column;
   gap: 0;
 }
+
+.nombre-proyecto {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 22.5px;
+  min-height: calc(22.5px * 3);
+}
+
 .titulo-contenido-levantamiento {
   align-items: center;
 }
@@ -194,5 +227,10 @@ const handleCrearProyecto = () => {
 .icono-proyecto {
   width: 40px;
   height: 40px;
+}
+
+.boton-accion-proyecto {
+  width: 100%;
+  justify-content: center;
 }
 </style>

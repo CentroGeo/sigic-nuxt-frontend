@@ -77,7 +77,7 @@ function eliminarOpcion(index) {
         @update:model-value="(valor) => actualizarOpcion(index, valor)"
       />
       <button
-        class="boton-secundario boton-grande boton-pictograma boton-eliminar-opcion"
+        class="boton-pictograma boton-sin-contenedor-secundario boton-grande boton-eliminar-opcion"
         @click="eliminarOpcion(index)"
       >
         <span class="pictograma-cerrar" aria-hidden="true" />
