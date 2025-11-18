@@ -57,7 +57,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
   });
 
   return {
-    isLoading: ref(true),
+    isLoading: ref(false),
     totals,
     myTotalsByType,
     resources,
