@@ -87,7 +87,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
      */
     async getTotalResources(resourceType = storeConsulta.resourceType, query) {
       const { gnoxyFetch } = useGnoxyUrl();
-      this.isLoading = true;
       //TODO: agregar filtro para traer solo recursos con metadatos
       const queryParams = {
         'sort[]': '-last_updated',
@@ -99,7 +98,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       const res = await request.json();
       totals[resourceType] = res.total;
       latestResources[resourceType] = res.resources[0];
-      this.isLoading = false;
     },
     /**
      * Hace una petición de recursos especificando la página y el número de recursos que se desea traer.
@@ -148,7 +146,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
      */
     async getMyTotal(section, query) {
       const { gnoxyFetch } = useGnoxyUrl();
-      this.isLoading = true;
       const queryParams = {
         ...query,
         page_size: 1,
@@ -159,7 +156,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
       totalMisArchivos[section] = res.total;
-      this.isLoading = false;
     },
     /**
      * Obtiene los recursos asociados a un usuario (yo), según si tienen metadatos o no

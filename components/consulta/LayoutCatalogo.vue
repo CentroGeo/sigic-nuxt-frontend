@@ -191,6 +191,11 @@ async function applyAdvancedFilter() {
   storeFilters.buildQueryParams();
 }
 
+function resetSearch() {
+  storeFilters.updateFilter('inputSearch', '');
+  storeFilters.buildQueryParams();
+}
+
 function resetAdvancedFilter() {
   isFilterActive.value = false;
   storeFilters.resetFilters();
@@ -223,7 +228,7 @@ onMounted(async () => {
 
 <template>
   <div class="catalogo-layout">
-    <div class="encabeado-catalogo">
+    <div class="encabezado-catalogo">
       <p class="h4 fondo-color-acento p-3 m-0">{{ titulo }}</p>
 
       <div class="m-x-2 m-y-1">
@@ -262,7 +267,7 @@ onMounted(async () => {
                 aria-label="Borrar"
                 class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
                 type="button"
-                @click="storeFilters.updateFilter('inputSearch', '')"
+                @click="resetSearch"
               >
                 <span aria-hidden="true" class="pictograma-cerrar" />
               </button>
@@ -320,9 +325,18 @@ onMounted(async () => {
         </div>
         <UiNumeroElementos :numero="totalResources" :etiqueta="etiquetaElementos" />
       </div>
-      <div v-if="isLoading" class="flex flex-contenido-centrado">
-        <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="60px" />
+      <div v-if="isLoading" class="flex flex-contenido-centrado m-t-3">
+        <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
       </div>
+
+      <div v-if="orderedCategories.length === 0 && !isLoading">
+        <div class="borde-redondeado-16 m-2 fondo-color-informacion texto-color-informacion p-2">
+          <p class="nota texto-color-informacion m-2">
+            No se encontraron resultados que coincidan con la búsqueda.
+          </p>
+        </div>
+      </div>
+
       <div v-if="orderedCategories.length > 0 && !isLoading">
         <div v-for="category in orderedCategories" :key="category" class="m-y-1">
           <ConsultaElementoCategoria
@@ -383,7 +397,7 @@ onMounted(async () => {
   overflow-x: hidden;
   position: relative;
 
-  .encabeado-catalogo {
+  .encabezado-catalogo {
     position: sticky;
     top: 0;
     z-index: 2;
