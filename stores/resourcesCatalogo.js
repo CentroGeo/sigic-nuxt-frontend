@@ -87,7 +87,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
      */
     async getTotalResources(resourceType = storeConsulta.resourceType, query) {
       const { gnoxyFetch } = useGnoxyUrl();
-      this.isLoading = true;
       //TODO: agregar filtro para traer solo recursos con metadatos
       const queryParams = {
         'sort[]': '-last_updated',
@@ -99,7 +98,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       const res = await request.json();
       totals[resourceType] = res.total;
       latestResources[resourceType] = res.resources[0];
-      this.isLoading = false;
     },
     /**
      * Hace una petición de recursos especificando la página y el número de recursos que se desea traer.

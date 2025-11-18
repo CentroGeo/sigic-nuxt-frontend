@@ -191,6 +191,11 @@ async function applyAdvancedFilter() {
   storeFilters.buildQueryParams();
 }
 
+function resetSearch() {
+  storeFilters.updateFilter('inputSearch', '');
+  storeFilters.buildQueryParams();
+}
+
 function resetAdvancedFilter() {
   isFilterActive.value = false;
   storeFilters.resetFilters();
@@ -262,7 +267,7 @@ onMounted(async () => {
                 aria-label="Borrar"
                 class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
                 type="button"
-                @click="storeFilters.updateFilter('inputSearch', '')"
+                @click="resetSearch"
               >
                 <span aria-hidden="true" class="pictograma-cerrar" />
               </button>
@@ -323,6 +328,7 @@ onMounted(async () => {
       <div v-if="isLoading" class="flex flex-contenido-centrado m-t-3">
         <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
       </div>
+
       <div v-if="orderedCategories.length === 0 && !isLoading">
         <div class="borde-redondeado-16 m-2 fondo-color-informacion texto-color-informacion p-2">
           <p class="nota texto-color-informacion m-2">
