@@ -144,9 +144,10 @@ watch(
     </template>
 
     <template #visualizador>
-      <template v-if="storeResources.isLoading">Cargando...</template>
-
-      <ClientOnly>
+      <div v-if="storeSelected.pks.length === 0" class="contenedor">
+        <ConsultaTarjetaSinSeleccion />
+      </div>
+      <ClientOnly v-else>
         <SisdaiMapa
           class="gema"
           :vista="vistaDelMapa"
