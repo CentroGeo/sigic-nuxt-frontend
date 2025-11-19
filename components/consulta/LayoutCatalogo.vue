@@ -242,12 +242,12 @@ onMounted(async () => {
             etiqueta="Buscar en catálogo y tus archivos:"
             instruccional="Selecciona los recursos por permisos"
           >
-            <option value="todos">Todos los conjuntos de datos</option>
+            <option value="catalogo">Archivos del Catálogo</option>
             <option v-if="storeConsulta.resourceType === 'dataLayer'" value="remotos">
-              Catálogos externos
+              Catálogos Externos
             </option>
-            <option value="catalogo">Archivos del catálogo</option>
             <option value="privados">Mis Archivos</option>
+            <option value="todos">Todos los Conjuntos de Datos</option>
           </SisdaiSelector>
         </ClientOnly>
 

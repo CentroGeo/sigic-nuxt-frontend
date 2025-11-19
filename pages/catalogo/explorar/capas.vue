@@ -126,8 +126,8 @@ onMounted(async () => {
               <SisdaiSelector v-model="seleccionOrden" etiqueta="Ordenar por">
                 <option value="titulo">Título</option>
                 <option value="categoria">Categoría</option>
-                <option value="fecha_descendente">Más reciente</option>
-                <option value="fecha_ascendente">Más antiguo</option>
+                <option value="fecha_descendente">Más Reciente</option>
+                <option value="fecha_ascendente">Más Antiguo</option>
               </SisdaiSelector>
             </ClientOnly>
           </div>
@@ -175,7 +175,7 @@ onMounted(async () => {
                       : 'boton-secundario boton-pictograma boton-grande'
                   "
                   aria-label="Filtro Avanzado"
-                  style="position: relative"
+                  style="position: relative; align-self: center"
                   type="button"
                   @click="modalFiltroAvanzado.abrirModalBusqueda"
                 >
