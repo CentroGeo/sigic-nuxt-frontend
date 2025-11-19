@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
       formData.append(field, JSON.stringify(body[field]));
     }
   });
-
+  console.log(formData);
   /*   formData.append("attribute_set", JSON.stringify({
       "15": {
         "description": "Clave numerica que indica un municipio",

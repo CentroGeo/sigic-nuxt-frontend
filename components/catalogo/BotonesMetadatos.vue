@@ -1,7 +1,6 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import { resourceTypeGeonode } from '~/utils/consulta';
-
 const storeMetadatos = useEditedMetadataStore();
 const props = defineProps({
   title: {
@@ -75,6 +74,7 @@ function validateAttributes(attribute_set) {
 async function updateMetadata() {
   modalActualizar.value?.abrirModal();
   const requestBody = storeMetadatos.buildRequestBody();
+  //console.log(requestBody);
   const isMetaValid = validateAttributes(requestBody.attribute_set);
   if (isMetaValid) {
     const token = data.value?.accessToken;
