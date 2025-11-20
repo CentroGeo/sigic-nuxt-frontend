@@ -67,10 +67,7 @@ function resetAdvancedFilter() {
   modalFiltroAvanzado.value.cerrarModalBusqueda();
   storeFilters.buildQueryParams();
 }
-function resetSearch() {
-  storeFilters.updateFilter('inputSearch', '');
-  storeFilters.buildQueryParams();
-}
+
 watch(paginaActual, () => {
   fetchNewData();
 });

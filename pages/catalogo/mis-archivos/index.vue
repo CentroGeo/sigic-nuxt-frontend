@@ -111,10 +111,7 @@ function resetAdvancedFilter() {
   modalFiltroAvanzado.value.cerrarModalBusqueda();
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
 }
-function resetSearch() {
-  storeFilters.updateFilter('inputSearch', '');
-  storeFilters.buildQueryParams();
-}
+
 watch([seleccionTipoArchivo, seleccionOrden], () => {
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
 });

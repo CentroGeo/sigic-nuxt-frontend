@@ -203,10 +203,6 @@ function resetAdvancedFilter() {
   storeFilters.buildQueryParams();
   modalFiltroAvanzado.value.cerrarModalBusqueda();
 }
-function resetSearch() {
-  storeFilters.updateFilter('inputSearch', '');
-  storeFilters.buildQueryParams();
-}
 
 watch(selectedOwner, () => {
   storeFilters.buildQueryParams();

@@ -88,11 +88,6 @@ function resetAdvancedFilter() {
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
 }
 
-function resetSearch() {
-  storeFilters.updateFilter('inputSearch', '');
-  storeFilters.buildQueryParams();
-}
-
 watch([seleccionTipoArchivo, seleccionOrden], () => {
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
 });
