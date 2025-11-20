@@ -74,8 +74,19 @@ function validateAttributes(attribute_set) {
 async function updateMetadata() {
   modalActualizar.value?.abrirModal();
   const requestBody = storeMetadatos.buildRequestBody();
-  //console.log(requestBody);
+  const token = data.value?.accessToken;
   const isMetaValid = validateAttributes(requestBody.attribute_set);
+  console.warn(isMetaValid);
+  const response = await $fetch('/api/metadatos', {
+    method: 'POST',
+    headers: { token: token, resourceType: resourceTypeGeonode[props.tipo], pk: props.pk },
+    body: requestBody,
+  });
+  console.warn('La res:', response);
+  modalActualizar.value?.cerrarModal();
+
+  //console.log(requestBody);
+  /*   const isMetaValid = validateAttributes(requestBody.attribute_set);
   if (isMetaValid) {
     const token = data.value?.accessToken;
     const response = await $fetch('/api/metadatos', {
@@ -90,7 +101,7 @@ async function updateMetadata() {
     router.go(0);
   } else {
     alert('Revisa la validez de los datos introducidos.');
-  }
+  } */
 }
 /**
  * Actualiza los metadatos con los valores del store

@@ -29,6 +29,7 @@ const props = defineProps({
 });
 //const storeCatalogo = useCatalogoStore();
 const { gnoxyFetch } = useGnoxyUrl();
+const config = useRuntimeConfig();
 const storeMetadatos = useEditedMetadataStore();
 storeMetadatos.checkFilling(props.resourcePk, props.resourceType);
 const imagen = ref();
@@ -85,7 +86,7 @@ const loadingUsers = ref(false);
 async function getUsers() {
   // Esta parte es para obtener todas las categorias
   loadingUsers.value = true;
-  const url = 'https://geonode.dev.geoint.mx/api/v2/users';
+  const url = `${config.public.geonodeApi}/users`;
   const requestTotal = await gnoxyFetch(url);
   const resTotal = await requestTotal.json();
   const totalUsers = resTotal.total;
@@ -97,7 +98,7 @@ async function getUsers() {
   loadingUsers.value = false;
 }
 
-await getUsers();
+getUsers();
 
 watch(campoAutor, () => {
   const selectedAuthor = geonodeUsers.value.find((d) => d.username === campoAutor.value);
@@ -132,7 +133,7 @@ async function guardarImagen(files) {
       :exclude-links="props.isModal"
     />
 
-    <div v-if="!props.isModal">
+    <div v-if="!props.isModal" style="opacity: 0.5">
       <p class="texto-peso-600">
         Miniatura imagen no mayor a 9kb tamaño 120x120px. Archivos Png o JPG
       </p>
@@ -228,6 +229,7 @@ async function guardarImagen(files) {
               etiqueta="Autor (de los metadatos)"
               ejemplo="Añade nombre de autor"
               :es_obligatorio="true"
+              style="opacity: 0.5"
             >
               <option v-for="value in geonodeUsers" :key="value.pk" :value="value.username">
                 {{ value.username }}

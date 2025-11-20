@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
       formData.append(field, JSON.stringify(body[field]));
     }
   });
-  console.log(formData);
+  //console.log(formData);
   /*   formData.append("attribute_set", JSON.stringify({
       "15": {
         "description": "Clave numerica que indica un municipio",
@@ -40,7 +40,7 @@ export default defineEventHandler(async (event) => {
       body: formData,
     });
 
-    //console.log('La respuesta:', response);
+    console.log('La respuesta:', response);
     if (!response.ok) {
       throw new Error(`Falló la edición de metadatos: ${response.status}`);
     }

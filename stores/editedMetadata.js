@@ -19,14 +19,21 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
     metadata_author_pk: undefined,
     metadata_author: undefined,
     //group: undefined,
-    owner: undefined,
-    regions: undefined,
-    attribution: undefined,
-    alternate: undefined,
-    constraints_other: undefined,
+    //regions: undefined,
     license: undefined,
     language: undefined,
+    attribution: undefined,
+    //alternate: undefined,
     data_quality_statement: undefined,
+    restrictions: undefined,
+    constraints_other: undefined,
+    edition: undefined,
+    doi: undefined,
+    purpose: undefined,
+    supplemental_information: undefined,
+    //publisher: undefined,
+    //maintenance_frequency: undefined,
+    //owner: undefined,
     thumbnail_url: undefined,
     attribute_set: [],
   });
@@ -72,6 +79,8 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
           metadata[key] = metadataResponse.metadata_author[0]['username'];
         } else if (key === 'metadata_author_pk') {
           metadata[key] = metadataResponse.metadata_author[0]['pk'];
+        } else if (key === 'license') {
+          metadata[key] = metadataResponse.license.identifier;
         } else if (key in metadataResponse) {
           //console.log(key, metadataResponse[key]);
           metadata[key] = metadataResponse[key];
@@ -79,6 +88,7 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
           metadata[key] = undefined;
         }
       });
+      //console.log('store', metadata);
       this.isLoading = false;
     },
     async checkFilling(pk, resource_type) {
@@ -107,12 +117,23 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
         gn_description: categoriesNames[metadata.category],
       };
       //metaDict['keywords']
-      metaDict['metadata_author'] = [
+      /*      metaDict['metadata_author'] = [
         {
           pk: metadata.metadata_author_pk,
           username: metadata.metadata_author,
         },
-      ];
+      ]; */
+      metaDict['language'] = metadata.language;
+      metaDict['license'] = { identifier: metadata.license };
+      metaDict['attribution'] = metadata.attribution;
+      metaDict['data_quality_statement'] = metadata.data_quality_statement;
+      //metaDict['restrictions'] =
+      metaDict['constraints_other'] = metadata.constraints_other;
+      metaDict[' edition'] = metadata.edition;
+      metaDict['doi'] = metadata.doi;
+      metaDict['purpose'] = metadata.purpose;
+      metaDict['supplemental_information'] = metadata.supplemental_information;
+
       const attrs = {};
       metadata.attribute_set.forEach((attribute) => {
         const object = {
