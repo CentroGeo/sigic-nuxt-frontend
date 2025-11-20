@@ -9,6 +9,7 @@ const storeConsulta = useConsultaStore();
 storeConsulta.resourceType = resourceTypeDic.dataTable;
 const storeFilters = useFilteredResources();
 const params = computed(() => storeFilters.filters.queryParams);
+const isLoading = computed(() => storeResources.isLoading);
 const totalResources = computed(() => storeResources.totalByType());
 const paginaActual = ref(0);
 const tamanioPagina = 10;
@@ -53,6 +54,11 @@ function fetchNewData() {
 function applyAdvancedFilter() {
   isFilterActive.value = true;
   modalFiltroAvanzado.value.cerrarModalBusqueda();
+  storeFilters.buildQueryParams();
+}
+
+function resetSearch() {
+  storeFilters.updateFilter('inputSearch', '');
   storeFilters.buildQueryParams();
 }
 
@@ -159,8 +165,10 @@ onMounted(async () => {
                   "
                   aria-label="Filtro Avanzado"
                   type="button"
+                  style="position: relative"
                   @click="modalFiltroAvanzado.abrirModalBusqueda"
                 >
+                  <div v-if="isFilterActive" class="circulo"></div>
                   <span class="pictograma-filtro" aria-hidden="true" />
                 </button>
               </div>
@@ -172,10 +180,21 @@ onMounted(async () => {
           <h2>Datos tabulados</h2>
           <UiNumeroElementos :numero="totalResources" />
         </div>
-
-        <div class="flex">
+        <div v-if="isLoading" class="flex flex-contenido-centrado m-t-3">
+          <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
+        </div>
+        <div v-if="totalResources === 0 && !isLoading" class="flex">
+          <div
+            class="flex flex-contenido-centrado columna-16 borde-redondeado-16 m-2 fondo-color-informacion texto-color-informacion p-2"
+          >
+            <p class="nota texto-color-informacion m-2">
+              No se encontraron resultados que coincidan con la búsqueda.
+            </p>
+          </div>
+        </div>
+        <div v-if="totalResources !== 0 && !isLoading" class="flex">
           <div class="columna-16">
-            <ClientOnly>
+            <ClientOnly v-if="totalResources !== 0 && !isLoading">
               <UiTablaAccesibleV2 :variables="variables" :datos="tableResources" />
               <UiPaginador
                 :pagina-parent="paginaActual"
@@ -196,3 +215,15 @@ onMounted(async () => {
     </template>
   </UiLayoutPaneles>
 </template>
+<style lang="scss" scoped>
+.circulo {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background-color: var(--color-informativo-2);
+  border-radius: 50%;
+  right: -4px;
+  top: -4px;
+  z-index: 1;
+}
+</style>
