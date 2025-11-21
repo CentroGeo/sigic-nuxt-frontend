@@ -36,10 +36,14 @@ function actualizarHashDesdeVista({ acercamiento, centro }) {
   }
 }
 
-function actualizarSwipeEnHash() {
+/**
+ * Actualiza el estatus del selector de swipe
+ */
+async function actualizarSwipeEnHash() {
   const hashList = route.hash.split('/');
-  hashList[3] = isSwipeActive.value;
+  hashList[3] = isSwipeActive.value.toString();
   const newHash = hashList.join('/');
+  await nextTick();
   router.replace({ query: route.query, hash: newHash });
 }
 
@@ -49,7 +53,6 @@ function actualizarSwipeEnHash() {
  */
 function updateMapFromHash(hashVista) {
   if (hashVista === '') return;
-
   const [acercamiento, latitud, longitud, swipe] = hashVista.split('=')[1].split('/');
   storeConsulta.mapExtent = undefined;
   vistaDelMapa.value = { acercamiento, centro: [longitud, latitud] };
@@ -63,18 +66,23 @@ function updateMapFromHash(hashVista) {
  * Actualiza el queryParam.
  * @param newQueryParam para asignar.
  */
-function updateQueryParam(capas) {
+async function updateQueryParam(capas) {
+  const hashList = route.hash.split('/');
+  hashList[3] = isSwipeActive.value.toString();
+  const newHash = hashList.join('/');
+  await nextTick();
   if (capas !== route.query.capas) {
-    router.replace({ query: { capas }, hash: route.hash });
+    router.replace({ query: { capas }, hash: newHash });
   }
 }
-watch(isSwipeActive, (nv) => {
-  actualizarSwipeEnHash();
+watch(isSwipeActive, async (nv) => {
+  await actualizarSwipeEnHash();
   if (nv === false) {
+    await nextTick();
     storeSelected.pks.forEach((pk) => storeSelected.byPk(pk).resetLado());
   }
 });
-watch(() => storeSelected.asQueryParam(), updateQueryParam);
+watch(() => storeSelected.asQueryParam(), updateQueryParam, { deep: true });
 watch(
   () => storeConsulta.mapExtent,
   (extension) => {
@@ -82,6 +90,7 @@ watch(
     vistaDelMapa.value = { extension };
   }
 );
+
 onMounted(async () => {
   //console.log('Extension:', vistaDelMapa.value);
   updateMapFromHash(route.hash?.slice(1));
@@ -144,9 +153,10 @@ watch(
     </template>
 
     <template #visualizador>
-      <template v-if="storeResources.isLoading">Cargando...</template>
-
-      <ClientOnly>
+      <div v-if="storeSelected.pks.length === 0" class="contenedor">
+        <ConsultaTarjetaSinSeleccion />
+      </div>
+      <ClientOnly v-else>
         <SisdaiMapa
           class="gema"
           :vista="vistaDelMapa"

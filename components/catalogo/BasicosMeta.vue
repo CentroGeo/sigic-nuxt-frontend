@@ -30,6 +30,8 @@ const props = defineProps({
 //const storeCatalogo = useCatalogoStore();
 const storeMetadatos = useEditedMetadataStore();
 storeMetadatos.checkFilling(props.resourcePk, props.resourceType);
+const { gnoxyFetch } = useGnoxyUrl();
+const config = useRuntimeConfig();
 const imagen = ref();
 const campoTitulo = computed({
   get: () => storeMetadatos.metadata.title,
@@ -39,63 +41,69 @@ const campoResumen = computed({
   get: () => storeMetadatos.metadata.abstract,
   set: (value) => storeMetadatos.updateAttr('abstract', value),
 });
-const seleccionTipoFecha = computed({
-  get: () => storeMetadatos.metadata.date_type,
-  set: (value) => storeMetadatos.updateAttr('date_type', value),
-});
+
 const seleccionFecha = computed({
   get: () => storeMetadatos.metadata.date,
   set: (value) => storeMetadatos.updateAttr('date', value),
 });
 const seleccionCategoria = computed({
-  get: () => storeMetadatos.metadata.category?.identifier,
+  get: () => storeMetadatos.metadata.category,
   set: (value) => storeMetadatos.updateAttr('category', value),
 });
-//const seleccionGrupo = ref('');
-const campoPalabrasClave = computed({
-  get: () => storeMetadatos.metadata.keywords,
-  set: (value) => storeMetadatos.updateAttr('keywords', value),
+const campoPalabrasClave = ref('');
+const campoAutor = computed({
+  get: () => storeMetadatos.metadata.metadata_author,
+  set: (value) => storeMetadatos.updateAttr('metadata_author', value),
 });
-const campoAutor = ref('');
-const campoAnioPublicacion = ref('');
+/* const campoAnioPublicacion = ref(''); */
 
 const dictCategoria = [
-  { imagery_base_maps_earth_cover: 'Mapas Base y Cobertura Terrestre' },
+  { imageryBaseMapsEarthCover: 'Mapas Base y Cobertura Terrestre' },
   { society: 'Sociedad' },
   { economy: 'Economía' },
-  { utilities_communication: 'Servicios Públicos y Comunicación' },
+  { utilitiesCommunication: 'Servicios Públicos y Comunicación' },
   { environment: 'Medio Ambiente' },
   { oceans: 'Océanos' },
   { biota: 'Biota' },
   { health: 'Salud' },
   { elevation: 'Elevación' },
-  { geoscientific_information: 'Información Geocientífica' },
-  { planning_cadastre: 'Planeación Catastral' },
-  { inland_waters: 'Aguas Continentales' },
+  { geoscientificInformation: 'Información Geocientífica' },
+  { planningCadastre: 'Planeación Catastral' },
+  { inlandWaters: 'Aguas Continentales' },
   { boundaries: 'Fronteras' },
   { structure: 'Estructura' },
   { transportation: 'Transporte' },
-  { intelligence_military: 'Inteligencia Militar' },
+  { intelligenceMilitary: 'Inteligencia Militar' },
   { location: 'Ubicación' },
-  { climatology_meteorology_atmosphere: 'Climatología, Meteorología y Atmósfera' },
+  { climatologyMeteorologyAtmosphere: 'Climatología, Meteorología y Atmósfera' },
   { farming: 'Agricultura' },
   { population: 'Población' },
 ];
 
-// function editarMetadatos(dato, valor) {
-//   storeCatalogo.metadatos[dato] = valor;
-//   // console.log(storeCatalogo.metadatos[dato]);
-// }
+const geonodeUsers = ref(['...Cargando']);
+const loadingUsers = ref(false);
 
-watch(
-  () => storeMetadatos.metadata,
-  (nv) => {
-    console.warn('nv', nv);
-    //editarMetadatos('title', nv[0]);
-    //editarMetadatos('abstract', nv[1]);
-  },
-  { deep: true }
-);
+async function getUsers() {
+  // Esta parte es para obtener todas las categorias
+  loadingUsers.value = true;
+  const url = `${config.public.geonodeApi}/users`;
+  const requestTotal = await gnoxyFetch(url);
+  const resTotal = await requestTotal.json();
+  const totalUsers = resTotal.total;
+  const requestUsers = await gnoxyFetch(`${url}?page_size=${totalUsers}`);
+  const resUsers = await requestUsers.json();
+  geonodeUsers.value = resUsers.users.map((d) => {
+    return { pk: d.pk, username: d.username };
+  });
+  loadingUsers.value = false;
+}
+
+getUsers();
+
+watch(campoAutor, () => {
+  const selectedAuthor = geonodeUsers.value.find((d) => d.username === campoAutor.value);
+  storeMetadatos.updateAttr('metadata_author_pk', selectedAuthor.pk);
+});
 
 const dragNdDrop = ref(null);
 const img_files = ['.jpg', '.jpeg', '.png', '.webp'];
@@ -107,6 +115,14 @@ async function guardarImagen(files) {
     dragNdDrop.value?.archivoNoValido();
   }
 }
+
+/* watch(
+  () => storeMetadatos.metadata,
+  (nv) => {
+    console.log('nv', nv);
+  },
+  { deep: true }
+); */
 </script>
 
 <template>
@@ -117,7 +133,7 @@ async function guardarImagen(files) {
       :exclude-links="props.isModal"
     />
 
-    <div v-if="!props.isModal">
+    <div v-if="!props.isModal" style="opacity: 0.5">
       <p class="texto-peso-600">
         Miniatura imagen no mayor a 9kb tamaño 120x120px. Archivos Png o JPG
       </p>
@@ -147,10 +163,11 @@ async function guardarImagen(files) {
               tipo="text"
               :es_etiqueta_visible="true"
               :es_obligatorio="true"
+              texto_ayuda="El campo tener un mínimo de 30 caracteres"
             />
           </ClientOnly>
         </div>
-        <div class="columna-8">
+        <!--         <div class="columna-8">
           <ClientOnly>
             <SisdaiSelector
               v-model="seleccionTipoFecha"
@@ -162,7 +179,7 @@ async function guardarImagen(files) {
               <option value="revison">Revisón</option>
             </SisdaiSelector>
           </ClientOnly>
-        </div>
+        </div> -->
         <div class="columna-8">
           <ClientOnly>
             <SisdaiCampoBase
@@ -171,6 +188,7 @@ async function guardarImagen(files) {
               ejemplo="tipo date"
               tipo="date"
               texto_ayuda="aaaa-mm-dd"
+              :es_obligatorio="true"
             />
           </ClientOnly>
         </div>
@@ -189,15 +207,10 @@ async function guardarImagen(files) {
                 {{ value[Object.keys(value)] }}
               </option>
             </SisdaiSelector>
-            <!--             <SisdaiSelector
-              v-model="seleccionGrupo"
-              etiqueta="Selecciona al grupo con el que compartirás tu archivo"
-              texto_ayuda=" "
-            >
-              <option value="1">grupo uno publico</option>
-            </SisdaiSelector> -->
+
             <SisdaiCampoBase
               v-model="campoPalabrasClave"
+              style="opacity: 0.5"
               etiqueta="Palabras clave"
               ejemplo="Agua, educación, conservación..."
               :es_obligatorio="true"
@@ -206,14 +219,26 @@ async function guardarImagen(files) {
         </div>
         <div class="columna-8">
           <ClientOnly>
-            <SisdaiCampoBase
+            <!--            <SisdaiCampoBase
               v-model="campoAutor"
-              etiqueta="Autor"
+              etiqueta="Autor (de los metadatos)"
               ejemplo="Añade nombre de autor"
-            />
+              :es_obligatorio="true"
+            /> -->
+            <SisdaiSelector
+              v-model="campoAutor"
+              etiqueta="Autor (de los metadatos)"
+              ejemplo="Añade nombre de autor"
+              :es_obligatorio="true"
+              style="opacity: 0.5"
+            >
+              <option v-for="value in geonodeUsers" :key="value.pk" :value="value.username">
+                {{ value.username }}
+              </option>
+            </SisdaiSelector>
           </ClientOnly>
         </div>
-        <div class="columna-8">
+        <!--         <div class="columna-8">
           <ClientOnly>
             <SisdaiCampoBase
               v-model="campoAnioPublicacion"
@@ -221,7 +246,7 @@ async function guardarImagen(files) {
               ejemplo="Ej. 2002"
             />
           </ClientOnly>
-        </div>
+        </div> -->
       </div>
 
       <CatalogoBotonesMetadatos
