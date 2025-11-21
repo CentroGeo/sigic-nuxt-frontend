@@ -12,7 +12,7 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
     resource_type: undefined,
     title: undefined,
     abstract: undefined,
-    date_type: 'creation',
+    date_type: undefined,
     date: undefined,
     category: undefined,
     keywords: undefined,
@@ -23,7 +23,6 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
     license: undefined,
     language: undefined,
     attribution: undefined,
-    //alternate: undefined,
     data_quality_statement: undefined,
     restriction_code_type: undefined,
     constraints_other: undefined,
@@ -34,7 +33,7 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
     maintenance_frequency: undefined,
     //publisher: undefined,
     //owner: undefined,
-    thumbnail_url: undefined,
+    //thumbnail_url: undefined,
     attribute_set: [],
   });
 
@@ -70,11 +69,13 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
           metadata.attribute_set = [];
         } else if (key === 'abstract') {
           metadata.abstract = metadataResponse['raw_abstract'];
+        } else if (key === 'date_type') {
+          metadata[key] = 'creation';
         } else if (key === 'date') {
           const formatedDate = new Date(metadataResponse[key]).toISOString();
           metadata[key] = formatedDate.slice(0, 10);
         } else if (key === 'category') {
-          metadata[key] = metadataResponse.category.identifier;
+          metadata[key] = metadataResponse.category?.identifier;
         } else if (key === 'metadata_author') {
           metadata[key] = metadataResponse.metadata_author[0]['username'];
         } else if (key === 'metadata_author_pk') {
@@ -84,13 +85,11 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
         } else if (key === 'restriction_code_type') {
           metadata[key] = metadataResponse.restriction_code_type?.identifier;
         } else if (key in metadataResponse) {
-          //console.log(key, metadataResponse[key]);
           metadata[key] = metadataResponse[key];
         } else {
           metadata[key] = undefined;
         }
       });
-      //console.log('store', metadata);
       this.isLoading = false;
     },
     async checkFilling(pk, resource_type) {
@@ -107,55 +106,64 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
     },
 
     buildRequestBody() {
-      // TODO: Generar todas las entradas para cada uno de los metadatos
-      //const metaDict = { title: 'Centros de Investigacion', abstract: 'El abstract' };
+      const exclude = ['uuid', 'pk', 'resource_type', 'metadata_author_pk'];
+      const dictKeys = Object.keys(metadata).filter((key) => !exclude.includes(key));
       const metaDict = {};
-      const metaKeys = Object.keys(metadata);
-      metaKeys.forEach((key) => {
-        console.log(key);
-      });
-      metaDict['title'] = metadata.title;
-      metaDict['abstract'] = metadata.abstract;
-      metaDict['date_type'] = metadata.date_type;
-      metaDict['date'] = new Date(metadata.date).toISOString(); //
-      metaDict['category'] = {
-        identifier: metadata.category,
-        gn_description: categoriesNames[metadata.category],
-      }; //
-      //metaDict['keywords']
-      metaDict['metadata_author'] = [
-        {
-          pk: metadata.metadata_author_pk,
-          username: metadata.metadata_author,
-        },
-      ]; //
-      metaDict['language'] = metadata.language;
-      metaDict['license'] = { identifier: metadata.license }; //
-      metaDict['attribution'] = metadata.attribution;
-      metaDict['data_quality_statement'] = metadata.data_quality_statement;
-      metaDict['restriction_code_type'] = { identifier: metadata.restriction_code_type }; //
-      metaDict['constraints_other'] = metadata.constraints_other;
-      metaDict[' edition'] = metadata.edition;
-      metaDict['doi'] = metadata.doi;
-      metaDict['purpose'] = metadata.purpose;
-      metaDict['supplemental_information'] = metadata.supplemental_information;
-      metaDict['maintenance_frequency'] = metadata.maintenance_frequency;
-
-      const attrs = {};
-      metadata.attribute_set.forEach((attribute) => {
-        const object = {
-          visible: attribute.visible,
-          display_order: attribute.display_order,
-        };
-        if (attribute.description) {
-          object['description'] = attribute.description;
+      // Generamos el cuerpo de la petición de edición de metadatos
+      // y revisamos si el metadato está vacío
+      //TODO: incorporar keywords, publisher y arreglar metadata_author
+      dictKeys.forEach((key) => {
+        if (metadata[key] === null || metadata[key] === undefined) {
+          return;
+        } else if (typeof metadata[key] === 'string' && metadata[key].length === 0) {
+          return;
+        } else if (typeof metadata[key] === 'string' && metadata[key].length > 0) {
+          // Si no está vacío pero necesita una estructura particular
+          if (key === 'date') {
+            metaDict['date'] = new Date(metadata.date).toISOString(); //
+          } else if (key === 'category') {
+            metaDict['category'] = {
+              identifier: metadata.category,
+              gn_description: categoriesNames[metadata.category],
+            };
+          } else if (key === 'license' || key === 'restriction_code_type') {
+            metaDict[key] = { key: metadata[key] }; //
+          } else if (key === 'metadata_author') {
+            /* metaDict['metadata_author'] = [
+              {
+                pk: metadata.metadata_author_pk,
+                username: metadata.metadata_author,
+              },
+            ]; */
+            return;
+          } else {
+            // Si no necesita una estructura particular
+            metaDict[key] = metadata[key];
+          }
+        } else {
+          // Si el valor del metadato no es una cadena
+          if (key === 'attribute_set') {
+            const attrs = {};
+            metadata.attribute_set.forEach((attribute) => {
+              const object = {
+                visible: attribute.visible,
+                display_order: attribute.display_order,
+              };
+              if (attribute.description) {
+                object['description'] = attribute.description;
+              }
+              if (attribute.attribute_label) {
+                object['attribute_label'] = attribute.attribute_label;
+              }
+              attrs[`${attribute.pk}`] = object;
+            });
+            metaDict['attribute_set'] = attrs;
+          } else {
+            console.log(typeof metadata[key], key);
+          }
         }
-        if (attribute.attribute_label) {
-          object['attribute_label'] = attribute.attribute_label;
-        }
-        attrs[`${attribute.pk}`] = object;
       });
-      metaDict['attribute_set'] = attrs;
+      console.warn(metaDict);
       return metaDict;
     },
   };

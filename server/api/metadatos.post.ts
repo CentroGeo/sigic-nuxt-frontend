@@ -37,22 +37,23 @@ export default defineEventHandler(async (event) => {
 
   //console.log("La forma:", formData)
 
-  try {
-    const response = await fetch(url, {
-      method: 'PATCH',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: formData,
-    });
-
-    console.log('La respuesta:', response);
-    if (!response.ok) {
-      throw new Error(`Falló la edición de metadatos: ${response.status}`);
-    }
-    const json = await response.json();
-    return json;
-  } catch (error) {
-    console.error('Error al subir al GeoNode:', error);
-  }
+  /*   try {
+      const response = await fetch(url, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+  
+      console.log('La respuesta:', response);
+      if (!response.ok) {
+        throw new Error(`Falló la edición de metadatos: ${response.status}`);
+  
+      }
+      const json = await response.json();
+      return json;
+    } catch (error) {
+      console.error('Error al subir al GeoNode:', error);
+    } */
 });

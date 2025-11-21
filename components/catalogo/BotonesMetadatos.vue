@@ -56,7 +56,7 @@ function irARutaConQuery(direccion) {
   });
 }
 
-function validateAttributes(attribute_set) {
+/* function validateAttributes(attribute_set) {
   const attributeList = Object.keys(attribute_set);
   const displayOrderList = attributeList.map((d) => Number(attribute_set[d]['display_order']));
   const setList = Array.from(new Set(displayOrderList));
@@ -69,14 +69,14 @@ function validateAttributes(attribute_set) {
     //console.log(true);
     return true;
   }
-}
+} */
 
 async function updateMetadata() {
   modalActualizar.value?.abrirModal();
   const requestBody = storeMetadatos.buildRequestBody();
   const token = data.value?.accessToken;
-  const isMetaValid = validateAttributes(requestBody.attribute_set);
-  console.warn(isMetaValid);
+  //const isMetaValid = validateAttributes(requestBody.attribute_set);
+  //console.warn(isMetaValid);
   const response = await $fetch('/api/metadatos', {
     method: 'POST',
     headers: { token: token, resourceType: resourceTypeGeonode[props.tipo], pk: props.pk },

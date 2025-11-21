@@ -28,10 +28,10 @@ const props = defineProps({
   },
 });
 //const storeCatalogo = useCatalogoStore();
-const { gnoxyFetch } = useGnoxyUrl();
-const config = useRuntimeConfig();
 const storeMetadatos = useEditedMetadataStore();
 storeMetadatos.checkFilling(props.resourcePk, props.resourceType);
+const { gnoxyFetch } = useGnoxyUrl();
+const config = useRuntimeConfig();
 const imagen = ref();
 const campoTitulo = computed({
   get: () => storeMetadatos.metadata.title,
@@ -105,14 +105,6 @@ watch(campoAutor, () => {
   storeMetadatos.updateAttr('metadata_author_pk', selectedAuthor.pk);
 });
 
-/* watch(
-  () => storeMetadatos.metadata,
-  (nv) => {
-    console.log('nv', nv);
-  },
-  { deep: true }
-); */
-
 const dragNdDrop = ref(null);
 const img_files = ['.jpg', '.jpeg', '.png', '.webp'];
 async function guardarImagen(files) {
@@ -123,6 +115,14 @@ async function guardarImagen(files) {
     dragNdDrop.value?.archivoNoValido();
   }
 }
+
+/* watch(
+  () => storeMetadatos.metadata,
+  (nv) => {
+    console.log('nv', nv);
+  },
+  { deep: true }
+); */
 </script>
 
 <template>
@@ -229,6 +229,7 @@ async function guardarImagen(files) {
               etiqueta="Autor (de los metadatos)"
               ejemplo="Añade nombre de autor"
               :es_obligatorio="true"
+              style="opacity: 0.5"
             >
               <option v-for="value in geonodeUsers" :key="value.pk" :value="value.username">
                 {{ value.username }}
