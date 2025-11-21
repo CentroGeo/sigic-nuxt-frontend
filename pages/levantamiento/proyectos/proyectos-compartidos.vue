@@ -99,7 +99,7 @@ const storeLevantamiento = useLevantamientoStore();
             :key="proyecto.id"
             class="columna-4 fondo-color-neutro p-3 borde-redondeado-20"
           >
-            <img class="icono-proyecto m-b-minimo" src="/img/icono_sigic.png" />
+            <img class="icono-proyecto m-b-minimo color-invertir" src="/img/icono_sigic.png" />
             <div class="m-b-minimo texto-tamanio-4 nombre-proyecto">
               <b>{{ proyecto.nombre }}</b>
             </div>
