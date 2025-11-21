@@ -58,24 +58,24 @@ const campoAutor = computed({
 /* const campoAnioPublicacion = ref(''); */
 
 const dictCategoria = [
-  { imagery_base_maps_earth_cover: 'Mapas Base y Cobertura Terrestre' },
+  { imageryBaseMapsEarthCover: 'Mapas Base y Cobertura Terrestre' },
   { society: 'Sociedad' },
   { economy: 'Economía' },
-  { utilities_communication: 'Servicios Públicos y Comunicación' },
+  { utilitiesCommunication: 'Servicios Públicos y Comunicación' },
   { environment: 'Medio Ambiente' },
   { oceans: 'Océanos' },
   { biota: 'Biota' },
   { health: 'Salud' },
   { elevation: 'Elevación' },
-  { geoscientific_information: 'Información Geocientífica' },
-  { planning_cadastre: 'Planeación Catastral' },
-  { inland_waters: 'Aguas Continentales' },
+  { geoscientificInformation: 'Información Geocientífica' },
+  { planningCadastre: 'Planeación Catastral' },
+  { inlandWaters: 'Aguas Continentales' },
   { boundaries: 'Fronteras' },
   { structure: 'Estructura' },
   { transportation: 'Transporte' },
-  { intelligence_military: 'Inteligencia Militar' },
+  { intelligenceMilitary: 'Inteligencia Militar' },
   { location: 'Ubicación' },
-  { climatology_meteorology_atmosphere: 'Climatología, Meteorología y Atmósfera' },
+  { climatologyMeteorologyAtmosphere: 'Climatología, Meteorología y Atmósfera' },
   { farming: 'Agricultura' },
   { population: 'Población' },
 ];
@@ -229,7 +229,6 @@ async function guardarImagen(files) {
               etiqueta="Autor (de los metadatos)"
               ejemplo="Añade nombre de autor"
               :es_obligatorio="true"
-              style="opacity: 0.5"
             >
               <option v-for="value in geonodeUsers" :key="value.pk" :value="value.username">
                 {{ value.username }}

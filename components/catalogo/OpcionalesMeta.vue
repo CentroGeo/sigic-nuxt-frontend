@@ -51,13 +51,15 @@ const campoInformacionAdicional = computed({
 });
 //const seleccionInicioExtension = ref('');
 //const seleccionFinExtension = ref('');
-const seleccionFrecuenciaActual = ref('');
+const seleccionFrecuenciaActual = computed({
+  get: () => storeMetadatos.metadata.maintenance_frequency,
+  set: (value) => storeMetadatos.updateAttr('maintenance_frequency', value),
+});
 //const campoExtrametadato = ref('');
 //const seleccionRecursosRelacionados = ref('');
 //const campoPuntoContacto = ref('');
 //const seleccionDuenio = ref('');
 const campoPubisher = ref('');
-
 const dictFrecuenciaActual = [
   { unknown: 'se desconoce la frecuencia de actualización de los datos' },
   { continual: 'los datos se actualizan repetida y frecuentemente' },
@@ -193,9 +195,8 @@ getUsers();
             <SisdaiSelector
               v-model="seleccionFrecuenciaActual"
               etiqueta="Frencuencia de actualización"
-              style="opacity: 0.5"
             >
-              <option value="" selected="">---------</option>
+              <!--               <option value="" selected="">---------</option> -->
               <option
                 v-for="value in dictFrecuenciaActual"
                 :key="Object.keys(value)"

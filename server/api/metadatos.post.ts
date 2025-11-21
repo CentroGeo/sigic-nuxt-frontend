@@ -12,13 +12,18 @@ export default defineEventHandler(async (event) => {
   const formData = new FormData();
   const metaFileds = Object.keys(body);
   metaFileds.forEach((field) => {
-    if (typeof body[field] === 'string') {
+    if (Array.isArray(body[field])) {
+      const objectKeys = Object.keys(body[field][0]);
+      objectKeys.forEach((key) => {
+        formData.append(`${field}[0][${key}]`, body[field][0][key]);
+      });
+    } else if (typeof body[field] === 'string') {
       formData.append(field, body[field]);
     } else {
       formData.append(field, JSON.stringify(body[field]));
     }
   });
-  //console.log(formData);
+  console.log(formData);
   /*   formData.append("attribute_set", JSON.stringify({
       "15": {
         "description": "Clave numerica que indica un municipio",
@@ -31,6 +36,7 @@ export default defineEventHandler(async (event) => {
     formData.append('abstract', "Prueba de llenado del abstract") */
 
   //console.log("La forma:", formData)
+
   try {
     const response = await fetch(url, {
       method: 'PATCH',

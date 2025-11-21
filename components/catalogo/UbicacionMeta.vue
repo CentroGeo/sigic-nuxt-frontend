@@ -48,7 +48,10 @@ const campoEstadoCalidadDatos = computed({
   get: () => storeMetadatos.metadata.data_quality_statement,
   set: (value) => storeMetadatos.updateAttr('data_quality_statement', value),
 });
-const seleccionRestricciones = ref('');
+const seleccionRestricciones = computed({
+  get: () => storeMetadatos.metadata.restriction_code_type,
+  set: (value) => storeMetadatos.updateAttr('restriction_code_type', value),
+});
 const campoOtrasRestricciones = computed({
   get: () => storeMetadatos.metadata.constraints_other,
   set: (value) => storeMetadatos.updateAttr('constraints_other', value),
@@ -189,7 +192,7 @@ const dictLicencia = [
   { odbl: 'Open Data Commons Open Database License / OSM' },
   { nextview: 'NextView' },
 ];
-const dictRestricciones = [
+/* const dictRestricciones = [
   {
     1: 'exclusive right to the publication, production, or sale of the rights to a literary, dramatic, musical, or artistic work, or to the use of a commercial print or label, granted by law for a specified period of time to an author, composer, artist, distributor',
   },
@@ -212,15 +215,43 @@ const dictRestricciones = [
   {
     8: 'otherRestrictions',
   },
-];
+]; */
 
-/* watch(
+const dictRestricciones = [
+  {
+    copyright:
+      'exclusive right to the publication, production, or sale of the rights to a literary, dramatic, musical, or artistic work, or to the use of a commercial print or label, granted by law for a specified period of time to an author, composer, artist, distributor',
+  },
+  {
+    patent:
+      'government has granted exclusive right to make, sell, use or license an invention or discovery',
+  },
+  {
+    patentPending: 'produced or sold information awaiting a patent',
+  },
+  {
+    trademark:
+      'a name, symbol, or other device identifying a product, officially registered and legally restricted to the use of the owner or manufacturer',
+  },
+  { license: 'formal permission to do something' },
+  {
+    intellectualPropertyRights:
+      'rights to financial benefit from and control of distribution of non-tangible property that is a result of creativity',
+  },
+  {
+    restricted: 'withheld from general circulation or disclosure',
+  },
+  {
+    otherRestrictions: 'otherRestrictions',
+  },
+];
+watch(
   () => storeMetadatos.metadata,
   (nv) => {
     console.log('nv', nv);
   },
   { deep: true }
-); */
+);
 // function editarMetadatos(dato, valor) {
 //   storeCatalogo.metadatos[dato] = valor;
 //   // console.log(storeCatalogo.metadatos[dato]);
@@ -317,10 +348,10 @@ const dictRestricciones = [
             />
           </ClientOnly>
         </div>
-        <div class="columna-16" style="opacity: 0.5">
+        <div class="columna-16">
           <ClientOnly>
             <SisdaiSelector v-model="seleccionRestricciones" etiqueta="Restricciones">
-              <option value="" selected="">---------</option>
+              <!--               <option value="" selected="">---------</option> -->
               <option
                 v-for="value in dictRestricciones"
                 :key="Object.keys(value)"

@@ -25,14 +25,14 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
     attribution: undefined,
     //alternate: undefined,
     data_quality_statement: undefined,
-    restrictions: undefined,
+    restriction_code_type: undefined,
     constraints_other: undefined,
     edition: undefined,
     doi: undefined,
     purpose: undefined,
     supplemental_information: undefined,
+    maintenance_frequency: undefined,
     //publisher: undefined,
-    //maintenance_frequency: undefined,
     //owner: undefined,
     thumbnail_url: undefined,
     attribute_set: [],
@@ -81,6 +81,8 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
           metadata[key] = metadataResponse.metadata_author[0]['pk'];
         } else if (key === 'license') {
           metadata[key] = metadataResponse.license.identifier;
+        } else if (key === 'restriction_code_type') {
+          metadata[key] = metadataResponse.restriction_code_type?.identifier;
         } else if (key in metadataResponse) {
           //console.log(key, metadataResponse[key]);
           metadata[key] = metadataResponse[key];
@@ -108,31 +110,36 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
       // TODO: Generar todas las entradas para cada uno de los metadatos
       //const metaDict = { title: 'Centros de Investigacion', abstract: 'El abstract' };
       const metaDict = {};
+      const metaKeys = Object.keys(metadata);
+      metaKeys.forEach((key) => {
+        console.log(key);
+      });
       metaDict['title'] = metadata.title;
       metaDict['abstract'] = metadata.abstract;
       metaDict['date_type'] = metadata.date_type;
-      metaDict['date'] = new Date(metadata.date).toISOString();
+      metaDict['date'] = new Date(metadata.date).toISOString(); //
       metaDict['category'] = {
         identifier: metadata.category,
         gn_description: categoriesNames[metadata.category],
-      };
+      }; //
       //metaDict['keywords']
-      /*      metaDict['metadata_author'] = [
+      metaDict['metadata_author'] = [
         {
           pk: metadata.metadata_author_pk,
           username: metadata.metadata_author,
         },
-      ]; */
+      ]; //
       metaDict['language'] = metadata.language;
-      metaDict['license'] = { identifier: metadata.license };
+      metaDict['license'] = { identifier: metadata.license }; //
       metaDict['attribution'] = metadata.attribution;
       metaDict['data_quality_statement'] = metadata.data_quality_statement;
-      //metaDict['restrictions'] =
+      metaDict['restriction_code_type'] = { identifier: metadata.restriction_code_type }; //
       metaDict['constraints_other'] = metadata.constraints_other;
       metaDict[' edition'] = metadata.edition;
       metaDict['doi'] = metadata.doi;
       metaDict['purpose'] = metadata.purpose;
       metaDict['supplemental_information'] = metadata.supplemental_information;
+      metaDict['maintenance_frequency'] = metadata.maintenance_frequency;
 
       const attrs = {};
       metadata.attribute_set.forEach((attribute) => {
