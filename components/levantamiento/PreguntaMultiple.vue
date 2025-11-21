@@ -155,10 +155,11 @@ function agregarOpcion() {
         <SisdaiCasilla
           v-for="(opcion, index) in props.pregunta.opciones"
           :key="index"
-          name="opcion"
+          :name="`check-${index}-preg-${indice}`"
           :value="opcion"
           :etiqueta="opcion"
           class="opcion-checkbox"
+          :autofocus="false"
         />
       </div>
       <div v-if="props.pregunta.obligatorio">Obligatoria*</div>

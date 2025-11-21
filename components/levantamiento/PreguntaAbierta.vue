@@ -99,6 +99,7 @@ function bajarPregunta() {
         etiqueta="Respuesta"
         ejemplo="Responde la pregunta"
         :es_etiqueta_visible="false"
+        :autofocus="false"
       />
       <div v-if="props.pregunta.obligatorio">Obligatoria*</div>
     </div>

@@ -159,7 +159,8 @@ function agregarOpcion() {
           :key="index"
           :etiqueta="opcion"
           :value="opcion"
-          name="opcion"
+          :name="`opcion-preg-${indice}`"
+          :autofocus="false"
         />
       </SisdaiBotonesRadioGrupo>
       <div v-if="props.pregunta.obligatorio">Obligatoria*</div>

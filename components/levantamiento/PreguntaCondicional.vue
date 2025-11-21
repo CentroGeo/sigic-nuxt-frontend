@@ -222,7 +222,8 @@ function handleChangeRadio(e) {
           :key="index"
           :etiqueta="opcion.opcion"
           :value="opcion.opcion"
-          name="opcion"
+          :name="`opcion-preg-${indice}`"
+          :autofocus="false"
           @change="handleChangeRadio"
         />
       </SisdaiBotonesRadioGrupo>
@@ -237,6 +238,7 @@ function handleChangeRadio(e) {
           etiqueta="Respuesta"
           ejemplo="Responde la pregunta"
           :es_etiqueta_visible="false"
+          :autofocus="false"
         />
       </div>
       <div v-if="opcionSeleccionada.tipoCondicion === 'opcion'">
@@ -250,7 +252,8 @@ function handleChangeRadio(e) {
             :key="index"
             :etiqueta="opcion"
             :value="opcion"
-            name="opcion"
+            :name="`sub-opcion-preg-${indice}`"
+            :autofocus="false"
           />
         </SisdaiBotonesRadioGrupo>
       </div>

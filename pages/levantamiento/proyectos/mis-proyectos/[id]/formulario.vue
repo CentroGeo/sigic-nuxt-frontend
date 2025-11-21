@@ -230,3 +230,17 @@ function handleMoverPregunta({ indice, direccion }) {
   max-width: 40%;
 }
 </style>
+
+<style lang="scss">
+.modulo-levantamiento {
+  dialog.modal {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+
+  .modal-cuerpo {
+    overflow-y: auto !important;
+    max-height: 60vh !important;
+  }
+}
+</style>
