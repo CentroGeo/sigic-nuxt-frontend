@@ -182,8 +182,34 @@ try {
           </form>
         </div>
       </main>
-      <main v-else>...cargando</main>
-      <main v-if="cargando">...cargando</main>
+      <main v-else>
+        <div class="flex">
+          <div class="columna-4"></div>
+          <div class="columna-8">
+            <img
+              src="/img/loader.gif"
+              alt="Loader de SIGIC"
+              style="width: 100%"
+              class="color-invertir"
+            />
+          </div>
+          <div class="columna-4"></div>
+        </div>
+      </main>
+      <main v-if="cargando">
+        <div class="flex">
+          <div class="columna-4"></div>
+          <div class="columna-8">
+            <img
+              src="/img/loader.gif"
+              alt="Loader de SIGIC"
+              style="width: 100%"
+              class="color-invertir"
+            />
+          </div>
+          <div class="columna-4"></div>
+        </div>
+      </main>
     </template>
   </UiLayoutPaneles>
 </template>
