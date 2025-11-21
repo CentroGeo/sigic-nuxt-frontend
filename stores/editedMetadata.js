@@ -62,7 +62,6 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
       } else {
         metadataResponse = res.dataset;
       }
-      //console.log(metadataResponse);
       const attrs = Object.keys(metadata);
       attrs.forEach((key) => {
         if (key === 'attribute_set' && resource_type === 'document') {
@@ -92,25 +91,42 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
       });
       this.isLoading = false;
     },
+    /**
+     * Esta función revisa si ya hay algo en la store. Si no, solicita la información del recurso
+     * @param {*} pk
+     * @param {String} resource_type
+     */
     async checkFilling(pk, resource_type) {
       if (!metadata.pk || metadata.pk !== pk) {
         await this.fill(pk, resource_type);
       }
     },
+    /**
+     * Actualiza el valor de el metadato indicado
+     * @param {String} attr El metadato a editar
+     * @param {String} value El nuevo valor
+     */
     updateAttr(attr, value) {
       metadata[attr] = value;
     },
-
+    /**
+     * Regresa el valor del metadato especificado
+     * @param {String} field
+     * @returns El valor del metadato
+     */
     getMetaField(field) {
       return metadata[field];
     },
-
+    /**
+     * Genera el cuerpo de la petición de edición de metadatosy, ecluyendo campos
+     * si el metadato está vacío
+     * @returns Objeto de metadatos
+     */
     buildRequestBody() {
       const exclude = ['uuid', 'pk', 'resource_type', 'metadata_author_pk'];
       const dictKeys = Object.keys(metadata).filter((key) => !exclude.includes(key));
       const metaDict = {};
-      // Generamos el cuerpo de la petición de edición de metadatos
-      // y revisamos si el metadato está vacío
+
       //TODO: incorporar keywords, publisher y arreglar metadata_author
       dictKeys.forEach((key) => {
         if (metadata[key] === null || metadata[key] === undefined) {
@@ -159,7 +175,7 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
             });
             metaDict['attribute_set'] = attrs;
           } else {
-            console.log(typeof metadata[key], key);
+            console.warn(typeof metadata[key], key);
           }
         }
       });
