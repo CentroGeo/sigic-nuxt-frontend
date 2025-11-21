@@ -245,13 +245,13 @@ const dictRestricciones = [
     otherRestrictions: 'otherRestrictions',
   },
 ];
-watch(
+/* watch(
   () => storeMetadatos.metadata,
   (nv) => {
     console.log('nv', nv);
   },
   { deep: true }
-);
+); */
 // function editarMetadatos(dato, valor) {
 //   storeCatalogo.metadatos[dato] = valor;
 //   // console.log(storeCatalogo.metadatos[dato]);

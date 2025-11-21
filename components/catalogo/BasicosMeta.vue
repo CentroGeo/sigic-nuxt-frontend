@@ -163,6 +163,7 @@ async function guardarImagen(files) {
               tipo="text"
               :es_etiqueta_visible="true"
               :es_obligatorio="true"
+              texto_ayuda="El campo tener un mínimo de 30 caracteres"
             />
           </ClientOnly>
         </div>

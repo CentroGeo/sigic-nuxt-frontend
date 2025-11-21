@@ -24,36 +24,23 @@ export default defineEventHandler(async (event) => {
     }
   });
   console.log(formData);
-  /*   formData.append("attribute_set", JSON.stringify({
-      "15": {
-        "description": "Clave numerica que indica un municipio",
-        "attribute_label": "Clave Municipal",
-        "display_order": 6,
-        "visible": 'True'
-      }
-    }));
-    formData.append('title', "Laboratorios de investigación")
-    formData.append('abstract', "Prueba de llenado del abstract") */
 
-  //console.log("La forma:", formData)
-
-  /*   try {
-      const response = await fetch(url, {
-        method: 'PATCH',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
-  
-      console.log('La respuesta:', response);
-      if (!response.ok) {
-        throw new Error(`Falló la edición de metadatos: ${response.status}`);
-  
-      }
-      const json = await response.json();
-      return json;
-    } catch (error) {
-      console.error('Error al subir al GeoNode:', error);
-    } */
+  try {
+    const response = await fetch(url, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+    console.log('La respuesta:', response);
+    if (!response.ok) {
+      //throw new Error(`Falló la edición de metadatos: ${response.status}`);
+      return response.status;
+    }
+    const json = await response.json();
+    return json;
+  } catch (error) {
+    console.error('Error al subir al GeoNode:', error);
+  }
 });

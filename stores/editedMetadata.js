@@ -18,8 +18,6 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
     keywords: undefined,
     metadata_author_pk: undefined,
     metadata_author: undefined,
-    //group: undefined,
-    //regions: undefined,
     license: undefined,
     language: undefined,
     attribution: undefined,
@@ -123,12 +121,11 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
      * @returns Objeto de metadatos
      */
     buildRequestBody() {
-      const exclude = ['uuid', 'pk', 'resource_type', 'metadata_author_pk'];
-      const dictKeys = Object.keys(metadata).filter((key) => !exclude.includes(key));
-      const metaDict = {};
-
       //TODO: incorporar keywords, publisher y arreglar metadata_author
-      dictKeys.forEach((key) => {
+      const metaDict = {};
+      //const exclude = ['uuid', 'pk', 'resource_type', 'metadata_author_pk'];
+      //const dictKeys = Object.keys(metadata).filter((key) => !exclude.includes(key));
+      /*   dictKeys.forEach((key) => {
         if (metadata[key] === null || metadata[key] === undefined) {
           return;
         } else if (typeof metadata[key] === 'string' && metadata[key].length === 0) {
@@ -145,12 +142,12 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
           } else if (key === 'license' || key === 'restriction_code_type') {
             metaDict[key] = { key: metadata[key] }; //
           } else if (key === 'metadata_author') {
-            /* metaDict['metadata_author'] = [
-              {
-                pk: metadata.metadata_author_pk,
-                username: metadata.metadata_author,
-              },
-            ]; */
+            //  metaDict['metadata_author'] = [
+            //   {
+            //     pk: metadata.metadata_author_pk,
+            //     username: metadata.metadata_author,
+            //   },
+            // ]; 
             return;
           } else {
             // Si no necesita una estructura particular
@@ -175,11 +172,83 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
             });
             metaDict['attribute_set'] = attrs;
           } else {
-            console.warn(typeof metadata[key], key);
+            //console.warn(typeof metadata[key], key);
+            return;
           }
         }
+      }); */
+
+      if (metadata.title && metadata.title.length > 0) {
+        metaDict['title'] = metadata.title;
+      }
+      if (metadata.abstract && metadata.abstract.length > 0) {
+        metaDict['abstract'] = metadata.abstract;
+      }
+      if (metadata.date && metadata.date.length > 0) {
+        metaDict['date_type'] = metadata.date_type;
+        metaDict['date'] = new Date(metadata.date).toISOString(); //
+      }
+      if (metadata.category && metadata.category.length > 0) {
+        metaDict['category'] = {
+          identifier: metadata.category,
+          gn_description: categoriesNames[metadata.category],
+        };
+      }
+      if (metadata.license && metadata.license.length > 0) {
+        metaDict['license'] = { identifier: metadata.license };
+      }
+      if (metadata.language && metadata.language.length > 0) {
+        metaDict['language'] = metadata.language;
+      }
+
+      if (metadata.abstract && metadata.abstract.length > 0) {
+        metaDict['abstract'] = metadata.abstract;
+      }
+
+      if (metadata.attribution && metadata.attribution.length > 0) {
+        metaDict['attribution'] = metadata.attribution;
+      }
+      if (metadata.data_quality_statement && metadata.data_quality_statement.length > 0) {
+        metaDict['data_quality_statement'] = metadata.data_quality_statement;
+      }
+      if (metadata.restriction_code_type && metadata.restriction_code_type.length > 0) {
+        metaDict['restriction_code_type'] = { identifier: metadata.restriction_code_type };
+      }
+      if (metadata.constraints_other && metadata.constraints_other.length > 0) {
+        metaDict['constraints_other'] = metadata.constraints_other;
+      }
+      if (metadata.edition && metadata.edition.length > 0) {
+        metaDict['edition'] = metadata.edition;
+      }
+      if (metadata.doi && metadata.doi.length > 0) {
+        metaDict['doi'] = metadata.doi;
+      }
+      if (metadata.purpose && metadata.purpose.length > 0) {
+        metaDict['purpose'] = metadata.purpose;
+      }
+      if (metadata.supplemental_information && metadata.supplemental_information.length > 0) {
+        metaDict['supplemental_information'] = metadata.supplemental_information;
+      }
+      if (metadata.maintenance_frequency && metadata.maintenance_frequency.length > 0) {
+        metaDict['maintenance_frequency'] = metadata.maintenance_frequency;
+      }
+
+      const attrs = {};
+      metadata.attribute_set.forEach((attribute) => {
+        const object = {
+          visible: attribute.visible,
+          display_order: attribute.display_order,
+        };
+        if (attribute.description) {
+          object['description'] = attribute.description;
+        }
+        if (attribute.attribute_label) {
+          object['attribute_label'] = attribute.attribute_label;
+        }
+        attrs[`${attribute.pk}`] = object;
       });
-      console.warn(metaDict);
+      metaDict['attribute_set'] = attrs;
+      //console.warn('El cuerpo de la petición:', metaDict);
       return metaDict;
     },
   };
