@@ -27,21 +27,39 @@ const props = defineProps({
     default: false,
   },
 });
+const { gnoxyFetch } = useGnoxyUrl();
+const config = useRuntimeConfig();
 // const storeCatalogo = useCatalogoStore();
 // console.log('props.recurso', props.recurso);
-
-const campoEdicion = ref('');
-const campoDOI = ref('');
-const campoProposito = ref('');
-const campoInformacionAdicional = ref('');
-const seleccionInicioExtension = ref('');
-const seleccionFinExtension = ref('');
-const seleccionFrecuenciaActual = ref('');
-const campoExtrametadato = ref('');
-const seleccionRecursosRelacionados = ref('');
-const campoPuntoContacto = ref('');
-const seleccionDuenio = ref('');
-
+const storeMetadatos = useEditedMetadataStore();
+storeMetadatos.checkFilling(props.resourcePk, props.resourceType);
+const campoEdicion = computed({
+  get: () => storeMetadatos.metadata.edition,
+  set: (value) => storeMetadatos.updateAttr('edition', value),
+});
+const campoDOI = computed({
+  get: () => storeMetadatos.metadata.doi,
+  set: (value) => storeMetadatos.updateAttr('doi', value),
+});
+const campoProposito = computed({
+  get: () => storeMetadatos.metadata.purpose,
+  set: (value) => storeMetadatos.updateAttr('purpose', value),
+});
+const campoInformacionAdicional = computed({
+  get: () => storeMetadatos.metadata.supplemental_information,
+  set: (value) => storeMetadatos.updateAttr('supplemental_information', value),
+});
+//const seleccionInicioExtension = ref('');
+//const seleccionFinExtension = ref('');
+const seleccionFrecuenciaActual = computed({
+  get: () => storeMetadatos.metadata.maintenance_frequency,
+  set: (value) => storeMetadatos.updateAttr('maintenance_frequency', value),
+});
+//const campoExtrametadato = ref('');
+//const seleccionRecursosRelacionados = ref('');
+//const campoPuntoContacto = ref('');
+//const seleccionDuenio = ref('');
+const campoPubisher = ref('');
 const dictFrecuenciaActual = [
   { unknown: 'se desconoce la frecuencia de actualización de los datos' },
   { continual: 'los datos se actualizan repetida y frecuentemente' },
@@ -57,6 +75,22 @@ const dictFrecuenciaActual = [
   { quarterly: 'los datos se actualizan cada tres meses' },
 ];
 
+const geonodeUsers = ref(['...Cargando']);
+
+async function getUsers() {
+  // Esta parte es para obtener todas las categorias
+  const url = `${config.public.geonodeApi}/users`;
+  const requestTotal = await gnoxyFetch(url);
+  const resTotal = await requestTotal.json();
+  const totalUsers = resTotal.total;
+  const requestUsers = await gnoxyFetch(`${url}?page_size=${totalUsers}`);
+  const resUsers = await requestUsers.json();
+  geonodeUsers.value = resUsers.users.map((d) => {
+    return { pk: d.pk, username: d.username };
+  });
+}
+
+getUsers();
 // function editarMetadatos(dato, valor) {
 //   storeCatalogo.metadatos[dato] = valor;
 //   // console.log(storeCatalogo.metadatos[dato]);
@@ -136,7 +170,7 @@ const dictFrecuenciaActual = [
             />
           </ClientOnly>
         </div>
-        <div class="columna-8">
+        <!--         <div class="columna-8">
           <ClientOnly>
             <SisdaiCampoBase
               v-model="seleccionInicioExtension"
@@ -155,14 +189,14 @@ const dictFrecuenciaActual = [
               tipo="date"
             />
           </ClientOnly>
-        </div>
+        </div> -->
         <div class="columna-16">
           <ClientOnly>
             <SisdaiSelector
               v-model="seleccionFrecuenciaActual"
               etiqueta="Frencuencia de actualización"
             >
-              <option value="" selected="">---------</option>
+              <!--               <option value="" selected="">---------</option> -->
               <option
                 v-for="value in dictFrecuenciaActual"
                 :key="Object.keys(value)"
@@ -173,7 +207,7 @@ const dictFrecuenciaActual = [
             </SisdaiSelector>
           </ClientOnly>
         </div>
-        <div class="columna-16">
+        <!--         <div class="columna-16">
           <ClientOnly>
             <SisdaiCampoBase
               v-model="campoExtrametadato"
@@ -183,8 +217,8 @@ const dictFrecuenciaActual = [
               :es_etiqueta_visible="true"
             />
           </ClientOnly>
-        </div>
-        <div class="columna-16">
+        </div> -->
+        <!--         <div class="columna-16">
           <ClientOnly>
             <SisdaiSelector
               v-model="seleccionRecursosRelacionados"
@@ -195,8 +229,8 @@ const dictFrecuenciaActual = [
               <option value="3">3</option>
             </SisdaiSelector>
           </ClientOnly>
-        </div>
-        <div class="columna-16">
+        </div> -->
+        <!--         <div class="columna-16">
           <div class="fondo-color-neutro borde-redondeado-16 p-2">
             <p class="h3 m-t-0">Responsables</p>
             <div class="flex">
@@ -224,7 +258,20 @@ const dictFrecuenciaActual = [
               </div>
             </div>
           </div>
-        </div>
+        </div> -->
+        <ClientOnly>
+          <SisdaiSelector
+            v-model="campoPubisher"
+            etiqueta="Publisher"
+            ejemplo="Añade nombre de publisher"
+            :es_obligatorio="true"
+            style="opacity: 0.5"
+          >
+            <option v-for="value in geonodeUsers" :key="value.pk" :value="value.username">
+              {{ value.username }}
+            </option>
+          </SisdaiSelector>
+        </ClientOnly>
       </div>
 
       <CatalogoBotonesMetadatos

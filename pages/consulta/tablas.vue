@@ -86,16 +86,16 @@ onMounted(async () => {
     <template #visualizador>
       <template v-if="storeResources.isLoading">Cargando...</template>
       <div v-else-if="storeSelected.pks.length === 0" class="contenedor">
-        <h1>No hay seleccion</h1>
+        <ConsultaTarjetaSinSeleccion />
       </div>
-      <div v-else>
+      <div v-else class="fondo-color-neutro">
         <div class="contenedor-tabla">
           <UiPaginador
             :pagina-parent="paginaActual"
             :total-paginas="Math.ceil(totalFeatures / tamanioPagina)"
             @cambio="paginaActual = $event"
           />
-          <h2 v-if="selectedElement" class="m-t-1 m-b-0 m-x-2">{{ selectedElement.title }}</h2>
+          <h2 v-if="selectedElement" class="m-t-1 m-b-1 m-x-2">{{ selectedElement.title }}</h2>
           <UiTablaAccesible class="tabla" :variables="variables" :datos="datos" />
         </div>
       </div>
@@ -113,5 +113,9 @@ onMounted(async () => {
 <style scoped>
 .contenedor-tabla {
   height: var(--altura-consulta-esc);
+}
+
+.tabla {
+  background-color: var(--color-neutro-2);
 }
 </style>

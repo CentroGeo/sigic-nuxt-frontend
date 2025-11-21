@@ -29,14 +29,33 @@ const props = defineProps({
 });
 // const storeCatalogo = useCatalogoStore();
 // console.log('props.recurso', props.recurso);
-
-const seleccionIdioma = ref('');
-const seleccionLicencia = ref('');
-const campoAtribucion = ref('');
-const seleccionRegiones = ref('');
-const campoEstadoCalidadDatos = ref('');
-const seleccionRestricciones = ref('');
-const campoOtrasRestricciones = ref('');
+const storeMetadatos = useEditedMetadataStore();
+storeMetadatos.checkFilling(props.resourcePk, props.resourceType);
+const seleccionIdioma = computed({
+  get: () => storeMetadatos.metadata.language,
+  set: (value) => storeMetadatos.updateAttr('language', value),
+});
+const seleccionLicencia = computed({
+  get: () => storeMetadatos.metadata.license,
+  set: (value) => storeMetadatos.updateAttr('license', value),
+});
+const campoAtribucion = computed({
+  get: () => storeMetadatos.metadata.attribution,
+  set: (value) => storeMetadatos.updateAttr('attribution', value),
+});
+//const seleccionRegiones = ref('');
+const campoEstadoCalidadDatos = computed({
+  get: () => storeMetadatos.metadata.data_quality_statement,
+  set: (value) => storeMetadatos.updateAttr('data_quality_statement', value),
+});
+const seleccionRestricciones = computed({
+  get: () => storeMetadatos.metadata.restriction_code_type,
+  set: (value) => storeMetadatos.updateAttr('restriction_code_type', value),
+});
+const campoOtrasRestricciones = computed({
+  get: () => storeMetadatos.metadata.constraints_other,
+  set: (value) => storeMetadatos.updateAttr('constraints_other', value),
+});
 
 const dictIdiomas = [
   { abk: 'Abkhazian' },
@@ -155,7 +174,7 @@ const dictIdiomas = [
   { zha: 'Zhuang' },
   { zul: 'Zulu' },
 ];
-const dictLicencia = [
+/* const dictLicencia = [
   { 1: 'Not Specified' },
   { 2: 'Varied / Original' },
   { 3: 'Varied / Derived' },
@@ -163,8 +182,17 @@ const dictLicencia = [
   { 5: 'Public Domain / USG' },
   { 6: 'Open Data Commons Open Database License / OSM' },
   { 7: 'NextView' },
+]; */
+const dictLicencia = [
+  { not_specified: 'Not Specified' },
+  { varied_original: 'Varied / Original' },
+  { varied_derived: 'Varied / Derived' },
+  { public_domain: 'Public Domain' },
+  { public_domain_usg: 'Public Domain / USG' },
+  { odbl: 'Open Data Commons Open Database License / OSM' },
+  { nextview: 'NextView' },
 ];
-const dictRestricciones = [
+/* const dictRestricciones = [
   {
     1: 'exclusive right to the publication, production, or sale of the rights to a literary, dramatic, musical, or artistic work, or to the use of a commercial print or label, granted by law for a specified period of time to an author, composer, artist, distributor',
   },
@@ -187,8 +215,43 @@ const dictRestricciones = [
   {
     8: 'otherRestrictions',
   },
-];
+]; */
 
+const dictRestricciones = [
+  {
+    copyright:
+      'exclusive right to the publication, production, or sale of the rights to a literary, dramatic, musical, or artistic work, or to the use of a commercial print or label, granted by law for a specified period of time to an author, composer, artist, distributor',
+  },
+  {
+    patent:
+      'government has granted exclusive right to make, sell, use or license an invention or discovery',
+  },
+  {
+    patentPending: 'produced or sold information awaiting a patent',
+  },
+  {
+    trademark:
+      'a name, symbol, or other device identifying a product, officially registered and legally restricted to the use of the owner or manufacturer',
+  },
+  { license: 'formal permission to do something' },
+  {
+    intellectualPropertyRights:
+      'rights to financial benefit from and control of distribution of non-tangible property that is a result of creativity',
+  },
+  {
+    restricted: 'withheld from general circulation or disclosure',
+  },
+  {
+    otherRestrictions: 'otherRestrictions',
+  },
+];
+/* watch(
+  () => storeMetadatos.metadata,
+  (nv) => {
+    console.log('nv', nv);
+  },
+  { deep: true }
+); */
 // function editarMetadatos(dato, valor) {
 //   storeCatalogo.metadatos[dato] = valor;
 //   // console.log(storeCatalogo.metadatos[dato]);
@@ -236,7 +299,7 @@ const dictRestricciones = [
         <div class="columna-8">
           <ClientOnly>
             <SisdaiSelector v-model="seleccionLicencia" etiqueta="Licencia">
-              <option value="">---------</option>
+              <!--<option value="">---------</option> -->
               <option
                 v-for="value in dictLicencia"
                 :key="Object.keys(value)"
@@ -258,7 +321,7 @@ const dictRestricciones = [
             />
           </ClientOnly>
         </div>
-        <div class="columna-16">
+        <!--         <div class="columna-16">
           <ClientOnly>
             <SisdaiSelector v-model="seleccionRegiones" etiqueta="Regiones">
               <option value="1">1</option>
@@ -273,7 +336,7 @@ const dictRestricciones = [
             </p>
             <p class="m-0">Permiten insetar código HTML a través de un editor de texto wysiwyg</p>
           </div>
-        </div>
+        </div> -->
         <div class="columna-16">
           <ClientOnly>
             <SisdaiCampoBase
@@ -288,7 +351,7 @@ const dictRestricciones = [
         <div class="columna-16">
           <ClientOnly>
             <SisdaiSelector v-model="seleccionRestricciones" etiqueta="Restricciones">
-              <option value="" selected="">---------</option>
+              <!--               <option value="" selected="">---------</option> -->
               <option
                 v-for="value in dictRestricciones"
                 :key="Object.keys(value)"
