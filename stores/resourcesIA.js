@@ -80,6 +80,7 @@ export const useResourcesIAStore = defineStore('resourcesIA', () => {
         page: pageNum,
         page_size: 2,
         ...params,
+        'filter{complete_metadata}': 'true',
       };
       const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
       const request = await gnoxyFetch(url);
@@ -96,14 +97,7 @@ export const useResourcesIAStore = defineStore('resourcesIA', () => {
 
       //En caso de que los recursos incluyan servicios remotos, revisamos su getCapabilities
       const datum = res.resources;
-
-      // TODO: Agregar en los query params el filtrado para indicar que recursos con metadatos
-      // completos. Borrar la siguiente linea y cambiar data por datum
-      const data = datum.filter((d) => d.category);
-      resources[resourceType] = [...resources[resourceType], ...data];
-
-      //const data = res.resources;
-      //resources[resourceType] = [...resources[resourceType], ...data];
+      resources[resourceType] = [...resources[resourceType], ...datum];
     },
     /**
      * Reescribe la lista de pks correspondientes a los enésimos elementos

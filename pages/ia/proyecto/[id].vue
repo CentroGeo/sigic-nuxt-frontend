@@ -48,6 +48,7 @@ const nthElement = 1;
 async function fetchTotalByCategory(category) {
   const preParams = params.value;
   preParams['filter{category.identifier.in}'] = category;
+  preParams['filter{complete_metadata}'] = 'true';
   const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, preParams);
   const request = await gnoxyFetch(url.toString());
   const res = await request.json();
@@ -97,7 +98,7 @@ async function fetchNewData() {
     categoriesDict.value[categoriaSeleccionada.value].isLoading = true;
     await callResources(categoriaSeleccionada.value);
     storeResources.setNthElements(resourceType.value, [
-      recursos.value[recursos.value.length - nthElement].pk,
+      recursos.value[recursos.value.length - nthElement]?.pk,
     ]);
     categoriesDict.value[categoriaSeleccionada.value].isLoading = false;
   }
@@ -140,7 +141,7 @@ async function seleccionarCategoria(categoria) {
     // fetch de recursos paginados totales
     await storeResources.fetchByCategory(resourceType.value, 1, params.value);
     storeResources.setNthElements(resourceType.value, [
-      recursos.value[recursos.value.length - nthElement].pk,
+      recursos.value[recursos.value.length - nthElement]?.pk,
     ]);
     recursosCargando.value = false;
   }
