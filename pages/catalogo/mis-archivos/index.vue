@@ -157,11 +157,11 @@ onMounted(async () => {
           <div class="columna-4">
             <ClientOnly>
               <SisdaiSelector v-model="seleccionTipoArchivo" etiqueta="Tipo de archivo">
-                <option value="all">Todos los archivos</option>
-                <option value="dataLayer">Capas geográficas</option>
-                <option value="dataTable">Datos tabulados</option>
+                <option value="all">Todos los Archivos</option>
+                <option value="remotes">Catálogos Externos</option>
+                <option value="dataLayer">Capas Geográficas</option>
+                <option value="dataTable">Datos Tabulados</option>
                 <option value="document">Documentos</option>
-                <option value="remotes">Remotas</option>
               </SisdaiSelector>
             </ClientOnly>
           </div>
@@ -170,8 +170,8 @@ onMounted(async () => {
               <SisdaiSelector v-model="seleccionOrden" etiqueta="Ordenar por">
                 <option value="titulo">Título</option>
                 <option value="categoria">Categoría</option>
-                <option value="fecha_descendente">Más reciente</option>
-                <option value="fecha_ascendente">Más antiguo</option>
+                <option value="fecha_descendente">Más Reciente</option>
+                <option value="fecha_ascendente">Más Antiguo</option>
               </SisdaiSelector>
             </ClientOnly>
           </div>
@@ -219,7 +219,7 @@ onMounted(async () => {
                   "
                   aria-label="Filtro Avanzado"
                   type="button"
-                  style="position: relative"
+                  style="position: relative; align-self: center"
                   @click="modalFiltroAvanzado.abrirModalBusqueda"
                 >
                   <div v-if="isFilterActive" class="circulo"></div>

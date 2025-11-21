@@ -1,7 +1,6 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import { resourceTypeGeonode } from '~/utils/consulta';
-
 const storeMetadatos = useEditedMetadataStore();
 const props = defineProps({
   title: {
@@ -57,9 +56,9 @@ function irARutaConQuery(direccion) {
   });
 }
 
-function validateAttributes(attribute_set) {
-  const attributeList = Object.keys(attribute_set);
-  const displayOrderList = attributeList.map((d) => Number(attribute_set[d]['display_order']));
+/* function validateAttributes(attribute_set) {
+  const attributeList = Object.keys(body.attribute_set);
+  const displayOrderList = attributeList.map((d) => Number(body.attribute_set[d]['display_order']));
   const setList = Array.from(new Set(displayOrderList));
   //console.log(displayOrderList);
   //console.log(setList);
@@ -70,13 +69,52 @@ function validateAttributes(attribute_set) {
     //console.log(true);
     return true;
   }
+}  */
+
+function validateMeta(requestBody) {
+  let status = false;
+  const editedAbstract = requestBody.abstract?.replace(/\s/g, '') || '';
+  if (!requestBody.title || requestBody.title.length === 0) {
+    status = false;
+    console.log('titulo');
+  } else if (editedAbstract.length < 30) {
+    console.log('abstract');
+    status = false;
+  } else if (!requestBody.date || requestBody.date.length === 0) {
+    status = false;
+    console.log('date');
+  } else if (requestBody.attribute_set) {
+    const attributeList = Object.keys(requestBody.attribute_set);
+    const displayOrderList = attributeList.map((d) =>
+      Number(requestBody.attribute_set[d]['display_order'])
+    );
+    const setList = Array.from(new Set(displayOrderList));
+    if (displayOrderList.length !== setList.length) {
+      status = false;
+    } else {
+      status = true;
+    }
+  } else {
+    status = true;
+  }
+  return status;
 }
 
 async function updateMetadata() {
-  modalActualizar.value?.abrirModal();
   const requestBody = storeMetadatos.buildRequestBody();
-  const isMetaValid = validateAttributes(requestBody.attribute_set);
+  const isMetaValid = validateMeta(requestBody);
+  //console.log('El estatus', isMetaValid);
+  //const token = data.value?.accessToken;
+  /*  const response = await $fetch('/api/metadatos', {
+    method: 'POST',
+    headers: { token: token, resourceType: resourceTypeGeonode[props.tipo], pk: props.pk },
+    body: requestBody,
+  }); */
+  //console.warn('La res:', response);
+  //modalActualizar.value?.cerrarModal();
+  //console.log(requestBody);
   if (isMetaValid) {
+    modalActualizar.value?.abrirModal();
     const token = data.value?.accessToken;
     const response = await $fetch('/api/metadatos', {
       method: 'POST',
@@ -84,10 +122,10 @@ async function updateMetadata() {
       body: requestBody,
     });
     //TODO: agregar manejo de errores
-    console.warn('La res:', response);
+    console.warn('La respuesta de la petición:', response);
     modalActualizar.value?.cerrarModal();
-    const router = useRouter();
-    router.go(0);
+    //const router = useRouter();
+    //router.go(0);
   } else {
     alert('Revisa la validez de los datos introducidos.');
   }
