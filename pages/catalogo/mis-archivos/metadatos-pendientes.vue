@@ -1,6 +1,7 @@
 <script setup>
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { cleanInput } from '~/utils/consulta';
+
 definePageMeta({
   middleware: 'sidebase-auth',
   bodyAttrs: {
@@ -168,7 +169,7 @@ onMounted(async () => {
                       class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
                       aria-label="Borrar"
                       type="button"
-                      @click="storeFilters.updateFilter('inputSearch', '')"
+                      @click="resetSearch"
                     >
                       <span aria-hidden="true" class="pictograma-cerrar" />
                     </button>
@@ -177,6 +178,7 @@ onMounted(async () => {
                       class="boton-primario boton-pictograma campo-busqueda-buscar"
                       aria-label="Buscar"
                       type="button"
+                      @click="storeFilters.buildQueryParams"
                     >
                       <span class="pictograma-buscar" aria-hidden="true" />
                     </button>
@@ -219,7 +221,7 @@ onMounted(async () => {
 
         <div class="flex">
           <h2>Todos los archivos pendientes</h2>
-          <UiNumeroElementos :numero="tableResources.length" />
+          <UiNumeroElementos :numero="totalResources" />
         </div>
         <p>
           Aquí se listan los archivos pendientes de metadatos. Complétalos para poder usuarlos; al
