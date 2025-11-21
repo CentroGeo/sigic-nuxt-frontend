@@ -1,6 +1,5 @@
 <script setup>
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
-import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
 const props = defineProps({
   resource: {
@@ -30,10 +29,10 @@ const variables = {
   attribute_label: 'Etiqueta',
   description: 'Descripción',
   display_order: 'Mostrar Orden',
-  featureinfo_type: 'Display type',
+  //featureinfo_type: 'Display type',
   visible: 'Visible',
 };
-const typeOptions = {
+/* const typeOptions = {
   Label: 'type_property',
   URL: 'type_href',
   Image: 'type_image',
@@ -45,7 +44,7 @@ const typeOptions = {
   'Video (YouTube/VIMEO)': 'type_video_youtube',
   Audio: 'type_audio',
   IFRAME: 'type_iframe',
-};
+}; */
 
 /*watch(
   attrSet,
@@ -131,7 +130,7 @@ const typeOptions = {
                 />
               </ClientOnly>
             </td>
-            <td>
+            <!--             <td>
               <ClientOnly>
                 <SisdaiSelector v-model="datum['featureinfo_type']" etiqueta="">
                   <option
@@ -143,7 +142,7 @@ const typeOptions = {
                   </option>
                 </SisdaiSelector>
               </ClientOnly>
-            </td>
+            </td> -->
             <td>
               <input
                 :id="`visible-checkbox-${datum['pk']}`"

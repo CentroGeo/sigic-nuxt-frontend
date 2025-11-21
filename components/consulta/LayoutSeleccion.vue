@@ -101,7 +101,7 @@ const storeConsulta = useConsultaStore();
 const dividirMapa = computed({
   get: () => storeConsulta.divisionMapaActivado(),
   set(nuevValor) {
-    if (nuevValor) storeConsulta.activarDivisionMapa();
+    if (nuevValor === true) storeConsulta.activarDivisionMapa();
     else storeConsulta.desactivarDivisionMapa();
   },
 });

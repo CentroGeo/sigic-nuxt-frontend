@@ -1,6 +1,7 @@
 <script setup>
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { cleanInput } from '~/utils/consulta';
+
 definePageMeta({
   middleware: 'sidebase-auth',
   bodyAttrs: {
@@ -128,30 +129,30 @@ onMounted(async () => {
       <main class="contenedor m-b-10 m-t-3">
         <!--Controles de filtros-->
         <div class="flex">
-          <div class="columna-4">
+          <div class="columna-5">
             <ClientOnly>
               <SisdaiSelector v-model="seleccionTipoArchivo" etiqueta="Tipo de archivo">
-                <option value="all">Todos los archivos</option>
-                <option value="dataLayer">Capas geográficas</option>
-                <option value="dataTable">Datos tabulados</option>
+                <option value="all">Todos los Archivos</option>
+                <option value="remotes">Catálogos Externos</option>
+                <option value="dataLayer">Capas Geográficas</option>
+                <option value="dataTable">Datos Tabulados</option>
                 <option value="document">Documentos</option>
-                <option value="remotes">Remotas</option>
               </SisdaiSelector>
             </ClientOnly>
           </div>
-          <div class="columna-4">
+          <div class="columna-5">
             <ClientOnly>
               <SisdaiSelector v-model="seleccionOrden" etiqueta="Ordenar por">
                 <option value="titulo">Título</option>
-                <option value="categoria">Categoría</option>
+                <!--                 <option value="categoria">Categoría</option>-->
                 <option value="fecha_descendente">Más reciente</option>
                 <option value="fecha_ascendente">Más antiguo</option>
               </SisdaiSelector>
             </ClientOnly>
           </div>
-          <div class="columna-8">
+          <div class="columna-6">
             <div class="flex flex-contenido-separado">
-              <div class="columna-14">
+              <div class="columna-16">
                 <ClientOnly>
                   <label for="idunicobusquedamisarchivos"> Campo de búsqueda </label>
                   <form class="campo-busqueda" style="height: 40px" @submit.prevent>
@@ -168,7 +169,7 @@ onMounted(async () => {
                       class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
                       aria-label="Borrar"
                       type="button"
-                      @click="storeFilters.updateFilter('inputSearch', '')"
+                      @click="resetSearch"
                     >
                       <span aria-hidden="true" class="pictograma-cerrar" />
                     </button>
@@ -177,13 +178,14 @@ onMounted(async () => {
                       class="boton-primario boton-pictograma campo-busqueda-buscar"
                       aria-label="Buscar"
                       type="button"
+                      @click="storeFilters.buildQueryParams"
                     >
                       <span class="pictograma-buscar" aria-hidden="true" />
                     </button>
                   </form>
                 </ClientOnly>
               </div>
-              <div class="columna-2 flex-vertical-final">
+              <!--               <div class="columna-2 flex-vertical-final">
                 <button
                   :class="
                     isFilterActive
@@ -196,7 +198,7 @@ onMounted(async () => {
                 >
                   <span class="pictograma-filtro" aria-hidden="true" />
                 </button>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
@@ -219,7 +221,7 @@ onMounted(async () => {
 
         <div class="flex">
           <h2>Todos los archivos pendientes</h2>
-          <UiNumeroElementos :numero="tableResources.length" />
+          <UiNumeroElementos :numero="totalResources" />
         </div>
         <p>
           Aquí se listan los archivos pendientes de metadatos. Complétalos para poder usuarlos; al

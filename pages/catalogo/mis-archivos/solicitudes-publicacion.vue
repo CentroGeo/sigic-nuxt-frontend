@@ -83,13 +83,20 @@ function updateResources() {
   });
 }
 
-function fetchNewData() {
+/*function fetchNewData() {
   storeResources.resetBySection(section);
   storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, params.value);
 }
 
 watch(paginaActual, () => {
   fetchNewData();
+}); */
+function resetSearch() {
+  storeFilters.updateFilter('inputSearch', '');
+  storeFilters.buildQueryParams();
+}
+watch(resources, () => {
+  updateResources();
 });
 
 watch(
@@ -106,7 +113,7 @@ onMounted(async () => {
   storeResources.getMyTotal('disponibles', params.value);
   storeResources.getMyTotal('pendientes', params.value);
   storeResources.getMyTotal('publicacion', params.value);
-  fetchNewData();
+  // fetchNewData();
 });
 </script>
 
@@ -160,7 +167,7 @@ onMounted(async () => {
                       class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
                       aria-label="Borrar"
                       type="button"
-                      @click="storeFilters.updateFilter('inputSearch', '')"
+                      @click="resetSearch"
                     >
                       <span aria-hidden="true" class="pictograma-cerrar" />
                     </button>
