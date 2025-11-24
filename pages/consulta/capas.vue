@@ -1,7 +1,5 @@
 <script setup>
-import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
-import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/src/utiles';
-import { lados } from '@centrogeomx/sisdai-mapas/src/utiles/capa';
+import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa, utiles } from '@centrogeomx/sisdai-mapas';
 import { arrayNewsOlds, findServer, resourceTypeDic } from '~/utils/consulta';
 
 const storeConsulta = useConsultaStore();
@@ -15,10 +13,15 @@ const isSwipeActive = computed(() => storeConsulta.divisionMapaActivado());
 
 const vistaDelMapa = ref({ extension: storeConsulta.mapExtent });
 const selectorDivisionAbierto = ref(undefined);
+const estaAbiertoSelectorDivisionMapa = (lado) => selectorDivisionAbierto.value === lado;
+function alAbrirSelectorDivisionMapa(lado) {
+  selectorDivisionAbierto.value = estaAbiertoSelectorDivisionMapa(lado) ? undefined : lado;
+}
+
 const attributos = reactive({});
 const linkExportaMapa = ref();
 function exportarMapa() {
-  exportarHTMLComoPNG(
+  utiles.exportarHTMLComoPNG(
     document.querySelectorAll('.mapa .ol-viewport').item(0),
     linkExportaMapa.value
   );
@@ -174,20 +177,14 @@ watch(
             }"
           >
             <ConsultaSelectorDivisionMapa
-              :abierto="selectorDivisionAbierto === lados.derecho"
-              :lado="lados.derecho"
-              @al-abrir="
-                selectorDivisionAbierto =
-                  selectorDivisionAbierto === lados.derecho ? undefined : lados.derecho
-              "
+              :abierto="estaAbiertoSelectorDivisionMapa(utiles.capa.lados.derecho)"
+              :lado="utiles.capa.lados.derecho"
+              @al-abrir="alAbrirSelectorDivisionMapa"
             />
             <ConsultaSelectorDivisionMapa
-              :abierto="selectorDivisionAbierto === lados.izquierdo"
-              :lado="lados.izquierdo"
-              @al-abrir="
-                selectorDivisionAbierto =
-                  selectorDivisionAbierto === lados.izquierdo ? undefined : lados.izquierdo
-              "
+              :abierto="estaAbiertoSelectorDivisionMapa(utiles.capa.lados.izquierdo)"
+              :lado="utiles.capa.lados.izquierdo"
+              @al-abrir="alAbrirSelectorDivisionMapa"
             />
           </div>
 
