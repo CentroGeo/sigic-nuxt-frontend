@@ -307,6 +307,7 @@ onMounted(async () => {
           <button
             type="button"
             class="boton-secundario columna-16 boton-chico flex flex-contenido-centrado"
+            aria-label="Enlace Catalogue Service for the Web"
             @click="modalOWSglobal.abrirModalOWS"
           >
             Enlace Catalogue Service for the Web (CSW)

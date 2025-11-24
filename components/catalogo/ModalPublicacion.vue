@@ -207,13 +207,19 @@ defineExpose({
 
           <div class="flex flex-contenido-separado m-t-3">
             <div class="columna-8 texto-centrado">
-              <button type="button" class="boton-secundario" @click="modalDescarga.cerrarModal()">
+              <button
+                type="button"
+                aria-label="Cancelar"
+                class="boton-secundario"
+                @click="modalDescarga.cerrarModal()"
+              >
                 Cancelar
               </button>
             </div>
             <div class="columna-8">
               <button
                 type="button"
+                aria-label="Siguiente"
                 class="boton-primario texto-centrado"
                 @click="
                   modalDescarga.cerrarModal();
@@ -254,6 +260,7 @@ defineExpose({
           <div class="columna-8 texto-centrado">
             <button
               type="button"
+              aria-label="Regresar"
               class="boton-secundario"
               @click="
                 modalPublica1.cerrarModal();
@@ -265,6 +272,7 @@ defineExpose({
           </div>
           <div class="columna-8">
             <button
+              aria-label="Siguiente"
               type="button"
               class="boton-primario texto-centrado"
               @click="
@@ -306,6 +314,7 @@ defineExpose({
             <button
               type="button"
               class="boton-secundario"
+              aria-label="Regresar"
               @click="
                 modalPublica2.cerrarModal();
                 modalPublica1.abrirModal();
@@ -317,6 +326,7 @@ defineExpose({
           <div class="columna-8">
             <button
               type="button"
+              aria-label="Siguiente"
               class="boton-primario texto-centrado"
               @click="
                 modalPublica2.cerrarModal();
@@ -355,6 +365,7 @@ defineExpose({
           <div class="columna-8 texto-centrado">
             <button
               type="button"
+              aria-label="Regresar"
               class="boton-secundario"
               @click="
                 modalPublica3.cerrarModal();
@@ -367,6 +378,7 @@ defineExpose({
           <div class="columna-8">
             <button
               v-if="tagTitle !== 'capa'"
+              aria-label="Siguiente"
               type="button"
               class="boton-primario texto-centrado"
               @click="confirmarSolicitud('modalPublica3')"
@@ -377,6 +389,7 @@ defineExpose({
             <button
               v-if="tagTitle === 'capa'"
               type="button"
+              aria-label="Siguiente"
               class="boton-primario texto-centrado"
               @click="
                 modalPublica3.cerrarModal();
@@ -427,6 +440,7 @@ defineExpose({
           <div class="columna-8">
             <button
               type="button"
+              aria-label="Confirmar"
               class="boton-primario texto-centrado"
               @click="confirmarSolicitud('modalPublica4')"
             >
