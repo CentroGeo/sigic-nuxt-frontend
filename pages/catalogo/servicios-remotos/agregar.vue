@@ -15,11 +15,31 @@ const selecTipoFuente = ref('');
 const campoURL = ref('');
 const responseOk = ref(false);
 const opTipoFuente = [
-  { id: 0, servicio: 'Servicio de Mapas Web', tipo: 'WMS' },
-  { id: 1, servicio: 'Geonode (servicios de Mapas Web)', tipo: 'GN_WMS' },
-  { id: 2, servicio: 'Servicio ArcGIS REST MapServer', tipo: 'REST_MAP' },
-  { id: 3, servicio: 'Servcio ArcGIS REST ImageServer', tipo: 'REST_IMG' },
-  { id: 4, servicio: 'El nuevo', tipo: 'FILE' },
+  {
+    id: 0,
+    servicio: 'Servicio de Mapas Web',
+    tipo: 'WMS',
+    value: 'geonode.harvesting.harvesters.wms.OgcWmsHarvester',
+  },
+  {
+    id: 1,
+    servicio: 'Geonode (servicios de Mapas Web)',
+    tipo: 'GN_WMS',
+    value: 'geonode.harvesting.harvesters.wms.OgcWmsHarvester',
+  },
+  {
+    id: 2,
+    servicio: 'Servicio ArcGIS REST MapServer',
+    tipo: 'REST_MAP',
+    value: 'geonode.harvesting.harvesters.arcgis.ArcgisHarvesterWorker',
+  },
+  {
+    id: 3,
+    servicio: 'Servcio ArcGIS REST ImageServer',
+    tipo: 'REST_IMG',
+    value: 'geonode.harvesting.harvesters.arcgis.ArcgisHarvesterWorker',
+  },
+  /* { id: 4, servicio: 'El nuevo', tipo: 'FILE' }, */
 ];
 
 function irAImportarRecursos() {
