@@ -1,7 +1,5 @@
 <script setup>
-import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
-import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/src/utiles';
-import { lados } from '@centrogeomx/sisdai-mapas/src/utiles/capa';
+import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa, utiles } from '@centrogeomx/sisdai-mapas';
 import { arrayNewsOlds, findServer, resourceTypeDic } from '~/utils/consulta';
 
 const storeConsulta = useConsultaStore();
@@ -15,10 +13,15 @@ const isSwipeActive = computed(() => storeConsulta.divisionMapaActivado());
 
 const vistaDelMapa = ref({ extension: storeConsulta.mapExtent });
 const selectorDivisionAbierto = ref(undefined);
+const estaAbiertoSelectorDivisionMapa = (lado) => selectorDivisionAbierto.value === lado;
+function alAbrirSelectorDivisionMapa(lado) {
+  selectorDivisionAbierto.value = estaAbiertoSelectorDivisionMapa(lado) ? undefined : lado;
+}
+
 const attributos = reactive({});
 const linkExportaMapa = ref();
 function exportarMapa() {
-  exportarHTMLComoPNG(
+  utiles.exportarHTMLComoPNG(
     document.querySelectorAll('.mapa .ol-viewport').item(0),
     linkExportaMapa.value
   );
@@ -36,10 +39,14 @@ function actualizarHashDesdeVista({ acercamiento, centro }) {
   }
 }
 
-function actualizarSwipeEnHash() {
+/**
+ * Actualiza el estatus del selector de swipe
+ */
+async function actualizarSwipeEnHash() {
   const hashList = route.hash.split('/');
-  hashList[3] = isSwipeActive.value;
+  hashList[3] = isSwipeActive.value.toString();
   const newHash = hashList.join('/');
+  await nextTick();
   router.replace({ query: route.query, hash: newHash });
 }
 
@@ -49,7 +56,6 @@ function actualizarSwipeEnHash() {
  */
 function updateMapFromHash(hashVista) {
   if (hashVista === '') return;
-
   const [acercamiento, latitud, longitud, swipe] = hashVista.split('=')[1].split('/');
   storeConsulta.mapExtent = undefined;
   vistaDelMapa.value = { acercamiento, centro: [longitud, latitud] };
@@ -63,18 +69,23 @@ function updateMapFromHash(hashVista) {
  * Actualiza el queryParam.
  * @param newQueryParam para asignar.
  */
-function updateQueryParam(capas) {
+async function updateQueryParam(capas) {
+  const hashList = route.hash.split('/');
+  hashList[3] = isSwipeActive.value.toString();
+  const newHash = hashList.join('/');
+  await nextTick();
   if (capas !== route.query.capas) {
-    router.replace({ query: { capas }, hash: route.hash });
+    router.replace({ query: { capas }, hash: newHash });
   }
 }
-watch(isSwipeActive, (nv) => {
-  actualizarSwipeEnHash();
+watch(isSwipeActive, async (nv) => {
+  await actualizarSwipeEnHash();
   if (nv === false) {
+    await nextTick();
     storeSelected.pks.forEach((pk) => storeSelected.byPk(pk).resetLado());
   }
 });
-watch(() => storeSelected.asQueryParam(), updateQueryParam);
+watch(() => storeSelected.asQueryParam(), updateQueryParam, { deep: true });
 watch(
   () => storeConsulta.mapExtent,
   (extension) => {
@@ -82,6 +93,7 @@ watch(
     vistaDelMapa.value = { extension };
   }
 );
+
 onMounted(async () => {
   //console.log('Extension:', vistaDelMapa.value);
   updateMapFromHash(route.hash?.slice(1));
@@ -165,20 +177,14 @@ watch(
             }"
           >
             <ConsultaSelectorDivisionMapa
-              :abierto="selectorDivisionAbierto === lados.derecho"
-              :lado="lados.derecho"
-              @al-abrir="
-                selectorDivisionAbierto =
-                  selectorDivisionAbierto === lados.derecho ? undefined : lados.derecho
-              "
+              :abierto="estaAbiertoSelectorDivisionMapa(utiles.capa.lados.derecho)"
+              :lado="utiles.capa.lados.derecho"
+              @al-abrir="alAbrirSelectorDivisionMapa"
             />
             <ConsultaSelectorDivisionMapa
-              :abierto="selectorDivisionAbierto === lados.izquierdo"
-              :lado="lados.izquierdo"
-              @al-abrir="
-                selectorDivisionAbierto =
-                  selectorDivisionAbierto === lados.izquierdo ? undefined : lados.izquierdo
-              "
+              :abierto="estaAbiertoSelectorDivisionMapa(utiles.capa.lados.izquierdo)"
+              :lado="utiles.capa.lados.izquierdo"
+              @al-abrir="alAbrirSelectorDivisionMapa"
             />
           </div>
 

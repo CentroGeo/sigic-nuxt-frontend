@@ -111,8 +111,8 @@ onMounted(async () => {
               <SisdaiSelector v-model="seleccionOrden" etiqueta="Ordenar por">
                 <option value="titulo">Título</option>
                 <option value="categoria">Categoría</option>
-                <option value="fecha_descendente">Más reciente</option>
-                <option value="fecha_ascendente">Más antiguo</option>
+                <option value="fecha_descendente">Más Reciente</option>
+                <option value="fecha_ascendente">Más Antiguo</option>
               </SisdaiSelector>
             </ClientOnly>
           </div>
@@ -162,7 +162,7 @@ onMounted(async () => {
                   "
                   aria-label="Filtro Avanzado"
                   type="button"
-                  style="position: relative"
+                  style="position: relative; align-self: center"
                   @click="modalFiltroAvanzado.abrirModalBusqueda"
                 >
                   <div v-if="isFilterActive" class="circulo"></div>

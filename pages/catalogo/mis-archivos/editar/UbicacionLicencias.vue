@@ -7,12 +7,15 @@ definePageMeta({
   },
 });
 const storeCatalogo = useCatalogoStore();
+const storeMetadatos = useEditedMetadataStore();
 // Recuperamos información a partir de la url
 const route = useRoute();
 const selectedPk = route.query.data;
 const type = route.query.type;
 // Recuperamos la información completa del recurso
 const editedResource = ref(undefined);
+const isLoading = computed(() => storeMetadatos.isLoading);
+
 onMounted(async () => {
   editedResource.value = await fetchByPk(selectedPk);
 });
@@ -24,7 +27,7 @@ onMounted(async () => {
     </template>
 
     <template #visualizador>
-      <main v-if="editedResource" id="principal" class="contenedor m-b-10 m-y-3">
+      <main v-if="editedResource && !isLoading" id="principal" class="contenedor m-b-10 m-y-3">
         <div class="alineacion-izquierda ancho-lectura">
           <div class="flex">
             <nuxt-link to="/catalogo/mis-archivos" aria-label="regresar a mis archivos">
@@ -46,7 +49,9 @@ onMounted(async () => {
       </main>
 
       <main v-else>
-        <p>...cargando</p>
+        <div class="flex flex-contenido-centrado m-t-3">
+          <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
+        </div>
       </main>
     </template>
   </UiLayoutPaneles>
