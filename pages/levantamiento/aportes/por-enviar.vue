@@ -11,26 +11,23 @@ const storeLevantamiento = useLevantamientoStore();
 const router = useRouter();
 const route = useRoute();
 
-const notificacion = ref(true);
-
-const porModificar = ref([
+const porEnviar = ref([
   {
     id: 0,
     thumbnail_img: 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/kale-1.jpg',
     title: 'Título del aporte',
     update_date: formatDate(new Date()),
-    status: 'Por modificar',
+    status: 'Por enviar',
   },
   {
     id: 1,
     thumbnail_img: 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/kale-1.jpg',
     title: 'Título del aporte',
     update_date: formatDate(new Date()),
-    status: 'Por modificar',
+    status: 'Por enviar',
   },
 ]);
 
-const modalMensajes = ref(null);
 const modalRemoverAporte = ref(null);
 
 const aporteSeleccionado = ref({});
@@ -92,7 +89,7 @@ function irAEditarAporte() {
         <div class="grid">
           <div class="columna-16">
             <div class="flex">
-              <h2>Aportes por modificar</h2>
+              <h2>Aportes por enviar</h2>
               <UiNumeroElementos :numero="0" />
             </div>
           </div>
@@ -100,38 +97,10 @@ function irAEditarAporte() {
             <!-- Buscador -->
           </div>
           <div class="columna-16">
-            <div
-              v-if="notificacion"
-              class="fondo-color-informacion texto-color-informacion borde borde-color-informacion borde-redondeado-16 p-3"
-            >
-              <div class="flex flex-contenido-separado">
-                <p class="m-0 texto-peso-600 texto-tamanio-4">
-                  <span class="pictograma-informacion m-r-1" />Notificaciones
-                </p>
-                <button
-                  class="boton-pictograma boton-sin-contenedor-primario"
-                  aria-label="Cerrar notificación"
-                  type="button"
-                  @click="notificacion = false"
-                >
-                  <span
-                    class="pictograma-cerrar"
-                    style="color: var(--texto-informacion)"
-                    aria-hidden="true"
-                  />
-                </button>
-              </div>
-              <p class="m-0">
-                Tienes 1 aporte por modificar, puedes ver las observaciones en el botón "Mensajes"
-                de cada aporte
-              </p>
-            </div>
-          </div>
-          <div class="columna-16">
-            <div class="contenedor-por-modificar">
+            <div class="contenedor-por-enviar">
               <div class="grid">
-                <div v-for="value in porModificar" :key="value.id" class="columna-5">
-                  <div class="tarjeta" style="position: relative">
+                <div v-for="value in porEnviar" :key="value.id" class="columna-5">
+                  <div class="tarjeta">
                     <img class="tarjeta-imagen" alt="" :srcset="value.thumbnail_img" />
 
                     <div class="tarjeta-cuerpo">
@@ -142,19 +111,19 @@ function irAEditarAporte() {
 
                     <div class="tarjeta-pie">
                       <div class="flex" style="row-gap: 8px">
-                        <button
+                        <!-- <button
                           class="boton-primario boton-chico texto-centrado tarjeta-pie-boton"
+                          type="button"
+                          @click="modalEnviarRevision.abrirModal()"
+                        >
+                          Enviar a revisión
+                        </button> -->
+                        <button
+                          class="boton-secundario boton-chico texto-centrado tarjeta-pie-boton"
                           type="button"
                           @click="editarAporte(value)"
                         >
                           Editar aporte
-                        </button>
-                        <button
-                          class="boton-secundario boton-chico texto-centrado tarjeta-pie-boton"
-                          type="button"
-                          @click="modalMensajes.abrirModal()"
-                        >
-                          Mensajes
                         </button>
                         <button
                           class="boton-secundario boton-chico texto-centrado tarjeta-pie-boton"
@@ -165,12 +134,6 @@ function irAEditarAporte() {
                         </button>
                       </div>
                     </div>
-                    <p
-                      class="fondo-color-alerta texto-color-alerta borde borde-color-alerta borde-redondeado-8 p-1"
-                      style="position: absolute; top: 0; right: 24px"
-                    >
-                      {{ value.status }}
-                    </p>
                   </div>
                 </div>
               </div>
@@ -180,35 +143,6 @@ function irAEditarAporte() {
       </main>
 
       <ClientOnly>
-        <SisdaiModal ref="modalMensajes">
-          <template #encabezado> <h2>Modificaciones pendientes</h2> </template>
-          <template #cuerpo>
-            <p>
-              Realiza las siguientes modificaciones a tu aporte y envíalo de nuevo a aprobación, lo
-              revisaremos a la brevedad.
-            </p>
-            <p
-              class="fondo-color-informacion texto-color-informacion borde borde-color-informacion borde-redondeado-16 p-3"
-            >
-              Agrega una imagen donde se puede ver con claridad el mural
-            </p>
-            <p
-              class="fondo-color-informacion texto-color-informacion borde borde-color-informacion borde-redondeado-16 p-3"
-            >
-              Agrega mayor información sobre la descripción de la obra
-            </p>
-          </template>
-          <template #pie>
-            <button
-              class="boton-secundario boton-chico"
-              type="button"
-              @click="modalMensajes.cerrarModal()"
-            >
-              Regresar
-            </button>
-          </template>
-        </SisdaiModal>
-
         <SisdaiModal ref="modalRemoverAporte">
           <template #encabezado> <h2>Eliminar aporte</h2> </template>
           <template #cuerpo>
