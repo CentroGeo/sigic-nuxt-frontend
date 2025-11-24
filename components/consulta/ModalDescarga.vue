@@ -154,7 +154,7 @@ defineExpose({
         <p class="h5">{{ selectedElement.title }}</p>
         <div v-if="isDownloadActive" class="flex m-y-2 borde-redondeado-16 contenedor-proceso">
           <div class="columna-4 flex-vertical-centrado">
-            <img src="/img/loader.gif" alt="...Cargando" class="loader" />
+            <img src="/img/loader.gif" alt="...Cargando" class="loader color-invertir" />
           </div>
           <p class="columna-12">
             Descarga en curso.

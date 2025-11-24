@@ -1,19 +1,24 @@
 <script setup>
+import { wait } from '@/utils/consulta';
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
 const storeCatalogo = useCatalogoStore();
-
 definePageMeta({
   middleware: 'sidebase-auth',
   bodyAttrs: {
     class: '',
   },
 });
-
+const config = useRuntimeConfig();
+const { gnoxyFetch } = useGnoxyUrl();
 const selecTipoFuente = ref('');
 const campoURL = ref('');
-const responseOk = ref(false);
+const campoNombre = ref('');
+const responseOk = ref(null);
+const harvesterStatus = ref(null);
+const importingResources = ref(false);
+const newHarvester = ref();
 const opTipoFuente = [
   {
     id: 0,
@@ -56,19 +61,52 @@ function irAImportarRecursos() {
 }
 
 async function crearConexion() {
-  // const { data } = useAuth();
-  // const token = data.value?.accessToken;
+  const { data } = useAuth();
+  const token = data.value?.accessToken;
   if (campoURL.value && selecTipoFuente.value) {
-    const { body } = await $fetch('/api/externo', {
-      // const response = await $fetch('/api/externo', {
+    // Creamos la conexión
+    const { responseStatus, responseObject } = await $fetch('/api/externo', {
       method: 'POST',
-      // body: { url: campoURL.value, type: 'REST_MAP', token: token },
-      // body: { url: campoURL.value, type: selecTipoFuente.value, token: token },
-      body: { url: campoURL.value, type: selecTipoFuente.value },
+      headers: { token: token },
+      body: { name: campoNombre.value, url: campoURL.value, type: selecTipoFuente.value },
     });
-    // console.log('response', response);
-    console.warn('body', body);
-    responseOk.value = true;
+    responseOk.value = responseStatus;
+    newHarvester.value = responseObject.harvester;
+    //console.log('RespuestaRegistro:', responseOk.value);
+    //console.log('InfoHarvester:', newHarvester.value);
+
+    //Si la conexión se creó exitosamente, solicitamos la obtención de los recursos
+    if (responseOk.value && Object.keys(newHarvester.value).length > 0) {
+      // Actualizamos el estatus
+      const harvesterID = newHarvester.value.id;
+      console.warn('newHarvesterID', harvesterID);
+      importingResources.value = true;
+      const updateStatus = await $fetch('/api/actualizar-externo', {
+        method: 'POST',
+        headers: { token: token },
+        body: harvesterID,
+      });
+      console.warn('Update harvester status', updateStatus);
+      if (!updateStatus) {
+        importingResources.value = false;
+        return;
+      } else {
+        // Si la actualización de estatus funciona, esperamos el momento en que se termine de solicitar los recursos
+        do {
+          const res = await gnoxyFetch(`${config.public.geonodeApi}/harvesters/${harvesterID}`);
+          const info = await res.json();
+          harvesterStatus.value = info.harvester.status;
+          console.warn('Harvester Status:', harvesterStatus.value);
+
+          if (harvesterStatus.value === 'ready') break;
+
+          await wait(5000);
+        } while (harvesterStatus.value !== 'ready');
+        importingResources.value = false;
+      }
+
+      return;
+    }
   }
 }
 </script>
@@ -85,6 +123,13 @@ async function crearConexion() {
           <form @submit.prevent>
             <ClientOnly class="flex">
               <SisdaiCampoBase
+                v-model="campoNombre"
+                etiqueta="Nombre del Servicio remoto"
+                ejemplo="Nombre del Servicio remoto"
+                class="m-y-2"
+                tipo="text"
+              />
+              <SisdaiCampoBase
                 v-model="campoURL"
                 etiqueta="Servicio URL"
                 ejemplo="URL de servicio externo"
@@ -97,7 +142,7 @@ async function crearConexion() {
                 etiqueta="Tipo de servicio"
                 :es_obligatorio="true"
               >
-                <option v-for="opcion in opTipoFuente" :key="opcion.id" :value="opcion.tipo">
+                <option v-for="opcion in opTipoFuente" :key="opcion.id" :value="opcion.value">
                   {{ opcion.servicio }}
                 </option>
               </SisdaiSelector>
@@ -107,13 +152,14 @@ async function crearConexion() {
                 class="boton-primario"
                 aria-label="Crear conexión de catálogo externo"
                 type="button"
-                @click="crearConexion()"
+                @click="crearConexion"
               >
                 Crear conexión
               </button>
             </div>
           </form>
         </div>
+
         <div v-if="responseOk">
           <p
             class="flex flex-contenido-separado texto-color-confirmacion fondo-color-confirmacion p-1 borde borde-color-confirmacion borde-redondeado-8"
@@ -122,7 +168,33 @@ async function crearConexion() {
             <nuxt-link @click="irAImportarRecursos">Ir a importar recursos</nuxt-link>
           </p>
         </div>
+        <div v-if="responseOk === false">
+          <p
+            class="flex flex-contenido-separado texto-color-error fondo-color-error p-1 borde borde-color-confirmacion borde-redondeado-8"
+          >
+            <span> <span class="pictograma-alerta" />No se pudo registrar este servicio.</span>
+          </p>
+        </div>
+        <div v-if="importingResources" class="m-y-2">
+          <div
+            class="flex flex-contenido-inicio texto-color-informacion fondo-color-informacion p-1 borde borde-color-informacion borde-redondeado-8"
+          >
+            <div class="flex-vertical-centrado columna-2">
+              <img src="/img/loader.gif" alt="...Cargando" class="loader color-invertir" />
+            </div>
+            <p class="columna-14">
+              Estamos obteniendo los recursos del catálogo registrado. Este proceso puede demorar
+              unos minutos.
+            </p>
+          </div>
+        </div>
       </main>
     </template>
   </UiLayoutPaneles>
 </template>
+<style lang="scss" scoped>
+.loader {
+  max-height: 4em;
+  object-fit: scale-down;
+}
+</style>
