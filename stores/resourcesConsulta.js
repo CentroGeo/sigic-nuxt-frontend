@@ -61,6 +61,7 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
     async fillByCategory(resourceType = storeConsulta.resourceType, pageNum, params) {
       const { gnoxyFetch } = useGnoxyUrl();
       const queryParams = {
+        'filter{complete_metadata}': 'true',
         page: pageNum,
         page_size: 2,
         ...params,
@@ -77,11 +78,12 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
           })
         );
       }
-      const datum = res.resources;
 
       // TODO: Agregar en los query params el filtrado para indicar que recursos con metadatos
       // completos. Borrar la siguiente linea y cambiar data por datum
-      const data = datum.filter((d) => d.category);
+      //const datum = res.resources;
+      //const data = datum.filter((d) => d.category);
+      const data = res.resources;
       resources[resourceType] = [...resources[resourceType], ...data];
     },
     /**

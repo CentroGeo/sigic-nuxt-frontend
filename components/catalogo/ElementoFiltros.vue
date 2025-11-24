@@ -265,9 +265,9 @@ function filtrarPorEntrada() {
             etiqueta="Ordenar por"
             @input="emits('alOrdenar', filtro($event.target.value))"
           >
-            <option value="fecha_descendente">Recién agregados</option>
             <option value="titulo">Título</option>
             <option value="categoria">Categoría</option>
+            <option value="fecha_descendente">Más reciente</option>
             <option value="fecha_ascendente">Más antiguo</option>
           </SisdaiSelector>
         </ClientOnly>

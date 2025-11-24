@@ -2,18 +2,19 @@ import SelectedResource, { fromQueryParam } from './SelectedResource';
 
 export default class SelectedLayer extends SelectedResource {
   constructor(options = {}) {
-    const vars = ['pk', 'estilo', 'opacidad', 'visible', 'posicion'];
+    const vars = ['pk', 'estilo', 'lado', 'opacidad', 'visible', 'posicion'];
     const _options = typeof options === 'string' ? fromQueryParam(options, vars) : options;
     super(_options);
 
     this.estilo = _options.estilo || undefined;
+    this.lado = _options.lado || undefined;
     this.opacidad = _options.opacidad || 1;
-
-    this.lado = undefined;
   }
 
   get asQueryParam() {
-    return [this.pk, this.estilo || '', this.opacidad, Number(this.visible)].join(',');
+    return [this.pk, this.estilo || '', this.lado || '', this.opacidad, Number(this.visible)].join(
+      ','
+    );
   }
 
   get opacidad() {
@@ -21,5 +22,9 @@ export default class SelectedLayer extends SelectedResource {
   }
   set opacidad(valor) {
     this.opacidad_ = Number(valor);
+  }
+
+  resetLado() {
+    this.lado = undefined;
   }
 }

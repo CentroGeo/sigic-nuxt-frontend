@@ -22,7 +22,7 @@
   "dependencies": {
     "@centrogeomx/sisdai-componentes": "^4.14.1",
     "@centrogeomx/sisdai-css": "^1.10.2",
-    "@centrogeomx/sisdai-mapas": "git+https://github.com/CentroGeo/sisdai-mapas.git#fix/cuadro-informacion",
+    "@centrogeomx/sisdai-mapas": "git+https://github.com/CentroGeo/sisdai-mapas.git#v2.3.1",
     "@nuxt/image": "^1.10.0",
     "@nuxt/scripts": "^0.11.10",
     "@pinia/nuxt": "^0.11.1",
@@ -51,7 +51,8 @@
     "eslint-plugin-prettier": "^5.5.3",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.5",
-    "prettier": "^3.6.2"
+    "prettier": "^3.6.2",
+    "yargs": "^18.0.0"
   },
   "lint-staged": {
     "*.{css,scss,js,jsx,md,ts,vue}": [

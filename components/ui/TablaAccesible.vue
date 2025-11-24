@@ -28,6 +28,7 @@ const idAleatorio = generaIdAleatorio();
             :id="`${idAleatorio}-col-${v}`"
             :key="v"
             scope="col"
+            style="background-color: var(--color-neutro-0)"
           >
             {{ variable }}
           </th>

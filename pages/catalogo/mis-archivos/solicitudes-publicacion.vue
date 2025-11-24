@@ -118,7 +118,10 @@ fetchNewData();
 watch(paginaActual, () => {
   fetchNewData();
 }); */
-
+function resetSearch() {
+  storeFilters.updateFilter('inputSearch', '');
+  storeFilters.buildQueryParams();
+}
 watch(resources, () => {
   updateResources();
 });
@@ -275,9 +278,9 @@ onMounted(async () => {
           <div class="columna-4">
             <ClientOnly>
               <SisdaiSelector v-model="seleccionOrden" etiqueta="Ordenar por">
-                <option value="fecha_descendente">Recién agregados</option>
                 <option value="titulo">Título</option>
                 <option value="categoria">Categoría</option>
+                <option value="fecha_descendente">Más reciente</option>
                 <option value="fecha_ascendente">Más antiguo</option>
               </SisdaiSelector>
             </ClientOnly>
@@ -301,7 +304,7 @@ onMounted(async () => {
                       class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
                       aria-label="Borrar"
                       type="button"
-                      @click="storeFilters.updateFilter('inputSearch', '')"
+                      @click="resetSearch"
                     >
                       <span aria-hidden="true" class="pictograma-cerrar" />
                     </button>

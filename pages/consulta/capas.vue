@@ -1,7 +1,5 @@
 <script setup>
-import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
-//import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/funciones';
-import { lados } from '@centrogeomx/sisdai-mapas/src/utiles/capa';
+import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa, utiles } from '@centrogeomx/sisdai-mapas';
 import { arrayNewsOlds, findServer, resourceTypeDic } from '~/utils/consulta';
 
 const storeConsulta = useConsultaStore();
@@ -12,17 +10,22 @@ const { gnoxyFetch } = useGnoxyUrl();
 const route = useRoute();
 const router = useRouter();
 storeConsulta.resourceType = resourceTypeDic.dataLayer;
+const isSwipeActive = computed(() => storeConsulta.divisionMapaActivado());
 
 const vistaDelMapa = ref({ extension: storeConsulta.mapExtent });
 const selectorDivisionAbierto = ref(undefined);
+const estaAbiertoSelectorDivisionMapa = (lado) => selectorDivisionAbierto.value === lado;
+function alAbrirSelectorDivisionMapa(lado) {
+  selectorDivisionAbierto.value = estaAbiertoSelectorDivisionMapa(lado) ? undefined : lado;
+}
+
 const attributes = ref({});
 const linkExportaMapa = ref();
 function exportarMapa() {
-  console.warn('La funcion de exportar mapa no está en esta rama');
-  /*   exportarHTMLComoPNG(
+  utiles.exportarHTMLComoPNG(
     document.querySelectorAll('.mapa .ol-viewport').item(0),
     linkExportaMapa.value
-  ); */
+  );
 }
 
 /**
@@ -30,11 +33,22 @@ function exportarMapa() {
  * @param param vista del mapa
  */
 function actualizarHashDesdeVista({ acercamiento, centro }) {
-  const hash = `#vista=${acercamiento.toFixed(0)}/${centro[1].toFixed(4)}/${centro[0].toFixed(4)}`;
+  const hash = `#vista=${acercamiento.toFixed(0)}/${centro[1].toFixed(4)}/${centro[0].toFixed(4)}/${isSwipeActive.value}`;
 
   if (hash !== route.hash) {
     router.replace({ query: route.query, hash });
   }
+}
+
+/**
+ * Actualiza el estatus del selector de swipe
+ */
+async function actualizarSwipeEnHash() {
+  const hashList = route.hash.split('/');
+  hashList[3] = isSwipeActive.value.toString();
+  const newHash = hashList.join('/');
+  await nextTick();
+  router.replace({ query: route.query, hash: newHash });
 }
 
 /**
@@ -43,18 +57,26 @@ function actualizarHashDesdeVista({ acercamiento, centro }) {
  */
 function updateMapFromHash(hashVista) {
   if (hashVista === '') return;
-
-  const [acercamiento, latitud, longitud] = hashVista.split('=')[1].split('/');
+  const [acercamiento, latitud, longitud, swipe] = hashVista.split('=')[1].split('/');
   storeConsulta.mapExtent = undefined;
   vistaDelMapa.value = { acercamiento, centro: [longitud, latitud] };
+  if (swipe === 'true') {
+    storeConsulta.activarDivisionMapa();
+  } else {
+    storeConsulta.desactivarDivisionMapa();
+  }
 }
 /**
  * Actualiza el queryParam.
  * @param newQueryParam para asignar.
  */
-function updateQueryParam(capas) {
+async function updateQueryParam(capas) {
+  const hashList = route.hash.split('/');
+  hashList[3] = isSwipeActive.value.toString();
+  const newHash = hashList.join('/');
+  await nextTick();
   if (capas !== route.query.capas) {
-    router.replace({ query: { capas }, hash: route.hash });
+    router.replace({ query: { capas }, hash: newHash });
   }
 }
 
@@ -130,6 +152,7 @@ watch(
   (nv_) => {
     const selectedPks = Object.keys(nv_);
     const attributesPks = Object.keys(attributes.value);
+    //console.log(selectedPks, attributesPks);
     const { news, olds } = arrayNewsOlds(attributesPks, selectedPks);
     news.forEach(async (r) => await addAttribute(r));
     olds.forEach((resource) => delete attributes.value[resource]);
@@ -137,7 +160,14 @@ watch(
   { deep: true }
 );
 
-watch(() => storeSelected.asQueryParam(), updateQueryParam);
+watch(() => storeSelected.asQueryParam(), updateQueryParam, { deep: true });
+watch(isSwipeActive, async (nv) => {
+  await actualizarSwipeEnHash();
+  if (nv === false) {
+    await nextTick();
+    storeSelected.pks.forEach((pk) => storeSelected.byPk(pk).resetLado());
+  }
+});
 watch(
   () => storeConsulta.mapExtent,
   (extension) => {
@@ -145,6 +175,7 @@ watch(
     vistaDelMapa.value = { extension };
   }
 );
+
 onMounted(async () => {
   //console.log('Extension:', vistaDelMapa.value);
   updateMapFromHash(route.hash?.slice(1));
@@ -169,9 +200,10 @@ onMounted(async () => {
     </template>
 
     <template #visualizador>
-      <template v-if="storeResources.isLoading">Cargando...</template>
-
-      <ClientOnly>
+      <div v-if="storeSelected.pks.length === 0" class="contenedor">
+        <ConsultaTarjetaSinSeleccion />
+      </div>
+      <ClientOnly v-else>
         <SisdaiMapa
           class="gema"
           :vista="vistaDelMapa"
@@ -189,20 +221,14 @@ onMounted(async () => {
             }"
           >
             <ConsultaSelectorDivisionMapa
-              :abierto="selectorDivisionAbierto === lados.derecho"
-              :lado="lados.derecho"
-              @al-abrir="
-                selectorDivisionAbierto =
-                  selectorDivisionAbierto === lados.derecho ? undefined : lados.derecho
-              "
+              :abierto="estaAbiertoSelectorDivisionMapa(utiles.capa.lados.derecho)"
+              :lado="utiles.capa.lados.derecho"
+              @al-abrir="alAbrirSelectorDivisionMapa"
             />
             <ConsultaSelectorDivisionMapa
-              :abierto="selectorDivisionAbierto === lados.izquierdo"
-              :lado="lados.izquierdo"
-              @al-abrir="
-                selectorDivisionAbierto =
-                  selectorDivisionAbierto === lados.izquierdo ? undefined : lados.izquierdo
-              "
+              :abierto="estaAbiertoSelectorDivisionMapa(utiles.capa.lados.izquierdo)"
+              :lado="utiles.capa.lados.izquierdo"
+              @al-abrir="alAbrirSelectorDivisionMapa"
             />
           </div>
 
