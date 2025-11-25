@@ -1,12 +1,11 @@
 <script setup>
-import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
-import { exportarHTMLComoPNG } from '@centrogeomx/sisdai-mapas/src/utiles';
-import { lados } from '@centrogeomx/sisdai-mapas/src/utiles/capa';
+import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa, utiles } from '@centrogeomx/sisdai-mapas';
 import { arrayNewsOlds, findServer, resourceTypeDic } from '~/utils/consulta';
 
 const storeConsulta = useConsultaStore();
 const storeResources = useResourcesConsultaStore();
 const storeSelected = useSelectedResources2Store();
+const config = useRuntimeConfig();
 const { gnoxyFetch } = useGnoxyUrl();
 const route = useRoute();
 const router = useRouter();
@@ -15,10 +14,15 @@ const isSwipeActive = computed(() => storeConsulta.divisionMapaActivado());
 
 const vistaDelMapa = ref({ extension: storeConsulta.mapExtent });
 const selectorDivisionAbierto = ref(undefined);
-const attributos = reactive({});
+const estaAbiertoSelectorDivisionMapa = (lado) => selectorDivisionAbierto.value === lado;
+function alAbrirSelectorDivisionMapa(lado) {
+  selectorDivisionAbierto.value = estaAbiertoSelectorDivisionMapa(lado) ? undefined : lado;
+}
+
+const attributes = ref({});
 const linkExportaMapa = ref();
 function exportarMapa() {
-  exportarHTMLComoPNG(
+  utiles.exportarHTMLComoPNG(
     document.querySelectorAll('.mapa .ol-viewport').item(0),
     linkExportaMapa.value
   );
@@ -75,6 +79,88 @@ async function updateQueryParam(capas) {
     router.replace({ query: { capas }, hash: newHash });
   }
 }
+
+/**
+ * Obtiene el attribute set de un recurso a partir del pk del mismo
+ * @param pk
+ */
+async function addAttribute(pk) {
+  const maxAttrs = 5;
+  const resource = await gnoxyFetch(`${config.public.geonodeApi}/datasets/${pk}`);
+  if (!resource.ok) {
+    //console.error('Error en la peticion de atributos');
+    const alternateTitle = storeResources.findResource(pk, 'dataLayer')['alternate'];
+    attributes.value[alternateTitle] = [];
+  } else {
+    const res = await resource.json();
+    //console.log(res);
+    let visibleAttrs = res.dataset.attribute_set
+      .filter((a) => a.visible)
+      .sort((a, b) => a.display_order - b.display_order);
+
+    // Limitamos el máximo de atributos visibles
+    if (visibleAttrs.length > 0) {
+      if (visibleAttrs.length > maxAttrs) {
+        visibleAttrs = visibleAttrs.slice(0, maxAttrs);
+      }
+      attributes.value[res.dataset.alternate] = visibleAttrs;
+    } else {
+      attributes.value[res.dataset.alternate] = [];
+    }
+  }
+}
+
+/**
+ * Crea la información del cuadro de información
+ * @param url
+ * @param alternate
+ * @param title
+ * @param sourcetype
+ */
+async function buildLayerInfo(url, alternate, title, sourcetype) {
+  if (sourcetype === 'REMOTE') {
+    //return `<p style="margin-bottom: 8px;">${title}</p> <p>No hay información disponible para esta capa.</p>`;
+    return undefined;
+  } else {
+    const res = await gnoxyFetch(url);
+    if (!res.ok) {
+      //return `<p style="margin-bottom: 8px;">${title}</p> <p>No hay información disponible para esta capa.</p>`;
+      return undefined;
+    }
+    const data = await res.json();
+    if (data.features.length === 0) {
+      //return `<p style="margin-bottom: 8px;">${title}</p> <p>No hay información disponible para este punto.</p>`;
+      return undefined;
+    } else {
+      const propiedades = data.features[0].properties;
+      const match = attributes.value[alternate].map(({ attribute, attribute_label }) => {
+        if (attribute_label) {
+          return `<li class="m-0">${attribute_label}: ${propiedades[attribute]}</li>`;
+        } else {
+          return `<li class="m-0">${attribute}: ${propiedades[attribute]}</li>`;
+        }
+      });
+      return `<p style="margin-bottom: 8px;">${title}</p> <ol style="margin-top: 8px">${match.join(
+        ''
+      )}</ol>`;
+    }
+  }
+}
+
+watch(
+  () => storeSelected.resources[storeConsulta.resourceType],
+  (nv_) => {
+    const selectedPks = Object.keys(nv_);
+    const attributesPks = Object.keys(attributes.value);
+    //console.log(selectedPks, attributesPks);
+    const { news, olds } = arrayNewsOlds(attributesPks, selectedPks);
+    news.forEach(async (r) => await addAttribute(r));
+    olds.forEach((resource) => delete attributes.value[resource]);
+  },
+  { deep: true }
+);
+
+watch(() => storeSelected.asQueryParam(), updateQueryParam, { deep: true });
 watch(isSwipeActive, async (nv) => {
   await actualizarSwipeEnHash();
   if (nv === false) {
@@ -82,7 +168,6 @@ watch(isSwipeActive, async (nv) => {
     storeSelected.pks.forEach((pk) => storeSelected.byPk(pk).resetLado());
   }
 });
-watch(() => storeSelected.asQueryParam(), updateQueryParam, { deep: true });
 watch(
   () => storeConsulta.mapExtent,
   (extension) => {
@@ -103,44 +188,6 @@ onMounted(async () => {
     updateQueryParam(storeSelected.asQueryParam());
   }
 });
-
-async function addAttribute(pk) {
-  attributos[pk] = [];
-  const resource = await storeResources.fetchResourceByPk(pk);
-  if (resource.sourcetype === 'REMOTE') {
-    attributos[pk] = {
-      params: {
-        propertyName: '',
-      },
-      contenido: () =>
-        `<p style="font-weight: bold">${resource.title}</p> <p>No hay información disponible para esta capa</p>`,
-    };
-  } else {
-    const { columnas, etiquetas } = await storeResources.fetchAttrs(pk);
-    attributos[pk] = {
-      params: {
-        propertyName: columnas.join(','),
-      },
-      contenido: (data) =>
-        `<p style="font-weight: bold">${resource.title}</p>` +
-        columnas
-          .map((columna) => `<p><b>${etiquetas[columna] || columna}</b>: ${data[columna]}</p>`)
-          .join(''),
-    };
-  }
-}
-
-watch(
-  () => storeSelected.resources[storeConsulta.resourceType],
-  (nv_) => {
-    const selectedPks = Object.keys(nv_);
-    const attributesPks = Object.keys(attributos);
-    const { news, olds } = arrayNewsOlds(attributesPks, selectedPks);
-    news.forEach((r) => addAttribute(r));
-    olds.forEach((resource) => delete attributos[resource]);
-  },
-  { deep: true }
-);
 
 // api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
 // const contenedorSelectoresDivisionColapsado = ref(true);
@@ -174,25 +221,19 @@ watch(
             }"
           >
             <ConsultaSelectorDivisionMapa
-              :abierto="selectorDivisionAbierto === lados.derecho"
-              :lado="lados.derecho"
-              @al-abrir="
-                selectorDivisionAbierto =
-                  selectorDivisionAbierto === lados.derecho ? undefined : lados.derecho
-              "
+              :abierto="estaAbiertoSelectorDivisionMapa(utiles.capa.lados.derecho)"
+              :lado="utiles.capa.lados.derecho"
+              @al-abrir="alAbrirSelectorDivisionMapa"
             />
             <ConsultaSelectorDivisionMapa
-              :abierto="selectorDivisionAbierto === lados.izquierdo"
-              :lado="lados.izquierdo"
-              @al-abrir="
-                selectorDivisionAbierto =
-                  selectorDivisionAbierto === lados.izquierdo ? undefined : lados.izquierdo
-              "
+              :abierto="estaAbiertoSelectorDivisionMapa(utiles.capa.lados.izquierdo)"
+              :lado="utiles.capa.lados.izquierdo"
+              @al-abrir="alAbrirSelectorDivisionMapa"
             />
           </div>
 
           <SisdaiCapaXyz :posicion="0" />
-
+          <!---->
           <SisdaiCapaWms
             v-for="resource in storeResources.findResources(storeSelected.pks)"
             :key="`wms-${resource.pk}-${resource.position_}`"
@@ -204,7 +245,9 @@ watch(
             :opacidad="storeSelected.byPk(resource.pk).opacidad"
             :posicion="storeSelected.byPk(resource.pk).posicion + 1"
             :visible="storeSelected.byPk(resource.pk).visible"
-            :cuadro-informativo="attributos[resource.pk]"
+            :cuadro-informativo="
+              (url) => buildLayerInfo(url, resource.alternate, resource.title, resource.sourcetype)
+            "
           />
         </SisdaiMapa>
       </ClientOnly>

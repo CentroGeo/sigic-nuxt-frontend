@@ -74,6 +74,7 @@ function irARutaConQuery(value) {
             <div class="circulo"></div>
           </div>
           <button
+            :aria-label="`Ir a ${value.texto}`"
             class="boton-secundario header-link"
             type="button"
             @click="irARutaConQuery(value)"

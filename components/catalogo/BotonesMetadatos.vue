@@ -158,17 +158,24 @@ async function updateMetadata() {
       >
       <button
         class="boton-secundario boton-chico"
+        aria-label="Ir a mis archivos"
         :disabled="props.title === firstButton ? true : false"
         @click="irARutaConQuery('anterior')"
       >
         Regresar
       </button>
       <!--<button class="boton-primario boton-chico" :disabled="false" @click="actualizaMetadatos()"> -->
-      <button class="boton-primario boton-chico" :disabled="false" @click="updateMetadata">
+      <button
+        aria-label="Actualizar Metadatos"
+        class="boton-primario boton-chico"
+        :disabled="false"
+        @click="updateMetadata"
+      >
         Actualizar
       </button>
       <button
         v-if="props.title !== lastButton"
+        aria-label="Siguiente"
         class="boton-primario boton-chico"
         :disabled="props.title === lastButton ? true : false"
         @click="irARutaConQuery('siguiente')"
