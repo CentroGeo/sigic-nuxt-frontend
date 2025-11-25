@@ -14,20 +14,21 @@ const { gnoxyFetch } = useGnoxyUrl();
 const route = useRoute();
 const selectedId = route.query.id;
 const selectedTitle = route.query.title;
-//const selectedUniqueIdentifier = route.query.unique_identifier;
-//const selectedRemoteSourceType = route.query.remote_resource_type;
-const dictTipoRecursoRemoto = {
-  layers: 'Capas',
-};
-const selectedResources = ref([]);
 const totalReources = ref();
 const paginaActual = ref(0);
 const tamanioPagina = 10;
 const totalPags = computed(() => Math.ceil(totalReources.value / tamanioPagina));
+const selectedResources = ref([]);
 const unharvestedResources = ref([]);
 const harvesterStatus = ref(null);
+const isLoading = ref(false);
+const didUpdateFail = ref(false);
+const didUpdateSucceed = ref(false);
+const dictTipoRecursoRemoto = {
+  layers: 'Capas',
+};
 /**
- *
+ * Esta función permite obtener los recursos que aún no han sido cosechados
  */
 async function fetchData() {
   const configEnv = useRuntimeConfig();
@@ -42,7 +43,8 @@ async function fetchData() {
 }
 
 /**
- *
+ * Nos ayuda a identifcar si un recurso ha sido seleccionado o no.
+ * Esto se usa debido a que los recursos mostrados no viven eternamente aqui.
  * @param resource
  */
 function isSelected(resource) {
@@ -56,7 +58,8 @@ function isSelected(resource) {
 }
 
 /**
- *
+ * Al marcar una casilla del checklist, agrega el recurso a la seleccion
+ * Al desmarcarla, elimina el recurso de la selección
  * @param resource
  */
 function toggleSelection(resource) {
@@ -72,9 +75,10 @@ function toggleSelection(resource) {
 }
 
 /**
- *
+ * Importa los recursos usando el harvester
  */
 async function importarRecursos() {
+  isLoading.value = true;
   const { data } = useAuth();
   const token = data.value?.accessToken;
   const requestBody = selectedResources.value.map((d) => ({
@@ -82,11 +86,14 @@ async function importarRecursos() {
     title: d.title,
     should_be_harvested: true,
   }));
+  // Primero hacemos una petición para actualizar el estatus de cosecha de cada recurso
   const updateHarvestables = await $fetch('/api/importar-externo', {
     method: 'POST',
     headers: { token: token },
     body: { harvesterID: selectedId, resources: requestBody },
   });
+
+  // Ahora actualizamos el estatus del harvester para activar la importación de los recursos
   let updateStatus;
   if (updateHarvestables) {
     updateStatus = await $fetch('/api/actualizar-externo', {
@@ -94,8 +101,13 @@ async function importarRecursos() {
       headers: { token: token },
       body: { id: selectedId, status: 'harvesting-resources' },
     });
-    console.log('Se actualizo el estatus?', updateStatus);
+  } else {
+    didUpdateFail.value = false;
+    isLoading.value = false;
+    return;
   }
+
+  // Si logramos actualizar exitosamente el estatus, revisamos el estatus del harvester hasta que diga ready
   if (updateStatus) {
     do {
       const res = await gnoxyFetch(`${config.public.geonodeApi}/harvesters/${selectedId}`);
@@ -107,6 +119,14 @@ async function importarRecursos() {
 
       await wait(5000);
     } while (harvesterStatus.value !== 'ready');
+    selectedResources.value = [];
+    fetchData();
+    didUpdateSucceed.value = true;
+    isLoading.value = false;
+  } else {
+    didUpdateFail.value = false;
+    isLoading.value = false;
+    return;
   }
 }
 watch(paginaActual, () => {
@@ -130,6 +150,35 @@ try {
         <h2>Carga catálogos externos</h2>
         <h3>{{ selectedTitle }}</h3>
         <p>Selecciona los recursos que quieres importar</p>
+        <div>
+          <div
+            v-if="isLoading"
+            class="m-y-2 flex flex-contenido-inicio texto-color-informacion fondo-color-informacion p-1 borde borde-color-informacion borde-redondeado-8"
+          >
+            <div class="flex-vertical-centrado columna-2">
+              <img src="/img/loader.gif" alt="...Cargando" class="loader color-invertir" />
+            </div>
+            <p class="columna-14">
+              Estamos importando los recursos. Este proceso puede demorar unos minutos.
+            </p>
+          </div>
+          <p
+            v-if="didUpdateFail"
+            class="texto-color-error fondo-color-error borde borde-color-error p-2 borde-redondeado-8"
+          >
+            <span class="pictograma-alerta" /> Ocurrió un error. Revisa tu conexión e intentalo de
+            nuevo más tarde.
+          </p>
+          <p
+            v-if="didUpdateSucceed"
+            class="flex flex-contenido-separado texto-color-confirmacion fondo-color-confirmacion borde borde-color-confirmacion p-2 borde-redondeado-8"
+          >
+            <span><span class="pictograma-aprobado" /> Recursos importados con éxito.</span>
+            <nuxt-link to="/catalogo/mis-archivos/metadatos-pendientes"
+              >Ir a Editar Metadatos</nuxt-link
+            >
+          </p>
+        </div>
         <form @submit.prevent>
           <table class="tabla-condensada">
             <thead>
@@ -186,3 +235,9 @@ try {
     </template>
   </UiLayoutPaneles>
 </template>
+<style lang="scss" scoped>
+.loader {
+  max-height: 3em;
+  object-fit: scale-down;
+}
+</style>
