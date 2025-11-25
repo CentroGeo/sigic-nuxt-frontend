@@ -21,21 +21,6 @@ const dictTipoRecursoRemoto = {
   layers: 'Capas',
 };
 
-function importarRecursos() {
-  // TODO: importar recursos al backend
-  const harvestestToImport = notShouldBeHarvested.value.filter((d) => d.check === true);
-  console.warn('harvestestToImport', harvestestToImport);
-  navigateTo({
-    path: `/catalogo/servicios-remotos/${selectedId}`,
-    query: {
-      id: selectedId,
-      title: selectedTitle,
-      unique_identifier: selectedUniqueIdentifier,
-      remote_resource_type: selectedRemoteSourceType,
-    },
-  });
-}
-
 const totalReources = ref();
 const paginaActual = ref(0);
 const tamanioPagina = 10;
@@ -83,6 +68,20 @@ async function fetchNewData() {
   await fetchData();
 }
 
+function importarRecursos() {
+  // TODO: importar recursos al backend
+  const harvestestToImport = notShouldBeHarvested.value.filter((d) => d.check === true);
+  console.warn('harvestestToImport', harvestestToImport);
+  navigateTo({
+    path: `/catalogo/servicios-remotos/${selectedId}`,
+    query: {
+      id: selectedId,
+      title: selectedTitle,
+      unique_identifier: selectedUniqueIdentifier,
+      remote_resource_type: selectedRemoteSourceType,
+    },
+  });
+}
 watch(paginaActual, () => {
   fetchNewData();
 });

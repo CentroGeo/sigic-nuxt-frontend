@@ -52,8 +52,8 @@ function irAImportarRecursos() {
     path: `/catalogo/servicios-remotos/importar`,
     query: {
       // TODO: al cargar el recurso recuperar estos valores
-      id: 1,
-      title: 'v.title',
+      id: newHarvester.value?.id,
+      title: newHarvester.value?.name,
       unique_identifier: 'v.unique_identifier',
       remote_resource_type: 'v.remote_resource_type',
     },
