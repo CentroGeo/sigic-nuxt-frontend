@@ -54,8 +54,8 @@ function irAImportarRecursos() {
       // TODO: al cargar el recurso recuperar estos valores
       id: newHarvester.value?.id,
       title: newHarvester.value?.name,
-      unique_identifier: 'v.unique_identifier',
-      remote_resource_type: 'v.remote_resource_type',
+      //unique_identifier: 'v.unique_identifier',
+      //remote_resource_type: 'v.remote_resource_type',
     },
   });
 }

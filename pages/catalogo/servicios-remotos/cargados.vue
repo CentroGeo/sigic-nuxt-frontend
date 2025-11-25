@@ -27,12 +27,14 @@ const cargando = ref(false);
 
 const irARutaQuery = (v, destino) => {
   cargando.value = true;
+  console.log(v, 'aqui');
   if (destino !== 'pendientes') {
     navigateTo({
       path: `/catalogo/servicios-remotos/${v.id}`,
       query: {
         id: v.id,
         title: v.title,
+        total: v.exported_resources + v.to_attend_resources,
         /*         unique_identifier: v.unique_identifier,
         remote_resource_type: v.remote_resource_type, */
       },
@@ -85,7 +87,6 @@ async function fetchHarvestersInfo() {
 fetchHarvestersInfo();
 
 watch(paginaActual, () => {
-  console.log(paginaActual.value);
   remoteHaverstersResources.value = [];
   fetchHarvestersInfo();
 });
@@ -109,7 +110,11 @@ watch(paginaActual, () => {
             class="texto-color-alerta fondo-color-alerta borde borde-color-alerta p-2 borde-redondeado-8"
           >
             Los catálogos externos tienen funciones limitadas. Algunas descargas o consultas pueden
-            no estar disponibles
+            no estar disponibles. <br />
+            <br />
+            Los recursos importados requieren que
+            <span style="font-weight: bold">completes sus metadatos</span> antes de poder
+            visualizarlos.
           </p>
           <!--           <form> -->
           <table>
@@ -153,14 +158,14 @@ watch(paginaActual, () => {
             <nuxt-link
               class="boton boton-primario"
               aria-label="Ir a catálogo externo en mis archivos"
-              to="/catalogo/mis-archivos"
-              >Ver catálogo Externo en Mis Archivos
+              to="/catalogo/mis-archivos/metadatos-pendientes"
+              >Editar Metadatos
             </nuxt-link>
             <nuxt-link
               class="boton boton-secundario"
               aria-label="Agregar servicio remoto"
               to="/catalogo/servicios-remotos/agregar"
-              >Agregar servicio remoto
+              >Agregar Catálogo Externo
             </nuxt-link>
           </div>
           <!--           </form> -->
