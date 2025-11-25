@@ -84,7 +84,7 @@ async function crearConexion() {
       const updateStatus = await $fetch('/api/actualizar-externo', {
         method: 'POST',
         headers: { token: token },
-        body: harvesterID,
+        body: { id: harvesterID, status: 'updating-harvestable-resources' },
       });
       console.warn('Update harvester status', updateStatus);
       if (!updateStatus) {

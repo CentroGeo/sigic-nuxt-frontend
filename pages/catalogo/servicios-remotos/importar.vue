@@ -1,5 +1,5 @@
 <script setup>
-import SisdaiCasillaVerificacion from '@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue';
+import { wait } from '@/utils/consulta';
 
 definePageMeta({
   middleware: 'sidebase-auth',
@@ -9,81 +9,108 @@ definePageMeta({
 });
 
 const storeCatalogo = useCatalogoStore();
-
+const config = useRuntimeConfig();
+const { gnoxyFetch } = useGnoxyUrl();
 const route = useRoute();
 const selectedId = route.query.id;
 const selectedTitle = route.query.title;
-const selectedUniqueIdentifier = route.query.unique_identifier;
-const selectedRemoteSourceType = route.query.remote_resource_type;
-
-const notShouldBeHarvested = ref([]);
+//const selectedUniqueIdentifier = route.query.unique_identifier;
+//const selectedRemoteSourceType = route.query.remote_resource_type;
 const dictTipoRecursoRemoto = {
   layers: 'Capas',
 };
-
+const selectedResources = ref([]);
 const totalReources = ref();
 const paginaActual = ref(0);
 const tamanioPagina = 10;
 const totalPags = computed(() => Math.ceil(totalReources.value / tamanioPagina));
-
+const unharvestedResources = ref([]);
+const harvesterStatus = ref(null);
+/**
+ *
+ */
 async function fetchData() {
-  const { data } = useAuth();
-  const token = data.value?.accessToken;
-  const headers = ref({ Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' });
-
   const configEnv = useRuntimeConfig();
   const baseUrl = configEnv.public.geonodeApi;
-
-  const response = await $fetch(
-    `${baseUrl}/harvesters/${selectedId}/harvestable-resources/?page=${paginaActual.value + 1}`,
-    {
-      method: 'GET',
-      headers: headers.value,
-    }
+  const requestResources = await gnoxyFetch(
+    `${baseUrl}/harvesters/${selectedId}/harvestable-resources/?page=${paginaActual.value + 1}`
   );
-  // console.log('response', response);
+  const response = await requestResources.json();
   totalReources.value = response.total;
   const haverstableResources = response.harvestable_resources;
-  // console.log('haverstableResources', haverstableResources);
+  unharvestedResources.value = haverstableResources.filter((d) => d.should_be_harvested === false);
+}
 
-  // filtramos los que aún no están importados
-  const filteredNotShouldBeHarvested = haverstableResources.filter(
-    (d) => d.should_be_harvested === false
-  );
-  // console.log('notShouldBeHarvested', notShouldBeHarvested);
+/**
+ *
+ * @param resource
+ */
+function isSelected(resource) {
+  const resourceID = resource.unique_identifier;
+  const selectedIDs = selectedResources.value.map((d) => d.unique_identifier);
+  if (selectedIDs.includes(resourceID)) {
+    return true;
+  } else {
+    return false;
+  }
+}
 
-  // agregamos la propiedad check para la casilla de verificación
-  notShouldBeHarvested.value = filteredNotShouldBeHarvested.map((d) => ({
-    last_updated: d.last_updated,
-    remote_resource_type: d.remote_resource_type,
-    should_be_harvested: d.should_be_harvested,
-    status: d.status,
-    title: d.title,
+/**
+ *
+ * @param resource
+ */
+function toggleSelection(resource) {
+  const resourceID = resource.unique_identifier;
+  const selectedIDs = selectedResources.value.map((d) => d.unique_identifier);
+  if (selectedIDs.includes(resourceID)) {
+    selectedResources.value = selectedResources.value.filter(
+      (d) => d.unique_identifier !== resourceID
+    );
+  } else {
+    selectedResources.value.push(resource);
+  }
+}
+
+/**
+ *
+ */
+async function importarRecursos() {
+  const { data } = useAuth();
+  const token = data.value?.accessToken;
+  const requestBody = selectedResources.value.map((d) => ({
     unique_identifier: d.unique_identifier,
-    check: false,
+    title: d.title,
+    should_be_harvested: true,
   }));
-}
-
-async function fetchNewData() {
-  await fetchData();
-}
-
-function importarRecursos() {
-  // TODO: importar recursos al backend
-  const harvestestToImport = notShouldBeHarvested.value.filter((d) => d.check === true);
-  console.warn('harvestestToImport', harvestestToImport);
-  navigateTo({
-    path: `/catalogo/servicios-remotos/${selectedId}`,
-    query: {
-      id: selectedId,
-      title: selectedTitle,
-      unique_identifier: selectedUniqueIdentifier,
-      remote_resource_type: selectedRemoteSourceType,
-    },
+  const updateHarvestables = await $fetch('/api/importar-externo', {
+    method: 'POST',
+    headers: { token: token },
+    body: { harvesterID: selectedId, resources: requestBody },
   });
+  let updateStatus;
+  if (updateHarvestables) {
+    updateStatus = await $fetch('/api/actualizar-externo', {
+      method: 'POST',
+      headers: { token: token },
+      body: { id: selectedId, status: 'harvesting-resources' },
+    });
+    console.log('Se actualizo el estatus?', updateStatus);
+  }
+  if (updateStatus) {
+    do {
+      const res = await gnoxyFetch(`${config.public.geonodeApi}/harvesters/${selectedId}`);
+      const info = await res.json();
+      harvesterStatus.value = info.harvester.status;
+      console.warn('Harvester Status:', harvesterStatus.value);
+
+      if (harvesterStatus.value === 'ready') break;
+
+      await wait(5000);
+    } while (harvesterStatus.value !== 'ready');
+  }
 }
 watch(paginaActual, () => {
-  fetchNewData();
+  fetchData();
 });
 
 try {
@@ -99,7 +126,7 @@ try {
     </template>
 
     <template #visualizador>
-      <main v-if="true" id="principal" class="contenedor m-b-10 m-y-3">
+      <main v-if="unharvestedResources.length > 0" id="principal" class="contenedor m-b-10 m-y-3">
         <h2>Carga catálogos externos</h2>
         <h3>{{ selectedTitle }}</h3>
         <p>Selecciona los recursos que quieres importar</p>
@@ -114,14 +141,21 @@ try {
               </tr>
             </thead>
             <tbody>
-              <tr v-for="value in notShouldBeHarvested" :key="value.unique_identifier">
+              <tr v-for="value in unharvestedResources" :key="value.unique_identifier">
                 <td>
-                  <ClientOnly>
-                    <SisdaiCasillaVerificacion
-                      v-model="value.check"
-                      :etiqueta="value.unique_identifier"
-                    />
-                  </ClientOnly>
+                  <!-- <ClientOnly>
+                    <SisdaiCasillaVerificacion :etiqueta="value.unique_identifier" />
+                  </ClientOnly> -->
+                  <input
+                    :id="`checkbox-${value.unique_identifier}`"
+                    type="checkbox"
+                    name="checkboxes"
+                    :checked="isSelected(value)"
+                    @change="toggleSelection(value)"
+                  />
+                  <label :for="`checkbox-${value.unique_identifier}`">
+                    {{ value.unique_identifier }}
+                  </label>
                 </td>
                 <td>{{ value.title }}</td>
                 <td></td>

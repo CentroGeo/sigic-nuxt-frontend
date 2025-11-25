@@ -2,10 +2,13 @@ const config = useRuntimeConfig();
 
 export default defineEventHandler(async (event) => {
   const data = await readBody(event);
-  const harvesterID = data.id;
-  const newStatus = data.status;
   const token = getHeader(event, 'token');
-  const url = `${config.public.geonodeApi}/harvesters/${harvesterID}/`;
+  const harvesterID = data.harvesterID;
+  const resources = data.resources;
+  //console.error(token)
+  //console.log(harvesterID)
+  console.warn(resources);
+  const url = `${config.public.geonodeApi}/harvesters/${harvesterID}/harvestable-resources/`;
   let updateStatus = null;
 
   try {
@@ -15,9 +18,7 @@ export default defineEventHandler(async (event) => {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        status: `${newStatus}`,
-      }),
+      body: JSON.stringify(resources),
     });
     //console.log(response);
     updateStatus = response.ok;

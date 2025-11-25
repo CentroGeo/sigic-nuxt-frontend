@@ -23,11 +23,10 @@ const totalHarvesters = ref(0);
 const totalPags = computed(() => Math.ceil(totalHarvesters.value / tamanioPagina));
 const remoteHaverstersResources = ref([]);
 //const harvestableResources = ref([]);
-const cargando = ref(false);
+//const cargando = ref(false);
 
 const irARutaQuery = (v, destino) => {
-  cargando.value = true;
-  console.log(v, 'aqui');
+  //cargando.value = true;
   if (destino !== 'pendientes') {
     navigateTo({
       path: `/catalogo/servicios-remotos/${v.id}`,
@@ -98,11 +97,12 @@ watch(paginaActual, () => {
       <CatalogoListaMenuLateral />
     </template>
     <template #visualizador>
-      <main
+      <!-- <main
         v-if="remoteHaverstersResources.length !== 0 && !cargando"
         id="principal"
         class="contenedor m-b-10"
-      >
+      > -->
+      <main v-if="remoteHaverstersResources.length" id="principal" class="contenedor m-b-10">
         <h2>Carga catálogos externos</h2>
         <div class="ancho-fijo">
           <h3>Recursos cargados</h3>
@@ -185,7 +185,7 @@ watch(paginaActual, () => {
           <div class="columna-4"></div>
         </div>
       </main>
-      <main v-if="cargando">
+      <!-- <main v-if="cargando">
         <div class="flex">
           <div class="columna-4"></div>
           <div class="columna-8">
@@ -198,7 +198,7 @@ watch(paginaActual, () => {
           </div>
           <div class="columna-4"></div>
         </div>
-      </main>
+      </main> -->
     </template>
   </UiLayoutPaneles>
 </template>
