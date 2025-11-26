@@ -89,7 +89,7 @@ const handleCrearProyecto = () => {
                 @click="modalCrearProyecto.abrirModal()"
               >
                 Crear un proyecto
-                <span class="pictograma-agregar" aria-hidden="true" />
+                <span class="pictograma-agregar" aria-hidden="true"></span>
               </button>
             </div>
           </div>

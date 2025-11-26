@@ -71,5 +71,15 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
     obtenerTotalProyectosPublicos() {
       return this.proyectosPublicos.length;
     },
+
+    obtenerProyectoPorId(id) {
+      id = Number(id);
+
+      return (
+        this.proyectos.find((p) => p.id === id) ||
+        this.proyectosPublicos.find((p) => p.id === id) ||
+        null
+      );
+    },
   };
 });
