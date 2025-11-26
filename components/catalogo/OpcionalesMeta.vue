@@ -79,18 +79,34 @@ const dictFrecuenciaActual = [
 ];
 
 const geonodeUsers = ref([]);
+const isLoading = ref(false);
 
 async function getUsers() {
-  // Esta parte es para obtener todas las categorias
-  const url = `${config.public.geonodeApi}/users`;
-  const requestTotal = await gnoxyFetch(url);
-  const resTotal = await requestTotal.json();
-  const totalUsers = resTotal.total;
-  const requestUsers = await gnoxyFetch(`${url}?page_size=${totalUsers}`);
-  const resUsers = await requestUsers.json();
-  geonodeUsers.value = resUsers.users.map((d) => {
-    return { pk: d.pk, username: d.username };
-  });
+  isLoading.value = true;
+  if (storeMetadatos.metadata.publisher && storeMetadatos.metadata.publisher.length > 0) {
+    geonodeUsers.value.push({
+      pk: storeMetadatos.metadata.publisher_pk,
+      username: storeMetadatos.metadata.publisher,
+    });
+  }
+  let endpoint = `${config.public.geonodeApi}/users`;
+  do {
+    const requestUsers = await gnoxyFetch(endpoint);
+    if (!requestUsers.ok) {
+      const error = await requestUsers.json();
+      console.error('Falló petición de usuarios:', error);
+    }
+    const resUsers = await requestUsers.json();
+    const newUsers = resUsers.users
+      .map((d) => {
+        return { pk: d.pk, username: d.username };
+      })
+      .filter((d) => d.username !== storeMetadatos.metadata.publisher);
+    geonodeUsers.value = [...geonodeUsers.value, ...newUsers];
+
+    endpoint = resUsers.links.next;
+  } while (endpoint);
+  isLoading.value = false;
 }
 
 getUsers();
@@ -285,6 +301,7 @@ watch(campoPublisher, () => {
             <option v-for="value in geonodeUsers" :key="value.pk" :value="value.username">
               {{ value.username }}
             </option>
+            <option v-if="isLoading">...Cargando</option>
           </SisdaiSelector>
         </ClientOnly>
       </div>

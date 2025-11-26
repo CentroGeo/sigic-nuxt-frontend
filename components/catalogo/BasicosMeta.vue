@@ -86,16 +86,38 @@ const dictCategoria = [
 const geonodeUsers = ref([]);
 
 async function getUsers() {
-  // Esta parte es para obtener todas las categorias
-  const url = `${config.public.geonodeApi}/users`;
-  const requestTotal = await gnoxyFetch(url);
+  geonodeUsers.value.push({
+    pk: storeMetadatos.metadata.metadata_author_pk,
+    username: storeMetadatos.metadata.metadata_author,
+  });
+
+  let endpoint = `${config.public.geonodeApi}/users`;
+  do {
+    const requestUsers = await gnoxyFetch(endpoint);
+    if (!requestUsers.ok) {
+      const error = await requestUsers.json();
+      console.error('Falló petición de usuarios:', error);
+    }
+    const resUsers = await requestUsers.json();
+    const newUsers = resUsers.users
+      .map((d) => {
+        return { pk: d.pk, username: d.username };
+      })
+      .filter((d) => d.username !== storeMetadatos.metadata.metadata_author);
+    geonodeUsers.value = [...geonodeUsers.value, ...newUsers];
+
+    endpoint = resUsers.links.next;
+  } while (endpoint);
+
+  /*   const requestTotal = await gnoxyFetch(url);
   const resTotal = await requestTotal.json();
   const totalUsers = resTotal.total;
   const requestUsers = await gnoxyFetch(`${url}?page_size=${totalUsers}`);
   const resUsers = await requestUsers.json();
-  geonodeUsers.value = resUsers.users.map((d) => {
+  const newUsers = resUsers.users.map((d) => {
     return { pk: d.pk, username: d.username };
   });
+  geonodeUsers.value = [...geonodeUsers.value, ...newUsers]; */
 }
 
 getUsers();
