@@ -82,13 +82,19 @@ defineExpose({
       <template #pie>
         <button
           type="button"
+          aria-label="Ver Capa en Visualizador"
           class="boton-con-contenedor-secundario boton-grande ancho"
           @click="openLayerView"
         >
           Ver Capa en Visualizador
           <span aria-hidden="true" class="pictograma-previsualizar" />
         </button>
-        <button type="button" class="boton-primario boton-grande ancho" @click="downloadClicked()">
+        <button
+          type="button"
+          aria-label="Descargar"
+          class="boton-primario boton-grande ancho"
+          @click="downloadClicked()"
+        >
           Descarga Archivo
           <span aria-hidden="true" class="pictograma-archivo-descargar pictograma-grande" />
         </button>
