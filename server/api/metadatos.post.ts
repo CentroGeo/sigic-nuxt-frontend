@@ -36,25 +36,24 @@ export default defineEventHandler(async (event) => {
   });
 
   // Actualizamos keywords
-  if (keywordsBody.length > 0) {
-    try {
-      const keywordsResponse = await fetch(`${url}keywordtags/`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(keywordsBody),
-      });
 
-      //console.log('La respuesta:', keywordsResponse);
-      if (!keywordsResponse.ok) {
-        console.error(keywordsResponse);
-      }
-      total += 1;
-    } catch (error) {
-      console.error('Error al subir al GeoNode:', error);
+  try {
+    const keywordsResponse = await fetch(`${url}keywordtags/`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(keywordsBody),
+    });
+
+    //console.log('La respuesta:', keywordsResponse);
+    if (!keywordsResponse.ok) {
+      console.error('Keywords', keywordsResponse);
     }
+    total += 1;
+  } catch (error) {
+    console.error('Error al subir al GeoNode:', error);
   }
 
   // Actualizamos metadata_author y publisher
@@ -69,7 +68,7 @@ export default defineEventHandler(async (event) => {
     });
     //console.log('La respuesta:', contactsResponse);
     if (!contactsResponse.ok) {
-      console.error(contactsResponse);
+      console.error('Contactos', contactsResponse);
     }
     total += 1;
   } catch (error) {
@@ -87,12 +86,8 @@ export default defineEventHandler(async (event) => {
     });
     //console.log('La respuesta:', response);
     if (!response.ok) {
-      //throw new Error(`Falló la edición de metadatos: ${response.status}`);
-      //return response.status;
-      console.error(response);
+      console.error('General:', response);
     }
-    //const json = await response.json();
-    //return json;
     total += 1;
   } catch (error) {
     console.error('Error al subir al GeoNode:', error);

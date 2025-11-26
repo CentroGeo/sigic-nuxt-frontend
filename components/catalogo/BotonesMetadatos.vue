@@ -104,6 +104,8 @@ function validateMeta(requestBody) {
 }
 
 async function updateMetadata() {
+  wasUpdateSuccesful.value = false;
+  didUpdateFail.value = false;
   isLoading.value = true;
   const requestBody = storeMetadatos.buildRequestBody();
   const isMetaValid = validateMeta(requestBody);
