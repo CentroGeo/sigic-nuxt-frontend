@@ -59,7 +59,10 @@ const seleccionFrecuenciaActual = computed({
 //const seleccionRecursosRelacionados = ref('');
 //const campoPuntoContacto = ref('');
 //const seleccionDuenio = ref('');
-const campoPubisher = ref('');
+const campoPublisher = computed({
+  get: () => storeMetadatos.metadata.publisher,
+  set: (value) => storeMetadatos.updateAttr('publisher', value),
+});
 const dictFrecuenciaActual = [
   { unknown: 'se desconoce la frecuencia de actualización de los datos' },
   { continual: 'los datos se actualizan repetida y frecuentemente' },
@@ -75,7 +78,7 @@ const dictFrecuenciaActual = [
   { quarterly: 'los datos se actualizan cada tres meses' },
 ];
 
-const geonodeUsers = ref(['...Cargando']);
+const geonodeUsers = ref([]);
 
 async function getUsers() {
   // Esta parte es para obtener todas las categorias
@@ -91,6 +94,19 @@ async function getUsers() {
 }
 
 getUsers();
+
+watch(campoPublisher, () => {
+  const selectedPublisher = geonodeUsers.value.find((d) => d.username === campoPublisher.value);
+  storeMetadatos.updateAttr('publisher_pk', selectedPublisher.pk);
+});
+
+/* watch(
+  () => storeMetadatos.metadata,
+  (nv) => {
+    console.log('nv', nv);
+  },
+  { deep: true }
+); */
 // function editarMetadatos(dato, valor) {
 //   storeCatalogo.metadatos[dato] = valor;
 //   // console.log(storeCatalogo.metadatos[dato]);
@@ -261,11 +277,10 @@ getUsers();
         </div> -->
         <ClientOnly>
           <SisdaiSelector
-            v-model="campoPubisher"
+            v-model="campoPublisher"
             etiqueta="Publisher"
             ejemplo="Añade nombre de publisher"
             :es_obligatorio="true"
-            style="opacity: 0.5"
           >
             <option v-for="value in geonodeUsers" :key="value.pk" :value="value.username">
               {{ value.username }}

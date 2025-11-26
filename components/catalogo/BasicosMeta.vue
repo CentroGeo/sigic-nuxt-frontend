@@ -50,7 +50,10 @@ const seleccionCategoria = computed({
   get: () => storeMetadatos.metadata.category,
   set: (value) => storeMetadatos.updateAttr('category', value),
 });
-const campoPalabrasClave = ref('');
+const campoPalabrasClave = computed({
+  get: () => storeMetadatos.metadata.keywords,
+  set: (value) => storeMetadatos.updateAttr('keywords', value),
+});
 const campoAutor = computed({
   get: () => storeMetadatos.metadata.metadata_author,
   set: (value) => storeMetadatos.updateAttr('metadata_author', value),
@@ -80,12 +83,10 @@ const dictCategoria = [
   { population: 'Población' },
 ];
 
-const geonodeUsers = ref(['...Cargando']);
-const loadingUsers = ref(false);
+const geonodeUsers = ref([]);
 
 async function getUsers() {
   // Esta parte es para obtener todas las categorias
-  loadingUsers.value = true;
   const url = `${config.public.geonodeApi}/users`;
   const requestTotal = await gnoxyFetch(url);
   const resTotal = await requestTotal.json();
@@ -95,7 +96,6 @@ async function getUsers() {
   geonodeUsers.value = resUsers.users.map((d) => {
     return { pk: d.pk, username: d.username };
   });
-  loadingUsers.value = false;
 }
 
 getUsers();
@@ -230,7 +230,6 @@ async function guardarImagen(files) {
               etiqueta="Autor (de los metadatos)"
               ejemplo="Añade nombre de autor"
               :es_obligatorio="true"
-              style="opacity: 0.5"
             >
               <option v-for="value in geonodeUsers" :key="value.pk" :value="value.username">
                 {{ value.username }}
