@@ -82,28 +82,31 @@ async function guardarArchivo(files) {
         // Me parece que todo esto tendría quye dispararse condicionalmente.
         // Si el recurso no es un dataset, todo lo de abajo falla.
         // Si es document solo habría que fijar el archivo.tipo_recurso = document
-        const request_geonode = await gnoxyFetch(
-          `${configEnv.public.geonodeUrl}/api/v2/datasets/${archivo.IdRutaArchivo}`
-        );
-        const res_geonode = await request_geonode.json();
-
         let tipo;
-        if (Object.keys(res_geonode).includes('dataset')) {
-          tipo = isGeometricExtension(res_geonode.dataset.extent) ? 'dataLayer' : 'dataTable';
-        } else if (Object.keys(res_geonode).includes('document')) {
-          tipo = 'document';
-        }
-        //console.log('El tipo:', tipo);
 
-        archivo.tipo_recurso = tipo;
-        const request_geoserver = await gnoxyFetch(
-          `${configEnv.public.geoserverUrl}/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=${res_geonode.dataset.alternate}&resultType=hits`
-        );
-        const proyeccion = res_geonode?.dataset?.srid;
-        const res_geoserver = await request_geoserver.text();
-        const match = res_geoserver.match(/numberOfFeatures="(\d+)"/);
-        archivo.numero_geometrias = match ? parseInt(match[1], 10) : null;
-        archivo.proyeccion = proyeccion;
+        if (base_files.includes('.' + file.name.split('.').slice(-1)[0])) {
+          const request_geonode = await gnoxyFetch(
+            `${configEnv.public.geonodeUrl}/api/v2/datasets/${archivo.IdRutaArchivo}`
+          );
+          const res_geonode = await request_geonode.json();
+          tipo = isGeometricExtension(res_geonode.dataset.extent) ? 'dataLayer' : 'dataTable';
+
+          if (tipo === 'dataLayer') {
+            archivo.tipo_recurso = tipo;
+
+            const request_geoserver = await gnoxyFetch(
+              `${configEnv.public.geoserverUrl}/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=${res_geonode.dataset.alternate}&resultType=hits`
+            );
+            const proyeccion = res_geonode?.dataset?.srid;
+            const res_geoserver = await request_geoserver.text();
+            const match = res_geoserver.match(/numberOfFeatures="(\d+)"/);
+            archivo.numero_geometrias = match ? parseInt(match[1], 10) : null;
+            archivo.proyeccion = proyeccion;
+          }
+        } else {
+          tipo = 'document';
+          archivo.tipo_recurso = tipo;
+        }
       } else {
         archivo.estatus = 'error_carga';
         archivo.mensaje = 'Respuesta inesperada del servidor';
@@ -230,7 +233,7 @@ async function monitorLayerImport(executionId, archivo) {
                         >Editar metadatos</NuxtLink
                       >
                     </div>
-                    <div v-if="['geojson', 'gpkg', 'zip'].includes(archivo.extension)">
+                    <div v-if="archivo.tipo_recurso === 'dataLayer'">
                       <NuxtLink
                         :to="`/catalogo/mis-archivos/editar/estilo?data=${archivo.IdRutaArchivo}&type=dataLayer`"
                       >
