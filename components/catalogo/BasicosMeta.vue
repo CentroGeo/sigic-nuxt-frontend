@@ -150,7 +150,7 @@ async function guardarImagen(files) {
       body: formData,
     });
 
-    console.log(await response.json());
+    console.warn(await response.json());
   } else {
     dragNdDrop.value?.archivoNoValido();
   }
@@ -173,7 +173,7 @@ async function guardarImagen(files) {
       :exclude-links="props.isModal"
     />
 
-    <div v-if="!props.isModal" style="opacity: 0.5">
+    <div v-if="!props.isModal">
       <p class="texto-peso-600">
         Miniatura imagen no mayor a 9kb tamaño 120x120px. Archivos Png o JPG
       </p>

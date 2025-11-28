@@ -8,6 +8,7 @@ export default defineEventHandler(async (event) => {
 
   const baseUrl = config.public.geonodeApi;
   const url = `${baseUrl}/${type}s/${pk}/`;
+  const keywordsUrl = `${baseUrl}/resources/${pk}/keywordtags/`;
 
   let total = 0;
   let keywordsBody: string[] = [];
@@ -36,9 +37,8 @@ export default defineEventHandler(async (event) => {
   });
 
   // Actualizamos keywords
-
   try {
-    const keywordsResponse = await fetch(`${url}keywordtags/`, {
+    const keywordsResponse = await fetch(keywordsUrl, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -47,11 +47,12 @@ export default defineEventHandler(async (event) => {
       body: JSON.stringify(keywordsBody),
     });
 
-    //console.log('La respuesta:', keywordsResponse);
+    console.log('La respuesta keywords:', keywordsResponse);
     if (!keywordsResponse.ok) {
       console.error('Keywords', keywordsResponse);
+    } else {
+      total += 1;
     }
-    total += 1;
   } catch (error) {
     console.error('Error al subir al GeoNode:', error);
   }
@@ -69,8 +70,9 @@ export default defineEventHandler(async (event) => {
     //console.log('La respuesta:', contactsResponse);
     if (!contactsResponse.ok) {
       console.error('Contactos', contactsResponse);
+    } else {
+      total += 1;
     }
-    total += 1;
   } catch (error) {
     console.error('Error al subir al GeoNode:', error);
   }
@@ -87,8 +89,9 @@ export default defineEventHandler(async (event) => {
     //console.log('La respuesta:', response);
     if (!response.ok) {
       console.error('General:', response);
+    } else {
+      total += 1;
     }
-    total += 1;
   } catch (error) {
     console.error('Error al subir al GeoNode:', error);
   }
