@@ -32,7 +32,9 @@ const storeMetadatos = useEditedMetadataStore();
 storeMetadatos.checkFilling(props.resourcePk, props.resourceType);
 const { gnoxyFetch } = useGnoxyUrl();
 const config = useRuntimeConfig();
-const imagen = ref();
+
+const configEnv = useRuntimeConfig();
+
 const campoTitulo = computed({
   get: () => storeMetadatos.metadata.title,
   set: (value) => storeMetadatos.updateAttr('title', value),
@@ -84,6 +86,7 @@ const dictCategoria = [
 ];
 
 const geonodeUsers = ref([]);
+const { data } = useAuth();
 
 async function getUsers() {
   geonodeUsers.value.push({
@@ -130,9 +133,24 @@ watch(campoAutor, () => {
 const dragNdDrop = ref(null);
 const img_files = ['.jpg', '.jpeg', '.png', '.webp'];
 async function guardarImagen(files) {
-  // solo una o la primera archivo de imagen
+  const token = ref(data.value?.accessToken);
+
   if (img_files.map((end) => files[0]?.name.endsWith(end)).includes(true)) {
-    imagen.value = files;
+    const formData = new FormData();
+
+    // Enviamos SOLO el primer file
+    formData.append('file', files[0]);
+    formData.append('token', token.value);
+    formData.append('pk', props.resourcePk);
+
+    const endpoint = `${configEnv.public.basePath}/api/metadatos-thumbnail`;
+    // Mandamos el formdata a subirse por
+    const response = await fetch(endpoint, {
+      method: 'PUT',
+      body: formData,
+    });
+
+    console.log(await response.json());
   } else {
     dragNdDrop.value?.archivoNoValido();
   }
