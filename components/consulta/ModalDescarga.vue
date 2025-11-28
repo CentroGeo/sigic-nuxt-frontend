@@ -183,7 +183,12 @@ defineExpose({
             <label :for="`download-option-${option.label}`">{{ option.label }} </label>
           </div>
           <div class="flex flex-contenido-final">
-            <button type="button" class="boton-primario m-t-2" @click="descargarClicked">
+            <button
+              type="button"
+              aria-label="Descargar"
+              class="boton-primario m-t-2"
+              @click="descargarClicked"
+            >
               Descargar
             </button>
           </div>

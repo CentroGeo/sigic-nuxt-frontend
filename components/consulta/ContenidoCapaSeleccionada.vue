@@ -147,6 +147,7 @@ watch(resourceElement, () => {
       <button
         type="button"
         class="boton-secundario boton-chico columna-16 flex flex-contenido-centrado"
+        aria-label="Enlace Open Web Services"
         @click="shareOws"
       >
         Enlace Open Web Services (OWS)

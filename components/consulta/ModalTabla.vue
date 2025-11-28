@@ -73,6 +73,7 @@ watch([paginaActual], () => {
       <template v-if="props.selectedElement.sourcetype !== 'REMOTE'" #pie>
         <button
           type="button"
+          aria-label="Ver Tabla en Visualizador"
           class="boton-con-contenedor-secundario boton-grande ancho"
           @click="openTablas"
         >
@@ -81,6 +82,7 @@ watch([paginaActual], () => {
         </button>
         <button
           type="button"
+          aria-label="Descargar"
           class="boton-primario boton-grande ancho"
           @click="emit('notifyDownload')"
         >
