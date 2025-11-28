@@ -56,10 +56,16 @@ const preguntas = [
 ];
 
 const modalSolicitarDescarga = ref(null);
+const modalDescargaSolicitada = ref(null);
 
 function irAProyectosPublicos() {
   router.push('/levantamiento/proyectos/');
 }
+
+const handleDescarga = () => {
+  modalSolicitarDescarga.value.cerrarModal();
+  modalDescargaSolicitada.value.abrirModal();
+};
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeLevantamiento.catalogoColapsado">
@@ -210,7 +216,36 @@ function irAProyectosPublicos() {
               >
                 Cerrar
               </button>
-              <button type="button" class="boton-primario boton-chico">Solicitar descarga</button>
+              <button type="button" class="boton-primario boton-chico" @click="handleDescarga">
+                Solicitar descarga
+              </button>
+            </template>
+          </SisdaiModal>
+
+          <SisdaiModal ref="modalDescargaSolicitada">
+            <template #encabezado><h3>Descarga solicitada</h3></template>
+            <template #cuerpo>
+              <div
+                class="texto-color-confirmacion fondo-color-confirmacion borde-redondeado-20 borde borde-color-confirmacion p-3 m-b-3"
+              >
+                <div class="m-0 descarga-notificacion">
+                  <span class="pictograma-aprobado"></span>
+                  <div>
+                    Tu solicitud se ha procesado con éxito, puedes darle seguimiento en la sección
+                    “Descargas”.
+                  </div>
+                </div>
+              </div>
+            </template>
+            <template #pie>
+              <button
+                type="button"
+                class="boton-secundario boton-chico"
+                @click="modalDescargaSolicitada?.cerrarModal()"
+              >
+                Cerrar
+              </button>
+              <button type="button" class="boton-primario boton-chico">Ir a Descargas</button>
             </template>
           </SisdaiModal>
         </ClientOnly>
@@ -287,6 +322,15 @@ function irAProyectosPublicos() {
         justify-content: center;
       }
     }
+  }
+}
+
+.descarga-notificacion {
+  display: flex;
+  align-items: center;
+
+  span {
+    margin-right: 10px;
   }
 }
 </style>
