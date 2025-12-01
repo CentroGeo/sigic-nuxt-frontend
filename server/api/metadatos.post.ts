@@ -39,7 +39,7 @@ export default defineEventHandler(async (event) => {
   // Actualizamos keywords
   try {
     const keywordsResponse = await fetch(keywordsUrl, {
-      method: 'PUT',
+      method: 'PATCH',
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
