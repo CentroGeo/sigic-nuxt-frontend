@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
 
   const baseUrl = config.public.geonodeApi;
   const url = `${baseUrl}/${type}s/${pk}/`;
-  const keywordsUrl = `${baseUrl}/resources/${pk}/keywordtags/keywordtags/`;
+  const keywordsUrl = `${baseUrl}/resources/${pk}/keywordtags/replace/`;
 
   let total = 0;
   let keywordsBody: string[] = [];
@@ -36,10 +36,11 @@ export default defineEventHandler(async (event) => {
     }
   });
 
+  //console.warn(keywordsBody)
   // Actualizamos keywords
   try {
     const keywordsResponse = await fetch(keywordsUrl, {
-      method: 'PATCH',
+      method: 'Post',
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',

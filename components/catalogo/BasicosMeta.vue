@@ -250,7 +250,6 @@ async function guardarImagen(files) {
 
             <SisdaiCampoBase
               v-model="campoPalabrasClave"
-              style="opacity: 0.5"
               etiqueta="Palabras clave"
               ejemplo="Agua, educación, conservación..."
               :es_obligatorio="true"
