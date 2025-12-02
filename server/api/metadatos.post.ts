@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
 
   let total = 0;
   let keywordsBody: string[] = [];
-  const contactsBody = { metadata_author: [], publisher: [] };
+  const contactsBody = { metadata_author: [] };
   const formData = new FormData();
   const metaFileds = Object.keys(body);
   metaFileds.forEach((field) => {
@@ -24,9 +24,6 @@ export default defineEventHandler(async (event) => {
     } */
     if (field === 'metadata_author') {
       contactsBody['metadata_author'] = body[field];
-    } else if (field === 'publisher') {
-      contactsBody['publisher'] = body[field];
-      console.warn('Cuerpo peticion contacts:', contactsBody);
     } else if (field === 'keywords') {
       keywordsBody = body[field];
     } else if (typeof body[field] === 'string') {
@@ -36,11 +33,10 @@ export default defineEventHandler(async (event) => {
     }
   });
 
-  //console.warn(keywordsBody)
   // Actualizamos keywords
   try {
     const keywordsResponse = await fetch(keywordsUrl, {
-      method: 'Post',
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
@@ -58,7 +54,7 @@ export default defineEventHandler(async (event) => {
     console.error('Error al subir al GeoNode:', error);
   }
 
-  // Actualizamos metadata_author y publisher
+  // Actualizamos metadata_author
   try {
     const contactsResponse = await fetch(url, {
       method: 'PATCH',

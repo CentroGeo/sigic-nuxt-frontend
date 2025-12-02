@@ -314,10 +314,11 @@ const dictRestricciones = [
           <ClientOnly>
             <SisdaiCampoBase
               v-model="campoAtribucion"
-              etiqueta="Atribución"
+              etiqueta="Autores o Institución"
               ejemplo="Autoridad o función otorgada, ej. gobernante, delegada/o, o similar"
               tipo="text"
               :es_etiqueta_visible="true"
+              :es_obligatorio="true"
             />
           </ClientOnly>
         </div>

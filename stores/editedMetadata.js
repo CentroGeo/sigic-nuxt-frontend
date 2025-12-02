@@ -29,10 +29,6 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
     purpose: undefined,
     supplemental_information: undefined,
     maintenance_frequency: undefined,
-    publisher: '...cargando',
-    publisher_pk: undefined,
-    //owner: undefined,
-    //thumbnail_url: undefined,
     attribute_set: [],
   });
 
@@ -67,8 +63,6 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
           metadata.attribute_set = [];
         } else if (key === 'abstract') {
           metadata.abstract = metadataResponse['raw_abstract'];
-        } else if (key === 'date_type') {
-          metadata[key] = 'creation';
         } else if (key === 'date') {
           const formatedDate = new Date(metadataResponse[key]).toISOString();
           metadata[key] = formatedDate.slice(0, 10);
@@ -84,10 +78,6 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
           metadata[key] = metadataResponse.license.identifier;
         } else if (key === 'restriction_code_type') {
           metadata[key] = metadataResponse.restriction_code_type?.identifier;
-        } else if (key === 'publisher') {
-          metadata[key] = metadataResponse.publisher?.[0]?.['username'] || '';
-        } else if (key === 'publihser_pk') {
-          metadata[key] = metadataResponse.publisher?.[0]?.['pk'] || '';
         } else if (key in metadataResponse) {
           metadata[key] = metadataResponse[key];
         } else {
@@ -128,7 +118,6 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
      * @returns Objeto de metadatos
      */
     buildRequestBody() {
-      //TODO: incorporar keywords, publisher y arreglar metadata_author
       const metaDict = {};
       //const exclude = ['uuid', 'pk', 'resource_type', 'metadata_author_pk'];
       //const dictKeys = Object.keys(metadata).filter((key) => !exclude.includes(key));
@@ -190,7 +179,11 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
       }
       if (metadata.abstract && metadata.abstract.length > 0) {
         metaDict['abstract'] = metadata.abstract;
+      } else {
+        metaDict['abstract'] = 'No se proporcionó información';
+        //metaDict['abstract'] = ' ';
       }
+
       if (metadata.date && metadata.date.length > 0) {
         metaDict['date_type'] = metadata.date_type;
         metaDict['date'] = new Date(metadata.date).toISOString(); //
@@ -218,16 +211,17 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
       if (metadata.language && metadata.language.length > 0) {
         metaDict['language'] = metadata.language;
       }
-
-      if (metadata.abstract && metadata.abstract.length > 0) {
-        metaDict['abstract'] = metadata.abstract;
-      }
-
       if (metadata.attribution && metadata.attribution.length > 0) {
         metaDict['attribution'] = metadata.attribution;
+      } else {
+        //console.log('aqui', typeof metadata.attribution, metadata.attribution);
+        //metaDict['attribution'] = metadata.attribution;
+        metaDict['attribution'] = ' ';
       }
       if (metadata.data_quality_statement && metadata.data_quality_statement.length > 0) {
         metaDict['data_quality_statement'] = metadata.data_quality_statement;
+      } else {
+        metaDict['data_quality_statement'] = 'No se proporcionó información';
       }
       if (metadata.restriction_code_type && metadata.restriction_code_type.length > 0) {
         metaDict['restriction_code_type'] = { identifier: metadata.restriction_code_type };
@@ -249,14 +243,6 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
       }
       if (metadata.maintenance_frequency && metadata.maintenance_frequency.length > 0) {
         metaDict['maintenance_frequency'] = metadata.maintenance_frequency;
-      }
-      if (metadata.publisher && metadata.publisher_pk) {
-        metaDict['publisher'] = [
-          {
-            pk: metadata.publisher_pk,
-            username: metadata.publisher,
-          },
-        ];
       }
 
       const attrs = {};

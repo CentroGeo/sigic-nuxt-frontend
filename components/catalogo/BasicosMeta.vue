@@ -44,11 +44,17 @@ const campoResumen = computed({
   set: (value) => storeMetadatos.updateAttr('abstract', value),
 });
 
-const seleccionFecha = computed({
+const campoFecha = computed({
   get: () => storeMetadatos.metadata.date,
   set: (value) => storeMetadatos.updateAttr('date', value),
 });
-const seleccionCategoria = computed({
+
+const campoTipoFecha = computed({
+  get: () => storeMetadatos.metadata.date_type,
+  set: (value) => storeMetadatos.updateAttr('date_type', value),
+});
+
+const campoCategoria = computed({
   get: () => storeMetadatos.metadata.category,
   set: (value) => storeMetadatos.updateAttr('category', value),
 });
@@ -56,7 +62,7 @@ const campoPalabrasClave = computed({
   get: () => storeMetadatos.metadata.keywords,
   set: (value) => storeMetadatos.updateAttr('keywords', value),
 });
-const campoAutor = computed({
+const campoAutorMeta = computed({
   get: () => storeMetadatos.metadata.metadata_author,
   set: (value) => storeMetadatos.updateAttr('metadata_author', value),
 });
@@ -125,8 +131,8 @@ async function getUsers() {
 
 getUsers();
 
-watch(campoAutor, () => {
-  const selectedAuthor = geonodeUsers.value.find((d) => d.username === campoAutor.value);
+watch(campoAutorMeta, () => {
+  const selectedAuthor = geonodeUsers.value.find((d) => d.username === campoAutorMeta.value);
   storeMetadatos.updateAttr('metadata_author_pk', selectedAuthor.pk);
 });
 
@@ -198,32 +204,32 @@ async function guardarImagen(files) {
             />
             <SisdaiCampoBase
               v-model="campoResumen"
+              class="m-y-3"
               etiqueta="Resumen"
               ejemplo="El texto descriptivo es conciso y significativo. Debe ayudar a la persona usuaria a..."
               tipo="text"
               :es_etiqueta_visible="true"
-              :es_obligatorio="true"
-              texto_ayuda="El campo tener un mínimo de 30 caracteres"
             />
           </ClientOnly>
         </div>
-        <!--         <div class="columna-8">
+        <div class="columna-8">
           <ClientOnly>
             <SisdaiSelector
-              v-model="seleccionTipoFecha"
+              v-model="campoTipoFecha"
               etiqueta="Tipo de fecha"
               texto_ayuda="Creación, publicación o revisión."
+              :es_obligatorio="true"
             >
               <option value="creation">Creación</option>
               <option value="publication">Publicación</option>
               <option value="revison">Revisón</option>
             </SisdaiSelector>
           </ClientOnly>
-        </div> -->
+        </div>
         <div class="columna-8">
           <ClientOnly>
             <SisdaiCampoBase
-              v-model="seleccionFecha"
+              v-model="campoFecha"
               etiqueta="Fecha"
               ejemplo="tipo date"
               tipo="date"
@@ -234,11 +240,7 @@ async function guardarImagen(files) {
         </div>
         <div class="columna-16">
           <ClientOnly>
-            <SisdaiSelector
-              v-model="seleccionCategoria"
-              etiqueta="Categoría"
-              :es_obligatorio="true"
-            >
+            <SisdaiSelector v-model="campoCategoria" etiqueta="Categoría" :es_obligatorio="true">
               <option
                 v-for="value in dictCategoria"
                 :key="Object.keys(value)"
@@ -259,16 +261,15 @@ async function guardarImagen(files) {
         <div class="columna-8">
           <ClientOnly>
             <!--            <SisdaiCampoBase
-              v-model="campoAutor"
+              v-model="campoAutorMeta"
               etiqueta="Autor (de los metadatos)"
               ejemplo="Añade nombre de autor"
               :es_obligatorio="true"
             /> -->
             <SisdaiSelector
-              v-model="campoAutor"
-              etiqueta="Autor (de los metadatos)"
+              v-model="campoAutorMeta"
+              etiqueta="Autor(a) de los metadatos"
               ejemplo="Añade nombre de autor"
-              :es_obligatorio="true"
             >
               <option v-for="value in geonodeUsers" :key="value.pk" :value="value.username">
                 {{ value.username }}

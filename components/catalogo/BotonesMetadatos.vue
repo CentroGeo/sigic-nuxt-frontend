@@ -76,14 +76,14 @@ function irARutaConQuery(direccion) {
 
 function validateMeta(requestBody) {
   let status = false;
-  const editedAbstract = requestBody.abstract?.replace(/\s/g, '') || '';
+  //const editedAbstract = requestBody.abstract?.replace(/\s/g, '') || '';
   if (!requestBody.title || requestBody.title.length === 0) {
     status = false;
     //console.log('titulo');
-  } else if (editedAbstract.length < 30) {
+  } /* else if (editedAbstract.length < 30) {
     //console.log('abstract');
     status = false;
-  } else if (!requestBody.date || requestBody.date.length === 0) {
+  } */ else if (!requestBody.date || requestBody.date.length === 0) {
     status = false;
     //console.log('date');
   } else if (requestBody.attribute_set) {
