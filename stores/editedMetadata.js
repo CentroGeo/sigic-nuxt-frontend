@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { categoriesNames } from '~/utils/consulta';
+import { categoriesNames, unaccentUppercase } from '~/utils/consulta';
 
 export const useEditedMetadataStore = defineStore('editedMetadata', () => {
   const config = useRuntimeConfig();
@@ -29,7 +29,8 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
     purpose: undefined,
     supplemental_information: undefined,
     maintenance_frequency: undefined,
-    //publisher: undefined,
+    publisher: '...cargando',
+    publisher_pk: undefined,
     //owner: undefined,
     //thumbnail_url: undefined,
     attribute_set: [],
@@ -73,6 +74,8 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
           metadata[key] = formatedDate.slice(0, 10);
         } else if (key === 'category') {
           metadata[key] = metadataResponse.category?.identifier;
+        } else if (key === 'keywords') {
+          metadata[key] = metadataResponse.keywords.map((d) => d.name).join(',');
         } else if (key === 'metadata_author') {
           metadata[key] = metadataResponse.metadata_author[0]['username'];
         } else if (key === 'metadata_author_pk') {
@@ -81,6 +84,10 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
           metadata[key] = metadataResponse.license.identifier;
         } else if (key === 'restriction_code_type') {
           metadata[key] = metadataResponse.restriction_code_type?.identifier;
+        } else if (key === 'publisher') {
+          metadata[key] = metadataResponse.publisher?.[0]?.['username'] || '';
+        } else if (key === 'publihser_pk') {
+          metadata[key] = metadataResponse.publisher?.[0]?.['pk'] || '';
         } else if (key in metadataResponse) {
           metadata[key] = metadataResponse[key];
         } else {
@@ -194,6 +201,17 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
           gn_description: categoriesNames[metadata.category],
         };
       }
+      if (metadata.keywords && metadata.keywords.length > 0) {
+        metaDict['keywords'] = unaccentUppercase(metadata.keywords).split(',');
+      }
+      if (metadata.metadata_author && metadata.metadata_author_pk) {
+        metaDict['metadata_author'] = [
+          {
+            pk: metadata.metadata_author_pk,
+            username: metadata.metadata_author,
+          },
+        ];
+      }
       if (metadata.license && metadata.license.length > 0) {
         metaDict['license'] = { identifier: metadata.license };
       }
@@ -231,6 +249,14 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
       }
       if (metadata.maintenance_frequency && metadata.maintenance_frequency.length > 0) {
         metaDict['maintenance_frequency'] = metadata.maintenance_frequency;
+      }
+      if (metadata.publisher && metadata.publisher_pk) {
+        metaDict['publisher'] = [
+          {
+            pk: metadata.publisher_pk,
+            username: metadata.publisher,
+          },
+        ];
       }
 
       const attrs = {};
