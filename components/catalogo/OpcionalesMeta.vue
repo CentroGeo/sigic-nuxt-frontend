@@ -186,7 +186,7 @@ const dictFrecuenciaActual = [
               v-model="seleccionFrecuenciaActual"
               etiqueta="Frencuencia de actualización"
             >
-              <!--               <option value="" selected="">---------</option> -->
+              <option value="">----</option>
               <option
                 v-for="value in dictFrecuenciaActual"
                 :key="Object.keys(value)"

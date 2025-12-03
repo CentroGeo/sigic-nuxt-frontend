@@ -241,6 +241,7 @@ async function guardarImagen(files) {
         <div class="columna-16">
           <ClientOnly>
             <SisdaiSelector v-model="campoCategoria" etiqueta="Categoría" :es_obligatorio="true">
+              <option value="">----</option>
               <option
                 v-for="value in dictCategoria"
                 :key="Object.keys(value)"

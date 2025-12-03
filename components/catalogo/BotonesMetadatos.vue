@@ -79,13 +79,11 @@ function validateMeta(requestBody) {
   //const editedAbstract = requestBody.abstract?.replace(/\s/g, '') || '';
   if (!requestBody.title || requestBody.title.length === 0) {
     status = false;
-    //console.log('titulo');
   } /* else if (editedAbstract.length < 30) {
     //console.log('abstract');
     status = false;
-  } */ else if (!requestBody.date || requestBody.date.length === 0) {
+  }  */ else if (!requestBody.date || requestBody.date.length === 0) {
     status = false;
-    //console.log('date');
   } else if (requestBody.attribute_set) {
     const attributeList = Object.keys(requestBody.attribute_set);
     const displayOrderList = attributeList.map((d) =>
@@ -120,7 +118,7 @@ async function updateMetadata() {
     });
     console.warn('La respuesta de la petición:', response);
     isLoading.value = false;
-    if (response === 3) {
+    if (response === 2) {
       wasUpdateSuccesful.value = true;
     } else {
       didUpdateFail.value = true;

@@ -352,7 +352,7 @@ const dictRestricciones = [
         <div class="columna-16">
           <ClientOnly>
             <SisdaiSelector v-model="seleccionRestricciones" etiqueta="Restricciones">
-              <!--               <option value="" selected="">---------</option> -->
+              <option value="">----</option>
               <option
                 v-for="value in dictRestricciones"
                 :key="Object.keys(value)"
