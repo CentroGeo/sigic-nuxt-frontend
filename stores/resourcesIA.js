@@ -81,6 +81,7 @@ export const useResourcesIAStore = defineStore('resourcesIA', () => {
         page_size: 2,
         ...params,
         'filter{complete_metadata}': 'true',
+        'filter{is_published}': 'true',
       };
       const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
       const request = await gnoxyFetch(url);
