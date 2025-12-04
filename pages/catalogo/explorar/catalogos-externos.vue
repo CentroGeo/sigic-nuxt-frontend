@@ -1,4 +1,17 @@
-<script></script>
+<script setup>
+const storeCatalogo = useCatalogoStore();
+</script>
 <template>
-  <h3>Servicios Remotos</h3>
+  <UiLayoutPaneles :estado-colapable="storeCatalogo.catalogoColapsado">
+    <template #catalogo>
+      <CatalogoListaMenuLateral />
+    </template>
+    <template #visualizador>
+      <main id="principal" class="contenedor">
+        <h2>Servicios remotos</h2>
+        <CatalogoCatalogosInstitucionales />
+        <CatalogoCatalogosUsuarios />
+      </main>
+    </template>
+  </UiLayoutPaneles>
 </template>
