@@ -117,9 +117,17 @@ async function crearConexion() {
       <CatalogoListaMenuLateral />
     </template>
     <template #visualizador>
-      <main id="principal" class="contenedor m-b-10">
-        <div class="alineacion-izquierda ancho-lectura">
-          <h2>Carga catálogos externos</h2>
+      <main id="principal" class="contenedor ancho-fijo m-b-10">
+        <div
+          class="columna-10 alineacion-izquierda fondo-color-neutro borde-redondeado-16 m-y-4"
+          style="padding: 24px"
+        >
+          <h2>Conecta un catálogo externo</h2>
+          <p>
+            Puedes importar recursos de información desde catálogos externos. Para crear una
+            conexión necesitas el Servicio URL y el Tipo de servicio, una vez creada la conexión
+            podrás explorar los recursos disponibles e importar los que necesites a tus archivos.
+          </p>
           <form @submit.prevent>
             <ClientOnly class="flex">
               <SisdaiCampoBase
@@ -149,7 +157,7 @@ async function crearConexion() {
             </ClientOnly>
             <div class="flex flex-contenido-inicio m-t-3">
               <button
-                class="boton-primario"
+                class="boton-primario boton-chico"
                 aria-label="Crear conexión de catálogo externo"
                 type="button"
                 @click="crearConexion"

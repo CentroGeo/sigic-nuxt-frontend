@@ -8,7 +8,7 @@ definePageMeta({
 
 const storeCatalogo = useCatalogoStore();
 
-try {
+/* try {
   const { data } = useAuth();
   const token = data.value?.accessToken;
   // console.log(token);
@@ -29,7 +29,10 @@ try {
   }
 } catch (err) {
   console.warn('Error en el streaming: ' + err);
-}
+} */
+navigateTo({
+  path: '/catalogo/servicios-remotos/agregar',
+});
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeCatalogo.catalogoColapsado">
