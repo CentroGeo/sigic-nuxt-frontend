@@ -32,6 +32,7 @@ export default defineEventHandler(async (event) => {
     maintenance_frequency: null,
     attribute_set: {},
   };
+
   const metaFileds = Object.keys(body);
   metaFileds.forEach((field) => {
     if (field === 'attribute_set') {
