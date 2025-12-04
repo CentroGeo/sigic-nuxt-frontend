@@ -32,7 +32,9 @@ const storeMetadatos = useEditedMetadataStore();
 storeMetadatos.checkFilling(props.resourcePk, props.resourceType);
 const { gnoxyFetch } = useGnoxyUrl();
 const config = useRuntimeConfig();
-const imagen = ref();
+
+const configEnv = useRuntimeConfig();
+
 const campoTitulo = computed({
   get: () => storeMetadatos.metadata.title,
   set: (value) => storeMetadatos.updateAttr('title', value),
@@ -50,7 +52,10 @@ const seleccionCategoria = computed({
   get: () => storeMetadatos.metadata.category,
   set: (value) => storeMetadatos.updateAttr('category', value),
 });
-const campoPalabrasClave = ref('');
+const campoPalabrasClave = computed({
+  get: () => storeMetadatos.metadata.keywords,
+  set: (value) => storeMetadatos.updateAttr('keywords', value),
+});
 const campoAutor = computed({
   get: () => storeMetadatos.metadata.metadata_author,
   set: (value) => storeMetadatos.updateAttr('metadata_author', value),
@@ -80,22 +85,42 @@ const dictCategoria = [
   { population: 'Población' },
 ];
 
-const geonodeUsers = ref(['...Cargando']);
-const loadingUsers = ref(false);
+const geonodeUsers = ref([]);
+const { data } = useAuth();
 
 async function getUsers() {
-  // Esta parte es para obtener todas las categorias
-  loadingUsers.value = true;
-  const url = `${config.public.geonodeApi}/users`;
-  const requestTotal = await gnoxyFetch(url);
+  geonodeUsers.value.push({
+    pk: storeMetadatos.metadata.metadata_author_pk,
+    username: storeMetadatos.metadata.metadata_author,
+  });
+
+  let endpoint = `${config.public.geonodeApi}/users`;
+  do {
+    const requestUsers = await gnoxyFetch(endpoint);
+    if (!requestUsers.ok) {
+      const error = await requestUsers.json();
+      console.error('Falló petición de usuarios:', error);
+    }
+    const resUsers = await requestUsers.json();
+    const newUsers = resUsers.users
+      .map((d) => {
+        return { pk: d.pk, username: d.username };
+      })
+      .filter((d) => d.username !== storeMetadatos.metadata.metadata_author);
+    geonodeUsers.value = [...geonodeUsers.value, ...newUsers];
+
+    endpoint = resUsers.links.next;
+  } while (endpoint);
+
+  /*   const requestTotal = await gnoxyFetch(url);
   const resTotal = await requestTotal.json();
   const totalUsers = resTotal.total;
   const requestUsers = await gnoxyFetch(`${url}?page_size=${totalUsers}`);
   const resUsers = await requestUsers.json();
-  geonodeUsers.value = resUsers.users.map((d) => {
+  const newUsers = resUsers.users.map((d) => {
     return { pk: d.pk, username: d.username };
   });
-  loadingUsers.value = false;
+  geonodeUsers.value = [...geonodeUsers.value, ...newUsers]; */
 }
 
 getUsers();
@@ -108,9 +133,24 @@ watch(campoAutor, () => {
 const dragNdDrop = ref(null);
 const img_files = ['.jpg', '.jpeg', '.png', '.webp'];
 async function guardarImagen(files) {
-  // solo una o la primera archivo de imagen
+  const token = ref(data.value?.accessToken);
+
   if (img_files.map((end) => files[0]?.name.endsWith(end)).includes(true)) {
-    imagen.value = files;
+    const formData = new FormData();
+
+    // Enviamos SOLO el primer file
+    formData.append('file', files[0]);
+    formData.append('token', token.value);
+    formData.append('pk', props.resourcePk);
+
+    const endpoint = `${configEnv.public.basePath}/api/metadatos-thumbnail`;
+    // Mandamos el formdata a subirse por
+    const response = await fetch(endpoint, {
+      method: 'PUT',
+      body: formData,
+    });
+
+    console.warn(await response.json());
   } else {
     dragNdDrop.value?.archivoNoValido();
   }
@@ -133,7 +173,7 @@ async function guardarImagen(files) {
       :exclude-links="props.isModal"
     />
 
-    <div v-if="!props.isModal" style="opacity: 0.5">
+    <div v-if="!props.isModal">
       <p class="texto-peso-600">
         Miniatura imagen no mayor a 9kb tamaño 120x120px. Archivos Png o JPG
       </p>
@@ -210,7 +250,6 @@ async function guardarImagen(files) {
 
             <SisdaiCampoBase
               v-model="campoPalabrasClave"
-              style="opacity: 0.5"
               etiqueta="Palabras clave"
               ejemplo="Agua, educación, conservación..."
               :es_obligatorio="true"
@@ -230,7 +269,6 @@ async function guardarImagen(files) {
               etiqueta="Autor (de los metadatos)"
               ejemplo="Añade nombre de autor"
               :es_obligatorio="true"
-              style="opacity: 0.5"
             >
               <option v-for="value in geonodeUsers" :key="value.pk" :value="value.username">
                 {{ value.username }}
