@@ -6,6 +6,18 @@ const props = defineProps({
   },
 });
 const { harvester } = toRefs(props);
+
+function irARutaQuery() {
+  navigateTo({
+    path: `/catalogo/servicios-remotos/importar`,
+    query: {
+      id: harvester.value.id,
+      title: harvester.value.title,
+      /*         unique_identifier: v.unique_identifier,
+        remote_resource_type: v.remote_resource_type, */
+    },
+  });
+}
 </script>
 <template>
   <div class="tarjeta columna-5">
@@ -14,7 +26,11 @@ const { harvester } = toRefs(props);
       <p class="tarjeta-titulo" style="font-weight: bold">{{ harvester.title }}</p>
       <p>{{ harvester.remote_url }}</p>
       <UiNumeroElementos :numero="harvester.total_resources" :etiqueta="'Capas'" />
-      <button class="boton-primario flex flex-contenido-centrado" style="width: 100%; margin: 8px">
+      <button
+        class="boton-primario flex flex-contenido-centrado"
+        style="width: 100%; margin: 8px"
+        @click="irARutaQuery"
+      >
         Explorar recursos
       </button>
       <button

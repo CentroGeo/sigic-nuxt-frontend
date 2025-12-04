@@ -1,39 +1,20 @@
 <script setup>
-const { gnoxyFetch } = useGnoxyUrl();
+import { fetchHarvesters } from '~/utils/catalogo';
 
-const config = useRuntimeConfig();
-const institutionalHarvesters = ref([]);
+const harvesters = ref([]);
 const isLoading = ref(true);
+const fetchStatus = ref(null);
+const queryParams = ref({ page_size: 3 });
 
-async function fetchHarvesters() {
+async function getResources() {
   isLoading.value = true;
-  let harvesters = [];
-  const endpoint = `${config.public.geonodeApi}/harvesters/?page_size=3`;
-  // Obtenemos la información de todos los harvesters
-  const requestHarvesters = await gnoxyFetch(endpoint);
-  if (!requestHarvesters.ok) {
-    const error = await requestHarvesters.json();
-    console.error('Falló petición de harvesters:', error);
-  }
-  const resHarvesters = await requestHarvesters.json();
-  harvesters = resHarvesters.harvesters;
+  const { status, data } = await fetchHarvesters(true, queryParams.value);
+  harvesters.value = data;
+  fetchStatus.value = status;
 
-  // A partir de la información de los harvesters, construimos un nuevo objeto para construir las tarjetas
-  harvesters.forEach(async (h) => {
-    const harvestableResourcesUrl = h.links.harvestable_resources;
-    const resA = await gnoxyFetch(`${harvestableResourcesUrl}/?page_size=1`);
-    const dataA = await resA.json();
-    const totalResources = dataA.total;
-    institutionalHarvesters.value.push({
-      id: h.id,
-      title: h.name,
-      total_resources: totalResources,
-      remote_url: h.remote_url,
-    });
-  });
   isLoading.value = false;
 }
-fetchHarvesters();
+getResources();
 </script>
 <template>
   <div id="servicios-institucionales">
@@ -43,16 +24,30 @@ fetchHarvesters();
       a tus archivos y utilizarlos en la plataforma SIGIC. Ten en cuenta que deberás completar
       previamente los metadatos de cada uno.
     </p>
+
+    <!--El spinner general-->
     <div v-if="isLoading" class="flex flex-contenido-centrado m-y-5">
       <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
     </div>
-    <div v-else class="flex">
+
+    <!--Las tarjetas de servicios remotos-->
+    <div v-if="!isLoading && fetchStatus === 'ok'" class="flex">
       <CatalogoTarjetaServicio
-        v-for="catalogo in institutionalHarvesters"
+        v-for="catalogo in harvesters"
         :key="catalogo.id"
         :harvester="catalogo"
       />
     </div>
+
+    <!--Mensaje de error si falla la petición-->
+    <div
+      v-if="!isLoading && fetchStatus === 'error'"
+      class="contenedor ancho-lectura borde-redondeado-16 texto-color-error fondo-color-error p-3 m-3 flex flex-contenido-centrado"
+    >
+      <span class="pictograma-alerta" />
+      <b> No se pudo completar la solicitud. Revisa tu conexión e intentalo de nuevo más tarde.</b>
+    </div>
+
     <div class="flex flex-contenido-centrado m-y-2">
       <NuxtLink to="/catalogo/servicios-remotos/servicios-precargados" style="font-weight: bold">
         Ver todos los catálogos externos preconectados

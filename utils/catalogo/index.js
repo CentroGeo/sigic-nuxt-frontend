@@ -19,3 +19,68 @@ export function convertirBytes(bytes) {
 
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 }
+
+/**
+ * Esta función recupera información de los harvesters registrados en el sigic
+ * @param {Boolean} limited
+ * @param {Object} params
+ * @returns {Object} Objeto que permite construit las tarjetas y tablas de servicios remotos
+ */
+export async function fetchHarvesters(limited, params) {
+  const { gnoxyFetch } = useGnoxyUrl();
+  const config = useRuntimeConfig();
+  const dataParams = new URLSearchParams(params);
+  let url = `${config.public.geonodeApi}/harvesters/?${dataParams.toString()}`;
+  const data = [];
+  let harvesters = [];
+  let status = 'ok';
+
+  try {
+    // Obtenemos la información de todos los harvesters
+    do {
+      const requestHarvesters = await gnoxyFetch(url);
+      if (!requestHarvesters.ok) {
+        const error = await requestHarvesters.json();
+        console.error('Falló petición de harvesters:', error);
+      }
+      const resHarvesters = await requestHarvesters.json();
+      harvesters = [...harvesters, ...resHarvesters.harvesters];
+      if (limited) {
+        url = undefined;
+      } else {
+        url = resHarvesters.links.next;
+      }
+    } while (url);
+
+    // Creamos el objeto con la información que nos interesa
+    await Promise.all(
+      harvesters.map(async (h) => {
+        const harvestableResourcesUrl = h.links.harvestable_resources;
+        const resA = await gnoxyFetch(`${harvestableResourcesUrl}/?page_size=1`);
+        const dataA = await resA.json();
+        const totalResources = dataA.total;
+
+        const res2 = await gnoxyFetch(`${harvestableResourcesUrl}/?page_size=${totalResources}`);
+        const dataB = await res2.json();
+        const harvestableResources = dataB.harvestable_resources;
+        const exportedResources = harvestableResources.filter(
+          (j) => j.should_be_harvested === true
+        );
+
+        data.push({
+          id: h.id,
+          title: h.name,
+          total_resources: totalResources,
+          exported_resources: exportedResources.length,
+          to_attend_resources: totalResources - exportedResources.length,
+          remote_url: h.remote_url,
+        });
+      })
+    );
+    status = 'ok';
+  } catch (err) {
+    console.warn('Error en el streaming: ' + err);
+    status = 'error';
+  }
+  return { status, data };
+}
