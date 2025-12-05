@@ -152,8 +152,29 @@ watch(paginaActual, () => {
       <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
     </div>
 
+    <!--Si aun no hay servicios catgados por usuarios-->
+    <div
+      v-if="!isLoadingGeneral && fetchStatus === 'ok' && harvesters.length === 0"
+      class="flex flex-contenido-centrado"
+    >
+      <div class="texto-color-error borde-redondeado-8 sin-recursos" style="max-width: 50%">
+        <h5>Aún no hay servicios remotos registrados.</h5>
+        <p>Registra un servicio remoto, edita sus metadatos y visualiza sus recursos.</p>
+      </div>
+      <div class="columna-16 flex flex-contenido-centrado">
+        <NuxtLink
+          class="boton boton-primario boton-chico m-y-2"
+          to="/catalogo/servicios-remotos/agregar"
+          >Agregar servicio remoto</NuxtLink
+        >
+      </div>
+    </div>
+
     <!--La tabla de servicios remotos-->
-    <div v-if="!isLoadingGeneral && fetchStatus === 'ok'" class="contenedor m-b-10">
+    <div
+      v-if="!isLoadingGeneral && fetchStatus === 'ok' && harvesters.length > 0"
+      class="contenedor m-b-10"
+    >
       <table>
         <thead>
           <tr>
@@ -208,3 +229,10 @@ watch(paginaActual, () => {
     </div>
   </main>
 </template>
+<style scoped>
+.sin-recursos {
+  background-color: var(--fondo-acento);
+  gap: 8px;
+  padding: 16px;
+}
+</style>
