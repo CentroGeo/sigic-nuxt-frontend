@@ -14,6 +14,7 @@ const config = useRuntimeConfig();
 const { gnoxyFetch } = useGnoxyUrl();
 const selecTipoFuente = ref('');
 const campoURL = ref('');
+const urlYaExiste = ref(null);
 const campoNombre = ref('');
 const responseOk = ref(null);
 const harvesterStatus = ref(null);
@@ -60,6 +61,26 @@ function irAImportarRecursos() {
   });
 }
 
+async function isHarvestrerRegistered() {
+  let url = `${config.public.geonodeApi}/harvesters/`;
+  let harvesters = [];
+  do {
+    // Obtenemos la información de los harvesters
+    const requestHarvesters = await gnoxyFetch(url);
+    if (!requestHarvesters.ok) {
+      const error = await requestHarvesters.json();
+      console.error('Falló petición de harvesters:', error);
+    }
+    const resHarvesters = await requestHarvesters.json();
+    harvesters = [...harvesters, ...resHarvesters.harvesters.map((h) => h.remote_url)];
+    url = resHarvesters.links.next;
+  } while (url);
+  if (harvesters.includes(campoURL.value)) {
+    return true;
+  } else {
+    return false;
+  }
+}
 async function crearConexion() {
   const { data } = useAuth();
   const token = data.value?.accessToken;
@@ -109,6 +130,13 @@ async function crearConexion() {
     }
   }
 }
+
+async function registrar() {
+  urlYaExiste.value = await isHarvestrerRegistered();
+  if (!urlYaExiste.value) {
+    crearConexion();
+  }
+}
 </script>
 
 <template>
@@ -155,12 +183,21 @@ async function crearConexion() {
                 </option>
               </SisdaiSelector>
             </ClientOnly>
+            <p
+              v-if="urlYaExiste"
+              class="flex flex-contenido-separado texto-color-alerta fondo-color-alerta p-1 borde borde-color-alerta borde-redondeado-8"
+            >
+              <span> Esta url ya está registrada</span>
+              <nuxt-link to="/catalogo/explorar/catalogos-externos"
+                >Explorar Catálogos Externos</nuxt-link
+              >
+            </p>
             <div class="flex flex-contenido-inicio m-t-3">
               <button
                 class="boton-primario boton-chico"
                 aria-label="Crear conexión de catálogo externo"
                 type="button"
-                @click="crearConexion"
+                @click="registrar"
               >
                 Crear conexión
               </button>
@@ -178,7 +215,7 @@ async function crearConexion() {
         </div>
         <div v-if="responseOk === false">
           <p
-            class="flex flex-contenido-separado texto-color-error fondo-color-error p-1 borde borde-color-confirmacion borde-redondeado-8"
+            class="flex flex-contenido-separado texto-color-error fondo-color-error p-1 borde borde-color-error borde-redondeado-8"
           >
             <span> <span class="pictograma-alerta" />No se pudo registrar este servicio.</span>
           </p>

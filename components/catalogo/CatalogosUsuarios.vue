@@ -162,6 +162,7 @@ watch(paginaActual, () => {
             <th>Recursos pendientes</th>
             <th>URL</th>
             <th>Tipo</th>
+            <th>Status</th>
           </tr>
         </thead>
         <tbody v-if="!isLoadingPage">
@@ -183,6 +184,7 @@ watch(paginaActual, () => {
               </a>
             </td>
             <td>Servcio de Mapas</td>
+            <td>{{ harvester.status }}</td>
           </tr>
         </tbody>
       </table>

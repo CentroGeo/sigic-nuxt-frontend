@@ -70,6 +70,7 @@ export async function fetchHarvesters(limited, params) {
         data.push({
           id: h.id,
           title: h.name,
+          status: h.status,
           total_resources: totalResources,
           exported_resources: exportedResources.length,
           to_attend_resources: totalResources - exportedResources.length,
