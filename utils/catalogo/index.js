@@ -60,20 +60,23 @@ export async function fetchHarvesters(limited, params) {
         const dataA = await resA.json();
         const totalResources = dataA.total;
 
-        const res2 = await gnoxyFetch(`${harvestableResourcesUrl}/?page_size=${totalResources}`);
+        const res2 = await gnoxyFetch(
+          `${harvestableResourcesUrl}/?filter{should_be_harvested}=true&page_size=1`
+        );
         const dataB = await res2.json();
-        const harvestableResources = dataB.harvestable_resources;
+        const importedResources = dataB.total;
+        /*  const harvestableResources = dataB.harvestable_resources;
         const exportedResources = harvestableResources.filter(
           (j) => j.should_be_harvested === true
-        );
+        ); */
 
         data.push({
           id: h.id,
           title: h.name,
           status: h.status,
           total_resources: totalResources,
-          exported_resources: exportedResources.length,
-          to_attend_resources: totalResources - exportedResources.length,
+          imported_resources: importedResources,
+          to_attend_resources: totalResources - importedResources,
           remote_url: h.remote_url,
         });
       })

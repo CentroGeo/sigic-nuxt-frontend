@@ -8,13 +8,17 @@ const isLoadingGeneral = ref(true);
 const isLoadingPage = ref(true);
 const fetchStatus = ref(null);
 
-const seleccionOrden = ref(null);
+const seleccionOrden = ref('-id');
 const inputSearch = ref(null);
 const paginaActual = ref(0);
 const tamanioPagina = 3;
 const totalHarvesters = ref();
 const totalPags = computed(() => Math.ceil(totalHarvesters.value / tamanioPagina));
-const queryParams = ref({ page: paginaActual.value + 1, page_size: tamanioPagina });
+const queryParams = ref({
+  page: paginaActual.value + 1,
+  page_size: tamanioPagina,
+  'sort[]': seleccionOrden.value,
+});
 
 /**
  * Esta petición obtiene el total de servicios externos
@@ -63,7 +67,7 @@ const irARutaQuery = (v, destino) => {
       query: {
         id: v.id,
         title: v.title,
-        total: v.exported_resources + v.to_attend_resources,
+        total: v.imported_resources + v.to_attend_resources,
         /*         unique_identifier: v.unique_identifier,
         remote_resource_type: v.remote_resource_type, */
       },
@@ -86,25 +90,34 @@ watch(paginaActual, () => {
   queryParams.value.page = paginaActual.value + 1;
   fetchResources();
 });
+
+watch(seleccionOrden, () => {
+  queryParams.value['sort[]'] = seleccionOrden.value;
+  if (paginaActual.value === 0) {
+    fetchResources();
+  } else {
+    paginaActual.value = 0;
+  }
+});
 </script>
 <template>
   <main>
     <div id="servicios-institucionales">
       <h3>Explora catálogos externos preconectados</h3>
-      <div class="flex" style="opacity: 0.5">
+      <div class="flex">
         <!-- Selector Orden -->
         <div class="columna-8">
           <ClientOnly>
             <SisdaiSelector v-model="seleccionOrden" etiqueta="Ordenar por">
-              <option value="titulo">Título</option>
-              <option value="categoria">Categoría</option>
-              <option value="fecha_descendente">Más Reciente</option>
-              <option value="fecha_ascendente">Más Antiguo</option>
+              <option value="name">Nombre</option>
+              <option value="status">Status</option>
+              <option value="-id">Más Reciente</option>
+              <option value="id">Más Antiguo</option>
             </SisdaiSelector>
           </ClientOnly>
         </div>
         <!-- Campo de búsqueda avanzada -->
-        <div class="columna-8">
+        <div class="columna-8" style="opacity: 0.5">
           <div class="flex flex-contenido-separado">
             <div class="columna-14">
               <ClientOnly>
@@ -191,7 +204,7 @@ watch(paginaActual, () => {
             <td>{{ harvester.title }}</td>
             <td>
               <nuxt-link @click="irARutaQuery(harvester, '')">
-                {{ harvester.exported_resources }}
+                {{ harvester.imported_resources }}
               </nuxt-link>
             </td>
             <td>
