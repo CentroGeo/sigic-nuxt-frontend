@@ -1,4 +1,5 @@
 <script setup>
+// Esta vista ya no se usa
 definePageMeta({
   middleware: 'sidebase-auth',
   bodyAttrs: {
