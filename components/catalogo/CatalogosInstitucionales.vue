@@ -11,9 +11,9 @@ async function getResources() {
   const { status, data } = await fetchHarvesters(true, queryParams.value);
   harvesters.value = data;
   fetchStatus.value = status;
-
   isLoading.value = false;
 }
+
 getResources();
 </script>
 <template>

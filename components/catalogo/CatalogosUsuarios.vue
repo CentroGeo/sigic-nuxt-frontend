@@ -1,14 +1,97 @@
 <script setup>
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
+import { fetchHarvesters } from '~/utils/catalogo';
+const { gnoxyFetch } = useGnoxyUrl();
+const config = useRuntimeConfig();
+const harvesters = ref([]);
+const isLoadingGeneral = ref(true);
+const isLoadingPage = ref(true);
+const fetchStatus = ref(null);
 
 const seleccionOrden = ref(null);
 const inputSearch = ref(null);
+const paginaActual = ref(0);
+const tamanioPagina = 3;
+const totalHarvesters = ref();
+const totalPags = computed(() => Math.ceil(totalHarvesters.value / tamanioPagina));
+const queryParams = ref({ page: paginaActual.value + 1, page_size: tamanioPagina });
+
+/**
+ * Esta petición obtiene el total de servicios externos
+ */
+async function getTotal() {
+  const url = `${config.public.geonodeApi}/harvesters/`;
+  const requestHarvesters = await gnoxyFetch(url);
+  if (!requestHarvesters.ok) {
+    const error = await requestHarvesters.json();
+    console.error('Falló petición de harvesters:', error);
+  }
+  const resHarvesters = await requestHarvesters.json();
+  return resHarvesters.total;
+}
+
+/**
+ * Solicita información de los servicios externos enviando queryparams
+ */
+async function fetchResources() {
+  isLoadingPage.value = true;
+  const { status, data } = await fetchHarvesters(true, queryParams.value);
+  harvesters.value = data;
+  fetchStatus.value = status;
+  isLoadingPage.value = false;
+}
+
+/**
+ * Solicita información de los servicios externos enviando queryparams. Esta función coordina el estado global del componente.
+ */
+async function getResources() {
+  isLoadingGeneral.value = true;
+  totalHarvesters.value = await getTotal();
+  await fetchResources();
+  isLoadingGeneral.value = false;
+}
+
+/**
+ *
+ * @param v
+ * @param destino
+ */
+const irARutaQuery = (v, destino) => {
+  if (destino !== 'pendientes') {
+    navigateTo({
+      path: `/catalogo/servicios-remotos/${v.id}`,
+      query: {
+        id: v.id,
+        title: v.title,
+        total: v.exported_resources + v.to_attend_resources,
+        /*         unique_identifier: v.unique_identifier,
+        remote_resource_type: v.remote_resource_type, */
+      },
+    });
+  } else {
+    navigateTo({
+      path: `/catalogo/servicios-remotos/importar`,
+      query: {
+        id: v.id,
+        title: v.title,
+        /*         unique_identifier: v.unique_identifier,
+        remote_resource_type: v.remote_resource_type, */
+      },
+    });
+  }
+};
+getResources();
+
+watch(paginaActual, () => {
+  queryParams.value.page = paginaActual.value + 1;
+  fetchResources();
+});
 </script>
 <template>
   <main>
     <div id="servicios-institucionales">
       <h3>Explora catálogos externos preconectados</h3>
-      <div class="flex">
+      <div class="flex" style="opacity: 0.5">
         <!-- Selector Orden -->
         <div class="columna-8">
           <ClientOnly>
@@ -62,6 +145,64 @@ const inputSearch = ref(null);
         agregarlos a tus archivos y utilizarlos en la plataforma SIGIC. Ten en cuenta que deberás
         completar previamente los metadatos de cada uno.
       </p>
+    </div>
+
+    <!--El spinner general-->
+    <div v-if="isLoadingGeneral" class="flex flex-contenido-centrado m-y-5">
+      <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
+    </div>
+
+    <!--La tabla de servicios remotos-->
+    <div v-if="!isLoadingGeneral && fetchStatus === 'ok'" class="contenedor m-b-10">
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre de servicio externo</th>
+            <th>Recursos importados</th>
+            <th>Recursos pendientes</th>
+            <th>URL</th>
+            <th>Tipo</th>
+          </tr>
+        </thead>
+        <tbody v-if="!isLoadingPage">
+          <tr v-for="harvester in harvesters" :key="harvester.id">
+            <td>{{ harvester.title }}</td>
+            <td>
+              <nuxt-link @click="irARutaQuery(harvester, '')">
+                {{ harvester.exported_resources }}
+              </nuxt-link>
+            </td>
+            <td>
+              <nuxt-link @click="irARutaQuery(harvester, 'pendientes')">
+                {{ harvester.to_attend_resources }}
+              </nuxt-link>
+            </td>
+            <td>
+              <a :href="harvester.remote_url" target="_blank" rel="noopener noreferrer">
+                {{ harvester.remote_url }}
+              </a>
+            </td>
+            <td>Servcio de Mapas</td>
+          </tr>
+        </tbody>
+      </table>
+      <div v-if="isLoadingPage" class="flex flex-contenido-centrado m-y-2">
+        <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="32px" />
+      </div>
+      <UiPaginador
+        :pagina-parent="paginaActual"
+        :total-paginas="totalPags"
+        @cambio="paginaActual = $event"
+      />
+    </div>
+
+    <!--Mensaje de error si falla la petición-->
+    <div
+      v-if="!isLoadingGeneral && fetchStatus === 'error'"
+      class="contenedor ancho-lectura borde-redondeado-16 texto-color-error fondo-color-error p-3 m-3 flex flex-contenido-centrado"
+    >
+      <span class="pictograma-alerta" />
+      <b> No se pudo completar la solicitud. Revisa tu conexión e intentalo de nuevo más tarde.</b>
     </div>
   </main>
 </template>

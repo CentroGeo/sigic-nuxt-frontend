@@ -31,7 +31,7 @@ function irARutaQuery() {
         style="width: 100%; margin: 8px"
         @click="irARutaQuery"
       >
-        Explorar recursos
+        Importar recursos
       </button>
       <button
         class="boton-secundario flex flex-contenido-centrado"

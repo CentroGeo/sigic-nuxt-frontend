@@ -1,15 +1,16 @@
 <script setup>
 import { wait } from '@/utils/consulta';
-
+/* 
 definePageMeta({
   middleware: 'sidebase-auth',
   bodyAttrs: {
     class: '',
   },
-});
+}); */
 
 const storeCatalogo = useCatalogoStore();
 const config = useRuntimeConfig();
+const { status, signIn } = useAuth();
 const { gnoxyFetch } = useGnoxyUrl();
 const route = useRoute();
 const selectedId = route.query.id;
@@ -27,6 +28,13 @@ const didUpdateSucceed = ref(false);
 const dictTipoRecursoRemoto = {
   layers: 'Capas',
 };
+
+async function iniciarSesion() {
+  await signIn('keycloak', {
+    // A dónde volver después del login
+    callbackUrl: route.fullPath,
+  });
+}
 /**
  * Esta función permite obtener los recursos que aún no han sido cosechados
  */
@@ -147,9 +155,43 @@ try {
 
     <template #visualizador>
       <main v-if="unharvestedResources.length > 0" id="principal" class="contenedor m-b-10 m-y-3">
-        <h2>Carga catálogos externos</h2>
-        <h3>{{ selectedTitle }}</h3>
-        <p>Selecciona los recursos que quieres importar</p>
+        <!--Boton superior izquierda-->
+        <div class="flex alineacion-izquierda ancho-lectura">
+          <nuxt-link
+            to="/catalogo/explorar/catalogos-externos"
+            aria-label="regresar a mis archivos"
+          >
+            <span
+              class="pictograma-flecha-izquierda pictograma-mediano texto-color-acento"
+              aria-hidden="true"
+            />
+            <span class="h5 texto-color-primario p-l-2">Catalogos Externos</span>
+          </nuxt-link>
+        </div>
+
+        <h1 class="m-y-1">{{ selectedTitle }}</h1>
+
+        <!--Cuadro de información-->
+        <div
+          v-if="status !== 'authenticated'"
+          class="fondo-color-informacion texto-color-informacion borde-redondeado-16 borde -color-informacion m-t-2"
+          style="padding: 21px"
+        >
+          <h6 class="m-y-2">¿Quieres visualizar capas de este catálogo?</h6>
+          <p class="m-y-1">
+            Puedes importar recursos de información para visualizarlos en la plataforma SIGIC, para
+            ello debes iniciar sesión con una cuenta existente o crear una y completar el proceso de
+            importación.
+          </p>
+          <a href="#" style="font-weight: bold" @click.prevent="iniciarSesion(event)"
+            >Iniciar sesión</a
+          >
+        </div>
+
+        <!--Instrucciones-->
+        <p>Explora los recursos disponibles y selecciona los que desees importar.</p>
+
+        <!--Alertas-->
         <div>
           <div
             v-if="isLoading"
@@ -179,6 +221,8 @@ try {
             >
           </p>
         </div>
+
+        <!--Tabla de recursos-->
         <form @submit.prevent>
           <table class="tabla-condensada">
             <thead>
