@@ -35,6 +35,7 @@ async function iniciarSesion() {
     callbackUrl: route.fullPath,
   });
 }
+
 /**
  * Esta función permite obtener los recursos que aún no han sido cosechados
  */
@@ -137,15 +138,21 @@ async function importarRecursos() {
     return;
   }
 }
+
+function formatDate(date) {
+  return new Date(date).toLocaleDateString('es-ES', {
+    day: '2-digit',
+    // month: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+fetchData();
+
 watch(paginaActual, () => {
   fetchData();
 });
-
-try {
-  await fetchData();
-} catch (err) {
-  console.warn('Error en el streaming: ' + err);
-}
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeCatalogo.catalogoColapsado">
@@ -229,7 +236,7 @@ try {
               <tr>
                 <th>Nombre</th>
                 <th>Título</th>
-                <th>Resumen</th>
+                <th>Última actualización</th>
                 <th>Tipo</th>
               </tr>
             </thead>
@@ -244,6 +251,7 @@ try {
                     type="checkbox"
                     name="checkboxes"
                     :checked="isSelected(value)"
+                    :disabled="status !== 'authenticated'"
                     @change="toggleSelection(value)"
                   />
                   <label :for="`checkbox-${value.unique_identifier}`">
@@ -251,7 +259,7 @@ try {
                   </label>
                 </td>
                 <td>{{ value.title }}</td>
-                <td></td>
+                <td>{{ formatDate(value.last_updated) }}</td>
                 <td>{{ dictTipoRecursoRemoto[value.remote_resource_type] }}</td>
               </tr>
             </tbody>
@@ -264,18 +272,34 @@ try {
             @cambio="paginaActual = $event"
           />
         </ClientOnly>
+
+        <!--Botones-->
         <div class="flex flex-contenido-inicio m-t-3">
           <button
-            class="boton-primario"
+            v-if="status !== 'authenticated'"
+            class="boton-primario boton-chico"
+            aria-label="Iniciar sesión"
+            type="button"
+            @click="iniciarSesion"
+          >
+            Iniciar Sesión
+          </button>
+          <button
+            class="boton-primario boton-chico"
             aria-label="Importar recursos de catálogo externo"
             type="button"
+            :disabled="status !== 'authenticated'"
             @click="importarRecursos"
           >
             Importar recursos
           </button>
         </div>
       </main>
-      <main v-else>...cargando</main>
+      <main v-else>
+        <div class="flex flex-contenido-centrado m-t-5">
+          <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
+        </div>
+      </main>
     </template>
   </UiLayoutPaneles>
 </template>
