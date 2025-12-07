@@ -135,7 +135,6 @@ onMounted(async () => {
   storeResources.getMyTotal('disponibles', params.value);
   storeResources.getMyTotal('pendientes', params.value);
   storeResources.getMyTotal('publicacion', params.value);
-
   fetchNewData();
 });
 </script>
@@ -238,6 +237,11 @@ onMounted(async () => {
               texto: 'Solicitudes de publicación',
               ruta: '/catalogo/mis-archivos/solicitudes-publicacion',
               notificacion: haySolicitudesDeAprobacion,
+            },
+            {
+              texto: 'Gestión de solicitudes',
+              ruta: '/catalogo/revision-solicitudes',
+              notificacion: false,
             },
           ]"
         />

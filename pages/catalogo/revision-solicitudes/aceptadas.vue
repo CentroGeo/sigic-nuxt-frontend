@@ -1,47 +1,44 @@
 <script setup>
-/**TODO: agregar método para traer la info del usuario al store */
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { buildUrl, cleanInput } from '~/utils/consulta';
+import { cleanInput } from '~/utils/consulta';
 
 definePageMeta({
-  middleware: 'sidebase-auth',
-  bodyAttrs: {
-    class: '',
-  },
+  middleware: 'auth',
 });
 
-const { data } = useAuth();
-const storeResources = useResourcesCatalogoStore();
-const storeFilters = useFilteredResources();
 const storeCatalogo = useCatalogoStore();
-
+const storeResources = useResourcesCatalogoStore();
 const section = 'publicacion';
+// const params = computed(() => storeFilters.filters.queryParams);
 const isLoading = computed(() => storeResources.isLoading);
-const params = computed(() => storeFilters.filters.queryParams);
 const totalResources = computed(() => storeResources.myTotalBySection(section));
 const resources = computed(() => storeResources.mineBySection(section));
 const tableResources = ref([]);
-const variables = ['titulo', 'estatus', 'tipo_recurso', 'categoria', 'acciones'];
+const variables = ['titulo', 'tipo_recurso', 'actualizacion', 'propietario', 'revisor', 'acciones'];
 
 const paginaActual = ref(0);
 const tamanioPagina = 10;
 const totalPags = computed(() => Math.ceil(totalResources.value / tamanioPagina));
 
-const modalFiltroAvanzado = ref(null);
-const isFilterActive = ref(false);
+const seleccionTipoArchivo = ref('');
+const storeFilters = useFilteredResources();
+
 const seleccionOrden = computed({
   get: () => storeFilters.filters.sort,
   set: (value) => storeFilters.updateFilter('sort', value),
 });
-const seleccionTipoArchivo = ref('');
 const inputSearch = computed({
   get: () => storeFilters.filters.inputSearch,
   set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
 });
 
-const hayMetaPendiente = computed(() =>
-  storeResources.myTotalBySection('pendientes') > 0 ? true : false
-);
+function resetSearch() {
+  storeFilters.updateFilter('inputSearch', '');
+  storeFilters.buildQueryParams();
+}
+
+const isFilterActive = ref(false);
+const modalFiltroAvanzado = ref(null);
 
 /**
  * Valida si el tipo de recurso es documento o dataset con geometría o no
@@ -60,48 +57,38 @@ function tipoRecurso(recurso) {
   return tipo;
 }
 
-const dictEstatus = {
-  pending: 'Pendiente',
-  published: 'Publicado',
-  rejected: 'No aceptado',
-  on_review: 'En revisión',
-};
-
 /**
- * Formatea la fecha del recurso a esta forma: dd/mm/aaaa
- * @param fecha de actualización del recurso
- * @returns {Date} objeto con la fecha
+ * Obtiene las acciones dependiendo del estatus
+ * @param status de la solicitud
+ * @return {String} con las acciones
  */
-function formatearFecha(fecha) {
-  return new Date(fecha).toLocaleDateString('es-ES', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
-}
+const obtenerAcciones = (status) => {
+  if (status === 'published') {
+    return 'Ver, Comentarios';
+  }
+};
 
 function updateResources() {
   // obteniendo datos por las props de la tabla
   tableResources.value = resources.value.map((d) => {
     return {
+      pk: d.resource.pk,
       titulo: d.resource.title,
+      // estatus: dictEstatus[d.status],
       tipo_recurso: tipoRecurso(d.resource),
-      categoria: d.resource.category,
-      actualizacion: formatearFecha(d.updated_at),
-      estatus: dictEstatus[d.status],
-      acciones: 'Ver, Comentarios, Remover',
+      actualizacion: d.updated_at,
+      propietario: d.owner.username,
+      acciones: obtenerAcciones(d.status),
       comentarios: d.rejection_reason,
       revisor: d.reviewer?.username,
     };
   });
 }
 
-const userReviewerPk = ref(null);
 function fetchNewData() {
   storeResources.resetBySection(section);
-  // storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, params.value);
   storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, {
-    'filter{owner}': `${userReviewerPk.value}`,
+    'filter{status}': 'published',
   });
 }
 
@@ -120,33 +107,7 @@ watch(
 onMounted(async () => {
   storeFilters.resetAll();
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
-  storeResources.getMyTotal('disponibles', params.value);
-  storeResources.getMyTotal('pendientes', params.value);
-  // storeResources.getMyTotal('publicacion', params.value);
-  try {
-    const configEnv = useRuntimeConfig();
-    const { gnoxyFetch } = useGnoxyUrl();
-    const userEmail = data.value?.user.email;
-    const baseUrl = configEnv.public.geonodeApi;
-    const queryParams = {
-      page_size: 1,
-      'filter{email}': userEmail,
-    };
-
-    // petición para traer solo el usuario que coincida con el parámetro email
-    const url = buildUrl(`${baseUrl}/users`, queryParams);
-    const request = await gnoxyFetch(url.toString());
-    const res = await request.json();
-    const userInfo = res.users;
-
-    userReviewerPk.value = userInfo[0].pk;
-  } catch (error) {
-    console.error(error);
-  }
-
-  storeResources.getMyTotal('publicacion', {
-    'filter{owner}': `${userReviewerPk.value}`,
-  });
+  storeResources.getMyTotal('publicacion', { 'filter{status}': 'published' });
   fetchNewData();
 });
 </script>
@@ -233,42 +194,34 @@ onMounted(async () => {
             </div>
           </div>
         </div>
+
         <CatalogoMenuMisArchivos
           :opciones="[
-            { texto: 'Disponibles', ruta: '/catalogo/mis-archivos' },
             {
-              texto: 'Metadatos pendientes',
-              ruta: '/catalogo/mis-archivos/metadatos-pendientes',
-              notificacion: hayMetaPendiente,
-            },
-            {
-              texto: 'Solicitudes de publicación',
-              ruta: '/catalogo/mis-archivos/solicitudes-publicacion',
-              notificacion: totalResources > 0,
-            },
-            {
-              texto: 'Gestión de solicitudes',
-              ruta: '/catalogo/revision-solicitudes',
+              texto: 'Pendientes de revisor',
+              ruta: '/catalogo/revision-solicitudes/pendientes-revisor',
               notificacion: false,
+            },
+            {
+              texto: 'Mis revisiones',
+              ruta: '/catalogo/revision-solicitudes/mis-revisiones',
+            },
+            {
+              texto: 'Aceptadas',
+              ruta: '/catalogo/revision-solicitudes/aceptadas',
+            },
+            {
+              texto: 'No aceptadas',
+              ruta: '/catalogo/revision-solicitudes/no-aceptadas',
             },
           ]"
         />
 
         <div class="flex">
-          <p
-            class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-2 p-2 m-0"
-          >
-            Si el estatus de tu publicación aparece como <i>No aceptada</i>, revisa tu correo
-            electrónico donde encontrarás los motivos del rechazo y las indicaciones para realizar
-            las correciones necesarias.
-          </p>
-          <h2>Solicitudes de publicación</h2>
+          <h2>Aceptadas</h2>
           <UiNumeroElementos :numero="totalResources" />
         </div>
-        <p>
-          Se muestran los archivos enviados para revisión y su estatus de aprobación, junto con los
-          mensajes asociados.
-        </p>
+        <p>Solicitudes que haz aprobado y están actualmente en el catálogo público.</p>
 
         <div v-if="isLoading" class="flex flex-contenido-centrado m-t-3">
           <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
@@ -286,23 +239,20 @@ onMounted(async () => {
             </ClientOnly>
           </div>
         </div>
-
-        <div v-if="totalResources === 0 && !isLoading">
-          <div class="flex flex-contenido-centrado">
-            <div class="columna-7">
-              <div class="fondo-color-acento borde-redondeado-8 p-x-3 p-y-1 m-b-3">
-                <p>Aún no hay archivos en esta sección.</p>
-                <p>
-                  No tienes solicitudes de publicación activas. Para iniciar, dirígete a Mis
-                  archivos > Disponibles y selecciona uno para enviar a publicación.
-                </p>
-              </div>
-              <div class="flex flex-contenido-centrado">
-                <NuxtLink class="boton boton-primario" to="/catalogo/mis-archivos"
-                  >Disponibles
-                </NuxtLink>
-              </div>
+        <div v-if="totalResources === 0 && !isLoading" class="flex flex-contenido-centrado">
+          <div class="columna-8 flex flex-contenido-centrado">
+            <div class="fondo-color-acento p-3">
+              <p class="h5 m-t-0">Aún no hay archivos en esta sección</p>
+              <p class="m-b-0">
+                No tienes solicitudes Aceptadas. Estas se añadirán cuando Aceptes alguna solicitud
+                de publicación que tengas en proceso de revisión.
+              </p>
             </div>
+            <nuxt-link
+              class="boton boton-primario"
+              to="/catalogo/revision-solicitudes/pendientes-revisor"
+              >Ir a en proceso de revisión
+            </nuxt-link>
           </div>
         </div>
       </main>

@@ -1,4 +1,6 @@
 <script setup>
+/**TODO: agregar método para traer la info del usuario al store */
+import { buildUrl } from '~/utils/consulta';
 /**
  * @typedef {Object} Props
  * @property {Object} [recurso={}] - Indica el recurso que utiliza para comunicar a las rutas.
@@ -14,6 +16,8 @@ const props = defineProps({
   opciones: { type: Array, default: Array },
   notificacion: { type: Boolean, default: false },
 });
+
+const { data } = useAuth();
 const route = useRoute();
 
 /**
@@ -64,6 +68,32 @@ function irARutaConQuery(value) {
     });
   }
 }
+const esSuperusuario = ref(false);
+async function verificarSiEsSuperusuario() {
+  try {
+    const configEnv = useRuntimeConfig();
+    const { gnoxyFetch } = useGnoxyUrl();
+    const userEmail = data.value?.user.email;
+    const baseUrl = configEnv.public.geonodeApi;
+    const queryParams = {
+      page_size: 1,
+      'filter{email}': userEmail,
+    };
+
+    // petición para traer solo el usuario que coincida con el parámetro email
+    const url = buildUrl(`${baseUrl}/users`, queryParams);
+    const request = await gnoxyFetch(url.toString());
+    const res = await request.json();
+    const userInfo = res.users;
+
+    esSuperusuario.value = userInfo[0].is_superuser;
+  } catch (error) {
+    console.error(error);
+  }
+}
+onMounted(async () => {
+  await verificarSiEsSuperusuario();
+});
 </script>
 <template>
   <div class="menu-mis-archivos p-t-5 p-b-3">
@@ -74,6 +104,17 @@ function irARutaConQuery(value) {
             <div class="circulo"></div>
           </div>
           <button
+            v-if="value.texto === 'Gestión de solicitudes' && esSuperusuario"
+            :aria-label="`Ir a ${value.texto}`"
+            class="boton-secundario header-link"
+            type="button"
+            @click="irARutaConQuery(value)"
+          >
+            {{ value.texto }}
+            <div class="borde-enlace-hover"></div>
+          </button>
+          <button
+            v-else
             :aria-label="`Ir a ${value.texto}`"
             class="boton-secundario header-link"
             type="button"

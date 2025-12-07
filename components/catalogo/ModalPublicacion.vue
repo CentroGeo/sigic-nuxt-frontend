@@ -21,6 +21,7 @@ const modalPublicaBasicos = ref(null);
 const modalPublicaUbicacion = ref(null);
 const modalPublicaOpcionales = ref(null);
 const modalPublicaAtributos = ref(null);
+const modalPublicaConfirmar = ref(null);
 
 const tagTitle = ref();
 
@@ -48,6 +49,7 @@ function abrirModalDescarga() {
   tagTitle.value = optionsDict[resourceType.value]['title'];
 }
 
+const estatus = ref(true);
 /**
  * Confirma la solicitud de publicación, cierra los modales, realiza la
  * petición al endpoint de sigic/requests y navega a las solicitudes
@@ -67,21 +69,18 @@ async function confirmarSolicitud(cerrarModal) {
     const token = data.value?.accessToken;
     const configEnv = useRuntimeConfig();
     const baseUrl = configEnv.public.geonodeUrl;
-    // const baseUrl = 'http://10.2.102.177';
     const headers = ref({ Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' });
 
     // petición para enviar el recurso a la solicitud
-    await fetch(`${baseUrl}/sigic/requests/`, {
+    const response = await fetch(`${baseUrl}/sigic/requests/`, {
       method: 'POST',
       headers: headers.value,
       body: JSON.stringify({ resource_pk: id }),
     });
-
-    navigateTo({
-      path: '/catalogo/mis-archivos/solicitudes-publicacion',
-    });
+    estatus.value = response.ok ? true : false;
+    modalPublicaConfirmar.value.abrirModal();
   } catch (error) {
-    console.error(error);
+    console.error('error', error);
   }
 }
 
@@ -287,7 +286,7 @@ defineExpose({
           <div class="columna-8">
             <button
               v-if="tagTitle !== 'capa'"
-              aria-label="Siguiente"
+              aria-label="Confirmar"
               type="button"
               class="boton-primario texto-centrado"
               @click="confirmarSolicitud('modalPublicaOpcionales')"
@@ -350,6 +349,76 @@ defineExpose({
               @click="confirmarSolicitud('modalPublicaAtributos')"
             >
               Confirmar
+            </button>
+          </div>
+        </div>
+      </template>
+    </SisdaiModal>
+
+    <SisdaiModal ref="modalPublicaConfirmar" class="modal-grande">
+      <template #encabezado>
+        <p style="color: transparent">.</p>
+      </template>
+      <template #cuerpo>
+        <div v-if="estatus">
+          <h2>Tu archivo ha sido enviado a verificación.</h2>
+          <p class="m-0">
+            Recibirás una notificación en tu correo electrónico cuando el proceso se complete.
+          </p>
+        </div>
+        <div v-else>
+          <h2>Tu archivo no ha sido enviado a verificación.</h2>
+          <p class="m-0">
+            Revisa que el documento y sus metadatos estén correctos o vuelve a intentarlo.
+          </p>
+        </div>
+
+        <div
+          class="p-b-3 p-x-3 borde borde-redondeado-16 m-y-3"
+          :class="
+            estatus
+              ? 'fondo-color-confirmacion borde-color-confirmacion'
+              : 'fondo-color-error borde-color-error'
+          "
+        >
+          <div class="flex flex-contenido-separado">
+            <p class="flex flex-vertical-centrado">{{ selectedElement.title }}</p>
+            <div class="flex">
+              <p class="borde borde-redondeado-8 p-1">.{{ selectedElement.title.split('.')[1] }}</p>
+            </div>
+          </div>
+
+          <div :class="estatus ? 'texto-color-confirmacion' : 'texto-color-error'">
+            <span :class="estatus ? 'pictograma-aprobado' : 'pictograma-alerta'" />
+            <b v-if="estatus"
+              >El archivo ha sido enviado exitosamente para su proceso de aprobación.</b
+            >
+            <b v-else>El archivo no se ha enviado para su proceso de aprobación.</b>
+          </div>
+        </div>
+
+        <div class="flex flex-contenido-separado m-t-3">
+          <div class="columna-8 texto-centrado">
+            <button
+              type="button"
+              class="boton-secundario"
+              @click="modalPublicaConfirmar.cerrarModal()"
+            >
+              Finalizar
+            </button>
+          </div>
+          <div class="columna-8">
+            <button
+              type="button"
+              aria-label="Ir a mis archivos"
+              class="boton-primario texto-centrado"
+              @click="
+                navigateTo({
+                  path: '/catalogo/mis-archivos/solicitudes-publicacion',
+                })
+              "
+            >
+              Ver Mis Solicitudes
             </button>
           </div>
         </div>

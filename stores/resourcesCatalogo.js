@@ -148,18 +148,32 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
      */
     async getMyTotal(section, query) {
       const { gnoxyFetch } = useGnoxyUrl();
-      const queryParams = {
-        ...query,
-        page_size: 1,
-        'filter{owner.username}': userEmail,
-      };
+      const endpoint = section === 'publicacion' ? '/sigic/requests/' : '/api/v2/sigic-resources/';
+
+      // const queryParams = {
+      //   ...query,
+      //   page_size: 1,
+      //   'filter{owner.username}': userEmail,
+      // };
+      const queryParams =
+        section === 'publicacion'
+          ? {
+              ...query,
+              page_size: 1,
+            }
+          : {
+              ...query,
+              page_size: 1,
+              'filter{owner.username}': userEmail,
+            };
       // Agregar toda la lógica de queryparams correspondientes por sección
       if (section === 'disponibles') {
         queryParams['filter{complete_metadata}'] = 'true';
       } else if (section === 'pendientes') {
         queryParams['filter{complete_metadata}'] = 'false';
       }
-      const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
+      // const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
+      const url = buildUrl(`${config.public.geonodeUrl}${endpoint}`, queryParams);
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
       totalMisArchivos[section] = res.total;
@@ -172,22 +186,36 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
      */
     async getMyResourcesByPage(section, pageNum, pageSize, query) {
       const { gnoxyFetch } = useGnoxyUrl();
-      // const endpoint = section === 'publicacion' ? '/sigic/requests/' : '/api/v2/sigic-resources/';
+      const endpoint = section === 'publicacion' ? '/sigic/requests/' : '/api/v2/sigic-resources/';
 
       this.isLoading = true;
-      const queryParams = {
-        ...query,
-        page: pageNum,
-        page_size: pageSize,
-        'filter{owner.username}': userEmail,
-      };
+      // const queryParams = {
+      //   ...query,
+      //   page: pageNum,
+      //   page_size: pageSize,
+      //   'filter{owner.username}': userEmail,
+      // };
+      const queryParams =
+        section === 'publicacion'
+          ? {
+              ...query,
+              page: pageNum,
+              page_size: pageSize,
+            }
+          : {
+              ...query,
+              page: pageNum,
+              page_size: pageSize,
+              'filter{owner.username}': userEmail,
+            };
       // Agregar toda la lógica de queryparams correspondientes por sección
       if (section === 'disponibles') {
         queryParams['filter{complete_metadata}'] = 'true';
       } else if (section === 'pendientes') {
         queryParams['filter{complete_metadata}'] = 'false';
       }
-      const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
+      // const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
+      const url = buildUrl(`${config.public.geonodeUrl}${endpoint}`, queryParams);
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
       // TODO: Implementar en los queryparams si tiene metadatos pendientes o no
@@ -200,7 +228,8 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
         data = res.requests;
       }
       misArchivos[section] = data; */
-      misArchivos[section] = res.resources;
+      // misArchivos[section] = res.resources;
+      misArchivos[section] = section === 'publicacion' ? res.requests : res.resources;
       this.isLoading = false;
     },
 

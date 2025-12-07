@@ -216,6 +216,11 @@ onMounted(async () => {
               ruta: '/catalogo/mis-archivos/solicitudes-publicacion',
               notificacion: haySolicitudesDeAprobacion,
             },
+            {
+              texto: 'Gestión de solicitudes',
+              ruta: '/catalogo/revision-solicitudes',
+              notificacion: false,
+            },
           ]"
         />
 
