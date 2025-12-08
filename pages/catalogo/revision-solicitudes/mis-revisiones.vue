@@ -1,5 +1,6 @@
 <script setup>
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
+import { tipoRecurso } from '~/utils/catalogo';
 import { cleanInput } from '~/utils/consulta';
 
 definePageMeta({
@@ -25,6 +26,8 @@ const totalPags = computed(() => Math.ceil(totalResources.value / tamanioPagina)
 const seleccionTipoArchivo = ref('');
 const storeFilters = useFilteredResources();
 
+const isFilterActive = ref(false);
+const modalFiltroAvanzado = ref(null);
 const seleccionOrden = computed({
   get: () => storeFilters.filters.sort,
   set: (value) => storeFilters.updateFilter('sort', value),
@@ -37,26 +40,6 @@ const inputSearch = computed({
 function resetSearch() {
   storeFilters.updateFilter('inputSearch', '');
   storeFilters.buildQueryParams();
-}
-
-const isFilterActive = ref(false);
-const modalFiltroAvanzado = ref(null);
-
-/**
- * Valida si el tipo de recurso es documento o dataset con geometría o no
- * @param recurso del catálogo
- * @returns {String} ya sea Documentos, Capa geográfica o Datos tabulados
- */
-function tipoRecurso(recurso) {
-  let tipo;
-  if (recurso.resource_type === 'document') {
-    tipo = 'Documentos';
-  } else if (recurso.sourcetype === 'REMOTE') {
-    tipo = 'Capa Geográfica, Catálogo Externo';
-  } else {
-    tipo = isGeometricExtension(recurso.extent) ? 'Capa Geográfica' : 'Datos Tabulados';
-  }
-  return tipo;
 }
 
 /**
@@ -78,7 +61,6 @@ function updateResources() {
       pk_request: d.pk,
       pk: d.resource.pk,
       titulo: d.resource.title,
-      // estatus: dictEstatus[d.status],
       tipo_recurso: tipoRecurso(d.resource),
       actualizacion: d.updated_at,
       propietario: d.owner.username,
@@ -91,14 +73,8 @@ function updateResources() {
   });
 }
 
-// const { data } = useAuth();
-// const userReviewerPk = ref(null);
-
 function fetchNewData() {
   storeResources.resetBySection(section);
-  // storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, {
-  //   'filter{status}': 'on_review',
-  // });
   storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, {
     'filter{status}': 'on_review',
     'filter{reviewer}': `${userReviewerPk.value}`,

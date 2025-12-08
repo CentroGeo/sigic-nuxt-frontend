@@ -1,5 +1,6 @@
 <script setup>
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
+import { tipoRecurso } from '~/utils/catalogo';
 import { cleanInput } from '~/utils/consulta';
 
 definePageMeta({
@@ -40,30 +41,6 @@ function resetSearch() {
 const isFilterActive = ref(false);
 const modalFiltroAvanzado = ref(null);
 
-// const dictEstatus = {
-//   pending: 'Pendiente',
-//   published: 'Publicado',
-//   rejected: 'Rechazado',
-//   checking: 'En revisión',
-// };
-
-/**
- * Valida si el tipo de recurso es documento o dataset con geometría o no
- * @param recurso del catálogo
- * @returns {String} ya sea Documentos, Capa geográfica o Datos tabulados
- */
-function tipoRecurso(recurso) {
-  let tipo;
-  if (recurso.resource_type === 'document') {
-    tipo = 'Documentos';
-  } else if (recurso.sourcetype === 'REMOTE') {
-    tipo = 'Capa Geográfica, Catálogo Externo';
-  } else {
-    tipo = isGeometricExtension(recurso.extent) ? 'Capa Geográfica' : 'Datos Tabulados';
-  }
-  return tipo;
-}
-
 /**
  * Obtiene las acciones dependiendo del estatus
  * @param status de la solicitud
@@ -82,12 +59,10 @@ function updateResources() {
       pk_request: d.pk,
       pk: d.resource.pk,
       titulo: d.resource.title,
-      // estatus: dictEstatus[d.status],
       tipo_recurso: tipoRecurso(d.resource),
       actualizacion: d.updated_at,
       propietario: d.owner.username,
       acciones: obtenerAcciones(d.status),
-      // comentarios: d.rejection_reason,
       recurso_completo: d.resource,
     };
   });
