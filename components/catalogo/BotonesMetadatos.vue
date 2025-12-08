@@ -30,6 +30,7 @@ const firstButton = 'MetadatosBasicos';
 const isLoading = ref(false);
 const wasUpdateSuccesful = ref(false);
 const didUpdateFail = ref(false);
+const isMetaInvalid = ref(false);
 const rutasConAtributos = {
   MetadatosBasicos: { siguiente: 'UbicacionLicencias', anterior: undefined },
   UbicacionLicencias: { siguiente: 'MetadatosOpcionales', anterior: 'MetadatosBasicos' },
@@ -59,30 +60,17 @@ function irARutaConQuery(direccion) {
   });
 }
 
-/* function validateAttributes(attribute_set) {
-  const attributeList = Object.keys(body.attribute_set);
-  const displayOrderList = attributeList.map((d) => Number(body.attribute_set[d]['display_order']));
-  const setList = Array.from(new Set(displayOrderList));
-  //console.log(displayOrderList);
-  //console.log(setList);
-  if (displayOrderList.length !== setList.length) {
-    //console.log(false);
-    return false;
-  } else {
-    //console.log(true);
-    return true;
-  }
-}  */
-
 function validateMeta(requestBody) {
   let status = false;
-  //const editedAbstract = requestBody.abstract?.replace(/\s/g, '') || '';
   if (!requestBody.title || requestBody.title.length === 0) {
     status = false;
-  } /* else if (editedAbstract.length < 30) {
-    //console.log('abstract');
+  } else if (!requestBody.date || requestBody.date.length === 0) {
     status = false;
-  }  */ else if (!requestBody.date || requestBody.date.length === 0) {
+  } else if (!requestBody.category) {
+    status = false;
+  } else if (!requestBody.keywords || requestBody.keywords.length === 0) {
+    status = false;
+  } else if (!requestBody.attribution || requestBody.attribution.length === 0) {
     status = false;
   } else if (requestBody.attribute_set) {
     const attributeList = Object.keys(requestBody.attribute_set);
@@ -109,6 +97,7 @@ async function updateMetadata() {
   const isMetaValid = validateMeta(requestBody);
 
   if (isMetaValid) {
+    isMetaInvalid.value = false;
     modalActualizar.value?.abrirModal();
     const token = data.value?.accessToken;
     const response = await $fetch('/api/metadatos', {
@@ -128,7 +117,8 @@ async function updateMetadata() {
     //router.go(0);
   } else {
     isLoading.value = false;
-    alert('Revisa la validez de los datos introducidos.');
+    isMetaInvalid.value = true;
+    //alert('Revisa la validez de los datos introducidos.');
   }
 }
 
@@ -137,28 +127,15 @@ function irAmisArchivos() {
     path: `/catalogo/mis-archivos/`,
   });
 }
-/**
- * Actualiza los metadatos con los valores del store
- */
-
-/*async function actualizaMetadatos() {
-  // console.log(data.value?.accessToken);
-  const response = await $fetch('/api/metadatos', {
-    method: 'POST',
-    body: {
-      pk: props.resource.pk,
-      resource_type: props.resource.resource_type,
-      token: data.value?.accessToken,
-      // TODO: faltan los demás valores
-      abstract: storeCatalogo.metadatos.abstract,
-    },
-  });
-  console.warn('response', response);
-  cargaExitosa.value = true;
-}*/
 </script>
 <template>
   <div>
+    <div v-if="isMetaInvalid" class="tarjeta fondo-color-error m-t-3">
+      <div class="tarjeta-cuerpo">
+        <p class="texto-color-error">Revisa que los campos obligatorios estén llenos.</p>
+      </div>
+    </div>
+
     <div class="flex p-t-3">
       <nuxt-link class="boton-secundario boton-chico" type="button" to="/catalogo/mis-archivos"
         >Ir a mis archivos</nuxt-link
