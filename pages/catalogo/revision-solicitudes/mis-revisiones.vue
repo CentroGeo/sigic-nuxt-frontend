@@ -1,6 +1,6 @@
 <script setup>
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { buildUrl, cleanInput } from '~/utils/consulta';
+import { cleanInput } from '~/utils/consulta';
 
 definePageMeta({
   middleware: 'auth',
@@ -8,6 +8,8 @@ definePageMeta({
 
 const storeCatalogo = useCatalogoStore();
 const storeResources = useResourcesCatalogoStore();
+
+const userReviewerPk = computed(() => storeCatalogo.userInfo.pk);
 const section = 'publicacion';
 // const params = computed(() => storeFilters.filters.queryParams);
 const isLoading = computed(() => storeResources.isLoading);
@@ -89,8 +91,8 @@ function updateResources() {
   });
 }
 
-const { data } = useAuth();
-const userReviewerPk = ref(null);
+// const { data } = useAuth();
+// const userReviewerPk = ref(null);
 
 function fetchNewData() {
   storeResources.resetBySection(section);
@@ -116,33 +118,11 @@ watch(
 );
 
 onMounted(async () => {
+  await storeCatalogo.getUserInfo();
+
   storeFilters.resetAll();
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
 
-  try {
-    const configEnv = useRuntimeConfig();
-    const { gnoxyFetch } = useGnoxyUrl();
-    const userEmail = data.value?.user.email;
-    const baseUrl = configEnv.public.geonodeApi;
-    const queryParams = {
-      page_size: 1,
-      'filter{email}': userEmail,
-    };
-
-    // petición para traer solo el usuario que coincida con el parámetro email
-    const url = buildUrl(`${baseUrl}/users`, queryParams);
-    const request = await gnoxyFetch(url.toString());
-    const res = await request.json();
-    const userInfo = res.users;
-
-    userReviewerPk.value = userInfo[0].pk;
-  } catch (error) {
-    console.error(error);
-  }
-
-  // storeResources.getMyTotal('publicacion', {
-  //   'filter{status}': 'on_review',
-  // });
   storeResources.getMyTotal('publicacion', {
     'filter{status}': 'on_review',
     'filter{reviewer}': `${userReviewerPk.value}`,

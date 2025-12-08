@@ -1,7 +1,6 @@
 <script setup>
-/**TODO: agregar método para traer la info del usuario al store */
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { buildUrl, cleanInput } from '~/utils/consulta';
+import { cleanInput } from '~/utils/consulta';
 
 definePageMeta({
   middleware: 'sidebase-auth',
@@ -10,10 +9,11 @@ definePageMeta({
   },
 });
 
-const { data } = useAuth();
 const storeResources = useResourcesCatalogoStore();
 const storeFilters = useFilteredResources();
 const storeCatalogo = useCatalogoStore();
+
+const userReviewerPk = computed(() => storeCatalogo.userInfo.pk);
 
 const section = 'publicacion';
 const isLoading = computed(() => storeResources.isLoading);
@@ -100,10 +100,8 @@ function updateResources() {
   });
 }
 
-const userReviewerPk = ref(null);
 function fetchNewData() {
   storeResources.resetBySection(section);
-  params.value['filter{owner}'] = `${userReviewerPk.value}`;
   storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, params.value);
 }
 
@@ -117,7 +115,6 @@ watch(paginaActual, () => {
 
 watch(params, () => {
   paginaActual.value = 0;
-  params.value['filter{owner}'] = `${userReviewerPk.value}`;
   storeResources.getMyTotal('publicacion', params.value);
   fetchNewData();
 });
@@ -130,30 +127,12 @@ watch(
   { deep: true }
 );
 
-try {
-  const configEnv = useRuntimeConfig();
-  const { gnoxyFetch } = useGnoxyUrl();
-  const userEmail = data.value?.user.email;
-  const baseUrl = configEnv.public.geonodeApi;
-  const queryParams = {
-    page_size: 1,
-    'filter{email}': userEmail,
-  };
-
-  // petición para traer solo el usuario que coincida con el parámetro email
-  const url = buildUrl(`${baseUrl}/users`, queryParams);
-  const request = await gnoxyFetch(url.toString());
-  const res = await request.json();
-  const userInfo = res.users;
-
-  userReviewerPk.value = userInfo[0].pk;
-} catch (error) {
-  console.error(error);
-}
-
 onMounted(async () => {
+  await storeCatalogo.getUserInfo();
+
   storeFilters.resetAll();
   storeFilters.buildQueryParams();
+
   storeResources.getMyTotal('disponibles', {});
   storeResources.getMyTotal('pendientes', {});
 

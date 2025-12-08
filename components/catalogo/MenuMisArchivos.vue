@@ -1,6 +1,4 @@
 <script setup>
-/**TODO: agregar método para traer la info del usuario al store */
-import { buildUrl } from '~/utils/consulta';
 /**
  * @typedef {Object} Props
  * @property {Object} [recurso={}] - Indica el recurso que utiliza para comunicar a las rutas.
@@ -17,7 +15,6 @@ const props = defineProps({
   notificacion: { type: Boolean, default: false },
 });
 
-const { data } = useAuth();
 const route = useRoute();
 
 /**
@@ -68,31 +65,11 @@ function irARutaConQuery(value) {
     });
   }
 }
-const esSuperusuario = ref(false);
-async function verificarSiEsSuperusuario() {
-  try {
-    const configEnv = useRuntimeConfig();
-    const { gnoxyFetch } = useGnoxyUrl();
-    const userEmail = data.value?.user.email;
-    const baseUrl = configEnv.public.geonodeApi;
-    const queryParams = {
-      page_size: 1,
-      'filter{email}': userEmail,
-    };
+const storeCatalogo = useCatalogoStore();
+const esSuperusuaria = computed(() => storeCatalogo.userInfo.is_superuser);
 
-    // petición para traer solo el usuario que coincida con el parámetro email
-    const url = buildUrl(`${baseUrl}/users`, queryParams);
-    const request = await gnoxyFetch(url.toString());
-    const res = await request.json();
-    const userInfo = res.users;
-
-    esSuperusuario.value = userInfo[0].is_superuser;
-  } catch (error) {
-    console.error(error);
-  }
-}
 onMounted(async () => {
-  await verificarSiEsSuperusuario();
+  await storeCatalogo.getUserInfo();
 });
 </script>
 <template>
@@ -104,7 +81,7 @@ onMounted(async () => {
             <div class="circulo"></div>
           </div>
           <button
-            v-if="value.texto === 'Gestión de solicitudes' && esSuperusuario"
+            v-if="value.texto !== 'Gestión de solicitudes'"
             :aria-label="`Ir a ${value.texto}`"
             class="boton-secundario header-link"
             type="button"
@@ -114,7 +91,7 @@ onMounted(async () => {
             <div class="borde-enlace-hover"></div>
           </button>
           <button
-            v-else
+            v-else-if="esSuperusuaria"
             :aria-label="`Ir a ${value.texto}`"
             class="boton-secundario header-link"
             type="button"
