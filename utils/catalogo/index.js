@@ -54,7 +54,7 @@ export async function fetchHarvesters(limited, params) {
 
     // Creamos el objeto con la información que nos interesa
     await Promise.all(
-      harvesters.map(async (h) => {
+      harvesters.map(async (h, index) => {
         const harvestableResourcesUrl = h.links.harvestable_resources;
         const resA = await gnoxyFetch(`${harvestableResourcesUrl}/?page_size=1`);
         const dataA = await resA.json();
@@ -65,12 +65,8 @@ export async function fetchHarvesters(limited, params) {
         );
         const dataB = await res2.json();
         const importedResources = dataB.total;
-        /*  const harvestableResources = dataB.harvestable_resources;
-        const exportedResources = harvestableResources.filter(
-          (j) => j.should_be_harvested === true
-        ); */
 
-        data.push({
+        data[index] = {
           id: h.id,
           title: h.name,
           status: h.status,
@@ -78,7 +74,7 @@ export async function fetchHarvesters(limited, params) {
           imported_resources: importedResources,
           to_attend_resources: totalResources - importedResources,
           remote_url: h.remote_url,
-        });
+        };
       })
     );
     status = 'ok';

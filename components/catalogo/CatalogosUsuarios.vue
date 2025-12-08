@@ -35,7 +35,8 @@ async function getTotal() {
 }
 
 /**
- * Solicita información de los servicios externos enviando queryparams
+ * Solicita información de los servicios externos enviando queryparams.
+ * Esta función es reutilizable
  */
 async function fetchResources() {
   isLoadingPage.value = true;
@@ -46,7 +47,9 @@ async function fetchResources() {
 }
 
 /**
- * Solicita información de los servicios externos enviando queryparams. Esta función coordina el estado global del componente.
+ * Solicita información de los servicios externos enviando queryparams
+ * la primera vez que se abre la página.
+ * Esta función coordina el estado global del componente.
  */
 async function getResources() {
   isLoadingGeneral.value = true;
@@ -84,6 +87,7 @@ const irARutaQuery = (v, destino) => {
     });
   }
 };
+
 getResources();
 
 watch(paginaActual, () => {
@@ -109,10 +113,10 @@ watch(seleccionOrden, () => {
         <div class="columna-8">
           <ClientOnly>
             <SisdaiSelector v-model="seleccionOrden" etiqueta="Ordenar por">
+              <option value="id">Más Antiguo</option>
+              <option value="-id">Más Reciente</option>
               <option value="name">Nombre</option>
               <option value="status">Status</option>
-              <option value="-id">Más Reciente</option>
-              <option value="id">Más Antiguo</option>
             </SisdaiSelector>
           </ClientOnly>
         </div>
