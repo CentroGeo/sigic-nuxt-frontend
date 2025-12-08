@@ -245,7 +245,9 @@ const handleDescarga = () => {
               >
                 Cerrar
               </button>
-              <button type="button" class="boton-primario boton-chico">Ir a Descargas</button>
+              <nuxt-link class="boton boton-primario boton-chico" to="/levantamiento/descargas">
+                Ir a Descargas
+              </nuxt-link>
             </template>
           </SisdaiModal>
         </ClientOnly>

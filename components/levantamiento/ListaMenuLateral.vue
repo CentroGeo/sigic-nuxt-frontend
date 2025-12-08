@@ -27,6 +27,17 @@ const route = useRoute();
             >Aportes</nuxt-link
           >
         </li>
+        <li>
+          <nuxt-link
+            :class="{
+              ['router-link-active router-link-exact-active']: route.path.includes(
+                '/levantamiento/descargas/'
+              ),
+            }"
+            to="/levantamiento/descargas"
+            >Descargas</nuxt-link
+          >
+        </li>
       </ul>
     </div>
   </nav>

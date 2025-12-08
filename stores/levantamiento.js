@@ -38,6 +38,10 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
         aportes: 121,
       },
     ]),
+    descargasAprobadas: ref([]),
+    existenDescargasAprobadas: ref(false),
+    descargasEnRevision: ref([]),
+    existenDescargasEnRevision: ref(false),
 
     alternarCatalogoColapsable() {
       this.catalogoColapsado = !this.catalogoColapsado;
@@ -80,6 +84,12 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
         this.proyectosPublicos.find((p) => p.id === id) ||
         null
       );
+    },
+    obtenerTotalDescargasAprobadas() {
+      return this.descargasAprobadas.length;
+    },
+    obtenerTotalDescargasEnRevision() {
+      return this.descargasEnRevision.length;
     },
   };
 });
