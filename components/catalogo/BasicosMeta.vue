@@ -161,14 +161,6 @@ async function guardarImagen(files) {
     dragNdDrop.value?.archivoNoValido();
   }
 }
-
-/* watch(
-  () => storeMetadatos.metadata,
-  (nv) => {
-    console.log('nv', nv);
-  },
-  { deep: true }
-); */
 </script>
 
 <template>
@@ -178,6 +170,7 @@ async function guardarImagen(files) {
       :title="'Metadatos básicos'"
       :exclude-links="props.isModal"
     />
+    <p class="m-t-2 m-b-0">* Campos obligatorios</p>
 
     <div v-if="!props.isModal">
       <p class="texto-peso-600">
@@ -196,11 +189,10 @@ async function guardarImagen(files) {
           <ClientOnly>
             <SisdaiCampoBase
               v-model="campoTitulo"
-              etiqueta="Título"
+              etiqueta="Título*"
               ejemplo="Añade un nombre"
               tipo="text"
               :es_etiqueta_visible="true"
-              :es_obligatorio="true"
             />
             <SisdaiCampoBase
               v-model="campoResumen"
@@ -216,9 +208,8 @@ async function guardarImagen(files) {
           <ClientOnly>
             <SisdaiSelector
               v-model="campoTipoFecha"
-              etiqueta="Tipo de fecha"
+              etiqueta="Tipo de fecha*"
               texto_ayuda="Creación, publicación o revisión."
-              :es_obligatorio="true"
             >
               <option value="creation">Creación</option>
               <option value="publication">Publicación</option>
@@ -230,17 +221,16 @@ async function guardarImagen(files) {
           <ClientOnly>
             <SisdaiCampoBase
               v-model="campoFecha"
-              etiqueta="Fecha"
+              etiqueta="Fecha*"
               ejemplo="tipo date"
               tipo="date"
               texto_ayuda="aaaa-mm-dd"
-              :es_obligatorio="true"
             />
           </ClientOnly>
         </div>
         <div class="columna-16">
           <ClientOnly>
-            <SisdaiSelector v-model="campoCategoria" etiqueta="Categoría" :es_obligatorio="true">
+            <SisdaiSelector v-model="campoCategoria" etiqueta="Categoría*">
               <option value="">----</option>
               <option
                 v-for="value in dictCategoria"
@@ -253,22 +243,17 @@ async function guardarImagen(files) {
 
             <SisdaiCampoBase
               v-model="campoPalabrasClave"
-              etiqueta="Palabras clave"
+              class="m-t-3"
+              etiqueta="Palabras clave *"
               ejemplo="Agua, educación, conservación..."
-              :es_obligatorio="true"
             />
           </ClientOnly>
         </div>
-        <div class="columna-8">
+        <div class="columna-16">
           <ClientOnly>
-            <!--            <SisdaiCampoBase
-              v-model="campoAutorMeta"
-              etiqueta="Autor (de los metadatos)"
-              ejemplo="Añade nombre de autor"
-              :es_obligatorio="true"
-            /> -->
             <SisdaiSelector
               v-model="campoAutorMeta"
+              class="m-t-3"
               etiqueta="Autor(a) de los metadatos"
               ejemplo="Añade nombre de autor"
             >
@@ -278,15 +263,6 @@ async function guardarImagen(files) {
             </SisdaiSelector>
           </ClientOnly>
         </div>
-        <!--         <div class="columna-8">
-          <ClientOnly>
-            <SisdaiCampoBase
-              v-model="campoAnioPublicacion"
-              etiqueta="Año de publicación"
-              ejemplo="Ej. 2002"
-            />
-          </ClientOnly>
-        </div> -->
       </div>
 
       <CatalogoBotonesMetadatos
