@@ -23,6 +23,7 @@ const selectedResources = ref([]);
 const unharvestedResources = ref([]);
 const harvesterStatus = ref(null);
 const isLoading = ref(false);
+const isLoadingPage = ref(false);
 const didUpdateFail = ref(false);
 const didUpdateSucceed = ref(false);
 const dictTipoRecursoRemoto = {
@@ -43,7 +44,7 @@ async function fetchData() {
   const configEnv = useRuntimeConfig();
   const baseUrl = configEnv.public.geonodeApi;
   const requestResources = await gnoxyFetch(
-    `${baseUrl}/harvesters/${selectedId}/harvestable-resources/?page=${paginaActual.value + 1}`
+    `${baseUrl}/harvesters/${selectedId}/harvestable-resources/?filter{should_be_harvested}=false&page=${paginaActual.value + 1}`
   );
   const response = await requestResources.json();
   totalReources.value = response.total;
@@ -150,8 +151,10 @@ function formatDate(date) {
 
 fetchData();
 
-watch(paginaActual, () => {
-  fetchData();
+watch(paginaActual, async () => {
+  isLoadingPage.value = true;
+  await fetchData();
+  isLoadingPage.value = false;
 });
 </script>
 <template>
@@ -240,7 +243,7 @@ watch(paginaActual, () => {
                 <th>Tipo</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody v-if="!isLoadingPage">
               <tr v-for="value in unharvestedResources" :key="value.unique_identifier">
                 <td>
                   <!-- <ClientOnly>
@@ -265,6 +268,9 @@ watch(paginaActual, () => {
             </tbody>
           </table>
         </form>
+        <div v-if="isLoadingPage" class="flex flex-contenido-centrado m-y-2">
+          <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="32px" />
+        </div>
         <ClientOnly>
           <UiPaginador
             :pagina-parent="paginaActual"

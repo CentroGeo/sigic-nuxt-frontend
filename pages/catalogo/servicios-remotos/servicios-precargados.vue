@@ -3,21 +3,92 @@ import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/sele
 import { fetchHarvesters } from '~/utils/catalogo';
 
 const storeCatalogo = useCatalogoStore();
+const { gnoxyFetch } = useGnoxyUrl();
+const config = useRuntimeConfig();
+//const isLoadingPage = ref(false);
+const seleccionOrden = ref('-id');
+const inputSearch = ref(null);
+const tamanioPagina = 3;
+const paginaActual = ref(0);
+const queryParams = ref({
+  page: paginaActual.value + 1,
+  page_size: tamanioPagina,
+  'sort[]': seleccionOrden.value,
+});
+const totalHarvesters = ref();
 const harvesters = ref([]);
 const fetchStatus = ref(null);
-const queryParams = ref({ page_size: 10 });
-const isLoading = ref(true);
-const seleccionOrden = ref(null);
-const inputSearch = ref(null);
+const isLoadingGlobal = ref(true);
+const isLoadingPage = ref(false);
+
+// Para triggerear la función de observar
+let serviceObserver;
+const rootServices = ref();
+
+async function getTotal() {
+  const url = `${config.public.geonodeApi}/harvesters/`;
+  const requestHarvesters = await gnoxyFetch(url);
+  if (!requestHarvesters.ok) {
+    const error = await requestHarvesters.json();
+    console.error('Falló petición de harvesters:', error);
+  }
+  const resHarvesters = await requestHarvesters.json();
+  return resHarvesters.total;
+}
 
 async function getResources() {
-  isLoading.value = true;
-  const { status, data } = await fetchHarvesters(false, queryParams.value);
-  harvesters.value = data;
+  isLoadingGlobal.value = true;
+  const { status, data } = await fetchHarvesters(true, queryParams.value);
+  harvesters.value = [...harvesters.value, ...data];
   fetchStatus.value = status;
-  isLoading.value = false;
+  isLoadingGlobal.value = false;
 }
-getResources();
+
+async function fetchNewResources() {
+  if (harvesters.value.length < totalHarvesters.value) {
+    isLoadingPage.value = true;
+    paginaActual.value += 1;
+    queryParams.value.page = paginaActual.value + 1;
+    const { status, data } = await fetchHarvesters(true, queryParams.value);
+    harvesters.value = [...harvesters.value, ...data];
+    fetchStatus.value = status;
+    isLoadingPage.value = false;
+  }
+}
+
+watch(seleccionOrden, () => {
+  paginaActual.value = 0;
+  queryParams.value.page = paginaActual.value + 1;
+  queryParams.value['sort[]'] = seleccionOrden.value;
+  harvesters.value = [];
+  getResources();
+});
+
+onMounted(async () => {
+  // Esto es para observar cuando la tarjeta entra en la vista
+  serviceObserver = new IntersectionObserver(async (entries) => {
+    for (const entry of entries) {
+      if (entry.isIntersecting) {
+        fetchNewResources();
+        //serviceObserver.unobserve(entry.target);
+      }
+    }
+  });
+  totalHarvesters.value = await getTotal();
+  getResources();
+});
+
+watch(rootServices, (newValue) => {
+  if (newValue) {
+    serviceObserver.observe(newValue);
+  }
+});
+
+onUnmounted(() => {
+  if (serviceObserver && rootServices.value) {
+    serviceObserver.unobserve(rootServices.value);
+  }
+});
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeCatalogo.catalogoColapsado">
@@ -31,15 +102,15 @@ getResources();
           <div class="columna-8">
             <ClientOnly>
               <SisdaiSelector v-model="seleccionOrden" etiqueta="Ordenar por">
-                <option value="titulo">Título</option>
-                <option value="categoria">Categoría</option>
-                <option value="fecha_descendente">Más Reciente</option>
-                <option value="fecha_ascendente">Más Antiguo</option>
+                <option value="id">Más Antiguo</option>
+                <option value="-id">Más Reciente</option>
+                <option value="name">Nombre</option>
+                <option value="status">Status</option>
               </SisdaiSelector>
             </ClientOnly>
           </div>
           <!-- Campo de búsqueda avanzada -->
-          <div class="columna-8">
+          <div class="columna-8" style="opacity: 0.5">
             <div class="flex flex-contenido-separado">
               <div class="columna-14">
                 <ClientOnly>
@@ -77,7 +148,7 @@ getResources();
         </div>
         <div class="flex m-t-2">
           <h2>Catalogos externos</h2>
-          <UiNumeroElementos :numero="harvesters.length" />
+          <UiNumeroElementos :numero="totalHarvesters" />
         </div>
         <p>
           Explora los recursos de información de catálogos precargados, al importarlos podrás
@@ -86,22 +157,26 @@ getResources();
         </p>
 
         <!--El spinner general-->
-        <div v-if="isLoading" class="flex flex-contenido-centrado m-y-5">
+        <div v-if="isLoadingGlobal" class="flex flex-contenido-centrado m-y-5">
           <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
         </div>
 
         <!--Las tarjetas de servicios remotos-->
-        <div v-if="!isLoading && fetchStatus === 'ok'" class="flex">
+        <div v-if="!isLoadingGlobal && fetchStatus === 'ok'" class="flex">
           <CatalogoTarjetaServicio
             v-for="catalogo in harvesters"
             :key="catalogo.id"
             :harvester="catalogo"
           />
+          <div ref="rootServices"></div>
+          <div v-if="isLoadingPage" class="columna-16 flex flex-contenido-centrado m-y-2">
+            <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="40px" />
+          </div>
         </div>
 
         <!--Mensaje de error si falla la petición-->
         <div
-          v-if="!isLoading && fetchStatus === 'error'"
+          v-if="!isLoadingGlobal && fetchStatus === 'error'"
           class="contenedor ancho-lectura borde-redondeado-16 texto-color-error fondo-color-error p-3 m-3 flex flex-contenido-centrado"
         >
           <span class="pictograma-alerta" />
