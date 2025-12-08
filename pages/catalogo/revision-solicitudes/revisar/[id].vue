@@ -10,12 +10,14 @@ const storeCatalogo = useCatalogoStore();
 // Recuperamos información a partir de la url
 const route = useRoute();
 const selectedPk = route.query.pk;
-const previousPath = route.query.previous_path;
+
+const previousPath = computed(() => storeCatalogo.previousPath || '');
 
 const isDocumentoReading = ref(false);
 
 const modalAceptar = ref(null);
 const modalNoAceptar = ref(null);
+const modalAgregar = ref(null);
 
 const areaMensajeAceptar = ref('');
 const areaMensajeNoAceptar = ref('');
@@ -64,6 +66,52 @@ async function noAceptarSolicitud() {
     console.error(error);
   }
 }
+
+async function agregarAMisSolicitudes() {
+  try {
+    // petición para agregar la solicitud a Mis revisiones
+    const response = await $fetch(`${configEnv.public.basePath}/api/solicitudes`, {
+      method: 'POST',
+      body: {
+        pk: selectedPk,
+        token: token,
+        status: 'on_review',
+        rejection_reason: 'En revisión.', // no se puede quedar vacío ''
+      },
+    });
+    console.warn(response);
+    modalAgregar.value.cerrarModal();
+    await navigateTo('/catalogo/revision-solicitudes/mis-revisiones');
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+const rutaBoton = ref('');
+const textoBoton = ref('');
+const baseUrl = '/catalogo/revision-solicitudes';
+/**
+ * Asigna el texto y la ruta del botón de regresar
+ * dependiendo de la ruta anterior
+ */
+function asignaBotonRegresar() {
+  if (previousPath.value === `${baseUrl}/mis-revisiones`) {
+    rutaBoton.value = `${baseUrl}/mis-revisiones`;
+    textoBoton.value = 'Mis revisiones';
+  } else {
+    if (previousPath.value === `${baseUrl}/pendientes-revisor`) {
+      rutaBoton.value = `${baseUrl}/pendientes-revisor`;
+      textoBoton.value = 'Revisión de solicitudes';
+    } else {
+      rutaBoton.value = `${baseUrl}/no-aceptadas`;
+      textoBoton.value = 'No aceptadas';
+    }
+  }
+}
+
+onMounted(() => {
+  asignaBotonRegresar();
+});
 </script>
 
 <template>
@@ -75,35 +123,26 @@ async function noAceptarSolicitud() {
     <template #visualizador>
       <main class="contenedor m-b-10 m-t-4">
         <div class="flex flex-contenido-separado m-b-3">
-          <nuxt-link
-            :to="
-              previousPath === '/catalogo/revision-solicitudes/mis-revisiones'
-                ? '/catalogo/revision-solicitudes/mis-revisiones'
-                : previousPath === '/catalogo/revision-solicitudes'
-                  ? '/catalogo/revision-solicitudes'
-                  : '/catalogo/revision-solicitudes/no-aceptadas'
-            "
-            aria-label="Regresar a aportes"
-          >
+          <nuxt-link :to="rutaBoton" :aria-label="`Regresar a ${textoBoton}`">
             <span
               class="pictograma-flecha-izquierda pictograma-mediano texto-color-acento m-r-2"
               aria-hidden="true"
             />
-            <span class="h5 texto-color-primario">{{
-              previousPath === '/catalogo/revision-solicitudes/mis-revisiones'
-                ? 'Mis revisiones'
-                : previousPath === '/catalogo/revision-solicitudes'
-                  ? 'Revisión de solicitudes'
-                  : 'No aceptadas'
-            }}</span>
+            <span class="h5 texto-color-primario">{{ textoBoton }}</span>
           </nuxt-link>
 
-          <div v-if="previousPath === '/catalogo/revision-solicitudes/mis-revisiones'" class="flex">
+          <div v-if="previousPath === `${baseUrl}/mis-revisiones`" class="flex">
             <button type="button" @click="modalAceptar.abrirModal()">
               Aceptar<span class="pictograma-aprobado" aria-hidden="true" />
             </button>
             <button type="button" @click="modalNoAceptar.abrirModal()">
               Rechazar<span class="pictograma-cerrar" aria-hidden="true" />
+            </button>
+          </div>
+
+          <div v-if="previousPath === `${baseUrl}/pendientes-revisor`" class="flex">
+            <button class="boton-primario" type="button" @click="modalAgregar.abrirModal()">
+              Agregar a mis revisiones<span class="pictograma-agregar" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -121,6 +160,33 @@ async function noAceptarSolicitud() {
       </main>
 
       <ClientOnly>
+        <!-- Modal Agregar a Mis revisiones -->
+        <SisdaiModal ref="modalAgregar">
+          <template #encabezado> <h2>Agregar a mi revisión</h2> </template>
+          <template #cuerpo>
+            <p>
+              ¿Deseas añadir este documento a tu revisión? Al hacerlo, quedará reservado para ti y
+              no podrá ser revisado por otras personas hasta que lo liberes o completes el proceso.
+            </p>
+          </template>
+          <template #pie>
+            <button
+              class="boton-secundario boton-chico"
+              type="button"
+              @click="modalAgregar.cerrarModal()"
+            >
+              Cancelar
+            </button>
+            <button
+              class="boton-primario boton-chico"
+              type="button"
+              @click="agregarAMisSolicitudes"
+            >
+              Añadir a mi revisión
+            </button>
+          </template>
+        </SisdaiModal>
+
         <!-- Modal Aceptar -->
         <SisdaiModal ref="modalAceptar">
           <template #encabezado> <h2>Aceptar solicitud</h2> </template>

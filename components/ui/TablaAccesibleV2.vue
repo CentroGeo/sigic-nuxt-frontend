@@ -17,6 +17,7 @@ const props = defineProps({
     default: '',
   },
 });
+const storeCatalogo = useCatalogoStore();
 //const { data } = useAuth();
 const idAleatorio = 'id-' + Math.random().toString(36).substring(2);
 const shownModal = ref('ninguno');
@@ -68,12 +69,14 @@ function irARutaConQuery(recurso) {
 }
 
 const revisando = ref(false);
+const route = useRoute();
 async function openResourceReview(resource) {
   // console.log('resource.pk', resource.pk);
   if (resource.tipo_recurso === 'Documentos') {
+    storeCatalogo.previousPath = route.path;
     await navigateTo({
       path: `/catalogo/revision-solicitudes/revisar/${resource.pk}`,
-      query: { pk: resource.pk, previous_path: resource.previous_path },
+      query: { pk: resource.pk },
     });
     revisando.value = true;
   }
@@ -278,7 +281,8 @@ async function removerRevision() {
     console.warn(response);
     modalCancelarSolicitud.value.cerrarModal();
     // forzando recargar la página para ver el cambio
-    location.reload();
+    // location.reload();
+    router.go(0);
   } catch (error) {
     console.error(error);
   }
@@ -290,7 +294,10 @@ async function removerRevision() {
     <div v-if="revisando" class="fondo-loader">
       <figure class="flex flex-contenido-centrado">
         <div class="flex-vertical-centrado" style="height: calc(100vh - 112px)">
-          <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
+          <figure>
+            <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
+            <figcaption class="texto-centrado">Cargando documento</figcaption>
+          </figure>
         </div>
       </figure>
     </div>

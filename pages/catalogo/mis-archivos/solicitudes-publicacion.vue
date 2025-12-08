@@ -233,6 +233,7 @@ onMounted(async () => {
             </div>
           </div>
         </div>
+
         <CatalogoMenuMisArchivos
           :opciones="[
             { texto: 'Disponibles', ruta: '/catalogo/mis-archivos' },
@@ -266,8 +267,8 @@ onMounted(async () => {
           <UiNumeroElementos :numero="totalResources" />
         </div>
         <p>
-          Se muestran los archivos enviados para revisión y su estatus de aprobación, junto con los
-          mensajes asociados.
+          E esta tabla se muestran los archivos enviados para revisión antes de publicarse en el
+          catálogo público de SIGIC. También puedes consultar el estatus de su aprobación.
         </p>
 
         <div v-if="isLoading" class="flex flex-contenido-centrado m-t-3">
