@@ -13,6 +13,7 @@ export const useFilteredResources = defineStore('filteredResources', () => {
     resourceType: null,
     sort: null,
     queryParams: {},
+    requests: null,
   });
   return {
     filters,
@@ -37,6 +38,7 @@ export const useFilteredResources = defineStore('filteredResources', () => {
       filters.resourceType = null;
       filters.sort = null;
       filters.queryParams = {};
+      filters.requests = null;
     },
     /**
      * Regresa los filtros del modal de búsqueda avanzada a su valor original
@@ -66,6 +68,22 @@ export const useFilteredResources = defineStore('filteredResources', () => {
           if (filters.resourceType === 'document') {
             queryParams['filter{extension}'] = ['pdf', 'txt'];
           }
+        }
+      }
+
+      // Agregamos queryparams para filtrar por status de la solicitud
+      if (filters.requests !== null) {
+        if (filters.requests === 'pending') {
+          queryParams['filter{status}'] = 'pending';
+        }
+        if (filters.requests === 'on_review') {
+          queryParams['filter{status}'] = 'on_review';
+        }
+        if (filters.requests === 'published') {
+          queryParams['filter{status}'] = 'published';
+        }
+        if (filters.requests === 'rejected') {
+          queryParams['filter{status}'] = 'rejected';
         }
       }
 

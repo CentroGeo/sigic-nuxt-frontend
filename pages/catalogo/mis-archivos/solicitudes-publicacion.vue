@@ -29,11 +29,15 @@ const totalPags = computed(() => Math.ceil(totalResources.value / tamanioPagina)
 
 const modalFiltroAvanzado = ref(null);
 const isFilterActive = ref(false);
+const seleccionTipoArchivo = computed({
+  get: () => storeFilters.filters.requests,
+  set: (value) => storeFilters.updateFilter('requests', value),
+});
 const seleccionOrden = computed({
   get: () => storeFilters.filters.sort,
   set: (value) => storeFilters.updateFilter('sort', value),
 });
-const seleccionTipoArchivo = ref('');
+
 const inputSearch = computed({
   get: () => storeFilters.filters.inputSearch,
   set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
@@ -99,13 +103,22 @@ function updateResources() {
 const userReviewerPk = ref(null);
 function fetchNewData() {
   storeResources.resetBySection(section);
-  // storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, params.value);
-  storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, {
-    'filter{owner}': `${userReviewerPk.value}`,
-  });
+  params.value['filter{owner}'] = `${userReviewerPk.value}`;
+  storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, params.value);
 }
 
+watch([seleccionTipoArchivo], () => {
+  storeFilters.buildQueryParams();
+});
+
 watch(paginaActual, () => {
+  fetchNewData();
+});
+
+watch(params, () => {
+  paginaActual.value = 0;
+  params.value['filter{owner}'] = `${userReviewerPk.value}`;
+  storeResources.getMyTotal('publicacion', params.value);
   fetchNewData();
 });
 
@@ -117,36 +130,35 @@ watch(
   { deep: true }
 );
 
+try {
+  const configEnv = useRuntimeConfig();
+  const { gnoxyFetch } = useGnoxyUrl();
+  const userEmail = data.value?.user.email;
+  const baseUrl = configEnv.public.geonodeApi;
+  const queryParams = {
+    page_size: 1,
+    'filter{email}': userEmail,
+  };
+
+  // petición para traer solo el usuario que coincida con el parámetro email
+  const url = buildUrl(`${baseUrl}/users`, queryParams);
+  const request = await gnoxyFetch(url.toString());
+  const res = await request.json();
+  const userInfo = res.users;
+
+  userReviewerPk.value = userInfo[0].pk;
+} catch (error) {
+  console.error(error);
+}
+
 onMounted(async () => {
   storeFilters.resetAll();
-  storeFilters.buildQueryParams(seleccionTipoArchivo.value);
-  storeResources.getMyTotal('disponibles', params.value);
-  storeResources.getMyTotal('pendientes', params.value);
-  // storeResources.getMyTotal('publicacion', params.value);
-  try {
-    const configEnv = useRuntimeConfig();
-    const { gnoxyFetch } = useGnoxyUrl();
-    const userEmail = data.value?.user.email;
-    const baseUrl = configEnv.public.geonodeApi;
-    const queryParams = {
-      page_size: 1,
-      'filter{email}': userEmail,
-    };
+  storeFilters.buildQueryParams();
+  storeResources.getMyTotal('disponibles', {});
+  storeResources.getMyTotal('pendientes', {});
 
-    // petición para traer solo el usuario que coincida con el parámetro email
-    const url = buildUrl(`${baseUrl}/users`, queryParams);
-    const request = await gnoxyFetch(url.toString());
-    const res = await request.json();
-    const userInfo = res.users;
-
-    userReviewerPk.value = userInfo[0].pk;
-  } catch (error) {
-    console.error(error);
-  }
-
-  storeResources.getMyTotal('publicacion', {
-    'filter{owner}': `${userReviewerPk.value}`,
-  });
+  params.value['filter{owner}'] = `${userReviewerPk.value}`;
+  storeResources.getMyTotal('publicacion', params.value);
   fetchNewData();
 });
 </script>
@@ -163,12 +175,12 @@ onMounted(async () => {
         <div class="flex">
           <div class="columna-4">
             <ClientOnly>
-              <SisdaiSelector v-model="seleccionTipoArchivo" etiqueta="Tipo de archivo">
-                <option value="todes">Todos los archivos</option>
-                <option value="capas">Capas geográficas</option>
-                <option value="tablas">Datos tabulados</option>
-                <option value="documentos">Documentos</option>
-                <option value="remotas">Remotas</option>
+              <SisdaiSelector v-model="seleccionTipoArchivo" etiqueta="Estatus">
+                <option value="all">Todos los estatus</option>
+                <option value="on_review">En revisión</option>
+                <option value="published">Aceptados</option>
+                <option value="pending">Pendientes</option>
+                <option value="rejected">No Aceptados</option>
               </SisdaiSelector>
             </ClientOnly>
           </div>

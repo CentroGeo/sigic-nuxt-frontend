@@ -137,7 +137,6 @@ onMounted(async () => {
                 <option value="capas">Capas geográficas</option>
                 <option value="tablas">Datos tabulados</option>
                 <option value="documentos">Documentos</option>
-                <option value="remotas">Remotas</option>
               </SisdaiSelector>
             </ClientOnly>
           </div>
