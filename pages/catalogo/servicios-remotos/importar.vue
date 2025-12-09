@@ -15,13 +15,15 @@ const { gnoxyFetch } = useGnoxyUrl();
 const route = useRoute();
 const selectedId = route.query.id;
 const selectedTitle = route.query.title;
-const totalReources = ref();
+const totalResources = ref();
 const paginaActual = ref(0);
 const tamanioPagina = 10;
-const totalPags = computed(() => Math.ceil(totalReources.value / tamanioPagina));
+const totalPags = computed(() => Math.ceil(totalResources.value / tamanioPagina));
 const selectedResources = ref([]);
 const unharvestedResources = ref([]);
 const harvesterStatus = ref(null);
+const onMountHarvesterStatus = ref();
+const fetchingResources = ref(true);
 const isLoading = ref(false);
 const isLoadingPage = ref(false);
 const didUpdateFail = ref(false);
@@ -37,17 +39,24 @@ async function iniciarSesion() {
   });
 }
 
+async function checkStatus() {
+  const baseUrl = config.public.geonodeApi;
+  const requestResources = await gnoxyFetch(`${baseUrl}/harvesters/${selectedId}/`);
+  const response = await requestResources.json();
+  onMountHarvesterStatus.value = response.harvester.status;
+}
+
 /**
  * Esta función permite obtener los recursos que aún no han sido cosechados
  */
+
 async function fetchData() {
-  const configEnv = useRuntimeConfig();
-  const baseUrl = configEnv.public.geonodeApi;
+  const baseUrl = config.public.geonodeApi;
   const requestResources = await gnoxyFetch(
     `${baseUrl}/harvesters/${selectedId}/harvestable-resources/?filter{should_be_harvested}=false&page=${paginaActual.value + 1}`
   );
   const response = await requestResources.json();
-  totalReources.value = response.total;
+  totalResources.value = response.total;
   const haverstableResources = response.harvestable_resources;
   unharvestedResources.value = haverstableResources.filter((d) => d.should_be_harvested === false);
 }
@@ -149,7 +158,14 @@ function formatDate(date) {
   });
 }
 
-fetchData();
+onMounted(async () => {
+  fetchingResources.value = true;
+  await checkStatus();
+  if (onMountHarvesterStatus.value === 'ready') {
+    await fetchData();
+  }
+  fetchingResources.value = false;
+});
 
 watch(paginaActual, async () => {
   isLoadingPage.value = true;
@@ -164,7 +180,7 @@ watch(paginaActual, async () => {
     </template>
 
     <template #visualizador>
-      <main v-if="unharvestedResources.length > 0" id="principal" class="contenedor m-b-10 m-y-3">
+      <main v-if="!fetchingResources" id="principal" class="contenedor m-b-10 m-y-3">
         <!--Boton superior izquierda-->
         <div class="flex alineacion-izquierda ancho-lectura">
           <nuxt-link
@@ -181,7 +197,7 @@ watch(paginaActual, async () => {
 
         <h1 class="m-y-1">{{ selectedTitle }}</h1>
 
-        <!--Cuadro de información-->
+        <!--Cuadros de información de inicio de sesión-->
         <div
           v-if="status !== 'authenticated'"
           class="fondo-color-informacion texto-color-informacion borde-redondeado-16 borde -color-informacion m-t-2"
@@ -197,11 +213,45 @@ watch(paginaActual, async () => {
             >Iniciar sesión</a
           >
         </div>
+        <!--Cuadros de información de que el servicio no está listo-->
+
+        <div
+          v-if="!fetchingResources && onMountHarvesterStatus !== 'ready'"
+          class="tarjeta fondo-color-alerta"
+        >
+          <div class="tarjeta-cuerpo">
+            <p class="tarjeta-titulo texto-color-alerta">El servicio está ocupado</p>
+            <p class="texto-color-alerta">
+              Espera a que el estatus del servicio aparezca como Listo para poder importar recursos.
+            </p>
+          </div>
+        </div>
+        <!--Cuadros de información de que no hay recursos para importarlos-->
+
+        <div
+          v-if="
+            !fetchingResources &&
+            onMountHarvesterStatus === 'ready' &&
+            unharvestedResources.length === 0
+          "
+          class="tarjeta fondo-color-alerta m-y-3"
+        >
+          <div class="tarjeta-cuerpo">
+            <p class="tarjeta-titulo texto-color-alerta">
+              No hay recursos pendientes por importar.
+            </p>
+            <p class="texto-color-alerta">
+              Todos los recursos de este servicio ya han sido importados.
+            </p>
+          </div>
+        </div>
 
         <!--Instrucciones-->
-        <p>Explora los recursos disponibles y selecciona los que desees importar.</p>
+        <p v-if="unharvestedResources.length > 0">
+          Explora los recursos disponibles y selecciona los que desees importar.
+        </p>
 
-        <!--Alertas-->
+        <!--Alertas de importación-->
         <div>
           <div
             v-if="isLoading"
@@ -233,46 +283,48 @@ watch(paginaActual, async () => {
         </div>
 
         <!--Tabla de recursos-->
-        <form @submit.prevent>
-          <table class="tabla-condensada">
-            <thead>
-              <tr>
-                <th>Nombre</th>
-                <th>Título</th>
-                <th>Última actualización</th>
-                <th>Tipo</th>
-              </tr>
-            </thead>
-            <tbody v-if="!isLoadingPage">
-              <tr v-for="value in unharvestedResources" :key="value.unique_identifier">
-                <td>
-                  <!-- <ClientOnly>
+        <table v-if="unharvestedResources.length > 0" class="tabla-condensada">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Título</th>
+              <th>Última actualización</th>
+              <th>Tipo</th>
+            </tr>
+          </thead>
+          <tbody v-if="!isLoadingPage">
+            <tr v-for="value in unharvestedResources" :key="value.unique_identifier">
+              <td>
+                <!-- <ClientOnly>
                     <SisdaiCasillaVerificacion :etiqueta="value.unique_identifier" />
                   </ClientOnly> -->
-                  <input
-                    :id="`checkbox-${value.unique_identifier}`"
-                    type="checkbox"
-                    name="checkboxes"
-                    :checked="isSelected(value)"
-                    :disabled="status !== 'authenticated'"
-                    @change="toggleSelection(value)"
-                  />
-                  <label :for="`checkbox-${value.unique_identifier}`">
-                    {{ value.unique_identifier }}
-                  </label>
-                </td>
-                <td>{{ value.title }}</td>
-                <td>{{ formatDate(value.last_updated) }}</td>
-                <td>{{ dictTipoRecursoRemoto[value.remote_resource_type] }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </form>
-        <div v-if="isLoadingPage" class="flex flex-contenido-centrado m-y-2">
+                <input
+                  :id="`checkbox-${value.unique_identifier}`"
+                  type="checkbox"
+                  name="checkboxes"
+                  :checked="isSelected(value)"
+                  :disabled="status !== 'authenticated'"
+                  @change="toggleSelection(value)"
+                />
+                <label :for="`checkbox-${value.unique_identifier}`">
+                  {{ value.unique_identifier }}
+                </label>
+              </td>
+              <td>{{ value.title }}</td>
+              <td>{{ formatDate(value.last_updated) }}</td>
+              <td>{{ dictTipoRecursoRemoto[value.remote_resource_type] }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div
+          v-if="isLoadingPage && unharvestedResources.length > 0"
+          class="flex flex-contenido-centrado m-y-2"
+        >
           <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="32px" />
         </div>
         <ClientOnly>
           <UiPaginador
+            v-if="unharvestedResources.length > 0"
             :pagina-parent="paginaActual"
             :total-paginas="totalPags"
             @cambio="paginaActual = $event"
@@ -294,7 +346,11 @@ watch(paginaActual, async () => {
             class="boton-primario boton-chico"
             aria-label="Importar recursos de catálogo externo"
             type="button"
-            :disabled="status !== 'authenticated'"
+            :disabled="
+              status !== 'authenticated' ||
+              onMountHarvesterStatus !== 'ready' ||
+              unharvestedResources.length === 0
+            "
             @click="importarRecursos"
           >
             Importar recursos

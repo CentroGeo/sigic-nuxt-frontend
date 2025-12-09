@@ -54,15 +54,20 @@ if (
   lastButton.value = 'MetadatosOpcionales';
 }
 function irARutaConQuery(direccion) {
-  navigateTo({
-    path: `/catalogo/mis-archivos/editar/${rutas.value[props.title][direccion]}`,
-    query: { data: props.pk, type: props.tipo },
-  });
+  navigateTo(
+    {
+      path: `/catalogo/mis-archivos/editar/${rutas.value[props.title][direccion]}`,
+      query: { data: props.pk, type: props.tipo },
+    },
+    { replace: true }
+  );
 }
 
 function validateMeta(requestBody) {
   let status = false;
   if (!requestBody.title || requestBody.title.length === 0) {
+    status = false;
+  } else if (!requestBody.date_type || requestBody.date_type.length === 0) {
     status = false;
   } else if (!requestBody.date || requestBody.date.length === 0) {
     status = false;

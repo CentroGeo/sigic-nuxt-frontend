@@ -70,26 +70,32 @@ async function getResources() {
  */
 const irARutaQuery = (v, destino) => {
   if (destino !== 'pendientes') {
-    navigateTo({
-      path: `/catalogo/servicios-remotos/${v.id}`,
-      query: {
-        id: v.id,
-        title: v.title,
-        total: v.imported_resources + v.to_attend_resources,
-        /*         unique_identifier: v.unique_identifier,
+    navigateTo(
+      {
+        path: `/catalogo/servicios-remotos/${v.id}`,
+        query: {
+          id: v.id,
+          title: v.title,
+          total: v.imported_resources + v.to_attend_resources,
+          /*         unique_identifier: v.unique_identifier,
         remote_resource_type: v.remote_resource_type, */
+        },
       },
-    });
+      { replace: true }
+    );
   } else {
-    navigateTo({
-      path: `/catalogo/servicios-remotos/importar`,
-      query: {
-        id: v.id,
-        title: v.title,
-        /*         unique_identifier: v.unique_identifier,
+    navigateTo(
+      {
+        path: `/catalogo/servicios-remotos/importar`,
+        query: {
+          id: v.id,
+          title: v.title,
+          /*         unique_identifier: v.unique_identifier,
         remote_resource_type: v.remote_resource_type, */
+        },
       },
-    });
+      { replace: true }
+    );
   }
 };
 
@@ -214,20 +220,15 @@ onMounted(() => {
           <tr v-for="harvester in harvesters" :key="harvester.id">
             <td>{{ harvester.title }}</td>
             <td>
-              <nuxt-link v-if="harvester.status === 'ready'" @click="irARutaQuery(harvester, '')">
+              <nuxt-link @click="irARutaQuery(harvester, '')">
                 {{ harvester.imported_resources }}
               </nuxt-link>
-              <p v-else>{{ harvester.imported_resources }}</p>
             </td>
 
             <td>
-              <nuxt-link
-                v-if="harvester.status === 'ready'"
-                @click="irARutaQuery(harvester, 'pendientes')"
-              >
+              <nuxt-link @click="irARutaQuery(harvester, 'pendientes')">
                 {{ harvester.to_attend_resources }}
               </nuxt-link>
-              <p v-else>{{ harvester.to_attend_resources }}</p>
             </td>
             <td>
               <a :href="harvester.remote_url" target="_blank" rel="noopener noreferrer">
@@ -244,7 +245,7 @@ onMounted(() => {
               </div>
               <div
                 v-else
-                class="texto-color-informacion texto-centrado fondo-color-informacion borde borde-color-informacion borde-redondeado-8 p-1"
+                class="texto-color-alerta texto-centrado fondo-color-alerta borde borde-color-alerta borde-redondeado-8 p-1"
               >
                 {{ statusDict[harvester.status] }}
               </div>

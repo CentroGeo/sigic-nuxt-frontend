@@ -11,6 +11,7 @@ const storeCatalogo = useCatalogoStore();
 const route = useRoute();
 const selectedId = route.query.id;
 const selectedTitle = route.query.title;
+const total = route.query.total;
 const { gnoxyFetch } = useGnoxyUrl();
 const config = useRuntimeConfig();
 const selectedHarvester = ref({});
@@ -115,9 +116,18 @@ function irAImportarRecursos() {
     },
   });
 }
-getServiceUrl();
+
 watch(harvesterUrl, () => {
   fetchRemoteResources();
+});
+
+onMounted(() => {
+  if (total === '0') {
+    isLoading.value = false;
+    fetchStatus.value = 'ok';
+  } else {
+    getServiceUrl();
+  }
 });
 </script>
 <template>
@@ -142,7 +152,7 @@ watch(harvesterUrl, () => {
         </div>
         <h2>{{ selectedTitle }}</h2>
         <!--Cargando-->
-        <div v-if="isLoading" class="flex flex-contenido-centrado m-y-5">
+        <div v-if="isLoading && total !== '0'" class="flex flex-contenido-centrado m-y-5">
           <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
           <p class="columna-16 texto-color-error" style="text-align: center">{{ url }}</p>
         </div>
@@ -157,12 +167,23 @@ watch(harvesterUrl, () => {
         </div>
 
         <!--Aún no hay recursos importados-->
-        <div v-if="!isLoading && importedResources.length === 0 && fetchStatus === 'ok'">
-          <p
-            class="texto-color-informacion fondo-color-informacion borde borde-color-informacion p-2 borde-redondeado-8"
-          >
-            Aún no se han importado recursos
-          </p>
+        <div v-if="total === '0'">
+          <div class="flex flex-contenido-centrado ancho-lectura borde-redondeado-16 sin-seleccion">
+            <span class="pictograma-flkt pictograma-grande texto-color-error m-1"></span>
+            <h3 class="texto-color-error m-1">Aún no se han importado recursos</h3>
+            <p class="m-1">
+              Cuando selecciones un conjunto de datos del catálogo, podrás explorarlo en esta
+              sección
+            </p>
+            <div class="flex flex-contenido-inicio m-t-3">
+              <nuxt-link
+                class="boton boton-primario boton-chico"
+                aria-label="Ir a importar Recursos"
+                @click="irAImportarRecursos"
+                >Importar Recursos
+              </nuxt-link>
+            </div>
+          </div>
         </div>
 
         <!--Tabla de recursos-->
@@ -199,24 +220,31 @@ watch(harvesterUrl, () => {
               </tbody>
             </table>
           </form>
-        </div>
 
-        <div v-if="!isLoading" class="flex flex-contenido-inicio m-t-3">
-          <nuxt-link
-            v-if="!isLoading && importedResources.length > 0"
-            class="boton boton-primario boton-chico"
-            aria-label="Ir a editar metadatos"
-            to="/catalogo/mis-archivos/metadatos-pendientes"
-            >Editar metadatos
-          </nuxt-link>
-          <nuxt-link
-            class="boton boton-secundario boton-chico"
-            aria-label="Ir a recursos externos aún no importados"
-            @click="irAImportarRecursos"
-            >Ver recursos no importados
-          </nuxt-link>
+          <div class="flex flex-contenido-inicio m-t-3">
+            <nuxt-link
+              class="boton boton-primario boton-chico"
+              aria-label="Ir a editar metadatos"
+              to="/catalogo/mis-archivos/metadatos-pendientes"
+              >Editar metadatos
+            </nuxt-link>
+            <nuxt-link
+              class="boton boton-secundario boton-chico"
+              aria-label="Ir a recursos externos aún no importados"
+              @click="irAImportarRecursos"
+              >Ver recursos no importados
+            </nuxt-link>
+          </div>
         </div>
       </main>
     </template>
   </UiLayoutPaneles>
 </template>
+<style scoped>
+.sin-seleccion {
+  background-color: var(--fondo-acento);
+  gap: 8px;
+  padding: 16px;
+  text-align: center;
+}
+</style>
