@@ -13,7 +13,7 @@ const storeFilters = useFilteredResources();
 const storeCatalogo = useCatalogoStore();
 const section = 'disponibles';
 const params = computed(() => storeFilters.filters.queryParams);
-const isLoading = computed(() => storeResources.isLoading);
+const isLoading = ref(true);
 const hayMetaPendiente = computed(() =>
   storeResources.myTotalBySection('pendientes') > 0 ? true : false
 );
@@ -39,10 +39,6 @@ const inputSearch = computed({
   get: () => storeFilters.filters.inputSearch,
   set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
 });
-
-// const { data, status } = useAuth();
-// console.log('data:', data.value);
-// console.log('status:', status.value);
 
 /**
  * Valida si el tipo de recurso es documento o dataset con geometría o no
@@ -90,9 +86,14 @@ function updateResources() {
   }));
 }
 
-function fetchNewData() {
+async function fetchNewData() {
   storeResources.resetBySection(section);
-  storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, params.value);
+  await storeResources.getMyResourcesByPage(
+    section,
+    paginaActual.value + 1,
+    tamanioPagina,
+    params.value
+  );
 }
 function applyAdvancedFilter() {
   isFilterActive.value = true;
@@ -134,13 +135,14 @@ watch(
 );
 
 onMounted(async () => {
+  isLoading.value = true;
   storeFilters.resetAll();
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
   storeResources.getMyTotal('disponibles', params.value);
   storeResources.getMyTotal('pendientes', params.value);
   storeResources.getMyTotal('publicacion', params.value);
-
-  fetchNewData();
+  await fetchNewData();
+  isLoading.value = false;
 });
 </script>
 
