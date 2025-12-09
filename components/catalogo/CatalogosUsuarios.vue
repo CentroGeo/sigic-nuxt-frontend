@@ -11,7 +11,7 @@ const fetchStatus = ref(null);
 const seleccionOrden = ref('-id');
 const inputSearch = ref(null);
 const paginaActual = ref(0);
-const tamanioPagina = 3;
+const tamanioPagina = 5;
 const totalHarvesters = ref();
 const totalPags = computed(() => Math.ceil(totalHarvesters.value / tamanioPagina));
 const queryParams = ref({
@@ -199,7 +199,7 @@ watch(seleccionOrden, () => {
             <th>Recursos importados</th>
             <th>Recursos pendientes</th>
             <th>URL</th>
-            <th>Tipo</th>
+            <!--<th>Tipo</th>-->
             <th>Status</th>
           </tr>
         </thead>
@@ -221,7 +221,7 @@ watch(seleccionOrden, () => {
                 {{ harvester.remote_url }}
               </a>
             </td>
-            <td>Servcio de Mapas</td>
+            <!--<td>Servcio de Mapas</td>-->
             <td>{{ harvester.status }}</td>
           </tr>
         </tbody>

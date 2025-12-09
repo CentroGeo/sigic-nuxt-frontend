@@ -16,8 +16,8 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
     date: undefined,
     category: undefined,
     keywords: undefined,
-    metadata_author_pk: undefined,
-    metadata_author: undefined,
+    //metadata_author_pk: undefined,
+    //metadata_author: undefined,
     license: undefined,
     language: undefined,
     attribution: undefined,
@@ -29,10 +29,6 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
     purpose: undefined,
     supplemental_information: undefined,
     maintenance_frequency: undefined,
-    publisher: '...cargando',
-    publisher_pk: undefined,
-    //owner: undefined,
-    //thumbnail_url: undefined,
     attribute_set: [],
   });
 
@@ -62,13 +58,18 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
         metadataResponse = res.dataset;
       }
       const attrs = Object.keys(metadata);
+      const raw_attrs = [
+        'abstract',
+        'purpose',
+        'constraints_other',
+        'supplemental_information',
+        'data_quality_statement',
+      ];
       attrs.forEach((key) => {
         if (key === 'attribute_set' && resource_type === 'document') {
           metadata.attribute_set = [];
-        } else if (key === 'abstract') {
-          metadata.abstract = metadataResponse['raw_abstract'];
-        } else if (key === 'date_type') {
-          metadata[key] = 'creation';
+        } else if (raw_attrs.includes(key)) {
+          metadata[key] = metadataResponse[`raw_${key}`];
         } else if (key === 'date') {
           const formatedDate = new Date(metadataResponse[key]).toISOString();
           metadata[key] = formatedDate.slice(0, 10);
@@ -76,18 +77,14 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
           metadata[key] = metadataResponse.category?.identifier;
         } else if (key === 'keywords') {
           metadata[key] = metadataResponse.keywords.map((d) => d.name).join(',');
-        } else if (key === 'metadata_author') {
+        } /* else if (key === 'metadata_author') {
           metadata[key] = metadataResponse.metadata_author[0]['username'];
         } else if (key === 'metadata_author_pk') {
           metadata[key] = metadataResponse.metadata_author[0]['pk'];
-        } else if (key === 'license') {
+        }  */ else if (key === 'license') {
           metadata[key] = metadataResponse.license.identifier;
         } else if (key === 'restriction_code_type') {
           metadata[key] = metadataResponse.restriction_code_type?.identifier;
-        } else if (key === 'publisher') {
-          metadata[key] = metadataResponse.publisher?.[0]?.['username'] || '';
-        } else if (key === 'publihser_pk') {
-          metadata[key] = metadataResponse.publisher?.[0]?.['pk'] || '';
         } else if (key in metadataResponse) {
           metadata[key] = metadataResponse[key];
         } else {
@@ -128,63 +125,7 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
      * @returns Objeto de metadatos
      */
     buildRequestBody() {
-      //TODO: incorporar keywords, publisher y arreglar metadata_author
       const metaDict = {};
-      //const exclude = ['uuid', 'pk', 'resource_type', 'metadata_author_pk'];
-      //const dictKeys = Object.keys(metadata).filter((key) => !exclude.includes(key));
-      /*   dictKeys.forEach((key) => {
-        if (metadata[key] === null || metadata[key] === undefined) {
-          return;
-        } else if (typeof metadata[key] === 'string' && metadata[key].length === 0) {
-          return;
-        } else if (typeof metadata[key] === 'string' && metadata[key].length > 0) {
-          // Si no está vacío pero necesita una estructura particular
-          if (key === 'date') {
-            metaDict['date'] = new Date(metadata.date).toISOString(); //
-          } else if (key === 'category') {
-            metaDict['category'] = {
-              identifier: metadata.category,
-              gn_description: categoriesNames[metadata.category],
-            };
-          } else if (key === 'license' || key === 'restriction_code_type') {
-            metaDict[key] = { key: metadata[key] }; //
-          } else if (key === 'metadata_author') {
-            //  metaDict['metadata_author'] = [
-            //   {
-            //     pk: metadata.metadata_author_pk,
-            //     username: metadata.metadata_author,
-            //   },
-            // ]; 
-            return;
-          } else {
-            // Si no necesita una estructura particular
-            metaDict[key] = metadata[key];
-          }
-        } else {
-          // Si el valor del metadato no es una cadena
-          if (key === 'attribute_set') {
-            const attrs = {};
-            metadata.attribute_set.forEach((attribute) => {
-              const object = {
-                visible: attribute.visible,
-                display_order: attribute.display_order,
-              };
-              if (attribute.description) {
-                object['description'] = attribute.description;
-              }
-              if (attribute.attribute_label) {
-                object['attribute_label'] = attribute.attribute_label;
-              }
-              attrs[`${attribute.pk}`] = object;
-            });
-            metaDict['attribute_set'] = attrs;
-          } else {
-            //console.warn(typeof metadata[key], key);
-            return;
-          }
-        }
-      }); */
-
       if (metadata.title && metadata.title.length > 0) {
         metaDict['title'] = metadata.title;
       }
@@ -202,27 +143,22 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
         };
       }
       if (metadata.keywords && metadata.keywords.length > 0) {
-        metaDict['keywords'] = unaccentUppercase(metadata.keywords).split(',');
+        metaDict['keywords'] = unaccentUppercase(metadata.keywords).split(', ');
       }
-      if (metadata.metadata_author && metadata.metadata_author_pk) {
+      /* if (metadata.metadata_author && metadata.metadata_author_pk) {
         metaDict['metadata_author'] = [
           {
             pk: metadata.metadata_author_pk,
             username: metadata.metadata_author,
           },
         ];
-      }
+      } */
       if (metadata.license && metadata.license.length > 0) {
         metaDict['license'] = { identifier: metadata.license };
       }
       if (metadata.language && metadata.language.length > 0) {
         metaDict['language'] = metadata.language;
       }
-
-      if (metadata.abstract && metadata.abstract.length > 0) {
-        metaDict['abstract'] = metadata.abstract;
-      }
-
       if (metadata.attribution && metadata.attribution.length > 0) {
         metaDict['attribution'] = metadata.attribution;
       }
@@ -249,14 +185,6 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
       }
       if (metadata.maintenance_frequency && metadata.maintenance_frequency.length > 0) {
         metaDict['maintenance_frequency'] = metadata.maintenance_frequency;
-      }
-      if (metadata.publisher && metadata.publisher_pk) {
-        metaDict['publisher'] = [
-          {
-            pk: metadata.publisher_pk,
-            username: metadata.publisher,
-          },
-        ];
       }
 
       const attrs = {};

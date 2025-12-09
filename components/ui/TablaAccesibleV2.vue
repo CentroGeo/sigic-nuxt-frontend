@@ -17,7 +17,7 @@ const props = defineProps({
     default: '',
   },
 });
-//const { data } = useAuth();
+const { data } = useAuth();
 const idAleatorio = 'id-' + Math.random().toString(36).substring(2);
 const shownModal = ref('ninguno');
 const modalResource = ref(null);
@@ -160,13 +160,13 @@ function cancelarEliminar() {
 
 async function confirmarEliminar() {
   isBeingDeleted.value = true;
-  /*   const token = data.value?.accessToken;
+  const token = data.value?.accessToken;
   const response = await $fetch('/api/delete-resource', {
     method: 'DELETE',
     headers: { token: token, pk: resourceToDeletePk.value },
   });
   //TODO: agregar manejo de errores
-  console.warn('La res:', response);*/
+  console.warn('La res:', response);
   await wait(3000);
   isBeingDeleted.value = false;
   modalEliminar.value?.cerrarModal();
