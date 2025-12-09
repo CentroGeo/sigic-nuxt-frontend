@@ -29,6 +29,7 @@ function irARutaQuery() {
       <button
         class="boton-primario flex flex-contenido-centrado"
         style="width: 100%; margin: 8px"
+        :disabled="harvester.status !== 'ready'"
         @click="irARutaQuery"
       >
         Importar recursos

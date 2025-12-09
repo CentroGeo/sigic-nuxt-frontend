@@ -20,6 +20,11 @@ const queryParams = ref({
   'sort[]': seleccionOrden.value,
 });
 
+const statusDict = {
+  ready: 'Listo',
+  'updating-harvestable-resources': 'Listando recursos',
+  'harvesting-resources': 'Cosechando recursos',
+};
 /**
  * Esta petición obtiene el total de servicios externos
  */
@@ -88,8 +93,6 @@ const irARutaQuery = (v, destino) => {
   }
 };
 
-getResources();
-
 watch(paginaActual, () => {
   queryParams.value.page = paginaActual.value + 1;
   fetchResources();
@@ -102,6 +105,10 @@ watch(seleccionOrden, () => {
   } else {
     paginaActual.value = 0;
   }
+});
+
+onMounted(() => {
+  getResources();
 });
 </script>
 <template>
@@ -207,14 +214,20 @@ watch(seleccionOrden, () => {
           <tr v-for="harvester in harvesters" :key="harvester.id">
             <td>{{ harvester.title }}</td>
             <td>
-              <nuxt-link @click="irARutaQuery(harvester, '')">
+              <nuxt-link v-if="harvester.status === 'ready'" @click="irARutaQuery(harvester, '')">
                 {{ harvester.imported_resources }}
               </nuxt-link>
+              <p v-else>{{ harvester.imported_resources }}</p>
             </td>
+
             <td>
-              <nuxt-link @click="irARutaQuery(harvester, 'pendientes')">
+              <nuxt-link
+                v-if="harvester.status === 'ready'"
+                @click="irARutaQuery(harvester, 'pendientes')"
+              >
                 {{ harvester.to_attend_resources }}
               </nuxt-link>
+              <p v-else>{{ harvester.to_attend_resources }}</p>
             </td>
             <td>
               <a :href="harvester.remote_url" target="_blank" rel="noopener noreferrer">
@@ -222,7 +235,20 @@ watch(seleccionOrden, () => {
               </a>
             </td>
             <!--<td>Servcio de Mapas</td>-->
-            <td>{{ harvester.status }}</td>
+            <td>
+              <div
+                v-if="harvester.status === 'ready'"
+                class="texto-color-confirmacion texto-centrado fondo-color-confirmacion borde borde-color-confirmacion borde-redondeado-8 p-1"
+              >
+                {{ statusDict[harvester.status] }}
+              </div>
+              <div
+                v-else
+                class="texto-color-informacion texto-centrado fondo-color-informacion borde borde-color-informacion borde-redondeado-8 p-1"
+              >
+                {{ statusDict[harvester.status] }}
+              </div>
+            </td>
           </tr>
         </tbody>
       </table>
