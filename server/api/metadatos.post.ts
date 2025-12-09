@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
     date_type: null,
     date: null,
     category: null,
-    metadata_author: [],
+    //metadata_author: [],
     languaje: null,
     license: null,
     attribution: 'No especificado.',
@@ -28,7 +28,7 @@ export default defineEventHandler(async (event) => {
     edition: '1.0',
     doi: '-',
     purpose: 'Propósito original no documentado',
-    supplemental_information: 'No especificada',
+    supplemental_information: 'No proporcionada',
     maintenance_frequency: 'unknown',
     attribute_set: {},
   };
@@ -37,6 +37,11 @@ export default defineEventHandler(async (event) => {
   metaFileds.forEach((field) => {
     if (field === 'attribute_set') {
       bodyDict[field] = JSON.stringify(body[field]);
+    } else if (
+      field === 'supplemental_information' &&
+      body['supplemental_information'] === 'No information provided'
+    ) {
+      bodyDict['supplemental_information'] = 'No proporcionada';
     } else if (Object.keys(bodyDict).includes(field)) {
       bodyDict[field] = body[field];
     } else if (field === 'keywords') {

@@ -177,14 +177,15 @@ function irAmisArchivos() {
     <ClientOnly>
       <SisdaiModal ref="modalActualizar">
         <template #encabezado>
-          <h1></h1>
+          <h1 v-if="isLoading">Procesando</h1>
+          <p v-else></p>
         </template>
         <template #cuerpo>
-          <div v-if="isLoading" class="flex m-y-2">
-            <div class="columna-4 flex-vertical-centrado">
-              <img src="/img/loader.gif" alt="...Cargando" />
+          <div v-if="isLoading" class="m-y-2">
+            <div class="flex flex-contenido-centrado">
+              <img src="/img/loader.gif" alt="...Guardando" heigh="160px" width="160px" />
             </div>
-            <p class="columna-12">Actualizando información</p>
+            <p style="text-align: center">Guardando</p>
           </div>
           <div v-if="wasUpdateSuccesful" class="flex" style="gap: 0px">
             <p

@@ -16,8 +16,8 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
     date: undefined,
     category: undefined,
     keywords: undefined,
-    metadata_author_pk: undefined,
-    metadata_author: undefined,
+    //metadata_author_pk: undefined,
+    //metadata_author: undefined,
     license: undefined,
     language: undefined,
     attribution: undefined,
@@ -77,11 +77,11 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
           metadata[key] = metadataResponse.category?.identifier;
         } else if (key === 'keywords') {
           metadata[key] = metadataResponse.keywords.map((d) => d.name).join(',');
-        } else if (key === 'metadata_author') {
+        } /* else if (key === 'metadata_author') {
           metadata[key] = metadataResponse.metadata_author[0]['username'];
         } else if (key === 'metadata_author_pk') {
           metadata[key] = metadataResponse.metadata_author[0]['pk'];
-        } else if (key === 'license') {
+        }  */ else if (key === 'license') {
           metadata[key] = metadataResponse.license.identifier;
         } else if (key === 'restriction_code_type') {
           metadata[key] = metadataResponse.restriction_code_type?.identifier;
@@ -145,14 +145,14 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
       if (metadata.keywords && metadata.keywords.length > 0) {
         metaDict['keywords'] = unaccentUppercase(metadata.keywords).split(', ');
       }
-      if (metadata.metadata_author && metadata.metadata_author_pk) {
+      /* if (metadata.metadata_author && metadata.metadata_author_pk) {
         metaDict['metadata_author'] = [
           {
             pk: metadata.metadata_author_pk,
             username: metadata.metadata_author,
           },
         ];
-      }
+      } */
       if (metadata.license && metadata.license.length > 0) {
         metaDict['license'] = { identifier: metadata.license };
       }

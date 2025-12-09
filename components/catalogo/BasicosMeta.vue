@@ -30,8 +30,9 @@ const props = defineProps({
 //const storeCatalogo = useCatalogoStore();
 const storeMetadatos = useEditedMetadataStore();
 storeMetadatos.checkFilling(props.resourcePk, props.resourceType);
-const { gnoxyFetch } = useGnoxyUrl();
-const config = useRuntimeConfig();
+const { data } = useAuth();
+//const { gnoxyFetch } = useGnoxyUrl();
+//const config = useRuntimeConfig();
 
 const configEnv = useRuntimeConfig();
 
@@ -62,11 +63,10 @@ const campoPalabrasClave = computed({
   get: () => storeMetadatos.metadata.keywords,
   set: (value) => storeMetadatos.updateAttr('keywords', value),
 });
-const campoAutorMeta = computed({
+/* const campoAutorMeta = computed({
   get: () => storeMetadatos.metadata.metadata_author,
   set: (value) => storeMetadatos.updateAttr('metadata_author', value),
-});
-/* const campoAnioPublicacion = ref(''); */
+}); */
 
 const dictCategoria = [
   { imageryBaseMapsEarthCover: 'Mapas Base y Cobertura Terrestre' },
@@ -91,8 +91,8 @@ const dictCategoria = [
   { population: 'Población' },
 ];
 
-const geonodeUsers = ref([]);
-const { data } = useAuth();
+/*const geonodeUsers = ref([]);
+
 
 async function getUsers() {
   geonodeUsers.value.push({
@@ -118,23 +118,23 @@ async function getUsers() {
     endpoint = resUsers.links.next;
   } while (endpoint);
 
-  /*   const requestTotal = await gnoxyFetch(url);
-  const resTotal = await requestTotal.json();
-  const totalUsers = resTotal.total;
-  const requestUsers = await gnoxyFetch(`${url}?page_size=${totalUsers}`);
-  const resUsers = await requestUsers.json();
-  const newUsers = resUsers.users.map((d) => {
-    return { pk: d.pk, username: d.username };
-  });
-  geonodeUsers.value = [...geonodeUsers.value, ...newUsers]; */
-}
+  //const requestTotal = await gnoxyFetch(url);
+  //const resTotal = await requestTotal.json();
+  //const totalUsers = resTotal.total;
+  //const requestUsers = await gnoxyFetch(`${url}?page_size=${totalUsers}`);
+  //const resUsers = await requestUsers.json();
+  //const newUsers = resUsers.users.map((d) => {
+  //  return { pk: d.pk, username: d.username };
+  //});
+  //geonodeUsers.value = [...geonodeUsers.value, ...newUsers]; 
+} */
 
-getUsers();
+//getUsers();
 
-watch(campoAutorMeta, () => {
+/* watch(campoAutorMeta, () => {
   const selectedAuthor = geonodeUsers.value.find((d) => d.username === campoAutorMeta.value);
   storeMetadatos.updateAttr('metadata_author_pk', selectedAuthor.pk);
-});
+}); */
 
 const dragNdDrop = ref(null);
 const img_files = ['.jpg', '.jpeg', '.png', '.webp'];
@@ -249,7 +249,7 @@ async function guardarImagen(files) {
             />
           </ClientOnly>
         </div>
-        <div class="columna-16">
+        <!-- <div class="columna-16">
           <ClientOnly>
             <SisdaiSelector
               v-model="campoAutorMeta"
@@ -262,12 +262,13 @@ async function guardarImagen(files) {
               </option>
             </SisdaiSelector>
           </ClientOnly>
-        </div>
+        </div> -->
       </div>
 
       <CatalogoBotonesMetadatos
         v-if="!props.isModal"
         :key="`1-${props.resourcePk}-buttons`"
+        class="m-t-2"
         :resource="props.recurso"
         :title="'MetadatosBasicos'"
         :pk="props.resourcePk"
