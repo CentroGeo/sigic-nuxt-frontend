@@ -1,6 +1,6 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
-import { categoriesInSpanish, resourceTypeDic } from '~/utils/consulta';
+import { categoriesInSpanish, resourceTypeDic, wait } from '~/utils/consulta';
 import SelectedLayer from '~/utils/consulta/SelectedLayer';
 /**
  * @typedef {Object} Props
@@ -30,7 +30,7 @@ const modalEliminar = ref(null);
 const resourceToDeleteTitle = ref('');
 const resourceToDeletePk = ref(null);
 const resourceToDelete = ref(null);
-const deleteError = ref(false);
+const wasDeletionSuccesful = ref(null);
 const isBeingDeleted = ref(false);
 // diccionario para colocar acentos
 const dictTable = ref({
@@ -43,6 +43,12 @@ const dictTable = ref({
   estatus: 'Estatus',
 });
 
+const typeDict = {
+  'Capa Geográfica, Catálogo Externo': 'dataLayer',
+  'Capa Geográfica': 'dataLayer',
+  'Datos Tabulados': 'dataTable',
+  Documentos: 'document',
+};
 /**
  * Codifica la propiedad pk de un objeto y se pasa como query al ir a otra vista
  * @param objeto que se va a codificar
@@ -134,15 +140,24 @@ function tipoRecurso(recurso) {
   }
 }
 
+/**
+ * Abre el modal de publicación de un recurso
+ * @param resource
+ */
 function notifyReleaseRequest(resource) {
   shownModal.value = 'releaseOne';
   modalResource.value = resource.recurso_completo;
+  console.log(resource);
   resourceType.value = tipoRecurso(resource);
   nextTick(() => {
     releaseRequest.value?.abrirModalDescarga();
   });
 }
 
+/**
+ * Abre el modal de descarga de un recurso
+ * @param resource
+ */
 function notifyDownloadOneChild(resource) {
   shownModal.value = 'downloadOne';
   modalResource.value = resource.recurso_completo;
@@ -151,7 +166,13 @@ function notifyDownloadOneChild(resource) {
     downloadOneChild.value?.abrirModalDescarga();
   });
 }
+
+/**
+ * Abre el modal de confirmación de eliminación de un recurso
+ * @param resource
+ */
 function notifyDeleteResource(resource) {
+  wasDeletionSuccesful.value = null;
   resourceToDeleteTitle.value = resource.titulo;
   resourceToDeletePk.value = resource.pk;
   resourceToDelete.value = resource.recurso_completo;
@@ -159,6 +180,9 @@ function notifyDeleteResource(resource) {
   modalEliminar.value?.abrirModal();
 }
 
+/**
+ * Cierra el modal de confirmación de eliminación de un recurso
+ */
 function cancelarEliminar() {
   modalEliminar.value?.cerrarModal();
 }
@@ -196,6 +220,9 @@ async function getServiceUrl(urlService) {
   return selectedHarvester;
 }
 
+/**
+ * Cambia la bandera del recurso en los harvestable resources y actualiza el estado del harvester
+ */
 async function borrarRemoto() {
   const token = data.value?.accessToken;
   const remoteAlternate = resourceToDelete.value.alternate;
@@ -213,47 +240,85 @@ async function borrarRemoto() {
       should_be_harvested: false,
     },
   ];
-  const updateHarvestables = await $fetch('/api/importar-externo', {
-    method: 'POST',
-    headers: { token: token },
-    body: { harvesterID: harvesterIdentifier, resources: requestBody },
-  });
 
-  // Actualizamos los recursos cosechables
-  if (updateHarvestables) {
-    await $fetch('/api/actualizar-externo', {
+  try {
+    const updateHarvestables = await $fetch('/api/importar-externo', {
       method: 'POST',
       headers: { token: token },
-      body: { id: harvesterIdentifier, status: 'harvesting-resources' },
+      body: { harvesterID: harvesterIdentifier, resources: requestBody },
     });
-  } else {
-    deleteError.value = true;
+
+    // Actualizamos los recursos cosechables
+    if (updateHarvestables) {
+      const updateHarvesterStatus = await $fetch('/api/actualizar-externo', {
+        method: 'POST',
+        headers: { token: token },
+        body: { id: harvesterIdentifier, status: 'harvesting-resources' },
+      });
+      if (updateHarvesterStatus) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  } catch {
+    return false;
   }
 }
 
-/* async function borrarLocal() {
+/**
+ * Elimina el registro local de cualquier recurso: remotos y locales
+ */
+async function borrarLocal() {
   const token = data.value?.accessToken;
-  const response = await $fetch('/api/delete-resource', {
-    method: 'DELETE',
-    headers: { token: token, pk: resourceToDeletePk.value },
-  });
-  //TODO: agregar manejo de errores
-  console.warn('La res:', response);
-} */
-
-async function confirmarEliminar() {
-  //   isBeingDeleted.value = true;
-  if (resourceToDelete.value.sourcetype === 'REMOTE') {
-    borrarRemoto();
-  } else {
-    console.warn('Local');
+  try {
+    const response = await $fetch('/api/delete-resource', {
+      method: 'DELETE',
+      headers: { token: token, pk: resourceToDeletePk.value },
+    });
+    if (response) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch {
+    return false;
   }
-  /*borrarLocal();
+}
+
+/**
+ * Gestiona la eliminación de un recurso, ya sea local o remoto
+ */
+async function confirmarEliminar() {
+  isBeingDeleted.value = true;
+  let isRemoteDeleted;
+  if (resourceToDelete.value.sourcetype === 'REMOTE') {
+    isRemoteDeleted = await borrarRemoto();
+    if (isRemoteDeleted) {
+      wasDeletionSuccesful.value = await borrarLocal();
+    } else {
+      wasDeletionSuccesful.value = false;
+    }
+  } else {
+    wasDeletionSuccesful.value = await borrarLocal();
+  }
   await wait(3000);
   isBeingDeleted.value = false;
+  if (wasDeletionSuccesful.value) {
+    modalEliminar.value?.cerrarModal();
+    const router = useRouter();
+    router.go(0);
+  }
+}
+
+/**
+ * Cierra el modal de eliminación. Se usa cuando el proceso de eliminación falla
+ */
+function irAmisArchivos() {
+  wasDeletionSuccesful.value = null;
   modalEliminar.value?.cerrarModal();
-  const router = useRouter();
-  router.go(0); */
 }
 </script>
 
@@ -532,7 +597,7 @@ async function confirmarEliminar() {
       v-if="shownModal === 'releaseOne'"
       ref="releaseRequest"
       :key="`${modalResource.pk}_${resourceType}`"
-      :resource-type="resourceType"
+      :resource-type="typeDict[resourceType]"
       :selected-element="modalResource"
     />
     <!-- Modal para descargar datos -->
@@ -547,10 +612,14 @@ async function confirmarEliminar() {
     <ClientOnly>
       <SisdaiModal ref="modalEliminar">
         <template #encabezado>
-          <h1>¿Deseas eliminar {{ resourceToDeleteTitle }}?</h1>
+          <h2 v-if="wasDeletionSuccesful === null">
+            ¿Deseas eliminar {{ resourceToDeleteTitle }}?
+          </h2>
+          <p v-else></p>
         </template>
         <template #cuerpo>
-          <div class="flex m-y-2 flex-contenido-centrado">
+          <!--Botones-->
+          <div v-if="wasDeletionSuccesful === null" class="flex m-y-2 flex-contenido-centrado">
             <div class="contenedor flex flex-contenido-centrado">
               <button
                 type="button"
@@ -571,6 +640,18 @@ async function confirmarEliminar() {
             </div>
             <div v-if="isBeingDeleted" class="columna-3 color-invertir">
               <img src="/img/loader.gif" alt="...Cargando" />
+            </div>
+          </div>
+          <!--Alerta de que fracasó la eliminación-->
+          <div v-if="wasDeletionSuccesful === false" class="flex" style="gap: 0px">
+            <p
+              class="columna-14 texto-color-error fondo-color-error borde borde-color-error p-2 borde-redondeado-8"
+            >
+              <span class="pictograma-alerta" /> No pudimos eliminar {{ resourceToDeleteTitle }}.
+              Revisa tu conexión e intentalo de nuevo más tarde.
+            </p>
+            <div class="columna-14 flex flex-contenido-final">
+              <button class="boton-primario boton-chico" @click="irAmisArchivos">Regresar</button>
             </div>
           </div>
         </template>
