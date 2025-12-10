@@ -171,9 +171,7 @@ watch(paginaActual, async () => {
 onMounted(async () => {
   fetchingHarvestableResources.value = true;
   await checkStatus();
-  if (harvesterStatus.value === 'ready') {
-    await fetchData();
-  }
+  await fetchData();
   fetchingHarvestableResources.value = false;
 });
 </script>
