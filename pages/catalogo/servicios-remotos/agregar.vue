@@ -47,12 +47,13 @@ const opTipoFuente = [
   },
   /* { id: 4, servicio: 'El nuevo', tipo: 'FILE' }, */
 ];
+const isLoading = ref(false);
+const error = ref('El error de prueba');
 
 function irAImportarRecursos() {
   navigateTo({
     path: `/catalogo/servicios-remotos/importar`,
     query: {
-      // TODO: al cargar el recurso recuperar estos valores
       id: newHarvester.value?.id,
       title: newHarvester.value?.name,
       //unique_identifier: 'v.unique_identifier',
@@ -61,11 +62,35 @@ function irAImportarRecursos() {
   });
 }
 
+async function checkCapabilities() {
+  //console.log('selecTipoFuente', selecTipoFuente.value);
+  const url = selecTipoFuente.value.includes('arcgis')
+    ? `${campoURL.value}?f=json&pretty=true`
+    : `${campoURL.value}?service=WMS&request=GetCapabilities`;
+  //console.log(url);
+  try {
+    const requestCapabilities = await gnoxyFetch(url);
+    //console.log('Las capabilities:', requestCapabilities);
+    if (!requestCapabilities.ok) {
+      return false;
+    } else {
+      const res = await requestCapabilities.text();
+      //console.log(requestCapabilities, res);
+      if (res.includes('GetMap') || res.includes('MapServer')) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  } catch {
+    return false;
+  }
+}
+
 async function isHarvestrerRegistered() {
   let url = `${config.public.geonodeApi}/harvesters/`;
   let harvesters = [];
   do {
-    // Obtenemos la información de los harvesters
     const requestHarvesters = await gnoxyFetch(url);
     if (!requestHarvesters.ok) {
       const error = await requestHarvesters.json();
@@ -81,61 +106,76 @@ async function isHarvestrerRegistered() {
     return false;
   }
 }
+
+/** Valida información y, en caso de que todo ok, crea una conexión a un servicio remoto */
 async function crearConexion() {
   const { data } = useAuth();
   const token = data.value?.accessToken;
-  if (campoURL.value && selecTipoFuente.value) {
-    // Creamos la conexión
-    const { responseStatus, responseObject } = await $fetch('/api/externo', {
+  // Creamos la conexión
+  const { responseStatus, responseObject } = await $fetch('/api/externo', {
+    method: 'POST',
+    headers: { token: token },
+    body: { name: campoNombre.value, url: campoURL.value, type: selecTipoFuente.value },
+  });
+  responseOk.value = responseStatus;
+  newHarvester.value = responseObject.harvester;
+
+  //Si la conexión se creó exitosamente, solicitamos la obtención de los recursos
+  if (responseOk.value && Object.keys(newHarvester.value).length > 0) {
+    // Actualizamos el estatus
+    const harvesterID = newHarvester.value.id;
+    console.warn('newHarvesterID', harvesterID);
+    importingResources.value = true;
+    const updateStatus = await $fetch('/api/actualizar-externo', {
       method: 'POST',
       headers: { token: token },
-      body: { name: campoNombre.value, url: campoURL.value, type: selecTipoFuente.value },
+      body: { id: harvesterID, status: 'updating-harvestable-resources' },
     });
-    responseOk.value = responseStatus;
-    newHarvester.value = responseObject.harvester;
-    //console.log('RespuestaRegistro:', responseOk.value);
-    //console.log('InfoHarvester:', newHarvester.value);
-
-    //Si la conexión se creó exitosamente, solicitamos la obtención de los recursos
-    if (responseOk.value && Object.keys(newHarvester.value).length > 0) {
-      // Actualizamos el estatus
-      const harvesterID = newHarvester.value.id;
-      console.warn('newHarvesterID', harvesterID);
-      importingResources.value = true;
-      const updateStatus = await $fetch('/api/actualizar-externo', {
-        method: 'POST',
-        headers: { token: token },
-        body: { id: harvesterID, status: 'updating-harvestable-resources' },
-      });
-      console.warn('Update harvester status', updateStatus);
-      if (!updateStatus) {
-        importingResources.value = false;
-        return;
-      } else {
-        // Si la actualización de estatus funciona, esperamos el momento en que se termine de solicitar los recursos
-        do {
-          const res = await gnoxyFetch(`${config.public.geonodeApi}/harvesters/${harvesterID}`);
-          const info = await res.json();
-          harvesterStatus.value = info.harvester.status;
-          console.warn('Harvester Status:', harvesterStatus.value);
-
-          if (harvesterStatus.value === 'ready') break;
-
-          await wait(5000);
-        } while (harvesterStatus.value !== 'ready');
-        importingResources.value = false;
-      }
-
+    console.warn('Update harvester status', updateStatus);
+    if (!updateStatus) {
+      importingResources.value = false;
       return;
+    } else {
+      // Si la actualización de estatus funciona, esperamos el momento en que se termine de solicitar los recursos
+      do {
+        const res = await gnoxyFetch(`${config.public.geonodeApi}/harvesters/${harvesterID}`);
+        const info = await res.json();
+        harvesterStatus.value = info.harvester.status;
+        console.warn('Harvester Status:', harvesterStatus.value);
+
+        if (harvesterStatus.value === 'ready') break;
+
+        await wait(5000);
+      } while (harvesterStatus.value !== 'ready');
+      importingResources.value = false;
     }
+
+    return;
   }
 }
 
 async function registrar() {
-  urlYaExiste.value = await isHarvestrerRegistered();
-  if (!urlYaExiste.value) {
-    crearConexion();
+  isLoading.value = true;
+  // Validamos que se tenga la información necesaria
+  error.value = null;
+  if (campoURL.value && selecTipoFuente.value) {
+    // Luego revisamos si ya está registrado
+    urlYaExiste.value = await isHarvestrerRegistered();
+    if (!urlYaExiste.value) {
+      // Revisamos que sea una url válida
+      const isServiceValid = await checkCapabilities();
+      if (!isServiceValid) {
+        error.value = 'Revisa que la url apunte a un servicio válido';
+      } else {
+        crearConexion();
+      }
+    } else {
+      error.value = 'Este servicio ya está registrado';
+    }
+  } else {
+    error.value = 'Revisa que todos los campos obligatorios tengan información';
   }
+  isLoading.value = false;
 }
 </script>
 
@@ -156,6 +196,8 @@ async function registrar() {
             conexión necesitas el Servicio URL y el Tipo de servicio, una vez creada la conexión
             podrás explorar los recursos disponibles e importar los que necesites a tus archivos.
           </p>
+
+          <!--Formulario-->
           <form @submit.prevent>
             <ClientOnly class="flex">
               <SisdaiCampoBase
@@ -183,15 +225,23 @@ async function registrar() {
                 </option>
               </SisdaiSelector>
             </ClientOnly>
+
+            <!--Validación-->
+            <div v-if="isLoading" class="flex flex-contenido-centrado m-y-2">
+              <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="40px" />
+            </div>
             <p
-              v-if="urlYaExiste"
-              class="flex flex-contenido-separado texto-color-alerta fondo-color-alerta p-1 borde borde-color-alerta borde-redondeado-8"
+              v-if="error"
+              class="flex flex-contenido-separado texto-color-alerta fondo-color-alerta borde borde-redondeado-8 p-1"
             >
-              <span> Esta url ya está registrada</span>
-              <nuxt-link to="/catalogo/explorar/catalogos-externos"
+              <span><span class="pictograma-alerta"></span>{{ error }}</span>
+              <nuxt-link
+                v-if="error === 'Este servicio ya está registrado'"
+                to="/catalogo/explorar/catalogos-externos"
                 >Explorar Catálogos Externos</nuxt-link
               >
             </p>
+
             <div class="flex flex-contenido-inicio m-t-3">
               <button
                 class="boton-primario boton-chico"
@@ -205,6 +255,7 @@ async function registrar() {
           </form>
         </div>
 
+        <!--Alertas de registro de harvester-->
         <div v-if="responseOk">
           <p
             class="flex flex-contenido-separado texto-color-confirmacion fondo-color-confirmacion p-1 borde borde-color-confirmacion borde-redondeado-8"
@@ -217,7 +268,10 @@ async function registrar() {
           <p
             class="flex flex-contenido-separado texto-color-error fondo-color-error p-1 borde borde-color-error borde-redondeado-8"
           >
-            <span> <span class="pictograma-alerta" />No se pudo registrar este servicio.</span>
+            <span>
+              <span class="pictograma-alerta" />No se pudo registrar este servicio. Revisa tu
+              conexión e intentalo de nuevo más tarde.</span
+            >
           </p>
         </div>
         <div v-if="importingResources" class="m-y-2">

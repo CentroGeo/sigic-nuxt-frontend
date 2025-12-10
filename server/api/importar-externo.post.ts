@@ -5,9 +5,7 @@ export default defineEventHandler(async (event) => {
   const token = getHeader(event, 'token');
   const harvesterID = data.harvesterID;
   const resources = data.resources;
-  //console.error(token)
-  //console.log(harvesterID)
-  console.warn(resources);
+  //console.warn(resources);
   const url = `${config.public.geonodeApi}/harvesters/${harvesterID}/harvestable-resources/`;
   let updateStatus = null;
 
