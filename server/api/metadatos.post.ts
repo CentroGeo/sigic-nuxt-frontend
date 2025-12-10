@@ -8,45 +8,88 @@ export default defineEventHandler(async (event) => {
 
   const baseUrl = config.public.geonodeApi;
   const url = `${baseUrl}/${type}s/${pk}/`;
+  const keywordsUrl = `${baseUrl}/resources/${pk}/keywordtags/replace/`;
 
-  const formData = new FormData();
+  let total = 0;
+  let keywordsBody: string[] = [];
+  const bodyDict = {
+    title: null,
+    abstract: 'Información pendiente.',
+    date_type: null,
+    date: null,
+    category: null,
+    //metadata_author: [],
+    languaje: null,
+    license: null,
+    attribution: 'No especificado.',
+    data_quality_statement: 'Calidad no evaluada.',
+    restriction_code_type: null,
+    constraints_other: 'Ninguna',
+    edition: '1.0',
+    doi: '-',
+    purpose: 'Propósito original no documentado',
+    supplemental_information: 'No proporcionada',
+    maintenance_frequency: 'unknown',
+    attribute_set: {},
+  };
+
   const metaFileds = Object.keys(body);
   metaFileds.forEach((field) => {
-    if (typeof body[field] === 'string') {
-      formData.append(field, body[field]);
-    } else {
-      formData.append(field, JSON.stringify(body[field]));
+    if (field === 'attribute_set') {
+      bodyDict[field] = JSON.stringify(body[field]);
+    } else if (
+      field === 'supplemental_information' &&
+      body['supplemental_information'] === 'No information provided'
+    ) {
+      bodyDict['supplemental_information'] = 'No proporcionada';
+    } else if (Object.keys(bodyDict).includes(field)) {
+      bodyDict[field] = body[field];
+    } else if (field === 'keywords') {
+      keywordsBody = body[field];
     }
   });
 
-  /*   formData.append("attribute_set", JSON.stringify({
-      "15": {
-        "description": "Clave numerica que indica un municipio",
-        "attribute_label": "Clave Municipal",
-        "display_order": 6,
-        "visible": 'True'
-      }
-    }));
-    formData.append('title', "Laboratorios de investigación")
-    formData.append('abstract', "Prueba de llenado del abstract") */
-
-  //console.log("La forma:", formData)
+  //console.warn(formData)
+  // Actualizamos keywords
   try {
-    const response = await fetch(url, {
-      method: 'PATCH',
+    const keywordsResponse = await fetch(keywordsUrl, {
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
       },
-      body: formData,
+      body: JSON.stringify(keywordsBody),
     });
 
-    //console.log('La respuesta:', response);
-    if (!response.ok) {
-      throw new Error(`Falló la edición de metadatos: ${response.status}`);
+    //console.log('La respuesta keywords:', keywordsResponse);
+    if (!keywordsResponse.ok) {
+      console.error('Keywords', keywordsResponse);
+    } else {
+      total += 1;
     }
-    const json = await response.json();
-    return json;
   } catch (error) {
     console.error('Error al subir al GeoNode:', error);
   }
+
+  // Actualizamos el resto de los metadatos
+  try {
+    const contactsResponse = await fetch(url, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(bodyDict),
+    });
+    //console.log('La respuesta:', contactsResponse);
+    if (!contactsResponse.ok) {
+      console.error('Contactos', contactsResponse);
+    } else {
+      total += 1;
+    }
+  } catch (error) {
+    console.error('Error al subir al GeoNode:', error);
+  }
+
+  return total;
 });

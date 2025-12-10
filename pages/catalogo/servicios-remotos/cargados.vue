@@ -1,4 +1,5 @@
 <script setup>
+// Esta vista ya no se usa
 definePageMeta({
   middleware: 'sidebase-auth',
   bodyAttrs: {
@@ -92,7 +93,7 @@ try {
         remoteHaverstersResources.value.push({
           id: dd.id,
           title: d.title,
-          exported_resources: exportedResources.value.length,
+          imported_resources: exportedResources.value.length,
           to_attend_resources: totalResources.value - exportedResources.value.length,
           remote_url: dd.remote_url,
 
@@ -148,7 +149,7 @@ try {
                   <td>{{ value.title }}</td>
                   <td>
                     <nuxt-link @click="irARutaQuery(value, '')">
-                      {{ value.exported_resources }}
+                      {{ value.imported_resources }}
                     </nuxt-link>
                   </td>
                   <td>
@@ -182,8 +183,34 @@ try {
           </form>
         </div>
       </main>
-      <main v-else>...cargando</main>
-      <main v-if="cargando">...cargando</main>
+      <main v-else>
+        <div class="flex">
+          <div class="columna-4"></div>
+          <div class="columna-8">
+            <img
+              src="/img/loader.gif"
+              alt="Loader de SIGIC"
+              style="width: 100%"
+              class="color-invertir"
+            />
+          </div>
+          <div class="columna-4"></div>
+        </div>
+      </main>
+      <main v-if="cargando">
+        <div class="flex">
+          <div class="columna-4"></div>
+          <div class="columna-8">
+            <img
+              src="/img/loader.gif"
+              alt="Loader de SIGIC"
+              style="width: 100%"
+              class="color-invertir"
+            />
+          </div>
+          <div class="columna-4"></div>
+        </div>
+      </main>
     </template>
   </UiLayoutPaneles>
 </template>

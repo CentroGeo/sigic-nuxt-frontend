@@ -61,6 +61,7 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
     async fillByCategory(resourceType = storeConsulta.resourceType, pageNum, params) {
       const { gnoxyFetch } = useGnoxyUrl();
       const queryParams = {
+        'filter{complete_metadata}': 'true',
         page: pageNum,
         page_size: 2,
         ...params,
@@ -77,11 +78,12 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
           })
         );
       }
-      const datum = res.resources;
 
       // TODO: Agregar en los query params el filtrado para indicar que recursos con metadatos
       // completos. Borrar la siguiente linea y cambiar data por datum
-      const data = datum.filter((d) => d.category);
+      //const datum = res.resources;
+      //const data = datum.filter((d) => d.category);
+      const data = res.resources;
       resources[resourceType] = [...resources[resourceType], ...data];
     },
     /**
@@ -158,38 +160,6 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
      */
     findResources(pksToFind, resourceType = storeConsulta.resourceType) {
       return selectedResources[resourceType].filter(({ pk }) => pksToFind.includes(pk));
-    },
-
-    async fetchAttrs(pk) {
-      const config = useRuntimeConfig();
-      const { gnoxyFetch } = useGnoxyUrl();
-      const maxAttrs = 5;
-      const etiquetas = {};
-      let columnas = [];
-      try {
-        const res = await gnoxyFetch(`${config.public.geonodeApi}/datasets/${pk}/attribute_set`);
-        if (!res.ok) {
-          console.error(res.status);
-          return;
-        }
-        const { attributes } = await res.json();
-        columnas = attributes
-          .filter((a) => a.visible)
-          .sort((a, b) => a.display_order - b.display_order)
-          .map(({ attribute, attribute_label }) => {
-            etiquetas[attribute] = attribute_label || attribute;
-            return attribute;
-          });
-
-        // Limitamos el máximo de atributos visibles
-        if (columnas.length > maxAttrs) {
-          columnas = columnas.slice(0, maxAttrs);
-        }
-        return { columnas, etiquetas };
-      } catch {
-        console.error('Error');
-      }
-      return;
     },
   };
 });

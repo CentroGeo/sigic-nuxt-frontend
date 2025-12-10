@@ -28,6 +28,7 @@ async function guardarArchivo(files) {
       IdRutaArchivo: null,
       numero_geometrias: null,
       proyeccion: null,
+      tipo_recurso: null,
     })
   );
 
@@ -74,24 +75,38 @@ async function guardarArchivo(files) {
         monitorLayerImport(result.execution_id, archivo);
       } else if (result.url) {
         // Caso: documento cargado
-
         archivo.estatus = 'carga_finalizada';
         archivo.mensaje = 'Archivo cargado correctamente';
         archivo.IdRutaArchivo = result.url.split('/').slice(-1)[0];
         statusOk.value = true;
-        const request_geonode = await gnoxyFetch(
-          `${configEnv.public.geonodeUrl}/api/v2/datasets/${archivo.IdRutaArchivo}`
-        );
-        const res_geonode = await request_geonode.json();
+        // Me parece que todo esto tendría quye dispararse condicionalmente.
+        // Si el recurso no es un dataset, todo lo de abajo falla.
+        // Si es document solo habría que fijar el archivo.tipo_recurso = document
+        let tipo;
 
-        const request_geoserver = await gnoxyFetch(
-          `${configEnv.public.geoserverUrl}/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=${res_geonode.dataset.alternate}&resultType=hits`
-        );
-        const proyeccion = res_geonode?.dataset?.srid;
-        const res_geoserver = await request_geoserver.text();
-        const match = res_geoserver.match(/numberOfFeatures="(\d+)"/);
-        archivo.numero_geometrias = match ? parseInt(match[1], 10) : null;
-        archivo.proyeccion = proyeccion;
+        if (base_files.includes('.' + file.name.split('.').slice(-1)[0])) {
+          const request_geonode = await gnoxyFetch(
+            `${configEnv.public.geonodeUrl}/api/v2/datasets/${archivo.IdRutaArchivo}`
+          );
+          const res_geonode = await request_geonode.json();
+          tipo = isGeometricExtension(res_geonode.dataset.extent) ? 'dataLayer' : 'dataTable';
+
+          if (tipo === 'dataLayer') {
+            archivo.tipo_recurso = tipo;
+
+            const request_geoserver = await gnoxyFetch(
+              `${configEnv.public.geoserverUrl}/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=${res_geonode.dataset.alternate}&resultType=hits`
+            );
+            const proyeccion = res_geonode?.dataset?.srid;
+            const res_geoserver = await request_geoserver.text();
+            const match = res_geoserver.match(/numberOfFeatures="(\d+)"/);
+            archivo.numero_geometrias = match ? parseInt(match[1], 10) : null;
+            archivo.proyeccion = proyeccion;
+          }
+        } else {
+          tipo = 'document';
+          archivo.tipo_recurso = tipo;
+        }
       } else {
         archivo.estatus = 'error_carga';
         archivo.mensaje = 'Respuesta inesperada del servidor';
@@ -213,20 +228,22 @@ async function monitorLayerImport(executionId, archivo) {
                   <div v-if="archivo.IdRutaArchivo" class="flex flex-contenido-separado">
                     <div>
                       <NuxtLink
-                        :to="`/catalogo/mis-archivos/editar/MetadatosBasicos?data=${archivo.IdRutaArchivo}`"
+                        :to="`/catalogo/mis-archivos/editar/MetadatosBasicos?data=${archivo.IdRutaArchivo}&type=${archivo.tipo_recurso}`"
                         target="_blank"
                         >Editar metadatos</NuxtLink
                       >
                     </div>
-                    <div v-if="['geojson', 'gpkg', 'zip'].includes(archivo.extension)">
+                    <div v-if="archivo.tipo_recurso === 'dataLayer'">
                       <NuxtLink
-                        :to="`/catalogo/mis-archivos/editar/estilo?data=${archivo.IdRutaArchivo}`"
+                        :to="`/catalogo/mis-archivos/editar/estilo?data=${archivo.IdRutaArchivo}&type=dataLayer`"
                       >
                         Agregar un estilo (.sld)</NuxtLink
                       >
                     </div>
                     <div>
-                      <NuxtLink to="/catalogo/mis-archivos"> Ver en Mis archivos</NuxtLink>
+                      <NuxtLink to="/catalogo/mis-archivos/metadatos-pendientes">
+                        Ver en Mis archivos</NuxtLink
+                      >
                     </div>
                   </div>
                 </div>

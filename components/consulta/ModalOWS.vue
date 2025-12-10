@@ -67,6 +67,7 @@ defineExpose({
         <div class="flex flex-contenido-centrado m-t-2">
           <button
             class="columna-8 boton-secundario boton-chico flex flex-contenido-centrado"
+            aria-label="Cerrar"
             type="button"
             @click="modalOWS.cerrarModal"
           >
@@ -75,6 +76,7 @@ defineExpose({
           <button
             class="columna-8 boton-primario boton-chico flex flex-contenido-centrado"
             type="button"
+            aria-label="Copiar Código"
             @click="copyLink"
           >
             Copiar código

@@ -14,11 +14,9 @@ const storeConsulta = useConsultaStore();
         <p>Panel catálogo</p>
       </slot>
     </div>
-
-    <div
-      class="fondo-color-neutro"
-      :class="`columna-${storeConsulta.catalogoColapsado ? '12' : '8'}`"
-    >
+    <!--      class="fondo-color-neutro"
+-->
+    <div :class="`columna-${storeConsulta.catalogoColapsado ? '12' : '8'}`">
       <slot name="visualizador">
         <p>Panel visualización</p>
       </slot>

@@ -44,7 +44,7 @@ onMounted(async () => {
     <template #visualizador>
       <template v-if="storeResources.isLoading">Cargando...</template>
       <div v-else-if="storeSelected.pks.length === 0" class="contenedor">
-        <h1>No hay seleccion</h1>
+        <ConsultaTarjetaSinSeleccion />
       </div>
       <ConsultaVisualizacionDocumento v-else />
     </template>
