@@ -1,6 +1,7 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import { resourceTypeGeonode } from '~/utils/consulta';
+
 const storeMetadatos = useEditedMetadataStore();
 const props = defineProps({
   title: {
@@ -108,13 +109,11 @@ async function updateMetadata() {
       body: requestBody,
     });
     console.warn('La respuesta de la petición:', response);
-    isLoading.value = false;
     if (response === 2) {
       wasUpdateSuccesful.value = true;
     } else {
       didUpdateFail.value = true;
     }
-    //modalActualizar.value?.cerrarModal();
     //const router = useRouter();
     //router.go(0);
   } else {
@@ -125,6 +124,7 @@ async function updateMetadata() {
 }
 
 function irAmisArchivos() {
+  modalActualizar.value?.cerrarModal();
   navigateTo({
     path: `/catalogo/mis-archivos`,
   });
