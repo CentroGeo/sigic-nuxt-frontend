@@ -5,6 +5,10 @@ definePageMeta({
   middleware: 'auth',
 });
 const storeLevantamiento = useLevantamientoStore();
+
+onMounted(() => {
+  storeLevantamiento.obtenerProyectosPublicos();
+});
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeLevantamiento.catalogoColapsado">
@@ -56,7 +60,7 @@ const storeLevantamiento = useLevantamientoStore();
               <b>{{ proyecto.nombre }}</b>
             </div>
             <div class="m-b-minimo texto-color-secundario">{{ proyecto.institucion }}</div>
-            <div class="m-b-minimo texto-color-secundario">{{ proyecto.autor }}</div>
+            <div class="m-b-minimo texto-color-secundario">{{ proyecto.lider }}</div>
             <UiNumeroElementos :numero="proyecto.aportes" etiqueta="Aportes" class="m-b-3" />
             <NuxtLink
               class="boton boton-primario boton-chico boton-accion-proyecto m-b-1"

@@ -1,6 +1,9 @@
 import { defineStore } from 'pinia';
 
 export const useLevantamientoStore = defineStore('levantamiento', () => {
+  const config = useRuntimeConfig();
+  const apiUrl = config.public.levantamientoBackendUrl;
+
   return {
     catalogoColapsado: ref(false),
     idNavegacionLateral: 'navegacionlateral-' + Math.random().toString(36).substring(2),
@@ -9,7 +12,7 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
     existeFormulario: ref(false),
     proyectos: ref([]),
     proyectosPublicos: ref([
-      {
+      /* {
         id: 1,
         nombre: 'Registro de arte urbano en la ciudad de Mérida, Yucatán',
         institucion: 'Nombre de institución',
@@ -36,12 +39,24 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
         institucion: 'Nombre de institución',
         autor: 'Nombre de autoría',
         aportes: 121,
-      },
+      }, */
     ]),
     descargasAprobadas: ref([]),
     existenDescargasAprobadas: ref(false),
     descargasEnRevision: ref([]),
     existenDescargasEnRevision: ref(false),
+
+    async obtenerProyectosPublicos() {
+      try {
+        const data = await $fetch(`${apiUrl}/projects/public`);
+        console.log(data);
+        this.proyectosPublicos = data.proyectos;
+        /* proyectos.value = data;
+      existenProyectos.value = data?.length > 0; */
+      } catch (err) {
+        console.error('Error cargando proyectos:', err);
+      }
+    },
 
     alternarCatalogoColapsable() {
       this.catalogoColapsado = !this.catalogoColapsado;
