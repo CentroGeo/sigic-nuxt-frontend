@@ -55,9 +55,9 @@ function tipoRecurso(recurso) {
   }
   return tipo;
 }
+
+/**Crea el objeto de información como se necesita para esta vista */
 function updateResources() {
-  //filteredResources.value = nuevosRecursos;
-  // obteniendo datos por las props de la tabla
   tableResources.value = resources.value.map((d) => ({
     pk: d.pk,
     titulo: d.title,

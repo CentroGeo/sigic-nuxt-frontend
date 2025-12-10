@@ -54,13 +54,10 @@ if (
   lastButton.value = 'MetadatosOpcionales';
 }
 function irARutaConQuery(direccion) {
-  navigateTo(
-    {
-      path: `/catalogo/mis-archivos/editar/${rutas.value[props.title][direccion]}`,
-      query: { data: props.pk, type: props.tipo },
-    },
-    { replace: true }
-  );
+  navigateTo({
+    path: `/catalogo/mis-archivos/editar/${rutas.value[props.title][direccion]}`,
+    query: { data: props.pk, type: props.tipo },
+  });
 }
 
 function validateMeta(requestBody) {
@@ -129,7 +126,7 @@ async function updateMetadata() {
 
 function irAmisArchivos() {
   navigateTo({
-    path: `/catalogo/mis-archivos/`,
+    path: `/catalogo/mis-archivos`,
   });
 }
 </script>

@@ -70,32 +70,26 @@ async function getResources() {
  */
 const irARutaQuery = (v, destino) => {
   if (destino !== 'pendientes') {
-    navigateTo(
-      {
-        path: `/catalogo/servicios-remotos/${v.id}`,
-        query: {
-          id: v.id,
-          title: v.title,
-          total: v.imported_resources + v.to_attend_resources,
-          /*         unique_identifier: v.unique_identifier,
+    navigateTo({
+      path: `/catalogo/servicios-remotos/${v.id}`,
+      query: {
+        id: v.id,
+        title: v.title,
+        total: v.imported_resources + v.to_attend_resources,
+        /*         unique_identifier: v.unique_identifier,
         remote_resource_type: v.remote_resource_type, */
-        },
       },
-      { replace: true }
-    );
+    });
   } else {
-    navigateTo(
-      {
-        path: `/catalogo/servicios-remotos/importar`,
-        query: {
-          id: v.id,
-          title: v.title,
-          /*         unique_identifier: v.unique_identifier,
+    navigateTo({
+      path: `/catalogo/servicios-remotos/importar`,
+      query: {
+        id: v.id,
+        title: v.title,
+        /*         unique_identifier: v.unique_identifier,
         remote_resource_type: v.remote_resource_type, */
-        },
       },
-      { replace: true }
-    );
+    });
   }
 };
 

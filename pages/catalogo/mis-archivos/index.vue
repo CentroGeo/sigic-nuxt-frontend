@@ -69,15 +69,12 @@ function setActions(recurso) {
   }
 }
 function updateResources() {
-  //filteredResources.value = nuevosRecursos;
-  // obteniendo datos por las props de la tabla
   tableResources.value = resources.value.map((d) => ({
     pk: d.pk,
     titulo: d.title,
     tipo_recurso: tipoRecurso(d),
     categoria: d.category,
     actualizacion: d.last_updated,
-    //acciones: 'Editar, Ver, Publicar, Descargar, Remover',
     acciones: setActions(d),
     uuid: d.uuid,
     resource_type: d.resource_type,
