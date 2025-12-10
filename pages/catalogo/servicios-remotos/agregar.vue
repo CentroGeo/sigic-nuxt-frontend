@@ -48,7 +48,7 @@ const opTipoFuente = [
   /* { id: 4, servicio: 'El nuevo', tipo: 'FILE' }, */
 ];
 const isLoading = ref(false);
-const error = ref('El error de prueba');
+const error = ref(null);
 
 function irAImportarRecursos() {
   navigateTo({
@@ -69,7 +69,7 @@ async function checkCapabilities() {
     : `${campoURL.value}?service=WMS&request=GetCapabilities`;
   //console.log(url);
   try {
-    const requestCapabilities = await gnoxyFetch(url);
+    const requestCapabilities = await fetch(url);
     //console.log('Las capabilities:', requestCapabilities);
     if (!requestCapabilities.ok) {
       return false;

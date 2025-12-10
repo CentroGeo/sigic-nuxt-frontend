@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
       },
       body: JSON.stringify(resources),
     });
-    //console.log(response);
+    //console.warn(response);
     updateStatus = response.ok;
   } catch (error) {
     console.error('Error al subir al GeoNode:', error);

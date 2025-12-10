@@ -1,6 +1,6 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
-import { categoriesInSpanish, resourceTypeDic, wait } from '~/utils/consulta';
+import { categoriesInSpanish, resourceTypeDic } from '~/utils/consulta';
 import SelectedLayer from '~/utils/consulta/SelectedLayer';
 /**
  * @typedef {Object} Props
@@ -17,7 +17,9 @@ const props = defineProps({
     default: '',
   },
 });
+const config = useRuntimeConfig();
 const { data } = useAuth();
+const { gnoxyFetch } = useGnoxyUrl();
 const idAleatorio = 'id-' + Math.random().toString(36).substring(2);
 const shownModal = ref('ninguno');
 const modalResource = ref(null);
@@ -27,6 +29,8 @@ const resourceType = ref('');
 const modalEliminar = ref(null);
 const resourceToDeleteTitle = ref('');
 const resourceToDeletePk = ref(null);
+const resourceToDelete = ref(null);
+const deleteError = ref(false);
 const isBeingDeleted = ref(false);
 // diccionario para colocar acentos
 const dictTable = ref({
@@ -150,6 +154,7 @@ function notifyDownloadOneChild(resource) {
 function notifyDeleteResource(resource) {
   resourceToDeleteTitle.value = resource.titulo;
   resourceToDeletePk.value = resource.pk;
+  resourceToDelete.value = resource.recurso_completo;
   isBeingDeleted.value = false;
   modalEliminar.value?.abrirModal();
 }
@@ -158,8 +163,75 @@ function cancelarEliminar() {
   modalEliminar.value?.cerrarModal();
 }
 
-async function confirmarEliminar() {
-  isBeingDeleted.value = true;
+/**
+ * TODO: Borrar una vez que se solucione lo del harvester en el recurso
+ * Busca el harvester seleccionado pidiendo todos los harvesters para obtener su información
+ */
+async function getServiceUrl(urlService) {
+  let url = `${config.public.geonodeApi}/harvesters/`;
+  let harvesters = [];
+  let selectedHarvester = {};
+  do {
+    // Obtenemos la información de los harvesters
+    const requestHarvesters = await gnoxyFetch(url);
+    if (!requestHarvesters.ok) {
+      const error = await requestHarvesters.json();
+      console.error('Falló petición de harvesters:', error);
+    }
+    const resHarvesters = await requestHarvesters.json();
+    harvesters = [...harvesters, ...resHarvesters.harvesters];
+    // Revisamos si ya encontramos el harvester que nos interesa
+    harvesters.forEach((d) => {
+      if (d.remote_url.includes(urlService)) {
+        selectedHarvester = d;
+      }
+    });
+    //Si lo encontramos, detenemos el loop
+    if (Object.keys(selectedHarvester).length > 0) {
+      url = undefined;
+    } else {
+      url = resHarvesters.links.next;
+    }
+  } while (url);
+  return selectedHarvester;
+}
+
+async function borrarRemoto() {
+  const token = data.value?.accessToken;
+  const remoteAlternate = resourceToDelete.value.alternate;
+
+  // Obtenemos el identificador del harvester
+  const linkObject = resourceToDelete.value.links.find((link) => link.link_type === 'OGC:WMS');
+  const serviceLink = linkObject.url.replace('https://', '').split('/')[0];
+  const harvester = await getServiceUrl(serviceLink);
+  const harvesterIdentifier = harvester.id;
+
+  // Cambiamos el estatus del recurso a should_be_harvested false
+  const requestBody = [
+    {
+      unique_identifier: remoteAlternate,
+      should_be_harvested: false,
+    },
+  ];
+  const updateHarvestables = await $fetch('/api/importar-externo', {
+    method: 'POST',
+    headers: { token: token },
+    body: { harvesterID: harvesterIdentifier, resources: requestBody },
+  });
+
+  // Actualizamos los recursos cosechables
+  if (updateHarvestables) {
+    await $fetch('/api/actualizar-externo', {
+      method: 'POST',
+      headers: { token: token },
+      body: { id: harvesterIdentifier, status: 'harvesting-resources' },
+    });
+  } else {
+    deleteError.value = true;
+  }
+}
+
+/* async function borrarLocal() {
   const token = data.value?.accessToken;
   const response = await $fetch('/api/delete-resource', {
     method: 'DELETE',
@@ -167,11 +239,21 @@ async function confirmarEliminar() {
   });
   //TODO: agregar manejo de errores
   console.warn('La res:', response);
+} */
+
+async function confirmarEliminar() {
+  //   isBeingDeleted.value = true;
+  if (resourceToDelete.value.sourcetype === 'REMOTE') {
+    borrarRemoto();
+  } else {
+    console.warn('Local');
+  }
+  /*borrarLocal();
   await wait(3000);
   isBeingDeleted.value = false;
   modalEliminar.value?.cerrarModal();
   const router = useRouter();
-  router.go(0);
+  router.go(0); */
 }
 </script>
 
