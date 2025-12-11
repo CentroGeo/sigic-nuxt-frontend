@@ -1,13 +1,11 @@
 <script setup>
 import { onMounted, onUnmounted, ref, toRefs } from 'vue';
 import { tooltipContent } from '~/utils/consulta';
+
+const { data } = useAuth();
 const storeSelected = useSelectedResources2Store();
 const storeConsulta = useConsultaStore();
 const storeResources = useResourcesConsultaStore();
-const capasSeleccionadas = computed({
-  get: () => storeSelected.pks,
-  set: (pks) => storeSelected.updateByPks(pks),
-});
 const props = defineProps({
   catalogueElement: {
     type: Object,
@@ -15,13 +13,12 @@ const props = defineProps({
   },
 });
 const { catalogueElement } = toRefs(props);
-// Para hacer algo si es el enésimo elemento e incorporar el consumo de recursos paginados.
-const emit = defineEmits(['triggerFetch']);
-const { data } = useAuth();
-const isLoggedIn = ref(data.value ? true : false);
+const capasSeleccionadas = computed({
+  get: () => storeSelected.pks,
+  set: (pks) => storeSelected.updateByPks(pks, props.catalogueElement.default_style),
+});
 
-//console.log(data.value?.accessToken);
-//const userEmail = ref(data.value?.user.email);
+const isLoggedIn = ref(data.value ? true : false);
 const nthElementsPks = computed(() => storeResources.nthElementsByType());
 const geomType = ref(catalogueElement.value.geomType ? catalogueElement.value.geomType : 'Otro');
 const geomDict = {
@@ -71,6 +68,8 @@ const geomDict = {
     class: 'pictograma-alerta',
   },
 };
+const emit = defineEmits(['triggerFetch']);
+
 // Para triggerear la función de observar
 let observer;
 const rootEl = ref();

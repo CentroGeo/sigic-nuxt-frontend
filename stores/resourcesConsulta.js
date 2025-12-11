@@ -67,30 +67,52 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
         ...params,
       };
       const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
-      const request = await gnoxyFetch(url);
-      const res = await request.json();
 
-      if (resourceType === 'dataLayer') {
-        await Promise.all(
-          // Agregamos el tipo de geometría
-          res.resources.map(async (d) => {
-            d.geomType = await defineGeomType(d);
+      try {
+        const resourcesRequest = await gnoxyFetch(url);
+        if (!resourcesRequest.ok) {
+          console.error('Falló la petición inicial por recursos con categoría');
+          return;
+        }
 
-            // Y agregamos los estilos
-            const url = `${config.public.geonodeApi}/datasets/${d.pk}/sldstyles/`;
-            const res = await gnoxyFetch(url);
-            const data = await res.json();
-            d.default_style = data.default_style;
-            d.styles = data.styles;
-            if (!d.styles.includes(d.default_style)) {
-              d.styles.push(d.default_style);
-            }
-          })
-        );
+        const resourcesRes = await resourcesRequest.json();
+        // Agregamos el tipo de geometría y los estilos disponibles
+        if (resourceType === 'dataLayer') {
+          await Promise.all(
+            resourcesRes.resources.map(async (d) => {
+              d.geomType = await defineGeomType(d);
+
+              if (d.sourcetype !== 'REMOTE') {
+                const stylesURL = `${config.public.geonodeApi}/datasets/${d.pk}/sldstyles/`;
+                const stylesRes = await gnoxyFetch(stylesURL);
+
+                if (!stylesRes.ok) {
+                  d.default_style = null;
+                  d.styles = [];
+                  console.error('Falló la petición de estilos');
+                  return;
+                }
+
+                const stylesData = await stylesRes.json();
+                d.default_style = stylesData.default_style;
+                d.styles = stylesData.styles;
+                if (!d.styles.includes(d.default_style)) {
+                  d.styles.push(d.default_style);
+                }
+              } else {
+                d.default_style = null;
+                d.styles = [];
+              }
+            })
+          );
+        }
+        const data = resourcesRes.resources;
+        resources[resourceType] = [...resources[resourceType], ...data];
+        return;
+      } catch {
+        console.error('Fracasó la petición de recursos por categoría');
+        return;
       }
-
-      const data = res.resources;
-      resources[resourceType] = [...resources[resourceType], ...data];
     },
     /**
      * Reescribe la lista de pks correspondientes a los enésimos elementos
@@ -112,23 +134,36 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
       // TODO: Si la petición falla porque el recurso es privado, eliminarlo de la store de seleccion
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         try {
-          const res = await gnoxyFetch(url);
-          if (!res.ok) {
-            console.error(`Resource fetch failed: ${res.status}`);
+          const resourceRes = await gnoxyFetch(url);
+          if (!resourceRes.ok) {
+            console.error(`Resource fetch failed: ${resourceRes.status}`);
             return 'Error';
           }
-          const resource = await res.json();
+          const resource = await resourceRes.json();
           const resourceData = resource.resource;
 
+          // Agregamos los estilos
           if (resourceData.resource_type === 'dataset') {
-            // Agregamos los estilos
-            const url = `${config.public.geonodeApi}/datasets/${resourceData.pk}/sldstyles/`;
-            const res = await gnoxyFetch(url);
-            const styleData = await res.json();
-            resourceData.default_style = styleData.default_style;
-            resourceData.styles = styleData.styles;
-            if (!resourceData.styles.includes(resourceData.default_style)) {
-              resourceData.styles.push(resourceData.default_style);
+            if (resourceData.sourcetype !== 'REMOTE') {
+              const stylesURL = `${config.public.geonodeApi}/datasets/${resourceData.pk}/sldstyles/`;
+              const stylesRes = await gnoxyFetch(stylesURL);
+
+              if (!stylesRes.ok) {
+                resourceData.default_style = null;
+                resourceData.styles = [];
+                console.error('Falló la petición de estilos');
+                return;
+              }
+
+              const stylesData = await stylesRes.json();
+              resourceData.default_style = stylesData.default_style;
+              resourceData.styles = stylesData.styles;
+              if (!resourceData.styles.includes(resourceData.default_style)) {
+                resourceData.styles.push(resourceData.default_style);
+              }
+            } else {
+              resourceData.default_style = null;
+              resourceData.styles = [];
             }
           }
           return resourceData;
@@ -136,6 +171,7 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
           console.warn(`Falló el intento ${attempt + 1}.`);
         }
       }
+      return;
     },
 
     /**

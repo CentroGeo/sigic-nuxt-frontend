@@ -14,7 +14,6 @@ const selectedPk = route.query.data;
 const subidaExitosa = ref(undefined);
 const nombreSLD = ref('');
 const resourceToEdit = ref(null);
-//const user = data.value?.user.email || 'Sin sesion';
 const dragNdDrop = ref(null);
 const style_files = ['.sld'];
 const isLoadingGlobal = ref(true);
@@ -25,11 +24,23 @@ async function guardarArchivo(files) {
   subidaExitosa.value = undefined;
   isLoading.value = true;
   if (style_files.map((end) => files[0]?.name.endsWith(end)).includes(true)) {
-    const formData = new FormData();
+    // Esta parte es llama el archivo que cambia el sld
+    /* const formData = new FormData();
     // solo el primer elemento del arreglo
     nombreSLD.value = files[0].name;
     formData.append('base_file', files[0]);
-    //formData.append('dataset_title', resourceToEdit.value.alternate);
+    formData.append('dataset_title', resourceToEdit.alternate);
+    formData.append('token', data.value?.accessToken);
+
+    const response = await $fetch('/api/subirSLD', {
+      method: 'POST',
+      body: formData,
+    }); */
+
+    // Esta parte llama el archivo que agrega otro sld
+    nombreSLD.value = files[0].name;
+    const formData = new FormData();
+    formData.append('base_file', files[0]);
     formData.append('token', data.value?.accessToken);
     formData.append('pk', selectedPk);
 
@@ -37,6 +48,7 @@ async function guardarArchivo(files) {
       method: 'POST',
       body: formData,
     });
+
     console.warn('response', response);
     if (response === 'finished') {
       subidaExitosa.value = true;

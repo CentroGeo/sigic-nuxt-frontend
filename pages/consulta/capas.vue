@@ -245,6 +245,7 @@ onMounted(async () => {
             :opacidad="storeSelected.byPk(resource.pk).opacidad"
             :posicion="storeSelected.byPk(resource.pk).posicion + 1"
             :visible="storeSelected.byPk(resource.pk).visible"
+            :estilo="storeSelected.byPk(resource.pk).estilo"
             :cuadro-informativo="
               (url) => buildLayerInfo(url, resource.alternate, resource.title, resource.sourcetype)
             "

@@ -116,7 +116,11 @@ async function shareOws() {
 }
 watch(resourceElement, () => {
   updateFunctions();
-  selectedStyle.value = resourceElement.value.default_style;
+  selectedStyle.value = storeSelected.byPk(resourceElement.value.pk).estilo;
+});
+
+watch(selectedStyle, (nv) => {
+  storeSelected.byPk(resourceElement.value.pk).estilo = nv;
 });
 
 /* watch(selectedStyle, (nv) => {
@@ -143,6 +147,7 @@ watch(resourceElement, () => {
       <SisdaiLeyendaWms
         :consulta="gnoxyFetch"
         :fuente="findServer(resourceElement)"
+        :estilo="storeSelected.byPk(resourceElement.pk).estilo"
         :nombre="resourceElement.alternate"
         :titulo="resourceElement.title || 'cargando...'"
         :sin-control="true"
