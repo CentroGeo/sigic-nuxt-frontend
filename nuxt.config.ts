@@ -74,7 +74,8 @@ export default defineNuxtConfig({
     isEnabled: true,
     baseURL: authBaseUrl,
     originEnvKey: originEnvKey,
-    basePath: basePath,
+    basePath: appBasePath,
+    //basePath: basePath,
     // origin: origin,
     globalAppMiddleware: false,
     provider: {
