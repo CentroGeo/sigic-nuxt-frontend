@@ -34,6 +34,11 @@ onUnmounted(() => (document.querySelector('body').className = ''));
           ruta: `${ruta}/explorar/documentos`,
           globo: 'Documentos',
         },
+        {
+          pictograma: 'pictograma-flkt',
+          ruta: `${ruta}/explorar/catalogos-externos`,
+          globo: 'Servicios Remotos',
+        },
       ]"
       :sesion-paginas="[
         {
@@ -49,7 +54,7 @@ onUnmounted(() => (document.querySelector('body').className = ''));
         {
           pictograma: 'pictograma-ayuda',
           ruta: `${ruta}/servicios-remotos`,
-          globo: 'Carga de catálogos externos',
+          globo: 'Carga de servicios remotos',
         },
       ]"
       :id-colapsable="storeCatalogo.idNavegacionLateral"

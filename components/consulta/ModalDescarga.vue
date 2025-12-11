@@ -154,7 +154,7 @@ defineExpose({
         <p class="h5">{{ selectedElement.title }}</p>
         <div v-if="isDownloadActive" class="flex m-y-2 borde-redondeado-16 contenedor-proceso">
           <div class="columna-4 flex-vertical-centrado">
-            <img src="/img/loader.gif" alt="...Cargando" class="loader" />
+            <img src="/img/loader.gif" alt="...Cargando" class="loader color-invertir" />
           </div>
           <p class="columna-12">
             Descarga en curso.
@@ -183,7 +183,12 @@ defineExpose({
             <label :for="`download-option-${option.label}`">{{ option.label }} </label>
           </div>
           <div class="flex flex-contenido-final">
-            <button type="button" class="boton-primario m-t-2" @click="descargarClicked">
+            <button
+              type="button"
+              aria-label="Descargar"
+              class="boton-primario m-t-2"
+              @click="descargarClicked"
+            >
               Descargar
             </button>
           </div>
