@@ -20,17 +20,13 @@ const props = defineProps({
 });
 const { resourceType, selectedElement } = toRefs(props);
 const { gnoxyFetch } = useGnoxyUrl();
-
 const seleccionVarDisponibles = ref(selectedElement.value.alternate);
-//const config = useRuntimeConfig();
 const extentMap = ref(undefined);
-
 const modalDescarga = ref(null);
 const modalPublica1 = ref(null);
 const modalPublica2 = ref(null);
 const modalPublica3 = ref(null);
 const modalPublica4 = ref(null);
-
 const optionsList = ref(null);
 const selectedOption = ref();
 const tagTitle = ref();

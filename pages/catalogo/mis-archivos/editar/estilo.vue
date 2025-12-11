@@ -13,10 +13,11 @@ const selectedPk = route.query.data;
 //const resourceType = route.query.type;
 const subidaExitosa = ref(undefined);
 const nombreSLD = ref('');
-const resourceToEdit = await storeResources.fetchResourceByPk(selectedPk);
-const user = data.value?.user.email || 'Sin sesion';
+const resourceToEdit = ref(null);
+//const user = data.value?.user.email || 'Sin sesion';
 const dragNdDrop = ref(null);
 const style_files = ['.sld'];
+const isLoadingGlobal = ref(true);
 const isLoading = ref(false);
 
 async function guardarArchivo(files) {
@@ -28,14 +29,15 @@ async function guardarArchivo(files) {
     // solo el primer elemento del arreglo
     nombreSLD.value = files[0].name;
     formData.append('base_file', files[0]);
-    formData.append('dataset_title', resourceToEdit.alternate);
+    //formData.append('dataset_title', resourceToEdit.value.alternate);
     formData.append('token', data.value?.accessToken);
+    formData.append('pk', selectedPk);
 
-    const response = await $fetch('/api/subirSLD', {
+    const response = await $fetch('/api/subirSLDMultiple', {
       method: 'POST',
       body: formData,
     });
-    //console.warn('response', response);
+    console.warn('response', response);
     if (response === 'finished') {
       subidaExitosa.value = true;
     } else {
@@ -44,8 +46,14 @@ async function guardarArchivo(files) {
   } else {
     dragNdDrop.value?.archivoNoValido();
   }
+  subidaExitosa.value = true;
   isLoading.value = true;
 }
+
+onMounted(async () => {
+  resourceToEdit.value = await storeResources.fetchResourceByPk(selectedPk);
+  isLoadingGlobal.value = false;
+});
 </script>
 
 <template>
@@ -55,24 +63,21 @@ async function guardarArchivo(files) {
     </template>
 
     <template #visualizador>
-      <main v-if="!resourceToEdit || resourceToEdit === 'Error'">
-        <div
-          class="contenedor ancho-lectura borde-redondeado-16 texto-color-error fondo-color-error p-3 m-3 flex flex-contenido-centrado"
-        >
-          <span class="pictograma-alerta" />
-          <b> Hubo un error en el servidor o el archivo no existe</b>
-        </div>
-      </main>
-      <main v-else-if="!user || user !== resourceToEdit?.owner.username">
-        <div
-          class="contenedor ancho-lectura borde-redondeado-16 texto-color-error fondo-color-error p-3 m-3 flex flex-contenido-centrado"
-        >
-          <span class="pictograma-alerta" />
-          <b> No tienes permisos para ver esta página.</b>
+      <main v-if="isLoadingGlobal">
+        <div class="flex flex-contenido-centrado m-t-3">
+          <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
         </div>
       </main>
       <main v-else id="principal" class="contenedor m-b-10 m-y-3">
-        <div class="alineacion-izquierda ancho-lectura">
+        <div v-if="resourceToEdit === 'Error'">
+          <div
+            class="contenedor ancho-lectura borde-redondeado-16 texto-color-error fondo-color-error p-3 m-3 flex flex-contenido-centrado"
+          >
+            <span class="pictograma-alerta" />
+            <b> Hubo un error en el servidor o el archivo no existe</b>
+          </div>
+        </div>
+        <div v-else class="alineacion-izquierda ancho-lectura">
           <div class="flex">
             <nuxt-link to="/catalogo/mis-archivos" aria-label="regresar a mis archivos">
               <span

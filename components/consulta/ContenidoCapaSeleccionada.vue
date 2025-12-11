@@ -1,4 +1,5 @@
 <script setup>
+import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { SisdaiLeyendaWms } from '@centrogeomx/sisdai-mapas';
 import { findServer, getWMSserver, hasWMS } from '~/utils/consulta';
 
@@ -14,6 +15,7 @@ const props = defineProps({
   },
 });
 const { resourceElement } = toRefs(props);
+const selectedStyle = ref(null);
 const actualButtons = ref({});
 const optionsButtons = ref([
   {
@@ -114,11 +116,29 @@ async function shareOws() {
 }
 watch(resourceElement, () => {
   updateFunctions();
+  selectedStyle.value = resourceElement.value.default_style;
 });
+
+/* watch(selectedStyle, (nv) => {
+  console.log(nv);
+}); */
 </script>
 
 <template>
   <div v-if="resourceElement.title">
+    <div v-if="resourceElement.styles.length > 1" class="m-t-2">
+      <ClientOnly>
+        <SisdaiSelector
+          v-model="selectedStyle"
+          etiqueta="Variables disponibles"
+          texto_ayuda="Texto de ayuda."
+        >
+          <option v-for="estilo in resourceElement.styles" :key="estilo" :value="estilo">
+            {{ estilo }}
+          </option>
+        </SisdaiSelector>
+      </ClientOnly>
+    </div>
     <div class="m-y-2">
       <SisdaiLeyendaWms
         :consulta="gnoxyFetch"

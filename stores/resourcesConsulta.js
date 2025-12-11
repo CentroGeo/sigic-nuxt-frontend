@@ -70,19 +70,25 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
       const request = await gnoxyFetch(url);
       const res = await request.json();
 
-      // Agregamos el tipo de geometría cuando sea necesario
       if (resourceType === 'dataLayer') {
         await Promise.all(
+          // Agregamos el tipo de geometría
           res.resources.map(async (d) => {
             d.geomType = await defineGeomType(d);
+
+            // Y agregamos los estilos
+            const url = `${config.public.geonodeApi}/datasets/${d.pk}/sldstyles/`;
+            const res = await gnoxyFetch(url);
+            const data = await res.json();
+            d.default_style = data.default_style;
+            d.styles = data.styles;
+            if (!d.styles.includes(d.default_style)) {
+              d.styles.push(d.default_style);
+            }
           })
         );
       }
 
-      // TODO: Agregar en los query params el filtrado para indicar que recursos con metadatos
-      // completos. Borrar la siguiente linea y cambiar data por datum
-      //const datum = res.resources;
-      //const data = datum.filter((d) => d.category);
       const data = res.resources;
       resources[resourceType] = [...resources[resourceType], ...data];
     },
@@ -112,7 +118,20 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
             return 'Error';
           }
           const resource = await res.json();
-          return resource.resource;
+          const resourceData = resource.resource;
+
+          if (resourceData.resource_type === 'dataset') {
+            // Agregamos los estilos
+            const url = `${config.public.geonodeApi}/datasets/${resourceData.pk}/sldstyles/`;
+            const res = await gnoxyFetch(url);
+            const styleData = await res.json();
+            resourceData.default_style = styleData.default_style;
+            resourceData.styles = styleData.styles;
+            if (!resourceData.styles.includes(resourceData.default_style)) {
+              resourceData.styles.push(resourceData.default_style);
+            }
+          }
+          return resourceData;
         } catch {
           console.warn(`Falló el intento ${attempt + 1}.`);
         }

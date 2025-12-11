@@ -83,7 +83,7 @@ const iconOptions = {
       position: 'arriba',
     },
     {
-      tooltipText: 'Variables disponibles',
+      tooltipText: `${catalogueElement.value.styles.length} Variables disponibles`,
       class: 'pictograma-visualizador',
       position: 'arriba',
     },
