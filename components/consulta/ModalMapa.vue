@@ -50,10 +50,11 @@ defineExpose({
 
       <template #cuerpo>
         <SisdaiSelector
+          v-if="estilosLista.length > 1"
           v-model="estiloSeleccionado"
           etiqueta="Variables disponibles para visualizar"
           instruccional="Selecciona el estilo para visualizar"
-          class="m-y-2"
+          class="m-b-3"
         >
           <option v-for="(estilo, index) in estilosLista" :key="`estilo-${index}`" :value="estilo">
             {{ estilo }}
