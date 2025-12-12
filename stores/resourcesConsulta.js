@@ -105,6 +105,32 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
               }
             })
           );
+        } else if (resourceType === 'dataTable') {
+          await Promise.all(
+            resourcesRes.resources.map(async (d) => {
+              if (d.sourcetype !== 'REMOTE') {
+                const stylesURL = `${config.public.geonodeApi}/datasets/${d.pk}/sldstyles/`;
+                const stylesRes = await gnoxyFetch(stylesURL);
+
+                if (!stylesRes.ok) {
+                  d.default_style = null;
+                  d.styles = [];
+                  console.error('Falló la petición de estilos');
+                  return;
+                }
+
+                const stylesData = await stylesRes.json();
+                d.default_style = stylesData.default_style;
+                d.styles = stylesData.styles;
+                if (!d.styles.includes(d.default_style)) {
+                  d.styles.push(d.default_style);
+                }
+              } else {
+                d.default_style = null;
+                d.styles = [];
+              }
+            })
+          );
         }
         const data = resourcesRes.resources;
         resources[resourceType] = [...resources[resourceType], ...data];

@@ -58,8 +58,7 @@ async function guardarArchivo(files) {
   } else {
     dragNdDrop.value?.archivoNoValido();
   }
-  subidaExitosa.value = true;
-  isLoading.value = true;
+  isLoading.value = false;
 }
 
 onMounted(async () => {
