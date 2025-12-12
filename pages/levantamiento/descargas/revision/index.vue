@@ -72,6 +72,67 @@ const handleDescarga = () => {
           <div class="columna-4"></div>
         </div>
 
+        <div v-else class="grid">
+          <div
+            v-for="descarga in storeLevantamiento.descargasEnRevision"
+            :key="descarga.id"
+            class="columna-5 fondo-color-neutro p-3 borde-redondeado-20"
+          >
+            <div class="flex flex-contenido-separado encabezado-descarga m-b-3">
+              <span class="pictograma-capas pictograma-grande texto-color-acento"></span>
+              <p
+                class="borde borde-redondeado-12 p-x-1 p-y-minimo fondo-color-alerta texto-color-alerta borde-color-alerta m-0"
+              >
+                En revisión
+              </p>
+            </div>
+            <div class="m-b-3">
+              <div class="texto-color-secundario">Datos del proyecto:</div>
+              <div class="m-b-minimo texto-tamanio-4 nombre-proyecto">
+                <b>{{ descarga.nombre_proyecto }}</b>
+              </div>
+            </div>
+            <div class="m-b-3 texto-tamanio-2 texto-color-secundario">
+              <span class="m-r-2">Solicitante:</span> {{ descarga.solicitante }}
+            </div>
+            <div class="flex texto-tamanio-2 texto-color-secundario m-b-minimo">
+              <div class="columna-10">Formato:</div>
+              <div class="columna-6">
+                {{ descarga.formato }}
+              </div>
+            </div>
+            <div class="flex texto-tamanio-2 texto-color-secundario m-b-minimo">
+              <div class="columna-10">Fecha de solicitud:</div>
+              <div class="columna-6">
+                {{ descarga.fecha_solicitud }}
+              </div>
+            </div>
+            <div class="flex texto-tamanio-2 texto-color-secundario m-b-3">
+              <div class="columna-10">Fecha de aprobación:</div>
+              <div class="columna-6">---</div>
+            </div>
+            <div class="flex acciones-descarga">
+              <div class="columna-8">
+                <button
+                  class="boton-secundario boton-chico boton-accion-proyecto fondo-color-primario m-b-1"
+                  type="button"
+                >
+                  Eliminar
+                </button>
+              </div>
+              <div class="columna-8">
+                <button
+                  class="boton-primario boton-chico boton-accion-proyecto fondo-color-primario m-b-1"
+                  type="button"
+                  disabled
+                >
+                  Descargar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <ClientOnly>
           <SisdaiModal ref="modalSolicitarDescarga">
             <template #encabezado><h3>Descargar datos</h3></template>
@@ -171,5 +232,28 @@ const handleDescarga = () => {
 .contenido-levantamiento {
   flex: 1;
   align-items: center;
+}
+
+.encabezado-descarga {
+  p {
+    align-self: flex-start;
+  }
+}
+
+.nombre-proyecto {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 22.5px;
+  min-height: calc(22.5px * 3);
+}
+
+.acciones-descarga {
+  button {
+    width: 100%;
+    justify-content: center;
+  }
 }
 </style>

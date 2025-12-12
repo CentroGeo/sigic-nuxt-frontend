@@ -106,5 +106,17 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
     obtenerTotalDescargasEnRevision() {
       return this.descargasEnRevision.length;
     },
+    solicitarDescarga() {
+      const descarga = {
+        id: this.descargasEnRevision.length + 1,
+        nombre_proyecto: 'Registro de arte urbano en la Ciudad de Mérida, Yucatán (2025)',
+        solicitante: 'Daniela Acuña',
+        formato: '.gpkg',
+        fecha_solicitud: '12/11/25',
+      };
+
+      this.descargasEnRevision.push(descarga);
+      this.existenDescargasEnRevision = true;
+    },
   };
 });

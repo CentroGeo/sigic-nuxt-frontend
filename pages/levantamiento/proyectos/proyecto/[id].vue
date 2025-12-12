@@ -15,7 +15,19 @@ const route = useRoute();
 const storeLevantamiento = useLevantamientoStore();
 const proyecto = computed(() => storeLevantamiento.obtenerProyectoPorId(route.params.id));
 
-const preguntas = [
+const preguntas = computed(() => {
+  const ficha = proyecto.value?.ficha_proyecto;
+
+  if (!ficha) return [];
+
+  try {
+    return JSON.parse(ficha);
+  } catch (error) {
+    console.error('Error al parsear ficha_proyecto:', error);
+    return [];
+  }
+});
+/* const preguntas = [
   {
     id: 1,
     tipo: 'abierta',
@@ -53,7 +65,7 @@ const preguntas = [
       'Adjunta hasta cuatro fotos donde se aprecie claramente el lugar y los residuos. (Formatos permitidos: JPG, PNG, máximo 5 MB)',
     obligatorio: false,
   },
-];
+]; */
 
 const modalSolicitarDescarga = ref(null);
 const modalDescargaSolicitada = ref(null);
@@ -99,7 +111,7 @@ const handleDescarga = () => {
           </div>
           <UiNumeroElementos :numero="proyecto?.aportes" etiqueta="Aportes" />
           <div>{{ proyecto?.institucion }}</div>
-          <div>{{ proyecto?.autor }}</div>
+          <div>{{ proyecto?.lider }}</div>
         </div>
         <div class="contenedor">
           <div class="grid contenedor-formulario">
@@ -107,22 +119,13 @@ const handleDescarga = () => {
               <div class="m-b-3">
                 <h5 class="m-t-0 m-b-2">Objetivo del proyecto:</h5>
                 <p class="m-y-0">
-                  Generar un inventario actualizado de murales, grafitis y expresiones de arte
-                  urbano en espacios públicos, con el fin de documentar su ubicación, estado y valor
-                  cultural, además de fomentar la participación ciudadana en la conservación del
-                  patrimonio artístico contemporáneo.
+                  {{ proyecto?.objetivo }}
                 </p>
               </div>
               <div class="m-b-3">
                 <h5 class="m-t-0 m-b-2">Instrucciones clave del formulario:</h5>
                 <p class="m-y-0">
-                  1. Subir una fotografía clara del mural o pieza de arte urbano. <br />
-                  2. Señalar el tipo de obra (mural, grafiti, stencil, instalación temporal,
-                  otro).<br />
-                  3. Reportar estado de conservación (bueno, regular, deteriorado). <br />
-                  4. Compartir, si se conoce, el nombre del artista o colectivo. <br />
-                  5. Añadir observaciones (ejemplo: si la obra tiene temática social, cultural,
-                  ambiental).
+                  {{ proyecto?.especificaciones_multimedia }}
                 </p>
               </div>
               <div class="m-b-3">
@@ -130,22 +133,22 @@ const handleDescarga = () => {
                 <div class="fondo-color-neutro p-3 borde-redondeado-20 flex">
                   <div
                     v-for="pregunta in preguntas"
-                    :key="pregunta.id"
+                    :key="pregunta.id_pregunta"
                     class="p-3 borde-redondeado-20 fondo-color-primario columna-16"
                   >
                     <div v-if="pregunta.tipo !== 'multimedia'" class="m-b-2 texto-peso-500">
-                      {{ pregunta.id }}. {{ pregunta.pregunta }}
+                      {{ pregunta.id_pregunta }}. {{ pregunta.texto }}
                     </div>
                     <div class="m-b-1 texto-color-secundario texto-peso-500">
                       {{
                         pregunta.tipo === 'multimedia'
-                          ? `${pregunta.id}. ${pregunta.instrucciones}`
-                          : pregunta.instrucciones
+                          ? `${pregunta.id_pregunta}. ${pregunta.nota_para_registrante}`
+                          : pregunta.nota_para_registrante
                       }}
                     </div>
 
                     <div
-                      v-if="pregunta.obligatorio"
+                      v-if="pregunta.obligatoria"
                       class="texto-color-secundario texto-tamanio-2 text-peso-400"
                     >
                       Obligatoria*

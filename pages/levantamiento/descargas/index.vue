@@ -14,6 +14,7 @@ const modalDescargaSolicitada = ref(null);
 
 const handleDescarga = () => {
   modalSolicitarDescarga.value.cerrarModal();
+  storeLevantamiento.solicitarDescarga();
   modalDescargaSolicitada.value.abrirModal();
 };
 </script>
