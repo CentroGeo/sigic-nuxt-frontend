@@ -82,7 +82,7 @@ const iconOptions = {
       position: 'arriba',
     },
     {
-      tooltipText: `${catalogueElement.value.styles?.length} Variables disponibles`,
+      tooltipText: `Variables disponibles`,
       class: 'pictograma-visualizador',
       position: 'arriba',
     },
@@ -184,7 +184,14 @@ onUnmounted(() => {
         v-globo-informacion:[button.position]="button.tooltipText"
         :class="[button.class, 'pictograma-mediano picto']"
         aria-hidden="true"
-      />
+      >
+        <span
+          v-if="button.tooltipText === 'Variables disponibles'"
+          style="font-size: 12px; margin-left: 4px; text-align: center"
+        >
+          {{ catalogueElement.styles?.length === 0 ? 1 : catalogueElement.styles?.length }}
+        </span></span
+      >
     </div>
   </div>
 </template>
