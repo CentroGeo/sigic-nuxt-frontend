@@ -131,8 +131,9 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
             const { defaultStyle, styleList } = await getSLDs(resourceData);
             resourceData.default_style = defaultStyle;
             resourceData.styles = styleList;
-            return resourceData;
           }
+
+          return resourceData;
         } catch {
           console.warn(`Falló el intento ${attempt + 1}.`);
         }

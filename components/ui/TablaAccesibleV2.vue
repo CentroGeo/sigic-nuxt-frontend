@@ -105,6 +105,7 @@ async function openResourceView(resource) {
       null,
       resourceTypeDic.document
     );
+
     await navigateTo('/consulta/documentos');
   }
 }
