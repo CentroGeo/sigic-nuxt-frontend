@@ -1,6 +1,7 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import { resourceTypeGeonode } from '~/utils/consulta';
+
 const storeMetadatos = useEditedMetadataStore();
 const props = defineProps({
   title: {
@@ -27,6 +28,10 @@ const modalActualizar = ref(null);
 const rutas = ref({});
 const lastButton = ref('');
 const firstButton = 'MetadatosBasicos';
+const isLoading = ref(false);
+const wasUpdateSuccesful = ref(false);
+const didUpdateFail = ref(false);
+const isMetaInvalid = ref(false);
 const rutasConAtributos = {
   MetadatosBasicos: { siguiente: 'UbicacionLicencias', anterior: undefined },
   UbicacionLicencias: { siguiente: 'MetadatosOpcionales', anterior: 'MetadatosBasicos' },
@@ -56,33 +61,20 @@ function irARutaConQuery(direccion) {
   });
 }
 
-/* function validateAttributes(attribute_set) {
-  const attributeList = Object.keys(body.attribute_set);
-  const displayOrderList = attributeList.map((d) => Number(body.attribute_set[d]['display_order']));
-  const setList = Array.from(new Set(displayOrderList));
-  //console.log(displayOrderList);
-  //console.log(setList);
-  if (displayOrderList.length !== setList.length) {
-    //console.log(false);
-    return false;
-  } else {
-    //console.log(true);
-    return true;
-  }
-}  */
-
 function validateMeta(requestBody) {
   let status = false;
-  const editedAbstract = requestBody.abstract?.replace(/\s/g, '') || '';
   if (!requestBody.title || requestBody.title.length === 0) {
     status = false;
-    console.log('titulo');
-  } else if (editedAbstract.length < 30) {
-    console.log('abstract');
+  } else if (!requestBody.date_type || requestBody.date_type.length === 0) {
     status = false;
   } else if (!requestBody.date || requestBody.date.length === 0) {
     status = false;
-    console.log('date');
+  } else if (!requestBody.category) {
+    status = false;
+  } else if (!requestBody.keywords || requestBody.keywords.length === 0) {
+    status = false;
+  } else if (!requestBody.attribution || requestBody.attribution.length === 0) {
+    status = false;
   } else if (requestBody.attribute_set) {
     const attributeList = Object.keys(requestBody.attribute_set);
     const displayOrderList = attributeList.map((d) =>
@@ -101,19 +93,14 @@ function validateMeta(requestBody) {
 }
 
 async function updateMetadata() {
+  wasUpdateSuccesful.value = false;
+  didUpdateFail.value = false;
+  isLoading.value = true;
   const requestBody = storeMetadatos.buildRequestBody();
   const isMetaValid = validateMeta(requestBody);
-  //console.log('El estatus', isMetaValid);
-  //const token = data.value?.accessToken;
-  /*  const response = await $fetch('/api/metadatos', {
-    method: 'POST',
-    headers: { token: token, resourceType: resourceTypeGeonode[props.tipo], pk: props.pk },
-    body: requestBody,
-  }); */
-  //console.warn('La res:', response);
-  //modalActualizar.value?.cerrarModal();
-  //console.log(requestBody);
+
   if (isMetaValid) {
+    isMetaInvalid.value = false;
     modalActualizar.value?.abrirModal();
     const token = data.value?.accessToken;
     const response = await $fetch('/api/metadatos', {
@@ -121,54 +108,60 @@ async function updateMetadata() {
       headers: { token: token, resourceType: resourceTypeGeonode[props.tipo], pk: props.pk },
       body: requestBody,
     });
-    //TODO: agregar manejo de errores
     console.warn('La respuesta de la petición:', response);
-    modalActualizar.value?.cerrarModal();
+    if (response === 2) {
+      wasUpdateSuccesful.value = true;
+    } else {
+      didUpdateFail.value = true;
+    }
     //const router = useRouter();
     //router.go(0);
   } else {
-    alert('Revisa la validez de los datos introducidos.');
+    isLoading.value = false;
+    isMetaInvalid.value = true;
+    //alert('Revisa la validez de los datos introducidos.');
   }
 }
-/**
- * Actualiza los metadatos con los valores del store
- */
 
-/*async function actualizaMetadatos() {
-  // console.log(data.value?.accessToken);
-  const response = await $fetch('/api/metadatos', {
-    method: 'POST',
-    body: {
-      pk: props.resource.pk,
-      resource_type: props.resource.resource_type,
-      token: data.value?.accessToken,
-      // TODO: faltan los demás valores
-      abstract: storeCatalogo.metadatos.abstract,
-    },
+function irAmisArchivos() {
+  modalActualizar.value?.cerrarModal();
+  navigateTo({
+    path: `/catalogo/mis-archivos`,
   });
-  console.warn('response', response);
-  cargaExitosa.value = true;
-}*/
+}
 </script>
 <template>
   <div>
+    <div v-if="isMetaInvalid" class="tarjeta fondo-color-error m-t-3">
+      <div class="tarjeta-cuerpo">
+        <p class="texto-color-error">Revisa que los campos obligatorios estén llenos.</p>
+      </div>
+    </div>
+
     <div class="flex p-t-3">
       <nuxt-link class="boton-secundario boton-chico" type="button" to="/catalogo/mis-archivos"
         >Ir a mis archivos</nuxt-link
       >
       <button
         class="boton-secundario boton-chico"
+        aria-label="Ir a mis archivos"
         :disabled="props.title === firstButton ? true : false"
         @click="irARutaConQuery('anterior')"
       >
         Regresar
       </button>
       <!--<button class="boton-primario boton-chico" :disabled="false" @click="actualizaMetadatos()"> -->
-      <button class="boton-primario boton-chico" :disabled="false" @click="updateMetadata">
+      <button
+        aria-label="Actualizar Metadatos"
+        class="boton-primario boton-chico"
+        :disabled="false"
+        @click="updateMetadata"
+      >
         Actualizar
       </button>
       <button
         v-if="props.title !== lastButton"
+        aria-label="Siguiente"
         class="boton-primario boton-chico"
         :disabled="props.title === lastButton ? true : false"
         @click="irARutaConQuery('siguiente')"
@@ -186,17 +179,49 @@ async function updateMetadata() {
     <ClientOnly>
       <SisdaiModal ref="modalActualizar">
         <template #encabezado>
-          <h1></h1>
+          <h1 v-if="isLoading">Procesando</h1>
+          <p v-else></p>
         </template>
         <template #cuerpo>
-          <div class="flex m-y-2">
-            <div class="columna-4 flex-vertical-centrado">
-              <img src="/img/loader.gif" alt="...Cargando" />
+          <div v-if="isLoading" class="m-y-2">
+            <div class="flex flex-contenido-centrado">
+              <img src="/img/loader.gif" alt="...Guardando" heigh="160px" width="160px" />
             </div>
-            <p class="columna-12">Actualizando información</p>
+            <p style="text-align: center">Guardando</p>
+          </div>
+          <div v-if="wasUpdateSuccesful" class="flex" style="gap: 0px">
+            <p
+              class="columna-14 texto-color-confirmacion fondo-color-confirmacion borde borde-color-confirmacion p-2 borde-redondeado-8"
+            >
+              <span class="pictograma-aprobado" /> Actualización exitosa.
+            </p>
+            <div class="columna-14 flex flex-contenido-final">
+              <button class="boton-primario boton-chico" @click="irAmisArchivos">
+                Ir a mis archivos
+              </button>
+            </div>
+          </div>
+
+          <div v-if="didUpdateFail" class="flex" style="gap: 0px">
+            <p
+              class="columna-14 texto-color-error fondo-color-error borde borde-color-error p-2 borde-redondeado-8"
+            >
+              <span class="pictograma-alerta" /> No pudimos actualizar toda la información. Revisa
+              tu conexión e intentalo de nuevo más tarde.
+            </p>
+            <div class="columna-14 flex flex-contenido-final">
+              <button class="boton-primario boton-chico" @click="irAmisArchivos">
+                Ir a mis archivos
+              </button>
+            </div>
           </div>
         </template>
       </SisdaiModal>
     </ClientOnly>
   </div>
 </template>
+<style lang="scss" scoped>
+.align-rigth {
+  margin-left: auto;
+}
+</style>
