@@ -189,16 +189,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
 
-      // TODO: Implementar en los queryparams si tiene metadatos pendientes o no
-      /*     let data;
-      if (section === 'disponibles') {
-        data = res.resources.filter((d) => d.category !== null);
-      } else if (section === 'pendientes') {
-        data = res.resources.filter((d) => d.category === null);
-      } else {
-        data = [];
-      }
-      misArchivos[section] = data; */
       misArchivos[section] = res.resources;
       this.isLoading = false;
     },

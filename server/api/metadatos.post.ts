@@ -14,15 +14,15 @@ export default defineEventHandler(async (event) => {
   let keywordsBody: string[] = [];
   const bodyDict = {
     title: null,
-    abstract: 'Información pendiente.',
+    abstract: 'Información pendiente',
     date_type: null,
     date: null,
     category: null,
     //metadata_author: [],
     languaje: null,
     license: null,
-    attribution: 'No especificado.',
-    data_quality_statement: 'Calidad no evaluada.',
+    attribution: 'No especificado',
+    data_quality_statement: 'Calidad no evaluada',
     restriction_code_type: null,
     constraints_other: 'Ninguna',
     edition: '1.0',
@@ -48,7 +48,6 @@ export default defineEventHandler(async (event) => {
       keywordsBody = body[field];
     }
   });
-
   //console.warn(formData)
   // Actualizamos keywords
   try {

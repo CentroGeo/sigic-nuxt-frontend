@@ -11,14 +11,19 @@ const storeCatalogo = useCatalogoStore();
 const route = useRoute();
 const selectedId = route.query.id;
 const selectedTitle = route.query.title;
+const harvestableResources = route.query.total;
 const { gnoxyFetch } = useGnoxyUrl();
 const config = useRuntimeConfig();
 const selectedHarvester = ref({});
 const harvesterUrl = ref(undefined);
-const importedResources = ref([]);
+const resourcesToImport = ref([]);
 const isLoading = ref(true);
 const fetchStatus = ref(null);
 const url = ref(`${config.public.geonodeApi}/resources/?filter{subtype.in}=remote&page_size=70`);
+
+/**
+ * Busca el harvester seleccionado pidiendo todos los harvesters para obtener su información
+ */
 async function getServiceUrl() {
   let url = `${config.public.geonodeApi}/harvesters/`;
   let harvesters = [];
@@ -49,6 +54,9 @@ async function getServiceUrl() {
   } while (url);
 }
 
+/**
+ * Pide al endpount de resources los recursos remotos y los filtra según el link ogc: wms
+ */
 async function fetchRemoteResources() {
   isLoading.value = true;
 
@@ -63,7 +71,7 @@ async function fetchRemoteResources() {
     resRemotes.resources.forEach((d) => {
       const objetcLink = d.links.find((link) => link.link_type === 'OGC:WMS');
       if (objetcLink.url.includes(harvesterUrl.value)) {
-        importedResources.value.push(d);
+        resourcesToImport.value.push(d);
       }
     });
     fetchStatus.value = 'ok';
@@ -82,7 +90,7 @@ async function fetchRemoteResources() {
       resRemotes.resources.forEach((d) => {
         const objetcLink = d.links.find((link) => link.link_type === 'OGC:WMS');
         if (objetcLink.url.includes(harvesterUrl.value)) {
-          importedResources.value.push(d);
+          resourcesToImport.value.push(d);
         }
       });
     } while (url);
@@ -94,6 +102,10 @@ async function fetchRemoteResources() {
   isLoading.value = false;
 }
 
+/**
+ * Asigna una etiqueta según el tipo de recurso
+ * @param recurso
+ */
 function tipoRecurso(recurso) {
   let tipo;
   if (recurso.resource_type === 'document') {
@@ -104,6 +116,7 @@ function tipoRecurso(recurso) {
   return tipo;
 }
 
+/**Redirecciona */
 function irAImportarRecursos() {
   navigateTo({
     path: `/catalogo/servicios-remotos/importar`,
@@ -115,9 +128,18 @@ function irAImportarRecursos() {
     },
   });
 }
-getServiceUrl();
+
 watch(harvesterUrl, () => {
   fetchRemoteResources();
+});
+
+onMounted(() => {
+  if (harvestableResources === '0') {
+    isLoading.value = false;
+    fetchStatus.value = 'ok';
+  } else {
+    getServiceUrl();
+  }
 });
 </script>
 <template>
@@ -127,7 +149,7 @@ watch(harvesterUrl, () => {
     </template>
 
     <template #visualizador>
-      <main v-if="true" id="principal" class="contenedor m-b-10 m-y-3">
+      <main id="principal" class="contenedor m-b-10 m-y-3">
         <div class="flex">
           <nuxt-link
             to="/catalogo/explorar/catalogos-externos"
@@ -142,7 +164,10 @@ watch(harvesterUrl, () => {
         </div>
         <h2>{{ selectedTitle }}</h2>
         <!--Cargando-->
-        <div v-if="isLoading" class="flex flex-contenido-centrado m-y-5">
+        <div
+          v-if="isLoading && harvestableResources !== '0'"
+          class="flex flex-contenido-centrado m-y-5"
+        >
           <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
           <p class="columna-16 texto-color-error" style="text-align: center">{{ url }}</p>
         </div>
@@ -157,16 +182,27 @@ watch(harvesterUrl, () => {
         </div>
 
         <!--Aún no hay recursos importados-->
-        <div v-if="!isLoading && importedResources.length === 0 && fetchStatus === 'ok'">
-          <p
-            class="texto-color-informacion fondo-color-informacion borde borde-color-informacion p-2 borde-redondeado-8"
-          >
-            Aún no se han importado recursos
-          </p>
+        <div v-if="harvestableResources === '0'">
+          <div class="flex flex-contenido-centrado ancho-lectura borde-redondeado-16 sin-seleccion">
+            <span class="pictograma-flkt pictograma-grande texto-color-error m-1"></span>
+            <h3 class="texto-color-error m-1">Aún no se han importado recursos</h3>
+            <p class="m-1">
+              Cuando selecciones un conjunto de datos del catálogo, podrás explorarlo en esta
+              sección
+            </p>
+            <div class="flex flex-contenido-inicio m-t-3">
+              <nuxt-link
+                class="boton boton-primario boton-chico"
+                aria-label="Ir a importar Recursos"
+                @click="irAImportarRecursos"
+                >Importar Recursos
+              </nuxt-link>
+            </div>
+          </div>
         </div>
 
         <!--Tabla de recursos-->
-        <div v-if="!isLoading && importedResources.length > 0 && fetchStatus === 'ok'">
+        <div v-if="!isLoading && resourcesToImport.length > 0 && fetchStatus === 'ok'">
           <p
             class="texto-color-alerta fondo-color-alerta borde borde-color-alerta p-2 borde-redondeado-8"
           >
@@ -188,7 +224,7 @@ watch(harvesterUrl, () => {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="resource in importedResources" :key="resource.pk">
+                <tr v-for="resource in resourcesToImport" :key="resource.pk">
                   <td>
                     <!--                  <nuxt-link @click="openResourceView(value)">{{ value.title }}</nuxt-link>-->
                     {{ resource.title }}
@@ -199,24 +235,31 @@ watch(harvesterUrl, () => {
               </tbody>
             </table>
           </form>
-        </div>
 
-        <div v-if="!isLoading" class="flex flex-contenido-inicio m-t-3">
-          <nuxt-link
-            v-if="!isLoading && importedResources.length > 0"
-            class="boton boton-primario boton-chico"
-            aria-label="Ir a editar metadatos"
-            to="/catalogo/mis-archivos/metadatos-pendientes"
-            >Editar metadatos
-          </nuxt-link>
-          <nuxt-link
-            class="boton boton-secundario boton-chico"
-            aria-label="Ir a recursos externos aún no importados"
-            @click="irAImportarRecursos"
-            >Ver recursos no importados
-          </nuxt-link>
+          <div class="flex flex-contenido-inicio m-t-3">
+            <nuxt-link
+              class="boton boton-primario boton-chico"
+              aria-label="Ir a editar metadatos"
+              to="/catalogo/mis-archivos/metadatos-pendientes"
+              >Editar metadatos
+            </nuxt-link>
+            <nuxt-link
+              class="boton boton-secundario boton-chico"
+              aria-label="Ir a recursos externos aún no importados"
+              @click="irAImportarRecursos"
+              >Ver recursos no importados
+            </nuxt-link>
+          </div>
         </div>
       </main>
     </template>
   </UiLayoutPaneles>
 </template>
+<style scoped>
+.sin-seleccion {
+  background-color: var(--fondo-acento);
+  gap: 8px;
+  padding: 16px;
+  text-align: center;
+}
+</style>
