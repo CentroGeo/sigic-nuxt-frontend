@@ -102,6 +102,7 @@ async function openResourceView(resource) {
   if (resource.tipo_recurso === 'Documentos') {
     useSelectedResources2Store().add(
       new SelectedLayer({ pk: resource.pk }),
+      null,
       resourceTypeDic.document
     );
     await navigateTo('/consulta/documentos');

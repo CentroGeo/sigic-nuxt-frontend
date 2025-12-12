@@ -170,6 +170,15 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       } else if (section === 'pendientes') {
         queryParams['filter{complete_metadata}'] = 'false';
       }
+
+      // Excluimos los servicios usando queryparams
+      if (
+        !Object.keys(queryParams).includes('filter{subtype.in}') &&
+        !queryParams['filter{resource_type}']
+      ) {
+        queryParams['filter{resource_type}'] = ['dataset', 'document'];
+      }
+
       const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
@@ -196,9 +205,30 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       } else if (section === 'pendientes') {
         queryParams['filter{complete_metadata}'] = 'false';
       }
+
+      // Excluimos los servicios usando queryparams
+      if (
+        !Object.keys(queryParams).includes('filter{subtype.in}') &&
+        !queryParams['filter{resource_type}']
+      ) {
+        queryParams['filter{resource_type}'] = ['dataset', 'document'];
+      }
+
+      //Pedimos los recursos
       const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
+
+      // Agregamos el tipo de geometría y los estilos disponibles
+      await Promise.all(
+        res.resources.map(async (d) => {
+          if (d.resource_type === 'dataset') {
+            const { defaultStyle, styleList } = await getSLDs(d);
+            d.default_style = defaultStyle;
+            d.styles = styleList;
+          }
+        })
+      );
 
       misArchivos[section] = res.resources;
       this.isLoading = false;
