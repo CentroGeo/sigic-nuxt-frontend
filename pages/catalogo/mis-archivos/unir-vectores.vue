@@ -9,14 +9,12 @@ import { getWMSserver, hasWMS } from '~/utils/consulta';
 
 const { data } = useAuth();
 const token = data.value?.accessToken;
-// const userEmail = data.value?.user.email;
 
 const route = useRoute();
 const selectedPk = route.query.data;
-// const type = route.query.type;
 
 const storeCatalogo = useCatalogoStore();
-const storeCatalogoResources = useResourcesCatalogoStore();
+const storeResources = useResourcesCatalogoStore();
 
 const editedResource = ref(undefined);
 
@@ -25,18 +23,18 @@ const titleEditedResource = ref('');
 const seleccionCampoCapa = ref('');
 const variables = ref([]);
 
-storeCatalogoResources.getMyTotalResources('dataLayer');
-storeCatalogoResources.getMyResourcesByType('dataLayer');
-const layerTotals = computed(() => storeCatalogoResources.myTotalsByType['dataLayer']);
+storeResources.getMyTotalResources('dataLayer');
+storeResources.getMyResourcesByType('dataLayer');
+
 const seleccionCapaGeo = ref('');
-const layerResources = computed(() => storeCatalogoResources.myResourcesByType['dataLayer']);
+const layerResources = computed(() => storeResources.myResourcesByType['dataLayer']);
 
 const seleccionCampoObjetivo = ref('');
 const varGeoLayer = ref([]);
-const dict = ref({});
+const dictCamposAUnir = ref({});
 
 const unionExitosa = ref(false);
-const validarCampos = ref(false);
+const validarCampos = ref(true);
 
 const modalUnionVectorial = ref(null);
 const masTiempo = ref(false);
@@ -79,19 +77,21 @@ const obtenerVariables = async (resource) => {
 };
 
 function limpiarCamposAUnir() {
-  dict.value = Object.fromEntries(variables.value.map((d) => [d, false]));
+  dictCamposAUnir.value = Object.fromEntries(variables.value.map((d) => [d, false]));
 }
 
 // TODO: unir vectores con el backend
 async function unirCampos() {
   modalUnionVectorial.value.abrirModal();
+
   setTimeout(() => {
     masTiempo.value = true;
   }, 2000);
+
   // armar columnas
   const columns = ref([]);
-  Object.keys(dict.value).forEach((key) => {
-    if (dict.value[key] === true) {
+  Object.keys(dictCamposAUnir.value).forEach((key) => {
+    if (dictCamposAUnir.value[key] === true) {
       columns.value.push(key);
     }
   });
@@ -107,21 +107,21 @@ async function unirCampos() {
 
   try {
     const config = useRuntimeConfig();
-    const url = config.public.geonodeApi;
-    const token = data.value?.accessToken;
+    const url = config.public.geonodeUrl;
+    // const token = data.value?.accessToken;
     const body = {
       layer: +editedResource.value.pk,
       geo_layer: +seleccionCapaGeo.value,
       layer_pivot: seleccionCampoCapa.value,
       geo_pivot: seleccionCampoObjetivo.value,
       columns: columns.value,
-      token: token,
     };
-    await $fetch(`${url}/sigic/sigic_georeference/join`, {
+    const response = await $fetch(`${url}/sigic/georeference/join`, {
       method: 'POST',
-      // headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
+    console.warn('response', response);
 
     unionExitosa.value = true;
   } catch (error) {
@@ -130,14 +130,18 @@ async function unirCampos() {
 }
 
 // para habilitar o deshabilitar el botón de unir campos
-watch([seleccionCampoCapa, seleccionCapaGeo, seleccionCampoObjetivo], ([n1, n2, n3]) => {
-  // Si en los tres se ha seleccionado algo, habilita el botón
-  if (!n1.trim() <= 0 && n2.trim() >= 1 && !n3.trim() <= 0) {
-    validarCampos.value = false;
-  } else {
-    validarCampos.value = true;
-  }
-});
+watch(
+  [seleccionCampoCapa, seleccionCapaGeo, seleccionCampoObjetivo, dictCamposAUnir],
+  ([n1, n2, n3, n4]) => {
+    // Si en los cuatro se ha seleccionado algo, habilita el botón
+    if (!n1.trim() <= 0 && n2.trim() >= 1 && !n3.trim() <= 0 && Object.values(n4).includes(true)) {
+      validarCampos.value = false;
+    } else {
+      validarCampos.value = true;
+    }
+  },
+  { deep: true }
+);
 
 watch(seleccionCapaGeo, (nv) => {
   (async () => {
@@ -151,18 +155,8 @@ onMounted(async () => {
   editedResource.value = await fetchByPk(selectedPk);
   titleEditedResource.value = editedResource.value.title;
   variables.value = await obtenerVariables(editedResource.value);
-  dict.value = Object.fromEntries(variables.value.map((d) => [d, false]));
+  dictCamposAUnir.value = Object.fromEntries(variables.value.map((d) => [d, false]));
 });
-
-// const resourceToEdit = computed(() =>
-//   storeFetched.byResourceType(type).find(({ pk }) => pk === selectedPk)
-// );
-// const resourcesCapas = computed(
-//   () =>
-//     storeFetched
-//       .byResourceType(resourceTypeDic.dataLayer)
-//       .filter((resource) => resource.owner.email === userEmail) || {}
-// );
 </script>
 
 <template>
@@ -202,8 +196,14 @@ onMounted(async () => {
           </p>
 
           <div class="m-t-3">
-            <p v-if="titleEditedResource === ''">...cargando</p>
-            <div v-else class="flex">
+            <div
+              v-if="
+                titleEditedResource.trim().length >= 1 &&
+                layerResources.length > 0 &&
+                variables.length > 0
+              "
+              class="flex"
+            >
               <div class="columna-16">
                 <h3>{{ titleEditedResource }}</h3>
 
@@ -218,10 +218,7 @@ onMounted(async () => {
                     </option>
                   </SisdaiSelector>
 
-                  <p v-if="layerTotals === 0">...cargando capas</p>
-                  <!--Se desea incorporar paginación en el selector ?-->
                   <SisdaiSelector
-                    v-if="layerTotals > 0"
                     v-model="seleccionCapaGeo"
                     etiqueta="Capa objetivo"
                     texto_ayuda="Capa a la que se agregarán las nuevas columnas"
@@ -231,51 +228,68 @@ onMounted(async () => {
                     </option>
                   </SisdaiSelector>
 
-                  <p v-if="seleccionCapaGeo.trim() >= 1 && varGeoLayer.length === 0">
-                    ...cargando campos
-                  </p>
-                  <SisdaiSelector
-                    v-if="varGeoLayer.length > 0"
-                    v-model="seleccionCampoObjetivo"
-                    etiqueta="Campo objetivo"
-                    texto_ayuda="Campo o columna que se utilizará para hacer la unión vectorial"
-                  >
-                    <option v-for="value in varGeoLayer" :key="value" :value="value">
-                      {{ value }}
-                    </option>
-                  </SisdaiSelector>
+                  <div>
+                    <SisdaiSelector
+                      v-if="varGeoLayer.length > 0"
+                      v-model="seleccionCampoObjetivo"
+                      etiqueta="Campo objetivo"
+                      texto_ayuda="Campo o columna que se utilizará para hacer la unión vectorial"
+                    >
+                      <option v-for="value in varGeoLayer" :key="value" :value="value">
+                        {{ value }}
+                      </option>
+                    </SisdaiSelector>
+                    <div
+                      v-if="seleccionCapaGeo.trim() >= 1 && varGeoLayer.length === 0"
+                      class="flex flex-contenido-centrado"
+                    >
+                      <figure>
+                        <img
+                          class="color-invertir"
+                          src="/img/loader.gif"
+                          alt="Loader de SIGIC"
+                          width="64px"
+                        />
+                      </figure>
+                    </div>
+                  </div>
 
-                  <label for="idcolapnavcamposunidos">Campos a unir</label>
-                  <SisdaiColapsableNavegacion :colapsado="false">
-                    <template #encabezado> Selecciona las opciones que requieres </template>
-                    <template #contenido>
-                      <div class="columns columns-2">
-                        <div>
-                          <div v-for="(value, key, index) in dict" :key="index" class="">
-                            <ClientOnly>
-                              <SisdaiCasillaVerificacion
-                                v-model="dict[key]"
-                                name="idcolapnavcamposunidos"
-                                :etiqueta="key"
-                              />
-                            </ClientOnly>
+                  <div>
+                    <label for="idcolapnavcamposunidos">Campos a unir</label>
+                    <SisdaiColapsableNavegacion :colapsado="false">
+                      <template #encabezado>Selecciona las opciones que requieres</template>
+                      <template #contenido>
+                        <div class="columns columns-2">
+                          <div>
+                            <div
+                              v-for="(value, key, index) in dictCamposAUnir"
+                              :key="index"
+                              class=""
+                            >
+                              <ClientOnly>
+                                <SisdaiCasillaVerificacion
+                                  v-model="dictCamposAUnir[key]"
+                                  name="idcolapnavcamposunidos"
+                                  :etiqueta="key"
+                                />
+                              </ClientOnly>
+                            </div>
+                            <button
+                              class="boton-chico opcion-checkbox boton-secundario"
+                              aria-label="Limpiar selección"
+                              type="button"
+                              @click="limpiarCamposAUnir"
+                            >
+                              Limpiar selección
+                            </button>
                           </div>
-
-                          <button
-                            class="boton-chico opcion-checkbox boton-secundario"
-                            aria-label="Limpiar selección"
-                            type="button"
-                            @click="limpiarCamposAUnir"
-                          >
-                            Limpiar selección
-                          </button>
                         </div>
-                      </div>
-                    </template>
-                  </SisdaiColapsableNavegacion>
-                  <p aria-live="polite" class="formulario-ayuda" role="status">
-                    Elige los campos que quieres unir
-                  </p>
+                      </template>
+                    </SisdaiColapsableNavegacion>
+                    <p aria-live="polite" class="formulario-ayuda" role="status">
+                      Elige los campos que quieres unir
+                    </p>
+                  </div>
                 </ClientOnly>
               </div>
 
@@ -309,9 +323,28 @@ onMounted(async () => {
                 </div>
               </div>
             </div>
+            <div v-else class="flex flex-contenido-centrado">
+              <figure>
+                <img
+                  class="color-invertir"
+                  src="/img/loader.gif"
+                  alt="Loader de SIGIC"
+                  width="120px"
+                />
+                <figcaption class="texto-centrado">Cargando información</figcaption>
+              </figure>
+            </div>
+            <div v-if="layerResources.length < 0">
+              <p
+                class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-16 p-2"
+              >
+                No hay capas geográficas publicadas
+              </p>
+            </div>
           </div>
         </div>
       </main>
+
       <ClientOnly>
         <SisdaiModal ref="modalUnionVectorial">
           <template #encabezado>
@@ -324,7 +357,7 @@ onMounted(async () => {
           <template #cuerpo>
             <div class="flex flex-contenido-centrado">
               <figure>
-                <img src="/img/loader.gif" alt="Loader de SIGIC" />
+                <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
                 <figcaption class="texto-centrado">Uniendo capa</figcaption>
               </figure>
             </div>
@@ -355,7 +388,6 @@ onMounted(async () => {
 
 <style lang="scss">
 .modal-cuerpo {
-  // margin-top: 32px !important;
   .flex {
     .boton-secundario,
     .boton-primario {
