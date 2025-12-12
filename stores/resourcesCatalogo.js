@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { buildUrl, resourceTypeDic, resourceTypeGeonode } from '~/utils/consulta';
+import { buildUrl, getSLDs, resourceTypeDic, resourceTypeGeonode } from '~/utils/consulta';
 
 export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => {
   const config = useRuntimeConfig();
@@ -121,6 +121,17 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
       const request = await gnoxyFetch(url.toString());
       const res = await request.json();
+
+      // Agregamos el tipo de geometría y los estilos disponibles
+      if (resourceType === 'dataLayer' || resourceType === 'dataTable') {
+        await Promise.all(
+          res.resources.map(async (d) => {
+            const { defaultStyle, styleList } = await getSLDs(d);
+            d.default_style = defaultStyle;
+            d.styles = styleList;
+          })
+        );
+      }
       resources[resourceType] = res.resources;
       this.isLoading = false;
     },

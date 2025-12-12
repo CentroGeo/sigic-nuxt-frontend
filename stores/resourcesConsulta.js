@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { buildUrl, defineGeomType, resourceTypeDic } from '~/utils/consulta';
+import { buildUrl, defineGeomType, getSLDs, resourceTypeDic } from '~/utils/consulta';
 
 export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => {
   const config = useRuntimeConfig();
@@ -77,57 +77,15 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
 
         const resourcesRes = await resourcesRequest.json();
         // Agregamos el tipo de geometría y los estilos disponibles
-        if (resourceType === 'dataLayer') {
+        if (resourceType === 'dataLayer' || resourceType === 'dataTable') {
           await Promise.all(
             resourcesRes.resources.map(async (d) => {
-              d.geomType = await defineGeomType(d);
+              const { defaultStyle, styleList } = await getSLDs(d);
+              d.default_style = defaultStyle;
+              d.styles = styleList;
 
-              if (d.sourcetype !== 'REMOTE') {
-                const stylesURL = `${config.public.geonodeApi}/datasets/${d.pk}/sldstyles/`;
-                const stylesRes = await gnoxyFetch(stylesURL);
-
-                if (!stylesRes.ok) {
-                  d.default_style = null;
-                  d.styles = [];
-                  console.error('Falló la petición de estilos');
-                  return;
-                }
-
-                const stylesData = await stylesRes.json();
-                d.default_style = stylesData.default_style;
-                d.styles = stylesData.styles;
-                if (!d.styles.includes(d.default_style)) {
-                  d.styles.push(d.default_style);
-                }
-              } else {
-                d.default_style = null;
-                d.styles = [];
-              }
-            })
-          );
-        } else if (resourceType === 'dataTable') {
-          await Promise.all(
-            resourcesRes.resources.map(async (d) => {
-              if (d.sourcetype !== 'REMOTE') {
-                const stylesURL = `${config.public.geonodeApi}/datasets/${d.pk}/sldstyles/`;
-                const stylesRes = await gnoxyFetch(stylesURL);
-
-                if (!stylesRes.ok) {
-                  d.default_style = null;
-                  d.styles = [];
-                  console.error('Falló la petición de estilos');
-                  return;
-                }
-
-                const stylesData = await stylesRes.json();
-                d.default_style = stylesData.default_style;
-                d.styles = stylesData.styles;
-                if (!d.styles.includes(d.default_style)) {
-                  d.styles.push(d.default_style);
-                }
-              } else {
-                d.default_style = null;
-                d.styles = [];
+              if (resourceType === 'dataLayer') {
+                d.geomType = await defineGeomType(d);
               }
             })
           );
@@ -170,29 +128,11 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
 
           // Agregamos los estilos
           if (resourceData.resource_type === 'dataset') {
-            if (resourceData.sourcetype !== 'REMOTE') {
-              const stylesURL = `${config.public.geonodeApi}/datasets/${resourceData.pk}/sldstyles/`;
-              const stylesRes = await gnoxyFetch(stylesURL);
-
-              if (!stylesRes.ok) {
-                resourceData.default_style = null;
-                resourceData.styles = [];
-                console.error('Falló la petición de estilos');
-                return;
-              }
-
-              const stylesData = await stylesRes.json();
-              resourceData.default_style = stylesData.default_style;
-              resourceData.styles = stylesData.styles;
-              if (!resourceData.styles.includes(resourceData.default_style)) {
-                resourceData.styles.push(resourceData.default_style);
-              }
-            } else {
-              resourceData.default_style = null;
-              resourceData.styles = [];
-            }
+            const { defaultStyle, styleList } = await getSLDs(resourceData);
+            resourceData.default_style = defaultStyle;
+            resourceData.styles = styleList;
+            return resourceData;
           }
-          return resourceData;
         } catch {
           console.warn(`Falló el intento ${attempt + 1}.`);
         }

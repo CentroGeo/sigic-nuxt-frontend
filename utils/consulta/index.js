@@ -306,6 +306,45 @@ export async function defineGeomType(resource) {
 }
 
 /**
+ * Obtiene la lista de estilos asociados a un recurso y el estilo por default
+ * @param {Object} resource
+ * @returns {String, Array}
+ */
+export async function getSLDs(resource) {
+  console.log('Entramos a la función de petición de estilos');
+  const config = useRuntimeConfig();
+  const { gnoxyFetch } = useGnoxyUrl();
+  let styleList = [];
+  let defaultStyle = null;
+
+  try {
+    if (resource.sourcetype !== 'REMOTE') {
+      const stylesURL = `${config.public.geonodeApi}/datasets/${resource.pk}/sldstyles/`;
+      const stylesRes = await gnoxyFetch(stylesURL);
+
+      if (!stylesRes.ok) {
+        console.error('Falló la petición de estilos');
+        return { defaultStyle, styleList };
+      }
+
+      const stylesData = await stylesRes.json();
+      defaultStyle = stylesData.default_style;
+      styleList = stylesData.styles;
+      if (!styleList.includes(defaultStyle)) {
+        styleList.push(defaultStyle);
+      }
+      return { defaultStyle, styleList };
+    } else {
+      console.warn('Es un recurso remoto y falta implementar esa lógica');
+      return { defaultStyle, styleList };
+    }
+  } catch {
+    console.error('Falló la petición en general');
+    return { defaultStyle, styleList };
+  }
+}
+
+/**
  * Crea una url autenticada que permite visualizar documentos
  * @param {String} url
  * @returns

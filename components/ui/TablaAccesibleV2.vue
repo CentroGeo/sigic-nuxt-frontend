@@ -86,6 +86,7 @@ async function openResourceView(resource) {
   ) {
     useSelectedResources2Store().add(
       new SelectedLayer({ pk: resource.pk }),
+      resource.recurso_completo.default_style,
       resourceTypeDic.dataLayer
     );
     await navigateTo('/consulta/capas');
@@ -97,12 +98,7 @@ async function openResourceView(resource) {
     );
     await navigateTo('/consulta/tablas');
   }
-  /* (objeto.tipo_recurso === 'Documentos') {
-    navigateTo({
-      path: '/catalogo/mis-archivos/editar-metadatos',
-      query: { data: pk },
-    });
-  } */
+
   if (resource.tipo_recurso === 'Documentos') {
     useSelectedResources2Store().add(
       new SelectedLayer({ pk: resource.pk }),
