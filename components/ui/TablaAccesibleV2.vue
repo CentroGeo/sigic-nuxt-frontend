@@ -43,12 +43,12 @@ const dictTable = ref({
   estatus: 'Estatus',
 });
 
-const typeDict = {
+/* const typeDict = {
   'Capa Geográfica, Catálogo Externo': 'dataLayer',
   'Capa Geográfica': 'dataLayer',
   'Datos Tabulados': 'dataTable',
   Documentos: 'document',
-};
+}; */
 /**
  * Codifica la propiedad pk de un objeto y se pasa como query al ir a otra vista
  * @param objeto que se va a codificar
@@ -508,7 +508,7 @@ function irAmisArchivos() {
       v-if="shownModal === 'releaseOne'"
       ref="releaseRequest"
       :key="`${modalResource.pk}_${resourceType}`"
-      :resource-type="typeDict[resourceType]"
+      :resource-type="resourceType === 'Capa Geográfica' ? 'dataLayer' : resourceType"
       :selected-element="modalResource"
     />
     <!-- Modal para descargar datos -->

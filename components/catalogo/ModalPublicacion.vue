@@ -20,7 +20,7 @@ const props = defineProps({
 });
 const { resourceType, selectedElement } = toRefs(props);
 const { gnoxyFetch } = useGnoxyUrl();
-const seleccionVarDisponibles = ref(selectedElement.value.alternate);
+const seleccionVarDisponibles = ref(selectedElement.value.default_style);
 const extentMap = ref(undefined);
 const modalDescarga = ref(null);
 const modalPublica1 = ref(null);
@@ -162,6 +162,8 @@ function confirmarSolicitud(cerrarModal) {
 defineExpose({
   abrirModalDescarga,
 });
+
+console.log('Modal', selectedElement.value, resourceType.value);
 </script>
 <template>
   <ClientOnly>
@@ -185,11 +187,18 @@ defineExpose({
           <div v-if="tagTitle === 'capa'">
             <ClientOnly>
               <SisdaiSelector
+                v-if="selectedElement.styles.length > 1"
                 v-model="seleccionVarDisponibles"
                 class="m-b-1"
                 etiqueta="Variables disponibles para visualizar"
               >
-                <option value="1">variable</option>
+                <option
+                  v-for="style in selectedElement.styles"
+                  :key="`${style}-estilo`"
+                  :value="style"
+                >
+                  {{ style }}
+                </option>
               </SisdaiSelector>
             </ClientOnly>
 
@@ -197,6 +206,7 @@ defineExpose({
               <SisdaiCapaXyz />
 
               <SisdaiCapaWms
+                :estilo="seleccionVarDisponibles"
                 :capa="selectedElement.alternate"
                 :consulta="gnoxyFetch"
                 :fuente="findServer(selectedElement)"
