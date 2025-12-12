@@ -162,8 +162,6 @@ function confirmarSolicitud(cerrarModal) {
 defineExpose({
   abrirModalDescarga,
 });
-
-console.log('Modal', selectedElement.value, resourceType.value);
 </script>
 <template>
   <ClientOnly>
