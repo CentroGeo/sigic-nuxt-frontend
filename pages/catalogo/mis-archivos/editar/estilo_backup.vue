@@ -1,6 +1,4 @@
 <script setup>
-//import { getSLDs, wait } from '~/utils/consulta';
-
 definePageMeta({
   middleware: 'sidebase-auth',
   bodyAttrs: {
@@ -14,43 +12,49 @@ const route = useRoute();
 const selectedPk = route.query.data;
 //const resourceType = route.query.type;
 const subidaExitosa = ref(undefined);
+const nombreSLD = ref('');
 const resourceToEdit = ref(null);
 const dragNdDrop = ref(null);
 const style_files = ['.sld'];
 const isLoadingGlobal = ref(true);
 const isLoading = ref(false);
-const loadedStylesSatus = ref([]);
-//const resourcestyles = ref([]);
 
 async function guardarArchivo(files) {
+  // solo uno o el primer archivo
   subidaExitosa.value = undefined;
   isLoading.value = true;
+  if (style_files.map((end) => files[0]?.name.endsWith(end)).includes(true)) {
+    // Esta parte es llama el archivo que cambia el sld
+    /* const formData = new FormData();
+    // solo el primer elemento del arreglo
+    nombreSLD.value = files[0].name;
+    formData.append('base_file', files[0]);
+    formData.append('dataset_title', resourceToEdit.alternate);
+    formData.append('token', data.value?.accessToken);
 
-  const validFileList = {};
-  // Primero revisamos si los archivos son válidos
-  files.forEach((file) => {
-    const isValid = style_files.map((end) => file.name.endsWith(end)).includes(true);
-    validFileList[file.name] = isValid;
-  });
+    const response = await $fetch('/api/subirSLD', {
+      method: 'POST',
+      body: formData,
+    }); */
 
-  // Si los archivos son válidos, agregamos los sld
-  if (!Object.values(validFileList).includes(false)) {
-    loadedStylesSatus.value = await Promise.all(
-      files.map(async (d) => {
-        const fileName = d.name;
-        const formData = new FormData();
-        formData.append('base_file', files[0]);
-        formData.append('token', data.value?.accessToken);
-        formData.append('pk', selectedPk);
-        //await wait(2000);
-        const fileUpdateStatus = await $fetch('/api/subirSLDMultiple', {
-          method: 'POST',
-          body: formData,
-        });
+    // Esta parte llama el archivo que agrega otro sld
+    nombreSLD.value = files[0].name;
+    const formData = new FormData();
+    formData.append('base_file', files[0]);
+    formData.append('token', data.value?.accessToken);
+    formData.append('pk', selectedPk);
 
-        return { name: fileName, status: fileUpdateStatus };
-      })
-    );
+    const response = await $fetch('/api/subirSLDMultiple', {
+      method: 'POST',
+      body: formData,
+    });
+
+    console.warn('response', response);
+    if (response === 'finished') {
+      subidaExitosa.value = true;
+    } else {
+      subidaExitosa.value = false;
+    }
   } else {
     dragNdDrop.value?.archivoNoValido();
   }
@@ -59,8 +63,6 @@ async function guardarArchivo(files) {
 
 onMounted(async () => {
   resourceToEdit.value = await storeResources.fetchResourceByPk(selectedPk);
-  //const styles = await getSLDs(resourceToEdit.value);
-  //resourcestyles.value = styles.styleList;
   isLoadingGlobal.value = false;
 });
 </script>
@@ -100,7 +102,6 @@ onMounted(async () => {
           <div class="flex">
             <div class="columna-16">
               <h2 class="m-b-0">{{ resourceToEdit?.title }}</h2>
-              <h2 class="m-t-0">Estilo</h2>
 
               <CatalogoMenuMisArchivos
                 :recurso="resourceToEdit"
@@ -117,22 +118,8 @@ onMounted(async () => {
                 ]"
               />
 
-              <!-- <div>
-                <table class="tabla-condensada">
-                  <thead>
-                    <tr>
-                      <th>Estilos de la capa</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="style in resourcestyles" :key="style">
-                      <td>{{ style }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div> -->
-
-              <p><b>Agregar estilos. Solo archivos .sld</b></p>
+              <h2 class="m-t-0">Estilo</h2>
+              <p><b>Estilo, solo archivos .sld</b></p>
 
               <!-- Drag & Drop -->
               <ClientOnly>
@@ -149,36 +136,27 @@ onMounted(async () => {
                   <img src="/img/loader.gif" height="30" /> <b> Cargando Archivo </b>
                 </div>
               </div>
-
-              <div v-if="!isLoading && loadedStylesSatus.length > 0">
+              <!--Subida exitosa-->
+              <div v-if="subidaExitosa">
                 <h2>Cargas recientes</h2>
-                <div v-for="file in loadedStylesSatus" :key="file.name">
-                  <!--Subida exitosa-->
-                  <div
-                    v-if="file.status === 'finished'"
-                    class="fondo-color-confirmacion p-3 borde-redondeado-16 m-y-2"
-                  >
-                    <div class="flex texto-color-confirmacion">
-                      <span class="pictograma-aprobado" />
-                      <b> Archivo cargado correctamente </b>
-                    </div>
-                    <p>{{ file.name }}</p>
-                    <div>
-                      <nuxt-link to="/catalogo/mis-archivos">Ver en mis archivos</nuxt-link>
-                    </div>
+                <div class="fondo-color-confirmacion p-3 borde-redondeado-16">
+                  <div class="flex texto-color-confirmacion">
+                    <span class="pictograma-aprobado" />
+                    <b> Archivo cargado correctamente </b>
                   </div>
 
-                  <!--Subida fracasó-->
-                  <div
-                    v-else
-                    class="fondo-color-error texto-color-error p-3 borde-redondeado-16 m-y-2"
-                  >
-                    <div class="flex texto-color-error">
-                      <span class="pictograma-alerta" />
-                      <b> No se logró cargar el archivo adecuadamente. Inténtalo de nuevo </b>
-                    </div>
-                    <p>{{ file.name }}</p>
+                  <p>{{ nombreSLD }}</p>
+
+                  <div>
+                    <nuxt-link to="/catalogo/mis-archivos">Ver en mis archivos</nuxt-link>
                   </div>
+                </div>
+              </div>
+              <!--Subida fracasó-->
+              <div v-if="subidaExitosa === false">
+                <div class="borde-redondeado-16 flex texto-color-error fondo-color-error p-3">
+                  <span class="pictograma-alerta" />
+                  <b> No se logró cargar el archivo adecuadamente. Inténtalo de nuevo </b>
                 </div>
               </div>
             </div>
