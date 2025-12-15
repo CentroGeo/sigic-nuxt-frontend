@@ -227,7 +227,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       const res = await request.json();
 
       // Agregamos el tipo de geometría y los estilos disponibles
-      /* await Promise.all(
+      await Promise.all(
         res.resources.map(async (d) => {
           if (d.resource_type === 'dataset') {
             const { defaultStyle, styleList } = await getSLDs(d);
@@ -235,7 +235,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
             d.styles = styleList;
           }
         })
-      ); */
+      );
 
       misArchivos[section] = res.resources;
       this.isLoading = false;
