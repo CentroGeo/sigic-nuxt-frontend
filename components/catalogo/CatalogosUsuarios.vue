@@ -20,6 +20,11 @@ const queryParams = ref({
   'sort[]': seleccionOrden.value,
 });
 
+const statusDict = {
+  ready: 'Listo',
+  'updating-harvestable-resources': 'Listando recursos',
+  'harvesting-resources': 'Cosechando recursos',
+};
 /**
  * Esta petición obtiene el total de servicios externos
  */
@@ -88,8 +93,6 @@ const irARutaQuery = (v, destino) => {
   }
 };
 
-getResources();
-
 watch(paginaActual, () => {
   queryParams.value.page = paginaActual.value + 1;
   fetchResources();
@@ -102,6 +105,10 @@ watch(seleccionOrden, () => {
   } else {
     paginaActual.value = 0;
   }
+});
+
+onMounted(() => {
+  getResources();
 });
 </script>
 <template>
@@ -211,6 +218,7 @@ watch(seleccionOrden, () => {
                 {{ harvester.imported_resources }}
               </nuxt-link>
             </td>
+
             <td>
               <nuxt-link @click="irARutaQuery(harvester, 'pendientes')">
                 {{ harvester.to_attend_resources }}
@@ -222,7 +230,20 @@ watch(seleccionOrden, () => {
               </a>
             </td>
             <!--<td>Servcio de Mapas</td>-->
-            <td>{{ harvester.status }}</td>
+            <td>
+              <div
+                v-if="harvester.status === 'ready'"
+                class="texto-color-confirmacion texto-centrado fondo-color-confirmacion borde borde-color-confirmacion borde-redondeado-8 p-1"
+              >
+                {{ statusDict[harvester.status] }}
+              </div>
+              <div
+                v-else
+                class="texto-color-alerta texto-centrado fondo-color-alerta borde borde-color-alerta borde-redondeado-8 p-1"
+              >
+                {{ statusDict[harvester.status] }}
+              </div>
+            </td>
           </tr>
         </tbody>
       </table>
