@@ -1,0 +1,141 @@
+<script setup>
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+
+definePageMeta({
+  middleware: 'auth',
+});
+
+const { status, signOut } = useAuth();
+const route = useRoute();
+const router = useRouter();
+const modalConfirmarCierre = ref();
+async function cerrarSesion() {
+  // Cierra sesión y redirige al inicio
+  await signOut({ callbackUrl: '/' });
+}
+
+if (route.path === '/mi-cuenta') {
+  router.push('/mi-cuenta/informacion-personal');
+}
+</script>
+
+<template>
+  <div class="contenedor ancho-lectura">
+    <SisdaiModal ref="modalConfirmarCierre">
+      <template #encabezado>
+        <p class="h4">¿Confirmas que deseas cerrar sesión?</p>
+        <p></p>
+      </template>
+      <template #cuerpo>
+        <p>
+          Si cierras sesión, tendrás que volver a ingresar tu correo y contraseña para acceder
+          nuevamente.
+        </p>
+      </template>
+      <template #pie>
+        <div class="flex flex-contenido-centrado contenedor contenedor-botones">
+          <div class="columna-8">
+            <button
+              aria-label="Cancelar"
+              type="button"
+              class="boton-secundario texto-centrado"
+              @click="modalConfirmarCierre.cerrarModal()"
+            >
+              <span class="flex">Cancelar</span>
+            </button>
+          </div>
+          <div class="columna-8">
+            <button
+              v-if="status === 'authenticated'"
+              aria-label="Cerrar sesión"
+              type="button"
+              class="boton-primario texto-centrado"
+              @click="cerrarSesion"
+            >
+              <span class="flex">Cerrar sesión</span>
+            </button>
+          </div>
+        </div>
+      </template>
+    </SisdaiModal>
+    <div class="flex flex-contenido-separado">
+      <div class="flex"><h1>Mi Cuenta</h1></div>
+      <div class="flex-vertical-centrado">
+        <button
+          aria-label="Cerrar sesión"
+          type="button"
+          class="boton-secundario m-t-3 texto-centrado"
+          @click="modalConfirmarCierre.abrirModal()"
+        >
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+    <div class="un-menu">
+      <div class="p-t-5 p-b-3">
+        <div class="flex menu-mis-archivos">
+          <NuxtLink to="/mi-cuenta/informacion-personal">Información personal</NuxtLink>
+          <NuxtLink to="/mi-cuenta/produccion-colaboraciones">Producción y colaboraciones</NuxtLink>
+
+          <NuxtLink to="/mi-cuenta/seguridad">Seguridad</NuxtLink>
+        </div>
+      </div>
+    </div>
+    <div>
+      <NuxtPage />
+    </div>
+  </div>
+</template>
+
+<style lang="scss" scoped>
+.menu-mis-archivos {
+  gap: 0;
+  border-bottom: var(--boton-secundario-deshabilitado-borde) 1px solid;
+}
+a {
+  box-shadow: inherit;
+  padding: inherit;
+  padding: 16px 24px 16px 16px;
+  position: relative;
+  color: var(--texto-secundario);
+  font-weight: 600;
+  border-radius: 0;
+  &::after {
+    content: '';
+    position: absolute;
+    left: calc(50%);
+    top: calc(100%);
+    width: 0px;
+    height: 4px;
+    border-radius: 2px 2px 0px 0px;
+    background-color: var(--boton-primario-borde);
+    text-align: center;
+    margin: -4px auto 0;
+    transition: all 0.2s;
+  }
+  &.router-link-active.router-link-exact-active {
+    &::after {
+      content: '';
+      position: absolute;
+      left: calc(50% - 16px);
+      top: calc(100% - 3px);
+      width: 32px;
+      height: 8px;
+    }
+  }
+  &:hover,
+  &:focus {
+    background-color: var(--boton-secundario-cursor-fondo);
+    text-decoration: none;
+    // background-color: transparent;
+  }
+}
+.contenedor-botones {
+  button {
+    width: 100%;
+    span {
+      margin: auto;
+    }
+  }
+}
+</style>

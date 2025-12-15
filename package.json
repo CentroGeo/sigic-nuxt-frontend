@@ -4,30 +4,59 @@
   "private": true,
   "scripts": {
     "build": "nuxt build",
-    "clean": "rm -rf node_modules .nuxt dist && rm -f package-lock.json && npm cache clean -f && npm cache verify",
+    "clean": "rm -rf node_modules .nuxt .output dist && rm -f package-lock.json && npm cache clean -f && npm cache verify",
+    "clean:ci": "rm -rf node_modules .nuxt .output dist && npm cache clean -f && npm cache verify",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
+    "start": "nuxt start",
     "postinstall": "nuxt prepare",
-    "reinstall": "npm run clean && npm i"
+    "reinstall": "npm run clean && npm i",
+    "reinstall:ci": "npm run clean:ci && npm ci",
+    "format": "prettier --write .",
+    "format-lint": "npm run format && npm run lint",
+    "lint": "eslint . --fix",
+    "lint:no-fix": "eslint . --ext .js,.ts,.vue",
+    "prepare": "husky"
   },
   "dependencies": {
-    "@centrogeomx/sisdai-componentes": "^4.14.0",
-    "@centrogeomx/sisdai-css": "^1.9.0",
-    "@centrogeomx/sisdai-mapas": "^2.2.0",
-    "@nuxt/content": "^3.5.1",
-    "@nuxt/eslint": "^1.4.1",
+    "@centrogeomx/sisdai-componentes": "^4.14.1",
+    "@centrogeomx/sisdai-css": "^1.10.2",
+    "@centrogeomx/sisdai-mapas": "git+https://github.com/CentroGeo/sisdai-mapas.git#v2.3.1",
     "@nuxt/image": "^1.10.0",
-    "@nuxt/test-utils": "^3.19.1",
+    "@nuxt/scripts": "^0.11.10",
     "@pinia/nuxt": "^0.11.1",
-    "@sidebase/nuxt-auth": "^0.10.1",
-    "better-sqlite3": "^11.10.0",
-    "eslint": "^9.28.0",
+    "@sidebase/nuxt-auth": "1.1.1",
+    "@unhead/vue": "^2.0.14",
+    "@vueuse/nuxt": "^13.5.0",
+    "dompurify": "^3.2.6",
+    "formidable": "^3.5.4",
+    "marked": "^16.1.1",
     "next-auth": "~4.21.1",
-    "nuxt": "^3.17.5",
+    "nuxt": "^3.19.3",
     "pinia": "^3.0.3",
+    "undici": "^7.10.0",
     "vue": "latest",
     "vue-router": "latest"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@nuxt/devtools": "^2.6.5",
+    "@nuxt/eslint": "^1.7.0",
+    "@nuxt/test-utils": "^3.19.2",
+    "@types/formidable": "^3.4.5",
+    "@vueuse/nuxt": "^13.5.0",
+    "eslint": "^9.32.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.5",
+    "prettier": "^3.6.2",
+    "yargs": "^18.0.0"
+  },
+  "lint-staged": {
+    "*.{css,scss,js,jsx,md,ts,vue}": [
+      "npm run format-lint"
+    ]
+  }
 }

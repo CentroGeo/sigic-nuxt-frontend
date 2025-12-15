@@ -84,3 +84,48 @@ bun run preview
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
 
 ## Licencia
+
+## Variables de entorno (.env)
+
+Las variables que debe incluir el archivo .env deben ser nombradas como sigue
+
+```bash
+# Api del geonode fuente del catálogo
+NUXT_PUBLIC_GEONODE_API = https://geonode.dev.geoint.mx/api/v2
+# Url del geonode fuente del catálogo
+NUXT_PUBLIC_GEONODE_URL = https://geonode.dev.geoint.mx
+# Url del geoserver fuente de capas geográficas
+NUXT_PUBLIC_GEOSERVER_URL = https://geonode.dev.geoint.mx/geoserver
+
+# ID del cliente de autenticación
+KEYCLOAK_CLIENT_ID = <Id client>
+KEYCLOAK_ISSUER = https://iam.dev.geoint.mx/realms/sigic
+# Clave secreta del servicio de autenticación
+KEYCLOAK_CLIENT_SECRET = <Clave secreta>
+NUXT_AUTH_SECRET = <clave alfanumérica definida por la persona desarrolladora>
+NUXT_PUBLIC_IA_BACKEND_URL = https://sigic.ia.dev.geoint.mx/
+
+```
+
+Para el despliegue en producción se debe hacer un archivo `.env.production`
+
+```bash
+# Api del geonode fuente del catálogo
+NUXT_PUBLIC_GEONODE_API = <geonode api de producción>
+# Url del geonode fuente del catálogo
+NUXT_PUBLIC_GEONODE_URL = <geonode url de producción>
+# Url del geoserver fuente de capas geográficas
+NUXT_PUBLIC_GEOSERVER_URL = <geoserver url de producción>
+
+# ID del cliente de autenticación
+KEYCLOAK_CLIENT_ID = <Id client>
+KEYCLOAK_ISSUER = <keycloak de produccón>
+# Clave secreta del servicio de autenticación
+KEYCLOAK_CLIENT_SECRET = <Clave secreta>
+NUXT_AUTH_SECRET = <clave alfanumérica>
+# Url del proyecto sigic
+NUXT_PUBLIC_BASE_URL = <sigic url de producción>
+
+NUXT_PUBLIC_IA_BACKEND_URL = <ulr del back de IA>
+
+```

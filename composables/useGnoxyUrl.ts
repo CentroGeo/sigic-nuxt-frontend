@@ -1,0 +1,22 @@
+export function useGnoxyUrl() {
+  const config = useRuntimeConfig();
+
+  function gnoxyUrl(inputUrl: string): string {
+    if (!inputUrl) return '';
+
+    const { geonodeUrl, baseURL, basePath } = config.public;
+
+    // Caso 1: URL empieza con geonodeUrl → traducir a gnoxy normal
+    if (inputUrl.startsWith(geonodeUrl)) {
+      return inputUrl.replace(geonodeUrl, `${baseURL}${basePath}/api/gnoxy`);
+    }
+
+    // Caso 2: cualquier otra URL → usar gnoxy/proxy con encode
+    return `${baseURL}${basePath}/api/gnoxy/proxy/?url=${encodeURIComponent(inputUrl)}`;
+  }
+
+  return {
+    gnoxyUrl,
+    gnoxyFetch: (url: string) => fetch(gnoxyUrl(url)),
+  };
+}
