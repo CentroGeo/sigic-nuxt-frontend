@@ -33,7 +33,10 @@ RUN npm install --include=dev
 COPY . .
 
 # compilar la aplicación
-RUN npm run clean && npm run build
+RUN npm run build  \
+    && mv .output/ build_output \
+    && npm run clean \
+    && mv build_output/ .output/
 
 
 # 🚀 Final stage
