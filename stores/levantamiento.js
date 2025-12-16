@@ -70,17 +70,27 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
       this.existeFormulario = !this.existeFormulario;
     },
 
-    guardarProyecto() {
-      const proyecto = {
-        id: this.proyectos.length + 1,
-        nombre: 'Mapa de puntos de basura acumulada',
-        institucion: 'CentroGeo',
-        autor: 'César Rovelo',
-        aportes: 0,
-      };
+    async guardarProyecto(formData) {
+      try {
+        const response = await fetch(`${apiUrl}/projects/create`, {
+          method: 'POST',
+          body: formData,
+        });
 
-      this.proyectos.push(proyecto);
-      this.existenProyectos = true;
+        console.log(response);
+
+        if (!response.ok) {
+          throw new Error('Error al guardar el proyecto');
+        }
+
+        const data = await response.json();
+        console.log('Proyecto guardado:', data);
+        this.proyectos.push(data.proyecto);
+        this.existenProyectos = true;
+      } catch (error) {
+        console.error('Error:', error);
+        throw error;
+      }
     },
 
     obtenerTotalProyectos() {

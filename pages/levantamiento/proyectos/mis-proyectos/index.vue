@@ -9,14 +9,47 @@ definePageMeta({
   middleware: 'auth',
 });
 
+const { data } = useAuth();
+
 const storeLevantamiento = useLevantamientoStore();
 
 const modalCrearProyecto = ref(null);
+const imagenPreview = ref(null);
+const imagenProyecto = ref(null);
 
-const handleCrearProyecto = () => {
-  storeLevantamiento.guardarProyecto();
+async function guardarArchivo(archivo) {
+  imagenProyecto.value = archivo;
+}
+
+const handleCrearProyecto = async () => {
+  const formData = new FormData();
+
+  Object.entries(nuevoProyecto).forEach(([key, value]) => {
+    formData.append(key, value);
+  });
+
+  formData.append('id_propietario', data.value?.user.email);
+  formData.append('lider', data.value?.user.name);
+
+  const timestamp = Date.now();
+  const extension = imagenProyecto.value.name.split('.').pop();
+  const baseName = imagenProyecto.value.name.replace(`.${extension}`, '');
+
+  const nombreImagen = `${baseName}_${timestamp}.${extension}`;
+
+  formData.append('image', imagenProyecto.value, nombreImagen);
+
+  await storeLevantamiento.guardarProyecto(formData);
   modalCrearProyecto.value.cerrarModal();
 };
+
+const nuevoProyecto = reactive({
+  nombre: '',
+  institucion: '',
+  categoria: '',
+  objetivo: '',
+  especificaciones_multimedia: '',
+});
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeLevantamiento.catalogoColapsado">
@@ -138,23 +171,33 @@ const handleCrearProyecto = () => {
             <div class="p-3">
               <ClientOnly>
                 <SisdaiCampoBase
+                  v-model="nuevoProyecto.nombre"
                   etiqueta="Nombre del proyecto"
                   ejemplo="Escribe el nombre de tu proyecto"
                   :es_etiqueta_visible="true"
                   :es_obligatorio="false"
                   class="m-b-2"
                 />
-                <SisdaiSelector etiqueta="Institución a la que pertenece" class="m-b-2">
+                <SisdaiSelector
+                  v-model="nuevoProyecto.institucion"
+                  etiqueta="Institución a la que pertenece"
+                  class="m-b-2"
+                >
                   <option value="1">Opcion Uno</option>
                   <option value="2">Opcion Dos</option>
                   <option value="3">Opcion Tres</option>
                 </SisdaiSelector>
-                <SisdaiSelector etiqueta="Categoría del proyecto" class="m-b-2">
+                <SisdaiSelector
+                  v-model="nuevoProyecto.categoria"
+                  etiqueta="Categoría del proyecto"
+                  class="m-b-2"
+                >
                   <option value="1">Opcion Uno</option>
                   <option value="2">Opcion Dos</option>
                   <option value="3">Opcion Tres</option>
                 </SisdaiSelector>
                 <SisdaiAreaTexto
+                  v-model="nuevoProyecto.objetivo"
                   etiqueta="Objetivo del proyecto"
                   ejemplo="Describe brevemente tu proyecto"
                   :es_etiqueta_visible="true"
@@ -162,6 +205,7 @@ const handleCrearProyecto = () => {
                   class="m-b-2"
                 />
                 <SisdaiAreaTexto
+                  v-model="nuevoProyecto.especificaciones_multimedia"
                   etiqueta="Instrucciones para participantes"
                   ejemplo="Describe brevemente tu proyecto"
                   :es_etiqueta_visible="true"
