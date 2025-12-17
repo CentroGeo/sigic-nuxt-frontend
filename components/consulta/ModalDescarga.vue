@@ -119,6 +119,8 @@ const optionsDict = {
 };
 async function descargarClicked() {
   isDownloadActive.value = true;
+  isDownloadSlow.value = false;
+  hasDownloadFailed.value = false;
   const selectedFunction = optionsList.value.find((d) => d.label === selectedOption.value);
 
   //La siguiente línea se pone para agregar alerta si el proceso de descarga toma mas de 3 segundos
