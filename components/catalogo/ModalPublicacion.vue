@@ -21,12 +21,19 @@ const props = defineProps({
 const { resourceType, selectedElement } = toRefs(props);
 const { gnoxyFetch } = useGnoxyUrl();
 const seleccionVarDisponibles = ref(selectedElement.value.default_style);
+const hasAttrTable = computed(() => {
+  if (selectedElement.value.sourcetype === 'REMOTE' || resourceType.value === 'document') {
+    return false;
+  } else {
+    return true;
+  }
+});
 const extentMap = ref(undefined);
-const modalDescarga = ref(null);
-const modalPublica1 = ref(null);
-const modalPublica2 = ref(null);
-const modalPublica3 = ref(null);
-const modalPublica4 = ref(null);
+const modalMapaPreview = ref(null);
+const modalMetaBasicos = ref(null);
+const modalMetaLicencias = ref(null);
+const modalMetaOpcionales = ref(null);
+const modalMetaAtributos = ref(null);
 const optionsList = ref(null);
 const selectedOption = ref();
 const tagTitle = ref();
@@ -38,8 +45,12 @@ const docExtension = ref(
 const layerType = ref(
   resourceType.value === 'dataLayer' ? selectedElement.value.subtype : 'No aplica'
 );
-function abrirModalDescarga() {
-  modalDescarga.value?.abrirModal();
+function abrirmodalPublicacion() {
+  if (resourceType.value === 'dataLayer') {
+    modalMapaPreview.value?.abrirModal();
+  } else {
+    modalMetaBasicos.value?.abrirModal();
+  }
   optionsList.value = optionsDict[resourceType.value]['elements'];
   tagTitle.value = optionsDict[resourceType.value]['title'];
   selectedOption.value = optionsList.value.map((d) => d.label)[0];
@@ -148,10 +159,10 @@ const optionsDict = {
 };
 
 function confirmarSolicitud(cerrarModal) {
-  if (cerrarModal === 'modalPublica3') {
-    modalPublica3.value.cerrarModal();
+  if (cerrarModal === 'modalMetaOpcionales') {
+    modalMetaOpcionales.value.cerrarModal();
   } else {
-    modalPublica4.value.cerrarModal();
+    modalMetaAtributos.value.cerrarModal();
   }
   console.warn('confirmada');
   navigateTo({
@@ -160,12 +171,12 @@ function confirmarSolicitud(cerrarModal) {
 }
 
 defineExpose({
-  abrirModalDescarga,
+  abrirmodalPublicacion,
 });
 </script>
 <template>
   <ClientOnly>
-    <SisdaiModal ref="modalDescarga">
+    <SisdaiModal ref="modalMapaPreview">
       <template #encabezado>
         <p class="m-t-0 m-b-1" style="color: transparent">a</p>
         <div
@@ -219,7 +230,7 @@ defineExpose({
                 type="button"
                 aria-label="Cancelar"
                 class="boton-secundario"
-                @click="modalDescarga.cerrarModal()"
+                @click="modalMapaPreview.cerrarModal()"
               >
                 Cancelar
               </button>
@@ -230,8 +241,8 @@ defineExpose({
                 aria-label="Siguiente"
                 class="boton-primario texto-centrado"
                 @click="
-                  modalDescarga.cerrarModal();
-                  modalPublica1.abrirModal();
+                  modalMapaPreview.cerrarModal();
+                  modalMetaBasicos.abrirModal();
                 "
               >
                 Siguiente
@@ -242,7 +253,7 @@ defineExpose({
       </template>
     </SisdaiModal>
 
-    <SisdaiModal ref="modalPublica1">
+    <SisdaiModal ref="modalMetaBasicos">
       <template #encabezado>
         <p class="m-t-0 m-b-1" style="color: transparent">a</p>
         <div
@@ -271,8 +282,8 @@ defineExpose({
               aria-label="Regresar"
               class="boton-secundario"
               @click="
-                modalPublica1.cerrarModal();
-                modalDescarga.abrirModal();
+                modalMetaBasicos.cerrarModal();
+                modalMapaPreview.abrirModal();
               "
             >
               Regresar
@@ -284,8 +295,8 @@ defineExpose({
               type="button"
               class="boton-primario texto-centrado"
               @click="
-                modalPublica1.cerrarModal();
-                modalPublica2.abrirModal();
+                modalMetaBasicos.cerrarModal();
+                modalMetaLicencias.abrirModal();
               "
             >
               Siguiente
@@ -295,7 +306,7 @@ defineExpose({
       </template>
     </SisdaiModal>
 
-    <SisdaiModal ref="modalPublica2">
+    <SisdaiModal ref="modalMetaLicencias">
       <template #encabezado>
         <p class="m-t-0 m-b-1" style="color: transparent">a</p>
         <div
@@ -324,8 +335,8 @@ defineExpose({
               class="boton-secundario"
               aria-label="Regresar"
               @click="
-                modalPublica2.cerrarModal();
-                modalPublica1.abrirModal();
+                modalMetaLicencias.cerrarModal();
+                modalMetaBasicos.abrirModal();
               "
             >
               Regresar
@@ -337,8 +348,8 @@ defineExpose({
               aria-label="Siguiente"
               class="boton-primario texto-centrado"
               @click="
-                modalPublica2.cerrarModal();
-                modalPublica3.abrirModal();
+                modalMetaLicencias.cerrarModal();
+                modalMetaOpcionales.abrirModal();
               "
             >
               Siguiente
@@ -348,7 +359,7 @@ defineExpose({
       </template>
     </SisdaiModal>
 
-    <SisdaiModal ref="modalPublica3">
+    <SisdaiModal ref="modalMetaOpcionales">
       <template #encabezado>
         <p class="m-t-0 m-b-1" style="color: transparent">a</p>
         <div
@@ -376,32 +387,34 @@ defineExpose({
               aria-label="Regresar"
               class="boton-secundario"
               @click="
-                modalPublica3.cerrarModal();
-                modalPublica2.abrirModal();
+                modalMetaOpcionales.cerrarModal();
+                modalMetaLicencias.abrirModal();
               "
             >
               Regresar
             </button>
           </div>
           <div class="columna-8">
+            <!--v-if="tagTitle !== 'capa'"-->
             <button
-              v-if="tagTitle !== 'capa'"
+              v-if="!hasAttrTable"
               aria-label="Siguiente"
               type="button"
               class="boton-primario texto-centrado"
-              @click="confirmarSolicitud('modalPublica3')"
+              @click="confirmarSolicitud('modalMetaOpcionales')"
             >
               Confirmar
             </button>
             <!-- TODO: revisar la parte de capa con geometría y subtipo con vector -->
+            <!--v-if="tagTitle == 'capa'"-->
             <button
-              v-if="tagTitle === 'capa'"
+              v-if="hasAttrTable"
               type="button"
               aria-label="Siguiente"
               class="boton-primario texto-centrado"
               @click="
-                modalPublica3.cerrarModal();
-                modalPublica4.abrirModal();
+                modalMetaOpcionales.cerrarModal();
+                modalMetaAtributos.abrirModal();
               "
             >
               Siguiente
@@ -411,7 +424,7 @@ defineExpose({
       </template>
     </SisdaiModal>
 
-    <SisdaiModal ref="modalPublica4">
+    <SisdaiModal ref="modalMetaAtributos">
       <template #encabezado>
         <p class="m-t-0 m-b-1" style="color: transparent">a</p>
         <div
@@ -438,8 +451,8 @@ defineExpose({
               type="button"
               class="boton-secundario"
               @click="
-                modalPublica4.cerrarModal();
-                modalPublica3.abrirModal();
+                modalMetaAtributos.cerrarModal();
+                modalMetaOpcionales.abrirModal();
               "
             >
               Regresar
@@ -450,7 +463,7 @@ defineExpose({
               type="button"
               aria-label="Confirmar"
               class="boton-primario texto-centrado"
-              @click="confirmarSolicitud('modalPublica4')"
+              @click="confirmarSolicitud('modalMetaAtributos')"
             >
               Confirmar
             </button>

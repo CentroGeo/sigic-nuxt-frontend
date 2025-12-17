@@ -146,10 +146,9 @@ function tipoRecurso(recurso) {
 function notifyReleaseRequest(resource) {
   shownModal.value = 'releaseOne';
   modalResource.value = resource.recurso_completo;
-  console.log(resource);
   resourceType.value = tipoRecurso(resource);
   nextTick(() => {
-    releaseRequest.value?.abrirModalDescarga();
+    releaseRequest.value?.abrirmodalPublicacion();
   });
 }
 
