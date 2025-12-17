@@ -35,6 +35,14 @@ const componenteActual = computed(() => {
 function irAMisProyectos() {
   router.push('/levantamiento/proyectos/mis-proyectos');
 }
+
+const componentRef = ref(null);
+
+function guardarCambios() {
+  if (componentRef.value?.actualizarProyecto) {
+    componentRef.value.actualizarProyecto();
+  }
+}
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeLevantamiento.catalogoColapsado">
@@ -68,6 +76,7 @@ function irAMisProyectos() {
           <button
             class="boton-primario boton-chico boton-guardar-cambios-proyecto"
             aria-label="Guardar Cambios"
+            @click="guardarCambios"
           >
             Guardar Cambios <span class="pictograma-guardar"></span>
           </button>
@@ -79,7 +88,7 @@ function irAMisProyectos() {
             :class="subrutaActual === 'participantes-permisos' ? 'columna-3' : 'columna-4'"
           ></div>
 
-          <component :is="componenteActual" />
+          <component :is="componenteActual" ref="componentRef" />
 
           <div
             v-if="subrutaActual !== 'formulario'"

@@ -51,8 +51,6 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
         const data = await $fetch(`${apiUrl}/projects/public`);
         console.log(data);
         this.proyectosPublicos = data.proyectos;
-        /* proyectos.value = data;
-      existenProyectos.value = data?.length > 0; */
       } catch (err) {
         console.error('Error cargando proyectos:', err);
       }
@@ -127,6 +125,43 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
 
       this.descargasEnRevision.push(descarga);
       this.existenDescargasEnRevision = true;
+    },
+    async obtenerMisProyectos(email) {
+      try {
+        const body = {
+          email: email,
+        };
+
+        const data = await $fetch(`${apiUrl}/projects/own`, {
+          method: 'POST',
+          body: body,
+        });
+        console.log(data);
+        this.proyectos = data.proyectos;
+        this.existenProyectos = true;
+      } catch (err) {
+        console.error('Error cargando proyectos:', err);
+      }
+    },
+    async actualizarProyecto(formData, idProyecto) {
+      try {
+        const response = await fetch(`${apiUrl}/projects/update/${idProyecto}`, {
+          method: 'PUT',
+          body: formData,
+        });
+
+        console.log(response);
+
+        if (!response.ok) {
+          throw new Error('Error al actualizar el proyecto');
+        }
+
+        const data = await response.json();
+        console.log('Proyecto guardado:', data);
+      } catch (error) {
+        console.error('Error:', error);
+        throw error;
+      }
     },
   };
 });

@@ -61,7 +61,11 @@ onMounted(() => {
             </div>
             <div class="m-b-minimo texto-color-secundario">{{ proyecto.institucion }}</div>
             <div class="m-b-minimo texto-color-secundario">{{ proyecto.lider }}</div>
-            <UiNumeroElementos :numero="proyecto.aportes" etiqueta="Aportes" class="m-b-3" />
+            <UiNumeroElementos
+              :numero="proyecto.num_aportaciones"
+              etiqueta="Aportes"
+              class="m-b-3"
+            />
             <NuxtLink
               class="boton boton-primario boton-chico boton-accion-proyecto m-b-1"
               aria-label="Ver proyecto"

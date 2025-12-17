@@ -48,7 +48,11 @@ const nuevoProyecto = reactive({
   institucion: '',
   categoria: '',
   objetivo: '',
-  especificaciones_multimedia: '',
+  instrucciones: '',
+});
+
+onMounted(() => {
+  storeLevantamiento.obtenerMisProyectos(data.value?.user.email);
 });
 </script>
 <template>
@@ -137,8 +141,8 @@ const nuevoProyecto = reactive({
                 <b>{{ proyecto.nombre }}</b>
               </div>
               <div class="m-b-minimo texto-color-secundario">{{ proyecto.institucion }}</div>
-              <div class="m-b-minimo texto-color-secundario">{{ proyecto.autor }}</div>
-              <UiNumeroElementos :numero="proyecto.aportes" etiqueta="Aportes" />
+              <div class="m-b-minimo texto-color-secundario">{{ proyecto.lider }}</div>
+              <UiNumeroElementos :numero="proyecto.num_aportaciones" etiqueta="Aportes" />
               <NuxtLink
                 class="boton boton-primario boton-chico boton-accion-proyecto m-b-1"
                 aria-label="Configurar proyecto"
@@ -147,18 +151,23 @@ const nuevoProyecto = reactive({
                 Configurar proyecto
               </NuxtLink>
               <button
-                class="boton-secundario boton-chico boton-accion-proyecto m-b-1 fondo-color-primario"
+                class="boton-secundario boton-chico boton-accion-proyecto m-b-3 fondo-color-primario"
                 disabled
                 type="button"
               >
                 Aportar
               </button>
-              <button
-                class="boton-secundario boton-chico boton-accion-proyecto m-b-1 fondo-color-primario"
-                type="button"
-              >
-                Eliminar proyecto
-              </button>
+              <div class="flex flex-contenido-final proyecto-acciones">
+                <button class="boton-pictograma boton-sin-contenedor-primario">
+                  <span class="pictograma-compartir" aria-hidden="true"></span>
+                </button>
+                <button class="boton-pictograma boton-sin-contenedor-primario">
+                  <span class="pictograma-archivo-descargar" aria-hidden="true"></span>
+                </button>
+                <button class="boton-pictograma boton-sin-contenedor-primario">
+                  <span class="pictograma-eliminar" aria-hidden="true"></span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -183,18 +192,18 @@ const nuevoProyecto = reactive({
                   etiqueta="Institución a la que pertenece"
                   class="m-b-2"
                 >
-                  <option value="1">Opcion Uno</option>
-                  <option value="2">Opcion Dos</option>
-                  <option value="3">Opcion Tres</option>
+                  <option value="inst_1">Institución Uno</option>
+                  <option value="inst_2">Institución Dos</option>
+                  <option value="inst_3">Institución Tres</option>
                 </SisdaiSelector>
                 <SisdaiSelector
                   v-model="nuevoProyecto.categoria"
                   etiqueta="Categoría del proyecto"
                   class="m-b-2"
                 >
-                  <option value="1">Opcion Uno</option>
-                  <option value="2">Opcion Dos</option>
-                  <option value="3">Opcion Tres</option>
+                  <option value="cat_1">Categoría Uno</option>
+                  <option value="cat_2">Categoría Dos</option>
+                  <option value="cat_3">Categoría Tres</option>
                 </SisdaiSelector>
                 <SisdaiAreaTexto
                   v-model="nuevoProyecto.objetivo"
@@ -205,7 +214,7 @@ const nuevoProyecto = reactive({
                   class="m-b-2"
                 />
                 <SisdaiAreaTexto
-                  v-model="nuevoProyecto.especificaciones_multimedia"
+                  v-model="nuevoProyecto.instrucciones"
                   etiqueta="Instrucciones para participantes"
                   ejemplo="Describe brevemente tu proyecto"
                   :es_etiqueta_visible="true"
@@ -276,5 +285,9 @@ const nuevoProyecto = reactive({
 .boton-accion-proyecto {
   width: 100%;
   justify-content: center;
+}
+
+.proyecto-acciones {
+  gap: 8px;
 }
 </style>
