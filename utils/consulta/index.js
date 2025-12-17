@@ -306,12 +306,65 @@ export async function defineGeomType(resource) {
 }
 
 /**
+ * Hace una petición GetCapabilities y busca en el xml de respuesta
+ * para obtener una lista de estilos y un estilo por default
+ * para capas que viven en servidores externos
+ * @param {Object} resource
+ * @returns { String, Array }
+ */
+export async function fetchRemoteStyles(resource) {
+  console.warn('solicitando los estilos de capas remotas');
+  const { gnoxyFetch } = useGnoxyUrl();
+  const server = getWMSserver(resource);
+  const url = `${server}service=wms&request=getCapabilities`;
+  const request = await gnoxyFetch(url);
+  const targetLayerName = resource.alternate;
+  let targetLayerDefaultStyle = null;
+  const targetLayerStyles = [];
+  if (!request.ok) {
+    console.error('Fracasó la petición de estilos remotos');
+  } else {
+    const res = await request.text();
+    const parser = new DOMParser();
+    const parsedRes = parser.parseFromString(res, 'application/xml');
+    const capabilitiesTags = parsedRes.getElementsByTagName('Capability');
+    const rootLayers = Array.from(capabilitiesTags[0].children).filter(
+      (d) => d.tagName === 'Layer'
+    );
+
+    let layers = [];
+    for (const layer of rootLayers) {
+      const subLayers = Array.from(layer.children).filter((d) => d.tagName === 'Layer');
+      layers = [...layers, ...subLayers];
+    }
+    for (const layer of layers) {
+      const nameEl = layer.getElementsByTagName('Name')[0];
+      if (nameEl.textContent === targetLayerName) {
+        const styleTags = layer.getElementsByTagName('Style');
+        for (const style of Array.from(styleTags)) {
+          const nameTag = style.getElementsByTagName('Name')[0];
+          const name = nameTag.textContent;
+          if (!targetLayerStyles.includes(name)) {
+            targetLayerStyles.push(name);
+          }
+        }
+        break;
+      }
+    }
+
+    if (targetLayerStyles.length > 0) {
+      targetLayerDefaultStyle = targetLayerStyles[0];
+    }
+    return { targetLayerDefaultStyle, targetLayerStyles };
+  }
+}
+/**
  * Obtiene la lista de estilos asociados a un recurso y el estilo por default
  * @param {Object} resource
  * @returns {String, Array}
  */
 export async function getSLDs(resource) {
-  console.log('Entramos a la función de petición de estilos');
+  console.warn('Entramos a la función de petición de estilos');
   const config = useRuntimeConfig();
   const { gnoxyFetch } = useGnoxyUrl();
   let styleList = [];
@@ -335,7 +388,9 @@ export async function getSLDs(resource) {
       }
       return { defaultStyle, styleList };
     } else {
-      console.warn('Es un recurso remoto y falta implementar esa lógica');
+      const { targetLayerDefaultStyle, targetLayerStyles } = await fetchRemoteStyles(resource);
+      defaultStyle = targetLayerDefaultStyle;
+      styleList = targetLayerStyles;
       return { defaultStyle, styleList };
     }
   } catch {
