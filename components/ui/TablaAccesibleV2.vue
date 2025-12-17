@@ -49,6 +49,7 @@ const dictTable = ref({
   'Datos Tabulados': 'dataTable',
   Documentos: 'document',
 }; */
+
 /**
  * Codifica la propiedad pk de un objeto y se pasa como query al ir a otra vista
  * @param objeto que se va a codificar
@@ -145,6 +146,7 @@ function tipoRecurso(recurso) {
 function notifyReleaseRequest(resource) {
   shownModal.value = 'releaseOne';
   modalResource.value = resource.recurso_completo;
+  console.log(resource);
   resourceType.value = tipoRecurso(resource);
   nextTick(() => {
     releaseRequest.value?.abrirModalDescarga();
