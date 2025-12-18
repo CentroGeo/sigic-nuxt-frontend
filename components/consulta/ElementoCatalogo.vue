@@ -58,6 +58,26 @@ const geomDict = {
     tooltipText: 'Raster',
     class: 'pictograma-capas',
   },
+  esriGeometryPoint: {
+    tooltipText: 'Capa de puntos',
+    class: 'pictograma-capa-puntos',
+  },
+  esriGeometryMultipoint: {
+    tooltipText: 'Capa de puntos',
+    class: 'pictograma-capa-puntos',
+  },
+  esriGeometryPolyline: {
+    tooltipText: 'Capa de lineas',
+    class: 'pictograma-capa-lineas',
+  },
+  esriGeometryPolygon: {
+    tooltipText: 'Capa de poligonos',
+    class: 'pictograma-capa-poligono',
+  },
+  esriGeometryEnvelope: {
+    tooltipText: 'Geom Envelope',
+    class: 'pictograma-flkt',
+  },
   Otro: {
     tooltipText: 'Indefinido',
     class: 'pictograma-flkt',

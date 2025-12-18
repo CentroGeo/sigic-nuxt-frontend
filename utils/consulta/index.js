@@ -162,9 +162,11 @@ export function buildUrl(endpoint, query) {
  */
 export function getWMSserver(resource) {
   const wmsObject = resource.links.find((link) => link.link_type === 'OGC:WMS');
-  const link = wmsObject['url'];
+  const restObject = resource.links.find((link) => link.url.includes('arcgis'));
+  const link = wmsObject ? wmsObject['url'] : restObject['url'];
   return `${link.split('?')[0]}?`;
 }
+
 /**
  * Obtiene el servidor que aloja al recurso
  * @param {Object} resource
@@ -180,6 +182,22 @@ export function findServer(resource) {
 }
 
 /**
+ * Construye la url para solicitar info de un recurso
+ * @param {Object} resource
+ * @returns
+ */
+export function buildArcgisLayerRequest(resource) {
+  const restObject = resource.links.find((link) => link.url.includes('arcgis'));
+  const link = restObject['url'].split('?')[0];
+  const params = restObject['url'].split('?')[1].split('&');
+  const layers = params.filter((d) => d.includes('layers'))[0].split('=')[1];
+  const decoded = decodeURIComponent(layers);
+  const id = decoded.split(':')[1];
+  const newUrl = `${link}/${id}/`;
+  return newUrl;
+}
+
+/**
  * Esta funcion revisa si el servidor que aloja un servicio remoto WFS
  * tiene servicios especificos
  * @param {Object} resource Es el recurso del que se desea obtener más informacion
@@ -189,7 +207,7 @@ export function findServer(resource) {
  */
 export async function hasWMS(resource, service) {
   const { gnoxyFetch } = useGnoxyUrl();
-  const maxAttempts = 5;
+  const maxAttempts = 1;
   const url = new URL(findServer(resource));
   url.search = new URLSearchParams({
     service: 'WFS',
@@ -235,16 +253,18 @@ export async function hasWMS(resource, service) {
 }
 
 /**
- * Consulta al servidor que aloja un recurso remoto o de tipo vectorail para
+ * Consulta al servidor WMS que aloja un recurso remoto o de tipo vectorail para
  * obtener el tipo de geometria del mismo
  * @param {Object} resource
  * @param {String} server
  * @returns {String}
  */
-export async function fetchGeometryType(resource) {
+export async function fetchGeometryWMS(resource) {
   const { gnoxyFetch } = useGnoxyUrl();
   const maxAttempts = 5;
   const url = new URL(findServer(resource));
+  console.log(url);
+
   url.search = new URLSearchParams({
     service: 'WFS',
     version: '1.0.0',
@@ -274,10 +294,33 @@ export async function fetchGeometryType(resource) {
     } catch {
       console.warn('Se está intentando una vez más');
     }
+    // Si fracasa en todos los intentos
+    return 'Error';
   }
+}
 
-  // Si fracasa en todos los intentos
-  return 'Error';
+export async function fetchGeometryArcgis(resource) {
+  const { gnoxyFetch } = useGnoxyUrl();
+  const maxAttempts = 5;
+  const url = await buildArcgisLayerRequest(resource);
+  //const url = new URL(findServer(resource));
+
+  // Como a veces hace timeout, lo intentamos tres veces
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const res = await gnoxyFetch(`${url}?f=pjson`);
+      if (!res.ok) {
+        return 'Error';
+      }
+      const json = await res.json();
+      const geometry = json.geometryType;
+      return geometry;
+    } catch {
+      console.warn('Se está intentando una vez más');
+    }
+    // Si fracasa en todos los intentos
+    return 'Error';
+  }
 }
 
 /**
@@ -289,16 +332,22 @@ export async function fetchGeometryType(resource) {
 export async function defineGeomType(resource) {
   let geomType;
   if (resource.sourcetype === 'REMOTE') {
-    const resourceHasWMS = await hasWMS(resource, 'geometry');
-    if (resourceHasWMS) {
-      geomType = await fetchGeometryType(resource);
+    const server = findServer(resource);
+    if (!server.includes('arcgis')) {
+      const resourceHasWMS = await hasWMS(resource, 'geometry');
+      if (resourceHasWMS) {
+        geomType = await fetchGeometryWMS(resource);
+      } else {
+        geomType = 'Remoto';
+      }
+      return 'Remoto';
     } else {
-      geomType = 'Remoto';
+      geomType = await fetchGeometryArcgis(resource);
     }
   } else if (resource.subtype === 'raster') {
     geomType = 'Raster';
   } else if (resource.subtype === 'vector') {
-    geomType = await fetchGeometryType(resource);
+    geomType = await fetchGeometryWMS(resource);
   } else {
     geomType = 'Otro';
   }
