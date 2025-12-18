@@ -65,12 +65,6 @@ function irARutaConQuery(value) {
     });
   }
 }
-const storeCatalogo = useCatalogoStore();
-const esSuperusuaria = computed(() => storeCatalogo.userInfo.is_superuser);
-
-onMounted(async () => {
-  await storeCatalogo.getUserInfo();
-});
 </script>
 <template>
   <div class="menu-mis-archivos p-t-5 p-b-3">
@@ -81,17 +75,6 @@ onMounted(async () => {
             <div class="circulo"></div>
           </div>
           <button
-            v-if="value.texto !== 'Gestión de solicitudes'"
-            :aria-label="`Ir a ${value.texto}`"
-            class="boton-secundario header-link"
-            type="button"
-            @click="irARutaConQuery(value)"
-          >
-            {{ value.texto }}
-            <div class="borde-enlace-hover"></div>
-          </button>
-          <button
-            v-else-if="esSuperusuaria"
             :aria-label="`Ir a ${value.texto}`"
             class="boton-secundario header-link"
             type="button"
@@ -148,7 +131,6 @@ onMounted(async () => {
   &:hover,
   &:focus {
     background-color: var(--boton-secundario-cursor-fondo);
-    // background-color: transparent;
     .borde-enlace-hover {
       position: absolute;
       bottom: 0px;
