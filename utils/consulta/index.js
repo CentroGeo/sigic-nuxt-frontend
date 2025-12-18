@@ -252,36 +252,34 @@ export async function hasWFS(resource, service) {
   }
 }
 
+/**
+ * Esta funcion revisa si el servidor de arcgis que aloja un servicio remoto
+ * permite consultar la tabla de atributos
+ * @param {Object} resource
+ * @returns
+ */
+
 export async function hasFeatureServer(resource) {
   const { gnoxyFetch } = useGnoxyUrl();
-  let tiene;
+  let hasFeatureService;
   const url = await buildArcgisLayerRequest(resource);
-  const base = url.split('/services/')[0];
-  const nameSpace = url.split('/services/')[1].split('/')[0];
-  const serviceUrl = `${base}/services/?f=pjson`;
-  const res = await gnoxyFetch(serviceUrl);
-  const data = await res.json();
-  const linkedServices = data.services.filter((d) => d.name === nameSpace);
-  if (linkedServices.map((d) => d.type).includes('FeatureServer')) {
-    tiene = true;
-    // Esto es para
-    const newUrl = url.replace('MapServer', 'FeatureServer') + 'query/';
-    const featureUrl = new URL(newUrl);
-    featureUrl.search = new URLSearchParams({
-      where: '1=1',
-      outFields: '*',
-      f: 'json',
-    });
-
-    //const encodedURL = encodeURIComponent(featureUrl);
-    const attrRes = await gnoxyFetch(featureUrl.href);
-    const attrsData = await attrRes.json();
-    const data = attrsData.features;
-    console.log('Peticion de atts:', data);
+  if (url.includes('ImageServer')) {
+    hasFeatureService = false;
   } else {
-    tiene = false;
+    const base = url.split('/services/')[0];
+    const nameSpace = url.split('/services/')[1].split('/')[0];
+    const serviceUrl = `${base}/services/?f=pjson`;
+    const res = await gnoxyFetch(serviceUrl);
+    const data = await res.json();
+    const linkedServices = data.services.filter((d) => d.name === nameSpace);
+    if (linkedServices.map((d) => d.type).includes('FeatureServer')) {
+      hasFeatureService = true;
+    } else {
+      hasFeatureService = false;
+    }
   }
-  console.log('Tiene Feature Service:', tiene);
+  //console.log(resource.title, 'tiene Feature Service:', hasFeatureService);
+  return hasFeatureService;
 }
 /**
  * Consulta al servidor WMS que aloja un recurso remoto o de tipo vectorail para
@@ -340,26 +338,29 @@ export async function fetchGeometryArcgis(resource) {
   const { gnoxyFetch } = useGnoxyUrl();
   const maxAttempts = 5;
   const url = await buildArcgisLayerRequest(resource);
-  //const url = new URL(findServer(resource));
-
   await hasFeatureServer(resource);
 
-  // Como a veces hace timeout, lo intentamos tres veces
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    try {
-      const res = await gnoxyFetch(`${url}?f=pjson`);
-      if (!res.ok) {
-        return 'Error';
+  if (url.includes('ImageServer')) {
+    return 'Raster';
+  } else {
+    // Como a veces hace timeout, lo intentamos tres veces
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      try {
+        const res = await gnoxyFetch(`${url}?f=pjson`);
+        if (!res.ok) {
+          return 'Error';
+        }
+        const json = await res.json();
+        const geometry = json.geometryType;
+        return geometry;
+      } catch {
+        console.warn('Se está intentando una vez más');
       }
-      const json = await res.json();
-      const geometry = json.geometryType;
-      return geometry;
-    } catch {
-      console.warn('Se está intentando una vez más');
+      // Si fracasa en todos los intentos
+      return 'Error';
     }
-    // Si fracasa en todos los intentos
-    return 'Error';
   }
+  //const url = new URL(findServer(resource));
 }
 
 /**
