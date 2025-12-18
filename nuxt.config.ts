@@ -4,7 +4,7 @@ import { defineNuxtConfig } from 'nuxt/config';
 const isDev = process.env.NODE_ENV !== 'production';
 const appBasePath = process.env.NUXT_PUBLIC_APP_BASE_PATH || '/';
 const basePath = appBasePath.replace(/\/+$/, '');
-const origin = process.env.NUXT_PUBLIC_BASE_URL;
+// const origin = process.env.NUXT_PUBLIC_BASE_URL;
 const authBaseUrl = process.env.NUXT_PUBLIC_AUTH_BASE_URL;
 const originEnvKey = isDev ? undefined : 'NUXT_AUTH_ORIGIN';
 
@@ -74,8 +74,9 @@ export default defineNuxtConfig({
     isEnabled: true,
     baseURL: authBaseUrl,
     originEnvKey: originEnvKey,
-    basePath: basePath,
-    origin: origin,
+    basePath: appBasePath,
+    //basePath: basePath,
+    // origin: origin,
     globalAppMiddleware: false,
     provider: {
       type: 'authjs',

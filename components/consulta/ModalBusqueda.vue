@@ -105,7 +105,7 @@ defineExpose({
             v-model="yearInput"
             tipo='"text"'
             class="m-y-1"
-            etiqueta="Año de publicación"
+            etiqueta="Año"
             ejemplo="1995...."
           />
         </ClientOnly>

@@ -30,8 +30,9 @@ const props = defineProps({
 //const storeCatalogo = useCatalogoStore();
 const storeMetadatos = useEditedMetadataStore();
 storeMetadatos.checkFilling(props.resourcePk, props.resourceType);
-const { gnoxyFetch } = useGnoxyUrl();
-const config = useRuntimeConfig();
+const { data } = useAuth();
+//const { gnoxyFetch } = useGnoxyUrl();
+//const config = useRuntimeConfig();
 
 const configEnv = useRuntimeConfig();
 
@@ -44,11 +45,17 @@ const campoResumen = computed({
   set: (value) => storeMetadatos.updateAttr('abstract', value),
 });
 
-const seleccionFecha = computed({
+const campoFecha = computed({
   get: () => storeMetadatos.metadata.date,
   set: (value) => storeMetadatos.updateAttr('date', value),
 });
-const seleccionCategoria = computed({
+
+const campoTipoFecha = computed({
+  get: () => storeMetadatos.metadata.date_type,
+  set: (value) => storeMetadatos.updateAttr('date_type', value),
+});
+
+const campoCategoria = computed({
   get: () => storeMetadatos.metadata.category,
   set: (value) => storeMetadatos.updateAttr('category', value),
 });
@@ -56,11 +63,10 @@ const campoPalabrasClave = computed({
   get: () => storeMetadatos.metadata.keywords,
   set: (value) => storeMetadatos.updateAttr('keywords', value),
 });
-const campoAutor = computed({
+/* const campoAutorMeta = computed({
   get: () => storeMetadatos.metadata.metadata_author,
   set: (value) => storeMetadatos.updateAttr('metadata_author', value),
-});
-/* const campoAnioPublicacion = ref(''); */
+}); */
 
 const dictCategoria = [
   { imageryBaseMapsEarthCover: 'Mapas Base y Cobertura Terrestre' },
@@ -85,8 +91,8 @@ const dictCategoria = [
   { population: 'Población' },
 ];
 
-const geonodeUsers = ref([]);
-const { data } = useAuth();
+/*const geonodeUsers = ref([]);
+
 
 async function getUsers() {
   geonodeUsers.value.push({
@@ -112,23 +118,23 @@ async function getUsers() {
     endpoint = resUsers.links.next;
   } while (endpoint);
 
-  /*   const requestTotal = await gnoxyFetch(url);
-  const resTotal = await requestTotal.json();
-  const totalUsers = resTotal.total;
-  const requestUsers = await gnoxyFetch(`${url}?page_size=${totalUsers}`);
-  const resUsers = await requestUsers.json();
-  const newUsers = resUsers.users.map((d) => {
-    return { pk: d.pk, username: d.username };
-  });
-  geonodeUsers.value = [...geonodeUsers.value, ...newUsers]; */
-}
+  //const requestTotal = await gnoxyFetch(url);
+  //const resTotal = await requestTotal.json();
+  //const totalUsers = resTotal.total;
+  //const requestUsers = await gnoxyFetch(`${url}?page_size=${totalUsers}`);
+  //const resUsers = await requestUsers.json();
+  //const newUsers = resUsers.users.map((d) => {
+  //  return { pk: d.pk, username: d.username };
+  //});
+  //geonodeUsers.value = [...geonodeUsers.value, ...newUsers]; 
+} */
 
-getUsers();
+//getUsers();
 
-watch(campoAutor, () => {
-  const selectedAuthor = geonodeUsers.value.find((d) => d.username === campoAutor.value);
+/* watch(campoAutorMeta, () => {
+  const selectedAuthor = geonodeUsers.value.find((d) => d.username === campoAutorMeta.value);
   storeMetadatos.updateAttr('metadata_author_pk', selectedAuthor.pk);
-});
+}); */
 
 const dragNdDrop = ref(null);
 const img_files = ['.jpg', '.jpeg', '.png', '.webp'];
@@ -155,14 +161,6 @@ async function guardarImagen(files) {
     dragNdDrop.value?.archivoNoValido();
   }
 }
-
-/* watch(
-  () => storeMetadatos.metadata,
-  (nv) => {
-    console.log('nv', nv);
-  },
-  { deep: true }
-); */
 </script>
 
 <template>
@@ -172,6 +170,7 @@ async function guardarImagen(files) {
       :title="'Metadatos básicos'"
       :exclude-links="props.isModal"
     />
+    <p class="m-t-2 m-b-0">* Campos obligatorios</p>
 
     <div v-if="!props.isModal">
       <p class="texto-peso-600">
@@ -190,28 +189,26 @@ async function guardarImagen(files) {
           <ClientOnly>
             <SisdaiCampoBase
               v-model="campoTitulo"
-              etiqueta="Título"
+              etiqueta="Título*"
               ejemplo="Añade un nombre"
               tipo="text"
               :es_etiqueta_visible="true"
-              :es_obligatorio="true"
             />
             <SisdaiCampoBase
               v-model="campoResumen"
+              class="m-y-3"
               etiqueta="Resumen"
               ejemplo="El texto descriptivo es conciso y significativo. Debe ayudar a la persona usuaria a..."
               tipo="text"
               :es_etiqueta_visible="true"
-              :es_obligatorio="true"
-              texto_ayuda="El campo tener un mínimo de 30 caracteres"
             />
           </ClientOnly>
         </div>
-        <!--         <div class="columna-8">
+        <div class="columna-8">
           <ClientOnly>
             <SisdaiSelector
-              v-model="seleccionTipoFecha"
-              etiqueta="Tipo de fecha"
+              v-model="campoTipoFecha"
+              etiqueta="Tipo de fecha*"
               texto_ayuda="Creación, publicación o revisión."
             >
               <option value="creation">Creación</option>
@@ -219,26 +216,22 @@ async function guardarImagen(files) {
               <option value="revison">Revisón</option>
             </SisdaiSelector>
           </ClientOnly>
-        </div> -->
+        </div>
         <div class="columna-8">
           <ClientOnly>
             <SisdaiCampoBase
-              v-model="seleccionFecha"
-              etiqueta="Fecha"
+              v-model="campoFecha"
+              etiqueta="Fecha*"
               ejemplo="tipo date"
               tipo="date"
               texto_ayuda="aaaa-mm-dd"
-              :es_obligatorio="true"
             />
           </ClientOnly>
         </div>
         <div class="columna-16">
           <ClientOnly>
-            <SisdaiSelector
-              v-model="seleccionCategoria"
-              etiqueta="Categoría"
-              :es_obligatorio="true"
-            >
+            <SisdaiSelector v-model="campoCategoria" etiqueta="Categoría*">
+              <option value="">----</option>
               <option
                 v-for="value in dictCategoria"
                 :key="Object.keys(value)"
@@ -250,39 +243,24 @@ async function guardarImagen(files) {
 
             <SisdaiCampoBase
               v-model="campoPalabrasClave"
-              etiqueta="Palabras clave"
+              class="m-t-3"
+              etiqueta="Palabras clave *"
               ejemplo="Agua, educación, conservación..."
-              :es_obligatorio="true"
             />
           </ClientOnly>
         </div>
-        <div class="columna-8">
+        <!-- <div class="columna-16">
           <ClientOnly>
-            <!--            <SisdaiCampoBase
-              v-model="campoAutor"
-              etiqueta="Autor (de los metadatos)"
-              ejemplo="Añade nombre de autor"
-              :es_obligatorio="true"
-            /> -->
             <SisdaiSelector
-              v-model="campoAutor"
-              etiqueta="Autor (de los metadatos)"
+              v-model="campoAutorMeta"
+              class="m-t-3"
+              etiqueta="Autor(a) de los metadatos"
               ejemplo="Añade nombre de autor"
-              :es_obligatorio="true"
             >
               <option v-for="value in geonodeUsers" :key="value.pk" :value="value.username">
                 {{ value.username }}
               </option>
             </SisdaiSelector>
-          </ClientOnly>
-        </div>
-        <!--         <div class="columna-8">
-          <ClientOnly>
-            <SisdaiCampoBase
-              v-model="campoAnioPublicacion"
-              etiqueta="Año de publicación"
-              ejemplo="Ej. 2002"
-            />
           </ClientOnly>
         </div> -->
       </div>
@@ -290,6 +268,7 @@ async function guardarImagen(files) {
       <CatalogoBotonesMetadatos
         v-if="!props.isModal"
         :key="`1-${props.resourcePk}-buttons`"
+        class="m-t-2"
         :resource="props.recurso"
         :title="'MetadatosBasicos'"
         :pk="props.resourcePk"
