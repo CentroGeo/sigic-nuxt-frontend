@@ -47,9 +47,7 @@ export function useGeoserverDataTable({ paginaActual, tamanioPagina, resource } 
       const atributos = data.features.map((f) => f.properties);
       variables.value = Object.keys(atributos[0] || {});
       datos.value = atributos;
-    }
-
-    if (resource && serverType === 'ArcGis') {
+    } else if (resource && serverType === 'ArcGis') {
       const newUrl = url.replace('MapServer', 'FeatureServer') + 'query/';
       const featureUrl = new URL(newUrl);
       featureUrl.search = new URLSearchParams({
@@ -63,14 +61,11 @@ export function useGeoserverDataTable({ paginaActual, tamanioPagina, resource } 
       const totalRes = await gnoxyFetch(`${featureUrl.href}&returnCountOnly=true`);
       const totalData = await totalRes.json();
       totalFeatures.value = totalData.count;
-      console.log('Total Res', totalData.count);
       const attrRes = await gnoxyFetch(featureUrl.href);
       const attrsData = await attrRes.json();
       variables.value = attrsData.fields.map((d) => d.name);
       datos.value = attrsData.features.map((d) => d.attributes);
     }
-    console.log('Variables:', variables.value);
-    console.log('datos:', datos.value);
   };
 
   fetchTable({ paginaActual, tamanioPagina, resource });
