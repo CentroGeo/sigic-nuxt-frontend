@@ -191,10 +191,10 @@ export const useResourcesIAStore = defineStore('resourcesIA', () => {
     let remotes = datum.filter((resource) => resource.sourcetype === 'REMOTE');
     const filterRemotes = await Promise.all(
       remotes.map(async (resource) => {
-        return { resourceValue: resource, resourceHasWms: await hasWMS(resource, 'map', proxyURL) };
+        return { resourceValue: resource, resourcehasWFS: await hasWFS(resource, 'map', proxyURL) };
       })
     );
-    remotes = filterRemotes.filter((d) => d.resourceHasWms).map((d) => d.resourceValue);
+    remotes = filterRemotes.filter((d) => d.resourcehasWFS).map((d) => d.resourceValue);
     return locals.concat(remotes);
   }
   if (resourceType === resourceTypeDic.dataTable) {
@@ -205,11 +205,11 @@ export const useResourcesIAStore = defineStore('resourcesIA', () => {
       remotes.map(async (resource) => {
         return {
           resourceValue: resource,
-          resourceHasWms: await hasWMS(resource, 'table', proxyURL),
+          resourcehasWFS: await hasWFS(resource, 'table', proxyURL),
         };
       })
     );
-    remotes = filterRemotes.filter((d) => d.resourceHasWms).map((d) => d.resourceValue);
+    remotes = filterRemotes.filter((d) => d.resourcehasWFS).map((d) => d.resourceValue);
     return locals.concat(remotes);
   }
 } */

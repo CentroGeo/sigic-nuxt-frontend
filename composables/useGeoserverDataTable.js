@@ -1,7 +1,7 @@
 // Este composable hace peticiones de datos a Geonode
 // TODO: Resolver las peticiones de información para mostrar capas y datasets privados
 // TODO: Manejo de errores en la petición
-import { getWMSserver, hasWMS } from '@/utils/consulta';
+import { getWMSserver, hasWFS } from '@/utils/consulta';
 import { ref } from 'vue';
 
 export function useGeoserverDataTable({ paginaActual, tamanioPagina, resource } = {}) {
@@ -18,7 +18,7 @@ export function useGeoserverDataTable({ paginaActual, tamanioPagina, resource } 
     if (!resource || resource.sourcetype !== 'REMOTE') {
       url = new URL(`${config.public.geonodeUrl}/gs/ows`);
     } else if (resource.sourcetype === 'REMOTE') {
-      const wmsStatus = await hasWMS(resource, 'table', config.public.geonodeUrl);
+      const wmsStatus = await hasWFS(resource, 'table');
       if (wmsStatus) {
         const link = getWMSserver(resource);
         url = new URL(link);
@@ -34,6 +34,7 @@ export function useGeoserverDataTable({ paginaActual, tamanioPagina, resource } 
         maxFeatures: tamanioPagina,
         startIndex: paginaActual * tamanioPagina,
       }).toString();
+      console.log(url);
       //const res = await fetch(url);
       let res;
       if (resource.sourcetype === 'REMOTE') {

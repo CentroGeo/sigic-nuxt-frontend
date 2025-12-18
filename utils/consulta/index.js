@@ -205,7 +205,7 @@ export function buildArcgisLayerRequest(resource) {
  * Puede ser map, table o geometry
  * @returns {Boolean}
  */
-export async function hasWMS(resource, service) {
+export async function hasWFS(resource, service) {
   const { gnoxyFetch } = useGnoxyUrl();
   const maxAttempts = 1;
   const url = new URL(findServer(resource));
@@ -252,18 +252,47 @@ export async function hasWMS(resource, service) {
   }
 }
 
+export async function hasFeatureServer(resource) {
+  const { gnoxyFetch } = useGnoxyUrl();
+  let tiene;
+  const url = await buildArcgisLayerRequest(resource);
+  const base = url.split('/services/')[0];
+  const nameSpace = url.split('/services/')[1].split('/')[0];
+  const serviceUrl = `${base}/services/?f=pjson`;
+  const res = await gnoxyFetch(serviceUrl);
+  const data = await res.json();
+  const linkedServices = data.services.filter((d) => d.name === nameSpace);
+  if (linkedServices.map((d) => d.type).includes('FeatureServer')) {
+    tiene = true;
+    // Esto es para
+    const newUrl = url.replace('MapServer', 'FeatureServer') + 'query/';
+    const featureUrl = new URL(newUrl);
+    featureUrl.search = new URLSearchParams({
+      where: '1=1',
+      outFields: '*',
+      f: 'json',
+    });
+
+    //const encodedURL = encodeURIComponent(featureUrl);
+    const attrRes = await gnoxyFetch(featureUrl.href);
+    const attrsData = await attrRes.json();
+    const data = attrsData.features;
+    console.log('Peticion de atts:', data);
+  } else {
+    tiene = false;
+  }
+  console.log('Tiene Feature Service:', tiene);
+}
 /**
  * Consulta al servidor WMS que aloja un recurso remoto o de tipo vectorail para
  * obtener el tipo de geometria del mismo
  * @param {Object} resource
- * @param {String} server
  * @returns {String}
  */
 export async function fetchGeometryWMS(resource) {
   const { gnoxyFetch } = useGnoxyUrl();
   const maxAttempts = 5;
   const url = new URL(findServer(resource));
-  console.log(url);
 
   url.search = new URLSearchParams({
     service: 'WFS',
@@ -299,11 +328,21 @@ export async function fetchGeometryWMS(resource) {
   }
 }
 
+/**
+ * Consulta al servidor ArcGis que aloja un recurso remoto o de tipo vectorail para
+ * obtener el tipo de geometria del mismo
+ * @param {Object} resource
+ * @returns {String}
+ * @param {*} resource
+ * @returns
+ */
 export async function fetchGeometryArcgis(resource) {
   const { gnoxyFetch } = useGnoxyUrl();
   const maxAttempts = 5;
   const url = await buildArcgisLayerRequest(resource);
   //const url = new URL(findServer(resource));
+
+  await hasFeatureServer(resource);
 
   // Como a veces hace timeout, lo intentamos tres veces
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
@@ -334,8 +373,8 @@ export async function defineGeomType(resource) {
   if (resource.sourcetype === 'REMOTE') {
     const server = findServer(resource);
     if (!server.includes('arcgis')) {
-      const resourceHasWMS = await hasWMS(resource, 'geometry');
-      if (resourceHasWMS) {
+      const resourcehasWFS = await hasWFS(resource, 'geometry');
+      if (resourcehasWFS) {
         geomType = await fetchGeometryWMS(resource);
       } else {
         geomType = 'Remoto';
