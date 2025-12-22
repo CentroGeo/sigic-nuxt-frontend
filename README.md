@@ -125,7 +125,6 @@ KEYCLOAK_CLIENT_SECRET = <Clave secreta>
 NUXT_AUTH_SECRET = <clave alfanumérica>
 # Url del proyecto sigic
 NUXT_PUBLIC_BASE_URL = <sigic url de producción>
-
 NUXT_PUBLIC_IA_BACKEND_URL = <ulr del back de IA>
 
 ```
