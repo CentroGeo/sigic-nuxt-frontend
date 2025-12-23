@@ -219,7 +219,7 @@ async function monitorLayerImport(executionId, archivo) {
                     Sistema de referencia {{ archivo.proyeccion }}
                   </div>
 
-                  <div v-if="archivo.IdRutaArchivo" class="flex flex-contenido-separado">
+                  <div v-if="archivo.IdRutaArchivo" class="flex flex-contenido-inicio">
                     <div class="m-x-2 m-y-1">
                       <NuxtLink
                         :to="`/catalogo/mis-archivos/editar/MetadatosBasicos?data=${archivo.IdRutaArchivo}&type=${archivo.tipo_recurso}`"
