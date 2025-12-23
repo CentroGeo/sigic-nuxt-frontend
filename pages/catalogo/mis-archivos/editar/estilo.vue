@@ -22,6 +22,7 @@ const isLoading = ref(false);
 const loadedStylesSatus = ref([]);
 //const resourcestyles = ref([]);
 
+// Función que usa el nuevo endpoint
 async function guardarArchivo(files) {
   subidaExitosa.value = undefined;
   isLoading.value = true;
@@ -42,7 +43,6 @@ async function guardarArchivo(files) {
         formData.append('base_file', files[0]);
         formData.append('token', data.value?.accessToken);
         formData.append('pk', selectedPk);
-        //await wait(2000);
         const fileUpdateStatus = await $fetch('/api/subirSLDMultiple', {
           method: 'POST',
           body: formData,

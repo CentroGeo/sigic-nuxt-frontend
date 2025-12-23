@@ -313,14 +313,16 @@ export async function defineGeomType(resource) {
  * @returns { String, Array }
  */
 export async function fetchRemoteStyles(resource) {
-  console.warn('solicitando los estilos de capas remotas');
+  //console.warn('solicitando los estilos de capas remotas');
   const { gnoxyFetch } = useGnoxyUrl();
+  const targetLayerName = resource.alternate;
+  const targetLayerStyles = [];
+  let targetLayerDefaultStyle = null;
   const server = getWMSserver(resource);
+  console.log(server);
   const url = `${server}service=wms&request=getCapabilities`;
   const request = await gnoxyFetch(url);
-  const targetLayerName = resource.alternate;
-  let targetLayerDefaultStyle = null;
-  const targetLayerStyles = [];
+
   if (!request.ok) {
     console.error('Fracasó la petición de estilos remotos');
   } else {
@@ -364,7 +366,6 @@ export async function fetchRemoteStyles(resource) {
  * @returns {String, Array}
  */
 export async function getSLDs(resource) {
-  console.warn('Entramos a la función de petición de estilos');
   const config = useRuntimeConfig();
   const { gnoxyFetch } = useGnoxyUrl();
   let styleList = [];
@@ -376,14 +377,26 @@ export async function getSLDs(resource) {
       const stylesRes = await gnoxyFetch(stylesURL);
 
       if (!stylesRes.ok) {
-        console.error('Falló la petición de estilos');
+        console.error('Falló la petición de estilos de:', resource.title);
         return { defaultStyle, styleList };
       }
 
       const stylesData = await stylesRes.json();
       defaultStyle = stylesData.default_style;
       styleList = stylesData.styles;
-      if (!styleList.includes(defaultStyle)) {
+      stylesData.styles.forEach((d) => {
+        const optionList = d.split(':');
+        if (optionList.length > 1) {
+          styleList.push(optionList[1]);
+        } else {
+          styleList.push(optionList[0]);
+        }
+      });
+
+      console.log('default:', defaultStyle);
+      console.log('List:', styleList);
+
+      if (!styleList.includes(defaultStyle.split(':')[1])) {
         styleList.push(defaultStyle);
       }
       return { defaultStyle, styleList };
@@ -394,7 +407,7 @@ export async function getSLDs(resource) {
       return { defaultStyle, styleList };
     }
   } catch {
-    console.error('Falló la petición en general');
+    console.error('Falló la petición general de estilos de:', resource.title);
     return { defaultStyle, styleList };
   }
 }
