@@ -9,6 +9,7 @@ const storeCatalogo = useCatalogoStore();
 const configEnv = useRuntimeConfig();
 const statusOk = ref(false);
 const archivosEnCarga = ref([]);
+const hayCargas = ref(false);
 const { data } = useAuth();
 const { gnoxyFetch } = useGnoxyUrl();
 
@@ -16,6 +17,7 @@ const base_files = ['.geojson', '.gpkg', '.zip', '.csv'];
 const docs_files = ['.txt', '.pdf', '.xls', '.xlsx'];
 
 async function guardarArchivo(files) {
+  hayCargas.value = true;
   const token = ref(data.value?.accessToken);
 
   const nuevosArchivos = Array.from(files).map((file) =>
@@ -64,7 +66,7 @@ async function guardarArchivo(files) {
 
       const result = await response.json();
 
-      // 5️⃣ Evaluar respuesta
+      // Evaluar respuesta
       if (!result.success) {
         archivo.estatus = 'error_carga';
         archivo.mensaje = result.message || 'Error en procesamiento';
@@ -79,11 +81,8 @@ async function guardarArchivo(files) {
         archivo.mensaje = 'Archivo cargado correctamente';
         archivo.IdRutaArchivo = result.url.split('/').slice(-1)[0];
         statusOk.value = true;
-        // Me parece que todo esto tendría quye dispararse condicionalmente.
-        // Si el recurso no es un dataset, todo lo de abajo falla.
-        // Si es document solo habría que fijar el archivo.tipo_recurso = document
-        let tipo;
 
+        let tipo;
         if (base_files.includes('.' + file.name.split('.').slice(-1)[0])) {
           const request_geonode = await gnoxyFetch(
             `${configEnv.public.geonodeUrl}/api/v2/datasets/${archivo.IdRutaArchivo}`
@@ -119,19 +118,14 @@ async function guardarArchivo(files) {
   });
 }
 
-// 🕒 Polling para monitorear la importación de capas base
+// Polling para monitorear la importación de capas base
 async function monitorLayerImport(executionId, archivo) {
-  const token = ref(data.value?.accessToken);
+  //const token = ref(data.value?.accessToken);
   const startTime = Date.now();
   const interval = setInterval(async () => {
     try {
-      const res = await fetch(
-        `${configEnv.public.geonodeUrl}/api/v2/executionrequest/${executionId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token.value}`,
-          },
-        }
+      const res = await gnoxyFetch(
+        `${configEnv.public.geonodeUrl}/api/v2/executionrequest/${executionId}`
       );
       const data = await res.json();
 
@@ -171,7 +165,7 @@ async function monitorLayerImport(executionId, archivo) {
             <CatalogoElementoDragNdDrop @pasar-archivo="(i) => guardarArchivo(i)" />
           </ClientOnly>
 
-          <h2>Cargas</h2>
+          <h2 v-if="hayCargas">Cargas</h2>
 
           <div v-for="(archivo, i) in archivosEnCarga" :key="i" class="tarjetitas-carga">
             <div
@@ -226,25 +220,25 @@ async function monitorLayerImport(executionId, archivo) {
                   </div>
 
                   <div v-if="archivo.IdRutaArchivo" class="flex flex-contenido-separado">
-                    <div>
+                    <div class="m-x-2 m-y-1">
                       <NuxtLink
                         :to="`/catalogo/mis-archivos/editar/MetadatosBasicos?data=${archivo.IdRutaArchivo}&type=${archivo.tipo_recurso}`"
                         target="_blank"
                         >Editar metadatos</NuxtLink
                       >
                     </div>
-                    <div v-if="archivo.tipo_recurso === 'dataLayer'">
+                    <div v-if="archivo.tipo_recurso === 'dataLayer'" class="m-x-2 m-y-1">
                       <NuxtLink
                         :to="`/catalogo/mis-archivos/editar/estilo?data=${archivo.IdRutaArchivo}&type=dataLayer`"
                       >
                         Agregar un estilo (.sld)</NuxtLink
                       >
                     </div>
-                    <div>
+                    <!-- <div>
                       <NuxtLink to="/catalogo/mis-archivos/metadatos-pendientes">
                         Ver en Mis archivos</NuxtLink
                       >
-                    </div>
+                    </div> -->
                   </div>
                 </div>
               </div>
