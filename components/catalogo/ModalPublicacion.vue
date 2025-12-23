@@ -365,9 +365,9 @@ defineExpose({
       <template #cuerpo>
         <div v-if="estatus">
           <h2>Tu archivo ha sido enviado a verificación.</h2>
-          <p class="m-0">
+          <!-- <p class="m-0">
             Recibirás una notificación en tu correo electrónico cuando el proceso se complete.
-          </p>
+          </p> -->
         </div>
         <div v-else>
           <h2>Tu archivo no ha sido enviado a verificación.</h2>

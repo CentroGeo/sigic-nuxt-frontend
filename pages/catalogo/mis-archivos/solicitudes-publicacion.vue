@@ -93,7 +93,7 @@ function updateResources() {
       categoria: d.resource.category,
       actualizacion: formatearFecha(d.updated_at),
       estatus: dictEstatus[d.status],
-      acciones: 'Ver, Comentarios, Remover',
+      acciones: d.status === 'pending' ? 'Ver, Comentarios, Cancelar' : 'Ver, Comentarios',
       comentarios: d.rejection_reason,
       revisor: d.reviewer?.username,
     };
@@ -242,13 +242,13 @@ onMounted(async () => {
         />
 
         <div class="flex">
-          <p
+          <!-- <p
             class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-2 p-2 m-0"
           >
             Si el estatus de tu publicación aparece como <i>No aceptada</i>, revisa tu correo
             electrónico donde encontrarás los motivos del rechazo y las indicaciones para realizar
             las correciones necesarias.
-          </p>
+          </p> -->
           <h2>Solicitudes de publicación</h2>
           <UiNumeroElementos :numero="totalResources" />
         </div>

@@ -141,6 +141,9 @@ onMounted(() => {
           </div>
 
           <div v-if="previousPath === `${baseUrl}/pendientes-revisor`" class="flex">
+            <!-- <button class="boton-secundario" type="button">
+              Ver comentarios anteriores<span class="pictograma-ayuda" aria-hidden="true" />
+            </button> -->
             <button class="boton-primario" type="button" @click="modalAgregar.abrirModal()">
               Agregar a mis revisiones<span class="pictograma-agregar" aria-hidden="true" />
             </button>
