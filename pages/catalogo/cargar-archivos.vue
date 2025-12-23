@@ -159,7 +159,10 @@ async function monitorLayerImport(executionId, archivo) {
       <main id="principal" class="contenedor m-b-10">
         <div class="alineacion-izquierda ancho-lectura">
           <h2>Carga archivo</h2>
-          <p><b>Solo archivos GeoJSON, Geopaquetes, CSV, XML, PDF, JPG y PNG.</b></p>
+          <p>
+            <!-- <b>Solo archivos GeoJSON, Geopaquetes, CSV, XML, PDF, JPG y PNG.</b> -->
+            <b>Solo archivos GeoJSON, Geopaquetes, CSV, y PDF.</b>
+          </p>
 
           <ClientOnly>
             <CatalogoElementoDragNdDrop @pasar-archivo="(i) => guardarArchivo(i)" />
