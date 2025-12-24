@@ -319,7 +319,6 @@ export async function fetchRemoteStyles(resource) {
   const targetLayerStyles = [];
   let targetLayerDefaultStyle = null;
   const server = getWMSserver(resource);
-  console.log(server);
   const url = `${server}service=wms&request=getCapabilities`;
   const request = await gnoxyFetch(url);
 
