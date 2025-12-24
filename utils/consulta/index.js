@@ -383,20 +383,17 @@ export async function getSLDs(resource) {
 
       const stylesData = await stylesRes.json();
       defaultStyle = stylesData.default_style;
-      styleList = stylesData.styles;
+      //styleList = stylesData.styles;
       stylesData.styles.forEach((d) => {
         const optionList = d.split(':');
-        if (optionList.length > 1) {
+        if (optionList.length > 1 && !styleList.includes(optionList[1])) {
           styleList.push(optionList[1]);
-        } else {
+        } else if (optionList.length === 1 && !styleList.includes(optionList[0])) {
           styleList.push(optionList[0]);
         }
       });
 
-      console.log('default:', defaultStyle);
-      console.log('List:', styleList);
-
-      if (!styleList.includes(defaultStyle.split(':')[1])) {
+      if (!styleList.includes(defaultStyle)) {
         styleList.push(defaultStyle);
       }
       return { defaultStyle, styleList };
