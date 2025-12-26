@@ -18,12 +18,17 @@ const isLoggedIn = ref(data.value ? true : false);
 //const userEmail = ref(data.value?.user.email);
 const goDown = () => storeSelected.changePosition(props.selectedElement.pk, -1);
 const goUp = () => storeSelected.changePosition(props.selectedElement.pk, +1);
+
+const isElementReady = ref(false);
 </script>
 
 <template>
   <div class="tarjeta m-y-1">
     <div class="tarjeta-selected fondo-color-acento">
-      <div class="flex flex-contenido-separado m-0 encabezado-tarjeta">
+      <div
+        v-if="resourceElement && isElementReady"
+        class="flex flex-contenido-separado m-0 encabezado-tarjeta"
+      >
         <p v-if="resourceElement" class="tarjeta-texto-secundario m-0">
           {{
             resourceElement?.category
@@ -68,7 +73,7 @@ const goUp = () => storeSelected.changePosition(props.selectedElement.pk, +1);
           </button>
         </div>
       </div>
-      <div v-if="resourceElement">
+      <div v-if="resourceElement && isElementReady">
         <div
           v-if="
             isLoggedIn &&
@@ -87,21 +92,23 @@ const goUp = () => storeSelected.changePosition(props.selectedElement.pk, +1);
       </div>
 
       <ConsultaContenidoCapaSeleccionada
-        v-if="resourceType === resourceTypeDic.dataLayer"
+        v-if="props.resourceType === resourceTypeDic.dataLayer"
         :resource-element="resourceElement"
         @opacidad-clicked="emit('openOpacity', resourceElement)"
         @descarga-clicked="emit('openDownload', resourceElement)"
         @tabla-clicked="emit('openTabla', resourceElement)"
         @ows-clicked="(link) => emit('openOWS', link)"
+        @resource-ready="isElementReady = true"
       />
 
       <ConsultaContenidoDocSeleccionado
         v-else
-        :group-name="resourceType"
-        :resource-type="resourceType"
+        :group-name="props.resourceType"
+        :resource-type="props.resourceType"
         :resource-element="resourceElement"
         @descarga-clicked="emit('openDownload', resourceElement)"
         @mapa-clicked="emit('openMapa', resourceElement)"
+        @resource-ready="isElementReady = true"
       />
     </div>
   </div>

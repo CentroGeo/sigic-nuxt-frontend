@@ -6,7 +6,13 @@ const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
 const storeSelected = useSelectedResources2Store();
 const { gnoxyFetch } = useGnoxyUrl();
-const emit = defineEmits(['opacidadClicked', 'descargaClicked', 'tablaClicked', 'owsClicked']);
+const emit = defineEmits([
+  'opacidadClicked',
+  'descargaClicked',
+  'tablaClicked',
+  'owsClicked',
+  'resourceReady',
+]);
 const props = defineProps({
   resourceElement: {
     type: Object,
@@ -14,6 +20,7 @@ const props = defineProps({
   },
 });
 const { resourceElement } = toRefs(props);
+const isResourceReady = ref(false);
 const actualButtons = ref({});
 const optionsButtons = ref([
   {
@@ -102,7 +109,6 @@ async function updateFunctions() {
   }
   actualButtons.value = buttons;
 }
-updateFunctions();
 
 async function shareOws() {
   let server;
@@ -114,13 +120,23 @@ async function shareOws() {
   const owsLink = `${server}/${resourceElement.value.alternate.replace(':', '/')}/ows`;
   emit('owsClicked', owsLink);
 }
-watch(resourceElement, () => {
-  updateFunctions();
+watch(resourceElement, async () => {
+  await updateFunctions();
+  isResourceReady.value = true;
+  emit('resourceReady');
+});
+
+onMounted(async () => {
+  if (resourceElement.value.title) {
+    await updateFunctions();
+    isResourceReady.value = true;
+    emit('resourceReady');
+  }
 });
 </script>
 
 <template>
-  <div v-if="resourceElement.title">
+  <div v-if="isResourceReady">
     <div class="m-y-2">
       <SisdaiLeyendaWms
         :consulta="gnoxyFetch"
