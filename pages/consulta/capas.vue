@@ -287,9 +287,12 @@ onMounted(async () => {
               'arcgis'
             )"
             :key="`arcgis-${resource.pk}-${resource.position_}`"
-            :fuente="findServer(resource)"
-            :mosaicos="false"
+            :fuente="findServer(resource).replace('?', '')"
+            :capa="resource.alternate.split(':')[1]"
+            :mosaicos="true"
+            :opacidad="storeSelected.byPk(resource.pk).opacidad"
             :posicion="storeSelected.byPk(resource.pk).posicion + 1"
+            :visible="storeSelected.byPk(resource.pk).visible"
           />
         </SisdaiMapa>
       </ClientOnly>
