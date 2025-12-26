@@ -1,5 +1,6 @@
 <script setup>
 //import { getSLDs, wait } from '~/utils/consulta';
+import { getSLDs } from '~/utils/consulta';
 
 definePageMeta({
   middleware: 'sidebase-auth',
@@ -20,7 +21,7 @@ const style_files = ['.sld'];
 const isLoadingGlobal = ref(true);
 const isLoading = ref(false);
 const loadedStylesSatus = ref({});
-//const resourcestyles = ref([]);
+const resourcestyles = ref([]);
 
 // Función que usa el nuevo endpoint
 async function guardarArchivo(files) {
@@ -51,6 +52,8 @@ async function guardarArchivo(files) {
         body: formData,
       });
       loadedStylesSatus.value[fileName] = fileUpdateStatus;
+      const styles = await getSLDs(resourceToEdit.value);
+      resourcestyles.value = styles.styleList;
     }
   } else {
     dragNdDrop.value?.archivoNoValido();
@@ -60,8 +63,8 @@ async function guardarArchivo(files) {
 
 onMounted(async () => {
   resourceToEdit.value = await storeResources.fetchResourceByPk(selectedPk);
-  //const styles = await getSLDs(resourceToEdit.value);
-  //resourcestyles.value = styles.styleList;
+  const styles = await getSLDs(resourceToEdit.value);
+  resourcestyles.value = styles.styleList;
   isLoadingGlobal.value = false;
 });
 </script>
@@ -118,7 +121,7 @@ onMounted(async () => {
                 ]"
               />
 
-              <!-- <div>
+              <div>
                 <table class="tabla-condensada">
                   <thead>
                     <tr>
@@ -131,7 +134,7 @@ onMounted(async () => {
                     </tr>
                   </tbody>
                 </table>
-              </div> -->
+              </div>
 
               <p><b>Agregar estilos. Solo archivos .sld</b></p>
 
