@@ -7,8 +7,12 @@ import {
   downloadWMS,
 } from '@/utils/consulta';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
-import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
+import {
+  SisdaiCapaArcgis,
+  SisdaiCapaWms,
+  SisdaiCapaXyz,
+  SisdaiMapa,
+} from '@centrogeomx/sisdai-mapas';
 import { findServer } from '~/utils/consulta';
 
 const props = defineProps({
@@ -21,9 +25,10 @@ const props = defineProps({
 const { resourceType, selectedElement } = toRefs(props);
 const { gnoxyFetch } = useGnoxyUrl();
 
-const seleccionVarDisponibles = ref(selectedElement.value.alternate);
+const serverType = ref(null);
+//const seleccionVarDisponibles = ref(selectedElement.value.alternate);
 //const config = useRuntimeConfig();
-const extentMap = ref(undefined);
+//const extentMap = ref(undefined);
 
 const modalDescarga = ref(null);
 const modalPublica1 = ref(null);
@@ -151,6 +156,14 @@ const optionsDict = {
   },
 };
 
+function checkServerType() {
+  const server = findServer(selectedElement.value);
+  if (server.includes('arcgis')) {
+    serverType.value = 'arcgis';
+  } else {
+    serverType.value = 'ogc';
+  }
+}
 function confirmarSolicitud(cerrarModal) {
   if (cerrarModal === 'modalPublica3') {
     modalPublica3.value.cerrarModal();
@@ -162,9 +175,12 @@ function confirmarSolicitud(cerrarModal) {
     path: '/catalogo/mis-archivos/solicitudes-publicacion',
   });
 }
-
 defineExpose({
   abrirModalDescarga,
+});
+
+onMounted(() => {
+  checkServerType();
 });
 </script>
 <template>
@@ -187,7 +203,7 @@ defineExpose({
       <template #cuerpo>
         <div class="modal-alto-cuerpo">
           <div v-if="tagTitle === 'capa'">
-            <ClientOnly>
+            <!-- <ClientOnly>
               <SisdaiSelector
                 v-model="seleccionVarDisponibles"
                 class="m-b-1"
@@ -195,17 +211,25 @@ defineExpose({
               >
                 <option value="1">variable</option>
               </SisdaiSelector>
-            </ClientOnly>
+            </ClientOnly> -->
 
-            <SisdaiMapa class="gema" :vista="{ extension: extentMap }">
+            <!-- <SisdaiMapa class="gema" :vista="{ extension: extentMap }"> -->
+            <SisdaiMapa class="gema" :vista="{ extension: selectedElement.extent.coords }">
               <SisdaiCapaXyz />
 
+              <SisdaiCapaArcgis
+                v-if="serverType === 'arcgis'"
+                :capa="selectedElement.alternate.split(':')[1]"
+                :fuente="findServer(selectedElement).replace('?', '')"
+              />
+              <!--  @al-finalizar-carga="extentMap = selectedElement.extent.coords" -->
               <SisdaiCapaWms
+                v-else
                 :capa="selectedElement.alternate"
                 :consulta="gnoxyFetch"
                 :fuente="findServer(selectedElement)"
-                @al-finalizar-carga="extentMap = selectedElement.extent.coords"
               />
+              <!--  @al-finalizar-carga="extentMap = selectedElement.extent.coords" -->
             </SisdaiMapa>
           </div>
 
