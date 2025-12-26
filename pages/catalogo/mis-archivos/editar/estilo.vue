@@ -104,7 +104,6 @@ onMounted(async () => {
           <div class="flex">
             <div class="columna-16">
               <h2 class="m-b-0">{{ resourceToEdit?.title }}</h2>
-              <h2 class="m-t-0">Estilo</h2>
 
               <CatalogoMenuMisArchivos
                 :recurso="resourceToEdit"
@@ -121,6 +120,7 @@ onMounted(async () => {
                 ]"
               />
 
+              <h2 class="m-t-0">Estilo</h2>
               <div>
                 <table class="tabla-condensada">
                   <thead>
@@ -136,7 +136,7 @@ onMounted(async () => {
                 </table>
               </div>
 
-              <p><b>Agregar estilos. Solo archivos .sld</b></p>
+              <p><b style="font-weight: bold">Agregar estilos, solo archivos .sld</b></p>
 
               <!-- Drag & Drop -->
               <ClientOnly>
@@ -195,3 +195,8 @@ onMounted(async () => {
     </template>
   </UiLayoutPaneles>
 </template>
+<style scoped>
+.h3 {
+  background-color: pink;
+}
+</style>
