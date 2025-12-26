@@ -17,7 +17,8 @@ export default defineEventHandler(async (event) => {
   const url = `${config.public.geonodeApi}/datasets/${datasetPk}/sldstyles/`;
 
   if (!base_file) {
-    throw createError({ statusCode: 400, message: 'Archivo faltante' });
+    //throw createError({ statusCode: 400, message: 'Archivo faltante' });
+    return 'failed';
   }
 
   const formData = new FormData();

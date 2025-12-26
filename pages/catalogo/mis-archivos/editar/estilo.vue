@@ -19,7 +19,7 @@ const dragNdDrop = ref(null);
 const style_files = ['.sld'];
 const isLoadingGlobal = ref(true);
 const isLoading = ref(false);
-const loadedStylesSatus = ref([]);
+const loadedStylesSatus = ref({});
 //const resourcestyles = ref([]);
 
 // Función que usa el nuevo endpoint
@@ -36,21 +36,22 @@ async function guardarArchivo(files) {
 
   // Si los archivos son válidos, agregamos los sld
   if (!Object.values(validFileList).includes(false)) {
-    loadedStylesSatus.value = await Promise.all(
-      files.map(async (d) => {
-        const fileName = d.name;
-        const formData = new FormData();
-        formData.append('base_file', files[0]);
-        formData.append('token', data.value?.accessToken);
-        formData.append('pk', selectedPk);
-        const fileUpdateStatus = await $fetch('/api/subirSLDMultiple', {
-          method: 'POST',
-          body: formData,
-        });
+    files.forEach((d) => {
+      loadedStylesSatus.value[d.name] = 'loading';
+    });
 
-        return { name: fileName, status: fileUpdateStatus };
-      })
-    );
+    for (const d of files) {
+      const fileName = d.name;
+      const formData = new FormData();
+      formData.append('base_file', d);
+      formData.append('token', data.value?.accessToken);
+      formData.append('pk', selectedPk);
+      const fileUpdateStatus = await $fetch('/api/subirSLDMultiple', {
+        method: 'POST',
+        body: formData,
+      });
+      loadedStylesSatus.value[fileName] = fileUpdateStatus;
+    }
   } else {
     dragNdDrop.value?.archivoNoValido();
   }
@@ -144,25 +145,28 @@ onMounted(async () => {
             </div>
 
             <div class="columna-16">
-              <div v-if="isLoading">
-                <div class="borde-redondeado-16 flex fondo-color-neutro p-3">
-                  <img src="/img/loader.gif" height="30" /> <b> Cargando Archivo </b>
-                </div>
-              </div>
-
-              <div v-if="!isLoading && loadedStylesSatus.length > 0">
+              <div v-if="Object.keys(loadedStylesSatus).length > 0">
                 <h2>Cargas recientes</h2>
-                <div v-for="file in loadedStylesSatus" :key="file.name">
+                <div v-for="file in Object.keys(loadedStylesSatus)" :key="file">
+                  <!--Cargando-->
+                  <div
+                    v-if="loadedStylesSatus[file] === 'loading'"
+                    class="fondo-color-neutro p-3 borde-redondeado-16 m-y-2"
+                  >
+                    <img class="color-invertir" src="/img/loader.gif" height="30" />
+                    <b> Subiendo {{ file }}... </b>
+                  </div>
+
                   <!--Subida exitosa-->
                   <div
-                    v-if="file.status === 'finished'"
+                    v-else-if="loadedStylesSatus[file] === 'finished'"
                     class="fondo-color-confirmacion p-3 borde-redondeado-16 m-y-2"
                   >
                     <div class="flex texto-color-confirmacion">
                       <span class="pictograma-aprobado" />
                       <b> Archivo cargado correctamente </b>
                     </div>
-                    <p>{{ file.name }}</p>
+                    <p>{{ file }}</p>
                     <div>
                       <nuxt-link to="/catalogo/mis-archivos">Ver en mis archivos</nuxt-link>
                     </div>
@@ -177,7 +181,7 @@ onMounted(async () => {
                       <span class="pictograma-alerta" />
                       <b> No se logró cargar el archivo adecuadamente. Inténtalo de nuevo </b>
                     </div>
-                    <p>{{ file.name }}</p>
+                    <p>{{ file }}</p>
                   </div>
                 </div>
               </div>
