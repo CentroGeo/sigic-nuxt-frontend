@@ -84,10 +84,6 @@ function limpiarCamposAUnir() {
 async function unirCampos() {
   modalUnionVectorial.value.abrirModal();
 
-  setTimeout(() => {
-    masTiempo.value = true;
-  }, 2000);
-
   // armar columnas
   const columns = ref([]);
   Object.keys(dictCamposAUnir.value).forEach((key) => {
@@ -107,23 +103,45 @@ async function unirCampos() {
 
   try {
     const config = useRuntimeConfig();
-    const url = config.public.geonodeUrl;
-    // const token = data.value?.accessToken;
-    const body = {
-      layer: +editedResource.value.pk,
-      geo_layer: +seleccionCapaGeo.value,
-      layer_pivot: seleccionCampoCapa.value,
-      geo_pivot: seleccionCampoObjetivo.value,
-      columns: columns.value,
-    };
-    const response = await $fetch(`${url}/sigic/georeference/join`, {
+    const response = await $fetch(`${config.public.basePath}/api/join`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+      headers: { token: token },
+      body: {
+        layer: +editedResource.value.pk, // Tabla destino (sin geometría)
+        geo_layer: +seleccionCapaGeo.value, // Capa fuente (con geometría)
+        layer_pivot: seleccionCampoCapa.value, // Columna llave en destino
+        geo_pivot: seleccionCampoObjetivo.value, // Columna llave en fuente
+        columns: columns.value, // Columnas a copiar
+      },
     });
     console.warn('response', response);
+    if (!response.status) {
+      throw new Error(`Join falló: ${response.error.status}`);
+    }
 
-    unionExitosa.value = true;
+    // Monitorear el estado
+    const checkStatus = async () => {
+      const response = await fetch(
+        `${config.public.geonodeUrl}/sigic/georeference/status/${seleccionCapaGeo.value}/`
+      );
+      const { status } = await response.json();
+      return status;
+    };
+
+    // Esperar a que termine el procesamiento
+    let status = await checkStatus();
+    while (status === 'STATE_RUNNING') {
+      await new Promise((resolve) => setTimeout(resolve, 2000)); // Esperar 2 segundos
+      masTiempo.value = true;
+      status = await checkStatus();
+      // console.log('status', status);
+    }
+
+    if (status === 'STATE_WAITING') {
+      console.log('Proceso completado exitosamente');
+    } else {
+      console.error('Proceso terminó con estado:', status);
+    }
   } catch (error) {
     console.error('Error al unir capas: ', error);
   }

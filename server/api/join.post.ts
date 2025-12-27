@@ -1,36 +1,36 @@
-const configEnv = useRuntimeConfig();
+const config = useRuntimeConfig();
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event);
-  const baseUrl = configEnv.public.geonodeApi;
-  const url = `${baseUrl}/sigic/georeference/join`;
+  const data = await readBody(event);
+  const token = getHeader(event, 'token');
+  const url = `${config.public.geonodeUrl}/sigic/georeference/join`;
 
   try {
     const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${body.token}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        layer: body.layer,
-        geo_layer: body.geo_layer,
-        layer_pivot: body.layer_pivot,
-        geo_pivot: body.geo_pivot,
-        columns: body.columns,
+        layer: data.layer, // Tabla destino (sin geometría)
+        geo_layer: data.geo_layer, // Capa fuente (con geometría)
+        layer_pivot: data.layer_pivot, // Columna llave en destino
+        geo_pivot: data.geo_pivot, // Columna llave en fuente
+        columns: data.columns, // Columnas a copiar
       }),
     });
-
-    if (!response.ok) {
-      throw new Error(`Error POST (id}): ${response.status}`);
-    }
     console.warn('response: ', response);
 
-    const json = await response.json();
-    // console.warn("json:", json);
-
-    return json;
+    if (response.ok) {
+      console.log('Join completado exitosamente');
+      return { success: true, data: response };
+    } else {
+      console.error('Error en join:', response.status, response.statusText);
+      return { success: false, error: { status: response.status } };
+    }
   } catch (error) {
-    console.error('Error al subir al Join:', error);
+    console.error('Error de red: ', error);
+    return { success: false, error: error };
   }
 });
