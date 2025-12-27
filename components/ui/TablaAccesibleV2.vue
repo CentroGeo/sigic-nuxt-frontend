@@ -43,12 +43,13 @@ const dictTable = ref({
   estatus: 'Estatus',
 });
 
-const typeDict = {
+/* const typeDict = {
   'Capa Geográfica, Catálogo Externo': 'dataLayer',
   'Capa Geográfica': 'dataLayer',
   'Datos Tabulados': 'dataTable',
   Documentos: 'document',
-};
+}; */
+
 /**
  * Codifica la propiedad pk de un objeto y se pasa como query al ir a otra vista
  * @param objeto que se va a codificar
@@ -86,6 +87,7 @@ async function openResourceView(resource) {
   ) {
     useSelectedResources2Store().add(
       new SelectedLayer({ pk: resource.pk }),
+      resource.recurso_completo.default_style,
       resourceTypeDic.dataLayer
     );
     await navigateTo('/consulta/capas');
@@ -97,17 +99,14 @@ async function openResourceView(resource) {
     );
     await navigateTo('/consulta/tablas');
   }
-  /* (objeto.tipo_recurso === 'Documentos') {
-    navigateTo({
-      path: '/catalogo/mis-archivos/editar-metadatos',
-      query: { data: pk },
-    });
-  } */
+
   if (resource.tipo_recurso === 'Documentos') {
     useSelectedResources2Store().add(
       new SelectedLayer({ pk: resource.pk }),
+      null,
       resourceTypeDic.document
     );
+
     await navigateTo('/consulta/documentos');
   }
 }
@@ -147,10 +146,9 @@ function tipoRecurso(recurso) {
 function notifyReleaseRequest(resource) {
   shownModal.value = 'releaseOne';
   modalResource.value = resource.recurso_completo;
-  console.log(resource);
   resourceType.value = tipoRecurso(resource);
   nextTick(() => {
-    releaseRequest.value?.abrirModalDescarga();
+    releaseRequest.value?.abrirmodalPublicacion();
   });
 }
 
@@ -472,92 +470,6 @@ function irAmisArchivos() {
                   <span class="pictograma-eliminar"></span>
                 </button>
               </div>
-
-              <!--               <div v-if="datum[variable] === 'Editar, Ver, Descargar, Remover'" class="flex-width">
-                <button
-                  v-globo-informacion:izquierda="'Editar'"
-                  class="boton-pictograma boton-secundario"
-                  aria-label="Editar metadatos"
-                  type="button"
-                  @click="irARutaConQuery(datum)"
-                >
-                  <span class="pictograma-editar"></span>
-                </button>
-                <button
-                  v-globo-informacion:izquierda="'Ver en visualizador'"
-                  class="boton-pictograma boton-secundario"
-                  aria-label="Ver en visualizador"
-                  type="button"
-                  @click="openResourceView(datum)"
-                >
-                  <span class="pictograma-previsualizar"></span>
-                </button>
-                <button
-                  v-globo-informacion:izquierda="'Publicar en catálogo'"
-                  class="boton-pictograma boton-secundario"
-                  aria-label="Publicar en catálogo"
-                  type="button"
-                  @click="notifyReleaseRequest(datum)"
-                >
-                  <span class="pictograma-ayuda"></span>
-                </button>
-                <button
-                  v-globo-informacion:izquierda="'Descargar'"
-                  class="boton-pictograma boton-secundario"
-                  aria-label="Descargar archivo"
-                  type="button"
-                  @click="notifyDownloadOneChild(datum)"
-                >
-                  <span class="pictograma-archivo-descargar"></span>
-                </button>
-                <button
-                  v-globo-informacion:izquierda="'Remover'"
-                  class="boton-pictograma boton-secundario"
-                  aria-label="Remover archivo"
-                  type="button"
-                >
-                  <span class="pictograma-eliminar"></span>
-                </button>
-              </div>
-              <div v-if="datum[variable] === 'Ver, Descargar'" class="flex-width">
-                <button
-                  v-globo-informacion:izquierda="'Ver en visualizador'"
-                  class="boton-pictograma boton-secundario"
-                  aria-label="Ver en visualizador"
-                  type="button"
-                  @click="openResourceView(datum)"
-                >
-                  <span class="pictograma-previsualizar"></span>
-                </button>
-                <button
-                  v-globo-informacion:izquierda="'Descargar'"
-                  class="boton-pictograma boton-secundario"
-                  aria-label="Descargar archivo"
-                  type="button"
-                  @click="notifyDownloadOneChild(datum)"
-                >
-                  <span class="pictograma-archivo-descargar"></span>
-                </button>
-              </div>
-              <div v-if="datum[variable] === 'Editar, Remover'" class="flex-width">
-                <button
-                  v-globo-informacion:izquierda="'Editar'"
-                  class="boton-pictograma boton-secundario"
-                  aria-label="Editar metadatos"
-                  type="button"
-                  @click="irARutaConQuery(datum)"
-                >
-                  <span class="pictograma-editar"></span>
-                </button>
-                <button
-                  v-globo-informacion:izquierda="'Remover'"
-                  class="boton-pictograma boton-secundario"
-                  aria-label="Remover archivo"
-                  type="button"
-                >
-                  <span class="pictograma-eliminar"></span>
-                </button>
-              </div> -->
             </div>
 
             <!-- Estatus -->
@@ -597,7 +509,7 @@ function irAmisArchivos() {
       v-if="shownModal === 'releaseOne'"
       ref="releaseRequest"
       :key="`${modalResource.pk}_${resourceType}`"
-      :resource-type="typeDict[resourceType]"
+      :resource-type="resourceType === 'Capa Geográfica' ? 'dataLayer' : resourceType"
       :selected-element="modalResource"
     />
     <!-- Modal para descargar datos -->

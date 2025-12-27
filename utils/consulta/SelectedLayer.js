@@ -24,6 +24,12 @@ export default class SelectedLayer extends SelectedResource {
     this.opacidad_ = Number(valor);
   }
 
+  get estilo() {
+    return this.estilo_;
+  }
+  set estilo(valor) {
+    this.estilo_ = valor;
+  }
   resetLado() {
     this.lado = undefined;
   }

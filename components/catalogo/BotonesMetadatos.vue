@@ -114,6 +114,8 @@ async function updateMetadata() {
     } else {
       didUpdateFail.value = true;
     }
+    isLoading.value = false;
+    isMetaInvalid.value = false;
     //const router = useRouter();
     //router.go(0);
   } else {

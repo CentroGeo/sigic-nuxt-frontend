@@ -119,18 +119,18 @@ async function addAttribute(pk) {
  */
 async function buildLayerInfo(url, alternate, title, sourcetype) {
   if (sourcetype === 'REMOTE') {
-    //return `<p style="margin-bottom: 8px;">${title}</p> <p>No hay información disponible para esta capa.</p>`;
-    return undefined;
+    return `<p style="margin-bottom: 8px;">${title}</p> <p>No hay información disponible para esta capa.</p>`;
+    //return undefined;
   } else {
     const res = await gnoxyFetch(url);
     if (!res.ok) {
-      //return `<p style="margin-bottom: 8px;">${title}</p> <p>No hay información disponible para esta capa.</p>`;
-      return undefined;
+      return `<p style="margin-bottom: 8px;">${title}</p> <p>No hay información disponible para esta capa.</p>`;
+      //return undefined;
     }
     const data = await res.json();
     if (data.features.length === 0) {
-      //return `<p style="margin-bottom: 8px;">${title}</p> <p>No hay información disponible para este punto.</p>`;
-      return undefined;
+      return `<p style="margin-bottom: 8px;">${title}</p> <p>No hay información disponible para este punto.</p>`;
+      //return undefined;
     } else {
       const propiedades = data.features[0].properties;
       const match = attributes.value[alternate].map(({ attribute, attribute_label }) => {
@@ -245,6 +245,7 @@ onMounted(async () => {
             :opacidad="storeSelected.byPk(resource.pk).opacidad"
             :posicion="storeSelected.byPk(resource.pk).posicion + 1"
             :visible="storeSelected.byPk(resource.pk).visible"
+            :estilo="storeSelected.byPk(resource.pk).estilo"
             :cuadro-informativo="
               (url) => buildLayerInfo(url, resource.alternate, resource.title, resource.sourcetype)
             "
