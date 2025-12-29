@@ -63,9 +63,13 @@ const resourcesDict = computed(() => ({
 async function updateSelection(type) {
   const currentPk = resourcesDict.value[type].latest.pk;
   if (type === 'dataTable' || type === 'document') {
-    storeSelected.add(new SelectedResource({ pk: currentPk }), type);
+    storeSelected.add(new SelectedResource({ pk: currentPk }), null, type);
   } else {
-    storeSelected.add(new SelectedLayer({ pk: currentPk }), type);
+    storeSelected.add(
+      new SelectedLayer({ pk: currentPk }),
+      resourcesDict.value[type].default_style,
+      type
+    );
   }
   nextTick(async () => {
     await navigateTo(resourcesDict.value[type].consultaTo);
@@ -124,14 +128,13 @@ async function updateSelection(type) {
                   </span>
                 </div>
                 <div class="tarjeta-pie">
-                  <nuxt-link
+                  <button
                     class="boton boton-primario boton-chico"
                     aria-label="Ver capa en visualizador"
-                    :to="resourcesDict[type].consultaTo"
-                    @click.prevent="updateSelection(type)"
+                    @click="updateSelection(type)"
                   >
                     {{ resourcesDict[type].consultaLabel }}
-                  </nuxt-link>
+                  </button>
                 </div>
               </div>
             </div>

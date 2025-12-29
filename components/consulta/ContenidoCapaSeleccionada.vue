@@ -1,4 +1,5 @@
 <script setup>
+import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { SisdaiLeyendaWms } from '@centrogeomx/sisdai-mapas';
 import { findServer, getWMSserver, hasFeatureServer, hasWFS } from '~/utils/consulta';
 
@@ -21,6 +22,7 @@ const props = defineProps({
 });
 const { resourceElement } = toRefs(props);
 const isResourceReady = ref(false);
+const selectedStyle = ref(null);
 const actualButtons = ref({});
 const optionsButtons = ref([
   {
@@ -123,6 +125,7 @@ async function shareOws() {
 watch(resourceElement, async () => {
   await updateFunctions();
   isResourceReady.value = true;
+  selectedStyle.value = storeSelected.byPk(resourceElement.value.pk).estilo;
   emit('resourceReady');
 });
 
@@ -133,14 +136,36 @@ onMounted(async () => {
     emit('resourceReady');
   }
 });
+
+watch(selectedStyle, (nv) => {
+  storeSelected.byPk(resourceElement.value.pk).estilo = nv;
+});
+
+/* watch(selectedStyle, (nv) => {
+  console.log(nv);
+}); */
 </script>
 
 <template>
   <div v-if="isResourceReady">
+    <div v-if="resourceElement.styles.length > 1" class="m-t-2">
+      <ClientOnly>
+        <SisdaiSelector
+          v-model="selectedStyle"
+          etiqueta="Variables disponibles"
+          texto_ayuda="Texto de ayuda."
+        >
+          <option v-for="estilo in resourceElement.styles" :key="estilo" :value="estilo">
+            {{ estilo }}
+          </option>
+        </SisdaiSelector>
+      </ClientOnly>
+    </div>
     <div class="m-y-2">
       <SisdaiLeyendaWms
         :consulta="gnoxyFetch"
         :fuente="findServer(resourceElement)"
+        :estilo="storeSelected.byPk(resourceElement.pk).estilo"
         :nombre="resourceElement.alternate"
         :titulo="resourceElement.title || 'cargando...'"
         :sin-control="true"

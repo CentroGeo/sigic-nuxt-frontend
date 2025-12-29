@@ -28,12 +28,16 @@ const conEstiloOSinGeometria = (value) => {
       // si es documento solo se puede editar los metadatos
       return value.texto === 'Metadatos';
     } else {
-      // es dataset
       if (isGeometricExtension(props.recurso.extent)) {
-        // si tiene geometría se puede editar el estilo y los metadatos de la capa
-        return value.texto === 'Metadatos' || value.texto === 'Estilo';
+        if (props.recurso.sourcetype === 'REMOTE') {
+          // Si es una capa remota, no se pueden cambiar los estilos
+          return value.texto === 'Metadatos';
+        } else {
+          // Si es capa local, se editan metadatos y estilos
+          return value.texto === 'Metadatos' || value.texto === 'Estilo';
+        }
       } else {
-        // si no se puede unir mediante su clave geoestadística y editar metadatos de la tabla
+        // Si es tabla, se pueden editar metadatos y agregar cevegeo
         return value.texto === 'Metadatos' || value.texto === 'Clave Geoestadística';
       }
     }
@@ -41,6 +45,10 @@ const conEstiloOSinGeometria = (value) => {
     return true;
   }
 };
+
+/**
+ * Redirecciona según sea necesario
+ */
 function irARutaConQuery(value) {
   if (
     value.texto === 'Metadatos' ||

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { buildUrl, defineGeomType, resourceTypeDic } from '~/utils/consulta';
+import { buildUrl, defineGeomType, getSLDs, resourceTypeDic } from '~/utils/consulta';
 
 export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => {
   const config = useRuntimeConfig();
@@ -67,24 +67,36 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
         ...params,
       };
       const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
-      const request = await gnoxyFetch(url);
-      const res = await request.json();
 
-      // Agregamos el tipo de geometría cuando sea necesario
-      if (resourceType === 'dataLayer') {
-        await Promise.all(
-          res.resources.map(async (d) => {
-            d.geomType = await defineGeomType(d);
-          })
-        );
+      try {
+        const resourcesRequest = await gnoxyFetch(url);
+        if (!resourcesRequest.ok) {
+          console.error('Falló la petición inicial por recursos con categoría');
+          return;
+        }
+
+        const resourcesRes = await resourcesRequest.json();
+        // Agregamos el tipo de geometría y los estilos disponibles
+        if (resourceType === 'dataLayer' || resourceType === 'dataTable') {
+          await Promise.all(
+            resourcesRes.resources.map(async (d) => {
+              const { defaultStyle, styleList } = await getSLDs(d);
+              d.default_style = defaultStyle;
+              d.styles = styleList;
+
+              if (resourceType === 'dataLayer') {
+                d.geomType = await defineGeomType(d);
+              }
+            })
+          );
+        }
+        const data = resourcesRes.resources;
+        resources[resourceType] = [...resources[resourceType], ...data];
+        return;
+      } catch {
+        console.error('Fracasó la petición de recursos por categoría');
+        return;
       }
-
-      // TODO: Agregar en los query params el filtrado para indicar que recursos con metadatos
-      // completos. Borrar la siguiente linea y cambiar data por datum
-      //const datum = res.resources;
-      //const data = datum.filter((d) => d.category);
-      const data = res.resources;
-      resources[resourceType] = [...resources[resourceType], ...data];
     },
     /**
      * Reescribe la lista de pks correspondientes a los enésimos elementos
@@ -106,17 +118,27 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
       // TODO: Si la petición falla porque el recurso es privado, eliminarlo de la store de seleccion
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         try {
-          const res = await gnoxyFetch(url);
-          if (!res.ok) {
-            console.error(`Resource fetch failed: ${res.status}`);
+          const resourceRes = await gnoxyFetch(url);
+          if (!resourceRes.ok) {
+            console.error(`Resource fetch failed: ${resourceRes.status}`);
             return 'Error';
           }
-          const resource = await res.json();
-          return resource.resource;
+          const resource = await resourceRes.json();
+          const resourceData = resource.resource;
+
+          // Agregamos los estilos
+          if (resourceData.resource_type === 'dataset') {
+            const { defaultStyle, styleList } = await getSLDs(resourceData);
+            resourceData.default_style = defaultStyle;
+            resourceData.styles = styleList;
+          }
+
+          return resourceData;
         } catch {
           console.warn(`Falló el intento ${attempt + 1}.`);
         }
       }
+      return;
     },
 
     /**

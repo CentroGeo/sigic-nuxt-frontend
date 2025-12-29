@@ -70,6 +70,8 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
           metadata.attribute_set = [];
         } else if (raw_attrs.includes(key)) {
           metadata[key] = metadataResponse[`raw_${key}`];
+        } else if (key === 'date_type' && metadataResponse['date_type'] === '') {
+          metadata[key] = 'creation';
         } else if (key === 'date') {
           const formatedDate = new Date(metadataResponse[key]).toISOString();
           metadata[key] = formatedDate.slice(0, 10);
