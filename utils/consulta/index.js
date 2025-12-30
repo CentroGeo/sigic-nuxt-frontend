@@ -402,12 +402,18 @@ export async function defineGeomType(resource) {
  * @returns { String, Array }
  */
 export async function fetchRemoteStyles(resource) {
-  //console.warn('solicitando los estilos de capas remotas');
   const { gnoxyFetch } = useGnoxyUrl();
   const targetLayerName = resource.alternate;
   const targetLayerStyles = [];
   let targetLayerDefaultStyle = null;
   const server = getWMSserver(resource);
+
+  // Los servicios arcgis no permiten multiples estilos
+  if (server.includes('arcgis')) {
+    return { targetLayerDefaultStyle, targetLayerStyles };
+  }
+
+  // Los servicios ogc sí lo permiten
   const url = `${server}service=wms&request=getCapabilities`;
   const request = await gnoxyFetch(url);
 
