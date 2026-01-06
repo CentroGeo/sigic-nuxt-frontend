@@ -78,19 +78,9 @@ defineExpose({
                 <p>Arratra o suelta tu archivo</p>
               </div>
 
-              <label
-                class="boton boton-secundario boton-chico"
-                for="identificadorCAMPOFILE"
-                @click="open()"
-              >
+              <label class="boton boton-secundario boton-chico" @click.stop="open()">
                 Elige Archivo
               </label>
-              <input
-                id="identificadorCAMPOFILE"
-                name="identificadorCAMPOFILE"
-                type="file"
-                @click="open()"
-              />
             </div>
           </div>
         </div>
@@ -126,7 +116,6 @@ defineExpose({
 
 <style lang="scss">
 .contenedor-dragnddrop {
-  // min-height: 281px;
   height: 300px;
   border-style: dashed;
   cursor: pointer;
