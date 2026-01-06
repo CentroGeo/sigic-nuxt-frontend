@@ -7,6 +7,7 @@ import {
   downloadWMS,
 } from '@/utils/consulta';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import {
   SisdaiCapaArcgis,
   SisdaiCapaWms,
@@ -211,7 +212,7 @@ onMounted(() => {
       <template #cuerpo>
         <div class="modal-alto-cuerpo">
           <div v-if="tagTitle === 'capa'">
-            <!-- <ClientOnly>
+            <ClientOnly>
               <SisdaiSelector
                 v-if="selectedElement.styles.length > 1"
                 v-model="seleccionVarDisponibles"
@@ -226,7 +227,7 @@ onMounted(() => {
                   {{ style }}
                 </option>
               </SisdaiSelector>
-            </ClientOnly> -->
+            </ClientOnly>
 
             <!-- <SisdaiMapa class="gema" :vista="{ extension: extentMap }"> -->
             <SisdaiMapa class="gema" :vista="{ extension: selectedElement.extent.coords }">
