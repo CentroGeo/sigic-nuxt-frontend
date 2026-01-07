@@ -5,18 +5,34 @@ definePageMeta({
   middleware: 'auth',
 });
 
+const config = useRuntimeConfig();
+const { gnoxyFetch } = useGnoxyUrl();
+const isLoading = ref(true);
 const status = ref('read');
+const tagsDict = {
+  first_name: 'Nombre',
+  last_name: 'Apellidos',
+  email: 'Dirección de correo electrónico',
+  organization: 'Nombre de la organización',
+  department: 'Laboratorio, Área o Departamento',
+  position: 'Posición',
+  city: 'Ciudad',
+  state: 'Entidad o provincia',
+  postal_code: 'Código Postal',
+  country: 'País',
+};
+
 const userInfo = ref({
-  Nombre: 'Daniela',
-  Apellidos: 'Fernández Acuña',
-  'Dirección de correo electrónico': 'danielaferac@conabio.gob.mx',
-  'Nombre de la organización': 'Comisión Nacional para el conocimiento y la Biodiversidad',
-  'Laboratorio, Área o Departamento': 'Secretaria General',
-  Posición: 'Subcoordinadora Técnica',
-  Ciudad: 'Ciudad de México',
-  'Entidad o provincia': 'Ciudad de México',
-  'Código Postal': '04000',
-  País: 'México',
+  first_name: null,
+  last_name: null,
+  email: null,
+  organization: null,
+  department: null,
+  position: null,
+  city: null,
+  state: null,
+  postal_code: null,
+  country: null,
 });
 
 function toggleStatus() {
@@ -26,11 +42,37 @@ function toggleStatus() {
     status.value = 'read';
   }
 }
+
+async function fetchData() {
+  const url = `${config.public.geonodeApi}/account/me/profile/`;
+  const infoRequest = await gnoxyFetch(url);
+  const info = await infoRequest.json();
+  userInfo.value['first_name'] = info.first_name || '-';
+  userInfo.value['last_name'] = info.last_name || '-';
+  userInfo.value['email'] = info.email || '-';
+  userInfo.value['organization'] = info.organization || '-';
+  userInfo.value['department'] = info.department || '-';
+  userInfo.value['position'] = info.position || '-';
+  userInfo.value['city'] = info.city || '-';
+  userInfo.value['state'] = info.state || '-';
+  userInfo.value['postal_code'] = info.postal_code || '-';
+  userInfo.value['country'] = info.country || '-';
+  isLoading.value = false;
+}
+
+function updateInfo() {
+  console.warn(userInfo.value);
+}
+
+onMounted(async () => {
+  fetchData();
+});
 </script>
 <template>
   <div>
     <h2>Información personal</h2>
-    <div class="flex columna-4">
+    <div v-if="isLoading">...Cargando</div>
+    <div v-else class="flex columna-4">
       <div class="columna-4" style="text-align: center">
         <img src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg" />
         <a class="m-t-1">Cambiar foto</a>
@@ -38,7 +80,7 @@ function toggleStatus() {
 
       <div v-if="status === 'read'" class="columna-12">
         <div v-for="(campo, index) in Object.keys(userInfo)" :key="index" class="m-b-2">
-          <label class="m-0">{{ campo }}</label>
+          <label class="m-0">{{ tagsDict[campo] }}</label>
           <p class="m-0">{{ userInfo[campo] }}</p>
         </div>
         <div class="flex m-y-6">
@@ -57,7 +99,7 @@ function toggleStatus() {
             v-for="(campo, index) in Object.keys(userInfo)"
             :key="index"
             v-model="userInfo[campo]"
-            :etiqueta="campo"
+            :etiqueta="tagsDict[campo]"
             :ejemplo="userInfo[campo]"
             tipo="text"
             class="m-b-2"
@@ -67,7 +109,11 @@ function toggleStatus() {
           <button class="boton-secundario boton-chico" aria-label="Cancelar" @click="toggleStatus">
             Cancelar
           </button>
-          <button class="boton-primario boton-chico" aria-label="Guardar Cambios">
+          <button
+            class="boton-primario boton-chico"
+            aria-label="Guardar Cambios"
+            @click="updateInfo"
+          >
             Guardar Cambios <span class="pictograma-guardar"></span>
           </button>
         </div>
