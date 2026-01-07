@@ -6,6 +6,7 @@ definePageMeta({
 });
 
 const config = useRuntimeConfig();
+const { data } = useAuth();
 const { gnoxyFetch } = useGnoxyUrl();
 const isLoading = ref(true);
 const status = ref('read');
@@ -19,7 +20,7 @@ const tagsDict = {
   city: 'Ciudad',
   state: 'Entidad o provincia',
   postal_code: 'Código Postal',
-  country: 'País',
+  country: 'País (Código alfa-3)',
 };
 
 const userInfo = ref({
@@ -47,21 +48,39 @@ async function fetchData() {
   const url = `${config.public.geonodeApi}/account/me/profile/`;
   const infoRequest = await gnoxyFetch(url);
   const info = await infoRequest.json();
-  userInfo.value['first_name'] = info.first_name || '-';
-  userInfo.value['last_name'] = info.last_name || '-';
-  userInfo.value['email'] = info.email || '-';
-  userInfo.value['organization'] = info.organization || '-';
-  userInfo.value['department'] = info.department || '-';
-  userInfo.value['position'] = info.position || '-';
-  userInfo.value['city'] = info.city || '-';
-  userInfo.value['state'] = info.state || '-';
-  userInfo.value['postal_code'] = info.postal_code || '-';
-  userInfo.value['country'] = info.country || '-';
+  userInfo.value['first_name'] = info.first_name || 'No suministrado';
+  userInfo.value['last_name'] = info.last_name || 'No suministrado';
+  userInfo.value['email'] = info.email || 'No suministrado';
+  userInfo.value['organization'] = info.organization || 'No suministrado';
+  userInfo.value['department'] = info.department || 'No suministrado';
+  userInfo.value['position'] = info.position || 'No suministrado';
+  userInfo.value['city'] = info.city || 'No suministrado';
+  userInfo.value['state'] = info.state || 'No suministrado';
+  userInfo.value['postal_code'] = info.postal_code || 'No suministrado';
+  userInfo.value['country'] = info.country || 'No suministrado';
   isLoading.value = false;
 }
 
-function updateInfo() {
+async function updateInfo() {
   console.warn(userInfo.value);
+  const invalidValues = ['', 'No suministrado'];
+  const token = data.value?.accessToken;
+  const body = {};
+
+  for (const key of Object.keys(userInfo.value)) {
+    if (invalidValues.includes(userInfo.value[key].trim())) {
+      body[key] = null;
+    } else {
+      body[key] = userInfo.value[key];
+    }
+  }
+  console.log(body);
+  const response = await $fetch('/api/info-personal', {
+    method: 'POST',
+    headers: { token: token },
+    body: body,
+  });
+  console.log(response);
 }
 
 onMounted(async () => {
