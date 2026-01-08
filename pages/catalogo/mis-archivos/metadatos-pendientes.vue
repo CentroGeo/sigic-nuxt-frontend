@@ -73,6 +73,7 @@ function updateResources() {
 }
 
 async function fetchNewData() {
+  isLoading.value = true;
   storeResources.resetBySection(section);
   await storeResources.getMyResourcesByPage(
     section,
@@ -80,6 +81,7 @@ async function fetchNewData() {
     tamanioPagina,
     params.value
   );
+  isLoading.value = false;
 }
 
 function applyAdvancedFilter() {
@@ -117,14 +119,12 @@ watch(
 );
 
 onMounted(async () => {
-  isLoading.value = true;
   storeFilters.resetAll();
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
   storeResources.getMyTotal('disponibles', params.value);
   storeResources.getMyTotal('pendientes', params.value);
   storeResources.getMyTotal('publicacion', params.value);
   await fetchNewData();
-  isLoading.value = false;
 });
 </script>
 

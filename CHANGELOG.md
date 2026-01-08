@@ -7,6 +7,16 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.2.2] - 08-01-2026
+
+### Arreglado (Fix)
+
+- Se ajustó el color del fondo de las tablas del módulo de consulta pues se perdía el texto en el modo oscuro
+- Se ajustó el estilo de algunos spinners de los módulos de consulta y catálogo porque se perdían en modo oscuro
+- Se ajustó el consumo de recursos a 10 por vez en el módulo de consulta
+- Se ajustó el estilo del titulo de los recursos en los modales del módulo de consulta para que no apareciera un scroll lateral
+- Se cambió la imagen que aparece al compartir el recurso por el icono del SIGIC
+
 ## [0.2.1] - 06-01-2026
 
 ### Arreglado (Fix)
@@ -38,6 +48,7 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.2.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.0.2...v0.1.0

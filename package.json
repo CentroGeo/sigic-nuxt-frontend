@@ -17,7 +17,11 @@
     "format-lint": "npm run format && npm run lint",
     "lint": "eslint . --fix",
     "lint:no-fix": "eslint . --ext .js,.ts,.vue",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:unit": "vitest --project unit",
+    "test:nuxt": "vitest --project nuxt"
   },
   "dependencies": {
     "@centrogeomx/sisdai-componentes": "^4.14.1",
@@ -44,6 +48,7 @@
     "@nuxt/eslint": "^1.7.0",
     "@nuxt/test-utils": "^3.19.2",
     "@types/formidable": "^3.4.5",
+    "@vue/test-utils": "^2.4.6",
     "@vueuse/nuxt": "^13.5.0",
     "eslint": "^9.32.0",
     "eslint-config-google": "^0.14.0",
@@ -52,6 +57,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.1.5",
     "prettier": "^3.6.2",
+    "vitest": "^4.0.16",
     "yargs": "^18.0.0"
   },
   "lint-staged": {
