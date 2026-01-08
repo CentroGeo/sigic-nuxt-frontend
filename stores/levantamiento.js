@@ -8,6 +8,7 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
     catalogoColapsado: ref(false),
     idNavegacionLateral: 'navegacionlateral-' + Math.random().toString(36).substring(2),
     existenProyectos: ref(false),
+    participantes: ref([]),
     existenParticipantes: ref(false),
     existeFormulario: ref(false),
     proyectos: ref([]),
@@ -161,6 +162,42 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
       } catch (error) {
         console.error('Error:', error);
         throw error;
+      }
+    },
+    async obtenerParticipantesPorProyecto(email, idProyecto) {
+      try {
+        const body = {
+          user_id: email,
+        };
+
+        const data = await $fetch(`${apiUrl}/projects/shared/${idProyecto}/user/list`, {
+          method: 'POST',
+          body: body,
+        });
+        console.log(data);
+        this.participantes = data.usuarios;
+        if (data.usuarios.length > 0) {
+          this.existenParticipantes = true;
+        }
+      } catch (err) {
+        console.error('Error cargando participantes:', err);
+      }
+    },
+    async agregarParticipanteProyecto(userEmail, email, rol, idProyecto) {
+      try {
+        const body = {
+          user_id: userEmail,
+          email: email,
+          rol: rol,
+        };
+
+        const data = await $fetch(`${apiUrl}/projects/shared/${idProyecto}/user/add`, {
+          method: 'POST',
+          body: body,
+        });
+        console.log(data);
+      } catch (err) {
+        console.error('Error guardando participante:', err);
       }
     },
   };

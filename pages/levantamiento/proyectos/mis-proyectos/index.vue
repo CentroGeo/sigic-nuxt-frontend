@@ -54,6 +54,10 @@ const nuevoProyecto = reactive({
 onMounted(() => {
   storeLevantamiento.obtenerMisProyectos(data.value?.user.email);
 });
+
+const eliminarProyecto = (idProyecto) => {
+  console.log(idProyecto);
+};
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeLevantamiento.catalogoColapsado">
@@ -164,7 +168,10 @@ onMounted(() => {
                 <button class="boton-pictograma boton-sin-contenedor-primario">
                   <span class="pictograma-archivo-descargar" aria-hidden="true"></span>
                 </button>
-                <button class="boton-pictograma boton-sin-contenedor-primario">
+                <button
+                  class="boton-pictograma boton-sin-contenedor-primario"
+                  @click="eliminarProyecto(proyecto.id)"
+                >
                   <span class="pictograma-eliminar" aria-hidden="true"></span>
                 </button>
               </div>

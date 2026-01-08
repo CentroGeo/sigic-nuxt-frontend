@@ -39,7 +39,7 @@ function cargarImagenDelContexto() {
     return;
   }
 
-  const imageUrl = `${config.public.levantamientoBackendUrl}/${proyecto.value.imagen}`;
+  const imageUrl = `${config.public.levantamientoBackendUrl}/${proyecto.value?.imagen}`;
   imagenPreview.value = imageUrl;
 }
 
