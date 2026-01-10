@@ -20,7 +20,7 @@ onUnmounted(() => (document.querySelector('body').className = ''));
           globo: 'Explorar',
         },
         {
-          pictograma: 'pictograma-capas',
+          pictograma: 'pic-sisdai-capas',
           ruta: `${ruta}/explorar/capas`,
           globo: 'Capas',
         },
@@ -30,7 +30,7 @@ onUnmounted(() => (document.querySelector('body').className = ''));
           globo: 'Datos tabulados',
         },
         {
-          pictograma: 'pictograma-documento',
+          pictograma: 'pic-sisdai-documento',
           ruta: `${ruta}/explorar/documentos`,
           globo: 'Documentos',
         },
