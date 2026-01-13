@@ -79,9 +79,11 @@ export const useFilteredResources = defineStore('filteredResources', () => {
       // Agregamos queryparams para buscar según propietario
       if (filters.owner !== 'todos') {
         if (filters.owner === 'privados') {
-          //queryParams['filter{owner.username}'] = userEmail;
-          queryParams['filter{is_published}'] = 'false';
-          queryParams['filter{is_approved}'] = 'false';
+          const { data } = useAuth();
+          const username = data.value.user.email;
+          queryParams['filter{owner.username}'] = username;
+          //queryParams['filter{is_published}'] = 'false';
+          // queryParams['filter{is_approved}'] = 'false';
         }
         if (filters.owner === 'catalogo' && filters.resourceType === 'dataLayer') {
           queryParams['filter{is_published}'] = 'true';

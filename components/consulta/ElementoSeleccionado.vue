@@ -13,6 +13,8 @@ const props = defineProps({
 });
 const resourceElement = computed(() => storeResources.findResource(props.selectedElement.pk));
 const isLoggedIn = ref(data.value ? true : false);
+const username = ref(data.value ? data.value.user.email : undefined);
+
 const goDown = () => storeSelected.changePosition(props.selectedElement.pk, -1);
 const goUp = () => storeSelected.changePosition(props.selectedElement.pk, +1);
 const emit = defineEmits(['openOpacity', 'openDownload', 'openTabla', 'openMapa', 'openOWS']);
@@ -67,12 +69,13 @@ const emit = defineEmits(['openOpacity', 'openDownload', 'openTabla', 'openMapa'
         </div>
       </div>
       <div v-if="resourceElement">
+        <!--
+        isLoggedIn &&
+        resourceElement.is_approved === false &&
+        resourceElement.is_published === false
+        -->
         <div
-          v-if="
-            isLoggedIn &&
-            resourceElement.is_approved === false &&
-            resourceElement.is_published === false
-          "
+          v-if="isLoggedIn && resourceElement.owner.username === username"
           class="id-tag flex m-b-1 m-t-0"
         >
           <span class="pictograma-persona"></span>
