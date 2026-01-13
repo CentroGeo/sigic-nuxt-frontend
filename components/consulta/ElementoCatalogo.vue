@@ -145,18 +145,15 @@ onUnmounted(() => {
     observer.unobserve(rootEl.value);
   }
 });
-
-console.log(catalogueElement.value);
-console.log(data.value.user.email);
 </script>
 
 <template>
   <div :id="`elemento-${catalogueElement.pk}`" ref="rootEl" class="tarjeta-catalogo">
-    <!-- v-if="
+    <!--
         isLoggedIn &&
         catalogueElement.is_approved === false &&
         catalogueElement.is_published === false
-      "-->
+        -->
     <div
       v-if="isLoggedIn && catalogueElement.owner.username === username"
       class="id-tag flex m-b-1 m-t-0"
