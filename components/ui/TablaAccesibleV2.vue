@@ -524,14 +524,18 @@ function irAmisArchivos() {
     <ClientOnly>
       <SisdaiModal ref="modalEliminar">
         <template #encabezado>
-          <h2 v-if="wasDeletionSuccesful === null">
-            ¿Deseas eliminar {{ resourceToDeleteTitle }}?
+          <h2 v-if="wasDeletionSuccesful === null || isBeingDeleted">
+            ¿Deseas eliminar <span class="header-title">{{ resourceToDeleteTitle }}</span
+            >?
           </h2>
           <p v-else></p>
         </template>
         <template #cuerpo>
           <!--Botones-->
-          <div v-if="wasDeletionSuccesful === null" class="flex m-y-2 flex-contenido-centrado">
+          <div
+            v-if="wasDeletionSuccesful === null || isBeingDeleted"
+            class="flex m-y-2 flex-contenido-centrado"
+          >
             <div class="contenedor flex flex-contenido-centrado">
               <button
                 type="button"
@@ -551,7 +555,7 @@ function irAmisArchivos() {
               </button>
             </div>
             <div v-if="isBeingDeleted" class="columna-3 color-invertir">
-              <img src="/img/loader.gif" alt="...Cargando" />
+              <img src="/img/loader.gif" class="color-invertir" alt="...Procesando" />
             </div>
           </div>
           <!--Alerta de que fracasó la eliminación-->
@@ -586,5 +590,12 @@ table {
     // min-width: 224px;
     width: fit-content;
   }
+}
+
+.header-title {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  height: 1.2em;
+  white-space: nowrap;
 }
 </style>
