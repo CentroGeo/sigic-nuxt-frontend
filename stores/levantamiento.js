@@ -12,36 +12,7 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
     existenParticipantes: ref(false),
     existeFormulario: ref(false),
     proyectos: ref([]),
-    proyectosPublicos: ref([
-      /* {
-        id: 1,
-        nombre: 'Registro de arte urbano en la ciudad de Mérida, Yucatán',
-        institucion: 'Nombre de institución',
-        autor: 'Nombre de autoría',
-        aportes: 16,
-      },
-      {
-        id: 2,
-        nombre: 'Mapa de puntos de basura acumulada',
-        institucion: 'Nombre de institución',
-        autor: 'Nombre de autoría',
-        aportes: 16,
-      },
-      {
-        id: 3,
-        nombre: 'Registro de cruces peatonales peligrosos',
-        institucion: 'Nombre de institución',
-        autor: 'Nombre de autoría',
-        aportes: 33,
-      },
-      {
-        id: 4,
-        nombre: 'Censo de luminarias en la colonia Jardines del Horizonte',
-        institucion: 'Nombre de institución',
-        autor: 'Nombre de autoría',
-        aportes: 121,
-      }, */
-    ]),
+    proyectosPublicos: ref([]),
     descargasAprobadas: ref([]),
     existenDescargasAprobadas: ref(false),
     descargasEnRevision: ref([]),
@@ -100,14 +71,22 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
       return this.proyectosPublicos.length;
     },
 
-    obtenerProyectoPorId(id) {
-      id = Number(id);
+    async obtenerProyectoPorId(email, id) {
+      try {
+        const body = {
+          email: email,
+        };
 
-      return (
-        this.proyectos.find((p) => p.id === id) ||
-        this.proyectosPublicos.find((p) => p.id === id) ||
-        null
-      );
+        const data = await $fetch(`${apiUrl}/projects/register/${id}`, {
+          method: 'POST',
+          body: body,
+        });
+
+        /* console.log(data.proyectos[0]); */
+        return data.proyectos[0];
+      } catch (err) {
+        console.error('Error cargando proyecto:', err);
+      }
     },
     obtenerTotalDescargasAprobadas() {
       return this.descargasAprobadas.length;

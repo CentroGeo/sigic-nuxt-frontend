@@ -1,6 +1,9 @@
 <script setup>
 import SisdaiAreaTexto from '@centrogeomx/sisdai-componentes/src/componentes/area-texto/SisdaiAreaTexto.vue';
+import SisdaiBotonesRadioGrupo from '@centrogeomx/sisdai-componentes/src/componentes/boton-radio-grupo/SisdaiBotonesRadioGrupo.vue';
+import SisdaiBotonRadio from '@centrogeomx/sisdai-componentes/src/componentes/boton-radio/SisdaiBotonRadio.vue';
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { useRoute } from 'vue-router';
 
@@ -21,8 +24,6 @@ const elementosPrivacidad = [
     description: 'Solo personas invitadas pueden participar',
   },
 ];
-
-const privacidadSeleccionada = ref('publico');
 
 const permisos = [
   {
@@ -47,11 +48,6 @@ const permisos = [
   },
 ];
 
-/* const usuariosAsignados = [
-  { email: 'persona_usuaria@centrogeo.edu.mx', permiso: 'Revisar', fecha: '17/10/2025' },
-  { email: 'persona_usuaria@centrogeo.edu.mx', permiso: 'Administrar', fecha: '17/10/2025' },
-]; */
-
 const { data } = useAuth();
 const route = useRoute();
 
@@ -59,6 +55,32 @@ const participante = reactive({
   email: '',
   rol: '',
 });
+
+const proyecto = ref(null);
+
+watch(
+  () => data.value?.user.email,
+  async (email) => {
+    if (!email) return;
+
+    proyecto.value = await storeLevantamiento.obtenerProyectoPorId(email, route.params.id);
+  },
+  { immediate: true }
+);
+
+const privacidadSeleccionada = ref('privado');
+
+watch(
+  () => proyecto.value?.es_privada,
+  (esPrivada) => {
+    if (esPrivada === true) {
+      privacidadSeleccionada.value = 'privado';
+    } else if (esPrivada === false) {
+      privacidadSeleccionada.value = 'publico';
+    }
+  },
+  { immediate: true }
+);
 
 onMounted(() => {
   storeLevantamiento.obtenerParticipantesPorProyecto(data.value?.user.email, route.params.id);
@@ -80,9 +102,17 @@ const formatearFecha = (fechaISO) => {
     year: 'numeric',
   });
 
-  console.log(fecha);
-
   return fecha;
+};
+
+const modalCambiarPermiso = ref(null);
+const participanteSeleccionado = ref(null);
+const permisoSeleccionado = ref('');
+
+const abrirModalCambiarPermiso = (participante) => {
+  participanteSeleccionado.value = participante;
+  permisoSeleccionado.value = participante.rol;
+  modalCambiarPermiso.value.abrirModal();
 };
 </script>
 
@@ -167,10 +197,10 @@ const formatearFecha = (fechaISO) => {
             </div>
             <div class="privacidad-input">
               <SisdaiSelector v-model="participante.rol" etiqueta="Permiso">
-                <option value="administrar">Administrar</option>
-                <option value="revisar">Revisar</option>
-                <option value="participar">Participar</option>
-                <option value="ver">Solo ver</option>
+                <option value="Administrar">Administrar</option>
+                <option value="Revisar">Revisar</option>
+                <option value="Participar">Participar</option>
+                <option value="Solo ver">Solo ver</option>
               </SisdaiSelector>
             </div>
           </div>
@@ -209,13 +239,65 @@ const formatearFecha = (fechaISO) => {
               </div>
             </div>
             <div class="flex">
-              <button class="boton-secundario boton boton-chico">Cambiar permiso</button>
+              <button
+                class="boton-secundario boton boton-chico"
+                @click="abrirModalCambiarPermiso(participante)"
+              >
+                Cambiar permiso
+              </button>
               <button class="boton-secundario boton boton-chico">Eliminar</button>
             </div>
           </div>
         </div>
       </div>
     </div>
+
+    <ClientOnly>
+      <SisdaiModal ref="modalCambiarPermiso">
+        <template #encabezado><h3>Cambiar permiso</h3></template>
+        <template #cuerpo>
+          <p class="m-t-0 m-b-3">
+            Selecciona los permisos que deseas asignarle a esta persona usuaria
+          </p>
+          <SisdaiBotonesRadioGrupo leyenda="" :es_vertical="true">
+            <SisdaiBotonRadio
+              v-model="permisoSeleccionado"
+              etiqueta="Administrar"
+              value="Administrar"
+              name="permiso-usuario"
+            />
+            <SisdaiBotonRadio
+              v-model="permisoSeleccionado"
+              etiqueta="Revisar"
+              value="Revisar"
+              name="permiso-usuario"
+            />
+            <SisdaiBotonRadio
+              v-model="permisoSeleccionado"
+              etiqueta="Participar"
+              value="Participar"
+              name="permiso-usuario"
+            />
+            <SisdaiBotonRadio
+              v-model="permisoSeleccionado"
+              etiqueta="Solo ver"
+              value="Solo ver"
+              name="permiso-usuario"
+            />
+          </SisdaiBotonesRadioGrupo>
+        </template>
+        <template #pie>
+          <button
+            type="button"
+            class="boton-secundario boton-chico"
+            @click="modalCambiarPermiso?.cerrarModal()"
+          >
+            Cerrar
+          </button>
+          <button type="button" class="boton-primario boton-chico">Asignar permiso</button>
+        </template>
+      </SisdaiModal>
+    </ClientOnly>
   </div>
 </template>
 

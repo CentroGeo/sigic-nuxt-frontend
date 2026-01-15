@@ -22,30 +22,37 @@ async function guardarArchivo(archivo) {
   imagenProyecto.value = archivo;
 }
 
-const proyecto = computed(() => storeLevantamiento.obtenerProyectoPorId(route.params.id));
-/* const proyecto = {
-  nombre: 'Mapa de puntos de basura acumulada',
-  institucion: 'CentroGeo',
-  categoria: 'Infraestructura y servicios',
-  objetivo:
-    'Crear un inventario detallado de puntos de basura acumulada en espacios públicos, documentando su ubicación, estado y el impacto ambiental, con el objetivo de promover la participación ciudadana en la limpieza y conservación del entorno.',
-  instrucciones:
-    '1.Completa el formulario de recolección de datos sobre puntos de basura acumulada.\n2.Proporciona información precisa sobre la ubicación de la basura.\n3.Indica la cantidad de basura presente.\n4.Tu colaboración ayudará a las autoridades a limpiar y mantener el área de manera efectiva.',
-}; */
+const { data } = useAuth();
 
-function cargarImagenDelContexto() {
-  if (!proyecto.value?.imagen) {
-    console.error('No se encontró imagen en el proyecto');
-    return;
-  }
-
-  const imageUrl = `${config.public.levantamientoBackendUrl}/${proyecto.value?.imagen}`;
-  imagenPreview.value = imageUrl;
-}
-
-onMounted(async () => {
-  cargarImagenDelContexto();
+const proyecto = ref({
+  nombre: '',
+  institucion: '',
+  descripcion: '',
+  objetivo: '',
+  especificaciones_multimedia: '',
+  imagen: null,
 });
+
+watch(
+  () => data.value?.user.email,
+  async (email) => {
+    if (!email) return;
+
+    proyecto.value = await storeLevantamiento.obtenerProyectoPorId(email, route.params.id);
+  },
+  { immediate: true }
+);
+
+watch(
+  proyecto,
+  (nuevoProyecto) => {
+    if (!nuevoProyecto?.imagen) return;
+
+    const imageUrl = `${config.public.levantamientoBackendUrl}/${nuevoProyecto.imagen}`;
+    imagenPreview.value = imageUrl;
+  },
+  { immediate: true }
+);
 
 onBeforeUnmount(() => {
   if (imagenPreview.value) {

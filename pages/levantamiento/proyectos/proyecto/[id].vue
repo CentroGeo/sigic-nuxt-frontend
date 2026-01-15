@@ -13,7 +13,18 @@ definePageMeta({
 const router = useRouter();
 const route = useRoute();
 const storeLevantamiento = useLevantamientoStore();
-const proyecto = computed(() => storeLevantamiento.obtenerProyectoPorId(route.params.id));
+const { data } = useAuth();
+const proyecto = ref(null);
+
+watch(
+  () => data.value?.user.email,
+  async (email) => {
+    if (!email) return;
+
+    proyecto.value = await storeLevantamiento.obtenerProyectoPorId(email, route.params.id);
+  },
+  { immediate: true }
+);
 
 const preguntas = computed(() => {
   const ficha = proyecto.value?.ficha_proyecto;
@@ -27,45 +38,6 @@ const preguntas = computed(() => {
     return [];
   }
 });
-/* const preguntas = [
-  {
-    id: 1,
-    tipo: 'abierta',
-    pregunta: '¿Qué observaciones adicionales deseas compartir sobre este punto?',
-    instrucciones:
-      'Describe con tus palabras cualquier detalle relevante: tipo de residuos, frecuencia con la que se acumulan o si hay personas afectadas.',
-    obligatorio: true,
-  },
-  {
-    id: 2,
-    tipo: 'unica',
-    pregunta: '¿Qué tipo de residuos predominan en este punto?',
-    instrucciones: 'Selecciona la opción que mejor describa el tipo de residuos observados.',
-    obligatorio: true,
-  },
-  {
-    id: 3,
-    tipo: 'multiple',
-    pregunta: '¿Qué factores crees que contribuyen a la acumulación de basura en este sitio?',
-    instrucciones: 'Marca todas las opciones que apliquen',
-    obligatorio: true,
-  },
-  {
-    id: 4,
-    tipo: 'condicional',
-    pregunta: '¿Has reportado anteriormente este punto a las autoridades?',
-    instrucciones: '¿A qué dependencia o programa hiciste el reporte y cuándo?',
-    obligatorio: true,
-  },
-  {
-    id: 5,
-    tipo: 'multimedia',
-    pregunta: '',
-    instrucciones:
-      'Adjunta hasta cuatro fotos donde se aprecie claramente el lugar y los residuos. (Formatos permitidos: JPG, PNG, máximo 5 MB)',
-    obligatorio: false,
-  },
-]; */
 
 const modalSolicitarDescarga = ref(null);
 const modalDescargaSolicitada = ref(null);
