@@ -388,7 +388,7 @@ onMounted(async () => {
         <p
           v-else
           style="font-size: 120px"
-          class="pictograma-persona p-0 m-0"
+          class="pictograma-persona texto-color-acento p-0 m-0"
           aria-label="Pictograma de persona"
         ></p>
         <a class="m-t-1" @click="updateAvatar">Cambiar foto</a>
