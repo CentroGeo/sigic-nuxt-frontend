@@ -11,9 +11,16 @@ const config = useRuntimeConfig();
 const { data } = useAuth();
 const { gnoxyFetch } = useGnoxyUrl();
 const isLoading = ref(true);
+const dragNdropAvatar = ref(null);
+const img_files = ['.jpg', '.jpeg', '.png', '.webp'];
+const failedFetching = ref(false);
 const isUpdating = ref(false);
+const wasAvatarUpdated = ref(false);
+const isAvatarUpdating = ref(false);
+const didAvatarUpdateFail = ref(null);
 const status = ref('read');
 const modalUpdateInfo = ref(null);
+const modalUpdateAvatar = ref(null);
 const wasUpdateSuccesful = ref(null);
 const editableFields = [
   'first_name',
@@ -250,6 +257,7 @@ const userInfo = ref({
   state: null,
   postal_code: null,
   country: null,
+  avatar_url: null,
 });
 
 function toggleStatus() {
@@ -261,19 +269,30 @@ function toggleStatus() {
 }
 
 async function fetchData() {
+  failedFetching.value = false;
   const url = `${config.public.geonodeApi}/account/me/profile/`;
-  const infoRequest = await gnoxyFetch(url);
-  const info = await infoRequest.json();
-  userInfo.value['first_name'] = info.first_name || 'No suministrado';
-  userInfo.value['last_name'] = info.last_name || 'No suministrado';
-  userInfo.value['email'] = info.email || 'No suministrado';
-  userInfo.value['organization'] = info.organization || 'No suministrado';
-  userInfo.value['department'] = info.department || 'No suministrado';
-  userInfo.value['position'] = info.position || 'No suministrado';
-  userInfo.value['city'] = info.city || 'No suministrado';
-  userInfo.value['state'] = info.state || 'No suministrado';
-  userInfo.value['postal_code'] = info.postal_code || 'No suministrado';
-  userInfo.value['country'] = countriesDict[info.country] || 'No suministrado';
+  try {
+    const infoRequest = await gnoxyFetch(url);
+    if (!infoRequest.ok) {
+      failedFetching.value = true;
+    } else {
+      const info = await infoRequest.json();
+      userInfo.value['first_name'] = info.first_name || 'No suministrado';
+      userInfo.value['last_name'] = info.last_name || 'No suministrado';
+      userInfo.value['email'] = info.email || 'No suministrado';
+      userInfo.value['organization'] = info.organization || 'No suministrado';
+      userInfo.value['department'] = info.department || 'No suministrado';
+      userInfo.value['position'] = info.position || 'No suministrado';
+      userInfo.value['city'] = info.city || 'No suministrado';
+      userInfo.value['state'] = info.state || 'No suministrado';
+      userInfo.value['postal_code'] = info.postal_code || 'No suministrado';
+      userInfo.value['country'] = countriesDict[info.country] || 'No suministrado';
+      userInfo.value['avatar_url'] =
+        info.avatar_url || 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg';
+    }
+  } catch {
+    failedFetching.value = true;
+  }
   isLoading.value = false;
 }
 
@@ -304,6 +323,46 @@ async function updateInfo() {
   isUpdating.value = false;
 }
 
+function updateAvatar() {
+  wasAvatarUpdated.value = false;
+  didAvatarUpdateFail.value = null;
+  modalUpdateAvatar.value?.abrirModal();
+}
+
+async function guardarImagen(files) {
+  isAvatarUpdating.value = true;
+  wasAvatarUpdated.value = true;
+  const { data } = useAuth();
+  if (img_files.map((end) => files[0]?.name.endsWith(end)).includes(true)) {
+    // Enviamos SOLO el primer file
+    const formData = new FormData();
+    formData.append('token', data.value?.accessToken);
+    formData.append('image', files[0]);
+
+    const response = await fetch('/api/update-avatar/', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      didAvatarUpdateFail.value = true;
+      isAvatarUpdating.value = false;
+    } else {
+      const status = await response.text();
+      if (status === 'Error') {
+        didAvatarUpdateFail.value = true;
+        isAvatarUpdating.value = false;
+      } else {
+        userInfo.value.avatar_url = status;
+        didAvatarUpdateFail.value = false;
+        isAvatarUpdating.value = false;
+      }
+    }
+  } else {
+    dragNdropAvatar.value?.archivoNoValido();
+  }
+}
+
 onMounted(async () => {
   fetchData();
 });
@@ -314,14 +373,28 @@ onMounted(async () => {
     <div v-if="isLoading" class="flex flex-contenido-centrado m-y-5">
       <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
     </div>
+    <div v-else-if="!isLoading && failedFetching" class="m-t-2 m-b-2">
+      <div
+        class="fondo-color-error flex flex-contenido-centrado ancho-lectura borde-redondeado-16 sin-seleccion"
+      >
+        <p class="texto-color-error m-1">
+          No se pudo recuperar la información. Revisa tu conexión a internet e intentalo de nuevo
+          más tarde.
+        </p>
+      </div>
+    </div>
     <div v-else class="flex columna-4">
       <div class="columna-4" style="text-align: center">
-        <img src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg" />
-        <a class="m-t-1">Cambiar foto</a>
+        <img :src="userInfo.avatar_url" />
+        <a class="m-t-1" @click="updateAvatar">Cambiar foto</a>
       </div>
 
       <div v-if="status === 'read'" class="columna-12">
-        <div v-for="(campo, index) in Object.keys(userInfo)" :key="index" class="m-b-2">
+        <div
+          v-for="(campo, index) in Object.keys(userInfo).filter((d) => d != 'avatar_url')"
+          :key="index"
+          class="m-b-2"
+        >
           <label class="m-0">{{ tagsDict[campo] }}</label>
           <p class="m-0">{{ userInfo[campo] }}</p>
         </div>
@@ -406,6 +479,58 @@ onMounted(async () => {
             >
               <span class="pictograma-alerta" /> No pudimos actualizar la información. Revisa tu
               conexión e intentalo de nuevo más tarde.
+            </p>
+          </div>
+        </template>
+      </SisdaiModal>
+    </ClientOnly>
+
+    <ClientOnly>
+      <SisdaiModal ref="modalUpdateAvatar">
+        <template #encabezado>
+          <h1>Actualizar avatar</h1>
+        </template>
+        <template #cuerpo>
+          <ClientOnly>
+            <CatalogoElementoDragNdDrop
+              v-if="!isAvatarUpdating && !wasAvatarUpdated"
+              ref="dragNdropAvatar"
+              @pasar-archivo="(i) => guardarImagen(i)"
+            />
+          </ClientOnly>
+          <div v-if="isAvatarUpdating" class="m-y-2">
+            <div class="flex flex-contenido-centrado">
+              <img
+                src="/img/loader.gif"
+                class="color-invertir"
+                alt="...Actualizando Avatar"
+                heigh="160px"
+                width="160px"
+              />
+            </div>
+            <p style="text-align: center">Actualizando Avatar</p>
+          </div>
+          <div
+            v-if="wasAvatarUpdated && didAvatarUpdateFail === true"
+            class="flex"
+            style="gap: 0px"
+          >
+            <p
+              class="columna-14 texto-color-error fondo-color-error borde borde-color-error p-2 borde-redondeado-8"
+            >
+              <span class="pictograma-alerta" /> No pudimos actualizar tu avatar. Revisa tu conexión
+              e intentalo de nuevo más tarde.
+            </p>
+          </div>
+          <div
+            v-if="wasAvatarUpdated && didAvatarUpdateFail === false"
+            class="flex"
+            style="gap: 0px"
+          >
+            <p
+              class="columna-14 texto-color-confirmacion fondo-color-confirmacion borde borde-color-confirmacion p-2 borde-redondeado-8"
+            >
+              <span class="pictograma-aprobado" /> Actualización exitosa.
             </p>
           </div>
         </template>
