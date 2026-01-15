@@ -287,8 +287,7 @@ async function fetchData() {
       userInfo.value['state'] = info.state || 'No suministrado';
       userInfo.value['postal_code'] = info.postal_code || 'No suministrado';
       userInfo.value['country'] = countriesDict[info.country] || 'No suministrado';
-      userInfo.value['avatar_url'] =
-        info.avatar_url || 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg';
+      userInfo.value['avatar_url'] = info.avatar_url;
     }
   } catch {
     failedFetching.value = true;
@@ -385,7 +384,13 @@ onMounted(async () => {
     </div>
     <div v-else class="flex columna-4">
       <div class="columna-4" style="text-align: center">
-        <img :src="userInfo.avatar_url" />
+        <img v-if="userInfo.avatar_url" :src="userInfo.avatar_url" />
+        <p
+          v-else
+          style="font-size: 120px"
+          class="pictograma-persona p-0 m-0"
+          aria-label="Pictograma de persona"
+        ></p>
         <a class="m-t-1" @click="updateAvatar">Cambiar foto</a>
       </div>
 
