@@ -24,6 +24,7 @@ const { resourceElement } = toRefs(props);
 const isResourceReady = ref(false);
 const selectedStyle = ref(null);
 const actualButtons = ref({});
+const serverType = ref(null);
 const optionsButtons = ref([
   {
     excludeFor: 'none',
@@ -89,29 +90,6 @@ const optionsButtons = ref([
   },
 ]);
 
-async function updateFunctions() {
-  let buttons = optionsButtons.value;
-  if (resourceElement.value.subtype === 'raster') {
-    buttons = buttons.filter((d) => d.excludeFor !== 'noTables');
-  }
-  if (resourceElement.value.sourcetype === 'REMOTE') {
-    // Se excluye el botón de descargar para remotos
-    buttons = buttons.filter((d) => d.excludeFor !== 'remotes');
-    const resourcehasWFS = await hasWFS(resourceElement.value, 'table');
-    const resourcehasFeatureServer = await hasFeatureServer(resourceElement.value);
-    const hasTable = resourcehasWFS || resourcehasFeatureServer;
-    // Se excluye el botón para ver tablas en caso de que el archivo remoto no permita consultar la tabla
-    if (hasTable === false) {
-      buttons = buttons.filter((d) => d.excludeFor !== 'noTables');
-    }
-  }
-  if (resourceElement.value.is_approved === false && resourceElement.value.is_published === false) {
-    // Se excluye el botón OWS para recursos privados
-    buttons = buttons.filter((d) => d.label !== 'Vínculo OWS');
-  }
-  actualButtons.value = buttons;
-}
-
 async function shareOws() {
   let server;
   if (resourceElement.value.sourcetype === 'REMOTE') {
@@ -122,6 +100,36 @@ async function shareOws() {
   const owsLink = `${server}/${resourceElement.value.alternate.replace(':', '/')}/ows`;
   emit('owsClicked', owsLink);
 }
+
+async function updateFunctions() {
+  // Primero averiguamos el tipo de servidor
+  serverType.value = findServer(resourceElement.value).includes('arcgis') ? 'arcgis' : 'ogc';
+  let buttons = optionsButtons.value;
+  if (resourceElement.value.subtype === 'raster') {
+    buttons = buttons.filter((d) => d.excludeFor !== 'noTables');
+  }
+  if (resourceElement.value.sourcetype === 'REMOTE') {
+    // Se excluye el botón de descargar para remotos
+    buttons = buttons.filter((d) => d.excludeFor !== 'remotes');
+
+    // Averiguamos si podemos consumir la tabla de atribunos o no
+    let hasTable;
+    if (serverType.value === 'arcgis') {
+      hasTable = await hasFeatureServer(resourceElement.value);
+    } else {
+      hasTable = await hasWFS(resourceElement.value, 'table');
+    }
+    if (hasTable === false) {
+      buttons = buttons.filter((d) => d.excludeFor !== 'noTables');
+    }
+  }
+  // Se excluye el botón OWS para recursos privados
+  if (resourceElement.value.is_approved === false && resourceElement.value.is_published === false) {
+    buttons = buttons.filter((d) => d.label !== 'Vínculo OWS');
+  }
+  actualButtons.value = buttons;
+}
+
 watch(resourceElement, async () => {
   await updateFunctions();
   isResourceReady.value = true;
@@ -133,6 +141,7 @@ onMounted(async () => {
   if (resourceElement.value.title) {
     await updateFunctions();
     isResourceReady.value = true;
+
     emit('resourceReady');
   }
 });
