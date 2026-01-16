@@ -8,8 +8,9 @@ const storeCatalogo = useCatalogoStore();
     </template>
     <template #visualizador>
       <main id="principal" class="contenedor">
-        <h2>Servicios remotos</h2>
-        <CatalogoCatalogosInstitucionales />
+        <!--         <h2>Servicios remotos</h2>
+ -->
+        <!-- <CatalogoCatalogosInstitucionales /> -->
         <CatalogoCatalogosUsuarios />
       </main>
     </template>

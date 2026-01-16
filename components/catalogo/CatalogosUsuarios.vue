@@ -11,7 +11,7 @@ const fetchStatus = ref(null);
 const seleccionOrden = ref('-id');
 const inputSearch = ref(null);
 const paginaActual = ref(0);
-const tamanioPagina = 5;
+const tamanioPagina = 10;
 const totalHarvesters = ref();
 const totalPags = computed(() => Math.ceil(totalHarvesters.value / tamanioPagina));
 const queryParams = ref({
@@ -29,14 +29,14 @@ const statusDict = {
  * Esta petición obtiene el total de servicios externos
  */
 async function getTotal() {
-  const url = `${config.public.geonodeApi}/harvesters/`;
-  const requestHarvesters = await gnoxyFetch(url);
-  if (!requestHarvesters.ok) {
-    const error = await requestHarvesters.json();
-    console.error('Falló petición de harvesters:', error);
+  const url = `${config.public.geonodeApi}/services/`;
+  const requestServices = await gnoxyFetch(url);
+  if (!requestServices.ok) {
+    const error = await requestServices.json();
+    console.error('Falló petición de servicios:', error);
   }
-  const resHarvesters = await requestHarvesters.json();
-  return resHarvesters.total;
+  const resServices = await requestServices.json();
+  return resServices.count;
 }
 
 /**
@@ -45,7 +45,7 @@ async function getTotal() {
  */
 async function fetchResources() {
   isLoadingPage.value = true;
-  const { status, data } = await fetchHarvesters(true, queryParams.value);
+  const { status, data } = await fetchHarvesters(queryParams.value);
   harvesters.value = data;
   fetchStatus.value = status;
   isLoadingPage.value = false;
@@ -114,8 +114,7 @@ onMounted(() => {
 <template>
   <main>
     <div id="servicios-institucionales">
-      <h3>Explora catálogos externos preconectados</h3>
-      <div class="flex">
+      <div class="flex m-t-3 m-b-2">
         <!-- Selector Orden -->
         <div class="columna-8">
           <ClientOnly>
@@ -164,6 +163,11 @@ onMounted(() => {
           </div>
         </div>
       </div>
+      <div class="flex">
+        <!--         <h3>Explora catálogos externos preconectados</h3> -->
+        <h2>Servicios Remotos</h2>
+        <UiNumeroElementos :numero="totalHarvesters" />
+      </div>
       <p>
         Explora los recursos de información de catálogos precargados, al importarlos podrás
         agregarlos a tus archivos y utilizarlos en la plataforma SIGIC. Ten en cuenta que deberás
@@ -203,16 +207,31 @@ onMounted(() => {
         <thead>
           <tr>
             <th>Nombre de servicio externo</th>
+            <!--<th>Tipo</th>-->
+            <th>Status</th>
             <th>Recursos importados</th>
             <th>Recursos pendientes</th>
             <th>URL</th>
-            <!--<th>Tipo</th>-->
-            <th>Status</th>
           </tr>
         </thead>
         <tbody v-if="!isLoadingPage">
           <tr v-for="harvester in harvesters" :key="harvester.id">
             <td>{{ harvester.title }}</td>
+            <!--<td>Servcio de Mapas</td>-->
+            <td>
+              <div
+                v-if="harvester.status === 'ready'"
+                class="texto-color-confirmacion texto-centrado fondo-color-confirmacion borde borde-color-confirmacion borde-redondeado-8 p-1"
+              >
+                {{ statusDict[harvester.status] }}
+              </div>
+              <div
+                v-else
+                class="texto-color-alerta texto-centrado fondo-color-alerta borde borde-color-alerta borde-redondeado-8 p-1"
+              >
+                {{ statusDict[harvester.status] }}
+              </div>
+            </td>
             <td>
               <nuxt-link @click="irARutaQuery(harvester, '')">
                 {{ harvester.imported_resources }}
@@ -228,21 +247,6 @@ onMounted(() => {
               <a :href="harvester.remote_url" target="_blank" rel="noopener noreferrer">
                 {{ harvester.remote_url }}
               </a>
-            </td>
-            <!--<td>Servcio de Mapas</td>-->
-            <td>
-              <div
-                v-if="harvester.status === 'ready'"
-                class="texto-color-confirmacion texto-centrado fondo-color-confirmacion borde borde-color-confirmacion borde-redondeado-8 p-1"
-              >
-                {{ statusDict[harvester.status] }}
-              </div>
-              <div
-                v-else
-                class="texto-color-alerta texto-centrado fondo-color-alerta borde borde-color-alerta borde-redondeado-8 p-1"
-              >
-                {{ statusDict[harvester.status] }}
-              </div>
             </td>
           </tr>
         </tbody>
