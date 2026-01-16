@@ -172,6 +172,7 @@ watch(selectedStyle, (nv) => {
     </div>
     <div class="m-y-2">
       <SisdaiLeyendaWms
+        v-if="serverType != 'arcgis'"
         :consulta="gnoxyFetch"
         :fuente="findServer(resourceElement)"
         :estilo="storeSelected.byPk(resourceElement.pk).estilo"
@@ -180,6 +181,11 @@ watch(selectedStyle, (nv) => {
         :sin-control="true"
         :sin-control-clases="true"
       />
+      <div v-else>
+        Servidor: {{ findServer(resourceElement).replace('?', '') }} <br />
+        Capa:
+        {{ resourceElement.alternate.split(':')[1] }}
+      </div>
     </div>
 
     <div v-if="resourceElement.title" class="flex flex-contenido-final">
