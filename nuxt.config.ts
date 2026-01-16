@@ -7,7 +7,7 @@ const basePath = appBasePath.replace(/\/+$/, '');
 const authBaseUrl = process.env.NUXT_PUBLIC_AUTH_BASE_URL;
 const originEnvKey = isDev ? undefined : 'NUXT_AUTH_ORIGIN';
 
-const metaImg = 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg';
+const metaImg = '/img/icono_sigic.png';
 const metaDescription =
   'Sistema Integral de Gestión de Información Científica. Integra, visualiza y aprovecha el conocimiento científico de México.';
 
