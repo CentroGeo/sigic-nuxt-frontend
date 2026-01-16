@@ -76,8 +76,6 @@ const irARutaQuery = (v, destino) => {
         id: v.id,
         title: v.title,
         total: v.imported_resources + v.to_attend_resources,
-        /*         unique_identifier: v.unique_identifier,
-        remote_resource_type: v.remote_resource_type, */
       },
     });
   } else {
@@ -86,8 +84,6 @@ const irARutaQuery = (v, destino) => {
       query: {
         id: v.id,
         title: v.title,
-        /*         unique_identifier: v.unique_identifier,
-        remote_resource_type: v.remote_resource_type, */
       },
     });
   }
