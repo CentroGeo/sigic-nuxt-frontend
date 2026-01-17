@@ -89,6 +89,7 @@ function updateResources() {
   tableResources.value = resources.value.map((d) => {
     return {
       titulo: d.resource.title,
+      pk: `${d.resource.pk}`,
       tipo_recurso: tipoRecurso(d.resource),
       categoria: d.resource.category,
       actualizacion: formatearFecha(d.updated_at),

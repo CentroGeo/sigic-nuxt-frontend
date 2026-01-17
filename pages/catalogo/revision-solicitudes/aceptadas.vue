@@ -55,7 +55,7 @@ function updateResources() {
   // obteniendo datos por las props de la tabla
   tableResources.value = resources.value.map((d) => {
     return {
-      pk: d.resource.pk,
+      pk: `${d.resource.pk}`,
       titulo: d.resource.title,
       tipo_recurso: tipoRecurso(d.resource),
       actualizacion: d.updated_at,

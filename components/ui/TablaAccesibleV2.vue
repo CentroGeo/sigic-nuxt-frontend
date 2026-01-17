@@ -82,15 +82,27 @@ function irARutaConQuery(recurso) {
 const revisando = ref(false);
 const route = useRoute();
 async function openResourceReview(resource) {
-  // console.log('resource.pk', resource.pk);
   if (resource.tipo_recurso === 'Documentos') {
     storeCatalogo.previousPath = route.path;
     await navigateTo({
       path: `/catalogo/revision-solicitudes/revisar/${resource.pk}`,
-      query: { pk: resource.pk },
+      query: { pk: resource.pk, pk_request: resource.pk_request },
     });
     revisando.value = true;
   }
+  // if (resource.tipo_recurso === 'Capa') {
+  //   storeCatalogo.previousPath = route.path;
+  //   useSelectedResources2Store().add(
+  //     new SelectedLayer({ pk: resource.pk }),
+  //     resourceTypeDic.dataLayer
+  //   );
+  //   await navigateTo({
+  //     path: `/catalogo/revision-solicitudes/revisar/${resource.pk}`,
+  //     query: { pk: resource.pk },
+  //   });
+  //   // await navigateTo('/consulta/capas');
+  //   revisando.value = true;
+  // }
 }
 
 const modalAgregarMisRevisiones = ref(null);
@@ -113,20 +125,23 @@ const configEnv = useRuntimeConfig();
  */
 async function addRequestToMyReviews() {
   try {
+    console.log('pkResource.value', pkResource.value);
     // petición para añadir la solicitud a mis revisiones
     const response = await $fetch(`${configEnv.public.basePath}/api/solicitudes`, {
       method: 'POST',
-      body: {
+      body: JSON.stringify({
         pk: pkResource.value,
         token: token,
         status: 'on_review',
         rejection_reason: 'En revisión.', // no se puede quedar vacío ''
-      },
+      }),
     });
     console.warn(response);
-    modalAgregarMisRevisiones.value.cerrarModal();
-    // ir a Mis revisiones
-    await navigateTo('/catalogo/revision-solicitudes/mis-revisiones');
+    if (response !== undefined) {
+      modalAgregarMisRevisiones.value.cerrarModal();
+      // ir a Mis revisiones
+      await navigateTo('/catalogo/revision-solicitudes/mis-revisiones');
+    }
   } catch (error) {
     console.error(error);
   }

@@ -10,6 +10,7 @@ const storeCatalogo = useCatalogoStore();
 // Recuperamos información a partir de la url
 const route = useRoute();
 const selectedPk = route.query.pk;
+const selectedPkRequest = route.query.pk_request;
 
 const previousPath = computed(() => storeCatalogo.previousPath || '');
 
@@ -32,7 +33,7 @@ async function aceptarSolicitud() {
     const response = await $fetch(`${configEnv.public.basePath}/api/solicitudes`, {
       method: 'POST',
       body: {
-        pk: selectedPk,
+        pk: selectedPkRequest,
         token: token,
         status: 'published',
         rejection_reason:
@@ -53,7 +54,7 @@ async function noAceptarSolicitud() {
     const response = await $fetch(`${configEnv.public.basePath}/api/solicitudes`, {
       method: 'POST',
       body: {
-        pk: selectedPk,
+        pk: selectedPkRequest,
         token: token,
         status: 'rejected',
         rejection_reason: areaMensajeNoAceptar.value,
@@ -73,15 +74,18 @@ async function agregarAMisSolicitudes() {
     const response = await $fetch(`${configEnv.public.basePath}/api/solicitudes`, {
       method: 'POST',
       body: {
-        pk: selectedPk,
+        pk: selectedPkRequest,
         token: token,
         status: 'on_review',
         rejection_reason: 'En revisión.', // no se puede quedar vacío ''
       },
     });
     console.warn(response);
-    modalAgregar.value.cerrarModal();
-    await navigateTo('/catalogo/revision-solicitudes/mis-revisiones');
+    if (response !== undefined) {
+      modalAgregar.value.cerrarModal();
+      // ir a Mis revisiones
+      await navigateTo('/catalogo/revision-solicitudes/mis-revisiones');
+    }
   } catch (error) {
     console.error(error);
   }
