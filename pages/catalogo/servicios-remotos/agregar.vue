@@ -1,5 +1,4 @@
 <script setup>
-import { wait } from '@/utils/consulta';
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
@@ -10,42 +9,60 @@ definePageMeta({
     class: '',
   },
 });
-const config = useRuntimeConfig();
+//const config = useRuntimeConfig();
 const { gnoxyFetch } = useGnoxyUrl();
-const selecTipoFuente = ref('');
+const campoTipo = ref('');
 const campoURL = ref('');
-const urlYaExiste = ref(null);
+//const urlYaExiste = ref(null);
 const campoNombre = ref('');
+const campoDescripcion = ref('');
 const responseOk = ref(null);
-const harvesterStatus = ref(null);
+//const harvesterStatus = ref(null);
 const importingResources = ref(false);
 const newHarvester = ref();
-const opTipoFuente = [
+const tiposFuente = [
   {
     id: 0,
-    servicio: 'Servicio de Mapas Web',
-    tipo: 'WMS',
-    value: 'geonode.harvesting.harvesters.wms.OgcWmsHarvester',
+    servicio: 'Detección Automática',
+    tipo: 'Detección Automática',
+    value: 'AUTO',
   },
   {
     id: 1,
-    servicio: 'Geonode (servicios de Mapas Web)',
-    tipo: 'GN_WMS',
-    value: 'geonode.harvesting.harvesters.wms.OgcWmsHarvester',
+    servicio: 'OGC Web Service Genérico',
+    tipo: 'OGC Web Service Genérico',
+    value: 'OWS',
   },
   {
     id: 2,
-    servicio: 'Servicio ArcGIS REST MapServer',
-    tipo: 'REST_MAP',
-    value: 'geonode.harvesting.harvesters.arcgis.ArcgisHarvesterWorker',
+    servicio: 'Web Map Service',
+    tipo: 'Web Map Service',
+    value: 'WMS',
   },
   {
     id: 3,
-    servicio: 'Servcio ArcGIS REST ImageServer',
-    tipo: 'REST_IMG',
-    value: 'geonode.harvesting.harvesters.arcgis.ArcgisHarvesterWorker',
+    servicio: 'GeoNode Web Map Service',
+    tipo: 'GeoNode Web Map Service',
+    value: 'GN_WMS',
   },
-  /* { id: 4, servicio: 'El nuevo', tipo: 'FILE' }, */
+  {
+    id: 4,
+    servicio: 'ArcGIS REST MapServer',
+    tipo: 'ArcGIS REST MapServer',
+    value: 'REST_MAP',
+  },
+  {
+    id: 5,
+    servicio: 'ArcGIS REST ImageServer',
+    tipo: 'ArcGIS REST ImageServer',
+    value: 'REST_IMG',
+  },
+  {
+    id: 6,
+    servicio: 'Archivo (csv, json, geojson, xls, xlsx)',
+    tipo: 'Archivo (csv, json, geojson, xls, xlsx)',
+    value: 'FILE',
+  },
 ];
 const isLoading = ref(false);
 const error = ref(null);
@@ -62,32 +79,32 @@ function irAImportarRecursos() {
   });
 }
 
-async function checkCapabilities() {
-  //console.log('selecTipoFuente', selecTipoFuente.value);
-  const url = selecTipoFuente.value.includes('arcgis')
-    ? `${campoURL.value}?f=json&pretty=true`
-    : `${campoURL.value}?service=WMS&request=GetCapabilities`;
-  //console.log(url);
+async function validateUrl() {
+  const serverType = campoURL.value.includes('arcgis') ? 'arcgis' : 'ogc';
+  const url =
+    serverType === 'arcgis'
+      ? `${campoURL.value}?f=json`
+      : `${campoURL.value}?service=WMS&request=GetCapabilities`;
+  let isValid;
+
   try {
-    const requestCapabilities = await fetch(url);
-    //console.log('Las capabilities:', requestCapabilities);
-    if (!requestCapabilities.ok) {
-      return false;
+    const fetchUrl = await gnoxyFetch(url);
+    if (!fetchUrl.ok) {
+      isValid = false;
+    } else if (serverType === 'arcgis') {
+      const res = await fetchUrl.json();
+      isValid = res.capabilities.includes('Map') || res.capabilities.includes('Image');
     } else {
-      const res = await requestCapabilities.text();
-      //console.log(requestCapabilities, res);
-      if (res.includes('GetMap') || res.includes('MapServer')) {
-        return true;
-      } else {
-        return false;
-      }
+      const res = await fetchUrl.text();
+      isValid = res.includes('GetMap');
     }
   } catch {
-    return false;
+    isValid = false;
   }
+  return isValid;
 }
 
-async function isHarvestrerRegistered() {
+/* async function isHarvestrerRegistered() {
   let url = `${config.public.geonodeApi}/harvesters/`;
   let harvesters = [];
   do {
@@ -105,10 +122,10 @@ async function isHarvestrerRegistered() {
   } else {
     return false;
   }
-}
+} */
 
 /** Valida información y, en caso de que todo ok, crea una conexión a un servicio remoto */
-async function crearConexion() {
+/* async function crearConexion() {
   const { data } = useAuth();
   const token = data.value?.accessToken;
   // Creamos la conexión
@@ -152,15 +169,39 @@ async function crearConexion() {
 
     return;
   }
-}
+} */
 
 async function registrar() {
   isLoading.value = true;
   // Validamos que se tenga la información necesaria
   error.value = null;
-  if (campoURL.value && selecTipoFuente.value) {
+  if (campoURL.value && campoTipo.value) {
+    // Hacemos la validación de la url
+    const isUrlValid = await validateUrl();
+    if (isUrlValid) {
+      const { data } = useAuth();
+      const token = data.value?.accessToken;
+
+      // Creamos la conexión
+      const { responseStatus, message } = await $fetch('/api/registrar-servicio', {
+        method: 'POST',
+        headers: { token: token },
+        body: {
+          url: campoURL.value,
+          type: campoTipo.value,
+          description: campoDescripcion.value,
+        },
+      });
+      if (responseStatus === 'error') {
+        error.value = message;
+      } else {
+        console.warn('Se registró exitosamente');
+      }
+    } else {
+      error.value = 'Revisa que la url apunte a un servicio válido';
+    }
     // Luego revisamos si ya está registrado
-    urlYaExiste.value = await isHarvestrerRegistered();
+    /*     urlYaExiste.value = await isHarvestrerRegistered();
     if (!urlYaExiste.value) {
       // Revisamos que sea una url válida
       const isServiceValid = await checkCapabilities();
@@ -171,7 +212,7 @@ async function registrar() {
       }
     } else {
       error.value = 'Este servicio ya está registrado';
-    }
+    } */
   } else {
     error.value = 'Revisa que todos los campos obligatorios tengan información';
   }
@@ -215,15 +256,22 @@ async function registrar() {
                 tipo="url"
               />
               <SisdaiSelector
-                v-model="selecTipoFuente"
+                v-model="campoTipo"
                 class="m-y-1"
                 etiqueta="Tipo de servicio"
                 :es_obligatorio="true"
               >
-                <option v-for="opcion in opTipoFuente" :key="opcion.id" :value="opcion.value">
+                <option v-for="opcion in tiposFuente" :key="opcion.id" :value="opcion.value">
                   {{ opcion.servicio }}
                 </option>
               </SisdaiSelector>
+              <SisdaiCampoBase
+                v-model="campoDescripcion"
+                etiqueta="Descripción del servicio"
+                ejemplo="Descripción del servicio"
+                :es_obligatorio="false"
+                tipo="texto"
+              />
             </ClientOnly>
 
             <!--Validación-->
