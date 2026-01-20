@@ -18,7 +18,7 @@ const queryParams = ref({
   page: paginaActual.value + 1,
   page_size: tamanioPagina,
   sort: seleccionOrden.value,
-  name: inputSearch.value,
+  title: inputSearch.value,
 });
 
 const statusDict = {
@@ -69,7 +69,7 @@ async function getResources() {
  * el input de busqueda como query param
  */
 async function searchByName() {
-  queryParams.value['name'] = inputSearch.value;
+  queryParams.value['title'] = inputSearch.value;
   if (paginaActual.value === 0) {
     fetchResources();
   } else {
@@ -86,7 +86,7 @@ async function resetSearch() {
 }
 
 /**
- *
+ * Redirige
  * @param v
  * @param destino
  */

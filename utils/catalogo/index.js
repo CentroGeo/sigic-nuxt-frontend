@@ -27,8 +27,8 @@ export function convertirBytes(bytes) {
  * @returns {Object} Objeto que permite construit las tarjetas y tablas de servicios remotos
  */
 export async function fetchHarvesters(params) {
-  if (!params.name || params.name.trim().length === 0) {
-    delete params.name;
+  if (!params.title || params.title.trim().length === 0) {
+    delete params.title;
   }
   const { gnoxyFetch } = useGnoxyUrl();
   const config = useRuntimeConfig();
@@ -50,9 +50,7 @@ export async function fetchHarvesters(params) {
     // Creamos el objeto con la información que nos interesa
     await Promise.all(
       services.map(async (h, index) => {
-        const harvesterUrl = h.harvester_id
-          ? `${config.public.geonodeApi}/harvesters/${h.harvester_id}`
-          : `${config.public.geonodeApi}/harvesters/58`;
+        const harvesterUrl = `${config.public.geonodeApi}/harvesters/${h.harvester_id}`;
         const fetchHarvesterStatus = await gnoxyFetch(harvesterUrl);
         const resHarvesterStatus = await fetchHarvesterStatus.json();
         const harvesterStatus = resHarvesterStatus.harvester.status;

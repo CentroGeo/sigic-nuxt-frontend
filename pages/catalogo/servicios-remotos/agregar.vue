@@ -10,7 +10,7 @@ definePageMeta({
   },
 });
 //const config = useRuntimeConfig();
-const { gnoxyFetch } = useGnoxyUrl();
+//const { gnoxyFetch } = useGnoxyUrl();
 const campoTipo = ref('');
 const campoURL = ref('');
 //const urlYaExiste = ref(null);
@@ -19,7 +19,7 @@ const campoDescripcion = ref('');
 const responseOk = ref(null);
 //const harvesterStatus = ref(null);
 const importingResources = ref(false);
-const newHarvester = ref();
+//const newHarvester = ref();
 const tiposFuente = [
   {
     id: 0,
@@ -69,13 +69,14 @@ const error = ref(null);
 
 function irAImportarRecursos() {
   navigateTo({
-    path: `/catalogo/servicios-remotos/importar`,
+    path: `/catalogo/explorar/catalogos-externos`,
+    /* path: `/catalogo/servicios-remotos/importar`,
     query: {
       id: newHarvester.value?.id,
       title: newHarvester.value?.name,
       //unique_identifier: 'v.unique_identifier',
       //remote_resource_type: 'v.remote_resource_type',
-    },
+    }, */
   });
 }
 
@@ -88,7 +89,7 @@ async function validateUrl() {
   let isValid;
 
   try {
-    const fetchUrl = await gnoxyFetch(url);
+    const fetchUrl = await fetch(url);
     if (!fetchUrl.ok) {
       isValid = false;
     } else if (serverType === 'arcgis') {
@@ -104,115 +105,42 @@ async function validateUrl() {
   return isValid;
 }
 
-/* async function isHarvestrerRegistered() {
-  let url = `${config.public.geonodeApi}/harvesters/`;
-  let harvesters = [];
-  do {
-    const requestHarvesters = await gnoxyFetch(url);
-    if (!requestHarvesters.ok) {
-      const error = await requestHarvesters.json();
-      console.error('Falló petición de harvesters:', error);
-    }
-    const resHarvesters = await requestHarvesters.json();
-    harvesters = [...harvesters, ...resHarvesters.harvesters.map((h) => h.remote_url)];
-    url = resHarvesters.links.next;
-  } while (url);
-  if (harvesters.includes(campoURL.value)) {
-    return true;
-  } else {
-    return false;
-  }
-} */
-
-/** Valida información y, en caso de que todo ok, crea una conexión a un servicio remoto */
-/* async function crearConexion() {
-  const { data } = useAuth();
-  const token = data.value?.accessToken;
-  // Creamos la conexión
-  const { responseStatus, responseObject } = await $fetch('/api/externo', {
-    method: 'POST',
-    headers: { token: token },
-    body: { name: campoNombre.value, url: campoURL.value, type: selecTipoFuente.value },
-  });
-  responseOk.value = responseStatus;
-  newHarvester.value = responseObject.harvester;
-
-  //Si la conexión se creó exitosamente, solicitamos la obtención de los recursos
-  if (responseOk.value && Object.keys(newHarvester.value).length > 0) {
-    // Actualizamos el estatus
-    const harvesterID = newHarvester.value.id;
-    console.warn('newHarvesterID', harvesterID);
-    importingResources.value = true;
-    const updateStatus = await $fetch('/api/actualizar-externo', {
-      method: 'POST',
-      headers: { token: token },
-      body: { id: harvesterID, status: 'updating-harvestable-resources' },
-    });
-    console.warn('Update harvester status', updateStatus);
-    if (!updateStatus) {
-      importingResources.value = false;
-      return;
-    } else {
-      // Si la actualización de estatus funciona, esperamos el momento en que se termine de solicitar los recursos
-      do {
-        const res = await gnoxyFetch(`${config.public.geonodeApi}/harvesters/${harvesterID}`);
-        const info = await res.json();
-        harvesterStatus.value = info.harvester.status;
-        console.warn('Harvester Status:', harvesterStatus.value);
-
-        if (harvesterStatus.value === 'ready') break;
-
-        await wait(5000);
-      } while (harvesterStatus.value !== 'ready');
-      importingResources.value = false;
-    }
-
-    return;
-  }
-} */
-
 async function registrar() {
+  responseOk.value = null;
+  error.value = null;
   isLoading.value = true;
   // Validamos que se tenga la información necesaria
-  error.value = null;
-  if (campoURL.value && campoTipo.value) {
-    // Hacemos la validación de la url
-    const isUrlValid = await validateUrl();
-    if (isUrlValid) {
-      const { data } = useAuth();
-      const token = data.value?.accessToken;
+  if (campoURL.value && campoTipo.value && campoNombre.value) {
+    if (campoDescripcion.value.trim().length > 2000) {
+      error.value = 'La descripción debe tener menos de 2 mil caracteres';
+    } else {
+      // Hacemos la validación de la url
+      const isUrlValid = await validateUrl();
+      if (isUrlValid) {
+        const { data } = useAuth();
+        const token = data.value?.accessToken;
 
-      // Creamos la conexión
-      const { responseStatus, message } = await $fetch('/api/registrar-servicio', {
-        method: 'POST',
-        headers: { token: token },
-        body: {
-          url: campoURL.value,
-          type: campoTipo.value,
-          description: campoDescripcion.value,
-        },
-      });
-      if (responseStatus === 'error') {
-        error.value = message;
+        // Creamos la conexión
+        const { responseStatus, message } = await $fetch('/api/registrar-servicio', {
+          method: 'POST',
+          headers: { token: token },
+          body: {
+            url: campoURL.value,
+            type: campoTipo.value,
+            abstract: campoDescripcion.value,
+            title: campoNombre.value,
+          },
+        });
+        if (responseStatus === 'error') {
+          error.value = message;
+        } else {
+          responseOk.value = true;
+          console.warn('Se registró exitosamente');
+        }
       } else {
-        console.warn('Se registró exitosamente');
-      }
-    } else {
-      error.value = 'Revisa que la url apunte a un servicio válido';
-    }
-    // Luego revisamos si ya está registrado
-    /*     urlYaExiste.value = await isHarvestrerRegistered();
-    if (!urlYaExiste.value) {
-      // Revisamos que sea una url válida
-      const isServiceValid = await checkCapabilities();
-      if (!isServiceValid) {
         error.value = 'Revisa que la url apunte a un servicio válido';
-      } else {
-        crearConexion();
       }
-    } else {
-      error.value = 'Este servicio ya está registrado';
-    } */
+    }
   } else {
     error.value = 'Revisa que todos los campos obligatorios tengan información';
   }
@@ -243,9 +171,10 @@ async function registrar() {
             <ClientOnly class="flex">
               <SisdaiCampoBase
                 v-model="campoNombre"
+                class="m-y-2"
                 etiqueta="Nombre del Servicio remoto"
                 ejemplo="Nombre del Servicio remoto"
-                class="m-y-2"
+                :es_obligatorio="true"
                 tipo="text"
               />
               <SisdaiCampoBase
@@ -271,6 +200,7 @@ async function registrar() {
                 ejemplo="Descripción del servicio"
                 :es_obligatorio="false"
                 tipo="texto"
+                texto_ayuda="Máximo 2 mil caracteres."
               />
             </ClientOnly>
 
@@ -284,7 +214,7 @@ async function registrar() {
             >
               <span><span class="pictograma-alerta"></span>{{ error }}</span>
               <nuxt-link
-                v-if="error === 'Este servicio ya está registrado'"
+                v-if="error === 'Ya existe un servicio con esta URL para tu usuario.'"
                 to="/catalogo/explorar/catalogos-externos"
                 >Explorar Catálogos Externos</nuxt-link
               >
@@ -309,7 +239,7 @@ async function registrar() {
             class="flex flex-contenido-separado texto-color-confirmacion fondo-color-confirmacion p-1 borde borde-color-confirmacion borde-redondeado-8"
           >
             <span> <span class="pictograma-aprobado" />La conexión remota tuvo éxito </span>
-            <nuxt-link @click="irAImportarRecursos">Ir a importar recursos</nuxt-link>
+            <nuxt-link @click="irAImportarRecursos">Explorar Servicios Remotos</nuxt-link>
           </p>
         </div>
         <div v-if="responseOk === false">
