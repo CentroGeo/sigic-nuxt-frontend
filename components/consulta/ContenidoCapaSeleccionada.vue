@@ -1,7 +1,7 @@
 <script setup>
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { SisdaiLeyendaWms } from '@centrogeomx/sisdai-mapas';
-import SisdaiLeyendaArcgis from '@centrogeomx/sisdai-mapas/src/componentes/leyenda/arcgis';
+import { SisdaiLeyendaArcgis, SisdaiLeyendaWms } from '@centrogeomx/sisdai-mapas';
+//import SisdaiLeyendaArcgis from '@centrogeomx/sisdai-mapas/src/componentes/leyenda/arcgis';
 import { findServer, getWMSserver, hasFeatureServer, hasWFS } from '~/utils/consulta';
 
 const config = useRuntimeConfig();
@@ -184,6 +184,9 @@ watch(selectedStyle, (nv) => {
       />
       <SisdaiLeyendaArcgis
         v-else
+        :sin-control="true"
+        :sin-control-clases="true"
+        :titulo="resourceElement.title || 'cargando...'"
         :capa="resourceElement.alternate.split(':')[1]"
         :fuente="findServer(resourceElement).replace('?', '')"
       />
