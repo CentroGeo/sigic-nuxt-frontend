@@ -86,13 +86,15 @@ onMounted(() => {
   storeLevantamiento.obtenerParticipantesPorProyecto(data.value?.user.email, route.params.id);
 });
 
-const agregarParticipante = () => {
-  storeLevantamiento.agregarParticipanteProyecto(
+const agregarParticipante = async () => {
+  await storeLevantamiento.agregarParticipanteProyecto(
     data.value?.user.email,
     participante.email,
     participante.rol,
     route.params.id
   );
+
+  await storeLevantamiento.obtenerParticipantesPorProyecto(data.value?.user.email, route.params.id);
 };
 
 const formatearFecha = (fechaISO) => {
@@ -113,6 +115,35 @@ const abrirModalCambiarPermiso = (participante) => {
   participanteSeleccionado.value = participante;
   permisoSeleccionado.value = participante.rol;
   modalCambiarPermiso.value.abrirModal();
+};
+
+const actualizarPermiso = async () => {
+  await storeLevantamiento.actualizarParticipanteProyecto(
+    data.value?.user.email,
+    permisoSeleccionado.value,
+    route.params.id,
+    participanteSeleccionado.value.id
+  );
+
+  await storeLevantamiento.obtenerParticipantesPorProyecto(data.value?.user.email, route.params.id);
+  modalCambiarPermiso.value.cerrarModal();
+};
+
+const modalEliminarPermiso = ref(null);
+
+const abrirModalEliminarPermiso = (participante) => {
+  participanteSeleccionado.value = participante;
+  modalEliminarPermiso.value.abrirModal();
+};
+const eliminarPermiso = async () => {
+  await storeLevantamiento.eliminarParticipanteProyecto(
+    data.value?.user.email,
+    route.params.id,
+    participanteSeleccionado.value.id
+  );
+
+  await storeLevantamiento.obtenerParticipantesPorProyecto(data.value?.user.email, route.params.id);
+  modalEliminarPermiso.value.cerrarModal();
 };
 </script>
 
@@ -245,7 +276,12 @@ const abrirModalCambiarPermiso = (participante) => {
               >
                 Cambiar permiso
               </button>
-              <button class="boton-secundario boton boton-chico">Eliminar</button>
+              <button
+                class="boton-secundario boton boton-chico"
+                @click="abrirModalEliminarPermiso(participante)"
+              >
+                Eliminar
+              </button>
             </div>
           </div>
         </div>
@@ -294,7 +330,31 @@ const abrirModalCambiarPermiso = (participante) => {
           >
             Cerrar
           </button>
-          <button type="button" class="boton-primario boton-chico">Asignar permiso</button>
+          <button type="button" class="boton-primario boton-chico" @click="actualizarPermiso">
+            Asignar permiso
+          </button>
+        </template>
+      </SisdaiModal>
+
+      <SisdaiModal ref="modalEliminarPermiso">
+        <template #encabezado><h3>Eliminar permiso</h3></template>
+        <template #cuerpo>
+          <p class="m-t-0 m-b-3">
+            ¿Deseas eliminar los permisos de esta persona usuaria? después de realizar esta acción
+            ya no podrá participar en tu proyecto hasta que sea invitada nuevamente.
+          </p>
+        </template>
+        <template #pie>
+          <button
+            type="button"
+            class="boton-secundario boton-chico"
+            @click="modalEliminarPermiso?.cerrarModal()"
+          >
+            Regresar
+          </button>
+          <button type="button" class="boton-primario boton-chico" @click="eliminarPermiso">
+            Confirmar
+          </button>
         </template>
       </SisdaiModal>
     </ClientOnly>

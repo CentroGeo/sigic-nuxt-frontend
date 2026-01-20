@@ -55,7 +55,13 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
 
         const data = await response.json();
         console.log('Proyecto guardado:', data);
-        this.proyectos.push(data.proyecto);
+
+        const proyectoConAportaciones = {
+          ...data.proyecto,
+          num_aportaciones: '0',
+        };
+
+        this.proyectos.unshift(proyectoConAportaciones);
         this.existenProyectos = true;
       } catch (error) {
         console.error('Error:', error);
@@ -118,7 +124,9 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
         });
         console.log(data);
         this.proyectos = data.proyectos;
-        this.existenProyectos = true;
+        if (data.proyectos.length > 0) {
+          this.existenProyectos = true;
+        }
       } catch (err) {
         console.error('Error cargando proyectos:', err);
       }
@@ -177,6 +185,43 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
         console.log(data);
       } catch (err) {
         console.error('Error guardando participante:', err);
+      }
+    },
+    async actualizarParticipanteProyecto(userEmail, rol, idProyecto, idParticipante) {
+      try {
+        const body = {
+          user_id: userEmail,
+          rol: rol,
+        };
+
+        const data = await $fetch(
+          `${apiUrl}/projects/shared/${idProyecto}/user/${idParticipante}/update`,
+          {
+            method: 'POST',
+            body: body,
+          }
+        );
+        console.log(data);
+      } catch (err) {
+        console.error('Error actualizando participante:', err);
+      }
+    },
+    async eliminarParticipanteProyecto(userEmail, idProyecto, idParticipante) {
+      try {
+        const body = {
+          user_id: userEmail,
+        };
+
+        const data = await $fetch(
+          `${apiUrl}/projects/shared/${idProyecto}/user/${idParticipante}/remove`,
+          {
+            method: 'DELETE',
+            body: body,
+          }
+        );
+        console.log(data);
+      } catch (err) {
+        console.error('Error eliminando participante:', err);
       }
     },
   };
