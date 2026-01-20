@@ -8,7 +8,7 @@ const isLoadingGeneral = ref(true);
 const isLoadingPage = ref(true);
 const fetchStatus = ref(null);
 
-const seleccionOrden = ref('-id');
+const seleccionOrden = ref('-created');
 const inputSearch = ref(null);
 const paginaActual = ref(0);
 const tamanioPagina = 10;
@@ -17,7 +17,8 @@ const totalPags = computed(() => Math.ceil(totalHarvesters.value / tamanioPagina
 const queryParams = ref({
   page: paginaActual.value + 1,
   page_size: tamanioPagina,
-  'sort[]': seleccionOrden.value,
+  sort: seleccionOrden.value,
+  name: inputSearch.value,
 });
 
 const statusDict = {
@@ -63,6 +64,24 @@ async function getResources() {
   isLoadingGeneral.value = false;
 }
 
+async function searchByName() {
+  queryParams.value['name'] = inputSearch.value;
+  if (paginaActual.value === 0) {
+    fetchResources();
+  } else {
+    paginaActual.value = 0;
+  }
+}
+
+async function resetSearch() {
+  queryParams.value['name'] = null;
+  if (paginaActual.value === 0) {
+    fetchResources();
+  } else {
+    paginaActual.value = 0;
+  }
+}
+
 /**
  *
  * @param v
@@ -95,7 +114,7 @@ watch(paginaActual, () => {
 });
 
 watch(seleccionOrden, () => {
-  queryParams.value['sort[]'] = seleccionOrden.value;
+  queryParams.value['sort'] = seleccionOrden.value;
   if (paginaActual.value === 0) {
     fetchResources();
   } else {
@@ -115,15 +134,14 @@ onMounted(() => {
         <div class="columna-8">
           <ClientOnly>
             <SisdaiSelector v-model="seleccionOrden" etiqueta="Ordenar por">
-              <option value="id">Más Antiguo</option>
-              <option value="-id">Más Reciente</option>
-              <option value="name">Nombre</option>
-              <option value="status">Status</option>
+              <option value="created">Más Antiguo</option>
+              <option value="-created">Más Reciente</option>
+              <option value="title">Nombre</option>
             </SisdaiSelector>
           </ClientOnly>
         </div>
-        <!-- Campo de búsqueda avanzada -->
-        <div class="columna-8" style="opacity: 0.5">
+        <!-- Campo de búsqueda -->
+        <div class="columna-8">
           <div class="flex flex-contenido-separado">
             <div class="columna-14">
               <ClientOnly>
@@ -142,6 +160,7 @@ onMounted(() => {
                     class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
                     aria-label="Borrar"
                     type="button"
+                    @click="resetSearch"
                   >
                     <span aria-hidden="true" class="pictograma-cerrar" />
                   </button>
@@ -150,6 +169,7 @@ onMounted(() => {
                     class="boton-primario boton-pictograma campo-busqueda-buscar"
                     aria-label="Buscar"
                     type="button"
+                    @click="searchByName"
                   >
                     <span class="pictograma-buscar" aria-hidden="true" />
                   </button>
