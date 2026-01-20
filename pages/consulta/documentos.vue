@@ -24,6 +24,8 @@ function updateQueryFromStore(queryParam) {
 watch(() => storeSelected.asQueryParam(), updateQueryFromStore);
 
 onMounted(async () => {
+  useSelectedResources2Store().reset();
+
   storeResources.resetByType(storeConsulta.resourceType);
   storeSelected.addFromQueryParam(route.query.docs);
 

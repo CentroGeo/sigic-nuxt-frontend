@@ -18,6 +18,7 @@ const props = defineProps({
   },
 });
 const storeCatalogo = useCatalogoStore();
+const storeSelected = useSelectedResources2Store();
 //const { data } = useAuth();
 const config = useRuntimeConfig();
 const { data } = useAuth();
@@ -96,6 +97,7 @@ async function openResourceReview(resource) {
   }
   if (resource.tipo_recurso === 'Capa Geográfica') {
     storeCatalogo.previousPath = route.path;
+    storeSelected.reset();
     useSelectedResources2Store().add(
       new SelectedLayer({ pk: resource.pk }),
       resourceTypeDic.dataLayer
@@ -162,6 +164,7 @@ async function openResourceView(resource) {
     resource.tipo_recurso === 'Capa Geográfica' ||
     resource.tipo_recurso === 'Capa Geográfica, Catálogo Externo'
   ) {
+    useSelectedResources2Store().reset();
     useSelectedResources2Store().add(
       new SelectedLayer({ pk: resource.pk }),
       resourceTypeDic.dataLayer
@@ -169,6 +172,7 @@ async function openResourceView(resource) {
     await navigateTo('/consulta/capas');
   }
   if (resource.tipo_recurso === 'Datos Tabulados') {
+    useSelectedResources2Store().reset();
     useSelectedResources2Store().add(
       new SelectedLayer({ pk: resource.pk }),
       resourceTypeDic.dataTable
@@ -182,6 +186,7 @@ async function openResourceView(resource) {
     });
   } */
   if (resource.tipo_recurso === 'Documentos') {
+    useSelectedResources2Store().reset();
     useSelectedResources2Store().add(
       new SelectedLayer({ pk: resource.pk }),
       resourceTypeDic.document
