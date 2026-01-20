@@ -29,7 +29,7 @@ const proyecto = ref({
   institucion: '',
   descripcion: '',
   objetivo: '',
-  especificaciones_multimedia: '',
+  instrucciones: '',
   imagen: null,
 });
 
@@ -67,7 +67,7 @@ async function actualizarProyecto() {
   formData.append('institucion', proyecto.value.institucion);
   formData.append('categoria', proyecto.value.descripcion);
   formData.append('objetivo', proyecto.value.objetivo);
-  formData.append('instrucciones', proyecto.value.especificaciones_multimedia);
+  formData.append('instrucciones', proyecto.value.instrucciones);
 
   if (imagenProyecto.value) {
     const timestamp = Date.now();
@@ -127,7 +127,7 @@ defineExpose({
           class="m-b-2"
         />
         <SisdaiAreaTexto
-          v-model="proyecto.especificaciones_multimedia"
+          v-model="proyecto.instrucciones"
           etiqueta="Instrucciones para participantes"
           ejemplo="Describe brevemente tu proyecto"
           :es_etiqueta_visible="true"
