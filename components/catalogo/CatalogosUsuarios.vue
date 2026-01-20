@@ -64,6 +64,10 @@ async function getResources() {
   isLoadingGeneral.value = false;
 }
 
+/**
+ * Hace la petición de los servicios externos mandando
+ * el input de busqueda como query param
+ */
 async function searchByName() {
   queryParams.value['name'] = inputSearch.value;
   if (paginaActual.value === 0) {
@@ -73,13 +77,12 @@ async function searchByName() {
   }
 }
 
+/**
+ * Limpia el input de busqueda y vuelve a pedir los servicios
+ */
 async function resetSearch() {
-  queryParams.value['name'] = null;
-  if (paginaActual.value === 0) {
-    fetchResources();
-  } else {
-    paginaActual.value = 0;
-  }
+  inputSearch.value = null;
+  searchByName();
 }
 
 /**
