@@ -86,23 +86,30 @@ async function openResourceReview(resource) {
     storeCatalogo.previousPath = route.path;
     await navigateTo({
       path: `/catalogo/revision-solicitudes/revisar/${resource.pk}`,
-      query: { pk: resource.pk, pk_request: resource.pk_request },
+      query: {
+        pk: resource.pk,
+        pk_request: resource.pk_request,
+        resource_type: resource.tipo_recurso,
+      },
     });
     revisando.value = true;
   }
-  // if (resource.tipo_recurso === 'Capa') {
-  //   storeCatalogo.previousPath = route.path;
-  //   useSelectedResources2Store().add(
-  //     new SelectedLayer({ pk: resource.pk }),
-  //     resourceTypeDic.dataLayer
-  //   );
-  //   await navigateTo({
-  //     path: `/catalogo/revision-solicitudes/revisar/${resource.pk}`,
-  //     query: { pk: resource.pk },
-  //   });
-  //   // await navigateTo('/consulta/capas');
-  //   revisando.value = true;
-  // }
+  if (resource.tipo_recurso === 'Capa Geográfica') {
+    storeCatalogo.previousPath = route.path;
+    useSelectedResources2Store().add(
+      new SelectedLayer({ pk: resource.pk }),
+      resourceTypeDic.dataLayer
+    );
+    await navigateTo({
+      path: `/catalogo/revision-solicitudes/revisar/${resource.pk}`,
+      query: {
+        pk: resource.pk,
+        pk_request: resource.pk_request,
+        resource_type: resource.tipo_recurso,
+      },
+    });
+    revisando.value = true;
+  }
 }
 
 const modalAgregarMisRevisiones = ref(null);
@@ -125,7 +132,6 @@ const configEnv = useRuntimeConfig();
  */
 async function addRequestToMyReviews() {
   try {
-    console.log('pkResource.value', pkResource.value);
     // petición para añadir la solicitud a mis revisiones
     const response = await $fetch(`${configEnv.public.basePath}/api/solicitudes`, {
       method: 'POST',

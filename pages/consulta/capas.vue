@@ -177,6 +177,7 @@ watch(
 );
 
 onMounted(async () => {
+  storeConsulta.catalogoColapsado = false;
   //console.log('Extension:', vistaDelMapa.value);
   updateMapFromHash(route.hash?.slice(1));
   storeResources.resetByType(storeConsulta.resourceType);

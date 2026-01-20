@@ -11,6 +11,7 @@ const storeCatalogo = useCatalogoStore();
 const route = useRoute();
 const selectedPk = route.query.pk;
 const selectedPkRequest = route.query.pk_request;
+const selectedResourceType = route.query.resource_type;
 
 const previousPath = computed(() => storeCatalogo.previousPath || '');
 
@@ -154,16 +155,20 @@ onMounted(() => {
           </div>
         </div>
 
-        <div v-if="!isDocumentoReading" class="flex flex-contenido-centrado">
-          <figure>
-            <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
-            <figcaption class="texto-centrado">Cargando documento</figcaption>
-          </figure>
+        <div v-if="selectedResourceType === 'Documentos'">
+          <div v-if="!isDocumentoReading" class="flex flex-contenido-centrado">
+            <figure>
+              <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
+              <figcaption class="texto-centrado">Cargando documento</figcaption>
+            </figure>
+          </div>
+          <CatalogoDocRevision
+            :selected-element-pk="selectedPk"
+            @doc-cargado="isDocumentoReading = true"
+          />
         </div>
-        <CatalogoDocRevision
-          :selected-element-pk="selectedPk"
-          @doc-cargado="isDocumentoReading = true"
-        />
+
+        <CatalogoCapaRevision v-if="selectedResourceType === 'Capa Geográfica'" />
       </main>
 
       <ClientOnly>
