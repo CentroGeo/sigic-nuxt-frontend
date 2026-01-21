@@ -115,17 +115,25 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
     obtenerTotalDescargasEnRevision() {
       return this.descargasEnRevision.length;
     },
-    solicitarDescarga() {
-      const descarga = {
-        id: this.descargasEnRevision.length + 1,
-        nombre_proyecto: 'Registro de arte urbano en la Ciudad de Mérida, Yucatán (2025)',
-        solicitante: 'Daniela Acuña',
-        formato: '.gpkg',
-        fecha_solicitud: '12/11/25',
-      };
+    async solicitarDescarga(formData) {
+      try {
+        const response = await fetch(`${apiUrl}/downloads/owner/download/`, {
+          method: 'POST',
+          body: formData,
+        });
 
-      this.descargasEnRevision.push(descarga);
-      this.existenDescargasEnRevision = true;
+        console.log(response);
+
+        if (!response.ok) {
+          throw new Error('Error al solicitar descarga');
+        }
+
+        const data = await response.json();
+        console.log('Descarga solicitada:', data);
+      } catch (error) {
+        console.error('Error:', error);
+        throw error;
+      }
     },
     async obtenerMisProyectos(email) {
       try {
