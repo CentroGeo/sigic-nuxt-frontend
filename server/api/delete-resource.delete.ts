@@ -18,9 +18,10 @@ export default defineEventHandler(async (event) => {
     if (!response.ok) {
       throw new Error(`Falló el borrar un recurso: ${response.status}`);
     }
-    const status = response.status;
-    return status;
+    //const status = response.ok;
+    return response.ok;
   } catch (error) {
     console.error('Error al borrar un recurso:', error);
+    return false;
   }
 });

@@ -1,30 +1,41 @@
+const config = useRuntimeConfig();
+
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event);
-  // const url = 'https://geonode.dev.geoint.mx/services/register';
+  const requestBody = await readBody(event);
+  const token = getHeader(event, 'token');
+  const url = `${config.public.geonodeApi}/harvesters/`;
+  let responseStatus = undefined;
+  let responseObject = {};
 
-  const formData = new FormData();
-  formData.append('url', body.url);
-  formData.append('type', body.type);
-
+  const actualBody = {
+    name: requestBody.name,
+    remote_url: requestBody.url,
+    scheduling_enabled: false,
+    harvester_type: requestBody.type,
+    harvester_type_specific_configuration: {},
+    harvest_new_resources_by_default: false,
+    delete_orphan_resources_automatically: true,
+  };
   try {
-    // const response = await fetch(url, {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-type': 'application/json; charset=UTF-8',
-    //     Authorization: `Bearer ${body.token}`,
-    //   },
-    //   body: formData,
-    // });
-    // .then(response => console.log(response))
-    // if (!response.ok) {
-    //   throw new Error(`Error POST servicio externo (${body.type}): ${response.status}`);
-    // }
-    // console.warn('response status:', response.status);
-    // const json = await response.json();
-    // return json;
-
-    return { body };
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(actualBody),
+    });
+    //console.log(response);
+    responseStatus = response.ok;
+    if (!response.ok) {
+      //throw new Error(`Error POST servicio externo (${body.type}): ${response.status}`);
+      responseObject = {};
+    } else {
+      responseObject = await response.json();
+    }
   } catch (error) {
     console.error('Error al subir al GeoNode:', error);
   }
+
+  return { responseStatus, responseObject };
 });

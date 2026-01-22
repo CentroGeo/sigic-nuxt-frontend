@@ -19,6 +19,7 @@ const hayMetaPendiente = computed(() =>
 const haySolicitudesDeAprobacion = computed(() =>
   storeResources.myTotalBySection('publicacion') > 0 ? true : false
 );
+const isLoading = ref(true);
 const totalResources = computed(() => storeResources.myTotalBySection(section));
 const resources = computed(() => storeResources.mineBySection(section));
 const tableResources = ref([]);
@@ -54,9 +55,9 @@ function tipoRecurso(recurso) {
   }
   return tipo;
 }
+
+/**Crea el objeto de información como se necesita para esta vista */
 function updateResources() {
-  //filteredResources.value = nuevosRecursos;
-  // obteniendo datos por las props de la tabla
   tableResources.value = resources.value.map((d) => ({
     pk: d.pk,
     titulo: d.title,
@@ -71,10 +72,18 @@ function updateResources() {
   }));
 }
 
-function fetchNewData() {
+async function fetchNewData() {
+  isLoading.value = true;
   storeResources.resetBySection(section);
-  storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, params.value);
+  await storeResources.getMyResourcesByPage(
+    section,
+    paginaActual.value + 1,
+    tamanioPagina,
+    params.value
+  );
+  isLoading.value = false;
 }
+
 function applyAdvancedFilter() {
   isFilterActive.value = true;
   modalFiltroAvanzado.value.cerrarModalBusqueda();
@@ -115,7 +124,7 @@ onMounted(async () => {
   storeResources.getMyTotal('disponibles', params.value);
   storeResources.getMyTotal('pendientes', params.value);
   storeResources.getMyTotal('publicacion', params.value);
-  fetchNewData();
+  await fetchNewData();
 });
 </script>
 
@@ -228,8 +237,7 @@ onMounted(async () => {
           hacerlo se moverán a la sección de disponibles.
         </p>
         <div class="flex">
-          <div class="columna-16">
-            <!-- TODO: implementar paginador -->
+          <div v-if="!isLoading" class="columna-16">
             <ClientOnly>
               <UiTablaAccesibleV2 :variables="variables" :datos="tableResources" />
               <UiPaginador
@@ -238,6 +246,9 @@ onMounted(async () => {
                 @cambio="paginaActual = $event"
               />
             </ClientOnly>
+          </div>
+          <div v-if="isLoading" class="flex flex-contenido-centrado m-t-3 columna-16">
+            <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
           </div>
         </div>
       </main>

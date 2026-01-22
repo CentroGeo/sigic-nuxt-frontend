@@ -119,6 +119,8 @@ const optionsDict = {
 };
 async function descargarClicked() {
   isDownloadActive.value = true;
+  isDownloadSlow.value = false;
+  hasDownloadFailed.value = false;
   const selectedFunction = optionsList.value.find((d) => d.label === selectedOption.value);
 
   //La siguiente línea se pone para agregar alerta si el proceso de descarga toma mas de 3 segundos
@@ -151,7 +153,7 @@ defineExpose({
         <h1>Descargar {{ tagTitle }}</h1>
       </template>
       <template #cuerpo>
-        <p class="h5">{{ selectedElement.title }}</p>
+        <p class="h5 title">{{ selectedElement.title }}</p>
         <div v-if="isDownloadActive" class="flex m-y-2 borde-redondeado-16 contenedor-proceso">
           <div class="columna-4 flex-vertical-centrado">
             <img src="/img/loader.gif" alt="...Cargando" class="loader" />
@@ -183,7 +185,12 @@ defineExpose({
             <label :for="`download-option-${option.label}`">{{ option.label }} </label>
           </div>
           <div class="flex flex-contenido-final">
-            <button type="button" class="boton-primario m-t-2" @click="descargarClicked">
+            <button
+              type="button"
+              aria-label="Descargar"
+              class="boton-primario m-t-2"
+              @click="descargarClicked"
+            >
               Descargar
             </button>
           </div>
@@ -232,5 +239,11 @@ defineExpose({
 .loader {
   max-height: 3em;
   object-fit: scale-down;
+}
+
+.title {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 </style>

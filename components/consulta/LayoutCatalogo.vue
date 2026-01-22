@@ -42,7 +42,6 @@ const categorizedResources = ref({});
 const selectedCategories = ref([]);
 const modalFiltroAvanzado = ref(null);
 const modalOWSglobal = ref(null);
-//https://geonode.dev.geoint.mx/gs/ows
 const sigicOWS = `${config.public.baseURL}/catalogue/csw`;
 const isFilterActive = ref(false);
 
@@ -307,6 +306,7 @@ onMounted(async () => {
           <button
             type="button"
             class="boton-secundario columna-16 boton-chico flex flex-contenido-centrado"
+            aria-label="Enlace Catalogue Service for the Web"
             @click="modalOWSglobal.abrirModalOWS"
           >
             Enlace Catalogue Service for the Web (CSW)

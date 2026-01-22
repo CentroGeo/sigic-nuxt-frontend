@@ -1,9 +1,9 @@
 <script setup>
 import { categoriesInSpanish, resourceTypeDic, tooltipContent } from '~/utils/consulta';
 
+const { data } = useAuth();
 const storeResources = useResourcesConsultaStore();
 const storeSelected = useSelectedResources2Store();
-const emit = defineEmits(['openOpacity', 'openDownload', 'openTabla', 'openMapa', 'openOWS']);
 const props = defineProps({
   selectedElement: {
     type: Object,
@@ -11,13 +11,11 @@ const props = defineProps({
   },
   resourceType: { type: String, required: true },
 });
-
 const resourceElement = computed(() => storeResources.findResource(props.selectedElement.pk));
-const { data } = useAuth();
 const isLoggedIn = ref(data.value ? true : false);
-//const userEmail = ref(data.value?.user.email);
 const goDown = () => storeSelected.changePosition(props.selectedElement.pk, -1);
 const goUp = () => storeSelected.changePosition(props.selectedElement.pk, +1);
+const emit = defineEmits(['openOpacity', 'openDownload', 'openTabla', 'openMapa', 'openOWS']);
 </script>
 
 <template>

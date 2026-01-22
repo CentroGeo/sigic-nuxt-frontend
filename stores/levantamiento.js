@@ -21,7 +21,6 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
     async obtenerProyectosPublicos() {
       try {
         const data = await $fetch(`${apiUrl}/projects/public`);
-        console.log(data);
         this.proyectosPublicos = data.proyectos;
       } catch (err) {
         console.error('Error cargando proyectos:', err);
@@ -97,20 +96,66 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
     obtenerTotalDescargasAprobadas() {
       return this.descargasAprobadas.length;
     },
-    obtenerTotalDescargasEnRevision() {
-      return this.descargasEnRevision.length;
-    },
-    solicitarDescarga() {
-      const descarga = {
-        id: this.descargasEnRevision.length + 1,
-        nombre_proyecto: 'Registro de arte urbano en la Ciudad de Mérida, Yucatán (2025)',
-        solicitante: 'Daniela Acuña',
-        formato: '.gpkg',
-        fecha_solicitud: '12/11/25',
-      };
 
-      this.descargasEnRevision.push(descarga);
-      this.existenDescargasEnRevision = true;
+    async obtenerTotalDescargasEnRevision(user_id) {
+      try {
+        const response = await $fetch(`${apiUrl}/downloads/user/list`, {
+          method: 'POST',
+          body: {
+            email: user_id,
+            page: 1,
+            limit: 10,
+            status: 'NO REVISADO',
+          },
+        });
+
+        this.descargasEnRevision = response;
+        this.existenDescargasEnRevision = response?.descargas?.length > 0;
+
+        console.log('lista descarga:', response);
+        return response?.descargas?.length ?? 0;
+      } catch (error) {
+        console.error('Error:', error);
+        throw error;
+      }
+    },
+
+    async eliminarDescargaEnRevision(id, usr) {
+      try {
+        const response = await $fetch(`${apiUrl}/downloads/user/${id}`, {
+          method: 'DELETE',
+          body: {
+            id,
+            email: usr,
+          },
+        });
+
+        console.log('descarga eliminada:', response);
+        return response;
+      } catch (error) {
+        console.error('Error:', error);
+        throw error;
+      }
+    },
+    async solicitarDescarga(formData) {
+      try {
+        const response = await $fetch(`${apiUrl}/downloads/owner/downloads`, {
+          method: 'POST',
+          body: {
+            user_id: formData.get('user_id'),
+            project_name: formData.get('project_name'),
+            descriptionFileToExport: formData.get('descriptionFileToExport'),
+            project_id: formData.get('project_id'),
+          },
+        });
+
+        console.log(response);
+
+        console.log('Descarga solicitada:', response);
+      } catch (error) {
+        console.error('Error:', error);
+        throw error;
+      }
     },
     async obtenerMisProyectos(email) {
       try {
