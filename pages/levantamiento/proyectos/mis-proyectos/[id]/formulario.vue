@@ -1,5 +1,6 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+import { useRoute } from 'vue-router';
 
 const storeLevantamiento = useLevantamientoStore();
 
@@ -61,6 +62,44 @@ function handleMoverPregunta({ indice, direccion }) {
 
   preguntas.value = [...arr];
 }
+
+const route = useRoute();
+const modalFormularioGuardado = ref(null);
+const esEdicion = ref(false);
+
+const { data } = useAuth();
+const proyecto = ref(null);
+
+watch(
+  () => data.value?.user.email,
+  async (email) => {
+    if (!email) return;
+
+    proyecto.value = await storeLevantamiento.obtenerProyectoPorId(email, route.params.id);
+    if (proyecto.value.ficha_proyecto !== null) {
+      esEdicion.value = true;
+      preguntas.value = JSON.parse(proyecto.value.ficha_proyecto);
+    }
+  },
+  { immediate: true }
+);
+
+const actualizarProyecto = async () => {
+  if (preguntas.value.length > 0) {
+    const payload = {
+      ficha_proyecto: preguntas.value,
+    };
+
+    console.log(preguntas.value);
+    await storeLevantamiento.solicitarAprobacionProyecto(payload, route.params.id);
+    esEdicion.value = true;
+    modalFormularioGuardado.value.abrirModal();
+  }
+};
+
+defineExpose({
+  actualizarProyecto,
+});
 </script>
 
 <template>
@@ -84,7 +123,7 @@ function handleMoverPregunta({ indice, direccion }) {
     </div>
   </div>
 
-  <div v-else class="columna-16">
+  <div v-else-if="!esEdicion" class="columna-16">
     <div class="grid">
       <div class="columna-6 fondo-color-neutro borde-redondeado-20 p-3">
         <h6 class="m-t-0 m-b-1">Agregar pregunta</h6>
@@ -209,7 +248,71 @@ function handleMoverPregunta({ indice, direccion }) {
           </div>
         </template>
       </SisdaiModal>
+
+      <SisdaiModal ref="modalFormularioGuardado">
+        <template #encabezado><h3>Formulario guardado</h3></template>
+        <template #cuerpo>
+          <div
+            class="fondo-color-confirmacion p-x-2 p-y-1 borde borde-color-confirmacion borde-redondeado-20"
+          >
+            <p class="texto-color-confirmacion">
+              <span class="pictograma-aprobado" />
+              Tus cambios se han guardado correctamente
+            </p>
+          </div>
+        </template>
+      </SisdaiModal>
     </ClientOnly>
+  </div>
+
+  <div v-else>
+    <div v-for="(pregunta, index) in preguntas" :key="index">
+      <levantamiento-pregunta-abierta
+        v-if="pregunta.tipo === 'abierta'"
+        :pregunta="pregunta"
+        :es-edicion="true"
+        :indice="index"
+        @update:pregunta="preguntas[index] = $event"
+        @eliminar="preguntas.splice($event, 1)"
+        @mover="handleMoverPregunta"
+      />
+      <levantamiento-pregunta-unica
+        v-if="pregunta.tipo === 'unica'"
+        :pregunta="pregunta"
+        :es-edicion="true"
+        :indice="index"
+        @update:pregunta="preguntas[index] = $event"
+        @eliminar="preguntas.splice($event, 1)"
+        @mover="handleMoverPregunta"
+      />
+      <levantamiento-pregunta-multiple
+        v-if="pregunta.tipo === 'multiple'"
+        :pregunta="pregunta"
+        :es-edicion="true"
+        :indice="index"
+        @update:pregunta="preguntas[index] = $event"
+        @eliminar="preguntas.splice($event, 1)"
+        @mover="handleMoverPregunta"
+      />
+      <levantamiento-pregunta-condicional
+        v-if="pregunta.tipo === 'condicional'"
+        :pregunta="pregunta"
+        :es-edicion="true"
+        :indice="index"
+        @update:pregunta="preguntas[index] = $event"
+        @eliminar="preguntas.splice($event, 1)"
+        @mover="handleMoverPregunta"
+      />
+      <levantamiento-pregunta-multimedia
+        v-if="pregunta.tipo === 'multimedia'"
+        :pregunta="pregunta"
+        :es-edicion="true"
+        :indice="index"
+        @update:pregunta="preguntas[index] = $event"
+        @eliminar="preguntas.splice($event, 1)"
+        @mover="handleMoverPregunta"
+      />
+    </div>
   </div>
 </template>
 

@@ -138,14 +138,12 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
           body: formData,
         });
 
-        console.log(response);
-
         if (!response.ok) {
           throw new Error('Error al actualizar el proyecto');
         }
 
         const data = await response.json();
-        console.log('Proyecto guardado:', data);
+        console.log('Proyecto actualizado:', data);
       } catch (error) {
         console.error('Error:', error);
         throw error;
@@ -222,6 +220,27 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
         console.log(data);
       } catch (err) {
         console.error('Error eliminando participante:', err);
+      }
+    },
+    async solicitarAprobacionProyecto(payload, idProyecto) {
+      try {
+        const response = await fetch(`${apiUrl}/projects/update/${idProyecto}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al actualizar el proyecto');
+        }
+
+        const data = await response.json();
+        console.log('Proyecto enviado a aprobación:', data);
+      } catch (error) {
+        console.error('Error:', error);
+        throw error;
       }
     },
   };

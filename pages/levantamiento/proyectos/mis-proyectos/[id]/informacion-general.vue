@@ -27,7 +27,7 @@ const { data } = useAuth();
 const proyecto = ref({
   nombre: '',
   institucion: '',
-  descripcion: '',
+  categoria: '',
   objetivo: '',
   instrucciones: '',
   imagen: null,
@@ -65,7 +65,7 @@ async function actualizarProyecto() {
 
   formData.append('nombre', proyecto.value.nombre);
   formData.append('institucion', proyecto.value.institucion);
-  formData.append('categoria', proyecto.value.descripcion);
+  formData.append('categoria', proyecto.value.categoria);
   formData.append('objetivo', proyecto.value.objetivo);
   formData.append('instrucciones', proyecto.value.instrucciones);
 
@@ -110,7 +110,7 @@ defineExpose({
           <option value="inst_3">Institución Tres</option>
         </SisdaiSelector>
         <SisdaiSelector
-          v-model="proyecto.descripcion"
+          v-model="proyecto.categoria"
           etiqueta="Categoría del proyecto"
           class="m-b-2"
         >

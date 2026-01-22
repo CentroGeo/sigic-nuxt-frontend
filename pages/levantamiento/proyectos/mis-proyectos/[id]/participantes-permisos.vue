@@ -5,7 +5,7 @@ import SisdaiBotonRadio from '@centrogeomx/sisdai-componentes/src/componentes/bo
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const storeLevantamiento = useLevantamientoStore();
 
@@ -145,6 +145,40 @@ const eliminarPermiso = async () => {
   await storeLevantamiento.obtenerParticipantesPorProyecto(data.value?.user.email, route.params.id);
   modalEliminarPermiso.value.cerrarModal();
 };
+
+const modalSolicitarAprobacion = ref(null);
+
+const solicitarAprobacion = async () => {
+  const payload = {
+    isPrivate: false,
+  };
+
+  await storeLevantamiento.solicitarAprobacionProyecto(payload, route.params.id);
+
+  modalSolicitarAprobacion.value.abrirModal();
+};
+
+const router = useRouter();
+
+const irAMisProyectos = () => {
+  router.push('/levantamiento/proyectos/mis-proyectos');
+};
+
+const modalProyectoPrivado = ref(null);
+
+const actualizarProyecto = async () => {
+  const payload = {
+    isPrivate: true,
+  };
+
+  await storeLevantamiento.solicitarAprobacionProyecto(payload, route.params.id);
+
+  modalProyectoPrivado.value.abrirModal();
+};
+
+defineExpose({
+  actualizarProyecto,
+});
 </script>
 
 <template>
@@ -198,7 +232,11 @@ const eliminarPermiso = async () => {
         </div>
       </div>
       <div class="flex flex-contenido-final">
-        <button class="boton-primario boton-chico" aria-label="Guardar Cambios">
+        <button
+          class="boton-primario boton-chico"
+          aria-label="Solicitar aprobación"
+          @click="solicitarAprobacion"
+        >
           Solicitar aprobación
         </button>
       </div>
@@ -354,6 +392,47 @@ const eliminarPermiso = async () => {
           </button>
           <button type="button" class="boton-primario boton-chico" @click="eliminarPermiso">
             Confirmar
+          </button>
+        </template>
+      </SisdaiModal>
+
+      <SisdaiModal ref="modalSolicitarAprobacion">
+        <template #encabezado><h3>Proyecto enviado a aprobación</h3></template>
+        <template #cuerpo>
+          <p class="m-t-0 m-b-3">
+            Tu proyecto se ha enviado a aprobación para hacerlo público, te enviaremos un correo
+            electrónico cuando se haya revisado.
+          </p>
+        </template>
+        <template #pie>
+          <button
+            type="button"
+            class="boton-secundario boton-chico"
+            @click="modalSolicitarAprobacion?.cerrarModal()"
+          >
+            Cerrar
+          </button>
+          <button type="button" class="boton-primario boton-chico" @click="irAMisProyectos">
+            Ir a Mis proyectos
+          </button>
+        </template>
+      </SisdaiModal>
+
+      <SisdaiModal ref="modalProyectoPrivado">
+        <template #encabezado><h3>Proyecto privado</h3></template>
+        <template #cuerpo>
+          <p class="m-t-0 m-b-3">Tu proyecto se ha cambiado a privado.</p>
+        </template>
+        <template #pie>
+          <button
+            type="button"
+            class="boton-secundario boton-chico"
+            @click="modalProyectoPrivado?.cerrarModal()"
+          >
+            Cerrar
+          </button>
+          <button type="button" class="boton-primario boton-chico" @click="irAMisProyectos">
+            Ir a Mis proyectos
           </button>
         </template>
       </SisdaiModal>
