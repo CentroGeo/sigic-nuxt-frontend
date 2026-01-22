@@ -78,7 +78,7 @@ watch(
     proyecto.value = await storeLevantamiento.obtenerProyectoPorId(email, route.params.id);
     if (proyecto.value.ficha_proyecto !== null) {
       esEdicion.value = true;
-      preguntas.value = JSON.parse(proyecto.value.ficha_proyecto);
+      preguntas.value = proyecto.value.ficha_proyecto;
     }
   },
   { immediate: true }
