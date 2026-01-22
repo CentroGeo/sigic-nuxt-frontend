@@ -9,13 +9,54 @@ definePageMeta({
   middleware: 'auth',
 });
 
+const { data } = useAuth();
+
 const storeLevantamiento = useLevantamientoStore();
 
 const modalCrearProyecto = ref(null);
+const imagenPreview = ref(null);
+const imagenProyecto = ref(null);
 
-const handleCrearProyecto = () => {
-  storeLevantamiento.guardarProyecto();
+async function guardarArchivo(archivo) {
+  imagenProyecto.value = archivo;
+}
+
+const handleCrearProyecto = async () => {
+  const formData = new FormData();
+
+  Object.entries(nuevoProyecto).forEach(([key, value]) => {
+    formData.append(key, value);
+  });
+
+  formData.append('id_propietario', data.value?.user.email);
+  formData.append('lider', data.value?.user.name);
+
+  const timestamp = Date.now();
+  const extension = imagenProyecto.value.name.split('.').pop();
+  const baseName = imagenProyecto.value.name.replace(`.${extension}`, '');
+
+  const nombreImagen = `${baseName}_${timestamp}.${extension}`;
+
+  formData.append('image', imagenProyecto.value, nombreImagen);
+
+  await storeLevantamiento.guardarProyecto(formData);
   modalCrearProyecto.value.cerrarModal();
+};
+
+const nuevoProyecto = reactive({
+  nombre: '',
+  institucion: '',
+  categoria: '',
+  objetivo: '',
+  instrucciones: '',
+});
+
+onMounted(() => {
+  storeLevantamiento.obtenerMisProyectos(data.value?.user.email);
+});
+
+const eliminarProyecto = (idProyecto) => {
+  console.log(idProyecto);
 };
 </script>
 <template>
@@ -89,7 +130,7 @@ const handleCrearProyecto = () => {
                 @click="modalCrearProyecto.abrirModal()"
               >
                 Crear un proyecto
-                <span class="pictograma-agregar" aria-hidden="true" />
+                <span class="pictograma-agregar" aria-hidden="true"></span>
               </button>
             </div>
           </div>
@@ -104,8 +145,8 @@ const handleCrearProyecto = () => {
                 <b>{{ proyecto.nombre }}</b>
               </div>
               <div class="m-b-minimo texto-color-secundario">{{ proyecto.institucion }}</div>
-              <div class="m-b-minimo texto-color-secundario">{{ proyecto.autor }}</div>
-              <UiNumeroElementos :numero="proyecto.aportes" etiqueta="Aportes" />
+              <div class="m-b-minimo texto-color-secundario">{{ proyecto.lider }}</div>
+              <UiNumeroElementos :numero="proyecto.num_aportaciones" etiqueta="Aportes" />
               <NuxtLink
                 class="boton boton-primario boton-chico boton-accion-proyecto m-b-1"
                 aria-label="Configurar proyecto"
@@ -114,18 +155,26 @@ const handleCrearProyecto = () => {
                 Configurar proyecto
               </NuxtLink>
               <button
-                class="boton-secundario boton-chico boton-accion-proyecto m-b-1 fondo-color-primario"
+                class="boton-secundario boton-chico boton-accion-proyecto m-b-3 fondo-color-primario"
                 disabled
                 type="button"
               >
                 Aportar
               </button>
-              <button
-                class="boton-secundario boton-chico boton-accion-proyecto m-b-1 fondo-color-primario"
-                type="button"
-              >
-                Eliminar proyecto
-              </button>
+              <div class="flex flex-contenido-final proyecto-acciones">
+                <button class="boton-pictograma boton-sin-contenedor-primario">
+                  <span class="pictograma-compartir" aria-hidden="true"></span>
+                </button>
+                <button class="boton-pictograma boton-sin-contenedor-primario">
+                  <span class="pictograma-archivo-descargar" aria-hidden="true"></span>
+                </button>
+                <button
+                  class="boton-pictograma boton-sin-contenedor-primario"
+                  @click="eliminarProyecto(proyecto.id)"
+                >
+                  <span class="pictograma-eliminar" aria-hidden="true"></span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -138,23 +187,33 @@ const handleCrearProyecto = () => {
             <div class="p-3">
               <ClientOnly>
                 <SisdaiCampoBase
+                  v-model="nuevoProyecto.nombre"
                   etiqueta="Nombre del proyecto"
                   ejemplo="Escribe el nombre de tu proyecto"
                   :es_etiqueta_visible="true"
                   :es_obligatorio="false"
                   class="m-b-2"
                 />
-                <SisdaiSelector etiqueta="Institución a la que pertenece" class="m-b-2">
-                  <option value="1">Opcion Uno</option>
-                  <option value="2">Opcion Dos</option>
-                  <option value="3">Opcion Tres</option>
+                <SisdaiSelector
+                  v-model="nuevoProyecto.institucion"
+                  etiqueta="Institución a la que pertenece"
+                  class="m-b-2"
+                >
+                  <option value="inst_1">Institución Uno</option>
+                  <option value="inst_2">Institución Dos</option>
+                  <option value="inst_3">Institución Tres</option>
                 </SisdaiSelector>
-                <SisdaiSelector etiqueta="Categoría del proyecto" class="m-b-2">
-                  <option value="1">Opcion Uno</option>
-                  <option value="2">Opcion Dos</option>
-                  <option value="3">Opcion Tres</option>
+                <SisdaiSelector
+                  v-model="nuevoProyecto.categoria"
+                  etiqueta="Categoría del proyecto"
+                  class="m-b-2"
+                >
+                  <option value="cat_1">Categoría Uno</option>
+                  <option value="cat_2">Categoría Dos</option>
+                  <option value="cat_3">Categoría Tres</option>
                 </SisdaiSelector>
                 <SisdaiAreaTexto
+                  v-model="nuevoProyecto.objetivo"
                   etiqueta="Objetivo del proyecto"
                   ejemplo="Describe brevemente tu proyecto"
                   :es_etiqueta_visible="true"
@@ -162,6 +221,7 @@ const handleCrearProyecto = () => {
                   class="m-b-2"
                 />
                 <SisdaiAreaTexto
+                  v-model="nuevoProyecto.instrucciones"
                   etiqueta="Instrucciones para participantes"
                   ejemplo="Describe brevemente tu proyecto"
                   :es_etiqueta_visible="true"
@@ -232,5 +292,9 @@ const handleCrearProyecto = () => {
 .boton-accion-proyecto {
   width: 100%;
   justify-content: center;
+}
+
+.proyecto-acciones {
+  gap: 8px;
 }
 </style>

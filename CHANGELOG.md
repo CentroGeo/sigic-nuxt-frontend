@@ -7,6 +7,12 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.3.0] - 22-01-2026
+
+### Agregado (Added)
+
+- En el módulo de levantamiento se comenzó la conexión de con la API en la sección de descargas. Hasta ahora permite solicitar descargas y eliminar descargas en revisión.
+
 ## [0.2.3] - 22-01-2026
 
 ### Arreglado (Fix)
@@ -54,6 +60,7 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.3.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.2.3...v0.3.0
 [0.2.3]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.2.0...v0.2.1
