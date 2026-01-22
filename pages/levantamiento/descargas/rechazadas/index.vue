@@ -37,7 +37,7 @@ const eliminarRevision = async (id) => {
         />
 
         <div class="flex titulo-contenido-levantamiento">
-          <h2>Descargas en revisión</h2>
+          <h2>Descargas rechazadas</h2>
           <UiNumeroElementos
             :numero="storeLevantamiento.descargasEnRevision?.descargas?.length"
             etiqueta="Descargas"

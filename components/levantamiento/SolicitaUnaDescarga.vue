@@ -17,7 +17,7 @@ const handleDescarga = () => {
     ).id
   );
   formData.append(
-    'nameFileToExport',
+    'project_name',
     storeLevantamiento.proyectosPublicos.find(
       (d) => String(d.id) === String(proyectoSeleccionadoId.value)
     ).nombre
@@ -25,9 +25,7 @@ const handleDescarga = () => {
   formData.append('descriptionFileToExport', usoDatos.value);
 
   formData.append('user_id', data.value?.user.email);
-  for (const [key, value] of formData.entries()) {
-    console.log(key, value);
-  }
+
   storeLevantamiento.solicitarDescarga(formData);
   modalSolicitarDescarga.value.cerrarModal();
 };
