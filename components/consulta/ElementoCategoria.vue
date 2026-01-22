@@ -21,6 +21,7 @@ const estadoAbierto = ref(false);
 <template>
   <button
     class="categoria-colapsable flex-contenido-separado borde-redondeado-0 fondo-color-acento texto-color-secundario borde-l borde-grosor-4 borde-color-error"
+    aria-label="Desplegar/Plegar categoría"
     @click="estadoAbierto = !estadoAbierto"
   >
     <div>

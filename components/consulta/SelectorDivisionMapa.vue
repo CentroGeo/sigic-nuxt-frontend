@@ -1,9 +1,11 @@
 <script>
-import { lados } from '@centrogeomx/sisdai-mapas/src/utiles/capa';
+import { utiles } from '@centrogeomx/sisdai-mapas';
 import { arrayNewsOlds } from '~/utils/consulta';
 
 function ladoContrario(lado) {
-  return lado === lados.derecho ? lados.izquierdo : lados.derecho;
+  return lado === utiles.capa.lados.derecho
+    ? utiles.capa.lados.izquierdo
+    : utiles.capa.lados.derecho;
 }
 </script>
 
@@ -17,7 +19,7 @@ const props = defineProps({
   },
   lado: {
     type: String,
-    default: lados.derecho,
+    default: utiles.capa.lados.derecho,
   },
 });
 
@@ -47,7 +49,7 @@ const pksSeleccionados = computed({
       :aria-controls="`colapsable-division-${lado}`"
       :aria-expanded="abierto"
       type="button"
-      @click="() => emits('alAbrir')"
+      @click="() => emits('alAbrir', lado)"
     >
       Panel {{ lado }}
       <span :aria-hidden="true" class="pictograma-angulo-derecho" />

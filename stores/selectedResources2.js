@@ -44,7 +44,7 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
      * @param {SelectedResource} newResource instancia del recurso.
      * @param {String} resourceType tipo de recurso a agregar.
      */
-    add(newResource, resourceType = storeConsulta.resourceType) {
+    add(newResource, estilo_sld, resourceType = storeConsulta.resourceType) {
       if (this.byPk(newResource.pk, resourceType)) {
         this.removeByPk(newResource.pk, resourceType);
       }
@@ -54,6 +54,10 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
         newResource.posicion = this.list(resourceType).length;
       }
 
+      if (resourceType === resourceTypeDic.dataLayer) {
+        newResource.estilo = estilo_sld;
+      }
+
       // Cuando no se agrega una capa (tablas y documentos)
       if (resourceType !== resourceTypeDic.dataLayer) {
         // Si el nuevo recurso tiene visibilidad, quitar visibiidad a los demás
@@ -61,7 +65,6 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
           this.setOnlyOneVisible(newResource.pk, resourceType);
         }
       }
-
       resources[resourceType][newResource.pk] = newResource;
     },
 
@@ -79,7 +82,10 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
       queryParam
         .split(';')
         .reverse()
-        .forEach((txt, position) => this.add(new ClassToUse(`${txt},${position}`), resourceType));
+        .forEach((txt, position) => {
+          const estilo = txt.split(',')[1];
+          this.add(new ClassToUse(`${txt},${position}`), estilo, resourceType);
+        });
     },
 
     /**
@@ -213,14 +219,14 @@ export const useSelectedResources2Store = defineStore('selectedResources2', () =
      * @param {Array<String>} newpks
      * @param {String} resourceType tipo de recursos a modificar.
      */
-    updateByPks(newPks, resourceType = storeConsulta.resourceType) {
+    updateByPks(newPks, style, resourceType = storeConsulta.resourceType) {
       const { news, olds } = arrayNewsOlds(this.pks, newPks);
 
       olds.forEach((pk) => this.removeByPk(pk, resourceType));
 
       const ClassToUse =
         resourceType === resourceTypeDic.dataLayer ? SelectedLayer : SelectedResource;
-      news.forEach((pk) => this.add(new ClassToUse({ pk }), resourceType));
+      news.forEach((pk) => this.add(new ClassToUse({ pk }), style, resourceType));
     },
 
     /**

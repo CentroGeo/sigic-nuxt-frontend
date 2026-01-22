@@ -12,6 +12,7 @@ const props = defineProps({
 });
 
 const modalTabla = ref(null);
+const isLoading = ref(true);
 const paginaActual = ref(0);
 const tamanioPagina = 6;
 const {
@@ -43,12 +44,18 @@ defineExpose({
   abrirModalTabla,
 });
 
-watch([paginaActual], () => {
-  fetchTable({
+watch(datos, () => {
+  isLoading.value = false;
+});
+
+watch([paginaActual], async () => {
+  isLoading.value = true;
+  await fetchTable({
     paginaActual: paginaActual.value,
     tamanioPagina: tamanioPagina,
     resource: props.selectedElement,
   });
+  isLoading.value = false;
 });
 </script>
 
@@ -56,10 +63,22 @@ watch([paginaActual], () => {
   <ClientOnly>
     <SisdaiModal id="modal-tabla" ref="modalTabla">
       <template #encabezado>
-        <h1>{{ props.selectedElement.title }}</h1>
+        <h1 class="title">{{ props.selectedElement.title }}</h1>
       </template>
 
-      <template #cuerpo>
+      <template v-if="isLoading" #cuerpo>
+        <div class="flex flex-contenido-centrado">
+          <img
+            src="/img/loader.gif"
+            class="color-invertir"
+            alt="...Cargando"
+            heigh="120px"
+            width="120px"
+          />
+        </div>
+      </template>
+
+      <template v-else #cuerpo>
         <div class="contenedor-tabla">
           <UiPaginador
             :pagina-parent="paginaActual"
@@ -70,9 +89,10 @@ watch([paginaActual], () => {
         </div>
       </template>
 
-      <template v-if="props.selectedElement.sourcetype !== 'REMOTE'" #pie>
+      <template v-if="props.selectedElement.sourcetype !== 'REMOTE' && !isLoading" #pie>
         <button
           type="button"
+          aria-label="Ver Tabla en Visualizador"
           class="boton-con-contenedor-secundario boton-grande ancho"
           @click="openTablas"
         >
@@ -81,6 +101,7 @@ watch([paginaActual], () => {
         </button>
         <button
           type="button"
+          aria-label="Descargar"
           class="boton-primario boton-grande ancho"
           @click="emit('notifyDownload')"
         >
@@ -103,6 +124,13 @@ watch([paginaActual], () => {
 .ancho {
   width: 50%;
   display: flex;
-  justify-content: center; /* horizontal center */
+  justify-content: center;
+}
+
+.title {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  height: 1.2em;
+  white-space: nowrap;
 }
 </style>

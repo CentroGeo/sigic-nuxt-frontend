@@ -27,10 +27,22 @@ defineExpose({
 
       <template #cuerpo>
         <div class="contenedor flex">
-          <button type="button" class="boton-secundario" @click="cancelarClicked()">
+          <button
+            type="button"
+            class="boton-secundario"
+            aria-label="Cancelar"
+            @click="cancelarClicked()"
+          >
             Cancelar
           </button>
-          <button type="button" class="boton-primario" @click="eliminarClicked()">Eliminar</button>
+          <button
+            type="button"
+            class="boton-primario"
+            aria-label="Eliminar"
+            @click="eliminarClicked()"
+          >
+            Eliminar
+          </button>
         </div>
       </template>
     </SisdaiModal>

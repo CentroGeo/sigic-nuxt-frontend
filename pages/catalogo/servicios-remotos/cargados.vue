@@ -1,4 +1,5 @@
 <script setup>
+// Esta vista ya no se usa
 definePageMeta({
   middleware: 'sidebase-auth',
   bodyAttrs: {
@@ -92,7 +93,7 @@ try {
         remoteHaverstersResources.value.push({
           id: dd.id,
           title: d.title,
-          exported_resources: exportedResources.value.length,
+          imported_resources: exportedResources.value.length,
           to_attend_resources: totalResources.value - exportedResources.value.length,
           remote_url: dd.remote_url,
 
@@ -148,7 +149,7 @@ try {
                   <td>{{ value.title }}</td>
                   <td>
                     <nuxt-link @click="irARutaQuery(value, '')">
-                      {{ value.exported_resources }}
+                      {{ value.imported_resources }}
                     </nuxt-link>
                   </td>
                   <td>

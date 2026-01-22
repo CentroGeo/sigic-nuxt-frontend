@@ -306,6 +306,109 @@ export async function defineGeomType(resource) {
 }
 
 /**
+ * Hace una petición GetCapabilities y busca en el xml de respuesta
+ * para obtener una lista de estilos y un estilo por default
+ * para capas que viven en servidores externos
+ * @param {Object} resource
+ * @returns { String, Array }
+ */
+export async function fetchRemoteStyles(resource) {
+  //console.warn('solicitando los estilos de capas remotas');
+  const { gnoxyFetch } = useGnoxyUrl();
+  const targetLayerName = resource.alternate;
+  const targetLayerStyles = [];
+  let targetLayerDefaultStyle = null;
+  const server = getWMSserver(resource);
+  const url = `${server}service=wms&request=getCapabilities`;
+  const request = await gnoxyFetch(url);
+
+  if (!request.ok) {
+    console.error('Fracasó la petición de estilos remotos');
+  } else {
+    const res = await request.text();
+    const parser = new DOMParser();
+    const parsedRes = parser.parseFromString(res, 'application/xml');
+    const capabilitiesTags = parsedRes.getElementsByTagName('Capability');
+    const rootLayers = Array.from(capabilitiesTags[0].children).filter(
+      (d) => d.tagName === 'Layer'
+    );
+
+    let layers = [];
+    for (const layer of rootLayers) {
+      const subLayers = Array.from(layer.children).filter((d) => d.tagName === 'Layer');
+      layers = [...layers, ...subLayers];
+    }
+    for (const layer of layers) {
+      const nameEl = layer.getElementsByTagName('Name')[0];
+      if (nameEl.textContent === targetLayerName) {
+        const styleTags = layer.getElementsByTagName('Style');
+        for (const style of Array.from(styleTags)) {
+          const nameTag = style.getElementsByTagName('Name')[0];
+          const name = nameTag.textContent;
+          if (!targetLayerStyles.includes(name)) {
+            targetLayerStyles.push(name);
+          }
+        }
+        break;
+      }
+    }
+
+    if (targetLayerStyles.length > 0) {
+      targetLayerDefaultStyle = targetLayerStyles[0];
+    }
+    return { targetLayerDefaultStyle, targetLayerStyles };
+  }
+}
+/**
+ * Obtiene la lista de estilos asociados a un recurso y el estilo por default
+ * @param {Object} resource
+ * @returns {String, Array}
+ */
+export async function getSLDs(resource) {
+  const config = useRuntimeConfig();
+  const { gnoxyFetch } = useGnoxyUrl();
+  let styleList = [];
+  let defaultStyle = null;
+
+  try {
+    if (resource.sourcetype !== 'REMOTE') {
+      const stylesURL = `${config.public.geonodeApi}/datasets/${resource.pk}/sldstyles/`;
+      const stylesRes = await gnoxyFetch(stylesURL);
+
+      if (!stylesRes.ok) {
+        console.error('Falló la petición de estilos de:', resource.title);
+        return { defaultStyle, styleList };
+      }
+
+      const stylesData = await stylesRes.json();
+      defaultStyle = stylesData.default_style;
+      //styleList = stylesData.styles;
+      stylesData.styles.forEach((d) => {
+        const optionList = d.split(':');
+        if (optionList.length > 1 && !styleList.includes(optionList[1])) {
+          styleList.push(optionList[1]);
+        } else if (optionList.length === 1 && !styleList.includes(optionList[0])) {
+          styleList.push(optionList[0]);
+        }
+      });
+
+      if (!styleList.includes(defaultStyle)) {
+        styleList.push(defaultStyle);
+      }
+      return { defaultStyle, styleList };
+    } else {
+      const { targetLayerDefaultStyle, targetLayerStyles } = await fetchRemoteStyles(resource);
+      defaultStyle = targetLayerDefaultStyle;
+      styleList = targetLayerStyles;
+      return { defaultStyle, styleList };
+    }
+  } catch {
+    console.error('Falló la petición general de estilos de:', resource.title);
+    return { defaultStyle, styleList };
+  }
+}
+
+/**
  * Crea una url autenticada que permite visualizar documentos
  * @param {String} url
  * @returns
