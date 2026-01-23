@@ -2,6 +2,7 @@
 import SisdaiAreaTexto from '@centrogeomx/sisdai-componentes/src/componentes/area-texto/SisdaiAreaTexto.vue';
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
+import { useRoute } from 'vue-router';
 
 const storeLevantamiento = useLevantamientoStore();
 
@@ -46,10 +47,43 @@ const permisos = [
   },
 ];
 
-const usuariosAsignados = [
+/* const usuariosAsignados = [
   { email: 'persona_usuaria@centrogeo.edu.mx', permiso: 'Revisar', fecha: '17/10/2025' },
   { email: 'persona_usuaria@centrogeo.edu.mx', permiso: 'Administrar', fecha: '17/10/2025' },
-];
+]; */
+
+const { data } = useAuth();
+const route = useRoute();
+
+const participante = reactive({
+  email: '',
+  rol: '',
+});
+
+onMounted(() => {
+  storeLevantamiento.obtenerParticipantesPorProyecto(data.value?.user.email, route.params.id);
+});
+
+const agregarParticipante = () => {
+  storeLevantamiento.agregarParticipanteProyecto(
+    data.value?.user.email,
+    participante.email,
+    participante.rol,
+    route.params.id
+  );
+};
+
+const formatearFecha = (fechaISO) => {
+  const fecha = new Date(fechaISO).toLocaleDateString('es-ES', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+
+  console.log(fecha);
+
+  return fecha;
+};
 </script>
 
 <template>
@@ -125,17 +159,18 @@ const usuariosAsignados = [
           <div class="flex privacidad-acciones m-b-3">
             <div class="privacidad-input">
               <SisdaiCampoBase
+                v-model="participante.email"
                 etiqueta="Correo electrónico del participante"
                 ejemplo="Ingresa un correo electrónico"
                 :es_etiqueta_visible="true"
               />
             </div>
             <div class="privacidad-input">
-              <SisdaiSelector etiqueta="Permiso">
-                <option value="1">Administrar</option>
-                <option value="2">Revisar</option>
-                <option value="3">Participar</option>
-                <option value="4">Solo ver</option>
+              <SisdaiSelector v-model="participante.rol" etiqueta="Permiso">
+                <option value="administrar">Administrar</option>
+                <option value="revisar">Revisar</option>
+                <option value="participar">Participar</option>
+                <option value="ver">Solo ver</option>
               </SisdaiSelector>
             </div>
           </div>
@@ -148,25 +183,29 @@ const usuariosAsignados = [
           />
         </ClientOnly>
         <div class="flex flex-contenido-final">
-          <button class="boton-primario boton boton-chico">Enviar invitación</button>
+          <button class="boton-primario boton boton-chico" @click="agregarParticipante">
+            Enviar invitación
+          </button>
         </div>
       </div>
       <div>
         <h6>Permisos asignados</h6>
         <div class="flex usuarios-asignados">
           <div
-            v-for="usuario in usuariosAsignados"
-            :key="usuario.email"
+            v-for="participante in storeLevantamiento.participantes"
+            :key="participante.id"
             class="correo-participante borde-redondeado-8 fondo-color-acento p-2 flex flex-contenido-separado"
           >
             <div>
-              <div class="m-b-minimo texto-tamanio-3 asignado-email">{{ usuario.email }}</div>
+              <div class="m-b-minimo texto-tamanio-3 asignado-email">{{ participante.correo }}</div>
               <div class="flex">
                 <span
                   class="p-x-1 p-y-minimo borde borde-color-acento borde-redondeado-8 texto-color-secundario"
-                  >{{ usuario.permiso }}</span
+                  >{{ participante.rol }}</span
                 >
-                <span class="asignado-fecha texto-tamanio-2">Asignado el {{ usuario.fecha }}</span>
+                <span class="asignado-fecha texto-tamanio-2"
+                  >Asignado el {{ formatearFecha(participante.created_date) }}</span
+                >
               </div>
             </div>
             <div class="flex">
