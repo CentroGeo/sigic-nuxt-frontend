@@ -136,6 +136,13 @@ async function registrar() {
         } else {
           responseOk.value = true;
           console.warn('Se registró exitosamente');
+
+          /*  const updateStatus = await $fetch('/api/actualizar-externo', {
+            method: 'POST',
+            headers: { token: token },
+            body: { id: harvesterID, status: 'updating-harvestable-resources' },
+          });
+          console.warn('Update harvester status', updateStatus); */
         }
       } else {
         error.value = 'Revisa que la url apunte a un servicio válido';
