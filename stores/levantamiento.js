@@ -17,6 +17,7 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
     existenDescargasAprobadas: ref(false),
     descargasEnRevision: ref([]),
     existenDescargasEnRevision: ref(false),
+    esEdicionFormulario: ref(true),
 
     async obtenerProyectosPublicos() {
       try {
@@ -267,7 +268,7 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
         console.error('Error eliminando participante:', err);
       }
     },
-    async solicitarAprobacionProyecto(payload, idProyecto) {
+    async actualizarFormularioParticipantesProyecto(payload, idProyecto) {
       try {
         const response = await fetch(`${apiUrl}/projects/update/${idProyecto}`, {
           method: 'PUT',

@@ -153,7 +153,7 @@ const solicitarAprobacion = async () => {
     isPrivate: false,
   };
 
-  await storeLevantamiento.solicitarAprobacionProyecto(payload, route.params.id);
+  await storeLevantamiento.actualizarFormularioParticipantesProyecto(payload, route.params.id);
 
   modalSolicitarAprobacion.value.abrirModal();
 };
@@ -171,7 +171,7 @@ const actualizarProyecto = async () => {
     isPrivate: true,
   };
 
-  await storeLevantamiento.solicitarAprobacionProyecto(payload, route.params.id);
+  await storeLevantamiento.actualizarFormularioParticipantesProyecto(payload, route.params.id);
 
   modalProyectoPrivado.value.abrirModal();
 };
