@@ -1,5 +1,11 @@
 <script setup>
-import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa, utiles } from '@centrogeomx/sisdai-mapas';
+import {
+  SisdaiCapaArcgis,
+  SisdaiCapaWms,
+  SisdaiCapaXyz,
+  SisdaiMapa,
+  utiles,
+} from '@centrogeomx/sisdai-mapas';
 import { arrayNewsOlds, findServer, resourceTypeDic } from '~/utils/consulta';
 
 const storeConsulta = useConsultaStore();
@@ -147,6 +153,27 @@ async function buildLayerInfo(url, alternate, title, sourcetype) {
   }
 }
 
+function filteredByServerType(resourcesList, serverType) {
+  const serverTypeCollection = [];
+  resourcesList.forEach((d) => {
+    const server = findServer(d);
+    if (serverType === 'arcgis') {
+      if (server.includes(serverType)) {
+        serverTypeCollection.push(d);
+      }
+    } else {
+      if (!server.includes('arcgis')) {
+        serverTypeCollection.push(d);
+      }
+    }
+  });
+  /* console.warn(
+    serverType,
+    serverTypeCollection.map((d) => d.title)
+  ); */
+  return serverTypeCollection;
+}
+
 watch(
   () => storeSelected.resources[storeConsulta.resourceType],
   (nv_) => {
@@ -156,6 +183,8 @@ watch(
     const { news, olds } = arrayNewsOlds(attributesPks, selectedPks);
     news.forEach(async (r) => await addAttribute(r));
     olds.forEach((resource) => delete attributes.value[resource]);
+
+    //filteredByServerType(storeResources.findResources(selectedPks), 'arcgis');
   },
   { deep: true }
 );
@@ -235,7 +264,10 @@ onMounted(async () => {
           <SisdaiCapaXyz :posicion="0" />
           <!---->
           <SisdaiCapaWms
-            v-for="resource in storeResources.findResources(storeSelected.pks)"
+            v-for="resource in filteredByServerType(
+              storeResources.findResources(storeSelected.pks),
+              'ogc'
+            )"
             :key="`wms-${resource.pk}-${resource.position_}`"
             :capa="resource.alternate"
             :consulta="gnoxyFetch"
@@ -249,6 +281,19 @@ onMounted(async () => {
             :cuadro-informativo="
               (url) => buildLayerInfo(url, resource.alternate, resource.title, resource.sourcetype)
             "
+          />
+          <SisdaiCapaArcgis
+            v-for="resource in filteredByServerType(
+              storeResources.findResources(storeSelected.pks),
+              'arcgis'
+            )"
+            :key="`arcgis-${resource.pk}-${resource.position_}`"
+            :fuente="findServer(resource).replace('?', '')"
+            :capa="resource.alternate.split(':')[1]"
+            :mosaicos="true"
+            :opacidad="storeSelected.byPk(resource.pk).opacidad"
+            :posicion="storeSelected.byPk(resource.pk).posicion + 1"
+            :visible="storeSelected.byPk(resource.pk).visible"
           />
         </SisdaiMapa>
       </ClientOnly>
