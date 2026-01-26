@@ -30,17 +30,16 @@ async function guardarArchivo(files) {
 
   const validFileList = {};
   // Primero revisamos si los archivos son válidos
-  files.forEach((file) => {
+  for (const file of files) {
     const isValid = style_files.map((end) => file.name.endsWith(end)).includes(true);
     validFileList[file.name] = isValid;
-  });
+  }
 
   // Si los archivos son válidos, agregamos los sld
   if (!Object.values(validFileList).includes(false)) {
-    files.forEach((d) => {
+    for (const d of files) {
       loadedStylesSatus.value[d.name] = 'loading';
-    });
-
+    }
     for (const d of files) {
       const fileName = d.name;
       const formData = new FormData();

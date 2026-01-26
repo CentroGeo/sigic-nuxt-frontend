@@ -5,7 +5,7 @@ import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/S
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
 import { fetchByPk } from '~/utils/catalogo';
-import { getWMSserver, hasWMS } from '~/utils/consulta';
+import { getWMSserver, hasWFS } from '~/utils/consulta';
 
 const { data } = useAuth();
 const token = data.value?.accessToken;
@@ -48,7 +48,7 @@ const obtenerVariables = async (resource) => {
   if (!resource || resource.sourcetype !== 'REMOTE') {
     url = new URL(`${config.public.geonodeUrl}/gs/ows`);
   } else if (resource.sourcetype === 'REMOTE') {
-    const wmsStatus = await hasWMS(resource, 'table');
+    const wmsStatus = await hasWFS(resource, 'table');
     if (wmsStatus) {
       const link = getWMSserver(resource);
       url = new URL(link);
