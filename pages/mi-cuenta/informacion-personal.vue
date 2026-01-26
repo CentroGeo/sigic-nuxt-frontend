@@ -286,7 +286,7 @@ async function fetchData() {
       userInfo.value['city'] = info.city || 'No suministrado';
       userInfo.value['state'] = info.state || 'No suministrado';
       userInfo.value['postal_code'] = info.postal_code || 'No suministrado';
-      userInfo.value['country'] = countriesDict[info.country] || 'No suministrado';
+      userInfo.value['country'] = info.country || 'No suministrado';
       userInfo.value['avatar_url'] = info.avatar_url;
     }
   } catch {
@@ -394,6 +394,7 @@ onMounted(async () => {
         <a class="m-t-1" @click="updateAvatar">Cambiar foto</a>
       </div>
 
+      <!--Vista de lectura-->
       <div v-if="status === 'read'" class="columna-12">
         <div
           v-for="(campo, index) in Object.keys(userInfo).filter((d) => d != 'avatar_url')"
@@ -401,7 +402,12 @@ onMounted(async () => {
           class="m-b-2"
         >
           <label class="m-0">{{ tagsDict[campo] }}</label>
-          <p class="m-0">{{ userInfo[campo] }}</p>
+          <p v-if="campo === 'country'" class="m-0">
+            {{ countriesDict[userInfo['country']] }}
+          </p>
+          <p v-else class="m-0">
+            {{ userInfo[campo] }}
+          </p>
         </div>
         <div class="flex m-y-6">
           <button
@@ -413,6 +419,7 @@ onMounted(async () => {
           </button>
         </div>
       </div>
+      <!--Vista de edición-->
       <div v-if="status === 'edit'" class="columna-12">
         <ClientOnly>
           <SisdaiCampoBase
@@ -424,6 +431,7 @@ onMounted(async () => {
             tipo="text"
             class="m-b-2"
           />
+
           <SisdaiSelector
             v-model="userInfo['country']"
             :etiqueta="tagsDict['country']"
