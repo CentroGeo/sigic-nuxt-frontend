@@ -56,7 +56,7 @@ export const useFilteredResources = defineStore('filteredResources', () => {
         if (filters.resourceType === 'remotes') {
           queryParams['filter{subtype.in}'] = 'remote';
         } else {
-          queryParams['filter{resource_type}'] = resourceTypeGeonode[filters.resourceType];
+          queryParams['filter{resource_type.in}'] = resourceTypeGeonode[filters.resourceType];
           if (filters.resourceType === 'dataLayer') {
             queryParams['filter{has_geometry}'] = 'true';
           }
