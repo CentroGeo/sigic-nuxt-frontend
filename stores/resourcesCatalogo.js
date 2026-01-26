@@ -50,12 +50,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
     [resourceTypeDic.document]: [],
   });
 
-  /*   const resourcesByType2 = reactive({
-    [resourceTypeDic.dataLayer]: [],
-    [resourceTypeDic.dataTable]: [],
-    [resourceTypeDic.document]: [],
-  }); */
-
   return {
     isLoading: ref(false),
     totals,
@@ -86,8 +80,8 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
      * Se usa en catalogo/explorar y catalogo/explorar/resourceType
      */
     async getTotalResources(resourceType = storeConsulta.resourceType, query) {
+      console.log('Traer el total de recursos');
       const { gnoxyFetch } = useGnoxyUrl();
-      //TODO: agregar filtro para traer solo recursos con metadatos
       const queryParams = {
         'sort[]': '-last_updated',
         page_size: 1,
@@ -115,6 +109,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
      * @param {Number} pageSize
      */
     async getResourcesByPage(resourceType = storeConsulta.resourceType, pageNum, pageSize, params) {
+      console.log('Traer recursos paginados');
       const { gnoxyFetch } = useGnoxyUrl();
       this.isLoading = true;
       //TODO: Agregar el parámetro para que solo traiga los recursos con metadata completa
