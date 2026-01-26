@@ -155,6 +155,7 @@ export function buildUrl(endpoint, query) {
   const pruebaUrl = `${pruebaApi}?${dataParams.toString().replace('extent_ne=%5B-1%2C-1%2C0%2C0%5D', 'extent_ne=[-1,-1,0,0]')}`;
   return pruebaUrl;
 }
+
 /**
  * Regresa el servidor en el que esta alojado un recurso remoto
  * @param {Object} resource
@@ -310,7 +311,6 @@ export async function fetchGeometryWMS(resource) {
         return 'Error';
       }
       const data = await res.json();
-      //console.log(resource.alternate, data);
       if (
         Array.isArray(data.features) &&
         data.features.length > 0 &&
@@ -380,7 +380,6 @@ export async function defineGeomType(resource) {
       } else {
         geomType = 'Remoto';
       }
-      return 'Remoto';
     } else {
       geomType = await fetchGeometryArcgis(resource);
     }
