@@ -1,7 +1,12 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
+import {
+  SisdaiCapaArcgis,
+  SisdaiCapaWms,
+  SisdaiCapaXyz,
+  SisdaiMapa,
+} from '@centrogeomx/sisdai-mapas';
 import { findServer } from '~/utils/consulta';
 
 const props = defineProps({
@@ -13,6 +18,8 @@ const props = defineProps({
 });
 const { resourceType, selectedElement } = toRefs(props);
 const { gnoxyFetch } = useGnoxyUrl();
+//const config = useRuntimeConfig();
+const serverType = ref(null);
 const seleccionVarDisponibles = ref(selectedElement.value.default_style);
 const hasAttrTable = computed(() => {
   if (selectedElement.value.sourcetype === 'REMOTE' || resourceType.value === 'document') {
@@ -21,7 +28,7 @@ const hasAttrTable = computed(() => {
     return true;
   }
 });
-const extentMap = ref(undefined);
+// const extentMap = ref(undefined);
 
 // const modalPublica = ref(null);
 // const modalPublicaBasicos = ref(null);
@@ -32,6 +39,7 @@ const modalPublicaConfirmar = ref(null);
 
 // const tagTitle = ref();
 //
+//const extentMap = ref(undefined);
 const modalMapaPreview = ref(null);
 const modalMetaBasicos = ref(null);
 const modalMetaLicencias = ref(null);
@@ -82,6 +90,15 @@ const optionsDict = {
 //   modalPublica.value?.abrirModal();
 //   tagTitle.value = optionsDict[resourceType.value]['title'];
 // }
+
+function checkServerType() {
+  const server = findServer(selectedElement.value);
+  if (server.includes('arcgis')) {
+    serverType.value = 'arcgis';
+  } else {
+    serverType.value = 'ogc';
+  }
+}
 
 const estatus = ref(true);
 /**
@@ -136,9 +153,12 @@ async function confirmarSolicitud(cerrarModal) {
     console.error('error', error);
   }
 }
-
 defineExpose({
   abrirmodalPublicacion,
+});
+
+onMounted(() => {
+  checkServerType();
 });
 </script>
 
@@ -176,16 +196,24 @@ defineExpose({
               </SisdaiSelector>
             </ClientOnly>
 
-            <SisdaiMapa class="gema" :vista="{ extension: extentMap }">
+            <!-- <SisdaiMapa class="gema" :vista="{ extension: extentMap }"> -->
+            <SisdaiMapa class="gema" :vista="{ extension: selectedElement.extent.coords }">
               <SisdaiCapaXyz />
 
+              <SisdaiCapaArcgis
+                v-if="serverType === 'arcgis'"
+                :capa="selectedElement.alternate.split(':')[1]"
+                :fuente="findServer(selectedElement).replace('?', '')"
+              />
+              <!--  @al-finalizar-carga="extentMap = selectedElement.extent.coords" -->
               <SisdaiCapaWms
+                v-else
                 :estilo="seleccionVarDisponibles"
                 :capa="selectedElement.alternate"
                 :consulta="gnoxyFetch"
                 :fuente="findServer(selectedElement)"
-                @al-finalizar-carga="extentMap = selectedElement.extent.coords"
               />
+              <!--  @al-finalizar-carga="extentMap = selectedElement.extent.coords" -->
             </SisdaiMapa>
           </div>
 

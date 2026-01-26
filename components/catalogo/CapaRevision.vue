@@ -11,7 +11,7 @@ import {
   arrayNewsOlds,
   categoriesInSpanish,
   findServer,
-  hasWMS,
+  hasWFS,
   resourceTypeDic,
   tooltipContent,
 } from '~/utils/consulta';
@@ -277,7 +277,7 @@ async function updateFunctions() {
   if (resourceElement.value.sourcetype === 'REMOTE') {
     // Se excluye el botón de descargar para remotos
     buttons = buttons.filter((d) => d.excludeFor !== 'remotes');
-    const resourceHasWMS = await hasWMS(resourceElement.value, 'table');
+    const resourceHasWMS = await hasWFS(resourceElement.value, 'table');
     // Se excluye el botón para ver tablas en caso de que el archivo remoto no permita consultar la tabla
     if (resourceHasWMS === false) {
       buttons = buttons.filter((d) => d.excludeFor !== 'noTables');

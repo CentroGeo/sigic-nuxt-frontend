@@ -50,12 +50,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
     [resourceTypeDic.document]: [],
   });
 
-  /*   const resourcesByType2 = reactive({
-    [resourceTypeDic.dataLayer]: [],
-    [resourceTypeDic.dataTable]: [],
-    [resourceTypeDic.document]: [],
-  }); */
-
   return {
     isLoading: ref(false),
     totals,
@@ -87,7 +81,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
      */
     async getTotalResources(resourceType = storeConsulta.resourceType, query) {
       const { gnoxyFetch } = useGnoxyUrl();
-      //TODO: agregar filtro para traer solo recursos con metadatos
       const queryParams = {
         'sort[]': '-last_updated',
         page_size: 1,
@@ -196,7 +189,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
         // Excluimos los servicios usando queryparams
         if (
           !Object.keys(queryParams).includes('filter{subtype.in}') &&
-          !queryParams['filter{resource_type}']
+          !queryParams['filter{resource_type.in}']
         ) {
           queryParams['filter{resource_type.in}'] = ['dataset', 'document'];
         }
@@ -249,7 +242,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
         // Excluimos los servicios usando queryparams
         if (
           !Object.keys(queryParams).includes('filter{subtype.in}') &&
-          !queryParams['filter{resource_type}']
+          !queryParams['filter{resource_type.in}']
         ) {
           queryParams['filter{resource_type.in}'] = ['dataset', 'document'];
         }
@@ -288,7 +281,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       //TODO: agregar filtro para traer solo recursos con metadatos
       const queryParams = {
         'filter{complete_metadata}': 'true',
-        'filter{resource_type}': resourceTypeGeonode[resourceType],
+        'filter{resource_type.in}': resourceTypeGeonode[resourceType],
         page_size: 1,
         'filter{owner.username}': userEmail,
       };
@@ -319,7 +312,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       //TODO: agregar filtro para traer solo recursos con metadatos
       const queryParams = {
         'filter{complete_metadata}': 'true',
-        'filter{resource_type}': resourceTypeGeonode[resourceType],
+        'filter{resource_type.in}': resourceTypeGeonode[resourceType],
         page_size: myTotalsByType[resourceType],
         'filter{owner.username}': userEmail,
       };
@@ -341,35 +334,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       this.isLoading = false;
       //return resources[resourceType];
     },
-    /**
-     *
-     * @param {Object} resourceType
-     */
-    /*     async getResourcesByType(resourceType = storeConsulta.resourceType) {
-      const { gnoxyFetch } = useGnoxyUrl();
-      this.isLoading = true;
-      const queryParams = {
-        'filter{resource_type}': resourceTypeGeonode[resourceType],
-        page_size: myTotalsByType[resourceType],
-      };
-      if (resourceType === 'dataLayer') {
-        queryParams['filter{has_geometry}'] = 'true';
-      }
-      if (resourceType === 'dataTable') {
-        queryParams['filter{subtype.in}'] = ['vector'];
-      }
-      if (resourceType === 'document') {
-        queryParams['filter{extension}'] = ['pdf', 'txt'];
-      }
-
-      const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
-      const request = await gnoxyFetch(url.toString());
-      const res = await request.json();
-
-      resourcesByType2[resourceType] = res.resources;
-      this.isLoading = false;
-    }, */
-
     /**
      * Traer la información de un solo recurso
      * @param {*} pkToFind

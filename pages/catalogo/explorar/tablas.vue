@@ -91,8 +91,6 @@ watch(
 onMounted(async () => {
   storeFilters.resetAll();
   storeFilters.buildQueryParams();
-  storeResources.getTotalResources(storeConsulta.resourceType, params.value);
-  fetchNewData();
 });
 </script>
 
