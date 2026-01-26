@@ -122,9 +122,9 @@ onMounted(async () => {
   storeFilters.resetAll();
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
   storeResources.getMyTotal('disponibles', params.value);
-  storeResources.getMyTotal('pendientes', params.value);
+  //storeResources.getMyTotal('pendientes', params.value);
   storeResources.getMyTotal('publicacion', params.value);
-  await fetchNewData();
+  //await fetchNewData();
 });
 </script>
 
