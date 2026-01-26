@@ -98,7 +98,7 @@ onMounted(async () => {
             @cambio="paginaActual = $event"
           />
           <h2 v-if="selectedElement" class="m-t-1 m-b-1 m-x-2">{{ selectedElement.title }}</h2>
-          <UiTablaAccesible class="tabla" :variables="variables" :datos="datos" />
+          <UiTablaAccesible :variables="variables" :datos="datos" />
         </div>
       </div>
     </template>
@@ -115,9 +115,5 @@ onMounted(async () => {
 <style scoped>
 .contenedor-tabla {
   height: var(--altura-consulta-esc);
-}
-
-.tabla {
-  background-color: var(--color-neutro-2);
 }
 </style>

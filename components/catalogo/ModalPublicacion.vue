@@ -13,19 +13,51 @@ const props = defineProps({
 });
 const { resourceType, selectedElement } = toRefs(props);
 const { gnoxyFetch } = useGnoxyUrl();
-
-const seleccionVarDisponibles = ref(selectedElement.value.alternate);
-//const config = useRuntimeConfig();
+const seleccionVarDisponibles = ref(selectedElement.value.default_style);
+const hasAttrTable = computed(() => {
+  if (selectedElement.value.sourcetype === 'REMOTE' || resourceType.value === 'document') {
+    return false;
+  } else {
+    return true;
+  }
+});
 const extentMap = ref(undefined);
 
-const modalPublica = ref(null);
-const modalPublicaBasicos = ref(null);
-const modalPublicaUbicacion = ref(null);
-const modalPublicaOpcionales = ref(null);
-const modalPublicaAtributos = ref(null);
+// const modalPublica = ref(null);
+// const modalPublicaBasicos = ref(null);
+// const modalPublicaUbicacion = ref(null);
+// const modalPublicaOpcionales = ref(null);
+// const modalPublicaAtributos = ref(null);
 const modalPublicaConfirmar = ref(null);
 
+// const tagTitle = ref();
+//
+const modalMapaPreview = ref(null);
+const modalMetaBasicos = ref(null);
+const modalMetaLicencias = ref(null);
+const modalMetaOpcionales = ref(null);
+const modalMetaAtributos = ref(null);
+const optionsList = ref(null);
+// const selectedOption = ref();
 const tagTitle = ref();
+// const docExtension = ref(
+//   resourceType.value === 'document'
+//     ? selectedElement.value.links.find((link) => link.link_type === 'uploaded').extension
+//     : 'No aplica'
+// );
+// const layerType = ref(
+//   resourceType.value === 'dataLayer' ? selectedElement.value.subtype : 'No aplica'
+// );
+function abrirmodalPublicacion() {
+  if (resourceType.value === 'dataLayer') {
+    modalMapaPreview.value?.abrirModal();
+  } else {
+    modalMetaBasicos.value?.abrirModal();
+  }
+  optionsList.value = optionsDict[resourceType.value]['elements'];
+  tagTitle.value = optionsDict[resourceType.value]['title'];
+  // selectedOption.value = optionsList.value.map((d) => d.label)[0];
+}
 
 const alertaModal = {
   titulo: 'Verifica antes de publicar',
@@ -46,10 +78,10 @@ const optionsDict = {
   },
 };
 
-function abrirModalDescarga() {
-  modalPublica.value?.abrirModal();
-  tagTitle.value = optionsDict[resourceType.value]['title'];
-}
+// function abrirModalDescarga() {
+//   modalPublica.value?.abrirModal();
+//   tagTitle.value = optionsDict[resourceType.value]['title'];
+// }
 
 const estatus = ref(true);
 /**
@@ -58,10 +90,18 @@ const estatus = ref(true);
  * @param {String} cerrarModal  la opción del modal a cerrar
  */
 async function confirmarSolicitud(cerrarModal) {
-  if (cerrarModal === 'modalPublicaOpcionales') {
-    modalPublicaOpcionales.value.cerrarModal();
+  //   function confirmarSolicitud(cerrarModal) {
+  //   if (cerrarModal === 'modalMetaOpcionales') {
+  //     modalMetaOpcionales.value.cerrarModal();
+  //   } else {
+  //     modalMetaAtributos.value.cerrarModal();
+  // >>>>>>> develop
+  //   }
+  // }
+  if (cerrarModal === 'modalMetaOpcionales') {
+    modalMetaOpcionales.value.cerrarModal();
   } else {
-    modalPublicaAtributos.value.cerrarModal();
+    modalMetaAtributos.value.cerrarModal();
   }
   const id = selectedElement.value.pk;
   console.warn(`solicitud ${id} confirmada`);
@@ -69,17 +109,28 @@ async function confirmarSolicitud(cerrarModal) {
   try {
     const { data } = useAuth();
     const token = data.value?.accessToken;
-    const configEnv = useRuntimeConfig();
-    const baseUrl = configEnv.public.geonodeUrl;
-    const headers = ref({ Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' });
-
+    const config = useRuntimeConfig();
     // petición para enviar el recurso a la solicitud
-    const response = await fetch(`${baseUrl}/sigic/requests/`, {
+    const response = await $fetch(`${config.public.basePath}/api/requests`, {
       method: 'POST',
-      headers: headers.value,
-      body: JSON.stringify({ resource_pk: id }),
+      headers: { token: token },
+      body: {
+        resource_pk: id, // id del recurso a solicitud
+      },
     });
-    estatus.value = response.ok ? true : false;
+    console.warn('response', response);
+
+    // const configEnv = useRuntimeConfig();
+    // const baseUrl = configEnv.public.geonodeUrl;
+    // const headers = ref({ Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' });
+
+    // // petición para enviar el recurso a la solicitud
+    // const response = await fetch(`${baseUrl}/sigic/requests/`, {
+    //   method: 'POST',
+    //   headers: headers.value,
+    //   body: JSON.stringify({ resource_pk: id }),
+    // });
+    estatus.value = response.success ? true : false;
     modalPublicaConfirmar.value.abrirModal();
   } catch (error) {
     console.error('error', error);
@@ -87,13 +138,13 @@ async function confirmarSolicitud(cerrarModal) {
 }
 
 defineExpose({
-  abrirModalDescarga,
+  abrirmodalPublicacion,
 });
 </script>
 
 <template>
   <ClientOnly>
-    <SisdaiModal ref="modalPublica" class="modal-grande">
+    <SisdaiModal ref="modalMapaPreview" class="modal-grande">
       <template #encabezado>
         <p style="color: transparent">.</p>
       </template>
@@ -109,12 +160,19 @@ defineExpose({
           <div v-if="tagTitle === 'capa'">
             <ClientOnly>
               <SisdaiSelector
+                v-if="selectedElement.styles.length > 1"
                 v-model="seleccionVarDisponibles"
                 class="m-b-1"
                 style="display: none"
                 etiqueta="Variables disponibles para visualizar"
               >
-                <option value="1">variable</option>
+                <option
+                  v-for="style in selectedElement.styles"
+                  :key="`${style}-estilo`"
+                  :value="style"
+                >
+                  {{ style }}
+                </option>
               </SisdaiSelector>
             </ClientOnly>
 
@@ -122,6 +180,7 @@ defineExpose({
               <SisdaiCapaXyz />
 
               <SisdaiCapaWms
+                :estilo="seleccionVarDisponibles"
                 :capa="selectedElement.alternate"
                 :consulta="gnoxyFetch"
                 :fuente="findServer(selectedElement)"
@@ -136,7 +195,7 @@ defineExpose({
                 type="button"
                 aria-label="Cancelar"
                 class="boton-secundario"
-                @click="modalDescarga.cerrarModal()"
+                @click="modalMapaPreview.cerrarModal()"
               >
                 Cancelar
               </button>
@@ -147,8 +206,8 @@ defineExpose({
                 aria-label="Siguiente"
                 class="boton-primario texto-centrado"
                 @click="
-                  modalPublica.cerrarModal();
-                  modalPublicaBasicos.abrirModal();
+                  modalMapaPreview.cerrarModal();
+                  modalMetaBasicos.abrirModal();
                 "
               >
                 Siguiente
@@ -159,7 +218,7 @@ defineExpose({
       </template>
     </SisdaiModal>
 
-    <SisdaiModal ref="modalPublicaBasicos" class="modal-grande">
+    <SisdaiModal ref="modalMetaBasicos" class="modal-grande">
       <template #encabezado>
         <p style="color: transparent">.</p>
       </template>
@@ -183,8 +242,8 @@ defineExpose({
               aria-label="Regresar"
               class="boton-secundario"
               @click="
-                modalPublicaBasicos.cerrarModal();
-                modalPublica.abrirModal();
+                modalMetaBasicos.cerrarModal();
+                modalMapaPreview.abrirModal();
               "
             >
               Regresar
@@ -196,8 +255,8 @@ defineExpose({
               type="button"
               class="boton-primario texto-centrado"
               @click="
-                modalPublicaBasicos.cerrarModal();
-                modalPublicaUbicacion.abrirModal();
+                modalMetaBasicos.cerrarModal();
+                modalMetaLicencias.abrirModal();
               "
             >
               Siguiente
@@ -207,7 +266,7 @@ defineExpose({
       </template>
     </SisdaiModal>
 
-    <SisdaiModal ref="modalPublicaUbicacion" class="modal-grande">
+    <SisdaiModal ref="modalMetaLicencias" class="modal-grande">
       <template #encabezado>
         <p style="color: transparent">.</p>
       </template>
@@ -231,8 +290,8 @@ defineExpose({
               class="boton-secundario"
               aria-label="Regresar"
               @click="
-                modalPublicaUbicacion.cerrarModal();
-                modalPublicaBasicos.abrirModal();
+                modalMetaLicencias.cerrarModal();
+                modalMetaBasicos.abrirModal();
               "
             >
               Regresar
@@ -244,8 +303,8 @@ defineExpose({
               aria-label="Siguiente"
               class="boton-primario texto-centrado"
               @click="
-                modalPublicaUbicacion.cerrarModal();
-                modalPublicaOpcionales.abrirModal();
+                modalMetaLicencias.cerrarModal();
+                modalMetaOpcionales.abrirModal();
               "
             >
               Siguiente
@@ -255,7 +314,7 @@ defineExpose({
       </template>
     </SisdaiModal>
 
-    <SisdaiModal ref="modalPublicaOpcionales" class="modal-grande">
+    <SisdaiModal ref="modalMetaOpcionales" class="modal-grande">
       <template #encabezado>
         <p style="color: transparent">.</p>
       </template>
@@ -279,32 +338,39 @@ defineExpose({
               aria-label="Regresar"
               class="boton-secundario"
               @click="
-                modalPublicaOpcionales.cerrarModal();
-                modalPublicaUbicacion.abrirModal();
+                modalMetaOpcionales.cerrarModal();
+                modalMetaLicencias.abrirModal();
               "
             >
               Regresar
             </button>
           </div>
           <div class="columna-8">
-            <button
-              v-if="tagTitle !== 'capa'"
+            <!--v-if="tagTitle !== 'capa'"-->
+            <!--v-if="tagTitle !== 'capa'"
               aria-label="Confirmar"
               type="button"
               class="boton-primario texto-centrado"
-              @click="confirmarSolicitud('modalPublicaOpcionales')"
+              @click="confirmarSolicitud('modalPublicaOpcionales')"-->
+            <button
+              v-if="!hasAttrTable"
+              aria-label="Siguiente"
+              type="button"
+              class="boton-primario texto-centrado"
+              @click="confirmarSolicitud('modalMetaOpcionales')"
             >
               Confirmar
             </button>
             <!-- TODO: revisar la parte de capa con geometría y subtipo con vector -->
+            <!--v-if="tagTitle == 'capa'"-->
             <button
-              v-if="tagTitle === 'capa'"
+              v-if="hasAttrTable"
               type="button"
               aria-label="Siguiente"
               class="boton-primario texto-centrado"
               @click="
-                modalPublicaOpcionales.cerrarModal();
-                modalPublicaAtributos.abrirModal();
+                modalMetaOpcionales.cerrarModal();
+                modalMetaAtributos.abrirModal();
               "
             >
               Siguiente
@@ -314,7 +380,7 @@ defineExpose({
       </template>
     </SisdaiModal>
 
-    <SisdaiModal ref="modalPublicaAtributos" class="modal-grande">
+    <SisdaiModal ref="modalMetaAtributos" class="modal-grande">
       <template #encabezado>
         <p style="color: transparent">.</p>
       </template>
@@ -337,8 +403,8 @@ defineExpose({
               type="button"
               class="boton-secundario"
               @click="
-                modalPublicaAtributos.cerrarModal();
-                modalPublicaOpcionales.abrirModal();
+                modalMetaAtributos.cerrarModal();
+                modalMetaOpcionales.abrirModal();
               "
             >
               Regresar
@@ -349,7 +415,7 @@ defineExpose({
               type="button"
               aria-label="Confirmar"
               class="boton-primario texto-centrado"
-              @click="confirmarSolicitud('modalPublicaAtributos')"
+              @click="confirmarSolicitud('modalMetaAtributos')"
             >
               Confirmar
             </button>

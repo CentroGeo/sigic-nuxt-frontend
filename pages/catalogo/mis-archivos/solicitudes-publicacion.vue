@@ -136,7 +136,6 @@ onMounted(async () => {
 
   storeResources.getMyTotal('disponibles', {});
   storeResources.getMyTotal('pendientes', {});
-
   params.value['filter{owner}'] = `${userReviewerPk.value}`;
   storeResources.getMyTotal('publicacion', params.value);
   fetchNewData();

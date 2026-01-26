@@ -114,6 +114,8 @@ async function updateMetadata() {
     } else {
       didUpdateFail.value = true;
     }
+    isLoading.value = false;
+    isMetaInvalid.value = false;
     //const router = useRouter();
     //router.go(0);
   } else {
@@ -185,7 +187,13 @@ function irAmisArchivos() {
         <template #cuerpo>
           <div v-if="isLoading" class="m-y-2">
             <div class="flex flex-contenido-centrado">
-              <img src="/img/loader.gif" alt="...Guardando" heigh="160px" width="160px" />
+              <img
+                src="/img/loader.gif"
+                class="color-invertir"
+                alt="...Guardando"
+                heigh="160px"
+                width="160px"
+              />
             </div>
             <p style="text-align: center">Guardando</p>
           </div>

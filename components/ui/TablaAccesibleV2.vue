@@ -48,12 +48,13 @@ const dictTable = ref({
   propietario: 'Propietario',
 });
 
-const typeDict = {
+/* const typeDict = {
   'Capa Geográfica, Catálogo Externo': 'dataLayer',
   'Capa Geográfica': 'dataLayer',
   'Datos Tabulados': 'dataTable',
   Documentos: 'document',
-};
+}; */
+
 /**
  * Codifica la propiedad pk de un objeto y se pasa como query al ir a otra vista
  * @param objeto que se va a codificar
@@ -167,6 +168,7 @@ async function openResourceView(resource) {
     useSelectedResources2Store().reset();
     useSelectedResources2Store().add(
       new SelectedLayer({ pk: resource.pk }),
+      resource.recurso_completo.default_style,
       resourceTypeDic.dataLayer
     );
     await navigateTo('/consulta/capas');
@@ -179,18 +181,15 @@ async function openResourceView(resource) {
     );
     await navigateTo('/consulta/tablas');
   }
-  /* (objeto.tipo_recurso === 'Documentos') {
-    navigateTo({
-      path: '/catalogo/mis-archivos/editar-metadatos',
-      query: { data: pk },
-    });
-  } */
+
   if (resource.tipo_recurso === 'Documentos') {
     useSelectedResources2Store().reset();
     useSelectedResources2Store().add(
       new SelectedLayer({ pk: resource.pk }),
+      null,
       resourceTypeDic.document
     );
+
     await navigateTo('/consulta/documentos');
   }
 }
@@ -230,10 +229,9 @@ function tipoRecurso(recurso) {
 function notifyReleaseRequest(resource) {
   shownModal.value = 'releaseOne';
   modalResource.value = resource.recurso_completo;
-  // console.log(resource);
   resourceType.value = tipoRecurso(resource);
   nextTick(() => {
-    releaseRequest.value?.abrirModalDescarga();
+    releaseRequest.value?.abrirmodalPublicacion();
   });
 }
 
@@ -710,7 +708,7 @@ async function removerRevision() {
       v-if="shownModal === 'releaseOne'"
       ref="releaseRequest"
       :key="`${modalResource.pk}_${resourceType}`"
-      :resource-type="typeDict[resourceType]"
+      :resource-type="resourceType === 'Capa Geográfica' ? 'dataLayer' : resourceType"
       :selected-element="modalResource"
     />
     <!-- Modal para descargar datos -->
@@ -726,14 +724,18 @@ async function removerRevision() {
       <!-- Modal Eliminar Recurso -->
       <SisdaiModal ref="modalEliminar">
         <template #encabezado>
-          <h2 v-if="wasDeletionSuccesful === null">
-            ¿Deseas eliminar {{ resourceToDeleteTitle }}?
+          <h2 v-if="wasDeletionSuccesful === null || isBeingDeleted">
+            ¿Deseas eliminar <span class="header-title">{{ resourceToDeleteTitle }}</span
+            >?
           </h2>
           <p v-else></p>
         </template>
         <template #cuerpo>
           <!--Botones-->
-          <div v-if="wasDeletionSuccesful === null" class="flex m-y-2 flex-contenido-centrado">
+          <div
+            v-if="wasDeletionSuccesful === null || isBeingDeleted"
+            class="flex m-y-2 flex-contenido-centrado"
+          >
             <div class="contenedor flex flex-contenido-centrado">
               <button
                 type="button"
@@ -753,7 +755,7 @@ async function removerRevision() {
               </button>
             </div>
             <div v-if="isBeingDeleted" class="columna-3 color-invertir">
-              <img src="/img/loader.gif" alt="...Cargando" />
+              <img src="/img/loader.gif" class="color-invertir" alt="...Procesando" />
             </div>
           </div>
           <!--Alerta de que fracasó la eliminación-->
@@ -872,5 +874,12 @@ table {
     // min-width: 224px;
     width: fit-content;
   }
+}
+
+.header-title {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  height: 1.2em;
+  white-space: nowrap;
 }
 </style>
