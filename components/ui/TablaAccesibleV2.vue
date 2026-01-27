@@ -18,7 +18,7 @@ const props = defineProps({
   },
 });
 const storeCatalogo = useCatalogoStore();
-const storeSelected = useSelectedResources2Store();
+// const storeSelected = useSelectedResources2Store();
 //const { data } = useAuth();
 const config = useRuntimeConfig();
 const { data } = useAuth();
@@ -98,11 +98,30 @@ async function openResourceReview(resource) {
   }
   if (resource.tipo_recurso === 'Capa Geográfica') {
     storeCatalogo.previousPath = route.path;
-    storeSelected.reset();
+    useSelectedResources2Store().reset();
     useSelectedResources2Store().add(
       new SelectedLayer({ pk: resource.pk }),
+      null,
       resourceTypeDic.dataLayer
     );
+    await navigateTo({
+      path: `/catalogo/revision-solicitudes/revisar/${resource.pk}`,
+      query: {
+        pk: resource.pk,
+        pk_request: resource.pk_request,
+        resource_type: resource.tipo_recurso,
+      },
+    });
+    revisando.value = true;
+  }
+  if (resource.tipo_recurso === 'Datos Tabulados') {
+    storeCatalogo.previousPath = route.path;
+    // useSelectedResources2Store().reset();
+    // useSelectedResources2Store().add(
+    //   new SelectedLayer({ pk: resource.pk }),
+    //   null,
+    //   resourceTypeDic.dataLayer
+    // );
     await navigateTo({
       path: `/catalogo/revision-solicitudes/revisar/${resource.pk}`,
       query: {

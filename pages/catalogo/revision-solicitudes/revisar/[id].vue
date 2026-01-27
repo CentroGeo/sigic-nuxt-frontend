@@ -169,6 +169,11 @@ onMounted(() => {
         </div>
 
         <CatalogoCapaRevision v-if="selectedResourceType === 'Capa Geográfica'" />
+
+        <CatalogoTablaRevision
+          v-if="selectedResourceType === 'Datos Tabulados'"
+          :selected-element-pk="selectedPk"
+        />
       </main>
 
       <ClientOnly>

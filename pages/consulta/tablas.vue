@@ -66,8 +66,6 @@ watch(
   { deep: true }
 );
 onMounted(async () => {
-  useSelectedResources2Store().reset();
-
   storeResources.resetByType(storeConsulta.resourceType);
   storeSelected.addFromQueryParam(route.query.tablas);
 
