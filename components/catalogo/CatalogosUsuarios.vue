@@ -3,6 +3,7 @@ import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/sele
 import { fetchHarvesters } from '~/utils/catalogo';
 const { gnoxyFetch } = useGnoxyUrl();
 const config = useRuntimeConfig();
+const userID = ref(null);
 const harvesters = ref([]);
 const isLoadingGeneral = ref(true);
 const isLoadingPage = ref(true);
@@ -26,6 +27,22 @@ const statusDict = {
   'updating-harvestable-resources': 'Listando recursos',
   'harvesting-resources': 'Cosechando recursos',
 };
+/**
+ * Esta función obtiene el pk de la persona usuaria
+ */
+async function getUserInfo() {
+  const { data } = useAuth();
+  const email = data.value?.user.email;
+  const url = `https://geonode.dev.geoint.mx/api/v2/users/?filter{username}=${email}`;
+  const request = await gnoxyFetch(url);
+  if (!request.ok) {
+    console.error('No se pudo recuperar la información de usuario');
+  } else {
+    const res = await request.json();
+    userID.value = res.users[0]['pk'];
+    queryParams.value['owner_id'] = userID.value;
+  }
+}
 /**
  * Esta petición obtiene el total de servicios externos
  */
@@ -125,8 +142,10 @@ watch(seleccionOrden, () => {
   }
 });
 
-onMounted(() => {
-  getResources();
+onMounted(async () => {
+  isLoadingGeneral.value = true;
+  await getUserInfo();
+  await getResources();
 });
 </script>
 <template>
