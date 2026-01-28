@@ -47,7 +47,7 @@ onMounted(async () => {
           :resource="editedResource"
           :resource-type="type"
           :resource-pk="selectedPk"
-        ></CatalogoAtributosMeta>
+        />
       </main>
       <main v-else>
         <div class="flex flex-contenido-centrado m-t-3">

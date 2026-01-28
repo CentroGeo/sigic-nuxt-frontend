@@ -197,6 +197,7 @@ watch(
 );
 
 onMounted(async () => {
+  storeConsulta.catalogoColapsado = false;
   updateMapFromHash(route.hash?.slice(1));
   storeResources.resetByType(storeConsulta.resourceType);
   storeSelected.addFromQueryParam(route.query.capas);

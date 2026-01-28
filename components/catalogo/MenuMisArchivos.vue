@@ -14,6 +14,7 @@ const props = defineProps({
   opciones: { type: Array, default: Array },
   notificacion: { type: Boolean, default: false },
 });
+
 const route = useRoute();
 
 /**
