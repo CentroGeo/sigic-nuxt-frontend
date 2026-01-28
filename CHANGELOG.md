@@ -11,7 +11,7 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Arreglado (Fix)
 
-- Ahora se pueden crear dos servicios que apunten a la misma url siempre y cuando sean dos personas usuarias distintas quienes las registran.
+- Ahora se pueden crear dos servicios que apunten a la misma url siempre y cuando sean dos personas usuarias distintas quienes las registran. Sin embargo, aún no se pueden importar recursos desde la segunda url registrada.
 - Se agregó redireccionamiento al login en la vista de explorar/servicios-remotos
 - Los servicios registrados que aparecen son los que la persona usuaria registró, incluso para superusuarios.
 
