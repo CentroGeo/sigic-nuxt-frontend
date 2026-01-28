@@ -31,7 +31,6 @@ function abrirModalTabla() {
 }
 
 async function openTablas() {
-  // modalTabla.value?.cerrarModal();
   useSelectedResources2Store().reset();
   useSelectedResources2Store().add(
     new SelectedResource({ pk: props.selectedElement.pk }),

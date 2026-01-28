@@ -16,12 +16,6 @@ const isDownloadActive = ref(false);
 const hasDownloadFailed = ref(false);
 const isDownloadSlow = ref(false);
 const timer = 7000;
-/* const includesRemote = computed(() =>
-  storeResources
-    .findResources(storeSelected.pks)
-    .map((resource) => resource.sourcetype)
-    .includes('REMOTE')
-); */
 
 function abrirModalDescargaAll() {
   isDownloadActive.value = false;
@@ -57,7 +51,6 @@ async function downloadAllDataTables(format) {
     hasDownloadFailed.value = true;
   }
   isDownloadActive.value = false;
-  //modalDescargaAll.value?.cerrarModal();
 }
 
 async function downloadAllDocs() {
@@ -85,7 +78,6 @@ async function downloadAllDocs() {
     hasDownloadFailed.value = true;
   }
   isDownloadActive.value = false;
-  //modalDescargaAll.value?.cerrarModal();
 }
 
 async function downloadAllMetadata() {
@@ -112,7 +104,6 @@ async function downloadAllMetadata() {
     hasDownloadFailed.value = true;
   }
   isDownloadActive.value = false;
-  //modalDescargaAll.value?.cerrarModal();
 }
 
 const optionsDict = {
@@ -183,7 +174,6 @@ defineExpose({
         <h1>Descargar {{ tagTitle }}</h1>
       </template>
       <template #cuerpo>
-        <!-- <div v-if="includesRemote" class="tarjeta m-y-3">  -->
         <div class="tarjeta m-y-3">
           <div class="tarjeta-cuerpo">
             <p>
@@ -234,17 +224,6 @@ defineExpose({
             Descargar
           </button>
         </div>
-        <!--         <div>
-          <button
-            v-for="option in optionsList"
-            :key="option.label"
-            type="button"
-            class="boton-secundario"
-            @click="option.action"
-          >
-            {{ option.label }}
-          </button>
-        </div> -->
       </template>
     </SisdaiModal>
   </ClientOnly>

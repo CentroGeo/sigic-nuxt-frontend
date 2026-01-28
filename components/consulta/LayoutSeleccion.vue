@@ -15,7 +15,7 @@ const buttonTagDict = {
   dataTable: 'archivos',
   document: 'archivos',
 };
-// const route = useRoute();
+
 const shownModal = ref('ninguno');
 const modalResource = ref(null);
 const owsLink = ref(null);
@@ -84,7 +84,6 @@ function notifyShareChild() {
 
 function shareState() {
   shownModal.value = 'share';
-  //console.log('Se copia el url en el portapapeles: ', route.fullPath);
   nextTick(() => {
     notifyShareChild();
   });
@@ -96,7 +95,6 @@ function changeModal(to) {
   }
 }
 
-// const isOpen = ref(false);
 const storeConsulta = useConsultaStore();
 const dividirMapa = computed({
   get: () => storeConsulta.divisionMapaActivado(),

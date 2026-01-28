@@ -94,12 +94,10 @@ async function addAttribute(pk) {
   const maxAttrs = 5;
   const resource = await gnoxyFetch(`${config.public.geonodeApi}/datasets/${pk}`);
   if (!resource.ok) {
-    //console.error('Error en la peticion de atributos');
     const alternateTitle = storeResources.findResource(pk, 'dataLayer')['alternate'];
     attributes.value[alternateTitle] = [];
   } else {
     const res = await resource.json();
-    //console.log(res);
     let visibleAttrs = res.dataset.attribute_set
       .filter((a) => a.visible)
       .sort((a, b) => a.display_order - b.display_order);
@@ -167,10 +165,6 @@ function filteredByServerType(resourcesList, serverType) {
       }
     }
   });
-  /* console.warn(
-    serverType,
-    serverTypeCollection.map((d) => d.title)
-  ); */
   return serverTypeCollection;
 }
 
@@ -179,12 +173,9 @@ watch(
   (nv_) => {
     const selectedPks = Object.keys(nv_);
     const attributesPks = Object.keys(attributes.value);
-    //console.log(selectedPks, attributesPks);
     const { news, olds } = arrayNewsOlds(attributesPks, selectedPks);
     news.forEach(async (r) => await addAttribute(r));
     olds.forEach((resource) => delete attributes.value[resource]);
-
-    //filteredByServerType(storeResources.findResources(selectedPks), 'arcgis');
   },
   { deep: true }
 );
@@ -207,21 +198,16 @@ watch(
 
 onMounted(async () => {
   storeConsulta.catalogoColapsado = false;
-
-  //console.log('Extension:', vistaDelMapa.value);
   updateMapFromHash(route.hash?.slice(1));
   storeResources.resetByType(storeConsulta.resourceType);
   storeSelected.addFromQueryParam(route.query.capas);
 
-  // Para cuando hace el cambio de página
+  // Cuando hace el cambio de página
   if (storeSelected.pks.length > 0) {
     storeResources.fetchResourcesByPk(storeConsulta.resourceType, storeSelected.pks);
     updateQueryParam(storeSelected.asQueryParam());
   }
 });
-
-// api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
-// const contenedorSelectoresDivisionColapsado = ref(true);
 </script>
 
 <template>
