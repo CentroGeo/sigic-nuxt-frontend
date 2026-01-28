@@ -1,6 +1,6 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
-import { categoriesInSpanish, resourceTypeDic, wait } from '~/utils/consulta';
+import { categoriesInSpanish, getSLDs, resourceTypeDic, wait } from '~/utils/consulta';
 import SelectedLayer from '~/utils/consulta/SelectedLayer';
 import SelectedResource from '~/utils/consulta/SelectedResource';
 /**
@@ -87,7 +87,10 @@ async function openResourceReview(resource) {
     });
     revisando.value = true;
   }
-  if (resource.tipo_recurso === 'Capa Geográfica') {
+  if (
+    resource.tipo_recurso === 'Capa Geográfica' ||
+    resource.tipo_recurso === 'Capa Geográfica, Catálogo Externo'
+  ) {
     storeCatalogo.previousPath = route.path;
     useSelectedResources2Store().reset();
     useSelectedResources2Store().add(
@@ -166,6 +169,17 @@ async function addRequestToMyReviews() {
   }
 }
 
+async function checkDefaultStyle(resource) {
+  if (Object.keys(resource).includes('recurso_completo')) {
+    return resource.recurso_completo.default_style;
+  } else {
+    const url = `${config.public.geonodeApi}/resources/${resource.pk}/`;
+    const req = await gnoxyFetch(url);
+    const res = await req.json();
+    const { defaultStyle } = await getSLDs(res.resource);
+    return defaultStyle;
+  }
+}
 /**
  * Agrega un recurso seleccionado al módulo de consulta y navega a la vista
  * @param resource del que se toma el pk para la selección
@@ -175,10 +189,11 @@ async function openResourceView(resource) {
     resource.tipo_recurso === 'Capa Geográfica' ||
     resource.tipo_recurso === 'Capa Geográfica, Catálogo Externo'
   ) {
+    const estilo = await checkDefaultStyle(resource);
     useSelectedResources2Store().reset();
     useSelectedResources2Store().add(
       new SelectedLayer({ pk: resource.pk }),
-      resource.recurso_completo.default_style,
+      estilo,
       resourceTypeDic.dataLayer
     );
     await navigateTo('/consulta/capas');
