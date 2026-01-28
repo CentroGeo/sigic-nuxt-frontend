@@ -2,6 +2,7 @@
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import { categoriesInSpanish, resourceTypeDic, wait } from '~/utils/consulta';
 import SelectedLayer from '~/utils/consulta/SelectedLayer';
+import SelectedResource from '~/utils/consulta/SelectedResource';
 /**
  * @typedef {Object} Props
  * @property {Array} [variables=[]] - Indica las variables del encabezado thead tr th.
@@ -18,8 +19,6 @@ const props = defineProps({
   },
 });
 const storeCatalogo = useCatalogoStore();
-// const storeSelected = useSelectedResources2Store();
-//const { data } = useAuth();
 const config = useRuntimeConfig();
 const { data } = useAuth();
 const { gnoxyFetch } = useGnoxyUrl();
@@ -35,7 +34,6 @@ const resourceToDeletePk = ref(null);
 const resourceToDelete = ref(null);
 const wasDeletionSuccesful = ref(null);
 const isBeingDeleted = ref(false);
-// diccionario para colocar acentos
 const dictTable = ref({
   pk: 'pk',
   titulo: 'Título',
@@ -47,13 +45,6 @@ const dictTable = ref({
   revisor: 'Revisor',
   propietario: 'Propietario',
 });
-
-/* const typeDict = {
-  'Capa Geográfica, Catálogo Externo': 'dataLayer',
-  'Capa Geográfica': 'dataLayer',
-  'Datos Tabulados': 'dataTable',
-  Documentos: 'document',
-}; */
 
 /**
  * Codifica la propiedad pk de un objeto y se pasa como query al ir a otra vista
@@ -195,7 +186,7 @@ async function openResourceView(resource) {
   if (resource.tipo_recurso === 'Datos Tabulados') {
     useSelectedResources2Store().reset();
     useSelectedResources2Store().add(
-      new SelectedLayer({ pk: resource.pk }),
+      new SelectedResource({ pk: resource.pk }),
       resourceTypeDic.dataTable
     );
     await navigateTo('/consulta/tablas');
@@ -204,8 +195,7 @@ async function openResourceView(resource) {
   if (resource.tipo_recurso === 'Documentos') {
     useSelectedResources2Store().reset();
     useSelectedResources2Store().add(
-      new SelectedLayer({ pk: resource.pk }),
-      null,
+      new SelectedResource({ pk: resource.pk }),
       resourceTypeDic.document
     );
 

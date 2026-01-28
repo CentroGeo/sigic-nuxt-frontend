@@ -1,6 +1,5 @@
 <script setup>
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { cleanInput } from '~/utils/consulta';
 
 definePageMeta({
   middleware: 'sidebase-auth',
@@ -12,9 +11,6 @@ definePageMeta({
 const storeResources = useResourcesCatalogoStore();
 const storeFilters = useFilteredResources();
 const storeCatalogo = useCatalogoStore();
-
-const userReviewerPk = computed(() => storeCatalogo.userInfo.pk);
-
 const section = 'publicacion';
 const isLoading = computed(() => storeResources.isLoading);
 const params = computed(() => storeFilters.filters.queryParams);
@@ -27,8 +23,8 @@ const paginaActual = ref(0);
 const tamanioPagina = 10;
 const totalPags = computed(() => Math.ceil(totalResources.value / tamanioPagina));
 
-const modalFiltroAvanzado = ref(null);
-const isFilterActive = ref(false);
+//const modalFiltroAvanzado = ref(null);
+//const isFilterActive = ref(false);
 const seleccionTipoArchivo = computed({
   get: () => storeFilters.filters.requests,
   set: (value) => storeFilters.updateFilter('requests', value),
@@ -38,10 +34,10 @@ const seleccionOrden = computed({
   set: (value) => storeFilters.updateFilter('sort', value),
 });
 
-const inputSearch = computed({
+/* const inputSearch = computed({
   get: () => storeFilters.filters.inputSearch,
   set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
-});
+}); */
 
 const hayMetaPendiente = computed(() =>
   storeResources.myTotalBySection('pendientes') > 0 ? true : false
@@ -103,7 +99,10 @@ function updateResources() {
 
 function fetchNewData() {
   storeResources.resetBySection(section);
-  storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, params.value);
+  storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, {
+    ...params.value,
+    'filter{owner}': storeCatalogo.userInfo.pk,
+  });
 }
 
 watch([seleccionTipoArchivo], () => {
@@ -116,7 +115,10 @@ watch(paginaActual, () => {
 
 watch(params, () => {
   paginaActual.value = 0;
-  storeResources.getMyTotal('publicacion', params.value);
+  storeResources.getMyTotal('publicacion', {
+    ...params.value,
+    'filter{owner}': storeCatalogo.userInfo.pk,
+  });
   fetchNewData();
 });
 
@@ -130,15 +132,12 @@ watch(
 
 onMounted(async () => {
   await storeCatalogo.getUserInfo();
-
   storeFilters.resetAll();
   storeFilters.buildQueryParams();
-
-  storeResources.getMyTotal('disponibles', {});
-  storeResources.getMyTotal('pendientes', {});
-  params.value['filter{owner}'] = `${userReviewerPk.value}`;
-  storeResources.getMyTotal('publicacion', params.value);
-  fetchNewData();
+  storeResources.getMyTotal('disponibles', params.value);
+  storeResources.getMyTotal('pendientes', params.value);
+  //storeResources.getMyTotal('publicacion', params.value);
+  //fetchNewData();
 });
 </script>
 
@@ -152,7 +151,8 @@ onMounted(async () => {
       <main class="contenedor m-b-10 m-t-3">
         <!--Controles de filtros-->
         <div class="flex">
-          <div class="columna-4">
+          <!--class="columna-4"-->
+          <div class="columna-7">
             <ClientOnly>
               <SisdaiSelector v-model="seleccionTipoArchivo" etiqueta="Estatus">
                 <option value="all">Todos los estatus</option>
@@ -163,7 +163,8 @@ onMounted(async () => {
               </SisdaiSelector>
             </ClientOnly>
           </div>
-          <div class="columna-4">
+          <!--class="columna-4"-->
+          <div class="columna-7">
             <ClientOnly>
               <SisdaiSelector v-model="seleccionOrden" etiqueta="Ordenar por">
                 <option value="titulo">Título</option>
@@ -175,7 +176,8 @@ onMounted(async () => {
           </div>
           <div class="columna-8">
             <div class="flex flex-contenido-separado">
-              <div class="columna-14">
+              <!--Campo de busqueda-->
+              <!-- <div class="columna-14">
                 <ClientOnly>
                   <label for="idunicobusquedamisarchivos"> Campo de búsqueda </label>
                   <form class="campo-busqueda" style="height: 40px" @submit.prevent>
@@ -206,8 +208,9 @@ onMounted(async () => {
                     </button>
                   </form>
                 </ClientOnly>
-              </div>
-              <div class="columna-2 flex-vertical-final">
+              </div> -->
+              <!--Busqueda avanzada-->
+              <!-- <div class="columna-2 flex-vertical-final">
                 <button
                   :class="
                     isFilterActive
@@ -220,7 +223,7 @@ onMounted(async () => {
                 >
                   <span class="pictograma-filtro" aria-hidden="true" />
                 </button>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
@@ -253,7 +256,7 @@ onMounted(async () => {
           <UiNumeroElementos :numero="totalResources" />
         </div>
         <p>
-          E esta tabla se muestran los archivos enviados para revisión antes de publicarse en el
+          En esta tabla se muestran los archivos enviados para revisión antes de publicarse en el
           catálogo público de SIGIC. También puedes consultar el estatus de su aprobación.
         </p>
 
@@ -295,11 +298,11 @@ onMounted(async () => {
       </main>
 
       <!-- Modal Búsqueda avanzada -->
-      <ConsultaModalBusqueda
+      <!-- <ConsultaModalBusqueda
         ref="modalFiltroAvanzado"
         @apply-filter="console.log('applyAdvancedFilter')"
         @reset-filter="console.log('resetAdvancedFilter')"
-      />
+      /> -->
     </template>
   </UiLayoutPaneles>
 </template>
