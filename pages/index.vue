@@ -27,6 +27,7 @@ const obtenerMasRecientes = (type) => {
 const capasMasRecientes = obtenerMasRecientes('dataLayer');
 
 async function updateSelection(newPk) {
+  storeSelected.reset();
   storeSelected.add(new SelectedLayer({ pk: newPk }), 'dataLayer');
 
   nextTick(async () => {

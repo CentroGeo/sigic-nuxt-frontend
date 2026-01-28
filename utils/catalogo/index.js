@@ -1,3 +1,20 @@
+/**
+ * Valida si el tipo de recurso es documento o dataset con geometría o no
+ * @param recurso del catálogo
+ * @returns {String} ya sea Documentos, Capa geográfica o Datos tabulados
+ */
+export function tipoRecurso(recurso) {
+  let tipo;
+  if (recurso.resource_type === 'document') {
+    tipo = 'Documentos';
+  } else if (recurso.sourcetype === 'REMOTE') {
+    tipo = 'Capa Geográfica, Catálogo Externo';
+  } else {
+    tipo = isGeometricExtension(recurso.extent) ? 'Capa Geográfica' : 'Datos Tabulados';
+  }
+  return tipo;
+}
+
 export async function fetchByPk(pk) {
   const config = useRuntimeConfig();
   const { gnoxyUrl } = useGnoxyUrl();

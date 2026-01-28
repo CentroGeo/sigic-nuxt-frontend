@@ -57,13 +57,19 @@ const variables = {
 </script>
 <template>
   <div>
-    <div class="alineacion-izquierda ancho-lectura">
+    <div v-if="!isModal" class="alineacion-izquierda ancho-lectura">
       <CatalogoHeaderMetadatos
         :resource="props.resource"
         :title="'Atributos del Conjunto de Datos'"
         :exclude-links="props.isModal"
-      ></CatalogoHeaderMetadatos>
+      />
     </div>
+    <CatalogoHeaderMetadatos
+      v-else
+      :resource="props.resource"
+      :title="'Atributos del Conjunto de Datos'"
+      :exclude-links="props.isModal"
+    />
 
     <div class="contenedor-tabla p-2">
       <table v-if="sortedAttrs.length > 0">

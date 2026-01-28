@@ -14,6 +14,7 @@ const props = defineProps({
   opciones: { type: Array, default: Array },
   notificacion: { type: Boolean, default: false },
 });
+
 const route = useRoute();
 
 /**
@@ -138,7 +139,6 @@ function irARutaConQuery(value) {
   &:hover,
   &:focus {
     background-color: var(--boton-secundario-cursor-fondo);
-    // background-color: transparent;
     .borde-enlace-hover {
       position: absolute;
       bottom: 0px;
