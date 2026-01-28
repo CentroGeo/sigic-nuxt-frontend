@@ -109,6 +109,11 @@ async function confirmarSolicitud(cerrarModal) {
     console.error('error', error);
   }
 }
+
+async function navigateToRequests() {
+  modalPublicaConfirmar.value.cerrarModal();
+  await navigateTo('/catalogo/mis-archivos/solicitudes-publicacion');
+}
 defineExpose({
   abrirmodalPublicacion,
 });
@@ -447,12 +452,13 @@ onMounted(() => {
             </button>
           </div>
           <div class="columna-8">
-            <nuxt-link
+            <button
               aria-label="Ir a mis archivos"
               class="boton boton-primario texto-centrado"
-              to="/catalogo/mis-archivos/solicitudes-publicacion"
-              >Ver Mis Solicitudes
-            </nuxt-link>
+              @click="navigateToRequests"
+            >
+              Ver Mis Solicitudes
+            </button>
           </div>
         </div>
       </template>
