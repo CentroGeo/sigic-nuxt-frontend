@@ -1,9 +1,12 @@
 <script setup>
 import SisdaiAreaTexto from '@centrogeomx/sisdai-componentes/src/componentes/area-texto/SisdaiAreaTexto.vue';
+import SisdaiBotonesRadioGrupo from '@centrogeomx/sisdai-componentes/src/componentes/boton-radio-grupo/SisdaiBotonesRadioGrupo.vue';
+import SisdaiBotonRadio from '@centrogeomx/sisdai-componentes/src/componentes/boton-radio/SisdaiBotonRadio.vue';
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
+import { onBeforeUnmount, ref } from 'vue';
 
 definePageMeta({
   middleware: 'auth',
@@ -55,9 +58,34 @@ onMounted(() => {
   storeLevantamiento.obtenerMisProyectos(data.value?.user.email);
 });
 
-const eliminarProyecto = (idProyecto) => {
-  console.log(idProyecto);
+const modalDescargarDatos = ref(null);
+const modalEliminarProyecto = ref(null);
+const proyectoSeleccionado = ref(null);
+
+const abrirModalEliminarProyecto = (proyecto) => {
+  proyectoSeleccionado.value = proyecto;
+  modalEliminarProyecto.value.abrirModal();
 };
+
+const modalProyectoEliminado = ref(null);
+let timeoutModal = null;
+
+const eliminarProyecto = async () => {
+  await storeLevantamiento.eliminarProyecto(data.value?.user.email, proyectoSeleccionado.value.id);
+  await storeLevantamiento.obtenerMisProyectos(data.value?.user.email);
+  modalEliminarProyecto.value.cerrarModal();
+
+  modalProyectoEliminado.value.abrirModal();
+  if (timeoutModal) clearTimeout(timeoutModal);
+  timeoutModal = setTimeout(() => {
+    modalProyectoEliminado.value.cerrarModal();
+    timeoutModal = null;
+  }, 3000);
+};
+
+onBeforeUnmount(() => {
+  if (timeoutModal) clearTimeout(timeoutModal);
+});
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeLevantamiento.catalogoColapsado">
@@ -165,12 +193,15 @@ const eliminarProyecto = (idProyecto) => {
                 <button class="boton-pictograma boton-sin-contenedor-primario">
                   <span class="pictograma-compartir" aria-hidden="true"></span>
                 </button>
-                <button class="boton-pictograma boton-sin-contenedor-primario">
+                <button
+                  class="boton-pictograma boton-sin-contenedor-primario"
+                  @click="modalDescargarDatos.abrirModal()"
+                >
                   <span class="pictograma-archivo-descargar" aria-hidden="true"></span>
                 </button>
                 <button
                   class="boton-pictograma boton-sin-contenedor-primario"
-                  @click="eliminarProyecto(proyecto.id)"
+                  @click="abrirModalEliminarProyecto(proyecto)"
                 >
                   <span class="pictograma-eliminar" aria-hidden="true"></span>
                 </button>
@@ -250,6 +281,67 @@ const eliminarProyecto = (idProyecto) => {
             </button>
           </template>
         </SisdaiModal>
+
+        <SisdaiModal ref="modalDescargarDatos">
+          <template #encabezado><h3>Descargar datos</h3></template>
+          <template #cuerpo>
+            <p class="m-t-0 m-b-3">Selecciona el formato en el cual deseas descargar los datos:</p>
+            <SisdaiBotonesRadioGrupo leyenda="" :es_vertical="true">
+              <SisdaiBotonRadio
+                etiqueta="Tabulado de datos .csv"
+                value="csv"
+                name="modo-descarga"
+              />
+              <SisdaiBotonRadio etiqueta="Reporte en PDF" value="pdf" name="modo-descarga" />
+            </SisdaiBotonesRadioGrupo>
+          </template>
+          <template #pie>
+            <button
+              type="button"
+              class="boton-secundario boton-chico"
+              @click="modalDescargarDatos?.cerrarModal()"
+            >
+              Cerrar
+            </button>
+            <button type="button" class="boton-primario boton-chico">Descargar</button>
+          </template>
+        </SisdaiModal>
+
+        <SisdaiModal ref="modalEliminarProyecto">
+          <template #encabezado><h3>Eliminar proyecto</h3></template>
+          <template #cuerpo>
+            <p class="m-t-0 m-b-3">
+              ¿Deseas eliminar este proyecto? Toda la información, participantes y formularios se
+              perderán y no se podrán recuperar.
+            </p>
+          </template>
+          <template #pie>
+            <button
+              type="button"
+              class="boton-secundario boton-chico"
+              @click="modalEliminarProyecto?.cerrarModal()"
+            >
+              Regresar
+            </button>
+            <button type="button" class="boton-primario boton-chico" @click="eliminarProyecto">
+              Eliminar proyecto
+            </button>
+          </template>
+        </SisdaiModal>
+
+        <SisdaiModal id="proyectoEliminadoModal" ref="modalProyectoEliminado">
+          <template #encabezado><h3>Proyecto eliminado</h3></template>
+          <template #cuerpo>
+            <div
+              class="fondo-color-confirmacion p-x-2 p-y-1 borde borde-color-confirmacion borde-redondeado-20"
+            >
+              <p class="texto-color-confirmacion">
+                <span class="pictograma-aprobado" />
+                El proyecto y toda su información relacionada se ha eliminado con éxito.
+              </p>
+            </div>
+          </template>
+        </SisdaiModal>
       </ClientOnly>
     </template>
   </UiLayoutPaneles>
@@ -296,5 +388,11 @@ const eliminarProyecto = (idProyecto) => {
 
 .proyecto-acciones {
   gap: 8px;
+}
+</style>
+
+<style lang="scss">
+dialog#proyectoEliminadoModal.modal .modal-contenedor .modal-cerrar {
+  display: none;
 }
 </style>

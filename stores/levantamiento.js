@@ -18,6 +18,7 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
     descargasEnRevision: ref([]),
     existenDescargasEnRevision: ref(false),
     esEdicionFormulario: ref(true),
+    proyectosCompartidos: ref([]),
 
     async obtenerProyectosPublicos() {
       try {
@@ -288,6 +289,43 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
         console.error('Error:', error);
         throw error;
       }
+    },
+    async eliminarProyecto(userEmail, idProyecto) {
+      try {
+        const body = {
+          user_id: userEmail,
+        };
+
+        const data = await $fetch(`${apiUrl}/projects/deactivate/${idProyecto}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: body,
+        });
+        console.log(data);
+      } catch (err) {
+        console.error('Error eliminando proyecto:', err);
+      }
+    },
+    async obtenerProyectosCompartidos(email) {
+      try {
+        const body = {
+          email: email,
+        };
+
+        const data = await $fetch(`${apiUrl}/projects/shared`, {
+          method: 'POST',
+          body: body,
+        });
+        console.log(data);
+        this.proyectosCompartidos = data.proyectos;
+      } catch (err) {
+        console.error('Error cargando proyectos compartidos:', err);
+      }
+    },
+    obtenerTotalProyectosCompartidos() {
+      return this.proyectosCompartidos.length;
     },
   };
 });

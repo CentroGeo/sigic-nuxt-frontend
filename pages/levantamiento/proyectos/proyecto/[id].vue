@@ -29,14 +29,7 @@ watch(
 const preguntas = computed(() => {
   const ficha = proyecto.value?.ficha_proyecto;
 
-  if (!ficha) return [];
-
-  try {
-    return JSON.parse(ficha);
-  } catch (error) {
-    console.error('Error al parsear ficha_proyecto:', error);
-    return [];
-  }
+  return Array.isArray(ficha) ? ficha : [];
 });
 
 const modalSolicitarDescarga = ref(null);
@@ -97,30 +90,30 @@ const handleDescarga = () => {
               <div class="m-b-3">
                 <h5 class="m-t-0 m-b-2">Instrucciones clave del formulario:</h5>
                 <p class="m-y-0">
-                  {{ proyecto?.especificaciones_multimedia }}
+                  {{ proyecto?.instrucciones }}
                 </p>
               </div>
               <div class="m-b-3">
                 <h5 class="m-t-0 m-b-2">Visualización de formulario</h5>
                 <div class="fondo-color-neutro p-3 borde-redondeado-20 flex">
                   <div
-                    v-for="pregunta in preguntas"
-                    :key="pregunta.id_pregunta"
+                    v-for="(pregunta, index) in preguntas"
+                    :key="index"
                     class="p-3 borde-redondeado-20 fondo-color-primario columna-16"
                   >
                     <div v-if="pregunta.tipo !== 'multimedia'" class="m-b-2 texto-peso-500">
-                      {{ pregunta.id_pregunta }}. {{ pregunta.texto }}
+                      {{ index + 1 }}. {{ pregunta.pregunta }}
                     </div>
                     <div class="m-b-1 texto-color-secundario texto-peso-500">
                       {{
                         pregunta.tipo === 'multimedia'
-                          ? `${pregunta.id_pregunta}. ${pregunta.nota_para_registrante}`
-                          : pregunta.nota_para_registrante
+                          ? `${index + 1}. ${pregunta.instrucciones}`
+                          : pregunta.instrucciones
                       }}
                     </div>
 
                     <div
-                      v-if="pregunta.obligatoria"
+                      v-if="pregunta.obligatorio"
                       class="texto-color-secundario texto-tamanio-2 text-peso-400"
                     >
                       Obligatoria*
