@@ -1,7 +1,6 @@
 <script setup>
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { SisdaiLeyendaArcgis, SisdaiLeyendaWms } from '@centrogeomx/sisdai-mapas';
-//import SisdaiLeyendaArcgis from '@centrogeomx/sisdai-mapas/src/componentes/leyenda/arcgis';
 import { findServer, getWMSserver, hasFeatureServer, hasWFS } from '~/utils/consulta';
 
 const config = useRuntimeConfig();
@@ -150,10 +149,6 @@ onMounted(async () => {
 watch(selectedStyle, (nv) => {
   storeSelected.byPk(resourceElement.value.pk).estilo = nv;
 });
-
-/* watch(selectedStyle, (nv) => {
-  console.log(nv);
-}); */
 </script>
 
 <template>

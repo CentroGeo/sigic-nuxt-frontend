@@ -1,7 +1,5 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
-import { resourceTypeDic } from '~/utils/consulta';
-import SelectedResource from '~/utils/consulta/SelectedResource';
 
 const emit = defineEmits(['notifyDownload']);
 const props = defineProps({
@@ -12,7 +10,6 @@ const props = defineProps({
 });
 
 const modalTabla = ref(null);
-const isLoading = ref(true);
 const paginaActual = ref(0);
 const tamanioPagina = 6;
 const {
@@ -30,32 +27,16 @@ function abrirModalTabla() {
   modalTabla.value?.abrirModal();
 }
 
-async function openTablas() {
-  useSelectedResources2Store().reset();
-  useSelectedResources2Store().add(
-    new SelectedResource({ pk: props.selectedElement.pk }),
-    resourceTypeDic.dataTable
-  );
-
-  await navigateTo('/consulta/tablas');
-}
-
 defineExpose({
   abrirModalTabla,
 });
 
-watch(datos, () => {
-  isLoading.value = false;
-});
-
-watch([paginaActual], async () => {
-  isLoading.value = true;
-  await fetchTable({
+watch([paginaActual], () => {
+  fetchTable({
     paginaActual: paginaActual.value,
     tamanioPagina: tamanioPagina,
     resource: props.selectedElement,
   });
-  isLoading.value = false;
 });
 </script>
 
@@ -63,22 +44,10 @@ watch([paginaActual], async () => {
   <ClientOnly>
     <SisdaiModal id="modal-tabla" ref="modalTabla">
       <template #encabezado>
-        <h1 class="title">{{ props.selectedElement.title }}</h1>
+        <h1>{{ props.selectedElement.title }}</h1>
       </template>
 
-      <template v-if="isLoading" #cuerpo>
-        <div class="flex flex-contenido-centrado">
-          <img
-            src="/img/loader.gif"
-            class="color-invertir"
-            alt="...Cargando"
-            heigh="120px"
-            width="120px"
-          />
-        </div>
-      </template>
-
-      <template v-else #cuerpo>
+      <template #cuerpo>
         <div class="contenedor-tabla">
           <UiPaginador
             :pagina-parent="paginaActual"
@@ -89,16 +58,7 @@ watch([paginaActual], async () => {
         </div>
       </template>
 
-      <template v-if="props.selectedElement.sourcetype !== 'REMOTE' && !isLoading" #pie>
-        <button
-          type="button"
-          aria-label="Ver Tabla en Visualizador"
-          class="boton-con-contenedor-secundario boton-grande ancho"
-          @click="openTablas"
-        >
-          Ver Tabla en Visualizador
-          <span aria-hidden="true" class="pictograma-previsualizar"></span>
-        </button>
+      <template v-if="props.selectedElement.sourcetype !== 'REMOTE'" #pie>
         <button
           type="button"
           aria-label="Descargar"
@@ -124,13 +84,6 @@ watch([paginaActual], async () => {
 .ancho {
   width: 50%;
   display: flex;
-  justify-content: center;
-}
-
-.title {
-  text-overflow: ellipsis;
-  overflow: hidden;
-  height: 1.2em;
-  white-space: nowrap;
+  justify-content: center; /* horizontal center */
 }
 </style>

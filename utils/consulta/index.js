@@ -155,6 +155,7 @@ export function buildUrl(endpoint, query) {
   const pruebaUrl = `${pruebaApi}?${dataParams.toString().replace('extent_ne=%5B-1%2C-1%2C0%2C0%5D', 'extent_ne=[-1,-1,0,0]')}`;
   return pruebaUrl;
 }
+
 /**
  * Regresa el servidor en el que esta alojado un recurso remoto
  * @param {Object} resource
@@ -227,14 +228,6 @@ export async function hasWFS(resource, service) {
         console.error('No se puede usar el WMS', url, resource.alternate, resource.title);
         return false;
       }
-
-      /*       if (requestType === 'GetFeatureInfo') {
-        if (data.includes('GetFeatureInfo')) {
-          return true;
-        } else {
-          return false;
-        }
-      } else {} */
       if (service === 'map') {
         return true;
       } else if (service === 'table' || service === 'geometry') {
@@ -278,7 +271,6 @@ export async function hasFeatureServer(resource) {
       hasFeatureService = false;
     }
   }
-  //console.log(resource.title, 'tiene Feature Service:', hasFeatureService);
   return hasFeatureService;
 }
 /**
@@ -310,7 +302,6 @@ export async function fetchGeometryWMS(resource) {
         return 'Error';
       }
       const data = await res.json();
-      //console.log(resource.alternate, data);
       if (
         Array.isArray(data.features) &&
         data.features.length > 0 &&
@@ -360,7 +351,6 @@ export async function fetchGeometryArcgis(resource) {
       return 'Error';
     }
   }
-  //const url = new URL(findServer(resource));
 }
 
 /**
@@ -380,7 +370,6 @@ export async function defineGeomType(resource) {
       } else {
         geomType = 'Remoto';
       }
-      return 'Remoto';
     } else {
       geomType = await fetchGeometryArcgis(resource);
     }
@@ -509,7 +498,6 @@ export async function getSLDs(resource) {
  * @returns
  */
 export async function fetchDoc(url) {
-  //const extensionDict = { pdf: 'application/pdf', txt: 'text/plain' };
   const { data } = useAuth();
   const token = data.value?.accessToken;
   const maxAttempts = 5;
@@ -528,7 +516,6 @@ export async function fetchDoc(url) {
       }
       const blob = await res.blob();
       const newUrl = URL.createObjectURL(blob);
-      //window.open(newUrl);
       return newUrl;
     } catch {
       console.warn('Se está intentando una vez más');
@@ -556,7 +543,6 @@ export async function downloadDocs(resource) {
     try {
       const res = await gnoxyFetch(url);
       if (!res.ok) {
-        //throw new Error(`Falló la descarga: ${res.status}`);
         return 'Error';
       }
       const blob = await res.blob();
@@ -599,7 +585,6 @@ export async function downloadMetadata(resource) {
     try {
       const res = await gnoxyFetch(api.toString());
       if (!res.ok) {
-        //throw new Error(`Falló la descarga: ${res.status}`);
         return 'Error';
       }
       const dataBlob = await res.blob();
@@ -667,15 +652,12 @@ export async function downloadWMS(resource, format, featureTypes) {
       console.warn(`Vamos en el intento: ${attempt}.`);
       const res = await gnoxyFetch(`${url}`);
       if (!res.ok) {
-        //throw new Error(`Download failed: ${res.status}`);
         return 'Error';
       }
-      //console.log('Estamos aquí');
       const blob = await res.blob();
       const anchor = document.createElement('a');
       const downloadUrl = URL.createObjectURL(blob);
       anchor.href = downloadUrl;
-      //anchor.target = '_blank';
       anchor.style.display = 'none';
       anchor.download = `${resource.title}.${format}`;
       document.body.appendChild(anchor);
@@ -763,7 +745,6 @@ export async function downloadRaster(resource) {
         } else {
           error = 'Error';
         }
-        //console.error(error);
         return error;
       }
       const blob = await res.blob();
@@ -799,53 +780,3 @@ export function arrayNewsOlds(list1, list2) {
 
   return { news, olds };
 }
-
-/* export async function downloadRaster(resource) {
-  //const urlArray = resource.download_urls.filter((link) => link.url.includes('/assets/'));
-  //const url = urlArray[0].url;
-  //const config = useRuntimeConfig();
-  //const url = `${config.public.geonodeUrl}/datasets/${resource.alternate}/dataset_download`;
-  const config = useRuntimeConfig();
-  const { data } = useAuth();
-  const token = data.value?.accessToken;
-  const pngObject = resource.links.filter((link) => link.name === 'PNG');
-  const pngLink = pngObject[0].url;
-  const paramsDict = {};
-  const paramsList = pngLink.replace(`${config.public.geoserverUrl}/ows?`, '').split('&');
-  paramsList.forEach((param) => {
-    const entry = param.split('=');
-    paramsDict[entry[0]] = entry[1];
-  });
-  const coords = resource.extent.coords;
-  const bboxRatio = (coords[3] - coords[1]) / (coords[2] - coords[0]);
-  //const url = new URL(`${config.public.geoserverUrl}/geonode/wms`);
-  const url = new URL(`${config.public.geonodeUrl}/gs/wms`);
-  url.search = new URLSearchParams({
-    service: 'WMS',
-    version: '1.1.0',
-    request: 'GetMap',
-    layers: resource.alternate,
-    bbox: resource.extent.coords.join(','),
-    width: Math.round(paramsDict.width * 1.5),
-    height: Math.round(paramsDict.height * bboxRatio * 1.5),
-    srs: resource.extent.srid,
-    styles: '',
-    format: 'image/geotiff',
-  });
-  let res;
-  if (token) {
-    res = await fetch(url, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-  } else {
-    res = await fetch(url);
-  }
-  const blob = await res.blob();
-  const anchor = document.createElement('a');
-  anchor.href = URL.createObjectURL(blob);
-  anchor.target = '_blank';
-  anchor.download = `${resource.title}.tiff`;
-  document.body.appendChild(anchor);
-  anchor.click();
-  document.body.removeChild(anchor);
-} */

@@ -17,6 +17,9 @@ const props = defineProps({
     default: '',
   },
 });
+const storeCatalogo = useCatalogoStore();
+// const storeSelected = useSelectedResources2Store();
+//const { data } = useAuth();
 const config = useRuntimeConfig();
 const { data } = useAuth();
 const { gnoxyFetch } = useGnoxyUrl();
@@ -41,6 +44,8 @@ const dictTable = ref({
   actualizacion: 'Actualización',
   acciones: 'Acciones',
   estatus: 'Estatus',
+  revisor: 'Revisor',
+  propietario: 'Propietario',
 });
 
 /* const typeDict = {
@@ -76,6 +81,100 @@ function irARutaConQuery(recurso) {
     });*/
 }
 
+const revisando = ref(false);
+const route = useRoute();
+async function openResourceReview(resource) {
+  if (resource.tipo_recurso === 'Documentos') {
+    storeCatalogo.previousPath = route.path;
+    await navigateTo({
+      path: `/catalogo/revision-solicitudes/revisar/${resource.pk}`,
+      query: {
+        pk: resource.pk,
+        pk_request: resource.pk_request,
+        resource_type: resource.tipo_recurso,
+      },
+    });
+    revisando.value = true;
+  }
+  if (resource.tipo_recurso === 'Capa Geográfica') {
+    storeCatalogo.previousPath = route.path;
+    useSelectedResources2Store().reset();
+    useSelectedResources2Store().add(
+      new SelectedLayer({ pk: resource.pk }),
+      null,
+      resourceTypeDic.dataLayer
+    );
+    await navigateTo({
+      path: `/catalogo/revision-solicitudes/revisar/${resource.pk}`,
+      query: {
+        pk: resource.pk,
+        pk_request: resource.pk_request,
+        resource_type: resource.tipo_recurso,
+      },
+    });
+    revisando.value = true;
+  }
+  if (resource.tipo_recurso === 'Datos Tabulados') {
+    storeCatalogo.previousPath = route.path;
+    // useSelectedResources2Store().reset();
+    // useSelectedResources2Store().add(
+    //   new SelectedLayer({ pk: resource.pk }),
+    //   null,
+    //   resourceTypeDic.dataLayer
+    // );
+    await navigateTo({
+      path: `/catalogo/revision-solicitudes/revisar/${resource.pk}`,
+      query: {
+        pk: resource.pk,
+        pk_request: resource.pk_request,
+        resource_type: resource.tipo_recurso,
+      },
+    });
+    revisando.value = true;
+  }
+}
+
+const modalAgregarMisRevisiones = ref(null);
+const pkResource = ref();
+/**
+ * Abre el modal para agregar la solicitud a revisión
+ * y asigna el pk de la solicitud a revisar.
+ * @param resource de la solicitud
+ */
+function openAddRequestToMyReviewsModal(resource) {
+  pkResource.value = resource.pk_request;
+  modalAgregarMisRevisiones.value.abrirModal();
+}
+
+// const { data } = useAuth();
+const token = data.value?.accessToken;
+const configEnv = useRuntimeConfig();
+/**
+ * Hace la petición para agregar la solicitud a revisión.
+ */
+async function addRequestToMyReviews() {
+  try {
+    // petición para añadir la solicitud a mis revisiones
+    const response = await $fetch(`${configEnv.public.basePath}/api/solicitudes`, {
+      method: 'POST',
+      body: JSON.stringify({
+        pk: pkResource.value,
+        token: token,
+        status: 'on_review',
+        rejection_reason: 'En revisión.', // no se puede quedar vacío ''
+      }),
+    });
+    console.warn(response);
+    if (response !== undefined) {
+      modalAgregarMisRevisiones.value.cerrarModal();
+      // ir a Mis revisiones
+      await navigateTo('/catalogo/revision-solicitudes/mis-revisiones');
+    }
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 /**
  * Agrega un recurso seleccionado al módulo de consulta y navega a la vista
  * @param resource del que se toma el pk para la selección
@@ -85,6 +184,7 @@ async function openResourceView(resource) {
     resource.tipo_recurso === 'Capa Geográfica' ||
     resource.tipo_recurso === 'Capa Geográfica, Catálogo Externo'
   ) {
+    useSelectedResources2Store().reset();
     useSelectedResources2Store().add(
       new SelectedLayer({ pk: resource.pk }),
       resource.recurso_completo.default_style,
@@ -93,6 +193,7 @@ async function openResourceView(resource) {
     await navigateTo('/consulta/capas');
   }
   if (resource.tipo_recurso === 'Datos Tabulados') {
+    useSelectedResources2Store().reset();
     useSelectedResources2Store().add(
       new SelectedLayer({ pk: resource.pk }),
       resourceTypeDic.dataTable
@@ -101,6 +202,7 @@ async function openResourceView(resource) {
   }
 
   if (resource.tipo_recurso === 'Documentos') {
+    useSelectedResources2Store().reset();
     useSelectedResources2Store().add(
       new SelectedLayer({ pk: resource.pk }),
       null,
@@ -185,6 +287,7 @@ function cancelarEliminar() {
   modalEliminar.value?.cerrarModal();
 }
 
+const router = useRouter();
 /**
  * TODO: Borrar una vez que se solucione lo del harvester en el recurso
  * Busca el harvester seleccionado pidiendo todos los harvesters para obtener su información
@@ -318,10 +421,75 @@ function irAmisArchivos() {
   wasDeletionSuccesful.value = null;
   modalEliminar.value?.cerrarModal();
 }
+
+const modalComentarios = ref(null);
+const comentarios = ref('');
+const revisor = ref('');
+const recursoSolicitud = ref({});
+/**
+ * Abre el modal de la acción comentarios en Reivisón de solicitudes
+ * @param solicitud
+ */
+function abrirModalComentarios(solicitud) {
+  modalComentarios.value.abrirModal();
+  // console.log('solicitud', solicitud);
+  // asignar si el valor es null
+  comentarios.value = solicitud.comentarios || 'Aún no se ha revisado.';
+  // TODO: utilizar la info del usuario del store
+  // (solicitud.revisor === userInfo[0].email) => { userInfo.first_name + userInfo.last_name}
+  revisor.value = solicitud.revisor;
+  recursoSolicitud.value = solicitud;
+}
+
+const modalCancelarSolicitud = ref(null);
+/**
+ * Abre el modal de cancelar o regresar la solicitud a status pendiente
+ * @param solicitud
+ */
+function abrirModalCancelarRevision(solicitud) {
+  modalCancelarSolicitud.value.abrirModal();
+  recursoSolicitud.value = solicitud;
+}
+
+/**
+ * Remueve la solicitud on_review a pending
+ */
+async function removerRevision() {
+  try {
+    // petición para aceptar y publicar la solicitud del recurso
+    const response = await $fetch(`${configEnv.public.basePath}/api/solicitudes`, {
+      method: 'POST',
+      body: {
+        pk: recursoSolicitud.value.pk_request,
+        token: token,
+        status: 'pending',
+        rejection_reason: 'Aún no se ha revisado.',
+      },
+    });
+    console.warn(response);
+    modalCancelarSolicitud.value.cerrarModal();
+    // forzando recargar la página para ver el cambio
+    // location.reload();
+    router.go(0);
+  } catch (error) {
+    console.error(error);
+  }
+}
 </script>
 
 <template>
   <div class="contenedor-tabla p-2">
+    <div v-if="revisando" class="fondo-loader">
+      <figure class="flex flex-contenido-centrado">
+        <div class="flex-vertical-centrado" style="height: calc(100vh - 112px)">
+          <figure>
+            <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
+            <figcaption class="texto-centrado">Cargando documento</figcaption>
+          </figure>
+        </div>
+      </figure>
+    </div>
+
     <table class="tabla-expandida">
       <caption>
         {{
@@ -440,12 +608,52 @@ function irAmisArchivos() {
                   <span class="pictograma-previsualizar"></span>
                 </button>
                 <button
+                  v-if="datum[variable].split(', ').includes('Visualizar')"
+                  v-globo-informacion:izquierda="'Visualizar'"
+                  class="boton-pictograma boton-secundario"
+                  aria-label="Visualizar archivo"
+                  type="button"
+                  @click="openResourceReview(datum)"
+                >
+                  <span class="pictograma-ayuda"></span>
+                </button>
+                <button
+                  v-if="datum[variable].split(', ').includes('Revisar')"
+                  v-globo-informacion:izquierda="'Revisar'"
+                  class="boton-pictograma boton-secundario"
+                  aria-label="Revisar archivo"
+                  type="button"
+                  @click="openResourceReview(datum)"
+                >
+                  <span class="pictograma-ayuda"></span>
+                </button>
+                <button
+                  v-if="datum[variable].split(', ').includes('Añadir')"
+                  v-globo-informacion:izquierda="'Agregar a mis revisiones'"
+                  class="boton-pictograma boton-secundario"
+                  aria-label="Agregar a mis revisiones"
+                  type="button"
+                  @click="openAddRequestToMyReviewsModal(datum)"
+                >
+                  <span class="pictograma-agregar"></span>
+                </button>
+                <button
                   v-if="datum[variable].split(', ').includes('Publicar')"
                   v-globo-informacion:izquierda="'Publicar en catálogo'"
                   class="boton-pictograma boton-secundario"
                   aria-label="Publicar en catálogo"
                   type="button"
                   @click="notifyReleaseRequest(datum)"
+                >
+                  <span class="pictograma-ayuda"></span>
+                </button>
+                <button
+                  v-if="datum[variable].split(', ').includes('Comentarios')"
+                  v-globo-informacion:izquierda="'Comentarios'"
+                  class="boton-pictograma boton-secundario"
+                  aria-label="Comentarios de la solicitud"
+                  type="button"
+                  @click="abrirModalComentarios(datum)"
                 >
                   <span class="pictograma-ayuda"></span>
                 </button>
@@ -458,6 +666,16 @@ function irAmisArchivos() {
                   @click="notifyDownloadOneChild(datum)"
                 >
                   <span class="pictograma-archivo-descargar"></span>
+                </button>
+                <button
+                  v-if="datum[variable].split(', ').includes('Cancelar')"
+                  v-globo-informacion:izquierda="'Cancelar'"
+                  class="boton-pictograma boton-secundario"
+                  aria-label="Cancelar solicitud"
+                  type="button"
+                  @click="abrirModalCancelarRevision(datum)"
+                >
+                  <span class="pictograma-cerrar"></span>
                 </button>
                 <button
                   v-if="datum[variable].split(', ').includes('Remover')"
@@ -475,7 +693,7 @@ function irAmisArchivos() {
             <!-- Estatus -->
             <div v-if="variable === 'estatus'" class="flex">
               <div
-                v-if="datum[variable] === 'Pendiente'"
+                v-if="datum[variable] === 'Pendiente' || datum[variable] === 'Pendiente revisor'"
                 class="texto-color-alerta texto-centrado fondo-color-alerta borde borde-color-alerta borde-redondeado-8 p-1"
               >
                 {{ datum[variable] }}
@@ -487,13 +705,13 @@ function irAmisArchivos() {
                 {{ datum[variable] }}
               </div>
               <div
-                v-if="datum[variable] === 'Publicado'"
+                v-if="datum[variable] === 'Publicado' || datum[variable] === 'Aceptado'"
                 class="texto-color-confirmacion texto-centrado fondo-color-confirmacion borde borde-color-confirmacion borde-redondeado-8 p-1"
               >
                 {{ datum[variable] }}
               </div>
               <div
-                v-if="datum[variable] === 'No aceptado'"
+                v-if="datum[variable] === 'Rechazado' || datum[variable] === 'No aceptado'"
                 class="texto-color-error texto-centrado fondo-color-error borde borde-color-error borde-redondeado-8 p-1"
               >
                 {{ datum[variable] }}
@@ -522,6 +740,7 @@ function irAmisArchivos() {
     />
 
     <ClientOnly>
+      <!-- Modal Eliminar Recurso -->
       <SisdaiModal ref="modalEliminar">
         <template #encabezado>
           <h2 v-if="wasDeletionSuccesful === null || isBeingDeleted">
@@ -572,11 +791,95 @@ function irAmisArchivos() {
           </div>
         </template>
       </SisdaiModal>
+
+      <!-- Modal Añadir a Mis revisiones -->
+      <SisdaiModal ref="modalAgregarMisRevisiones">
+        <template #encabezado> <h2>Agregar a mi revisión</h2> </template>
+        <template #cuerpo>
+          <p>
+            ¿Deseas añadir este documento a tu revisión? Al hacerlo, quedará reservado para ti y no
+            podrá ser revisado por otras personas hasta que lo liberes o completes el proceso.
+          </p>
+        </template>
+        <template #pie>
+          <button
+            class="boton-secundario boton-chico"
+            type="button"
+            @click="modalAgregarMisRevisiones.cerrarModal()"
+          >
+            Cancelar
+          </button>
+          <button class="boton-primario boton-chico" type="button" @click="addRequestToMyReviews">
+            Añadir a mi revisión
+          </button>
+        </template>
+      </SisdaiModal>
+
+      <!-- Modal Comentarios de Solicitud -->
+      <SisdaiModal ref="modalComentarios">
+        <template #encabezado> <h2>Mensajes</h2> </template>
+        <template #cuerpo>
+          <p class="texto-color-acento">{{ revisor }}</p>
+          <p>{{ comentarios }}</p>
+        </template>
+        <template #pie>
+          <button
+            class="boton-secundario boton-chico"
+            type="button"
+            @click="modalComentarios.cerrarModal()"
+          >
+            Cerrar
+          </button>
+          <!-- <button
+            class="boton-primario boton-chico"
+            type="button"
+            @click="verSolicitudEnVisualizador"
+          >
+            Abrir en visualizador
+          </button> -->
+        </template>
+      </SisdaiModal>
+
+      <!-- Modal Cancelar Solicitud -->
+      <SisdaiModal ref="modalCancelarSolicitud">
+        <template #encabezado>
+          <h2>Remover</h2>
+        </template>
+        <template #cuerpo>
+          <p>
+            ¿Estás segura(o) de remover este documento de tus revisiones? El archivo regresará a la
+            sección de <i>Pendientes de revisor</i> para que otra persona pueda revisarlo.
+          </p>
+        </template>
+        <template #pie>
+          <button
+            class="boton-secundario boton-chico"
+            type="button"
+            @click="modalCancelarSolicitud.cerrarModal()"
+          >
+            Cancelar
+          </button>
+          <button class="boton-primario boton-chico" type="button" @click="removerRevision">
+            Remover
+          </button>
+        </template>
+      </SisdaiModal>
     </ClientOnly>
   </div>
 </template>
 
 <style lang="scss" scoped>
+.fondo-loader {
+  width: calc(100% - 48px);
+  height: calc(100% - 47px);
+  position: absolute;
+  top: 101.5px;
+  bottom: 0;
+  left: 48px;
+  right: 0;
+  background-color: var(--opacidad-ligero);
+  z-index: 9996;
+}
 .contenedor-tabla {
   width: 100%;
   overflow: auto;

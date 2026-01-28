@@ -11,7 +11,6 @@ const linkStatus = ref(false);
 async function copyToClipboard() {
   try {
     await navigator.clipboard.writeText(currentPath.value);
-    //alert('Enlace copiado al portapapeles: ' + currentPath.value);
     linkStatus.value = true;
     await wait(1000);
     linkStatus.value = false;

@@ -20,6 +20,7 @@ const estiloSeleccionado = ref(props.selectedElement.default_style);
 const emit = defineEmits(['notifyDownload']);
 
 async function openLayerView() {
+  storeSelected.reset();
   storeSelected.add(
     new SelectedLayer({ pk: props.selectedElement.pk }),
     estiloSeleccionado.value,
@@ -106,6 +107,6 @@ defineExpose({
 .ancho {
   width: 50%;
   display: flex;
-  justify-content: center; /* horizontal center */
+  justify-content: center;
 }
 </style>

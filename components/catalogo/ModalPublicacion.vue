@@ -1,11 +1,4 @@
 <script setup>
-import {
-  downloadDocs,
-  downloadMetadata,
-  downloadNoGeometry,
-  downloadRaster,
-  downloadWMS,
-} from '@/utils/consulta';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import {
@@ -25,7 +18,6 @@ const props = defineProps({
 });
 const { resourceType, selectedElement } = toRefs(props);
 const { gnoxyFetch } = useGnoxyUrl();
-//const config = useRuntimeConfig();
 const serverType = ref(null);
 const seleccionVarDisponibles = ref(selectedElement.value.default_style);
 const hasAttrTable = computed(() => {
@@ -35,23 +27,16 @@ const hasAttrTable = computed(() => {
     return true;
   }
 });
-//const extentMap = ref(undefined);
+
+const modalPublicaConfirmar = ref(null);
 const modalMapaPreview = ref(null);
 const modalMetaBasicos = ref(null);
 const modalMetaLicencias = ref(null);
 const modalMetaOpcionales = ref(null);
 const modalMetaAtributos = ref(null);
 const optionsList = ref(null);
-const selectedOption = ref();
 const tagTitle = ref();
-const docExtension = ref(
-  resourceType.value === 'document'
-    ? selectedElement.value.links.find((link) => link.link_type === 'uploaded').extension
-    : 'No aplica'
-);
-const layerType = ref(
-  resourceType.value === 'dataLayer' ? selectedElement.value.subtype : 'No aplica'
-);
+
 function abrirmodalPublicacion() {
   if (resourceType.value === 'dataLayer') {
     modalMapaPreview.value?.abrirModal();
@@ -60,108 +45,24 @@ function abrirmodalPublicacion() {
   }
   optionsList.value = optionsDict[resourceType.value]['elements'];
   tagTitle.value = optionsDict[resourceType.value]['title'];
-  selectedOption.value = optionsList.value.map((d) => d.label)[0];
 }
 
-const layerOptions = {
-  raster: [
-    {
-      label: 'GeoTiff',
-      action: () => {
-        downloadRaster(selectedElement.value);
-      },
-    },
-    {
-      label: 'Metadatos',
-      action: () => {
-        downloadMetadata(selectedElement.value);
-      },
-    },
-  ],
-  vector: [
-    {
-      label: 'GeoJson',
-      action: () => {
-        downloadWMS(selectedElement.value, 'geojson', 'all');
-      },
-    },
-    {
-      label: 'CSV',
-      action: () => {
-        downloadWMS(selectedElement.value, 'csv', 'all');
-      },
-    },
-    {
-      label: 'GeoPackage',
-      action: () => {
-        downloadWMS(selectedElement.value, 'gpkg', 'all');
-      },
-    },
-    {
-      label: 'KML',
-      action: () => {
-        downloadWMS(selectedElement.value, 'kml', 'all');
-      },
-    },
-    {
-      label: 'Metadatos',
-      action: () => {
-        downloadMetadata(selectedElement.value);
-      },
-    },
-  ],
-  remote: [],
+const alertaModal = {
+  titulo: 'Verifica antes de publicar',
+  contenido:
+    'Revisa que el documento y sus metadatos sean correctos antes de enviarlo a aprobación para ser publicado en el Catálogo de SIGIC público.',
+  css: 'texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-4 p-1',
 };
+
 const optionsDict = {
   dataLayer: {
     title: 'capa',
-    elements: layerOptions[layerType.value],
   },
   dataTable: {
     title: 'archivo',
-    elements: [
-      {
-        label: 'CSV',
-        action: () => {
-          downloadNoGeometry(selectedElement.value, 'csv');
-        },
-      },
-      {
-        label: 'XLS',
-        action: () => {
-          downloadNoGeometry(selectedElement.value, 'xls');
-        },
-      },
-      {
-        label: 'XLSX',
-        action: () => {
-          downloadNoGeometry(selectedElement.value, 'xlsx');
-        },
-      },
-      {
-        label: 'Metadatos',
-        action: () => {
-          downloadMetadata(selectedElement.value);
-        },
-      },
-    ],
   },
   document: {
     title: 'documento',
-    elements: [
-      {
-        label: docExtension.value === 'pdf' ? 'PDF' : 'TXT',
-        action: () => {
-          downloadDocs(selectedElement.value);
-        },
-      },
-      {
-        label: 'Metadatos',
-        action: () => {
-          downloadMetadata(selectedElement.value);
-        },
-      },
-    ],
   },
 };
 
@@ -173,16 +74,40 @@ function checkServerType() {
     serverType.value = 'ogc';
   }
 }
-function confirmarSolicitud(cerrarModal) {
+
+const estatus = ref(true);
+/**
+ * Confirma la solicitud de publicación, cierra los modales, realiza la
+ * petición al endpoint de sigic/requests y navega a las solicitudes
+ * @param {String} cerrarModal  la opción del modal a cerrar
+ */
+async function confirmarSolicitud(cerrarModal) {
   if (cerrarModal === 'modalMetaOpcionales') {
     modalMetaOpcionales.value.cerrarModal();
   } else {
     modalMetaAtributos.value.cerrarModal();
   }
-  console.warn('confirmada');
-  navigateTo({
-    path: '/catalogo/mis-archivos/solicitudes-publicacion',
-  });
+  const id = selectedElement.value.pk;
+  console.warn(`solicitud ${id} confirmada`);
+
+  try {
+    const { data } = useAuth();
+    const token = data.value?.accessToken;
+    const config = useRuntimeConfig();
+    // petición para enviar el recurso a la solicitud
+    const response = await $fetch(`${config.public.basePath}/api/requests`, {
+      method: 'POST',
+      headers: { token: token },
+      body: {
+        resource_pk: id, // id del recurso a solicitud
+      },
+    });
+    console.warn('response', response);
+    estatus.value = response.success ? true : false;
+    modalPublicaConfirmar.value.abrirModal();
+  } catch (error) {
+    console.error('error', error);
+  }
 }
 defineExpose({
   abrirmodalPublicacion,
@@ -192,24 +117,21 @@ onMounted(() => {
   checkServerType();
 });
 </script>
+
 <template>
   <ClientOnly>
-    <SisdaiModal ref="modalMapaPreview">
+    <SisdaiModal ref="modalMapaPreview" class="modal-grande">
       <template #encabezado>
-        <p class="m-t-0 m-b-1" style="color: transparent">a</p>
-        <div
-          class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-4 p-1"
-        >
-          <strong class="m-0 texto-peso-600">Verifica antes de publicar</strong>
-          <p class="m-0">
-            Revisa que el documento y sus metadatos sean correctos antes de enviarlo a aprobación
-            para ser publicado en el Catálogo de SIGIC público.
-          </p>
-        </div>
-        <h1 class="m-t-3">{{ selectedElement.title }}</h1>
+        <p style="color: transparent">.</p>
       </template>
-
       <template #cuerpo>
+        <div :class="alertaModal.css">
+          <strong class="m-0 texto-peso-600">{{ alertaModal.titulo }}</strong>
+          <p class="m-0">{{ alertaModal.contenido }}</p>
+        </div>
+
+        <h2 class="m-t-3">{{ selectedElement.title }}</h2>
+
         <div class="modal-alto-cuerpo">
           <div v-if="tagTitle === 'capa'">
             <ClientOnly>
@@ -217,6 +139,7 @@ onMounted(() => {
                 v-if="selectedElement.styles.length > 1"
                 v-model="seleccionVarDisponibles"
                 class="m-b-1"
+                style="display: none"
                 etiqueta="Variables disponibles para visualizar"
               >
                 <option
@@ -229,7 +152,6 @@ onMounted(() => {
               </SisdaiSelector>
             </ClientOnly>
 
-            <!-- <SisdaiMapa class="gema" :vista="{ extension: extentMap }"> -->
             <SisdaiMapa class="gema" :vista="{ extension: selectedElement.extent.coords }">
               <SisdaiCapaXyz />
 
@@ -238,7 +160,6 @@ onMounted(() => {
                 :capa="selectedElement.alternate.split(':')[1]"
                 :fuente="findServer(selectedElement).replace('?', '')"
               />
-              <!--  @al-finalizar-carga="extentMap = selectedElement.extent.coords" -->
               <SisdaiCapaWms
                 v-else
                 :estilo="seleccionVarDisponibles"
@@ -246,7 +167,6 @@ onMounted(() => {
                 :consulta="gnoxyFetch"
                 :fuente="findServer(selectedElement)"
               />
-              <!--  @al-finalizar-carga="extentMap = selectedElement.extent.coords" -->
             </SisdaiMapa>
           </div>
 
@@ -279,21 +199,16 @@ onMounted(() => {
       </template>
     </SisdaiModal>
 
-    <SisdaiModal ref="modalMetaBasicos">
+    <SisdaiModal ref="modalMetaBasicos" class="modal-grande">
       <template #encabezado>
-        <p class="m-t-0 m-b-1" style="color: transparent">a</p>
-        <div
-          class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-4 p-1"
-        >
-          <strong class="m-0 texto-peso-600">Verifica antes de publicar</strong>
-          <p class="m-0">
-            Revisa que el documento y sus metadatos sean correctos antes de enviarlo a aprobación
-            para ser publicado en el Catálogo de SIGIC público.
-          </p>
-        </div>
+        <p style="color: transparent">.</p>
       </template>
-
       <template #cuerpo>
+        <div :class="alertaModal.css">
+          <strong class="m-0 texto-peso-600">{{ alertaModal.titulo }}</strong>
+          <p class="m-0">{{ alertaModal.contenido }}</p>
+        </div>
+
         <CatalogoBasicosMeta
           :recurso="selectedElement"
           :resource-pk="selectedElement.pk"
@@ -332,21 +247,16 @@ onMounted(() => {
       </template>
     </SisdaiModal>
 
-    <SisdaiModal ref="modalMetaLicencias">
+    <SisdaiModal ref="modalMetaLicencias" class="modal-grande">
       <template #encabezado>
-        <p class="m-t-0 m-b-1" style="color: transparent">a</p>
-        <div
-          class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-4 p-1"
-        >
-          <strong class="m-0 texto-peso-600">Verifica antes de publicar</strong>
-          <p class="m-0">
-            Revisa que el documento y sus metadatos sean correctos antes de enviarlo a aprobación
-            para ser publicado en el Catálogo de SIGIC público.
-          </p>
-        </div>
+        <p style="color: transparent">.</p>
       </template>
-
       <template #cuerpo>
+        <div :class="alertaModal.css">
+          <strong class="m-0 texto-peso-600">{{ alertaModal.titulo }}</strong>
+          <p class="m-0">{{ alertaModal.contenido }}</p>
+        </div>
+
         <CatalogoUbicacionMeta
           :recurso="selectedElement"
           :resource-pk="selectedElement.pk"
@@ -385,20 +295,16 @@ onMounted(() => {
       </template>
     </SisdaiModal>
 
-    <SisdaiModal ref="modalMetaOpcionales">
+    <SisdaiModal ref="modalMetaOpcionales" class="modal-grande">
       <template #encabezado>
-        <p class="m-t-0 m-b-1" style="color: transparent">a</p>
-        <div
-          class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-4 p-1"
-        >
-          <strong class="m-0 texto-peso-600">Verifica antes de publicar</strong>
-          <p class="m-0">
-            Revisa que el documento y sus metadatos sean correctos antes de enviarlo a aprobación
-            para ser publicado en el Catálogo de SIGIC público.
-          </p>
-        </div>
+        <p style="color: transparent">.</p>
       </template>
       <template #cuerpo>
+        <div :class="alertaModal.css">
+          <strong class="m-0 texto-peso-600">{{ alertaModal.titulo }}</strong>
+          <p class="m-0">{{ alertaModal.contenido }}</p>
+        </div>
+
         <CatalogoOpcionalesMeta
           :recurso="selectedElement"
           :resource-pk="selectedElement.pk"
@@ -421,7 +327,6 @@ onMounted(() => {
             </button>
           </div>
           <div class="columna-8">
-            <!--v-if="tagTitle !== 'capa'"-->
             <button
               v-if="!hasAttrTable"
               aria-label="Siguiente"
@@ -431,8 +336,6 @@ onMounted(() => {
             >
               Confirmar
             </button>
-            <!-- TODO: revisar la parte de capa con geometría y subtipo con vector -->
-            <!--v-if="tagTitle == 'capa'"-->
             <button
               v-if="hasAttrTable"
               type="button"
@@ -450,20 +353,16 @@ onMounted(() => {
       </template>
     </SisdaiModal>
 
-    <SisdaiModal ref="modalMetaAtributos">
+    <SisdaiModal ref="modalMetaAtributos" class="modal-grande">
       <template #encabezado>
-        <p class="m-t-0 m-b-1" style="color: transparent">a</p>
-        <div
-          class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-4 p-1"
-        >
-          <strong class="m-0 texto-peso-600">Verifica antes de publicar</strong>
-          <p class="m-0">
-            Revisa que el documento y sus metadatos sean correctos antes de enviarlo a aprobación
-            para ser publicado en el Catálogo de SIGIC público.
-          </p>
-        </div>
+        <p style="color: transparent">.</p>
       </template>
       <template #cuerpo>
+        <div :class="alertaModal.css">
+          <strong class="m-0 texto-peso-600">{{ alertaModal.titulo }}</strong>
+          <p class="m-0">{{ alertaModal.contenido }}</p>
+        </div>
+
         <CatalogoAtributosMeta
           :recurso="selectedElement"
           :resource-pk="selectedElement.pk"
@@ -497,12 +396,71 @@ onMounted(() => {
         </div>
       </template>
     </SisdaiModal>
+
+    <SisdaiModal ref="modalPublicaConfirmar" class="modal-grande">
+      <template #encabezado>
+        <p style="color: transparent">.</p>
+      </template>
+      <template #cuerpo>
+        <div v-if="estatus">
+          <h2>Tu archivo ha sido enviado a verificación.</h2>
+        </div>
+        <div v-else>
+          <h2>Tu archivo no ha sido enviado a verificación.</h2>
+          <p class="m-0">
+            Revisa que el documento y sus metadatos estén correctos o vuelve a intentarlo.
+          </p>
+        </div>
+
+        <div
+          class="p-b-3 p-x-3 borde borde-redondeado-16 m-y-3"
+          :class="
+            estatus
+              ? 'fondo-color-confirmacion borde-color-confirmacion'
+              : 'fondo-color-error borde-color-error'
+          "
+        >
+          <div class="flex flex-contenido-separado">
+            <p class="flex flex-vertical-centrado">{{ selectedElement.title }}</p>
+            <div class="flex">
+              <p class="borde borde-redondeado-8 p-1">.{{ selectedElement.title.split('.')[1] }}</p>
+            </div>
+          </div>
+
+          <div :class="estatus ? 'texto-color-confirmacion' : 'texto-color-error'">
+            <span :class="estatus ? 'pictograma-aprobado' : 'pictograma-alerta'" />
+            <b v-if="estatus"
+              >El archivo ha sido enviado exitosamente para su proceso de aprobación.</b
+            >
+            <b v-else>El archivo no se ha enviado para su proceso de aprobación.</b>
+          </div>
+        </div>
+
+        <div class="flex flex-contenido-separado m-t-3">
+          <div class="columna-8 texto-centrado">
+            <button
+              type="button"
+              class="boton-secundario"
+              @click="modalPublicaConfirmar.cerrarModal()"
+            >
+              Finalizar
+            </button>
+          </div>
+          <div class="columna-8">
+            <nuxt-link
+              aria-label="Ir a mis archivos"
+              class="boton boton-primario texto-centrado"
+              to="/catalogo/mis-archivos/solicitudes-publicacion"
+              >Ver Mis Solicitudes
+            </nuxt-link>
+          </div>
+        </div>
+      </template>
+    </SisdaiModal>
   </ClientOnly>
 </template>
+
 <style lang="scss" scoped>
-.modal-alto-cuerpo {
-  max-height: 320px;
-}
 .boton-secundario,
 .boton-primario {
   width: 100%;

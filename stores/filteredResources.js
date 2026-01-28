@@ -3,6 +3,7 @@ import { cleanInput, resourceTypeGeonode, unaccentUppercase } from '~/utils/cons
 
 export const useFilteredResources = defineStore('filteredResources', () => {
   const storeConsulta = useConsultaStore();
+  const storeCatalogo = useCatalogoStore();
   const filters = reactive({
     inputSearch: null,
     owner: 'todos',
@@ -13,6 +14,7 @@ export const useFilteredResources = defineStore('filteredResources', () => {
     resourceType: null,
     sort: null,
     queryParams: {},
+    requests: null,
   });
   return {
     filters,
@@ -37,6 +39,7 @@ export const useFilteredResources = defineStore('filteredResources', () => {
       filters.resourceType = null;
       filters.sort = null;
       filters.queryParams = {};
+      filters.requests = null;
     },
     /**
      * Regresa los filtros del modal de búsqueda avanzada a su valor original
@@ -48,7 +51,7 @@ export const useFilteredResources = defineStore('filteredResources', () => {
       filters.keywords = null;
     },
     /**Construye queryparams a partir de los filtros */
-    buildQueryParams(resourceType = storeConsulta.resourceType) {
+    async buildQueryParams(resourceType = storeConsulta.resourceType) {
       filters.resourceType = resourceType;
       const queryParams = {};
       // Agregamos queryparams correspondientes al tipo de recurso
@@ -69,6 +72,29 @@ export const useFilteredResources = defineStore('filteredResources', () => {
         }
       }
 
+      // Agregamos queryparams para filtrar por status de la solicitud
+      if (filters.requests !== null) {
+        if (filters.requests === 'all') {
+          queryParams['filter{owner}'] = `${storeCatalogo.userInfo.pk}`;
+        }
+        if (filters.requests === 'pending') {
+          queryParams['filter{status}'] = 'pending';
+          queryParams['filter{owner}'] = `${storeCatalogo.userInfo.pk}`;
+        }
+        if (filters.requests === 'on_review') {
+          queryParams['filter{status}'] = 'on_review';
+          queryParams['filter{owner}'] = `${storeCatalogo.userInfo.pk}`;
+        }
+        if (filters.requests === 'published') {
+          queryParams['filter{status}'] = 'published';
+          queryParams['filter{owner}'] = `${storeCatalogo.userInfo.pk}`;
+        }
+        if (filters.requests === 'rejected') {
+          queryParams['filter{status}'] = 'rejected';
+          queryParams['filter{owner}'] = `${storeCatalogo.userInfo.pk}`;
+        }
+      }
+
       // Agregamos queryparams para buscar por palabras en los campos de title y abstract
       if (filters.inputSearch !== null && filters.inputSearch.length > 0) {
         const wordsToSearch = filters.inputSearch.split(',').map((d) => cleanInput(d));
@@ -79,9 +105,11 @@ export const useFilteredResources = defineStore('filteredResources', () => {
       // Agregamos queryparams para buscar según propietario
       if (filters.owner !== 'todos') {
         if (filters.owner === 'privados') {
-          //queryParams['filter{owner.username}'] = userEmail;
-          queryParams['filter{is_published}'] = 'false';
-          queryParams['filter{is_approved}'] = 'false';
+          const { data } = useAuth();
+          const username = data.value.user.email;
+          queryParams['filter{owner.username}'] = username;
+          //queryParams['filter{is_published}'] = 'false';
+          // queryParams['filter{is_approved}'] = 'false';
         }
         if (filters.owner === 'catalogo' && filters.resourceType === 'dataLayer') {
           queryParams['filter{is_published}'] = 'true';
