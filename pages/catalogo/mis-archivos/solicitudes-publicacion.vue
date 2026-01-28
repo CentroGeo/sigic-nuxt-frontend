@@ -99,10 +99,7 @@ function updateResources() {
 
 function fetchNewData() {
   storeResources.resetBySection(section);
-  storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, {
-    ...params.value,
-    'filter{owner}': storeCatalogo.userInfo.pk,
-  });
+  storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, params.value);
 }
 
 watch([seleccionTipoArchivo], () => {
@@ -115,10 +112,7 @@ watch(paginaActual, () => {
 
 watch(params, () => {
   paginaActual.value = 0;
-  storeResources.getMyTotal('publicacion', {
-    ...params.value,
-    'filter{owner}': storeCatalogo.userInfo.pk,
-  });
+  storeResources.getMyTotal('publicacion', params.value);
   fetchNewData();
 });
 
