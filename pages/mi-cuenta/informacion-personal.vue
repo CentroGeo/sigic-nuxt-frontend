@@ -431,7 +431,9 @@ onMounted(async () => {
             tipo="text"
             class="m-b-2"
           />
+        </ClientOnly>
 
+        <ClientOnly>
           <SisdaiSelector
             v-model="userInfo['country']"
             :etiqueta="tagsDict['country']"
