@@ -13,8 +13,6 @@ function irARutaQuery() {
     query: {
       id: harvester.value.id,
       title: harvester.value.title,
-      /*         unique_identifier: v.unique_identifier,
-        remote_resource_type: v.remote_resource_type, */
     },
   });
 }

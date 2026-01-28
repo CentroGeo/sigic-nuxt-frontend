@@ -19,6 +19,8 @@ const capasSeleccionadas = computed({
 });
 
 const isLoggedIn = ref(data.value ? true : false);
+const username = ref(data.value ? data.value.user.email : undefined);
+
 const nthElementsPks = computed(() => storeResources.nthElementsByType());
 const geomType = ref(catalogueElement.value.geomType ? catalogueElement.value.geomType : 'Otro');
 const geomDict = {
@@ -54,6 +56,26 @@ const geomDict = {
   Raster: {
     tooltipText: 'Raster',
     class: 'pictograma-capas',
+  },
+  esriGeometryPoint: {
+    tooltipText: 'Capa de puntos',
+    class: 'pictograma-capa-puntos',
+  },
+  esriGeometryMultipoint: {
+    tooltipText: 'Capa de puntos',
+    class: 'pictograma-capa-puntos',
+  },
+  esriGeometryPolyline: {
+    tooltipText: 'Capa de lineas',
+    class: 'pictograma-capa-lineas',
+  },
+  esriGeometryPolygon: {
+    tooltipText: 'Capa de poligonos',
+    class: 'pictograma-capa-poligono',
+  },
+  esriGeometryEnvelope: {
+    tooltipText: 'Geom Envelope',
+    class: 'pictograma-flkt',
   },
   Otro: {
     tooltipText: 'Indefinido',
@@ -147,13 +169,13 @@ onUnmounted(() => {
 
 <template>
   <div :id="`elemento-${catalogueElement.pk}`" ref="rootEl" class="tarjeta-catalogo">
-    <!--isLoggedIn && catalogueElement.owner.email === userEmail && !catalogueElement.is_published-->
-    <div
-      v-if="
+    <!--
         isLoggedIn &&
         catalogueElement.is_approved === false &&
         catalogueElement.is_published === false
-      "
+        -->
+    <div
+      v-if="isLoggedIn && catalogueElement.owner.username === username"
       class="id-tag flex m-b-1 m-t-0"
     >
       <span class="pictograma-persona"></span>

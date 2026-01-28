@@ -34,7 +34,7 @@ const seleccionOrden = computed({
   get: () => storeFilters.filters.sort,
   set: (value) => storeFilters.updateFilter('sort', value),
 });
-const seleccionTipoArchivo = ref('');
+const seleccionTipoArchivo = ref('all');
 const inputSearch = computed({
   get: () => storeFilters.filters.inputSearch,
   set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
@@ -136,10 +136,10 @@ watch(
 onMounted(async () => {
   storeFilters.resetAll();
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
-  storeResources.getMyTotal('disponibles', params.value);
+  //storeResources.getMyTotal('disponibles', params.value);
   storeResources.getMyTotal('pendientes', params.value);
   storeResources.getMyTotal('publicacion', params.value);
-  await fetchNewData();
+  //await fetchNewData();
 });
 </script>
 

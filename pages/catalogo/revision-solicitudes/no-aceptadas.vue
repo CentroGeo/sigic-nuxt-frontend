@@ -1,100 +1,64 @@
 <script setup>
-import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { cleanInput } from '~/utils/consulta';
+// import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
+import { tipoRecurso } from '~/utils/catalogo';
+// import { cleanInput } from '~/utils/consulta';
 
 definePageMeta({
-  middleware: 'sidebase-auth',
-  bodyAttrs: {
-    class: '',
-  },
+  middleware: 'auth',
 });
 
-const storeResources = useResourcesCatalogoStore();
-const storeFilters = useFilteredResources();
 const storeCatalogo = useCatalogoStore();
-
-const userReviewerPk = computed(() => storeCatalogo.userInfo.pk);
-
+const storeResources = useResourcesCatalogoStore();
 const section = 'publicacion';
 const isLoading = computed(() => storeResources.isLoading);
-const params = computed(() => storeFilters.filters.queryParams);
 const totalResources = computed(() => storeResources.myTotalBySection(section));
 const resources = computed(() => storeResources.mineBySection(section));
 const tableResources = ref([]);
-const variables = ['titulo', 'estatus', 'tipo_recurso', 'categoria', 'acciones'];
+const variables = ['titulo', 'tipo_recurso', 'actualizacion', 'propietario', 'revisor', 'acciones'];
 
 const paginaActual = ref(0);
 const tamanioPagina = 10;
 const totalPags = computed(() => Math.ceil(totalResources.value / tamanioPagina));
 
-const modalFiltroAvanzado = ref(null);
-const isFilterActive = ref(false);
-const seleccionTipoArchivo = computed({
-  get: () => storeFilters.filters.requests,
-  set: (value) => storeFilters.updateFilter('requests', value),
-});
-const seleccionOrden = computed({
-  get: () => storeFilters.filters.sort,
-  set: (value) => storeFilters.updateFilter('sort', value),
-});
+const seleccionTipoArchivo = ref('');
+const storeFilters = useFilteredResources();
 
-const inputSearch = computed({
-  get: () => storeFilters.filters.inputSearch,
-  set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
-});
-
-const hayMetaPendiente = computed(() =>
-  storeResources.myTotalBySection('pendientes') > 0 ? true : false
-);
+// const isFilterActive = ref(false);
+// const modalFiltroAvanzado = ref(null);
+// const seleccionOrden = computed({
+//   get: () => storeFilters.filters.sort,
+//   set: (value) => storeFilters.updateFilter('sort', value),
+// });
+// const inputSearch = computed({
+//   get: () => storeFilters.filters.inputSearch,
+//   set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
+// });
+// function resetSearch() {
+//   storeFilters.updateFilter('inputSearch', '');
+//   storeFilters.buildQueryParams();
+// }
 
 /**
- * Valida si el tipo de recurso es documento o dataset con geometría o no
- * @param recurso del catálogo
- * @returns {String} ya sea Documentos, Capa geográfica o Datos tabulados
+ * Obtiene las acciones dependiendo del estatus
+ * @param status de la solicitud
+ * @return {String} con las acciones
  */
-function tipoRecurso(recurso) {
-  let tipo;
-  if (recurso.resource_type === 'document') {
-    tipo = 'Documentos';
-  } else if (recurso.sourcetype === 'REMOTE') {
-    tipo = 'Capa Geográfica, Catálogo Externo';
-  } else {
-    tipo = isGeometricExtension(recurso.extent) ? 'Capa Geográfica' : 'Datos Tabulados';
+const obtenerAcciones = (status) => {
+  if (status === 'rejected') {
+    return 'Visualizar, Comentarios';
   }
-  return tipo;
-}
-
-const dictEstatus = {
-  pending: 'Pendiente',
-  published: 'Publicado',
-  rejected: 'No aceptado',
-  on_review: 'En revisión',
 };
-
-/**
- * Formatea la fecha del recurso a esta forma: dd/mm/aaaa
- * @param fecha de actualización del recurso
- * @returns {Date} objeto con la fecha
- */
-function formatearFecha(fecha) {
-  return new Date(fecha).toLocaleDateString('es-ES', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
-}
 
 function updateResources() {
   // obteniendo datos por las props de la tabla
   tableResources.value = resources.value.map((d) => {
     return {
+      pk: d.resource.pk,
       titulo: d.resource.title,
-      pk: `${d.resource.pk}`,
       tipo_recurso: tipoRecurso(d.resource),
-      categoria: d.resource.category,
-      actualizacion: formatearFecha(d.updated_at),
-      estatus: dictEstatus[d.status],
-      acciones: d.status === 'pending' ? 'Ver, Comentarios, Cancelar' : 'Ver, Comentarios',
+      actualizacion: d.updated_at,
+      propietario: d.owner.username,
+      acciones: obtenerAcciones(d.status),
       comentarios: d.rejection_reason,
       revisor: d.reviewer?.username,
     };
@@ -103,20 +67,12 @@ function updateResources() {
 
 function fetchNewData() {
   storeResources.resetBySection(section);
-  storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, params.value);
+  storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, {
+    'filter{status}': 'rejected',
+  });
 }
 
-watch([seleccionTipoArchivo], () => {
-  storeFilters.buildQueryParams();
-});
-
 watch(paginaActual, () => {
-  fetchNewData();
-});
-
-watch(params, () => {
-  paginaActual.value = 0;
-  storeResources.getMyTotal('publicacion', params.value);
   fetchNewData();
 });
 
@@ -129,15 +85,9 @@ watch(
 );
 
 onMounted(async () => {
-  await storeCatalogo.getUserInfo();
-
   storeFilters.resetAll();
-  storeFilters.buildQueryParams();
-
-  storeResources.getMyTotal('disponibles', {});
-  storeResources.getMyTotal('pendientes', {});
-  params.value['filter{owner}'] = `${userReviewerPk.value}`;
-  storeResources.getMyTotal('publicacion', params.value);
+  storeFilters.buildQueryParams(seleccionTipoArchivo.value);
+  storeResources.getMyTotal('publicacion', { 'filter{status}': 'rejected' });
   fetchNewData();
 });
 </script>
@@ -151,15 +101,14 @@ onMounted(async () => {
     <template #visualizador>
       <main class="contenedor m-b-10 m-t-3">
         <!--Controles de filtros-->
-        <div class="flex">
+        <!-- <div class="flex">
           <div class="columna-4">
             <ClientOnly>
-              <SisdaiSelector v-model="seleccionTipoArchivo" etiqueta="Estatus">
-                <option value="all">Todos los estatus</option>
-                <option value="on_review">En revisión</option>
-                <option value="published">Aceptados</option>
-                <option value="pending">Pendientes</option>
-                <option value="rejected">No Aceptados</option>
+              <SisdaiSelector v-model="seleccionTipoArchivo" etiqueta="Tipo de archivo">
+                <option value="todes">Todos los archivos</option>
+                <option value="capas">Capas geográficas</option>
+                <option value="tablas">Datos tabulados</option>
+                <option value="documentos">Documentos</option>
               </SisdaiSelector>
             </ClientOnly>
           </div>
@@ -223,39 +172,41 @@ onMounted(async () => {
               </div>
             </div>
           </div>
-        </div>
+        </div> -->
 
         <CatalogoMenuMisArchivos
           :opciones="[
-            { texto: 'Disponibles', ruta: '/catalogo/mis-archivos' },
             {
-              texto: 'Metadatos pendientes',
-              ruta: '/catalogo/mis-archivos/metadatos-pendientes',
-              notificacion: hayMetaPendiente,
+              texto: 'Pendientes de revisor',
+              ruta: '/catalogo/revision-solicitudes/pendientes-revisor',
+              notificacion: false,
             },
             {
-              texto: 'Solicitudes de publicación',
-              ruta: '/catalogo/mis-archivos/solicitudes-publicacion',
-              notificacion: totalResources > 0,
+              texto: 'Mis revisiones',
+              ruta: '/catalogo/revision-solicitudes/mis-revisiones',
+            },
+            {
+              texto: 'Aceptadas',
+              ruta: '/catalogo/revision-solicitudes/aceptadas',
+            },
+            {
+              texto: 'No aceptadas',
+              ruta: '/catalogo/revision-solicitudes/no-aceptadas',
             },
           ]"
         />
 
         <div class="flex">
-          <!-- <p
-            class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-2 p-2 m-0"
-          >
-            Si el estatus de tu publicación aparece como <i>No aceptada</i>, revisa tu correo
-            electrónico donde encontrarás los motivos del rechazo y las indicaciones para realizar
-            las correciones necesarias.
-          </p> -->
-          <h2>Solicitudes de publicación</h2>
+          <h2>No aceptadas</h2>
           <UiNumeroElementos :numero="totalResources" />
         </div>
-        <p>
-          E esta tabla se muestran los archivos enviados para revisión antes de publicarse en el
-          catálogo público de SIGIC. También puedes consultar el estatus de su aprobación.
+        <p
+          class="borde borde-color-alerta borde-redondeado-16 fondo-color-alerta texto-color-alerta p-3"
+        >
+          Las solicitudes No aceptadas se eliminarán automáticamente de esta lista después de 10
+          días. No podrás consultarlas nuevamente.
         </p>
+        <p>Solicitudes que no fueron aceptadas para su publicación en el catálogo público.</p>
 
         <div v-if="isLoading" class="flex flex-contenido-centrado m-t-3">
           <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
@@ -273,23 +224,20 @@ onMounted(async () => {
             </ClientOnly>
           </div>
         </div>
-
-        <div v-if="totalResources === 0 && !isLoading">
-          <div class="flex flex-contenido-centrado">
-            <div class="columna-7">
-              <div class="fondo-color-acento borde-redondeado-8 p-x-3 p-y-1 m-b-3">
-                <p>Aún no hay archivos en esta sección.</p>
-                <p>
-                  No tienes solicitudes de publicación activas. Para iniciar, dirígete a Mis
-                  archivos > Disponibles y selecciona uno para enviar a publicación.
-                </p>
-              </div>
-              <div class="flex flex-contenido-centrado">
-                <NuxtLink class="boton boton-primario" to="/catalogo/mis-archivos"
-                  >Disponibles
-                </NuxtLink>
-              </div>
+        <div v-if="totalResources === 0 && !isLoading" class="flex flex-contenido-centrado">
+          <div class="columna-8 flex flex-contenido-centrado">
+            <div class="fondo-color-acento p-3">
+              <p class="h5 m-t-0">Aún no hay archivos en esta sección</p>
+              <p class="m-b-0">
+                No tienes solicitudes No aceptadas. Estas se añadirán cuando No aceptes alguna
+                solicitud de publicación que tengas en proceso de revisión.
+              </p>
             </div>
+            <nuxt-link
+              class="boton boton-primario"
+              to="/catalogo/revision-solicitudes/pendientes-revisor"
+              >Ir a en proceso de revisión
+            </nuxt-link>
           </div>
         </div>
       </main>

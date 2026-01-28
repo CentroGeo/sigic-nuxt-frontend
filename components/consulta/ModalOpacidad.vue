@@ -13,11 +13,11 @@ const props = defineProps({
 const { selectedElement } = toRefs(props);
 const controlOpacidad = ref();
 const modalOpacidad = ref(null);
+const valorOpacidad = ref();
 
 function abrirModalOpacidad() {
   modalOpacidad.value?.abrirModal();
 }
-const valorOpacidad = ref();
 
 defineExpose({
   abrirModalOpacidad,

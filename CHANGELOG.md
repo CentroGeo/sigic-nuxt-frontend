@@ -7,6 +7,30 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.6.0] - 28-01-2026
+
+### Agregado (Added)
+
+- Se habilito la edición de información personal y avatar
+
+## [0.5.0] - 27-01-2026
+
+### Agregado (Added)
+
+- En el módulo de catálogo se agregó la funcionalidad de agregar solicitudes de publicación.
+
+## [0.4.1] - 26-01-2026
+
+### Arreglado (Fix)
+
+- Se arregló un bug en la petición de recursos para la sección de Mis Archivos. Este bug impedía solicitar documentos y datasets al mismo tiempo.
+
+## [0.4.0] - 23-01-2026
+
+### Agregado (Added)
+
+- En el módulo de consulta se agregó la posibilidad de visualizar capas de servicios remotos tipo ArcGIS. También se agregó la funcionalidad de consultar el tipo de geometría de las mismas, así como sus tablas de antributos cuando estas están disponibles.
+
 ## [0.3.0] - 22-01-2026
 
 ### Agregado (Added)
@@ -60,6 +84,10 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.6.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.5.0...v0.6.0
+[0.5.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.4.1...v0.5.0
+[0.4.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.4.0...v0.4.1
+[0.4.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.2.3...v0.3.0
 [0.2.3]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.2.1...v0.2.2

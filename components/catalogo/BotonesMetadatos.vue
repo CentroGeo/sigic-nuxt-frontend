@@ -21,7 +21,6 @@ const props = defineProps({
     default: () => ({}),
   },
 });
-//const storeCatalogo = useCatalogoStore();
 const { data } = useAuth();
 const cargaExitosa = ref(false);
 const modalActualizar = ref(null);
@@ -116,12 +115,9 @@ async function updateMetadata() {
     }
     isLoading.value = false;
     isMetaInvalid.value = false;
-    //const router = useRouter();
-    //router.go(0);
   } else {
     isLoading.value = false;
     isMetaInvalid.value = true;
-    //alert('Revisa la validez de los datos introducidos.');
   }
 }
 
@@ -152,7 +148,6 @@ function irAmisArchivos() {
       >
         Regresar
       </button>
-      <!--<button class="boton-primario boton-chico" :disabled="false" @click="actualizaMetadatos()"> -->
       <button
         aria-label="Actualizar Metadatos"
         class="boton-primario boton-chico"

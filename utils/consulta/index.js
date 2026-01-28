@@ -155,6 +155,7 @@ export function buildUrl(endpoint, query) {
   const pruebaUrl = `${pruebaApi}?${dataParams.toString().replace('extent_ne=%5B-1%2C-1%2C0%2C0%5D', 'extent_ne=[-1,-1,0,0]')}`;
   return pruebaUrl;
 }
+
 /**
  * Regresa el servidor en el que esta alojado un recurso remoto
  * @param {Object} resource
@@ -162,9 +163,11 @@ export function buildUrl(endpoint, query) {
  */
 export function getWMSserver(resource) {
   const wmsObject = resource.links.find((link) => link.link_type === 'OGC:WMS');
-  const link = wmsObject['url'];
+  const restObject = resource.links.find((link) => link.url.includes('arcgis'));
+  const link = wmsObject ? wmsObject['url'] : restObject['url'];
   return `${link.split('?')[0]}?`;
 }
+
 /**
  * Obtiene el servidor que aloja al recurso
  * @param {Object} resource
@@ -180,6 +183,22 @@ export function findServer(resource) {
 }
 
 /**
+ * Construye la url para solicitar info de un recurso
+ * @param {Object} resource
+ * @returns
+ */
+export function buildArcgisLayerRequest(resource) {
+  const restObject = resource.links.find((link) => link.url.includes('arcgis'));
+  const link = restObject['url'].split('?')[0];
+  const params = restObject['url'].split('?')[1].split('&');
+  const layers = params.filter((d) => d.includes('layers'))[0].split('=')[1];
+  const decoded = decodeURIComponent(layers);
+  const id = decoded.split(':')[1];
+  const newUrl = `${link}/${id}/`;
+  return newUrl;
+}
+
+/**
  * Esta funcion revisa si el servidor que aloja un servicio remoto WFS
  * tiene servicios especificos
  * @param {Object} resource Es el recurso del que se desea obtener más informacion
@@ -187,9 +206,9 @@ export function findServer(resource) {
  * Puede ser map, table o geometry
  * @returns {Boolean}
  */
-export async function hasWMS(resource, service) {
+export async function hasWFS(resource, service) {
   const { gnoxyFetch } = useGnoxyUrl();
-  const maxAttempts = 5;
+  const maxAttempts = 1;
   const url = new URL(findServer(resource));
   url.search = new URLSearchParams({
     service: 'WFS',
@@ -209,14 +228,6 @@ export async function hasWMS(resource, service) {
         console.error('No se puede usar el WMS', url, resource.alternate, resource.title);
         return false;
       }
-
-      /*       if (requestType === 'GetFeatureInfo') {
-        if (data.includes('GetFeatureInfo')) {
-          return true;
-        } else {
-          return false;
-        }
-      } else {} */
       if (service === 'map') {
         return true;
       } else if (service === 'table' || service === 'geometry') {
@@ -235,16 +246,44 @@ export async function hasWMS(resource, service) {
 }
 
 /**
- * Consulta al servidor que aloja un recurso remoto o de tipo vectorail para
+ * Esta funcion revisa si el servidor de arcgis que aloja un servicio remoto
+ * permite consultar la tabla de atributos
+ * @param {Object} resource
+ * @returns
+ */
+
+export async function hasFeatureServer(resource) {
+  const { gnoxyFetch } = useGnoxyUrl();
+  let hasFeatureService;
+  const url = await buildArcgisLayerRequest(resource);
+  if (url.includes('ImageServer')) {
+    hasFeatureService = false;
+  } else {
+    const base = url.split('/services/')[0];
+    const nameSpace = url.split('/services/')[1].split('/')[0];
+    const serviceUrl = `${base}/services/?f=pjson`;
+    const res = await gnoxyFetch(serviceUrl);
+    const data = await res.json();
+    const linkedServices = data.services.filter((d) => d.name === nameSpace);
+    if (linkedServices.map((d) => d.type).includes('FeatureServer')) {
+      hasFeatureService = true;
+    } else {
+      hasFeatureService = false;
+    }
+  }
+  return hasFeatureService;
+}
+/**
+ * Consulta al servidor WMS que aloja un recurso remoto o de tipo vectorail para
  * obtener el tipo de geometria del mismo
  * @param {Object} resource
- * @param {String} server
  * @returns {String}
  */
-export async function fetchGeometryType(resource) {
+export async function fetchGeometryWMS(resource) {
   const { gnoxyFetch } = useGnoxyUrl();
   const maxAttempts = 5;
   const url = new URL(findServer(resource));
+
   url.search = new URLSearchParams({
     service: 'WFS',
     version: '1.0.0',
@@ -263,7 +302,6 @@ export async function fetchGeometryType(resource) {
         return 'Error';
       }
       const data = await res.json();
-      //console.log(resource.alternate, data);
       if (
         Array.isArray(data.features) &&
         data.features.length > 0 &&
@@ -274,10 +312,45 @@ export async function fetchGeometryType(resource) {
     } catch {
       console.warn('Se está intentando una vez más');
     }
+    // Si fracasa en todos los intentos
+    return 'Error';
   }
+}
 
-  // Si fracasa en todos los intentos
-  return 'Error';
+/**
+ * Consulta al servidor ArcGis que aloja un recurso remoto o de tipo vectorail para
+ * obtener el tipo de geometria del mismo
+ * @param {Object} resource
+ * @returns {String}
+ * @param {*} resource
+ * @returns
+ */
+export async function fetchGeometryArcgis(resource) {
+  const { gnoxyFetch } = useGnoxyUrl();
+  const maxAttempts = 5;
+  const url = await buildArcgisLayerRequest(resource);
+  await hasFeatureServer(resource);
+
+  if (url.includes('ImageServer')) {
+    return 'Raster';
+  } else {
+    // Como a veces hace timeout, lo intentamos tres veces
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      try {
+        const res = await gnoxyFetch(`${url}?f=pjson`);
+        if (!res.ok) {
+          return 'Error';
+        }
+        const json = await res.json();
+        const geometry = json.geometryType;
+        return geometry;
+      } catch {
+        console.warn('Se está intentando una vez más');
+      }
+      // Si fracasa en todos los intentos
+      return 'Error';
+    }
+  }
 }
 
 /**
@@ -289,16 +362,21 @@ export async function fetchGeometryType(resource) {
 export async function defineGeomType(resource) {
   let geomType;
   if (resource.sourcetype === 'REMOTE') {
-    const resourceHasWMS = await hasWMS(resource, 'geometry');
-    if (resourceHasWMS) {
-      geomType = await fetchGeometryType(resource);
+    const server = findServer(resource);
+    if (!server.includes('arcgis')) {
+      const resourcehasWFS = await hasWFS(resource, 'geometry');
+      if (resourcehasWFS) {
+        geomType = await fetchGeometryWMS(resource);
+      } else {
+        geomType = 'Remoto';
+      }
     } else {
-      geomType = 'Remoto';
+      geomType = await fetchGeometryArcgis(resource);
     }
   } else if (resource.subtype === 'raster') {
     geomType = 'Raster';
   } else if (resource.subtype === 'vector') {
-    geomType = await fetchGeometryType(resource);
+    geomType = await fetchGeometryWMS(resource);
   } else {
     geomType = 'Otro';
   }
@@ -313,12 +391,18 @@ export async function defineGeomType(resource) {
  * @returns { String, Array }
  */
 export async function fetchRemoteStyles(resource) {
-  //console.warn('solicitando los estilos de capas remotas');
   const { gnoxyFetch } = useGnoxyUrl();
   const targetLayerName = resource.alternate;
   const targetLayerStyles = [];
   let targetLayerDefaultStyle = null;
   const server = getWMSserver(resource);
+
+  // Los servicios arcgis no permiten multiples estilos
+  if (server.includes('arcgis')) {
+    return { targetLayerDefaultStyle, targetLayerStyles };
+  }
+
+  // Los servicios ogc sí lo permiten
   const url = `${server}service=wms&request=getCapabilities`;
   const request = await gnoxyFetch(url);
 
@@ -414,7 +498,6 @@ export async function getSLDs(resource) {
  * @returns
  */
 export async function fetchDoc(url) {
-  //const extensionDict = { pdf: 'application/pdf', txt: 'text/plain' };
   const { data } = useAuth();
   const token = data.value?.accessToken;
   const maxAttempts = 5;
@@ -433,7 +516,6 @@ export async function fetchDoc(url) {
       }
       const blob = await res.blob();
       const newUrl = URL.createObjectURL(blob);
-      //window.open(newUrl);
       return newUrl;
     } catch {
       console.warn('Se está intentando una vez más');
@@ -461,7 +543,6 @@ export async function downloadDocs(resource) {
     try {
       const res = await gnoxyFetch(url);
       if (!res.ok) {
-        //throw new Error(`Falló la descarga: ${res.status}`);
         return 'Error';
       }
       const blob = await res.blob();
@@ -504,7 +585,6 @@ export async function downloadMetadata(resource) {
     try {
       const res = await gnoxyFetch(api.toString());
       if (!res.ok) {
-        //throw new Error(`Falló la descarga: ${res.status}`);
         return 'Error';
       }
       const dataBlob = await res.blob();
@@ -572,15 +652,12 @@ export async function downloadWMS(resource, format, featureTypes) {
       console.warn(`Vamos en el intento: ${attempt}.`);
       const res = await gnoxyFetch(`${url}`);
       if (!res.ok) {
-        //throw new Error(`Download failed: ${res.status}`);
         return 'Error';
       }
-      //console.log('Estamos aquí');
       const blob = await res.blob();
       const anchor = document.createElement('a');
       const downloadUrl = URL.createObjectURL(blob);
       anchor.href = downloadUrl;
-      //anchor.target = '_blank';
       anchor.style.display = 'none';
       anchor.download = `${resource.title}.${format}`;
       document.body.appendChild(anchor);
@@ -668,7 +745,6 @@ export async function downloadRaster(resource) {
         } else {
           error = 'Error';
         }
-        //console.error(error);
         return error;
       }
       const blob = await res.blob();
@@ -704,53 +780,3 @@ export function arrayNewsOlds(list1, list2) {
 
   return { news, olds };
 }
-
-/* export async function downloadRaster(resource) {
-  //const urlArray = resource.download_urls.filter((link) => link.url.includes('/assets/'));
-  //const url = urlArray[0].url;
-  //const config = useRuntimeConfig();
-  //const url = `${config.public.geonodeUrl}/datasets/${resource.alternate}/dataset_download`;
-  const config = useRuntimeConfig();
-  const { data } = useAuth();
-  const token = data.value?.accessToken;
-  const pngObject = resource.links.filter((link) => link.name === 'PNG');
-  const pngLink = pngObject[0].url;
-  const paramsDict = {};
-  const paramsList = pngLink.replace(`${config.public.geoserverUrl}/ows?`, '').split('&');
-  paramsList.forEach((param) => {
-    const entry = param.split('=');
-    paramsDict[entry[0]] = entry[1];
-  });
-  const coords = resource.extent.coords;
-  const bboxRatio = (coords[3] - coords[1]) / (coords[2] - coords[0]);
-  //const url = new URL(`${config.public.geoserverUrl}/geonode/wms`);
-  const url = new URL(`${config.public.geonodeUrl}/gs/wms`);
-  url.search = new URLSearchParams({
-    service: 'WMS',
-    version: '1.1.0',
-    request: 'GetMap',
-    layers: resource.alternate,
-    bbox: resource.extent.coords.join(','),
-    width: Math.round(paramsDict.width * 1.5),
-    height: Math.round(paramsDict.height * bboxRatio * 1.5),
-    srs: resource.extent.srid,
-    styles: '',
-    format: 'image/geotiff',
-  });
-  let res;
-  if (token) {
-    res = await fetch(url, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-  } else {
-    res = await fetch(url);
-  }
-  const blob = await res.blob();
-  const anchor = document.createElement('a');
-  anchor.href = URL.createObjectURL(blob);
-  anchor.target = '_blank';
-  anchor.download = `${resource.title}.tiff`;
-  document.body.appendChild(anchor);
-  anchor.click();
-  document.body.removeChild(anchor);
-} */

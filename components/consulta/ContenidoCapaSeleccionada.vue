@@ -1,13 +1,19 @@
 <script setup>
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { SisdaiLeyendaWms } from '@centrogeomx/sisdai-mapas';
-import { findServer, getWMSserver, hasWMS } from '~/utils/consulta';
+import { SisdaiLeyendaArcgis, SisdaiLeyendaWms } from '@centrogeomx/sisdai-mapas';
+import { findServer, getWMSserver, hasFeatureServer, hasWFS } from '~/utils/consulta';
 
 const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
 const storeSelected = useSelectedResources2Store();
 const { gnoxyFetch } = useGnoxyUrl();
-const emit = defineEmits(['opacidadClicked', 'descargaClicked', 'tablaClicked', 'owsClicked']);
+const emit = defineEmits([
+  'opacidadClicked',
+  'descargaClicked',
+  'tablaClicked',
+  'owsClicked',
+  'resourceReady',
+]);
 const props = defineProps({
   resourceElement: {
     type: Object,
@@ -15,8 +21,10 @@ const props = defineProps({
   },
 });
 const { resourceElement } = toRefs(props);
+const isResourceReady = ref(false);
 const selectedStyle = ref(null);
 const actualButtons = ref({});
+const serverType = ref(null);
 const optionsButtons = ref([
   {
     excludeFor: 'none',
@@ -82,28 +90,6 @@ const optionsButtons = ref([
   },
 ]);
 
-async function updateFunctions() {
-  let buttons = optionsButtons.value;
-  if (resourceElement.value.subtype === 'raster') {
-    buttons = buttons.filter((d) => d.excludeFor !== 'noTables');
-  }
-  if (resourceElement.value.sourcetype === 'REMOTE') {
-    // Se excluye el botón de descargar para remotos
-    buttons = buttons.filter((d) => d.excludeFor !== 'remotes');
-    const resourceHasWMS = await hasWMS(resourceElement.value, 'table');
-    // Se excluye el botón para ver tablas en caso de que el archivo remoto no permita consultar la tabla
-    if (resourceHasWMS === false) {
-      buttons = buttons.filter((d) => d.excludeFor !== 'noTables');
-    }
-  }
-  if (resourceElement.value.is_approved === false && resourceElement.value.is_published === false) {
-    // Se excluye el botón OWS para recursos privados
-    buttons = buttons.filter((d) => d.label !== 'Vínculo OWS');
-  }
-  actualButtons.value = buttons;
-}
-updateFunctions();
-
 async function shareOws() {
   let server;
   if (resourceElement.value.sourcetype === 'REMOTE') {
@@ -114,22 +100,59 @@ async function shareOws() {
   const owsLink = `${server}/${resourceElement.value.alternate.replace(':', '/')}/ows`;
   emit('owsClicked', owsLink);
 }
-watch(resourceElement, () => {
-  updateFunctions();
+
+async function updateFunctions() {
+  // Primero averiguamos el tipo de servidor
+  serverType.value = findServer(resourceElement.value).includes('arcgis') ? 'arcgis' : 'ogc';
+  let buttons = optionsButtons.value;
+  if (resourceElement.value.subtype === 'raster') {
+    buttons = buttons.filter((d) => d.excludeFor !== 'noTables');
+  }
+  if (resourceElement.value.sourcetype === 'REMOTE') {
+    // Se excluye el botón de descargar para remotos
+    buttons = buttons.filter((d) => d.excludeFor !== 'remotes');
+
+    // Averiguamos si podemos consumir la tabla de atribunos o no
+    let hasTable;
+    if (serverType.value === 'arcgis') {
+      hasTable = await hasFeatureServer(resourceElement.value);
+    } else {
+      hasTable = await hasWFS(resourceElement.value, 'table');
+    }
+    if (hasTable === false) {
+      buttons = buttons.filter((d) => d.excludeFor !== 'noTables');
+    }
+  }
+  // Se excluye el botón OWS para recursos privados
+  if (resourceElement.value.is_approved === false && resourceElement.value.is_published === false) {
+    buttons = buttons.filter((d) => d.label !== 'Vínculo OWS');
+  }
+  actualButtons.value = buttons;
+}
+
+watch(resourceElement, async () => {
+  await updateFunctions();
+  isResourceReady.value = true;
   selectedStyle.value = storeSelected.byPk(resourceElement.value.pk).estilo;
+  emit('resourceReady');
+});
+
+onMounted(async () => {
+  if (resourceElement.value.title) {
+    await updateFunctions();
+    isResourceReady.value = true;
+
+    emit('resourceReady');
+  }
 });
 
 watch(selectedStyle, (nv) => {
   storeSelected.byPk(resourceElement.value.pk).estilo = nv;
 });
-
-/* watch(selectedStyle, (nv) => {
-  console.log(nv);
-}); */
 </script>
 
 <template>
-  <div v-if="resourceElement.title">
+  <div v-if="isResourceReady">
     <div v-if="resourceElement.styles.length > 1" class="m-t-2">
       <ClientOnly>
         <SisdaiSelector
@@ -145,6 +168,7 @@ watch(selectedStyle, (nv) => {
     </div>
     <div class="m-y-2">
       <SisdaiLeyendaWms
+        v-if="serverType != 'arcgis'"
         :consulta="gnoxyFetch"
         :fuente="findServer(resourceElement)"
         :estilo="storeSelected.byPk(resourceElement.pk).estilo"
@@ -152,6 +176,14 @@ watch(selectedStyle, (nv) => {
         :titulo="resourceElement.title || 'cargando...'"
         :sin-control="true"
         :sin-control-clases="true"
+      />
+      <SisdaiLeyendaArcgis
+        v-else
+        :sin-control="true"
+        :sin-control-clases="true"
+        :titulo="resourceElement.title || 'cargando...'"
+        :capa="resourceElement.alternate.split(':')[1]"
+        :fuente="findServer(resourceElement).replace('?', '')"
       />
     </div>
 
