@@ -1,5 +1,4 @@
 <script setup>
-// TODO: Quitar toda la logica para elementos sin categoria
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import {
   buildUrl,
@@ -58,7 +57,6 @@ async function fetchTotalByCategory(category) {
 async function buildCategoriesDict() {
   categoriesDict.value = {};
   orderedCategories.value = [];
-  // Esta parte es para obtener todas las categorias
   if (storeFilters.filters.categories.length === 0) {
     const request = await gnoxyFetch(apiCategorias);
     const geonodeCategories = await request.json();
@@ -171,6 +169,7 @@ async function setSelectedCategory(categoria) {
   } else {
     selectedCategories.value.push(categoria);
   }
+
   // Se agrega este if para que no se dispare la misma petición más de una vez
   if (!categoriesDict.value[categoria].isLoading) {
     await callResources(categoria);

@@ -22,7 +22,6 @@ function abrirModalOWS() {
 async function copyLink() {
   try {
     await navigator.clipboard.writeText(props.owsLink);
-    //alert('Enlace copiado al portapapeles: ' + props.owsLink);
     linkStatus.value = true;
     await wait(1000);
     linkStatus.value = false;

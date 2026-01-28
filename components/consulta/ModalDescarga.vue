@@ -117,6 +117,7 @@ const optionsDict = {
     ],
   },
 };
+
 async function descargarClicked() {
   isDownloadActive.value = true;
   isDownloadSlow.value = false;
@@ -142,6 +143,7 @@ async function descargarClicked() {
   }
   isDownloadActive.value = false;
 }
+
 defineExpose({
   abrirModalDescarga,
 });
@@ -194,18 +196,6 @@ defineExpose({
               Descargar
             </button>
           </div>
-          <!--           <div>
-                      <button
-              v-for="option in optionsList"
-              :key="option.label"
-              type="button"
-              class="boton-secundario"
-              @click="option.action"
-              :disabled="option.label === 'GeoTiff' && !isLoggedIn"
-            >
-              {{ option.label }}
-            </button> 
-          </div> -->
         </div>
       </template>
     </SisdaiModal>

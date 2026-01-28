@@ -174,15 +174,7 @@ const dictIdiomas = [
   { zha: 'Zhuang' },
   { zul: 'Zulu' },
 ];
-/* const dictLicencia = [
-  { 1: 'Not Specified' },
-  { 2: 'Varied / Original' },
-  { 3: 'Varied / Derived' },
-  { 4: 'Public Domain' },
-  { 5: 'Public Domain / USG' },
-  { 6: 'Open Data Commons Open Database License / OSM' },
-  { 7: 'NextView' },
-]; */
+
 const dictLicencia = [
   { not_specified: 'Not Specified' },
   { varied_original: 'Varied / Original' },
@@ -192,30 +184,6 @@ const dictLicencia = [
   { odbl: 'Open Data Commons Open Database License / OSM' },
   { nextview: 'NextView' },
 ];
-/* const dictRestricciones = [
-  {
-    1: 'exclusive right to the publication, production, or sale of the rights to a literary, dramatic, musical, or artistic work, or to the use of a commercial print or label, granted by law for a specified period of time to an author, composer, artist, distributor',
-  },
-  {
-    2: 'government has granted exclusive right to make, sell, use or license an invention or discovery',
-  },
-  {
-    3: 'produced or sold information awaiting a patent',
-  },
-  {
-    4: 'a name, symbol, or other device identifying a product, officially registered and legally restricted to the use of the owner or manufacturer',
-  },
-  { 5: 'formal permission to do something' },
-  {
-    6: 'rights to financial benefit from and control of distribution of non-tangible property that is a result of creativity',
-  },
-  {
-    7: 'withheld from general circulation or disclosure',
-  },
-  {
-    8: 'otherRestrictions',
-  },
-]; */
 
 const dictRestricciones = [
   {

@@ -13,7 +13,6 @@ const storeResources = useResourcesCatalogoStore();
 const { data } = useAuth();
 const route = useRoute();
 const selectedPk = route.query.data;
-//const resourceType = route.query.type;
 const subidaExitosa = ref(undefined);
 const resourceToEdit = ref(null);
 const dragNdDrop = ref(null);

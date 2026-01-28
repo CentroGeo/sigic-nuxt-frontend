@@ -106,6 +106,6 @@ defineExpose({
 .ancho {
   width: 50%;
   display: flex;
-  justify-content: center; /* horizontal center */
+  justify-content: center;
 }
 </style>
