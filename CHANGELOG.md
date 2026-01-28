@@ -7,6 +7,14 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.6.1] - 28-01-2026
+
+### Arreglado (Fix)
+
+- Ahora se pueden crear dos servicios que apunten a la misma url siempre y cuando sean dos personas usuarias distintas quienes las registran.
+- Se agregó redireccionamiento al login en la vista de explorar/servicios-remotos
+- Los servicios registrados que aparecen son los que la persona usuaria registró, incluso para superusuarios.
+
 ## [0.6.0] - 28-01-2026
 
 ### Agregado (Added)
@@ -84,6 +92,7 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.6.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.4.0...v0.4.1

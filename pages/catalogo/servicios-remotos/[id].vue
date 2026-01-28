@@ -14,90 +14,31 @@ const selectedTitle = route.query.title;
 const harvestableResources = route.query.total;
 const { gnoxyFetch } = useGnoxyUrl();
 const config = useRuntimeConfig();
-const selectedHarvester = ref({});
-const harvesterUrl = ref(undefined);
-const resourcesToImport = ref([]);
+const importedResources = ref([]);
 const isLoading = ref(true);
 const fetchStatus = ref(null);
-const url = ref(`${config.public.geonodeApi}/resources/?filter{subtype.in}=remote&page_size=70`);
 
 /**
- * Busca el harvester seleccionado pidiendo todos los harvesters para obtener su información
- */
-async function getServiceUrl() {
-  let url = `${config.public.geonodeApi}/harvesters/`;
-  let harvesters = [];
-  do {
-    // Obtenemos la información de los harvesters
-    const requestHarvesters = await gnoxyFetch(url);
-    if (!requestHarvesters.ok) {
-      const error = await requestHarvesters.json();
-      console.error('Falló petición de harvesters:', error);
-    }
-    const resHarvesters = await requestHarvesters.json();
-    harvesters = [...harvesters, ...resHarvesters.harvesters];
-
-    // Revisamos si ya encontramos el harvester que nos interesa
-    harvesters.forEach((d) => {
-      if (d.id === Number(selectedId)) {
-        selectedHarvester.value = d;
-        harvesterUrl.value = d.remote_url.replace('https://', '').split('/')[0];
-      }
-    });
-
-    // Si lo encontramos, detenemos el loop
-    if (Object.keys(selectedHarvester.value).length > 0) {
-      url = undefined;
-    } else {
-      url = resHarvesters.links.next;
-    }
-  } while (url);
-}
-
-/**
- * Pide al endpount de resources los recursos remotos y los filtra según el link ogc: wms
+ * Pide al endpoint de sigic-remote-datasets los recursos remotos asociados al selectedID
  */
 async function fetchRemoteResources() {
   isLoading.value = true;
 
   try {
-    const requestRemotes = await gnoxyFetch(`${url.value}`);
-    if (!requestRemotes.ok) {
-      const error = await requestRemotes.json();
-      console.error('Falló petición de harvesters:', error);
+    const serviceUrl = `${config.public.geonodeApi}/sigic-remote-datasets/?harvester_id=${selectedId}`;
+    const datasetRequest = await gnoxyFetch(serviceUrl);
+    if (!datasetRequest.ok) {
+      //const error = await requestRemotes.json();
+      console.error('Falló petición de harvesters:');
+      fetchStatus.value = 'failed';
+    } else {
+      const datasetsResponse = await datasetRequest.json();
+      importedResources.value = datasetsResponse.datasets;
+      fetchStatus.value = 'ok';
     }
-    const resRemotes = await requestRemotes.json();
-    url.value = resRemotes.links.next;
-    resRemotes.resources.forEach((d) => {
-      const objetcLink = d.links.find((link) => link.link_type === 'OGC:WMS');
-      if (objetcLink.url.includes(harvesterUrl.value)) {
-        resourcesToImport.value.push(d);
-      }
-    });
-    fetchStatus.value = 'ok';
   } catch {
     fetchStatus.value = 'failed';
   }
-  /*   try {
-    do {
-      const requestRemotes = await gnoxyFetch(url.value);
-      if (!requestRemotes.ok) {
-        const error = await requestRemotes.json();
-        console.error('Falló petición de harvesters:', error);
-      }
-      const resRemotes = await requestRemotes.json();
-      url.value = resRemotes.links.next;
-      resRemotes.resources.forEach((d) => {
-        const objetcLink = d.links.find((link) => link.link_type === 'OGC:WMS');
-        if (objetcLink.url.includes(harvesterUrl.value)) {
-          resourcesToImport.value.push(d);
-        }
-      });
-    } while (url);
-    fetchStatus.value = 'ok';
-  } catch {
-    fetchStatus.value = 'failed';
-  } */
 
   isLoading.value = false;
 }
@@ -123,22 +64,17 @@ function irAImportarRecursos() {
     query: {
       id: selectedId,
       title: selectedTitle,
-      /* unique_identifier: selectedUniqueIdentifier,
-     remote_resource_type: selectedRemoteSourceType, */
     },
   });
 }
-
-watch(harvesterUrl, () => {
-  fetchRemoteResources();
-});
 
 onMounted(() => {
   if (harvestableResources === '0') {
     isLoading.value = false;
     fetchStatus.value = 'ok';
   } else {
-    getServiceUrl();
+    //getServiceUrl();
+    fetchRemoteResources();
   }
 });
 </script>
@@ -169,7 +105,6 @@ onMounted(() => {
           class="flex flex-contenido-centrado m-y-5"
         >
           <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
-          <p class="columna-16 texto-color-error" style="text-align: center">{{ url }}</p>
         </div>
 
         <!--Falló la petición-->
@@ -202,7 +137,7 @@ onMounted(() => {
         </div>
 
         <!--Tabla de recursos-->
-        <div v-if="!isLoading && resourcesToImport.length > 0 && fetchStatus === 'ok'">
+        <div v-if="!isLoading && importedResources.length > 0 && fetchStatus === 'ok'">
           <p
             class="texto-color-alerta fondo-color-alerta borde borde-color-alerta p-2 borde-redondeado-8"
           >
@@ -224,7 +159,7 @@ onMounted(() => {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="resource in resourcesToImport" :key="resource.pk">
+                <tr v-for="resource in importedResources" :key="resource.pk">
                   <td>
                     <!--                  <nuxt-link @click="openResourceView(value)">{{ value.title }}</nuxt-link>-->
                     {{ resource.title }}
