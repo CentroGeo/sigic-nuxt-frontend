@@ -127,7 +127,7 @@ watch(
 onMounted(async () => {
   await storeCatalogo.getUserInfo();
   storeFilters.resetAll();
-  storeFilters.buildQueryParams();
+  storeFilters.buildQueryParams('all');
   storeResources.getMyTotal('disponibles', params.value);
   storeResources.getMyTotal('pendientes', params.value);
   //storeResources.getMyTotal('publicacion', params.value);

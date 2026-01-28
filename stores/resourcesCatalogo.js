@@ -158,6 +158,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
      * @param {Array} query
      */
     async getMyTotal(section, query) {
+      console.log('Se disparó la petición de recursos paginados:', section);
       const endpoint = section === 'publicacion' ? '/sigic/requests/' : '/api/v2/sigic-resources/';
       const { gnoxyFetch } = useGnoxyUrl();
       const queryParams = {
@@ -198,6 +199,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
      * @param {Array} query
      */
     async getMyResourcesByPage(section, pageNum, pageSize, query) {
+      console.log('Se disparó la petición de total de recursos:', section);
       const { gnoxyFetch } = useGnoxyUrl();
       this.isLoading = true;
       const endpoint = section === 'publicacion' ? '/sigic/requests/' : '/api/v2/sigic-resources/';

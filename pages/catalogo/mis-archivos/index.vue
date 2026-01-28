@@ -136,6 +136,7 @@ watch(
 onMounted(async () => {
   await storeCatalogo.getUserInfo();
   storeFilters.resetAll();
+  console.log(storeFilters.filters);
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
   storeResources.getMyTotal('pendientes', params.value);
   storeResources.getMyTotal('publicacion', params.value);

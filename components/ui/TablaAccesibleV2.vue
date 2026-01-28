@@ -169,6 +169,10 @@ async function addRequestToMyReviews() {
   }
 }
 
+/**
+ * regresa los estilos asociados a una capa
+ * @param resource
+ */
 async function checkDefaultStyle(resource) {
   if (Object.keys(resource).includes('recurso_completo')) {
     return resource.recurso_completo.default_style;
@@ -202,6 +206,7 @@ async function openResourceView(resource) {
     useSelectedResources2Store().reset();
     useSelectedResources2Store().add(
       new SelectedResource({ pk: resource.pk }),
+      null,
       resourceTypeDic.dataTable
     );
     await navigateTo('/consulta/tablas');
@@ -211,6 +216,7 @@ async function openResourceView(resource) {
     useSelectedResources2Store().reset();
     useSelectedResources2Store().add(
       new SelectedResource({ pk: resource.pk }),
+      null,
       resourceTypeDic.document
     );
 
