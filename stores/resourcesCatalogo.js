@@ -161,11 +161,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       const { gnoxyFetch } = useGnoxyUrl();
       const endpoint = section === 'publicacion' ? '/sigic/requests/' : '/api/v2/sigic-resources/';
 
-      // const queryParams = {
-      //   ...query,
-      //   page_size: 1,
-      //   'filter{owner.username}': userEmail,
-      // };
       const queryParams =
         section === 'publicacion'
           ? {
@@ -211,12 +206,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       const endpoint = section === 'publicacion' ? '/sigic/requests/' : '/api/v2/sigic-resources/';
 
       this.isLoading = true;
-      // const queryParams = {
-      //   ...query,
-      //   page: pageNum,
-      //   page_size: pageSize,
-      //   'filter{owner.username}': userEmail,
-      // };
 
       const queryParams =
         section === 'publicacion'

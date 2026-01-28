@@ -7,14 +7,10 @@ export const useCatalogoStore = defineStore('catalogo', () => {
   const userEmail = data.value?.user.email;
   const estaLogueado = computed(() => status.value === 'authenticated');
 
-  // la información del usuario activo
-  // const userInfo = reactive({});
-
   return {
     previousPath: ref(''),
     catalogoColapsado: ref(false),
     idNavegacionLateral: 'navegacionlateral-' + Math.random().toString(36).substring(2),
-    // userInfo,
     userInfo: reactive({}),
 
     alternarCatalogoColapsable() {

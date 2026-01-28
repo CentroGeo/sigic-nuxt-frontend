@@ -1,7 +1,7 @@
 <script setup>
-import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
+// import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { tipoRecurso } from '~/utils/catalogo';
-import { cleanInput } from '~/utils/consulta';
+// import { cleanInput } from '~/utils/consulta';
 
 definePageMeta({
   middleware: 'auth',
@@ -10,7 +10,6 @@ definePageMeta({
 const storeCatalogo = useCatalogoStore();
 const storeResources = useResourcesCatalogoStore();
 const section = 'publicacion';
-// const params = computed(() => storeFilters.filters.queryParams);
 const isLoading = computed(() => storeResources.isLoading);
 const totalResources = computed(() => storeResources.myTotalBySection(section));
 const resources = computed(() => storeResources.mineBySection(section));
@@ -24,21 +23,20 @@ const totalPags = computed(() => Math.ceil(totalResources.value / tamanioPagina)
 const seleccionTipoArchivo = ref('');
 const storeFilters = useFilteredResources();
 
-const isFilterActive = ref(false);
-const modalFiltroAvanzado = ref(null);
-const seleccionOrden = computed({
-  get: () => storeFilters.filters.sort,
-  set: (value) => storeFilters.updateFilter('sort', value),
-});
-const inputSearch = computed({
-  get: () => storeFilters.filters.inputSearch,
-  set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
-});
-
-function resetSearch() {
-  storeFilters.updateFilter('inputSearch', '');
-  storeFilters.buildQueryParams();
-}
+// const isFilterActive = ref(false);
+// const modalFiltroAvanzado = ref(null);
+// const seleccionOrden = computed({
+//   get: () => storeFilters.filters.sort,
+//   set: (value) => storeFilters.updateFilter('sort', value),
+// });
+// const inputSearch = computed({
+//   get: () => storeFilters.filters.inputSearch,
+//   set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
+// });
+// function resetSearch() {
+//   storeFilters.updateFilter('inputSearch', '');
+//   storeFilters.buildQueryParams();
+// }
 
 /**
  * Obtiene las acciones dependiendo del estatus
@@ -103,7 +101,7 @@ onMounted(async () => {
     <template #visualizador>
       <main class="contenedor m-b-10 m-t-3">
         <!--Controles de filtros-->
-        <div class="flex">
+        <!-- <div class="flex">
           <div class="columna-4">
             <ClientOnly>
               <SisdaiSelector v-model="seleccionTipoArchivo" etiqueta="Tipo de archivo">
@@ -174,7 +172,7 @@ onMounted(async () => {
               </div>
             </div>
           </div>
-        </div>
+        </div> -->
 
         <CatalogoMenuMisArchivos
           :opciones="[

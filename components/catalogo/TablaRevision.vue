@@ -1,5 +1,4 @@
 <script setup>
-// import { fetchDoc } from '~/utils/consulta';
 const props = defineProps({
   selectedElementPk: {
     type: String,
@@ -7,18 +6,10 @@ const props = defineProps({
   },
 });
 const storeResources = useResourcesIAStore();
-// const emit = defineEmits(['docCargado']);
-
-// const blobedUrl = ref('');
-// const extensionDocumento = ref();
 
 const resourceByPk = ref();
 resourceByPk.value = await storeResources.fetchResourceByPk(props.selectedElementPk);
 
-// const linkCargado = resourceByPk.value?.links.find((link) => link.link_type === 'uploaded');
-// extensionDocumento.value = linkCargado?.extension;
-// const resourceEmbedURL = resourceByPk.value?.embed_url.replace('/embed', '/link');
-// blobedUrl.value = await fetchDoc(resourceEmbedURL);
 const paginaActual = ref(0);
 const tamanioPagina = 6;
 const {

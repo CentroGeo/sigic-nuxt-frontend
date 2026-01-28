@@ -57,7 +57,7 @@ const variables = {
 </script>
 <template>
   <div>
-    <div v-if="!isModal" :class="{ 'alineacion-izquierda ancho-lectura': !isModal }">
+    <div v-if="!isModal" class="alineacion-izquierda ancho-lectura">
       <CatalogoHeaderMetadatos
         :resource="props.resource"
         :title="'Atributos del Conjunto de Datos'"

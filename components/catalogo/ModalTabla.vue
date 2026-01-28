@@ -27,16 +27,6 @@ function abrirModalTabla() {
   modalTabla.value?.abrirModal();
 }
 
-// async function openTablas() {
-//   // modalTabla.value?.cerrarModal();
-//   useSelectedResources2Store().add(
-//     new SelectedResource({ pk: props.selectedElement.pk }),
-//     resourceTypeDic.dataTable
-//   );
-
-//   await navigateTo('/consulta/tablas');
-// }
-
 defineExpose({
   abrirModalTabla,
 });
@@ -69,15 +59,6 @@ watch([paginaActual], () => {
       </template>
 
       <template v-if="props.selectedElement.sourcetype !== 'REMOTE'" #pie>
-        <!-- <button
-          type="button"
-          aria-label="Ver Tabla en Visualizador"
-          class="boton-con-contenedor-secundario boton-grande ancho"
-          @click="openTablas"
-        >
-          Ver Tabla en Visualizador
-          <span aria-hidden="true" class="pictograma-previsualizar"></span>
-        </button> -->
         <button
           type="button"
           aria-label="Descargar"
