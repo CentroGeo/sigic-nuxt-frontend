@@ -13,59 +13,24 @@ definePageMeta({
 const router = useRouter();
 const route = useRoute();
 const storeLevantamiento = useLevantamientoStore();
-const proyecto = computed(() => storeLevantamiento.obtenerProyectoPorId(route.params.id));
+const { data } = useAuth();
+const proyecto = ref(null);
+
+watch(
+  () => data.value?.user.email,
+  async (email) => {
+    if (!email) return;
+
+    proyecto.value = await storeLevantamiento.obtenerProyectoPorId(email, route.params.id);
+  },
+  { immediate: true }
+);
 
 const preguntas = computed(() => {
   const ficha = proyecto.value?.ficha_proyecto;
 
-  if (!ficha) return [];
-
-  try {
-    return JSON.parse(ficha);
-  } catch (error) {
-    console.error('Error al parsear ficha_proyecto:', error);
-    return [];
-  }
+  return Array.isArray(ficha) ? ficha : [];
 });
-/* const preguntas = [
-  {
-    id: 1,
-    tipo: 'abierta',
-    pregunta: '¿Qué observaciones adicionales deseas compartir sobre este punto?',
-    instrucciones:
-      'Describe con tus palabras cualquier detalle relevante: tipo de residuos, frecuencia con la que se acumulan o si hay personas afectadas.',
-    obligatorio: true,
-  },
-  {
-    id: 2,
-    tipo: 'unica',
-    pregunta: '¿Qué tipo de residuos predominan en este punto?',
-    instrucciones: 'Selecciona la opción que mejor describa el tipo de residuos observados.',
-    obligatorio: true,
-  },
-  {
-    id: 3,
-    tipo: 'multiple',
-    pregunta: '¿Qué factores crees que contribuyen a la acumulación de basura en este sitio?',
-    instrucciones: 'Marca todas las opciones que apliquen',
-    obligatorio: true,
-  },
-  {
-    id: 4,
-    tipo: 'condicional',
-    pregunta: '¿Has reportado anteriormente este punto a las autoridades?',
-    instrucciones: '¿A qué dependencia o programa hiciste el reporte y cuándo?',
-    obligatorio: true,
-  },
-  {
-    id: 5,
-    tipo: 'multimedia',
-    pregunta: '',
-    instrucciones:
-      'Adjunta hasta cuatro fotos donde se aprecie claramente el lugar y los residuos. (Formatos permitidos: JPG, PNG, máximo 5 MB)',
-    obligatorio: false,
-  },
-]; */
 
 const modalSolicitarDescarga = ref(null);
 const modalDescargaSolicitada = ref(null);
@@ -125,30 +90,30 @@ const handleDescarga = () => {
               <div class="m-b-3">
                 <h5 class="m-t-0 m-b-2">Instrucciones clave del formulario:</h5>
                 <p class="m-y-0">
-                  {{ proyecto?.especificaciones_multimedia }}
+                  {{ proyecto?.instrucciones }}
                 </p>
               </div>
               <div class="m-b-3">
                 <h5 class="m-t-0 m-b-2">Visualización de formulario</h5>
                 <div class="fondo-color-neutro p-3 borde-redondeado-20 flex">
                   <div
-                    v-for="pregunta in preguntas"
-                    :key="pregunta.id_pregunta"
+                    v-for="(pregunta, index) in preguntas"
+                    :key="index"
                     class="p-3 borde-redondeado-20 fondo-color-primario columna-16"
                   >
                     <div v-if="pregunta.tipo !== 'multimedia'" class="m-b-2 texto-peso-500">
-                      {{ pregunta.id_pregunta }}. {{ pregunta.texto }}
+                      {{ index + 1 }}. {{ pregunta.pregunta }}
                     </div>
                     <div class="m-b-1 texto-color-secundario texto-peso-500">
                       {{
                         pregunta.tipo === 'multimedia'
-                          ? `${pregunta.id_pregunta}. ${pregunta.nota_para_registrante}`
-                          : pregunta.nota_para_registrante
+                          ? `${index + 1}. ${pregunta.instrucciones}`
+                          : pregunta.instrucciones
                       }}
                     </div>
 
                     <div
-                      v-if="pregunta.obligatoria"
+                      v-if="pregunta.obligatorio"
                       class="texto-color-secundario texto-tamanio-2 text-peso-400"
                     >
                       Obligatoria*

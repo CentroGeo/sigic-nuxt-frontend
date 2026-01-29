@@ -1,8 +1,11 @@
 <script setup>
 import SisdaiAreaTexto from '@centrogeomx/sisdai-componentes/src/componentes/area-texto/SisdaiAreaTexto.vue';
+import SisdaiBotonesRadioGrupo from '@centrogeomx/sisdai-componentes/src/componentes/boton-radio-grupo/SisdaiBotonesRadioGrupo.vue';
+import SisdaiBotonRadio from '@centrogeomx/sisdai-componentes/src/componentes/boton-radio/SisdaiBotonRadio.vue';
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const storeLevantamiento = useLevantamientoStore();
 
@@ -21,8 +24,6 @@ const elementosPrivacidad = [
     description: 'Solo personas invitadas pueden participar',
   },
 ];
-
-const privacidadSeleccionada = ref('publico');
 
 const permisos = [
   {
@@ -47,11 +48,6 @@ const permisos = [
   },
 ];
 
-/* const usuariosAsignados = [
-  { email: 'persona_usuaria@centrogeo.edu.mx', permiso: 'Revisar', fecha: '17/10/2025' },
-  { email: 'persona_usuaria@centrogeo.edu.mx', permiso: 'Administrar', fecha: '17/10/2025' },
-]; */
-
 const { data } = useAuth();
 const route = useRoute();
 
@@ -60,17 +56,45 @@ const participante = reactive({
   rol: '',
 });
 
+const proyecto = ref(null);
+
+watch(
+  () => data.value?.user.email,
+  async (email) => {
+    if (!email) return;
+
+    proyecto.value = await storeLevantamiento.obtenerProyectoPorId(email, route.params.id);
+  },
+  { immediate: true }
+);
+
+const privacidadSeleccionada = ref('privado');
+
+watch(
+  () => proyecto.value?.es_privada,
+  (esPrivada) => {
+    if (esPrivada === true) {
+      privacidadSeleccionada.value = 'privado';
+    } else if (esPrivada === false) {
+      privacidadSeleccionada.value = 'publico';
+    }
+  },
+  { immediate: true }
+);
+
 onMounted(() => {
   storeLevantamiento.obtenerParticipantesPorProyecto(data.value?.user.email, route.params.id);
 });
 
-const agregarParticipante = () => {
-  storeLevantamiento.agregarParticipanteProyecto(
+const agregarParticipante = async () => {
+  await storeLevantamiento.agregarParticipanteProyecto(
     data.value?.user.email,
     participante.email,
     participante.rol,
     route.params.id
   );
+
+  await storeLevantamiento.obtenerParticipantesPorProyecto(data.value?.user.email, route.params.id);
 };
 
 const formatearFecha = (fechaISO) => {
@@ -80,10 +104,81 @@ const formatearFecha = (fechaISO) => {
     year: 'numeric',
   });
 
-  console.log(fecha);
-
   return fecha;
 };
+
+const modalCambiarPermiso = ref(null);
+const participanteSeleccionado = ref(null);
+const permisoSeleccionado = ref('');
+
+const abrirModalCambiarPermiso = (participante) => {
+  participanteSeleccionado.value = participante;
+  permisoSeleccionado.value = participante.rol;
+  modalCambiarPermiso.value.abrirModal();
+};
+
+const actualizarPermiso = async () => {
+  await storeLevantamiento.actualizarParticipanteProyecto(
+    data.value?.user.email,
+    permisoSeleccionado.value,
+    route.params.id,
+    participanteSeleccionado.value.id
+  );
+
+  await storeLevantamiento.obtenerParticipantesPorProyecto(data.value?.user.email, route.params.id);
+  modalCambiarPermiso.value.cerrarModal();
+};
+
+const modalEliminarPermiso = ref(null);
+
+const abrirModalEliminarPermiso = (participante) => {
+  participanteSeleccionado.value = participante;
+  modalEliminarPermiso.value.abrirModal();
+};
+const eliminarPermiso = async () => {
+  await storeLevantamiento.eliminarParticipanteProyecto(
+    data.value?.user.email,
+    route.params.id,
+    participanteSeleccionado.value.id
+  );
+
+  await storeLevantamiento.obtenerParticipantesPorProyecto(data.value?.user.email, route.params.id);
+  modalEliminarPermiso.value.cerrarModal();
+};
+
+const modalSolicitarAprobacion = ref(null);
+
+const solicitarAprobacion = async () => {
+  const payload = {
+    isPrivate: false,
+  };
+
+  await storeLevantamiento.actualizarFormularioParticipantesProyecto(payload, route.params.id);
+
+  modalSolicitarAprobacion.value.abrirModal();
+};
+
+const router = useRouter();
+
+const irAMisProyectos = () => {
+  router.push('/levantamiento/proyectos/mis-proyectos');
+};
+
+const modalProyectoPrivado = ref(null);
+
+const actualizarProyecto = async () => {
+  const payload = {
+    isPrivate: true,
+  };
+
+  await storeLevantamiento.actualizarFormularioParticipantesProyecto(payload, route.params.id);
+
+  modalProyectoPrivado.value.abrirModal();
+};
+
+defineExpose({
+  actualizarProyecto,
+});
 </script>
 
 <template>
@@ -137,7 +232,11 @@ const formatearFecha = (fechaISO) => {
         </div>
       </div>
       <div class="flex flex-contenido-final">
-        <button class="boton-primario boton-chico" aria-label="Guardar Cambios">
+        <button
+          class="boton-primario boton-chico"
+          aria-label="Solicitar aprobación"
+          @click="solicitarAprobacion"
+        >
           Solicitar aprobación
         </button>
       </div>
@@ -167,10 +266,10 @@ const formatearFecha = (fechaISO) => {
             </div>
             <div class="privacidad-input">
               <SisdaiSelector v-model="participante.rol" etiqueta="Permiso">
-                <option value="administrar">Administrar</option>
-                <option value="revisar">Revisar</option>
-                <option value="participar">Participar</option>
-                <option value="ver">Solo ver</option>
+                <option value="Administrar">Administrar</option>
+                <option value="Revisar">Revisar</option>
+                <option value="Participar">Participar</option>
+                <option value="Solo ver">Solo ver</option>
               </SisdaiSelector>
             </div>
           </div>
@@ -209,13 +308,135 @@ const formatearFecha = (fechaISO) => {
               </div>
             </div>
             <div class="flex">
-              <button class="boton-secundario boton boton-chico">Cambiar permiso</button>
-              <button class="boton-secundario boton boton-chico">Eliminar</button>
+              <button
+                class="boton-secundario boton boton-chico"
+                @click="abrirModalCambiarPermiso(participante)"
+              >
+                Cambiar permiso
+              </button>
+              <button
+                class="boton-secundario boton boton-chico"
+                @click="abrirModalEliminarPermiso(participante)"
+              >
+                Eliminar
+              </button>
             </div>
           </div>
         </div>
       </div>
     </div>
+
+    <ClientOnly>
+      <SisdaiModal ref="modalCambiarPermiso">
+        <template #encabezado><h3>Cambiar permiso</h3></template>
+        <template #cuerpo>
+          <p class="m-t-0 m-b-3">
+            Selecciona los permisos que deseas asignarle a esta persona usuaria
+          </p>
+          <SisdaiBotonesRadioGrupo leyenda="" :es_vertical="true">
+            <SisdaiBotonRadio
+              v-model="permisoSeleccionado"
+              etiqueta="Administrar"
+              value="Administrar"
+              name="permiso-usuario"
+            />
+            <SisdaiBotonRadio
+              v-model="permisoSeleccionado"
+              etiqueta="Revisar"
+              value="Revisar"
+              name="permiso-usuario"
+            />
+            <SisdaiBotonRadio
+              v-model="permisoSeleccionado"
+              etiqueta="Participar"
+              value="Participar"
+              name="permiso-usuario"
+            />
+            <SisdaiBotonRadio
+              v-model="permisoSeleccionado"
+              etiqueta="Solo ver"
+              value="Solo ver"
+              name="permiso-usuario"
+            />
+          </SisdaiBotonesRadioGrupo>
+        </template>
+        <template #pie>
+          <button
+            type="button"
+            class="boton-secundario boton-chico"
+            @click="modalCambiarPermiso?.cerrarModal()"
+          >
+            Cerrar
+          </button>
+          <button type="button" class="boton-primario boton-chico" @click="actualizarPermiso">
+            Asignar permiso
+          </button>
+        </template>
+      </SisdaiModal>
+
+      <SisdaiModal ref="modalEliminarPermiso">
+        <template #encabezado><h3>Eliminar permiso</h3></template>
+        <template #cuerpo>
+          <p class="m-t-0 m-b-3">
+            ¿Deseas eliminar los permisos de esta persona usuaria? después de realizar esta acción
+            ya no podrá participar en tu proyecto hasta que sea invitada nuevamente.
+          </p>
+        </template>
+        <template #pie>
+          <button
+            type="button"
+            class="boton-secundario boton-chico"
+            @click="modalEliminarPermiso?.cerrarModal()"
+          >
+            Regresar
+          </button>
+          <button type="button" class="boton-primario boton-chico" @click="eliminarPermiso">
+            Confirmar
+          </button>
+        </template>
+      </SisdaiModal>
+
+      <SisdaiModal ref="modalSolicitarAprobacion">
+        <template #encabezado><h3>Proyecto enviado a aprobación</h3></template>
+        <template #cuerpo>
+          <p class="m-t-0 m-b-3">
+            Tu proyecto se ha enviado a aprobación para hacerlo público, te enviaremos un correo
+            electrónico cuando se haya revisado.
+          </p>
+        </template>
+        <template #pie>
+          <button
+            type="button"
+            class="boton-secundario boton-chico"
+            @click="modalSolicitarAprobacion?.cerrarModal()"
+          >
+            Cerrar
+          </button>
+          <button type="button" class="boton-primario boton-chico" @click="irAMisProyectos">
+            Ir a Mis proyectos
+          </button>
+        </template>
+      </SisdaiModal>
+
+      <SisdaiModal ref="modalProyectoPrivado">
+        <template #encabezado><h3>Proyecto privado</h3></template>
+        <template #cuerpo>
+          <p class="m-t-0 m-b-3">Tu proyecto se ha cambiado a privado.</p>
+        </template>
+        <template #pie>
+          <button
+            type="button"
+            class="boton-secundario boton-chico"
+            @click="modalProyectoPrivado?.cerrarModal()"
+          >
+            Cerrar
+          </button>
+          <button type="button" class="boton-primario boton-chico" @click="irAMisProyectos">
+            Ir a Mis proyectos
+          </button>
+        </template>
+      </SisdaiModal>
+    </ClientOnly>
   </div>
 </template>
 
