@@ -68,7 +68,7 @@ const optionsDict = {
 
 function checkServerType() {
   const server = findServer(selectedElement.value);
-  if (server.includes('arcgis')) {
+  if (server.toLowerCase().includes('arcgis')) {
     serverType.value = 'arcgis';
   } else {
     serverType.value = 'ogc';

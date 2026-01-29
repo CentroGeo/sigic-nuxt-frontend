@@ -163,7 +163,7 @@ export function buildUrl(endpoint, query) {
  */
 export function getWMSserver(resource) {
   const wmsObject = resource.links.find((link) => link.link_type === 'OGC:WMS');
-  const restObject = resource.links.find((link) => link.url.includes('arcgis'));
+  const restObject = resource.links.find((link) => link.url.toLowerCase().includes('arcgis'));
   const link = wmsObject ? wmsObject['url'] : restObject['url'];
   return `${link.split('?')[0]}?`;
 }
@@ -188,7 +188,7 @@ export function findServer(resource) {
  * @returns
  */
 export function buildArcgisLayerRequest(resource) {
-  const restObject = resource.links.find((link) => link.url.includes('arcgis'));
+  const restObject = resource.links.find((link) => link.url.toLowerCase().includes('arcgis'));
   const link = restObject['url'].split('?')[0];
   const params = restObject['url'].split('?')[1].split('&');
   const layers = params.filter((d) => d.includes('layers'))[0].split('=')[1];
@@ -363,7 +363,7 @@ export async function defineGeomType(resource) {
   let geomType;
   if (resource.sourcetype === 'REMOTE') {
     const server = findServer(resource);
-    if (!server.includes('arcgis')) {
+    if (!server.toLowerCase().includes('arcgis')) {
       const resourcehasWFS = await hasWFS(resource, 'geometry');
       if (resourcehasWFS) {
         geomType = await fetchGeometryWMS(resource);
@@ -398,7 +398,7 @@ export async function fetchRemoteStyles(resource) {
   const server = getWMSserver(resource);
 
   // Los servicios arcgis no permiten multiples estilos
-  if (server.includes('arcgis')) {
+  if (server.toLowerCase().includes('arcgis')) {
     return { targetLayerDefaultStyle, targetLayerStyles };
   }
 

@@ -103,7 +103,9 @@ async function shareOws() {
 
 async function updateFunctions() {
   // Primero averiguamos el tipo de servidor
-  serverType.value = findServer(resourceElement.value).includes('arcgis') ? 'arcgis' : 'ogc';
+  serverType.value = findServer(resourceElement.value).toLowerCase().includes('arcgis')
+    ? 'arcgis'
+    : 'ogc';
   let buttons = optionsButtons.value;
   if (resourceElement.value.subtype === 'raster') {
     buttons = buttons.filter((d) => d.excludeFor !== 'noTables');

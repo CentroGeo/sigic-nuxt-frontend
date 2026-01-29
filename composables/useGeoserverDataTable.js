@@ -19,7 +19,7 @@ export function useGeoserverDataTable({ paginaActual, tamanioPagina, resource } 
       serverType = 'WMS';
     } else if (resource.sourcetype === 'REMOTE') {
       const link = getWMSserver(resource);
-      if (link.includes('arcgis')) {
+      if (link.toLowerCase().includes('arcgis')) {
         url = await buildArcgisLayerRequest(resource);
         serverType = 'ArcGis';
       } else {

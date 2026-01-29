@@ -64,7 +64,7 @@ function irAImportarRecursos() {
 
 async function checkCapabilities() {
   //console.log('selecTipoFuente', selecTipoFuente.value);
-  const url = selecTipoFuente.value.includes('arcgis')
+  const url = selecTipoFuente.value.toLowerCase().includes('arcgis')
     ? `${campoURL.value}?f=json&pretty=true`
     : `${campoURL.value}?service=WMS&request=GetCapabilities`;
   //console.log(url);
