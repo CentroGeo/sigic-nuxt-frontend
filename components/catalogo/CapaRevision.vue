@@ -1,9 +1,13 @@
 <script setup>
+import SisdaiControlDeslizante from '@centrogeomx/sisdai-componentes/src/componentes/control-deslizante/SisdaiControlDeslizante.vue';
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
 import {
+  SisdaiCapaArcgis,
   SisdaiCapaWms,
   SisdaiCapaXyz,
+  SisdaiLeyendaArcgis,
   SisdaiLeyendaWms,
   SisdaiMapa,
 } from '@centrogeomx/sisdai-mapas';
@@ -27,49 +31,18 @@ const isLoading = ref(true);
 const { data } = useAuth();
 const isLoggedIn = ref(data.value ? true : false);
 const username = ref(data.value ? data.value.user.email : undefined);
-
 const resourceElement = ref();
 const selectedStyle = ref();
 const predeterminedStyle = ref();
 const allStyles = ref();
-
-const vistaDelMapa = ref({ extension: storeConsulta.mapExtent });
-
-watch(
-  () => storeConsulta.mapExtent,
-  (extension) => {
-    if (extension === undefined) return;
-    vistaDelMapa.value = { extension };
-  }
-);
-
-const shownModal = ref('ninguno');
-const modalResource = ref(null);
+const serverType = ref();
+const modalOpacidad = ref(null);
+const controlOpacidad = ref();
+const layerOpacity = ref(100);
+const hasAttrTable = ref(null);
 const tablaChild = ref(null);
-//const downloadOneChild = ref(null);
-
-function notifyTablaChild(resource) {
-  shownModal.value = 'tablaModal';
-  modalResource.value = resource;
-  nextTick(() => {
-    tablaChild.value?.abrirModalTabla();
-  });
-}
-
-/* function notifyDownloadOneChild(resource) {
-  shownModal.value = 'downloadOne';
-  modalResource.value = resource;
-  nextTick(() => {
-    downloadOneChild.value?.abrirModalDescarga();
-  });
-} */
-
-/* function changeModal(to) {
-  if (to === 'downloadOne') {
-    notifyDownloadOneChild(modalResource.value);
-  }
-} */
-
+const isDownloadable = ref(null);
+const downloadOneChild = ref();
 const actualButtons = ref({});
 const optionsButtons = ref([
   {
@@ -87,10 +60,30 @@ const optionsButtons = ref([
     pictogram: 'pictograma-tabla',
     globo: 'Ver tabla',
     action: () => {
-      notifyTablaChild(resourceElement.value);
+      tablaChild.value?.abrirModalTabla();
+    },
+  },
+  {
+    excludeFor: 'none',
+    label: 'Cambiar opacidad',
+    pictogram: 'pictograma-editar',
+    globo: 'Opacidad',
+    action: () => {
+      modalOpacidad.value?.abrirModal();
+    },
+  },
+  {
+    excludeFor: 'remotes',
+    label: 'Descargar archivo',
+    pictogram: 'pictograma-archivo-descargar',
+    globo: 'Descargar',
+    action: () => {
+      downloadOneChild.value?.abrirModalDescarga();
     },
   },
 ]);
+
+const vistaDelMapa = ref({ extension: storeConsulta.mapExtent });
 
 async function updateFunctions() {
   let buttons = optionsButtons.value;
@@ -106,16 +99,26 @@ async function updateFunctions() {
       buttons = buttons.filter((d) => d.excludeFor !== 'noTables');
     }
   }
-  if (resourceElement.value.is_approved === false && resourceElement.value.is_published === false) {
-    // Se excluye el botón OWS para recursos privados
-    buttons = buttons.filter((d) => d.label !== 'Vínculo OWS');
-  }
+
   actualButtons.value = buttons;
+  hasAttrTable.value = actualButtons.value.map((d) => d.label).includes('Ver tablas');
+  isDownloadable.value = actualButtons.value.map((d) => d.label).includes('Descargar archivo');
 }
+
+watch(
+  () => storeConsulta.mapExtent,
+  (extension) => {
+    if (extension === undefined) return;
+    vistaDelMapa.value = { extension };
+  }
+);
 
 onMounted(async () => {
   storeConsulta.catalogoColapsado = true;
   resourceElement.value = await storeCatalogo.fetchResourceByPk(selectedPk);
+  serverType.value = findServer(resourceElement.value).toLowerCase().includes('arcgis')
+    ? 'arcgis'
+    : 'ogc';
   const { defaultStyle, styleList } = await getSLDs(resourceElement.value);
   predeterminedStyle.value = defaultStyle;
   selectedStyle.value = defaultStyle;
@@ -143,12 +146,23 @@ onMounted(async () => {
             <SisdaiCapaXyz :posicion="0" />
 
             <SisdaiCapaWms
+              v-if="serverType === 'ogc'"
               :key="`wms-${resourceElement.pk}`"
               :capa="resourceElement.alternate"
               :consulta="gnoxyFetch"
               :fuente="findServer(resourceElement)"
               :mosaicos="true"
               :estilo="selectedStyle"
+              :opacidad="layerOpacity / 100"
+            />
+
+            <SisdaiCapaArcgis
+              v-if="serverType === 'arcgis'"
+              :key="`arcgis-${resourceElement.pk}`"
+              :fuente="findServer(resourceElement).replace('?', '')"
+              :capa="resourceElement.alternate.split(':')[1]"
+              :mosaicos="true"
+              :opacidad="layerOpacity / 100"
             />
           </SisdaiMapa>
         </ClientOnly>
@@ -168,6 +182,7 @@ onMounted(async () => {
                     }}
                   </p>
 
+                  <!--Globos de información-->
                   <div class="m-0">
                     <button
                       v-globo-informacion:izquierda="{
@@ -182,6 +197,8 @@ onMounted(async () => {
                     </button>
                   </div>
                 </div>
+
+                <!--Etiquetas de Mis Archivos y Catálogo externo-->
                 <div v-if="resourceElement">
                   <div
                     v-if="isLoggedIn && resourceElement.owner.username === username"
@@ -215,7 +232,10 @@ onMounted(async () => {
                         </SisdaiSelector>
                       </ClientOnly>
                     </div>
+
+                    <!--Leyendas -->
                     <SisdaiLeyendaWms
+                      v-if="serverType === 'ogc'"
                       :consulta="gnoxyFetch"
                       :fuente="findServer(resourceElement)"
                       :nombre="resourceElement.alternate"
@@ -224,8 +244,18 @@ onMounted(async () => {
                       :sin-control="true"
                       :sin-control-clases="true"
                     />
+
+                    <SisdaiLeyendaArcgis
+                      v-else
+                      :sin-control="true"
+                      :sin-control-clases="true"
+                      :titulo="resourceElement.title || 'cargando...'"
+                      :capa="resourceElement.alternate.split(':')[1]"
+                      :fuente="findServer(resourceElement).replace('?', '')"
+                    />
                   </div>
 
+                  <!-- Acciones -->
                   <div v-if="resourceElement.title" class="flex flex-contenido-final">
                     <button
                       v-for="button in actualButtons"
@@ -240,40 +270,84 @@ onMounted(async () => {
                     </button>
                   </div>
                 </div>
-                <div v-else class="flex flex-contenido-centrado">
-                  <img src="/img/loader.gif" alt="...Cargando" height="50px" />
-                </div>
               </div>
             </div>
           </div>
 
-          <!--  <div id="los-modales">
+          <div id="los-modales">
+            <!--Modal descarga-->
             <ConsultaModalDescarga
-              v-if="shownModal === 'downloadOne'"
+              v-if="isDownloadable"
               ref="downloadOneChild"
-              :key="`descarga_${modalResource.pk}_${'dataLayer'}`"
+              :key="`descarga_${resourceElement.pk}_${'dataLayer'}`"
               :resource-type="'dataLayer'"
-              :selected-element="modalResource"
+              :selected-element="resourceElement"
             />
 
+            <!--Modal tabla-->
             <CatalogoModalTabla
-              v-if="shownModal === 'tablaModal'"
+              v-if="hasAttrTable"
               ref="tablaChild"
-              :key="`tabla_${modalResource.pk}_${'dataLayer'}`"
-              :selected-element="modalResource"
-              @notify-download="changeModal('downloadOne')"
+              :key="`tabla_${resourceElement.pk}_${'dataLayer'}`"
+              :selected-element="resourceElement"
             />
 
-            <ConsultaModalOpacidad
-              v-if="shownModal === 'opacityModal'"
-              ref="opacityChild"
-              :key="`opacidad_${modalResource.pk}_${'dataLayer'}`"
-              :selected-element="modalResource"
-            /> 
-          </div>-->
+            <!-- Modal opacidad -->
+            <ClientOnly>
+              <SisdaiModal ref="modalOpacidad">
+                <template #encabezado>
+                  <h1>Opacidad</h1>
+                </template>
+
+                <template #cuerpo>
+                  <p>{{ resourceElement.title }}</p>
+                  <div class="contenedor flex">
+                    <div class="columna-11">
+                      <SisdaiControlDeslizante
+                        id="contro-opacidad"
+                        ref="controlOpacidad"
+                        class="deslizante"
+                        :val_min="0"
+                        :val_max="100"
+                        :val_entrada="layerOpacity"
+                        step="1"
+                        @update:val_entrada="
+                          ($event) => {
+                            controlOpacidad.valor_seleccionado = $event;
+                            layerOpacity = Number(controlOpacidad.valor_seleccionado);
+                          }
+                        "
+                      />
+                    </div>
+
+                    <div class="columna-5">
+                      <input
+                        type="number"
+                        :value="controlOpacidad?.valor_seleccionado"
+                        min="0"
+                        max="100"
+                        step="1"
+                        @change="
+                          (e) => {
+                            layerOpacity = e.target.value;
+                          }
+                        "
+                      />
+                    </div>
+                  </div>
+                </template>
+              </SisdaiModal>
+            </ClientOnly>
+          </div>
         </div>
       </template>
     </ConsultaLayoutPaneles>
+  </div>
+  <div v-else class="flex flex-contenido-centrado">
+    <figure>
+      <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
+      <figcaption class="texto-centrado">Cargando Capa Geográfica</figcaption>
+    </figure>
   </div>
 </template>
 
