@@ -216,7 +216,9 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
         queryParams['filter{complete_metadata}'] = 'false';
         queryParams['filter{owner.username}'] = userEmail;
       } else if (section === 'publicacion') {
-        queryParams['filter{owner}'] = storeCatalogo.userInfo.pk;
+        if (storeCatalogo.userInfo.pk) {
+          queryParams['filter{owner}'] = storeCatalogo.userInfo.pk;
+        }
       }
 
       // Excluimos los servicios usando queryparams
