@@ -168,8 +168,7 @@ onMounted(() => {
           />
         </div>
 
-        <p v-if="selectedResourceType === 'dataLayer'">Es una capa</p>
-        <!-- <CatalogoCapaRevision v-if="selectedResourceType === 'Capa Geográfica'" /> -->
+        <CatalogoCapaRevision v-if="selectedResourceType === 'dataLayer'" />
         <p v-if="selectedResourceType === 'dataTable'">Es una tabla</p>
 
         <!-- <CatalogoTablaRevision

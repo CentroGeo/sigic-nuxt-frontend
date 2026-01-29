@@ -6,7 +6,7 @@ const props = defineProps({
     default: null,
   },
 });
-const storeResources = useResourcesIAStore();
+const storeResources = useResourcesCatalogoStore();
 const emit = defineEmits(['docCargado']);
 
 const documentRef = ref(null);
