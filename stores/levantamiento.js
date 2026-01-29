@@ -12,40 +12,13 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
     existenParticipantes: ref(false),
     existeFormulario: ref(false),
     proyectos: ref([]),
-    proyectosPublicos: ref([
-      /* {
-        id: 1,
-        nombre: 'Registro de arte urbano en la ciudad de Mérida, Yucatán',
-        institucion: 'Nombre de institución',
-        autor: 'Nombre de autoría',
-        aportes: 16,
-      },
-      {
-        id: 2,
-        nombre: 'Mapa de puntos de basura acumulada',
-        institucion: 'Nombre de institución',
-        autor: 'Nombre de autoría',
-        aportes: 16,
-      },
-      {
-        id: 3,
-        nombre: 'Registro de cruces peatonales peligrosos',
-        institucion: 'Nombre de institución',
-        autor: 'Nombre de autoría',
-        aportes: 33,
-      },
-      {
-        id: 4,
-        nombre: 'Censo de luminarias en la colonia Jardines del Horizonte',
-        institucion: 'Nombre de institución',
-        autor: 'Nombre de autoría',
-        aportes: 121,
-      }, */
-    ]),
+    proyectosPublicos: ref([]),
     descargasAprobadas: ref([]),
     existenDescargasAprobadas: ref(false),
     descargasEnRevision: ref([]),
     existenDescargasEnRevision: ref(false),
+    esEdicionFormulario: ref(true),
+    proyectosCompartidos: ref([]),
 
     async obtenerProyectosPublicos() {
       try {
@@ -83,7 +56,13 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
 
         const data = await response.json();
         console.log('Proyecto guardado:', data);
-        this.proyectos.push(data.proyecto);
+
+        const proyectoConAportaciones = {
+          ...data.proyecto,
+          num_aportaciones: '0',
+        };
+
+        this.proyectos.unshift(proyectoConAportaciones);
         this.existenProyectos = true;
       } catch (error) {
         console.error('Error:', error);
@@ -99,14 +78,22 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
       return this.proyectosPublicos.length;
     },
 
-    obtenerProyectoPorId(id) {
-      id = Number(id);
+    async obtenerProyectoPorId(email, id) {
+      try {
+        const body = {
+          email: email,
+        };
 
-      return (
-        this.proyectos.find((p) => p.id === id) ||
-        this.proyectosPublicos.find((p) => p.id === id) ||
-        null
-      );
+        const data = await $fetch(`${apiUrl}/projects/register/${id}`, {
+          method: 'POST',
+          body: body,
+        });
+
+        /* console.log(data.proyectos[0]); */
+        return data.proyectos[0];
+      } catch (err) {
+        console.error('Error cargando proyecto:', err);
+      }
     },
     obtenerTotalDescargasAprobadas() {
       return this.descargasAprobadas.length;
@@ -184,7 +171,9 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
         });
         console.log(data);
         this.proyectos = data.proyectos;
-        this.existenProyectos = true;
+        if (data.proyectos.length > 0) {
+          this.existenProyectos = true;
+        }
       } catch (err) {
         console.error('Error cargando proyectos:', err);
       }
@@ -196,14 +185,12 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
           body: formData,
         });
 
-        console.log(response);
-
         if (!response.ok) {
           throw new Error('Error al actualizar el proyecto');
         }
 
         const data = await response.json();
-        console.log('Proyecto guardado:', data);
+        console.log('Proyecto actualizado:', data);
       } catch (error) {
         console.error('Error:', error);
         throw error;
@@ -244,6 +231,101 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
       } catch (err) {
         console.error('Error guardando participante:', err);
       }
+    },
+    async actualizarParticipanteProyecto(userEmail, rol, idProyecto, idParticipante) {
+      try {
+        const body = {
+          user_id: userEmail,
+          rol: rol,
+        };
+
+        const data = await $fetch(
+          `${apiUrl}/projects/shared/${idProyecto}/user/${idParticipante}/update`,
+          {
+            method: 'POST',
+            body: body,
+          }
+        );
+        console.log(data);
+      } catch (err) {
+        console.error('Error actualizando participante:', err);
+      }
+    },
+    async eliminarParticipanteProyecto(userEmail, idProyecto, idParticipante) {
+      try {
+        const body = {
+          user_id: userEmail,
+        };
+
+        const data = await $fetch(
+          `${apiUrl}/projects/shared/${idProyecto}/user/${idParticipante}/remove`,
+          {
+            method: 'DELETE',
+            body: body,
+          }
+        );
+        console.log(data);
+      } catch (err) {
+        console.error('Error eliminando participante:', err);
+      }
+    },
+    async actualizarFormularioParticipantesProyecto(payload, idProyecto) {
+      try {
+        const response = await fetch(`${apiUrl}/projects/update/${idProyecto}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al actualizar el proyecto');
+        }
+
+        const data = await response.json();
+        console.log('Proyecto enviado a aprobación:', data);
+      } catch (error) {
+        console.error('Error:', error);
+        throw error;
+      }
+    },
+    async eliminarProyecto(userEmail, idProyecto) {
+      try {
+        const body = {
+          user_id: userEmail,
+        };
+
+        const data = await $fetch(`${apiUrl}/projects/deactivate/${idProyecto}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: body,
+        });
+        console.log(data);
+      } catch (err) {
+        console.error('Error eliminando proyecto:', err);
+      }
+    },
+    async obtenerProyectosCompartidos(email) {
+      try {
+        const body = {
+          email: email,
+        };
+
+        const data = await $fetch(`${apiUrl}/projects/shared`, {
+          method: 'POST',
+          body: body,
+        });
+        console.log(data);
+        this.proyectosCompartidos = data.proyectos;
+      } catch (err) {
+        console.error('Error cargando proyectos compartidos:', err);
+      }
+    },
+    obtenerTotalProyectosCompartidos() {
+      return this.proyectosCompartidos.length;
     },
   };
 });
