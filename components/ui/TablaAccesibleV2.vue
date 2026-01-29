@@ -82,7 +82,7 @@ async function openResourceReview(resource) {
       query: {
         pk: resource.pk,
         pk_request: resource.pk_request,
-        resource_type: resource.tipo_recurso,
+        resource_type: 'document',
       },
     });
     revisando.value = true;
@@ -103,7 +103,7 @@ async function openResourceReview(resource) {
       query: {
         pk: resource.pk,
         pk_request: resource.pk_request,
-        resource_type: resource.tipo_recurso,
+        resource_type: 'dataLayer',
       },
     });
     revisando.value = true;
@@ -121,7 +121,7 @@ async function openResourceReview(resource) {
       query: {
         pk: resource.pk,
         pk_request: resource.pk_request,
-        resource_type: resource.tipo_recurso,
+        resource_type: 'dataTable',
       },
     });
     revisando.value = true;

@@ -155,7 +155,7 @@ onMounted(() => {
           </div>
         </div>
 
-        <div v-if="selectedResourceType === 'Documentos'">
+        <div v-if="selectedResourceType === 'document'">
           <div v-if="!isDocumentoReading" class="flex flex-contenido-centrado">
             <figure>
               <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
@@ -168,12 +168,14 @@ onMounted(() => {
           />
         </div>
 
-        <CatalogoCapaRevision v-if="selectedResourceType === 'Capa Geográfica'" />
+        <p v-if="selectedResourceType === 'dataLayer'">Es una capa</p>
+        <!-- <CatalogoCapaRevision v-if="selectedResourceType === 'Capa Geográfica'" /> -->
+        <p v-if="selectedResourceType === 'dataTable'">Es una tabla</p>
 
-        <CatalogoTablaRevision
+        <!-- <CatalogoTablaRevision
           v-if="selectedResourceType === 'Datos Tabulados'"
           :selected-element-pk="selectedPk"
-        />
+        /> -->
       </main>
 
       <ClientOnly>

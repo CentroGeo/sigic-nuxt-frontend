@@ -9,16 +9,23 @@ const props = defineProps({
 const storeResources = useResourcesIAStore();
 const emit = defineEmits(['docCargado']);
 
+const documentRef = ref(null);
+const resourceByPk = ref(null);
+const resourceEmbedURL = ref(null);
+const extensionDocumento = ref(null);
 const blobedUrl = ref('');
-const extensionDocumento = ref();
 
-const resourceByPk = ref();
-resourceByPk.value = await storeResources.fetchResourceByPk(props.selectedElementPk);
+async function updateValues() {
+  const linkCargado = resourceByPk.value.links.find((link) => link.link_type === 'uploaded');
+  extensionDocumento.value = linkCargado.extension;
+  resourceEmbedURL.value = resourceByPk.value.embed_url.replace('/embed', '/link');
+  blobedUrl.value = await fetchDoc(resourceEmbedURL.value);
+}
 
-const linkCargado = resourceByPk.value?.links.find((link) => link.link_type === 'uploaded');
-extensionDocumento.value = linkCargado?.extension;
-const resourceEmbedURL = resourceByPk.value?.embed_url.replace('/embed', '/link');
-blobedUrl.value = await fetchDoc(resourceEmbedURL);
+onMounted(async () => {
+  resourceByPk.value = await storeResources.fetchResourceByPk(props.selectedElementPk);
+  updateValues();
+});
 </script>
 
 <template>
