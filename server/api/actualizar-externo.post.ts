@@ -6,6 +6,7 @@ export default defineEventHandler(async (event) => {
   const newStatus = data.status;
   const token = getHeader(event, 'token');
   const url = `${config.public.geonodeApi}/harvesters/${harvesterID}/`;
+  console.log(url);
   let updateStatus = null;
 
   try {
@@ -19,7 +20,7 @@ export default defineEventHandler(async (event) => {
         status: `${newStatus}`,
       }),
     });
-    //console.log(response);
+    console.log(response);
     updateStatus = response.ok;
   } catch (error) {
     console.error('Error al subir al GeoNode:', error);

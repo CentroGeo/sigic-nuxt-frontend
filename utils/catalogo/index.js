@@ -43,54 +43,54 @@ export function convertirBytes(bytes) {
  * @param {Object} params
  * @returns {Object} Objeto que permite construit las tarjetas y tablas de servicios remotos
  */
-export async function fetchHarvesters(limited, params) {
+export async function fetchHarvesters(params) {
+  if (!params.title || params.title.trim().length === 0) {
+    delete params.title;
+  }
   const { gnoxyFetch } = useGnoxyUrl();
   const config = useRuntimeConfig();
   const dataParams = new URLSearchParams(params);
-  let url = `${config.public.geonodeApi}/harvesters/?${dataParams.toString()}`;
+  const url = `${config.public.geonodeApi}/services/?${dataParams.toString()}`;
   const data = [];
-  let harvesters = [];
   let status = 'ok';
 
   try {
     // Obtenemos la información de todos los harvesters
-    do {
-      const requestHarvesters = await gnoxyFetch(url);
-      if (!requestHarvesters.ok) {
-        const error = await requestHarvesters.json();
-        console.error('Falló petición de harvesters:', error);
-      }
-      const resHarvesters = await requestHarvesters.json();
-      harvesters = [...harvesters, ...resHarvesters.harvesters];
-      if (limited) {
-        url = undefined;
-      } else {
-        url = resHarvesters.links.next;
-      }
-    } while (url);
+    const requestServices = await gnoxyFetch(url);
+    if (!requestServices.ok) {
+      const error = await requestServices.json();
+      console.error('Falló petición de harvesters:', error);
+    }
+    const resServices = await requestServices.json();
+    const services = [...resServices.results];
 
     // Creamos el objeto con la información que nos interesa
     await Promise.all(
-      harvesters.map(async (h, index) => {
-        const harvestableResourcesUrl = h.links.harvestable_resources;
-        const resA = await gnoxyFetch(`${harvestableResourcesUrl}/?page_size=1`);
-        const dataA = await resA.json();
-        const totalResources = dataA.total;
+      services.map(async (h, index) => {
+        const harvesterUrl = `${config.public.geonodeApi}/harvesters/${h.harvester_id}`;
+        const fetchHarvesterStatus = await gnoxyFetch(harvesterUrl);
+        const resHarvesterStatus = await fetchHarvesterStatus.json();
+        const harvesterStatus = resHarvesterStatus.harvester.status;
 
-        const res2 = await gnoxyFetch(
-          `${harvestableResourcesUrl}/?filter{should_be_harvested}=true&page_size=1`
+        const fetchHarvestableResources = await gnoxyFetch(
+          `${harvesterUrl}/harvestable-resources/?page_size=1`
         );
-        const dataB = await res2.json();
+        const resHarvestableResources = await fetchHarvestableResources.json();
+        const totalResources = resHarvestableResources.total;
+
+        const harvesterDatasets = `${config.public.geonodeApi}/sigic-remote-datasets/?harvester_id=${h.harvester_id}`;
+        const fetchHarvesterDatasets = await gnoxyFetch(harvesterDatasets);
+        const dataB = await fetchHarvesterDatasets.json();
         const importedResources = dataB.total;
 
         data[index] = {
-          id: h.id,
-          title: h.name,
-          status: h.status,
+          id: h.harvester_id,
+          title: h.title,
+          status: harvesterStatus,
           total_resources: totalResources,
           imported_resources: importedResources,
           to_attend_resources: totalResources - importedResources,
-          remote_url: h.remote_url,
+          remote_url: h.url,
         };
       })
     );
