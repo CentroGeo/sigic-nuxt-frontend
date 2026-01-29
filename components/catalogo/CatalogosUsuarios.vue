@@ -3,21 +3,23 @@ import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/sele
 import { fetchHarvesters } from '~/utils/catalogo';
 const { gnoxyFetch } = useGnoxyUrl();
 const config = useRuntimeConfig();
+const userID = ref(null);
 const harvesters = ref([]);
 const isLoadingGeneral = ref(true);
 const isLoadingPage = ref(true);
 const fetchStatus = ref(null);
 
-const seleccionOrden = ref('-id');
+const seleccionOrden = ref('-created');
 const inputSearch = ref(null);
 const paginaActual = ref(0);
-const tamanioPagina = 5;
+const tamanioPagina = 10;
 const totalHarvesters = ref();
 const totalPags = computed(() => Math.ceil(totalHarvesters.value / tamanioPagina));
 const queryParams = ref({
   page: paginaActual.value + 1,
   page_size: tamanioPagina,
-  'sort[]': seleccionOrden.value,
+  sort: seleccionOrden.value,
+  title: inputSearch.value,
 });
 
 const statusDict = {
@@ -26,17 +28,33 @@ const statusDict = {
   'harvesting-resources': 'Cosechando recursos',
 };
 /**
+ * Esta función obtiene el pk de la persona usuaria
+ */
+async function getUserInfo() {
+  const { data } = useAuth();
+  const email = data.value?.user.email;
+  const url = `https://geonode.dev.geoint.mx/api/v2/users/?filter{username}=${email}`;
+  const request = await gnoxyFetch(url);
+  if (!request.ok) {
+    console.error('No se pudo recuperar la información de usuario');
+  } else {
+    const res = await request.json();
+    userID.value = res.users[0]['pk'];
+    queryParams.value['owner_id'] = userID.value;
+  }
+}
+/**
  * Esta petición obtiene el total de servicios externos
  */
 async function getTotal() {
-  const url = `${config.public.geonodeApi}/harvesters/`;
-  const requestHarvesters = await gnoxyFetch(url);
-  if (!requestHarvesters.ok) {
-    const error = await requestHarvesters.json();
-    console.error('Falló petición de harvesters:', error);
+  const url = `${config.public.geonodeApi}/services/`;
+  const requestServices = await gnoxyFetch(url);
+  if (!requestServices.ok) {
+    const error = await requestServices.json();
+    console.error('Falló petición de servicios:', error);
   }
-  const resHarvesters = await requestHarvesters.json();
-  return resHarvesters.total;
+  const resServices = await requestServices.json();
+  return resServices.count;
 }
 
 /**
@@ -45,7 +63,7 @@ async function getTotal() {
  */
 async function fetchResources() {
   isLoadingPage.value = true;
-  const { status, data } = await fetchHarvesters(true, queryParams.value);
+  const { status, data } = await fetchHarvesters(queryParams.value);
   harvesters.value = data;
   fetchStatus.value = status;
   isLoadingPage.value = false;
@@ -64,7 +82,28 @@ async function getResources() {
 }
 
 /**
- *
+ * Hace la petición de los servicios externos mandando
+ * el input de busqueda como query param
+ */
+async function searchByName() {
+  queryParams.value['title'] = inputSearch.value;
+  if (paginaActual.value === 0) {
+    fetchResources();
+  } else {
+    paginaActual.value = 0;
+  }
+}
+
+/**
+ * Limpia el input de busqueda y vuelve a pedir los servicios
+ */
+async function resetSearch() {
+  inputSearch.value = null;
+  searchByName();
+}
+
+/**
+ * Redirige
  * @param v
  * @param destino
  */
@@ -95,7 +134,7 @@ watch(paginaActual, () => {
 });
 
 watch(seleccionOrden, () => {
-  queryParams.value['sort[]'] = seleccionOrden.value;
+  queryParams.value['sort'] = seleccionOrden.value;
   if (paginaActual.value === 0) {
     fetchResources();
   } else {
@@ -103,28 +142,28 @@ watch(seleccionOrden, () => {
   }
 });
 
-onMounted(() => {
-  getResources();
+onMounted(async () => {
+  isLoadingGeneral.value = true;
+  await getUserInfo();
+  await getResources();
 });
 </script>
 <template>
   <main>
     <div id="servicios-institucionales">
-      <h3>Explora catálogos externos preconectados</h3>
-      <div class="flex">
+      <div class="flex m-t-3 m-b-2">
         <!-- Selector Orden -->
         <div class="columna-8">
           <ClientOnly>
             <SisdaiSelector v-model="seleccionOrden" etiqueta="Ordenar por">
-              <option value="id">Más Antiguo</option>
-              <option value="-id">Más Reciente</option>
-              <option value="name">Nombre</option>
-              <option value="status">Status</option>
+              <option value="created">Más Antiguo</option>
+              <option value="-created">Más Reciente</option>
+              <option value="title">Nombre</option>
             </SisdaiSelector>
           </ClientOnly>
         </div>
-        <!-- Campo de búsqueda avanzada -->
-        <div class="columna-8" style="opacity: 0.5">
+        <!-- Campo de búsqueda -->
+        <div class="columna-8">
           <div class="flex flex-contenido-separado">
             <div class="columna-14">
               <ClientOnly>
@@ -143,6 +182,7 @@ onMounted(() => {
                     class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
                     aria-label="Borrar"
                     type="button"
+                    @click="resetSearch"
                   >
                     <span aria-hidden="true" class="pictograma-cerrar" />
                   </button>
@@ -151,6 +191,7 @@ onMounted(() => {
                     class="boton-primario boton-pictograma campo-busqueda-buscar"
                     aria-label="Buscar"
                     type="button"
+                    @click="searchByName"
                   >
                     <span class="pictograma-buscar" aria-hidden="true" />
                   </button>
@@ -159,6 +200,11 @@ onMounted(() => {
             </div>
           </div>
         </div>
+      </div>
+      <div class="flex">
+        <!--         <h3>Explora catálogos externos preconectados</h3> -->
+        <h2>Servicios Remotos</h2>
+        <UiNumeroElementos :numero="totalHarvesters" />
       </div>
       <p>
         Explora los recursos de información de catálogos precargados, al importarlos podrás
@@ -199,16 +245,31 @@ onMounted(() => {
         <thead>
           <tr>
             <th>Nombre de servicio externo</th>
+            <!--<th>Tipo</th>-->
+            <th>Status</th>
             <th>Recursos importados</th>
             <th>Recursos pendientes</th>
             <th>URL</th>
-            <!--<th>Tipo</th>-->
-            <th>Status</th>
           </tr>
         </thead>
         <tbody v-if="!isLoadingPage">
           <tr v-for="harvester in harvesters" :key="harvester.id">
             <td>{{ harvester.title }}</td>
+            <!--<td>Servcio de Mapas</td>-->
+            <td>
+              <div
+                v-if="harvester.status === 'ready'"
+                class="texto-color-confirmacion texto-centrado fondo-color-confirmacion borde borde-color-confirmacion borde-redondeado-8 p-1"
+              >
+                {{ statusDict[harvester.status] }}
+              </div>
+              <div
+                v-else
+                class="texto-color-alerta texto-centrado fondo-color-alerta borde borde-color-alerta borde-redondeado-8 p-1"
+              >
+                {{ statusDict[harvester.status] }}
+              </div>
+            </td>
             <td>
               <nuxt-link @click="irARutaQuery(harvester, '')">
                 {{ harvester.imported_resources }}
@@ -224,21 +285,6 @@ onMounted(() => {
               <a :href="harvester.remote_url" target="_blank" rel="noopener noreferrer">
                 {{ harvester.remote_url }}
               </a>
-            </td>
-            <!--<td>Servcio de Mapas</td>-->
-            <td>
-              <div
-                v-if="harvester.status === 'ready'"
-                class="texto-color-confirmacion texto-centrado fondo-color-confirmacion borde borde-color-confirmacion borde-redondeado-8 p-1"
-              >
-                {{ statusDict[harvester.status] }}
-              </div>
-              <div
-                v-else
-                class="texto-color-alerta texto-centrado fondo-color-alerta borde borde-color-alerta borde-redondeado-8 p-1"
-              >
-                {{ statusDict[harvester.status] }}
-              </div>
             </td>
           </tr>
         </tbody>
