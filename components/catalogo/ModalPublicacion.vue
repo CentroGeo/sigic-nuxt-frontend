@@ -110,9 +110,25 @@ async function confirmarSolicitud(cerrarModal) {
   }
 }
 
+/**Redirige a mis-archivos/solicitudes-publicacion */
 async function navigateToRequests() {
   modalPublicaConfirmar.value.cerrarModal();
   await navigateTo('/catalogo/mis-archivos/solicitudes-publicacion');
+}
+
+function defineExtension() {
+  if (selectedElement.value.sourcetype === 'REMOTE') {
+    return 'Remoto';
+  } else {
+    selectedElement.value.links.forEach((d) => {
+      const keys = Object.keys(d);
+      if (keys.includes('extras')) {
+        return `.${d.extras.content.type}`;
+      } else {
+        return 'Desconocido';
+      }
+    });
+  }
 }
 defineExpose({
   abrirmodalPublicacion,
@@ -120,6 +136,7 @@ defineExpose({
 
 onMounted(() => {
   checkServerType();
+  defineExtension();
 });
 </script>
 
@@ -428,7 +445,7 @@ onMounted(() => {
           <div class="flex flex-contenido-separado">
             <p class="flex flex-vertical-centrado">{{ selectedElement.title }}</p>
             <div class="flex">
-              <p class="borde borde-redondeado-8 p-1">.{{ selectedElement.title.split('.')[1] }}</p>
+              <p class="borde borde-redondeado-8 p-1">{{ defineExtension() }}</p>
             </div>
           </div>
 
