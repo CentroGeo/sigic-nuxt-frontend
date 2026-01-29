@@ -7,6 +7,18 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.7.1] - 29-01-2026
+
+### Arreglado (Fix)
+
+- Se atendió el bug que ocurría al solicitar mis-solicitudes cuando se navegaba a catálogo desde consulta.
+- Se atendió el bug de redireccionamiento de las solicitudes a consutla.
+- Se atendió el bug que congelaba la pantalla al navegar del modal que indica que se había creado exitosamente la solicitud a la vista de mis-solicitudes.
+- Se creó una función para obtener la extensión de un recurso y mostrarla en el modal de creación exitosa de solicitud.
+- Se atendió el bug que generaba un tipo espejo en la vista de revisión de solicitud para documentos.
+- Se agregó soporte para capas remotas y servicios arcgis en la vista de revisión de solicitud para capas.
+- Se implementó el uso del endpoint /api/v2/services/ al eliminar un recurso de un servidor externo.
+
 ## [0.7.0] - 28-01-2026
 
 ### Agregado (Added)
@@ -98,6 +110,7 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.7.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.5.0...v0.6.0
