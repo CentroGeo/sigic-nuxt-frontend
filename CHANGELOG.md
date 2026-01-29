@@ -7,6 +7,12 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.7.0] - 28-01-2026
+
+### Agregado (Added)
+
+- En el módulo de levantamiento se agregó la conexión con la API de la sección de proyectos. Esta integración incluye la creación y configuración de proyectos, así como la visualización de proyectos públicos y compartidos.
+
 ## [0.6.1] - 28-01-2026
 
 ### Arreglado (Fix)
