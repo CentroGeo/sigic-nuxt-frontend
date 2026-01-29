@@ -169,12 +169,11 @@ onMounted(() => {
         </div>
 
         <CatalogoCapaRevision v-if="selectedResourceType === 'dataLayer'" />
-        <p v-if="selectedResourceType === 'dataTable'">Es una tabla</p>
 
-        <!-- <CatalogoTablaRevision
-          v-if="selectedResourceType === 'Datos Tabulados'"
+        <CatalogoTablaRevision
+          v-if="selectedResourceType === 'dataTable'"
           :selected-element-pk="selectedPk"
-        /> -->
+        />
       </main>
 
       <ClientOnly>
