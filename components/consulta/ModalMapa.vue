@@ -20,13 +20,13 @@ const estiloSeleccionado = ref(props.selectedElement.default_style);
 const emit = defineEmits(['notifyDownload']);
 
 async function openLayerView() {
-  storeSelected.reset();
+  storeSelected.reset(resourceTypeDic.dataLayer);
   storeSelected.add(
     new SelectedLayer({ pk: props.selectedElement.pk }),
     estiloSeleccionado.value,
     resourceTypeDic.dataLayer
   );
-
+  modalMapa.value?.cerrarModal();
   await navigateTo('/consulta/capas');
 }
 
