@@ -18,6 +18,7 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 - Se atendió el bug que generaba un tipo espejo en la vista de revisión de solicitud para documentos.
 - Se agregó soporte para capas remotas y servicios arcgis en la vista de revisión de solicitud para capas.
 - Se implementó el uso del endpoint /api/v2/services/ al eliminar un recurso de un servidor externo.
+- Se modificó el consumo de filtros para las vistas de revisión de metadatos
 
 ## [0.7.0] - 28-01-2026
 
