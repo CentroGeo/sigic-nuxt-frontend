@@ -1,7 +1,8 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
-import { categoriesInSpanish, resourceTypeDic, wait } from '~/utils/consulta';
+import { categoriesInSpanish, getSLDs, resourceTypeDic, wait } from '~/utils/consulta';
 import SelectedLayer from '~/utils/consulta/SelectedLayer';
+import SelectedResource from '~/utils/consulta/SelectedResource';
 /**
  * @typedef {Object} Props
  * @property {Array} [variables=[]] - Indica las variables del encabezado thead tr th.
@@ -18,11 +19,13 @@ const props = defineProps({
   },
 });
 const storeCatalogo = useCatalogoStore();
-// const storeSelected = useSelectedResources2Store();
-//const { data } = useAuth();
 const config = useRuntimeConfig();
-const { data } = useAuth();
+const route = useRoute();
+const router = useRouter();
 const { gnoxyFetch } = useGnoxyUrl();
+
+const { data } = useAuth();
+const token = data.value?.accessToken;
 const idAleatorio = 'id-' + Math.random().toString(36).substring(2);
 const shownModal = ref('ninguno');
 const modalResource = ref(null);
@@ -35,7 +38,14 @@ const resourceToDeletePk = ref(null);
 const resourceToDelete = ref(null);
 const wasDeletionSuccesful = ref(null);
 const isBeingDeleted = ref(false);
-// diccionario para colocar acentos
+const revisando = ref(false);
+const modalAgregarMisRevisiones = ref(null);
+const pkResource = ref();
+const modalComentarios = ref(null);
+const comentarios = ref('');
+const revisor = ref('');
+const recursoSolicitud = ref({});
+const modalCancelarSolicitud = ref(null);
 const dictTable = ref({
   pk: 'pk',
   titulo: 'Título',
@@ -47,13 +57,6 @@ const dictTable = ref({
   revisor: 'Revisor',
   propietario: 'Propietario',
 });
-
-/* const typeDict = {
-  'Capa Geográfica, Catálogo Externo': 'dataLayer',
-  'Capa Geográfica': 'dataLayer',
-  'Datos Tabulados': 'dataTable',
-  Documentos: 'document',
-}; */
 
 /**
  * Codifica la propiedad pk de un objeto y se pasa como query al ir a otra vista
@@ -81,8 +84,9 @@ function irARutaConQuery(recurso) {
     });*/
 }
 
-const revisando = ref(false);
-const route = useRoute();
+/**
+ * Redirige a la vista de revisión de un recurso
+ * */
 async function openResourceReview(resource) {
   if (resource.tipo_recurso === 'Documentos') {
     storeCatalogo.previousPath = route.path;
@@ -91,12 +95,15 @@ async function openResourceReview(resource) {
       query: {
         pk: resource.pk,
         pk_request: resource.pk_request,
-        resource_type: resource.tipo_recurso,
+        resource_type: 'document',
       },
     });
     revisando.value = true;
   }
-  if (resource.tipo_recurso === 'Capa Geográfica') {
+  if (
+    resource.tipo_recurso === 'Capa Geográfica' ||
+    resource.tipo_recurso === 'Capa Geográfica, Catálogo Externo'
+  ) {
     storeCatalogo.previousPath = route.path;
     useSelectedResources2Store().reset();
     useSelectedResources2Store().add(
@@ -109,7 +116,7 @@ async function openResourceReview(resource) {
       query: {
         pk: resource.pk,
         pk_request: resource.pk_request,
-        resource_type: resource.tipo_recurso,
+        resource_type: 'dataLayer',
       },
     });
     revisando.value = true;
@@ -127,15 +134,13 @@ async function openResourceReview(resource) {
       query: {
         pk: resource.pk,
         pk_request: resource.pk_request,
-        resource_type: resource.tipo_recurso,
+        resource_type: 'dataTable',
       },
     });
     revisando.value = true;
   }
 }
 
-const modalAgregarMisRevisiones = ref(null);
-const pkResource = ref();
 /**
  * Abre el modal para agregar la solicitud a revisión
  * y asigna el pk de la solicitud a revisar.
@@ -146,16 +151,13 @@ function openAddRequestToMyReviewsModal(resource) {
   modalAgregarMisRevisiones.value.abrirModal();
 }
 
-// const { data } = useAuth();
-const token = data.value?.accessToken;
-const configEnv = useRuntimeConfig();
 /**
  * Hace la petición para agregar la solicitud a revisión.
  */
 async function addRequestToMyReviews() {
   try {
     // petición para añadir la solicitud a mis revisiones
-    const response = await $fetch(`${configEnv.public.basePath}/api/solicitudes`, {
+    const response = await $fetch(`${config.public.basePath}/api/solicitudes`, {
       method: 'POST',
       body: JSON.stringify({
         pk: pkResource.value,
@@ -176,6 +178,21 @@ async function addRequestToMyReviews() {
 }
 
 /**
+ * Regresa los estilos asociados a una capa
+ * @param resource
+ */
+async function checkDefaultStyle(resource) {
+  if (Object.keys(resource).includes('recurso_completo')) {
+    return resource.recurso_completo.default_style;
+  } else {
+    const url = `${config.public.geonodeApi}/resources/${resource.pk}/`;
+    const req = await gnoxyFetch(url);
+    const res = await req.json();
+    const { defaultStyle } = await getSLDs(res.resource);
+    return defaultStyle;
+  }
+}
+/**
  * Agrega un recurso seleccionado al módulo de consulta y navega a la vista
  * @param resource del que se toma el pk para la selección
  */
@@ -184,10 +201,11 @@ async function openResourceView(resource) {
     resource.tipo_recurso === 'Capa Geográfica' ||
     resource.tipo_recurso === 'Capa Geográfica, Catálogo Externo'
   ) {
+    const estilo = await checkDefaultStyle(resource);
     useSelectedResources2Store().reset();
     useSelectedResources2Store().add(
       new SelectedLayer({ pk: resource.pk }),
-      resource.recurso_completo.default_style,
+      estilo,
       resourceTypeDic.dataLayer
     );
     await navigateTo('/consulta/capas');
@@ -195,7 +213,8 @@ async function openResourceView(resource) {
   if (resource.tipo_recurso === 'Datos Tabulados') {
     useSelectedResources2Store().reset();
     useSelectedResources2Store().add(
-      new SelectedLayer({ pk: resource.pk }),
+      new SelectedResource({ pk: resource.pk }),
+      null,
       resourceTypeDic.dataTable
     );
     await navigateTo('/consulta/tablas');
@@ -204,7 +223,7 @@ async function openResourceView(resource) {
   if (resource.tipo_recurso === 'Documentos') {
     useSelectedResources2Store().reset();
     useSelectedResources2Store().add(
-      new SelectedLayer({ pk: resource.pk }),
+      new SelectedResource({ pk: resource.pk }),
       null,
       resourceTypeDic.document
     );
@@ -287,42 +306,31 @@ function cancelarEliminar() {
   modalEliminar.value?.cerrarModal();
 }
 
-const router = useRouter();
 /**
- * TODO: Borrar una vez que se solucione lo del harvester en el recurso
- * Busca el harvester seleccionado pidiendo todos los harvesters para obtener su información
+ * Identifica el harvester desde el cual se pidio el recurso seleccionado
+ * a partir de uno de los links del objeto del recurso
  */
-async function getServiceUrl(urlService) {
-  let url = `${config.public.geonodeApi}/harvesters/`;
-  let harvesters = [];
-  let selectedHarvester = {};
-  do {
-    // Obtenemos la información de los harvesters
-    const requestHarvesters = await gnoxyFetch(url);
-    if (!requestHarvesters.ok) {
-      const error = await requestHarvesters.json();
-      console.error('Falló petición de harvesters:', error);
-    }
-    const resHarvesters = await requestHarvesters.json();
-    harvesters = [...harvesters, ...resHarvesters.harvesters];
-    // Revisamos si ya encontramos el harvester que nos interesa
-    harvesters.forEach((d) => {
-      if (d.remote_url.includes(urlService)) {
-        selectedHarvester = d;
-      }
-    });
-    //Si lo encontramos, detenemos el loop
-    if (Object.keys(selectedHarvester).length > 0) {
-      url = undefined;
-    } else {
-      url = resHarvesters.links.next;
-    }
-  } while (url);
-  return selectedHarvester;
+async function getHarvesterId(urlService) {
+  await storeCatalogo.getUserInfo();
+  const userPk = storeCatalogo.userInfo.pk;
+  const url = `${config.public.geonodeApi}/services/?url=${urlService}&owner_id=${userPk}`;
+  let harvesterId = null;
+
+  // Obtenemos la información de los harvesters
+  const requestServices = await gnoxyFetch(url);
+  if (!requestServices.ok) {
+    const error = await requestServices.json();
+    console.error('Falló petición de harvesters:', error);
+  }
+  const resServices = await requestServices.json();
+  harvesterId = resServices.results[0]['harvester_id'];
+
+  return harvesterId;
 }
 
 /**
- * Cambia la bandera del recurso en los harvestable resources y actualiza el estado del harvester
+ * Cambia la bandera del recurso en los harvestable resources y
+ * actualiza el estado del harvester
  */
 async function borrarRemoto() {
   const token = data.value?.accessToken;
@@ -330,9 +338,8 @@ async function borrarRemoto() {
 
   // Obtenemos el identificador del harvester
   const linkObject = resourceToDelete.value.links.find((link) => link.link_type === 'OGC:WMS');
-  const serviceLink = linkObject.url.replace('https://', '').split('/')[0];
-  const harvester = await getServiceUrl(serviceLink);
-  const harvesterIdentifier = harvester.id;
+  const serviceLink = linkObject.url.replace('https://', '').replace('http://', '').split('/')[0];
+  const harvesterIdentifier = await getHarvesterId(serviceLink);
 
   // Cambiamos el estatus del recurso a should_be_harvested false
   const requestBody = [
@@ -422,10 +429,6 @@ function irAmisArchivos() {
   modalEliminar.value?.cerrarModal();
 }
 
-const modalComentarios = ref(null);
-const comentarios = ref('');
-const revisor = ref('');
-const recursoSolicitud = ref({});
 /**
  * Abre el modal de la acción comentarios en Reivisón de solicitudes
  * @param solicitud
@@ -441,7 +444,6 @@ function abrirModalComentarios(solicitud) {
   recursoSolicitud.value = solicitud;
 }
 
-const modalCancelarSolicitud = ref(null);
 /**
  * Abre el modal de cancelar o regresar la solicitud a status pendiente
  * @param solicitud
@@ -457,7 +459,7 @@ function abrirModalCancelarRevision(solicitud) {
 async function removerRevision() {
   try {
     // petición para aceptar y publicar la solicitud del recurso
-    const response = await $fetch(`${configEnv.public.basePath}/api/solicitudes`, {
+    const response = await $fetch(`${config.public.basePath}/api/solicitudes`, {
       method: 'POST',
       body: {
         pk: recursoSolicitud.value.pk_request,

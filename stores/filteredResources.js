@@ -3,7 +3,7 @@ import { cleanInput, resourceTypeGeonode, unaccentUppercase } from '~/utils/cons
 
 export const useFilteredResources = defineStore('filteredResources', () => {
   const storeConsulta = useConsultaStore();
-  const storeCatalogo = useCatalogoStore();
+  //const storeCatalogo = useCatalogoStore();
   const filters = reactive({
     inputSearch: null,
     owner: 'todos',
@@ -14,7 +14,8 @@ export const useFilteredResources = defineStore('filteredResources', () => {
     resourceType: null,
     sort: null,
     queryParams: {},
-    requests: null,
+    requests: 'all',
+    requestOwner: null,
   });
   return {
     filters,
@@ -73,26 +74,14 @@ export const useFilteredResources = defineStore('filteredResources', () => {
       }
 
       // Agregamos queryparams para filtrar por status de la solicitud
-      if (filters.requests !== null) {
-        if (filters.requests === 'all') {
-          queryParams['filter{owner}'] = `${storeCatalogo.userInfo.pk}`;
-        }
-        if (filters.requests === 'pending') {
-          queryParams['filter{status}'] = 'pending';
-          queryParams['filter{owner}'] = `${storeCatalogo.userInfo.pk}`;
-        }
-        if (filters.requests === 'on_review') {
-          queryParams['filter{status}'] = 'on_review';
-          queryParams['filter{owner}'] = `${storeCatalogo.userInfo.pk}`;
-        }
-        if (filters.requests === 'published') {
-          queryParams['filter{status}'] = 'published';
-          queryParams['filter{owner}'] = `${storeCatalogo.userInfo.pk}`;
-        }
-        if (filters.requests === 'rejected') {
-          queryParams['filter{status}'] = 'rejected';
-          queryParams['filter{owner}'] = `${storeCatalogo.userInfo.pk}`;
-        }
+      if (filters.requests === 'pending') {
+        queryParams['filter{status}'] = 'pending';
+      } else if (filters.requests === 'on_review') {
+        queryParams['filter{status}'] = 'on_review';
+      } else if (filters.requests === 'published') {
+        queryParams['filter{status}'] = 'published';
+      } else if (filters.requests === 'rejected') {
+        queryParams['filter{status}'] = 'rejected';
       }
 
       // Agregamos queryparams para buscar por palabras en los campos de title y abstract
@@ -108,18 +97,15 @@ export const useFilteredResources = defineStore('filteredResources', () => {
           const { data } = useAuth();
           const username = data.value.user.email;
           queryParams['filter{owner.username}'] = username;
-          //queryParams['filter{is_published}'] = 'false';
-          // queryParams['filter{is_approved}'] = 'false';
-        }
-        if (filters.owner === 'catalogo' && filters.resourceType === 'dataLayer') {
+        } else if (filters.owner === 'catalogo' && filters.resourceType === 'dataLayer') {
           queryParams['filter{is_published}'] = 'true';
           queryParams['filter{subtype.in}'] = ['vector', 'raster'];
-        }
-        if (filters.owner === 'catalogo' && filters.resourceType !== 'dataLayer') {
+        } else if (filters.owner === 'catalogo' && filters.resourceType !== 'dataLayer') {
           queryParams['filter{is_published}'] = 'true';
-        }
-        if (filters.owner === 'remotos') {
+        } else if (filters.owner === 'remotos') {
           queryParams['filter{subtype.in}'] = 'remote';
+        } else {
+          queryParams['filter{owner}'] = filters.owner;
         }
       }
 
@@ -163,7 +149,6 @@ export const useFilteredResources = defineStore('filteredResources', () => {
       }
       // Actualizamos los queryparams
       filters.queryParams = queryParams;
-      //console.log(filters.queryParams);
     },
   };
 });

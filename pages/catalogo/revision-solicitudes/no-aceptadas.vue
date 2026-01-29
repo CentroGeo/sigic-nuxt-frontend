@@ -9,7 +9,9 @@ definePageMeta({
 
 const storeCatalogo = useCatalogoStore();
 const storeResources = useResourcesCatalogoStore();
+const storeFilters = useFilteredResources();
 const section = 'publicacion';
+const userReviewerPk = ref(null);
 const isLoading = computed(() => storeResources.isLoading);
 const totalResources = computed(() => storeResources.myTotalBySection(section));
 const resources = computed(() => storeResources.mineBySection(section));
@@ -20,8 +22,7 @@ const paginaActual = ref(0);
 const tamanioPagina = 10;
 const totalPags = computed(() => Math.ceil(totalResources.value / tamanioPagina));
 
-const seleccionTipoArchivo = ref('');
-const storeFilters = useFilteredResources();
+//const seleccionTipoArchivo = ref('');
 
 // const isFilterActive = ref(false);
 // const modalFiltroAvanzado = ref(null);
@@ -69,6 +70,7 @@ function fetchNewData() {
   storeResources.resetBySection(section);
   storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, {
     'filter{status}': 'rejected',
+    'filter{reviewer}': `${userReviewerPk.value}`,
   });
 }
 
@@ -85,9 +87,15 @@ watch(
 );
 
 onMounted(async () => {
+  await storeCatalogo.getUserInfo();
+  userReviewerPk.value = storeCatalogo.userInfo.pk;
   storeFilters.resetAll();
-  storeFilters.buildQueryParams(seleccionTipoArchivo.value);
-  storeResources.getMyTotal('publicacion', { 'filter{status}': 'rejected' });
+  storeCatalogo.userInfo = {};
+  storeFilters.buildQueryParams('all');
+  storeResources.getMyTotal('publicacion', {
+    'filter{status}': 'rejected',
+    'filter{reviewer}': `${userReviewerPk.value}`,
+  });
   fetchNewData();
 });
 </script>

@@ -31,12 +31,13 @@ function abrirModalTabla() {
 }
 
 async function openTablas() {
-  useSelectedResources2Store().reset();
+  useSelectedResources2Store().reset(resourceTypeDic.dataTable);
   useSelectedResources2Store().add(
     new SelectedResource({ pk: props.selectedElement.pk }),
+    null,
     resourceTypeDic.dataTable
   );
-
+  modalTabla.value?.cerrarModal();
   await navigateTo('/consulta/tablas');
 }
 

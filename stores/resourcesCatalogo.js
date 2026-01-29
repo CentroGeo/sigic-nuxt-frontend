@@ -4,6 +4,7 @@ import { buildUrl, getSLDs, resourceTypeDic, resourceTypeGeonode } from '~/utils
 export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => {
   const config = useRuntimeConfig();
   const storeConsulta = useConsultaStore();
+  const storeCatalogo = useCatalogoStore();
   const { data } = useAuth();
   const userEmail = data.value?.user.email;
 
@@ -110,7 +111,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
     async getResourcesByPage(resourceType = storeConsulta.resourceType, pageNum, pageSize, params) {
       const { gnoxyFetch } = useGnoxyUrl();
       this.isLoading = true;
-      //TODO: Agregar el parámetro para que solo traiga los recursos con metadata completa
       const queryParams = {
         page: pageNum,
         page_size: pageSize,
@@ -158,30 +158,28 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
      * @param {Array} query
      */
     async getMyTotal(section, query) {
-      const { gnoxyFetch } = useGnoxyUrl();
       const endpoint = section === 'publicacion' ? '/sigic/requests/' : '/api/v2/sigic-resources/';
-
-      const queryParams =
-        section === 'publicacion'
-          ? {
-              ...query,
-              page_size: 1,
-            }
-          : {
-              ...query,
-              page_size: 1,
-              'filter{owner.username}': userEmail,
-            };
+      const { gnoxyFetch } = useGnoxyUrl();
+      const queryParams = {
+        ...query,
+        page_size: 1,
+      };
 
       // Agregar toda la lógica de queryparams correspondientes por sección
       if (section === 'disponibles') {
         queryParams['filter{complete_metadata}'] = 'true';
+        queryParams['filter{owner.username}'] = userEmail;
       } else if (section === 'pendientes') {
         queryParams['filter{complete_metadata}'] = 'false';
+        queryParams['filter{owner.username}'] = userEmail;
+      } else if (section === 'publicacion') {
+        if (storeCatalogo.userInfo.pk) {
+          queryParams['filter{owner}'] = storeCatalogo.userInfo.pk;
+        }
       }
 
+      // Excluimos los servicios usando queryparams
       if (section !== 'publicacion') {
-        // Excluimos los servicios usando queryparams
         if (
           !Object.keys(queryParams).includes('filter{subtype.in}') &&
           !queryParams['filter{resource_type.in}']
@@ -203,32 +201,28 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
      */
     async getMyResourcesByPage(section, pageNum, pageSize, query) {
       const { gnoxyFetch } = useGnoxyUrl();
-      const endpoint = section === 'publicacion' ? '/sigic/requests/' : '/api/v2/sigic-resources/';
-
       this.isLoading = true;
-
-      const queryParams =
-        section === 'publicacion'
-          ? {
-              ...query,
-              page: pageNum,
-              page_size: pageSize,
-            }
-          : {
-              ...query,
-              page: pageNum,
-              page_size: pageSize,
-              'filter{owner.username}': userEmail,
-            };
+      const endpoint = section === 'publicacion' ? '/sigic/requests/' : '/api/v2/sigic-resources/';
+      const queryParams = {
+        ...query,
+        page: pageNum,
+        page_size: pageSize,
+      };
       // Agregar toda la lógica de queryparams correspondientes por sección
       if (section === 'disponibles') {
         queryParams['filter{complete_metadata}'] = 'true';
+        queryParams['filter{owner.username}'] = userEmail;
       } else if (section === 'pendientes') {
         queryParams['filter{complete_metadata}'] = 'false';
+        queryParams['filter{owner.username}'] = userEmail;
+      } else if (section === 'publicacion') {
+        if (storeCatalogo.userInfo.pk) {
+          queryParams['filter{owner}'] = storeCatalogo.userInfo.pk;
+        }
       }
 
+      // Excluimos los servicios usando queryparams
       if (section !== 'publicacion') {
-        // Excluimos los servicios usando queryparams
         if (
           !Object.keys(queryParams).includes('filter{subtype.in}') &&
           !queryParams['filter{resource_type.in}']
@@ -236,7 +230,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
           queryParams['filter{resource_type.in}'] = ['dataset', 'document'];
         }
       }
-
       //Pedimos los recursos
       const url = buildUrl(`${config.public.geonodeUrl}${endpoint}`, queryParams);
       const request = await gnoxyFetch(url.toString());
@@ -267,7 +260,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
     async getMyTotalResources(resourceType = storeConsulta.resourceType) {
       const { gnoxyFetch } = useGnoxyUrl();
       this.isLoading = true;
-      //TODO: agregar filtro para traer solo recursos con metadatos
       const queryParams = {
         'filter{complete_metadata}': 'true',
         'filter{resource_type.in}': resourceTypeGeonode[resourceType],
@@ -298,7 +290,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
     async getMyResourcesByType(resourceType = storeConsulta.resourceType) {
       const { gnoxyFetch } = useGnoxyUrl();
       this.isLoading = true;
-      //TODO: agregar filtro para traer solo recursos con metadatos
       const queryParams = {
         'filter{complete_metadata}': 'true',
         'filter{resource_type.in}': resourceTypeGeonode[resourceType],
@@ -321,7 +312,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
 
       myResourcesByType[resourceType] = res.resources;
       this.isLoading = false;
-      //return resources[resourceType];
     },
     /**
      * Traer la información de un solo recurso
@@ -332,7 +322,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       const { gnoxyFetch } = useGnoxyUrl();
       const maxAttempts = 3;
       const url = `${config.public.geonodeApi}/sigic-resources/${pkToFind}`;
-      // TODO: Si la petición falla porque el recurso es privado, eliminarlo de la store de seleccion
+
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         try {
           const res = await gnoxyFetch(url);

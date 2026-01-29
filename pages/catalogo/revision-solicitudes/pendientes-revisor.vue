@@ -9,6 +9,7 @@ definePageMeta({
 
 const storeCatalogo = useCatalogoStore();
 const storeResources = useResourcesCatalogoStore();
+const storeFilters = useFilteredResources();
 const section = 'publicacion';
 const isLoading = computed(() => storeResources.isLoading);
 const totalResources = computed(() => storeResources.myTotalBySection(section));
@@ -20,8 +21,7 @@ const paginaActual = ref(0);
 const tamanioPagina = 10;
 const totalPags = computed(() => Math.ceil(totalResources.value / tamanioPagina));
 
-const seleccionTipoArchivo = ref('');
-const storeFilters = useFilteredResources();
+//const seleccionTipoArchivo = ref('');
 
 // const seleccionOrden = computed({
 //   get: () => storeFilters.filters.sort,
@@ -86,7 +86,8 @@ watch(
 
 onMounted(async () => {
   storeFilters.resetAll();
-  storeFilters.buildQueryParams(seleccionTipoArchivo.value);
+  storeCatalogo.userInfo = {};
+  storeFilters.buildQueryParams('all');
   storeResources.getMyTotal('publicacion', { 'filter{status}': 'pending' });
   fetchNewData();
 });

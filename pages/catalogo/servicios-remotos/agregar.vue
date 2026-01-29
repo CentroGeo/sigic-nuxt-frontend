@@ -81,7 +81,7 @@ function irAImportarRecursos() {
 }
 
 async function validateUrl() {
-  const serverType = campoURL.value.includes('arcgis') ? 'arcgis' : 'ogc';
+  const serverType = campoURL.value.toLowerCase().includes('arcgis') ? 'arcgis' : 'ogc';
   const url =
     serverType === 'arcgis'
       ? `${campoURL.value}?f=json`

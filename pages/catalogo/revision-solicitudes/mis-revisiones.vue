@@ -10,7 +10,7 @@ definePageMeta({
 const storeCatalogo = useCatalogoStore();
 const storeResources = useResourcesCatalogoStore();
 
-const userReviewerPk = computed(() => storeCatalogo.userInfo.pk);
+const userReviewerPk = ref(null);
 const section = 'publicacion';
 const isLoading = computed(() => storeResources.isLoading);
 const totalResources = computed(() => storeResources.myTotalBySection(section));
@@ -93,10 +93,10 @@ watch(
 
 onMounted(async () => {
   await storeCatalogo.getUserInfo();
-
+  userReviewerPk.value = storeCatalogo.userInfo.pk;
   storeFilters.resetAll();
+  storeCatalogo.userInfo = {};
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
-
   storeResources.getMyTotal('publicacion', {
     'filter{status}': 'on_review',
     'filter{reviewer}': `${userReviewerPk.value}`,

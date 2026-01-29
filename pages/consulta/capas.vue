@@ -160,7 +160,7 @@ function filteredByServerType(resourcesList, serverType) {
         serverTypeCollection.push(d);
       }
     } else {
-      if (!server.includes('arcgis')) {
+      if (!server.toLowerCase().includes('arcgis')) {
         serverTypeCollection.push(d);
       }
     }
