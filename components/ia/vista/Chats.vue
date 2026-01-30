@@ -213,7 +213,7 @@ const submitMensaje = async () => {
   // Envía la pregunta
   const token = data.value?.accessToken;
 
-  const res = await fetch(`${config.public.iaBackendUrl}/queue/start`, {
+  const res = await fetch(`https://n8n.cesarbenjamin.net/webhook/chat`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(body),

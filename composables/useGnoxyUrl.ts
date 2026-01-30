@@ -8,6 +8,9 @@ export function useGnoxyUrl() {
 
     // Caso 1: URL empieza con geonodeUrl → traducir a gnoxy normal
     if (inputUrl.startsWith(geonodeUrl)) {
+      if (basePath === '/') {
+        return inputUrl.replace(geonodeUrl, `${baseURL}/api/gnoxy`);
+      }
       return inputUrl.replace(geonodeUrl, `${baseURL}${basePath}/api/gnoxy`);
     }
 
