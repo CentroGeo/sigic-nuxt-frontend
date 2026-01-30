@@ -27,7 +27,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY package*.json ./
 
 # instalar dependencias
-RUN npm install --include=dev
+RUN npm install --include=dev --legacy-peer-deps
 
 # --- copiar el código ---
 COPY . .
