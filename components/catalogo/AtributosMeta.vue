@@ -29,41 +29,24 @@ const variables = {
   attribute_label: 'Etiqueta',
   description: 'Descripción',
   display_order: 'Mostrar Orden',
-  //featureinfo_type: 'Display type',
   visible: 'Visible',
 };
-/* const typeOptions = {
-  Label: 'type_property',
-  URL: 'type_href',
-  Image: 'type_image',
-  'Video (mp4)': 'type_video_mp4',
-  'Video (ogg)': 'type_video_ogg',
-  'Video (webm)': 'type_video_webm',
-  'Video (3gp)': 'type_video_3gp',
-  'Video (flv)': 'type_video_flv',
-  'Video (YouTube/VIMEO)': 'type_video_youtube',
-  Audio: 'type_audio',
-  IFRAME: 'type_iframe',
-}; */
-
-/*watch(
-  attrSet,
-  (newVal) => {
-    console.log(attrSet.value);
-    sortedAttrs.value = newVal.sort((a, b) => a.display_order - b.display_order);
-  },
-  { deep: true }
-); */
 </script>
 <template>
   <div>
-    <div class="alineacion-izquierda ancho-lectura">
+    <div v-if="!isModal" class="alineacion-izquierda ancho-lectura">
       <CatalogoHeaderMetadatos
         :resource="props.resource"
         :title="'Atributos del Conjunto de Datos'"
         :exclude-links="props.isModal"
-      ></CatalogoHeaderMetadatos>
+      />
     </div>
+    <CatalogoHeaderMetadatos
+      v-else
+      :resource="props.resource"
+      :title="'Atributos del Conjunto de Datos'"
+      :exclude-links="props.isModal"
+    />
 
     <div class="contenedor-tabla p-2">
       <table v-if="sortedAttrs.length > 0">
@@ -108,14 +91,6 @@ const variables = {
             </td>
             <td>
               <ClientOnly>
-                <!-- <SisdaiCampoBase
-                  :id="`display-order-${datum['pk']}`"
-                  v-model="datum['display_order']"
-                  :es_etiqueta_visible="false"
-                  :etiqueta="`display-order-${datum['pk']}`"
-                  tipo="number"
-                  class="m-y-1"
-                /> -->
                 <input
                   :id="`display-order-${datum['pk']}`"
                   v-model="datum['display_order']"
@@ -124,19 +99,7 @@ const variables = {
                 />
               </ClientOnly>
             </td>
-            <!--             <td>
-              <ClientOnly>
-                <SisdaiSelector v-model="datum['featureinfo_type']" etiqueta="">
-                  <option
-                    v-for="type in Object.keys(typeOptions)"
-                    :key="`${type}-tipo-opcion`"
-                    :value="typeOptions[type]"
-                  >
-                    {{ type }}
-                  </option>
-                </SisdaiSelector>
-              </ClientOnly>
-            </td> -->
+
             <td>
               <input
                 :id="`visible-checkbox-${datum['pk']}`"
@@ -150,10 +113,14 @@ const variables = {
       </table>
       <div
         v-else-if="sortedAttrs.length === 0"
-        class="contenedor ancho-lectura borde-redondeado-16 texto-color-error fondo-color-error p-3 m-3 flex flex-contenido-centrado"
+        class="tarjeta contenedor ancho-lectura borde-redondeado-16 fondo-color-error"
       >
-        <span class="pictograma-alerta" />
-        <b> Este recurso no permite la edición de su tabla de atributos.</b>
+        <div class="tarjeta-cuerpo">
+          <p class="texto-color-error">
+            <span class="pictograma-alerta" /> Este recurso no permite la edición de su tabla de
+            atributos.
+          </p>
+        </div>
       </div>
 
       <p v-else>...Cargando</p>

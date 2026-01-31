@@ -5,8 +5,16 @@ definePageMeta({
     class: '',
   },
 });
+
 const ruta = '/catalogo';
+
 const storeCatalogo = useCatalogoStore();
+const esSuperusuaria = computed(() => storeCatalogo.userInfo.is_superuser);
+
+onMounted(async () => {
+  await storeCatalogo.getUserInfo();
+});
+
 onUnmounted(() => (document.querySelector('body').className = ''));
 </script>
 
@@ -34,6 +42,11 @@ onUnmounted(() => (document.querySelector('body').className = ''));
           ruta: `${ruta}/explorar/documentos`,
           globo: 'Documentos',
         },
+        {
+          pictograma: 'pictograma-flkt',
+          ruta: `${ruta}/explorar/catalogos-externos`,
+          globo: 'Servicios Remotos',
+        },
       ]"
       :sesion-paginas="[
         {
@@ -49,8 +62,15 @@ onUnmounted(() => (document.querySelector('body').className = ''));
         {
           pictograma: 'pictograma-ayuda',
           ruta: `${ruta}/servicios-remotos`,
-          globo: 'Carga de catálogos externos',
+          globo: 'Carga de servicios remotos',
         },
+        esSuperusuaria
+          ? {
+              pictograma: 'pictograma-ayuda',
+              ruta: `${ruta}/revision-solicitudes`,
+              globo: 'Revisión de solicitudes',
+            }
+          : {},
       ]"
       :id-colapsable="storeCatalogo.idNavegacionLateral"
       :estado-colapable="storeCatalogo.catalogoColapsado"

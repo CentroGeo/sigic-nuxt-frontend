@@ -117,8 +117,11 @@ const optionsDict = {
     ],
   },
 };
+
 async function descargarClicked() {
   isDownloadActive.value = true;
+  isDownloadSlow.value = false;
+  hasDownloadFailed.value = false;
   const selectedFunction = optionsList.value.find((d) => d.label === selectedOption.value);
 
   //La siguiente línea se pone para agregar alerta si el proceso de descarga toma mas de 3 segundos
@@ -140,6 +143,7 @@ async function descargarClicked() {
   }
   isDownloadActive.value = false;
 }
+
 defineExpose({
   abrirModalDescarga,
 });
@@ -151,7 +155,7 @@ defineExpose({
         <h1>Descargar {{ tagTitle }}</h1>
       </template>
       <template #cuerpo>
-        <p class="h5">{{ selectedElement.title }}</p>
+        <p class="h5 title">{{ selectedElement.title }}</p>
         <div v-if="isDownloadActive" class="flex m-y-2 borde-redondeado-16 contenedor-proceso">
           <div class="columna-4 flex-vertical-centrado">
             <img src="/img/loader.gif" alt="...Cargando" class="loader" />
@@ -192,18 +196,6 @@ defineExpose({
               Descargar
             </button>
           </div>
-          <!--           <div>
-                      <button
-              v-for="option in optionsList"
-              :key="option.label"
-              type="button"
-              class="boton-secundario"
-              @click="option.action"
-              :disabled="option.label === 'GeoTiff' && !isLoggedIn"
-            >
-              {{ option.label }}
-            </button> 
-          </div> -->
         </div>
       </template>
     </SisdaiModal>
@@ -237,5 +229,11 @@ defineExpose({
 .loader {
   max-height: 3em;
   object-fit: scale-down;
+}
+
+.title {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 </style>

@@ -156,3 +156,54 @@ export const useResourcesIAStore = defineStore('resourcesIA', () => {
     },
   };
 });
+
+/* async function validacionTemporal(resources, resourceType) {
+  const config = useRuntimeConfig();
+  const proxyURL = config.public.geonodeUrl;
+  let datum;
+
+  if (resourceType === resourceTypeDic.document) {
+    // Filtramos los txt y pdfs
+    datum = resources.filter((resource) =>
+      resource.links.some(
+        (link) =>
+          link.link_type === 'uploaded' &&
+          (link.name.endsWith('.pdf') || link.name.endsWith('.txt'))
+      )
+    );
+    return datum;
+  }
+  if (resourceType === resourceTypeDic.dataLayer) {
+    const noGeometryExtent = [-1, -1, 0, 0];
+    datum = resources.filter(
+      (resource) =>
+        !resource.extent.coords.every((value, index) => value === noGeometryExtent[index])
+    );
+
+    // Revisamos si los servicios remotos tienen tabla
+    const locals = datum.filter((resource) => resource.sourcetype === 'LOCAL');
+    let remotes = datum.filter((resource) => resource.sourcetype === 'REMOTE');
+    const filterRemotes = await Promise.all(
+      remotes.map(async (resource) => {
+        return { resourceValue: resource, resourcehasWFS: await hasWFS(resource, 'map', proxyURL) };
+      })
+    );
+    remotes = filterRemotes.filter((d) => d.resourcehasWFS).map((d) => d.resourceValue);
+    return locals.concat(remotes);
+  }
+  if (resourceType === resourceTypeDic.dataTable) {
+    // Revisamos si los servicios remotos tienen tabla
+    const locals = resources.filter((resource) => resource.sourcetype === 'LOCAL');
+    let remotes = resources.filter((resource) => resource.sourcetype === 'REMOTE');
+    const filterRemotes = await Promise.all(
+      remotes.map(async (resource) => {
+        return {
+          resourceValue: resource,
+          resourcehasWFS: await hasWFS(resource, 'table', proxyURL),
+        };
+      })
+    );
+    remotes = filterRemotes.filter((d) => d.resourcehasWFS).map((d) => d.resourceValue);
+    return locals.concat(remotes);
+  }
+} */

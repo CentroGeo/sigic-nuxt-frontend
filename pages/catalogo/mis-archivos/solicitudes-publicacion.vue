@@ -1,68 +1,47 @@
 <script setup>
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { cleanInput } from '~/utils/consulta';
+
 definePageMeta({
   middleware: 'sidebase-auth',
   bodyAttrs: {
     class: '',
   },
 });
+
 const storeResources = useResourcesCatalogoStore();
 const storeFilters = useFilteredResources();
 const storeCatalogo = useCatalogoStore();
 const section = 'publicacion';
-storeResources.getMyTotal(section);
+const isLoading = computed(() => storeResources.isLoading);
+const params = computed(() => storeFilters.filters.queryParams);
 const totalResources = computed(() => storeResources.myTotalBySection(section));
 const resources = computed(() => storeResources.mineBySection(section));
-const variables = ['titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'estatus'];
+const tableResources = ref([]);
+const variables = ['titulo', 'estatus', 'tipo_recurso', 'categoria', 'acciones'];
+
 const paginaActual = ref(0);
 const tamanioPagina = 10;
 const totalPags = computed(() => Math.ceil(totalResources.value / tamanioPagina));
-const tableResources = ref([]);
-const tableResources2 = ref([
-  {
-    titulo: 'Capas lago texcoco',
-    tipo_recurso: 'Capa Geográfica',
-    categoria: { gn_description: 'Environment' },
-    actualizacion: '22 sep 2025',
-    estatus: 'Pendiente',
-  },
-  {
-    titulo: 'Flora_fauna_texcoco',
-    tipo_recurso: 'Datos Tabulados',
-    categoria: { gn_description: 'Environment' },
-    actualizacion: '22 sep 2025',
-    estatus: 'En revisión',
-  },
-  {
-    titulo: 'Pueblos originarios Texcoco',
-    tipo_recurso: 'Documentos',
-    categoria: { gn_description: 'Environment' },
-    actualizacion: '22 sep 2025',
-    estatus: 'Publicado',
-  },
-  {
-    titulo: 'Agua balance hídrico',
-    tipo_recurso: 'Capa Geográfica',
-    categoria: { gn_description: 'Environment' },
-    actualizacion: '22 sep 2025',
-    estatus: 'No aceptado',
-  },
-]);
-const modalFiltroAvanzado = ref(null);
-const isFilterActive = ref(false);
+
+//const modalFiltroAvanzado = ref(null);
+//const isFilterActive = ref(false);
+const seleccionTipoArchivo = computed({
+  get: () => storeFilters.filters.requests,
+  set: (value) => storeFilters.updateFilter('requests', value),
+});
 const seleccionOrden = computed({
   get: () => storeFilters.filters.sort,
   set: (value) => storeFilters.updateFilter('sort', value),
 });
-const seleccionTipoArchivo = ref('');
-const inputSearch = computed({
+
+/* const inputSearch = computed({
   get: () => storeFilters.filters.inputSearch,
   set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
-});
+}); */
 
-const { data } = useAuth();
-const userEmail = data.value.user.email;
+const hayMetaPendiente = computed(() =>
+  storeResources.myTotalBySection('pendientes') > 0 ? true : false
+);
 
 /**
  * Valida si el tipo de recurso es documento o dataset con geometría o no
@@ -81,177 +60,79 @@ function tipoRecurso(recurso) {
   return tipo;
 }
 
-function setActions(recurso) {
-  if (recurso.sourcetype === 'REMOTE') {
-    return 'Editar, Ver, Remover';
-  } else {
-    return 'Editar, Ver, Descargar, Remover';
-  }
+const dictEstatus = {
+  pending: 'Pendiente',
+  published: 'Publicado',
+  rejected: 'No aceptado',
+  on_review: 'En revisión',
+};
+
+/**
+ * Formatea la fecha del recurso a esta forma: dd/mm/aaaa
+ * @param fecha de actualización del recurso
+ * @returns {Date} objeto con la fecha
+ */
+function formatearFecha(fecha) {
+  return new Date(fecha).toLocaleDateString('es-ES', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
 }
 
 function updateResources() {
-  //filteredResources.value = nuevosRecursos;
   // obteniendo datos por las props de la tabla
-  // TODO: enviar solo los recursos que son candidatos a publicarse
-  tableResources.value = resources.value
-    .filter((resource) => resource.owner.email === userEmail)
-    .map((d) => ({
-      pk: d.pk,
-      titulo: d.title,
-      tipo_recurso: tipoRecurso(d),
-      categoria: d.category,
-      actualizacion: d.last_updated,
-      //acciones: 'Editar, Ver, Descargar, Remover',
-      acciones: setActions(d),
-      uuid: d.uuid,
-      resource_type: d.resource_type,
-      recurso_completo: d,
-    }));
+  tableResources.value = resources.value.map((d) => {
+    return {
+      titulo: d.resource.title,
+      pk: `${d.resource.pk}`,
+      tipo_recurso: tipoRecurso(d.resource),
+      categoria: d.resource.category,
+      actualizacion: formatearFecha(d.updated_at),
+      estatus: dictEstatus[d.status],
+      acciones: d.status === 'pending' ? 'Ver, Comentarios, Cancelar' : 'Ver, Comentarios',
+      comentarios: d.rejection_reason,
+      revisor: d.reviewer?.username,
+    };
+  });
 }
 
-/* function fetchNewData() {
+function fetchNewData() {
   storeResources.resetBySection(section);
-  storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina);
+  storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, params.value);
 }
-fetchNewData();
+
+watch([seleccionTipoArchivo], () => {
+  storeFilters.buildQueryParams();
+});
 
 watch(paginaActual, () => {
   fetchNewData();
-}); */
-function resetSearch() {
-  storeFilters.updateFilter('inputSearch', '');
-  storeFilters.buildQueryParams();
-}
-watch(resources, () => {
-  updateResources();
 });
-/* // TODO: fix paginador
-import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { cleanInput, resourceTypeDic } from '~/utils/consulta';
-definePageMeta({
-  middleware: 'sidebase-auth',
-  bodyAttrs: {
-    class: '',
+
+watch(params, () => {
+  paginaActual.value = 0;
+  storeResources.getMyTotal('publicacion', params.value);
+  fetchNewData();
+});
+
+watch(
+  resources,
+  () => {
+    updateResources();
   },
-});
-// para filtar por los archivos de la usuaria
-const { data } = useAuth();
-const userEmail = data.value.user.email;
-const storeFetched = useFetchedResources2Store();
-const storeFilters = useFilteredResources();
-storeFetched.checkFilling(resourceTypeDic.dataLayer);
-storeFetched.checkFilling(resourceTypeDic.dataTable);
-storeFetched.checkFilling(resourceTypeDic.document);
-
-const recursos = computed(() => storeFetched.all);
-const filteredResources = ref([]);
-const tableResources = ref([]);
-const tableResources2 = ref([
-  {
-    titulo: 'Capas lago texcoco',
-    tipo_recurso: 'Capa geográfica',
-    categoria: { gn_description: 'Environment' },
-    actualizacion: '22 sep 2025',
-    estatus: 'Pendiente',
-  },
-  {
-    titulo: 'Flora_fauna_texcoco',
-    tipo_recurso: 'Datos tabulados',
-    categoria: { gn_description: 'Environment' },
-    actualizacion: '22 sep 2025',
-    estatus: 'En revisión',
-  },
-  {
-    titulo: 'Pueblos originarios Texcoco',
-    tipo_recurso: 'Documentos',
-    categoria: { gn_description: 'Environment' },
-    actualizacion: '22 sep 2025',
-    estatus: 'Publicado',
-  },
-  {
-    titulo: 'Agua balance hídrico',
-    tipo_recurso: 'Capa geográfica',
-    categoria: { gn_description: 'Environment' },
-    actualizacion: '22 sep 2025',
-    estatus: 'No aceptado',
-  },
-]);
-
-const seleccionOrden = ref('');
-const seleccionTipoArchivo = ref('');
-const inputSearch = computed({
-  get: () => storeFilters.filters.inputSearch,
-  set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
-});
-const modalFiltroAvanzado = ref(null);
-const isFilterActive = ref(false);
-
-// obteniendo las variables keys para la tabla
-const variables = ['titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'estatus'];
-
-/**
- * Valida si el tipo de recurso es documento o dataset con geometría o no
- * @param recurso del catálogo
- * @returns {String} ya sea Documentos, Capa geográfica o Datos tabulados
- */
-/*function tipoRecurso(recurso) {
-  if (recurso.resource_type === 'document') {
-    return 'Documentos';
-  } else {
-    return isGeometricExtension(recurso.extent) ? 'Capa geográfica' : 'Datos tabulados';
-  }
-}
-
-function updateResources(nuevosRecursos) {
-  filteredResources.value = nuevosRecursos;
-  // obteniendo datos por las props de la tabla
-  // TODO: enviar solo los recursos que son candidatos a publicarse
-  tableResources.value = filteredResources.value
-    .filter((resource) => resource.owner.email === userEmail)
-    .map((d) => ({
-      pk: d.pk,
-      titulo: d.title,
-      tipo_recurso: tipoRecurso(d),
-      categoria: d.category,
-      actualizacion: d.last_updated,
-      acciones: 'Editar, Ver, Descargar, Remover',
-      uuid: d.uuid,
-      resource_type: d.resource_type,
-      recurso_completo: d,
-    }));
-}
-
-function applyAdvancedFilter() {
-  isFilterActive.value = true;
-  modalFiltroAvanzado.value.cerrarModalBusqueda();
-  updateResources(storeFilters.filter('all'));
-}
-function resetAdvancedFilter() {
-  isFilterActive.value = false;
-  storeFilters.resetFilters();
-  modalFiltroAvanzado.value.cerrarModalBusqueda();
-  updateResources(storeFilters.filter('all'));
-}
-
-watch([recursos, inputSearch], () => {
-  updateResources(storeFilters.filter('all'));
-});
-
-watch(seleccionOrden, (nv) => {
-  storeFilters.updateFilter('sort', nv);
-  updateResources(storeFilters.filter('all'));
-});
-watch(seleccionTipoArchivo, (nv) => {
-  storeFilters.filters.resourceType = nv;
-  updateResources(storeFilters.filter('all'));
-});
+  { deep: true }
+);
 
 onMounted(async () => {
+  await storeCatalogo.getUserInfo();
   storeFilters.resetAll();
-  if (recursos.value.length !== 0) {
-    updateResources(recursos.value);
-  }
-}); */
+  storeFilters.buildQueryParams('all');
+  storeResources.getMyTotal('disponibles', params.value);
+  storeResources.getMyTotal('pendientes', params.value);
+  //storeResources.getMyTotal('publicacion', params.value);
+  //fetchNewData();
+});
 </script>
 
 <template>
@@ -264,18 +145,20 @@ onMounted(async () => {
       <main class="contenedor m-b-10 m-t-3">
         <!--Controles de filtros-->
         <div class="flex">
-          <div class="columna-4">
+          <!--class="columna-4"-->
+          <div class="columna-7">
             <ClientOnly>
-              <SisdaiSelector v-model="seleccionTipoArchivo" etiqueta="Tipo de archivo">
-                <option value="todes">Todos los archivos</option>
-                <option value="capas">Capas geográficas</option>
-                <option value="tablas">Datos tabulados</option>
-                <option value="documentos">Documentos</option>
-                <option value="remotas">Remotas</option>
+              <SisdaiSelector v-model="seleccionTipoArchivo" etiqueta="Estatus">
+                <option value="all">Todos los estatus</option>
+                <option value="on_review">En revisión</option>
+                <option value="published">Aceptados</option>
+                <option value="pending">Pendientes</option>
+                <option value="rejected">No Aceptados</option>
               </SisdaiSelector>
             </ClientOnly>
           </div>
-          <div class="columna-4">
+          <!--class="columna-4"-->
+          <div class="columna-7">
             <ClientOnly>
               <SisdaiSelector v-model="seleccionOrden" etiqueta="Ordenar por">
                 <option value="titulo">Título</option>
@@ -287,7 +170,8 @@ onMounted(async () => {
           </div>
           <div class="columna-8">
             <div class="flex flex-contenido-separado">
-              <div class="columna-14">
+              <!--Campo de busqueda-->
+              <!-- <div class="columna-14">
                 <ClientOnly>
                   <label for="idunicobusquedamisarchivos"> Campo de búsqueda </label>
                   <form class="campo-busqueda" style="height: 40px" @submit.prevent>
@@ -318,8 +202,9 @@ onMounted(async () => {
                     </button>
                   </form>
                 </ClientOnly>
-              </div>
-              <div class="columna-2 flex-vertical-final">
+              </div> -->
+              <!--Busqueda avanzada-->
+              <!-- <div class="columna-2 flex-vertical-final">
                 <button
                   :class="
                     isFilterActive
@@ -332,7 +217,7 @@ onMounted(async () => {
                 >
                   <span class="pictograma-filtro" aria-hidden="true" />
                 </button>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
@@ -343,33 +228,50 @@ onMounted(async () => {
             {
               texto: 'Metadatos pendientes',
               ruta: '/catalogo/mis-archivos/metadatos-pendientes',
-              notificacion: true,
+              notificacion: hayMetaPendiente,
             },
             {
               texto: 'Solicitudes de publicación',
               ruta: '/catalogo/mis-archivos/solicitudes-publicacion',
-              notificacion: true,
+              notificacion: totalResources > 0,
             },
           ]"
         />
 
         <div class="flex">
-          <p
+          <!-- <p
             class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-2 p-2 m-0"
           >
             Si el estatus de tu publicación aparece como <i>No aceptada</i>, revisa tu correo
             electrónico donde encontrarás los motivos del rechazo y las indicaciones para realizar
             las correciones necesarias.
-          </p>
+          </p> -->
           <h2>Solicitudes de publicación</h2>
-          <UiNumeroElementos :numero="tableResources2.length" />
+          <UiNumeroElementos :numero="totalResources" />
         </div>
         <p>
           En esta tabla se muestran los archivos enviados para revisión antes de publicarse en el
           catálogo público de SIGIC. También puedes consultar el estatus de su aprobación.
         </p>
 
-        <div v-if="totalResources === 0">
+        <div v-if="isLoading" class="flex flex-contenido-centrado m-t-3">
+          <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
+        </div>
+
+        <div v-if="totalResources > 0 && !isLoading" class="flex">
+          <div class="columna-16">
+            <ClientOnly>
+              <UiTablaAccesibleV2 :variables="variables" :datos="tableResources" />
+              <UiPaginador
+                :pagina-parent="paginaActual"
+                :total-paginas="totalPags"
+                @cambio="paginaActual = $event"
+              />
+            </ClientOnly>
+          </div>
+        </div>
+
+        <div v-if="totalResources === 0 && !isLoading">
           <div class="flex flex-contenido-centrado">
             <div class="columna-7">
               <div class="fondo-color-acento borde-redondeado-8 p-x-3 p-y-1 m-b-3">
@@ -387,28 +289,14 @@ onMounted(async () => {
             </div>
           </div>
         </div>
-
-        <div v-else class="flex">
-          <div class="columna-16">
-            <!-- TODO: implementar paginador -->
-            <ClientOnly>
-              <UiTablaAccesibleV2 :variables="variables" :datos="tableResources2" />
-              <UiPaginador
-                :pagina-parent="paginaActual"
-                :total-paginas="totalPags"
-                @cambio="paginaActual = $event"
-              />
-            </ClientOnly>
-          </div>
-        </div>
       </main>
 
       <!-- Modal Búsqueda avanzada -->
-      <ConsultaModalBusqueda
+      <!-- <ConsultaModalBusqueda
         ref="modalFiltroAvanzado"
         @apply-filter="console.log('applyAdvancedFilter')"
         @reset-filter="console.log('resetAdvancedFilter')"
-      />
+      /> -->
     </template>
   </UiLayoutPaneles>
 </template>

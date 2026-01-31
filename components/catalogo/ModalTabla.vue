@@ -1,0 +1,89 @@
+<script setup>
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+
+const emit = defineEmits(['notifyDownload']);
+const props = defineProps({
+  selectedElement: {
+    type: Object,
+    default: () => ({}),
+  },
+});
+
+const modalTabla = ref(null);
+const paginaActual = ref(0);
+const tamanioPagina = 6;
+const {
+  variables,
+  datos,
+  totalFeatures,
+  refetch: fetchTable,
+} = useGeoserverDataTable({
+  paginaActual: paginaActual.value,
+  tamanioPagina: tamanioPagina,
+  resource: props.selectedElement,
+});
+
+function abrirModalTabla() {
+  modalTabla.value?.abrirModal();
+}
+
+defineExpose({
+  abrirModalTabla,
+});
+
+watch([paginaActual], () => {
+  fetchTable({
+    paginaActual: paginaActual.value,
+    tamanioPagina: tamanioPagina,
+    resource: props.selectedElement,
+  });
+});
+</script>
+
+<template>
+  <ClientOnly>
+    <SisdaiModal id="modal-tabla" ref="modalTabla">
+      <template #encabezado>
+        <h1>{{ props.selectedElement.title }}</h1>
+      </template>
+
+      <template #cuerpo>
+        <div class="contenedor-tabla">
+          <UiPaginador
+            :pagina-parent="paginaActual"
+            :total-paginas="Math.ceil(totalFeatures / tamanioPagina)"
+            @cambio="paginaActual = $event"
+          />
+          <UiTablaAccesible :variables="variables" :datos="datos" />
+        </div>
+      </template>
+
+      <template v-if="props.selectedElement.sourcetype !== 'REMOTE'" #pie>
+        <button
+          type="button"
+          aria-label="Descargar"
+          class="boton-primario boton-grande ancho"
+          @click="emit('notifyDownload')"
+        >
+          Descarga Archivo
+          <span aria-hidden="true" class="pictograma-archivo-descargar pictograma-grande"></span>
+        </button>
+      </template>
+    </SisdaiModal>
+  </ClientOnly>
+</template>
+
+<style lang="scss" scoped>
+#modal-tabla {
+  max-width: 40%;
+  margin-top: 64px;
+}
+.contenedor-tabla {
+  overflow-y: auto;
+}
+.ancho {
+  width: 50%;
+  display: flex;
+  justify-content: center; /* horizontal center */
+}
+</style>

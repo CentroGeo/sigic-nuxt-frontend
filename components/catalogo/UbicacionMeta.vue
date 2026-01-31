@@ -174,15 +174,7 @@ const dictIdiomas = [
   { zha: 'Zhuang' },
   { zul: 'Zulu' },
 ];
-/* const dictLicencia = [
-  { 1: 'Not Specified' },
-  { 2: 'Varied / Original' },
-  { 3: 'Varied / Derived' },
-  { 4: 'Public Domain' },
-  { 5: 'Public Domain / USG' },
-  { 6: 'Open Data Commons Open Database License / OSM' },
-  { 7: 'NextView' },
-]; */
+
 const dictLicencia = [
   { not_specified: 'Not Specified' },
   { varied_original: 'Varied / Original' },
@@ -192,30 +184,6 @@ const dictLicencia = [
   { odbl: 'Open Data Commons Open Database License / OSM' },
   { nextview: 'NextView' },
 ];
-/* const dictRestricciones = [
-  {
-    1: 'exclusive right to the publication, production, or sale of the rights to a literary, dramatic, musical, or artistic work, or to the use of a commercial print or label, granted by law for a specified period of time to an author, composer, artist, distributor',
-  },
-  {
-    2: 'government has granted exclusive right to make, sell, use or license an invention or discovery',
-  },
-  {
-    3: 'produced or sold information awaiting a patent',
-  },
-  {
-    4: 'a name, symbol, or other device identifying a product, officially registered and legally restricted to the use of the owner or manufacturer',
-  },
-  { 5: 'formal permission to do something' },
-  {
-    6: 'rights to financial benefit from and control of distribution of non-tangible property that is a result of creativity',
-  },
-  {
-    7: 'withheld from general circulation or disclosure',
-  },
-  {
-    8: 'otherRestrictions',
-  },
-]; */
 
 const dictRestricciones = [
   {
@@ -245,32 +213,6 @@ const dictRestricciones = [
     otherRestrictions: 'otherRestrictions',
   },
 ];
-/* watch(
-  () => storeMetadatos.metadata,
-  (nv) => {
-    console.log('nv', nv);
-  },
-  { deep: true }
-); */
-// function editarMetadatos(dato, valor) {
-//   storeCatalogo.metadatos[dato] = valor;
-//   // console.log(storeCatalogo.metadatos[dato]);
-// }
-// watch(
-//   [
-//     seleccionIdioma,
-//     seleccionLicencia,
-//     campoAtribucion,
-//     seleccionRegiones,
-//     campoEstadoCalidadDatos,
-//     seleccionRestricciones,
-//     campoOtrasRestricciones,
-//   ],
-//   (nv) => {
-//     // console.log('nv', nv);
-//     // actualizar datos en el store
-//   }
-// );
 </script>
 <template>
   <div>
@@ -279,13 +221,14 @@ const dictRestricciones = [
       :title="'Ubicación y Licencias'"
       :exclude-links="props.isModal"
     />
+    <p class="m-t-2 m-b-0">* Campos obligatorios</p>
 
     <!-- Formulario -->
     <div class="m-t-3">
       <div class="flex">
         <div class="columna-8">
           <ClientOnly>
-            <SisdaiSelector v-model="seleccionIdioma" etiqueta="Idioma">
+            <SisdaiSelector v-model="seleccionIdioma" etiqueta="Idioma*">
               <option
                 v-for="value in dictIdiomas"
                 :key="Object.keys(value)"
@@ -298,7 +241,7 @@ const dictRestricciones = [
         </div>
         <div class="columna-8">
           <ClientOnly>
-            <SisdaiSelector v-model="seleccionLicencia" etiqueta="Licencia">
+            <SisdaiSelector v-model="seleccionLicencia" etiqueta="Licencia*">
               <!--<option value="">---------</option> -->
               <option
                 v-for="value in dictLicencia"
@@ -314,29 +257,24 @@ const dictRestricciones = [
           <ClientOnly>
             <SisdaiCampoBase
               v-model="campoAtribucion"
-              etiqueta="Atribución"
+              etiqueta="Autores o Institución*"
               ejemplo="Autoridad o función otorgada, ej. gobernante, delegada/o, o similar"
               tipo="text"
               :es_etiqueta_visible="true"
             />
           </ClientOnly>
         </div>
-        <!--         <div class="columna-16">
-          <ClientOnly>
-            <SisdaiSelector v-model="seleccionRegiones" etiqueta="Regiones">
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-            </SisdaiSelector>
-          </ClientOnly>
-          <div class="texto-color-informacion fondo-color-informacion borde-redondeado-8 p-2 m-t-2">
-            <p class="m-t-0 m-b-1 texto-peso-600">
-              <span class="pictograma-informacion" /> Declaración de calidad de datos y los paneles
-              de Restricciones
+        <div class="tarjeta fondo-color-informacion texto-color-informacion">
+          <div class="tarjeta-cuerpo">
+            <p class="tarjeta-titulo texto-color-informacion">
+              <span class="pictograma-informacion"></span>Declaración de calidad de datos y los
+              paneles de Restricciones
             </p>
-            <p class="m-0">Permiten insetar código HTML a través de un editor de texto wysiwyg</p>
+            <p class="texto-color-informacion">
+              Permiten insertar código HTML a través de un editor de texto wysiwyg
+            </p>
           </div>
-        </div> -->
+        </div>
         <div class="columna-16">
           <ClientOnly>
             <SisdaiCampoBase
@@ -351,7 +289,7 @@ const dictRestricciones = [
         <div class="columna-16">
           <ClientOnly>
             <SisdaiSelector v-model="seleccionRestricciones" etiqueta="Restricciones">
-              <!--               <option value="" selected="">---------</option> -->
+              <option value="">----</option>
               <option
                 v-for="value in dictRestricciones"
                 :key="Object.keys(value)"

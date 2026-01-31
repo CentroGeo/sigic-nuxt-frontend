@@ -1,5 +1,7 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+import { onBeforeUnmount, ref } from 'vue';
+import { useRoute } from 'vue-router';
 
 const storeLevantamiento = useLevantamientoStore();
 
@@ -61,6 +63,58 @@ function handleMoverPregunta({ indice, direccion }) {
 
   preguntas.value = [...arr];
 }
+
+const route = useRoute();
+const modalFormularioGuardado = ref(null);
+
+const { data } = useAuth();
+const proyecto = ref(null);
+
+watch(
+  () => data.value?.user.email,
+  async (email) => {
+    if (!email) return;
+
+    proyecto.value = await storeLevantamiento.obtenerProyectoPorId(email, route.params.id);
+    if (proyecto.value.ficha_proyecto !== null) {
+      storeLevantamiento.esEdicionFormulario = false;
+      preguntas.value = proyecto.value.ficha_proyecto;
+      storeLevantamiento.existeFormulario = true;
+    }
+  },
+  { immediate: true }
+);
+
+let timeoutEdicion = null;
+
+const actualizarProyecto = async () => {
+  if (preguntas.value.length > 0) {
+    const payload = {
+      ficha_proyecto: preguntas.value,
+    };
+
+    await storeLevantamiento.actualizarFormularioParticipantesProyecto(payload, route.params.id);
+    modalFormularioGuardado.value.abrirModal();
+    if (timeoutEdicion) clearTimeout(timeoutEdicion);
+    timeoutEdicion = setTimeout(() => {
+      storeLevantamiento.esEdicionFormulario = false;
+      timeoutEdicion = null;
+    }, 3000);
+  }
+};
+
+const editarFormulario = () => {
+  storeLevantamiento.esEdicionFormulario = true;
+};
+
+defineExpose({
+  actualizarProyecto,
+  editarFormulario,
+});
+
+onBeforeUnmount(() => {
+  if (timeoutEdicion) clearTimeout(timeoutEdicion);
+});
 </script>
 
 <template>
@@ -84,7 +138,7 @@ function handleMoverPregunta({ indice, direccion }) {
     </div>
   </div>
 
-  <div v-else class="columna-16">
+  <div v-else-if="storeLevantamiento.esEdicionFormulario" class="columna-16">
     <div class="grid">
       <div class="columna-6 fondo-color-neutro borde-redondeado-20 p-3">
         <h6 class="m-t-0 m-b-1">Agregar pregunta</h6>
@@ -209,7 +263,60 @@ function handleMoverPregunta({ indice, direccion }) {
           </div>
         </template>
       </SisdaiModal>
+
+      <SisdaiModal id="formularioGuardadoModal" ref="modalFormularioGuardado">
+        <template #encabezado><h3>Formulario guardado</h3></template>
+        <template #cuerpo>
+          <div
+            class="fondo-color-confirmacion p-x-2 p-y-1 borde borde-color-confirmacion borde-redondeado-20"
+          >
+            <p class="texto-color-confirmacion">
+              <span class="pictograma-aprobado" />
+              Tus cambios se han guardado correctamente
+            </p>
+          </div>
+        </template>
+      </SisdaiModal>
     </ClientOnly>
+  </div>
+
+  <div v-else class="columna-16">
+    <div class="flex flex-contenido-centrado">
+      <div class="fondo-color-acento borde-redondeado-20 p-3 columna-12">
+        <div v-for="(pregunta, index) in preguntas" :key="index">
+          <levantamiento-pregunta-abierta
+            v-if="pregunta.tipo === 'abierta'"
+            :pregunta="pregunta"
+            :es-edicion="false"
+            :indice="index"
+          />
+          <levantamiento-pregunta-unica
+            v-if="pregunta.tipo === 'unica'"
+            :pregunta="pregunta"
+            :es-edicion="false"
+            :indice="index"
+          />
+          <levantamiento-pregunta-multiple
+            v-if="pregunta.tipo === 'multiple'"
+            :pregunta="pregunta"
+            :es-edicion="false"
+            :indice="index"
+          />
+          <levantamiento-pregunta-condicional
+            v-if="pregunta.tipo === 'condicional'"
+            :pregunta="pregunta"
+            :es-edicion="false"
+            :indice="index"
+          />
+          <levantamiento-pregunta-multimedia
+            v-if="pregunta.tipo === 'multimedia'"
+            :pregunta="pregunta"
+            :es-edicion="false"
+            :indice="index"
+          />
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -242,5 +349,9 @@ function handleMoverPregunta({ indice, direccion }) {
     overflow-y: auto !important;
     max-height: 60vh !important;
   }
+}
+
+dialog#formularioGuardadoModal.modal .modal-contenedor .modal-cerrar {
+  display: none;
 }
 </style>

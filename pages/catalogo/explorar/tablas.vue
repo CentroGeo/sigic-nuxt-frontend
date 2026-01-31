@@ -1,5 +1,4 @@
 <script setup>
-// TODO: Reactivar filtrado
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { cleanInput, resourceTypeDic } from '~/utils/consulta';
 
@@ -29,7 +28,6 @@ const inputSearch = computed({
 });
 
 function updateResources() {
-  //filteredResources.value = nuevosRecursos;
   // obteniendo datos por las props de la tabla
   tableResources.value = resources.value.map((d) => ({
     pk: d.pk,
@@ -91,8 +89,6 @@ watch(
 onMounted(async () => {
   storeFilters.resetAll();
   storeFilters.buildQueryParams();
-  storeResources.getTotalResources(storeConsulta.resourceType, params.value);
-  fetchNewData();
 });
 </script>
 
