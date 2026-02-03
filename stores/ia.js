@@ -431,8 +431,8 @@ export const useIAStore = defineStore('ia', {
         //formData.append('visibility', visibilidadProyecto.value);
         formData.append('public', isPublic === 'publico' ? 'True' : 'False');
 
-        console.log(archivos);
-        console.log(archivosGeonode);
+        // console.log('archivos', archivos);
+        // console.log('archivosGeonode', archivosGeonode);
 
         // Agregar archivos si existen
         archivos.forEach((archivo) => {
@@ -442,7 +442,7 @@ export const useIAStore = defineStore('ia', {
         archivosGeonode.forEach((archivo) => {
           formData.append(
             'archivos_geonode',
-            JSON.stringify({ id: archivo.pk, category: archivo.category })
+            JSON.stringify({ id: archivo.pk, category: archivo.category, nombre: archivo.nombre })
           );
         });
 
