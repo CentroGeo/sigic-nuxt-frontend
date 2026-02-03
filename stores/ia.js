@@ -54,7 +54,7 @@ export const useIAStore = defineStore('ia', {
         archivosGeonode.forEach((archivo) => {
           formData.append(
             'archivos_geonode',
-            JSON.stringify({ id: archivo.pk, category: archivo.category })
+            JSON.stringify({ id: archivo.pk, category: archivo.category, nombre: archivo.nombre })
           );
         });
 
@@ -445,6 +445,7 @@ export const useIAStore = defineStore('ia', {
             JSON.stringify({ id: archivo.pk, category: archivo.category, nombre: archivo.nombre })
           );
         });
+        console.log('formData', formData);
 
         if (archivosEliminados.length > 0) {
           archivosEliminados.forEach((element) => {
