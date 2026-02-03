@@ -3,7 +3,6 @@ import { useAuth, useRuntimeConfig } from '#imports';
 import { useCatalogoStore } from '@/stores/catalogo';
 import { reactive, ref } from 'vue';
 import { convertirBytes } from '~/utils/catalogo';
-import { wait } from '~/utils/consulta';
 
 const storeCatalogo = useCatalogoStore();
 const configEnv = useRuntimeConfig();
@@ -81,8 +80,6 @@ async function guardarArchivo(files) {
         // Se recupera la información necesaria para cada tipo de archivo
         let tipo;
         if (base_files.includes('.' + file.name.split('.').slice(-1)[0])) {
-          await wait(5000);
-
           const request_geonode = await gnoxyFetch(
             `${configEnv.public.geonodeUrl}/api/v2/datasets/${archivo.IdRutaArchivo}`
           );
