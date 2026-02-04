@@ -131,6 +131,7 @@ watch(
               : 'Cuando crees un proyecto, aparecerá en esta sección.'
           }}
         </p>
+        {{ idSeleccionado }}
         <ul class="lista-chats lista-sin-estilo">
           <li
             v-for="proyecto in catalogoFiltrado"
@@ -141,7 +142,7 @@ watch(
             <div
               class="proyecto p-l-4 p-r-2 p-y-1"
               :class="{
-                seleccionado: proyecto.id === idSeleccionado,
+                seleccionado: proyecto.id === idSeleccionado || proyecto.title === '',
               }"
             >
               <div class="proyecto-titulo m-b-1">{{ proyecto.title }}</div>

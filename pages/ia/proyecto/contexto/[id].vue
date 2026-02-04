@@ -153,7 +153,6 @@ const loadSources = async () => {
   //Consulta fuentes
   console.log(proyectoId.value);
   arraySources.value = await storeIA.getProjectSources(proyectoId.value);
-  // console.log('arraySources.value', arraySources.value);
 
   // Limpiar selecciones al cambiar de proyecto
   fuentesSeleccionadas.value = [];
@@ -432,7 +431,6 @@ onBeforeUnmount(() => {
                         class="texto-centrado fondo-color-acento p-1 m-0 texto-color-acento borde borde-redondeado-12"
                         style="width: max-content"
                       >
-                        <!-- fix: esta es cuando ya están arriba en propio -->
                         <span v-if="fuente.geonode_category === 'Documento'">
                           <!-- propio -->
                           <span class="pictograma-documento" />{{ fuente.geonode_category }}s

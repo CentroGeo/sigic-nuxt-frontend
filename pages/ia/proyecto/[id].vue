@@ -120,7 +120,6 @@ function cargarArchivosGeonode() {
 
   archivosGeonode.value = [...archivosGeonode.value, ...nuevosArchivos];
   archivosTabla.value = [...archivosSeleccionados.value, ...archivosGeonode.value];
-  // console.log('archivosTabla.value', archivosTabla.value);
 }
 
 const recursosCargando = ref(false);
@@ -314,7 +313,10 @@ const editarProyecto = async () => {
 
     loaderModal.value?.cerrarModal();
 
+    // navigateTo(`/ia/proyectos/${route.params.id}`);
+    console.log('acá');
     navigateTo('/ia/proyectos');
+    storeIA.proyectoSeleccionado = { id: route.params.id };
   } catch (error) {
     console.error('Error al actualizar: ' + error.message);
   }
@@ -499,7 +501,6 @@ async function siguenteAgregar() {
                         class="texto-centrado fondo-color-acento p-1 m-0 texto-color-acento borde borde-redondeado-12"
                         style="width: max-content"
                       >
-                        <!-- fix: al entrar en configurar proyecto en propio -->
                         <span v-if="archivo.category === 'Documento'">
                           <!-- propio -->
                           <span class="pictograma-documento" />{{ archivo.category }}s
@@ -709,7 +710,6 @@ async function siguenteAgregar() {
                           alt="Loader de SIGIC"
                           height="64px"
                         />
-                        <!-- <figcaption class="">{ { loaderMsg } }</figcaption> -->
                       </figure>
                     </ul>
                   </div>
@@ -742,17 +742,6 @@ async function siguenteAgregar() {
                           <div class="m-b-1">
                             {{ categoriesDict[recurso.category.gn_description]?.inSpanish }}
                           </div>
-                          <!-- <div v-if="resourceType === 'dataLayer'" class="icono">
-                            <span
-                              class="m-r-1"
-                              :class="[
-                                geomDict[recurso.geomType].class,
-                                'pictograma-mediano picto',
-                              ]"
-                              aria-hidden="true"
-                            />
-                            <span>{{ geomDict[recurso.geomType].tooltipText }}</span>
-                          </div> -->
                           <div class="icono">
                             <span
                               v-globo-informacion:derecha="recurso.raw_abstract"

@@ -21,7 +21,6 @@ const loadSources = async () => {
 
   //Consulta fuentes
   arraySources.value = await storeIA.getProjectSources(proyecto.value['id']);
-  // console.log('arraySources.value', arraySources.value);
 
   //catalogo.value = arrayProjects;
   //catalogoFiltrado.value = arrayProjects;
@@ -321,7 +320,6 @@ const handleDelete = async () => {
                       class="texto-centrado fondo-color-acento p-1 m-0 texto-color-acento borde borde-redondeado-12"
                       style="width: max-content"
                     >
-                      <!-- fix: esta es cuando ya están arriba en propio -->
                       <span v-if="archivo.geonode_category === 'Documento'">
                         <!-- propio -->
                         <span class="pictograma-documento" />{{ archivo.geonode_category }}s

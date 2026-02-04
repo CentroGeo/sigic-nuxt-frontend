@@ -186,6 +186,7 @@ export const useIAStore = defineStore('ia', {
       this.proyectos = data;
 
       if (data.length > 0) {
+        // this.proyectoSeleccionado = data[0];
         this.proyectoSeleccionado = data[data.length - 1];
         this.existenProyectos = true;
       } else {
@@ -445,7 +446,7 @@ export const useIAStore = defineStore('ia', {
             JSON.stringify({ id: archivo.pk, category: archivo.category, nombre: archivo.nombre })
           );
         });
-        console.log('formData', formData);
+        // console.log('formData', formData);
 
         if (archivosEliminados.length > 0) {
           archivosEliminados.forEach((element) => {
