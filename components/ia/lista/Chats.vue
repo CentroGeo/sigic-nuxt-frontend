@@ -305,14 +305,15 @@ watch(
           </SisdaiSelector>
         </template>
         <template #pie>
-          <nuxt-link
+          <button
             class="boton boton-primario boton-chico"
             aria-label="Iniciar chat"
             type="button"
-            :to="`/ia/chat/dinamica?context_id=${seleccionContexto}`"
+            :disabled="seleccionContexto === ''"
+            @click="router.push(`/ia/chat/dinamica?context_id=${seleccionContexto}`)"
           >
             Iniciar chat
-          </nuxt-link>
+          </button>
         </template>
       </SisdaiModal>
 
