@@ -7,115 +7,169 @@ Tecnologías requeridas:
 - [node.js](https://nodejs.org/) versión 22 o superior
 - [npm](https://www.npmjs.com/) versión 10 o superior
 
-## Nuxt Minimal Starter
+### Principales dependencias
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+El front-end de este proyecto está hecho con [Nuxt](https://nuxt.com/docs/getting-started/introduction) y como sistema de diseño usa el [SISDAI](https://sisdai.conahcyt.mx/).
 
-### Setup
+Para consultar más información de SISDAI y su estado actual se recomienda revisar los repositorios:
 
-Make sure to install dependencies:
+- [sisdai-mapas](https://github.com/CentroGeo/sisdai-mapas)
+- [sisdai-componentes](https://github.com/CentroGeo/sisdai-componentes)
+- [sisdai-css](https://github.com/CentroGeo/sisdai-css)
+- [sisdai-graficas](https://github.com/CentroGeo/sisdai-graficas)
+
+### Configuración
+
+Instalación de dependencias:
 
 ```bash
 # npm
 npm install
 
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
 ```
 
-### Development Server
+### Levantar en servidor local
 
-Start the development server on `http://localhost:3000`:
+Levantar el proyecto en un servidor local `http://localhost:3000`:
 
 ```bash
 # npm
 npm run dev
 
-# pnpm
-pnpm dev
 
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
-### Production
+### Compilar para producción
 
-Build the application for production:
+Para generar el código para producción:
 
 ```bash
 # npm
 npm run build
 
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
 ```
 
-Locally preview production build:
+Vista previa del proyecto en producción
 
 ```bash
 # npm
 npm run preview
 
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
 ```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+### Reinstalar dependencias
 
-## Licencia
+```bash
+# borra el package-lock.json, la carpeta node_modules y vuelve a instalar todas las dependencias
+npm run reinstall
+```
+
+###  Estructura del proyecto
+
+Uno de los beneficios de Nuxt es que la estructura de navegación de la aplicación web se genera a partir de la estructura que se le den a las vistas en la carpeta `pages`. La estructura es la siguiente:
+
+```bash
+.
+├── catalogo  # Este módulo permite cargar documentos, editar metadatos y previsualizarlos
+│   ├── cargar-archivos.vue
+│   ├── explorar
+│   │   ├── capas.vue
+│   │   ├── catalogos-externos.vue
+│   │   ├── documentos.vue
+│   │   ├── index.vue
+│   │   └── tablas.vue
+│   ├── mis-archivos
+│   │   ├── editar
+│   │   │   ├── AtributosConjunto.vue
+│   │   │   ├── estilo.vue
+│   │   │   ├── MetadatosBasicos.vue
+│   │   │   ├── MetadatosOpcionales.vue
+│   │   │   └── UbicacionLicencias.vue
+│   │   ├── index.vue
+│   │   ├── metadatos-pendientes.vue
+│   │   ├── solicitudes-publicacion.vue
+│   │   └── unir-vectores.vue
+│   ├── revision-solicitudes
+│   │   ├── aceptadas.vue
+│   │   ├── index.vue
+│   │   ├── mis-revisiones.vue
+│   │   ├── no-aceptadas.vue
+│   │   ├── pendientes-revisor.vue
+│   │   └── revisar
+│   │       └── [id].vue
+│   └── servicios-remotos
+│       ├── [id].vue
+│       ├── agregar.vue
+│       ├── cargados.vue
+│       ├── importar.vue
+│       └── index.vue
+├── catalogo.vue
+├── consulta # Este módulo permite visualizar los archivos publicos y cargados por la persona usuaria
+│   ├── capas.vue
+│   ├── documentos.vue
+│   └── tablas.vue
+├── consulta.vue
+├── ia # Módulo para crear proyectos y chats de IA
+│   ├── chat
+│   │   └── dinamica.vue
+│   ├── chats.vue
+│   ├── proyecto
+│   │   ├── [id].vue
+│   │   └── contexto
+│   │       └── [id].vue
+│   └── proyectos.vue
+├── ia.vue
+├── index.vue # Página de inicio del proyecto
+├── levantamiento # Módulo para levantar datos geoespaciales
+│   ├── aportes
+│   │   ├── editar
+│   │   │   └── [id].vue
+│   │   ├── en-revision.vue
+│   │   ├── index.vue
+│   │   ├── por-enviar.vue
+│   │   ├── por-modificar.vue
+│   │   └── rechazados.vue
+│   ├── descargas
+│   │   ├── index.vue
+│   │   ├── rechazadas
+│   │   │   └── index.vue
+│   │   └── revision
+│   │       └── index.vue
+│   └── proyectos
+│       ├── index.vue
+│       ├── mis-proyectos
+│       │   ├── [id]
+│       │   │   ├── formulario.vue
+│       │   │   ├── index.vue
+│       │   │   ├── informacion-general.vue
+│       │   │   └── participantes-permisos.vue
+│       │   └── index.vue
+│       ├── proyecto
+│       │   └── [id].vue
+│       └── proyectos-compartidos.vue
+├── levantamiento.vue
+├── mi-cuenta # Módulo para ver y modificar datos de la cuenta
+│   ├── informacion-personal.vue
+│   ├── produccion-colaboraciones.vue
+│   └── seguridad.vue
+└── mi-cuenta.vue
+
+```
 
 ## Variables de entorno (.env)
 
 Las variables que debe incluir el archivo .env deben ser nombradas como sigue
 
 ```bash
-# Api del geonode fuente del catálogo
-NUXT_PUBLIC_GEONODE_API = https://geonode.dev.geoint.mx/api/v2
-# Url del geonode fuente del catálogo
-NUXT_PUBLIC_GEONODE_URL = https://geonode.dev.geoint.mx
-# Url del geoserver fuente de capas geográficas
-NUXT_PUBLIC_GEOSERVER_URL = https://geonode.dev.geoint.mx/geoserver
 
-# ID del cliente de autenticación
-KEYCLOAK_CLIENT_ID = <Id client>
-KEYCLOAK_ISSUER = https://iam.dev.geoint.mx/realms/sigic
-# Clave secreta del servicio de autenticación
-KEYCLOAK_CLIENT_SECRET = <Clave secreta>
-NUXT_AUTH_SECRET = <clave alfanumérica definida por la persona desarrolladora>
-NUXT_PUBLIC_IA_BACKEND_URL = https://sigic.ia.dev.geoint.mx/
-
-```
-
-Para el despliegue en producción se debe hacer un archivo `.env.production`
-
-```bash
 # Api del geonode fuente del catálogo
 NUXT_PUBLIC_GEONODE_API = <geonode api de producción>
 # Url del geonode fuente del catálogo
 NUXT_PUBLIC_GEONODE_URL = <geonode url de producción>
 # Url del geoserver fuente de capas geográficas
 NUXT_PUBLIC_GEOSERVER_URL = <geoserver url de producción>
+# URL de autenticación
+NUXT_PUBLIC_AUTH_BASE_URL=http://localhost:3000/api/auth
 
 # ID del cliente de autenticación
 KEYCLOAK_CLIENT_ID = <Id client>
@@ -125,8 +179,24 @@ KEYCLOAK_CLIENT_SECRET = <Clave secreta>
 NUXT_AUTH_SECRET = <clave alfanumérica>
 # Url del proyecto sigic
 NUXT_PUBLIC_BASE_URL = <sigic url de producción>
+# URL del backend de IA
 NUXT_PUBLIC_IA_BACKEND_URL = <ulr del back de IA>
 
+# URL del backend de Levantamiento
+NUXT_PUBLIC_LEVANTAMIENTO_URL = <ulr del back de levantamiento>
+
+
+# Indica la ruta base del proyecto
+NUXT_PUBLIC_APP_BASE_PATH=/
+
+# Las siguientes variables habilitan o desahbilitan las vistas de
+# autenticación, catálogo, consulta, IA y levantamiento
+NUXT_PUBLIC_ENABLE_AUTH = true
+NUXT_PUBLIC_ENABLE_CATALOGO_VISTA = true
+NUXT_PUBLIC_ENABLE_CATALOGO_CARGA = true
+NUXT_PUBLIC_ENABLE_CONSULTA = true
+NUXT_PUBLIC_ENABLE_IAA = true
+NUXT_PUBLIC_ENABLE_LEVANTAMIENTO = true
 ```
 
 ##  Cómo contribuir al SIGIC
