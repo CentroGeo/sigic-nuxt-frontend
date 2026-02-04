@@ -12,6 +12,8 @@ const metaDescription =
   'Sistema Integral de Gestión de Información Científica. Integra, visualiza y aprovecha el conocimiento científico de México.';
 
 export default defineNuxtConfig({
+  ssr: true,
+
   app: {
     baseURL: appBasePath,
     head: {
@@ -54,6 +56,8 @@ export default defineNuxtConfig({
 
   nitro: {
     baseURL: appBasePath,
+    preset: 'node-server',
+    compressPublicAssets: false,
   },
 
   modules: [
