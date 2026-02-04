@@ -131,7 +131,6 @@ watch(
               : 'Cuando crees un proyecto, aparecerá en esta sección.'
           }}
         </p>
-        {{ idSeleccionado }}
         <ul class="lista-chats lista-sin-estilo">
           <li
             v-for="proyecto in catalogoFiltrado"
