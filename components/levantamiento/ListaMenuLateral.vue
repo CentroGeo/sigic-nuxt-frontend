@@ -1,5 +1,11 @@
 <script setup>
 const route = useRoute();
+const { data } = useAuth();
+const storeLevantamiento = useLevantamientoStore();
+
+onMounted(async () => {
+  await storeLevantamiento.obtenerEsRevisor(data.value?.user.email);
+});
 </script>
 <template>
   <nav class="menu-lateral">
@@ -39,6 +45,21 @@ const route = useRoute();
           >
         </li>
       </ul>
+      <ul
+        v-if="storeLevantamiento.esRevisor"
+        class="lista-subpagina"
+        :class="{ revisor: storeLevantamiento.esRevisor }"
+      >
+        <li>
+          <nuxt-link to="/levantamiento/revision-proyectos">Revisión de proyectos</nuxt-link>
+        </li>
+        <li>
+          <nuxt-link to="/levantamiento/revision-aportes">Revisión de aportes</nuxt-link>
+        </li>
+        <li>
+          <nuxt-link to="/levantamiento/revision-descargas">Revisión de descargar</nuxt-link>
+        </li>
+      </ul>
     </div>
   </nav>
 </template>
@@ -46,5 +67,9 @@ const route = useRoute();
 <style lang="scss" scoped>
 .menu-lateral .menu-lateral-contenedor {
   padding: 0;
+
+  .lista-subpagina.revisor {
+    margin-top: 32px;
+  }
 }
 </style>
