@@ -185,7 +185,7 @@ export function findServer(resource) {
 /**
  * Construye la url para solicitar info de un recurso
  * @param {Object} resource
- * @returns
+ * @returns {String>}
  */
 export function buildArcgisLayerRequest(resource) {
   const restObject = resource.links.find((link) => link.url.toLowerCase().includes('arcgis'));
@@ -204,7 +204,7 @@ export function buildArcgisLayerRequest(resource) {
  * @param {Object} resource Es el recurso del que se desea obtener más informacion
  * @param {String} service Se relaciona con el uso que se le dará a la informacion.
  * Puede ser map, table o geometry
- * @returns {Boolean}
+ * @returns {Promise<Boolean>}
  */
 export async function hasWFS(resource, service) {
   const { gnoxyFetch } = useGnoxyUrl();
@@ -249,25 +249,29 @@ export async function hasWFS(resource, service) {
  * Esta funcion revisa si el servidor de arcgis que aloja un servicio remoto
  * permite consultar la tabla de atributos
  * @param {Object} resource
- * @returns
+ * @returns {Promise<Boolean>}
  */
 
 export async function hasFeatureServer(resource) {
   const { gnoxyFetch } = useGnoxyUrl();
   let hasFeatureService;
-  const url = await buildArcgisLayerRequest(resource);
+  const url = buildArcgisLayerRequest(resource);
   if (url.includes('ImageServer')) {
     hasFeatureService = false;
   } else {
     const base = url.split('/services/')[0];
     const nameSpace = url.split('/services/')[1].split('/')[0];
     const serviceUrl = `${base}/services/?f=pjson`;
-    const res = await gnoxyFetch(serviceUrl);
-    const data = await res.json();
-    const linkedServices = data.services.filter((d) => d.name === nameSpace);
-    if (linkedServices.map((d) => d.type).includes('FeatureServer')) {
-      hasFeatureService = true;
-    } else {
+    try {
+      const res = await gnoxyFetch(serviceUrl);
+      const data = await res.json();
+      const linkedServices = data.services.filter((d) => d.name === nameSpace);
+      if (linkedServices.map((d) => d.type).includes('FeatureServer')) {
+        hasFeatureService = true;
+      } else {
+        hasFeatureService = false;
+      }
+    } catch {
       hasFeatureService = false;
     }
   }
@@ -277,7 +281,7 @@ export async function hasFeatureServer(resource) {
  * Consulta al servidor WMS que aloja un recurso remoto o de tipo vectorail para
  * obtener el tipo de geometria del mismo
  * @param {Object} resource
- * @returns {String}
+ * @returns {Promise<string>}
  */
 export async function fetchGeometryWMS(resource) {
   const { gnoxyFetch } = useGnoxyUrl();
@@ -318,18 +322,18 @@ export async function fetchGeometryWMS(resource) {
 }
 
 /**
- * Consulta al servidor ArcGis que aloja un recurso remoto o de tipo vectorail para
+ * Consulta al servidor ArcGis que aloja un recurso remoto o de tipo vectorial para
  * obtener el tipo de geometria del mismo
  * @param {Object} resource
  * @returns {String}
  * @param {*} resource
- * @returns
+ * @returns {Promise<String>}
  */
 export async function fetchGeometryArcgis(resource) {
   const { gnoxyFetch } = useGnoxyUrl();
   const maxAttempts = 5;
-  const url = await buildArcgisLayerRequest(resource);
-  await hasFeatureServer(resource);
+  const url = buildArcgisLayerRequest(resource);
+  //await hasFeatureServer(resource);
 
   if (url.includes('ImageServer')) {
     return 'Raster';
@@ -357,7 +361,7 @@ export async function fetchGeometryArcgis(resource) {
  * Define el tipo de geometría de un archivo de tipo dataset
  * sin importar si es remoto o local, raster o vectoria
  * @param {Object} resource
- * @returns
+ * @returns {Promise<string>}
  */
 export async function defineGeomType(resource) {
   let geomType;
@@ -388,7 +392,7 @@ export async function defineGeomType(resource) {
  * para obtener una lista de estilos y un estilo por default
  * para capas que viven en servidores externos
  * @param {Object} resource
- * @returns { String, Array }
+ * @returns {Promise<String, Array>}
  */
 export async function fetchRemoteStyles(resource) {
   const { gnoxyFetch } = useGnoxyUrl();
@@ -495,7 +499,7 @@ export async function getSLDs(resource) {
 /**
  * Crea una url autenticada que permite visualizar documentos
  * @param {String} url
- * @returns
+ * @returns {Promise<string>}
  */
 export async function fetchDoc(url) {
   const { data } = useAuth();
@@ -565,7 +569,7 @@ export async function downloadDocs(resource) {
 /**
  * Crea un link de para descargar los metadatos de un recurso
  * @param {Object} resource
- * @returns
+ * @returns {Promise<string>}
  */
 export async function downloadMetadata(resource) {
   const { gnoxyFetch } = useGnoxyUrl();
@@ -677,7 +681,7 @@ export async function downloadWMS(resource, format, featureTypes) {
  * Las peticiones pueden ser autenticadas o no.
  * @param {Object} resource
  * @param {String} format
- * @returns
+ * @returns {Promise<Array>}
  */
 export async function getFeatures(resource) {
   const { gnoxyFetch } = useGnoxyUrl();
@@ -716,7 +720,7 @@ export async function getFeatures(resource) {
  * Las peticiones pueden ser autenticadas o no.
  * @param {Object} resource
  * @param {String} format
- * @returns
+ * @returns {Promise<string>}
  */
 
 export async function downloadNoGeometry(resource, format) {
