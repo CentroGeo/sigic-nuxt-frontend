@@ -36,6 +36,11 @@ const loaderModal = ref(null);
 const loaderTitle = ref('Guardando');
 const loaderMsg = ref('Espera mientras se cargan tus archivos');
 
+const dictCategoria = {
+  datasets: 'Datos tabulados',
+  documents: 'Documentos',
+};
+
 // Si necesitas reaccionar a cambios en el parámetro
 watch(
   () => route.query.proyecto_id,
@@ -148,8 +153,6 @@ const loadSources = async () => {
   //Consulta fuentes
   console.log(proyectoId.value);
   arraySources.value = await storeIA.getProjectSources(proyectoId.value);
-
-  // console.log(arraySources.value);
 
   // Limpiar selecciones al cambiar de proyecto
   fuentesSeleccionadas.value = [];
@@ -425,15 +428,23 @@ onBeforeUnmount(() => {
                     </td>
                     <td class="p-3 flex flex-contenido-centrado">
                       <p
-                        class="texto-centrado fondo-color-acento p-1 texto-color-acento borde borde-redondeado-12"
+                        class="texto-centrado fondo-color-acento p-1 m-0 texto-color-acento borde borde-redondeado-12"
                         style="width: max-content"
                       >
                         <span v-if="fuente.geonode_category === 'Documento'">
-                          <span class="pictograma-documento" />{{ fuente.geonode_category }}
+                          <!-- propio -->
+                          <span class="pictograma-documento" />{{ fuente.geonode_category }}s
                         </span>
-
-                        <span v-if="fuente.geonode_category === 'Tabla'">
-                          <span class="pictograma-tabla" />{{ fuente.geonode_category }}
+                        <span v-if="fuente.geonode_category === 'documents'">
+                          <!-- catalogo -->
+                          <span class="pictograma-documento" />{{
+                            dictCategoria[fuente.geonode_category]
+                          }}
+                        </span>
+                        <span v-if="fuente.geonode_category === 'datasets'">
+                          <span class="pictograma-tabla" />{{
+                            dictCategoria[fuente.geonode_category]
+                          }}
                         </span>
                       </p>
                     </td>

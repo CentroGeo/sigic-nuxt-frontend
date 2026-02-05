@@ -33,7 +33,7 @@ const loadProjectList = async () => {
   // Consulta proyectos
   arrayProjects = await storeIA.getProjectsList();
 
-  catalogo.value = arrayProjects;
+  catalogo.value = arrayProjects.reverse();
   catalogoFiltrado.value = arrayProjects;
 };
 
@@ -141,7 +141,7 @@ watch(
             <div
               class="proyecto p-l-4 p-r-2 p-y-1"
               :class="{
-                seleccionado: proyecto.id === idSeleccionado,
+                seleccionado: proyecto.id === idSeleccionado || proyecto.title === '',
               }"
             >
               <div class="proyecto-titulo m-b-1">{{ proyecto.title }}</div>
