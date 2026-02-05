@@ -54,7 +54,7 @@ export const useIAStore = defineStore('ia', {
         archivosGeonode.forEach((archivo) => {
           formData.append(
             'archivos_geonode',
-            JSON.stringify({ id: archivo.pk, category: archivo.category })
+            JSON.stringify({ id: archivo.pk, category: archivo.category, nombre: archivo.nombre })
           );
         });
 
@@ -186,7 +186,8 @@ export const useIAStore = defineStore('ia', {
       this.proyectos = data;
 
       if (data.length > 0) {
-        this.proyectoSeleccionado = data[0];
+        // this.proyectoSeleccionado = data[0];
+        this.proyectoSeleccionado = data[data.length - 1];
         this.existenProyectos = true;
       } else {
         this.proyectoSeleccionado = null;
@@ -431,8 +432,8 @@ export const useIAStore = defineStore('ia', {
         //formData.append('visibility', visibilidadProyecto.value);
         formData.append('public', isPublic === 'publico' ? 'True' : 'False');
 
-        console.log(archivos);
-        console.log(archivosGeonode);
+        // console.log('archivos', archivos);
+        // console.log('archivosGeonode', archivosGeonode);
 
         // Agregar archivos si existen
         archivos.forEach((archivo) => {
@@ -442,12 +443,15 @@ export const useIAStore = defineStore('ia', {
         archivosGeonode.forEach((archivo) => {
           formData.append(
             'archivos_geonode',
-            JSON.stringify({ id: archivo.pk, category: archivo.category })
+            JSON.stringify({ id: archivo.pk, category: archivo.category, nombre: archivo.nombre })
           );
         });
+        // console.log('formData', formData);
 
         if (archivosEliminados.length > 0) {
-          formData.append('delete_files[]', archivosEliminados);
+          archivosEliminados.forEach((element) => {
+            formData.append('delete_files[]', element);
+          });
         }
 
         // Log para depuración

@@ -7,6 +7,20 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.8.1] - 05-01-2026
+
+### Arreglado (Fix)
+
+- Se resuelve un bug que hacía que se marcara como cargado un documento antes de obtener la información necesaria para construir todos los elementos de la tarjeta.
+- Se agrega manejo de errores en la función que revisa si un servidor arcgis tiene FeatureServer.
+- Se reactiva la función de seleccionar visualizar una capa de un servidor arcgis únicamente en un lado de una capa.
+
+## [0.8.0] - 04-02-2026
+
+### Agregado (Added)
+
+- Se agrega la funcionalidad de agregar archivos desde el catálogo de geonode al módulo de IA.
+
 ## [0.7.2] - 30-01-2026
 
 ### Arreglado (Fix)
@@ -117,6 +131,8 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.8.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.8.0...v0.8.1
+[0.7.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.7.2...v0.8.0
 [0.7.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.6.1...v0.7.0

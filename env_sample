@@ -27,3 +27,4 @@ NUXT_PUBLIC_APP_BASE_PATH=/
 
 
 NUXT_PUBLIC_LEVANTAMIENTO_URL = http://localhost:4009
+NUXT_PUBLIC_IA_BACKEND_URL = https://sigic.ia.dev.geoint.mx/llmb

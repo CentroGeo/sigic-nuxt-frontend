@@ -5,16 +5,21 @@ import SisdaiBotonRadio from '@centrogeomx/sisdai-componentes/src/componentes/bo
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 
-import { buildUrl, categoriesInSpanish } from '~/utils/consulta';
+import { buildUrl, categoriesInSpanish, categoriesValues, cleanInput } from '~/utils/consulta';
 
 const config = useRuntimeConfig();
 const storeFilters = useFilteredResources();
 const storeResources = useResourcesIAStore();
 const { gnoxyFetch } = useGnoxyUrl();
 
-const resourceType = ref('dataLayer');
+const resourceType = ref('dataTable');
 const recursos = computed(() => storeResources.resources[resourceType.value]);
 const recursosSeleccionados = computed(() => storeResources.selectedResources[resourceType.value]);
+const inputSearch = computed({
+  get: () => storeFilters.filters.inputSearch,
+  set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
+});
+const mensajeAyudaBuscador = ref('');
 
 const agregaCatalogoModal = ref(null);
 const seleccionCatalogoModal = ref(null);
@@ -23,52 +28,9 @@ const dictTipoRecurso = {
   dataTable: 'tablas',
   document: 'documentos',
 };
-const geomDict = {
-  Point: { tooltipText: 'Capa de puntos', class: 'pictograma-capa-puntos' },
-  MultiPoint: {
-    tooltipText: 'Capa de puntos',
-    class: 'pictograma-capa-puntos',
-  },
-  Polygon: {
-    tooltipText: 'Capa de poligonos',
-    class: 'pictograma-capa-poligono',
-  },
-  MultiPolygon: {
-    tooltipText: 'Capa de poligonos',
-    class: 'pictograma-capa-poligono',
-  },
-  LineString: {
-    tooltipText: 'Capa de lineas',
-    class: 'pictograma-capa-lineas',
-  },
-  LinearRing: {
-    tooltipText: 'Capa de lineas',
-    class: 'pictograma-capa-lineas',
-  },
-  MultiLineString: {
-    tooltipText: 'Capa de lineas',
-    class: 'pictograma-capa-lineas',
-  },
-  GeometryCollection: {
-    tooltipText: 'Colección de geometrías',
-    class: 'pictograma-capa-poligono',
-  },
-  Raster: {
-    tooltipText: 'Raster',
-    class: 'pictograma-capas',
-  },
-  Otro: {
-    tooltipText: 'Indefinido',
-    class: 'pictograma-flkt',
-  },
-  Remoto: {
-    tooltipText: 'Capa remota',
-    class: 'pictograma-colaborar',
-  },
-  Error: {
-    tooltipText: 'No se pudo recuperar la información',
-    class: 'pictograma-alerta',
-  },
+const dictCategoria = {
+  datasets: 'Datos tabulados',
+  documents: 'Documentos',
 };
 
 const archivosSeleccionados = ref([]);
@@ -86,6 +48,8 @@ const nthElement = 1;
 async function fetchTotalByCategory(category) {
   const preParams = params.value;
   preParams['filter{category.identifier.in}'] = category;
+  preParams['filter{complete_metadata}'] = 'true';
+  preParams['filter{is_published}'] = 'true';
   const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, preParams);
   const request = await gnoxyFetch(url.toString());
   const res = await request.json();
@@ -131,10 +95,14 @@ async function callResources(categoria) {
 }
 
 async function fetchNewData() {
-  await callResources(categoriaSeleccionada.value);
-  storeResources.setNthElements(resourceType.value, [
-    recursos.value[recursos.value.length - nthElement].pk,
-  ]);
+  if (totalCategoria.value > recursos.value.length) {
+    categoriesDict.value[categoriaSeleccionada.value].isLoading = true;
+    await callResources(categoriaSeleccionada.value);
+    storeResources.setNthElements(resourceType.value, [
+      recursos.value[recursos.value.length - nthElement]?.pk,
+    ]);
+    categoriesDict.value[categoriaSeleccionada.value].isLoading = false;
+  }
 }
 
 function cargarArchivosGeonode() {
@@ -143,57 +111,41 @@ function cargarArchivosGeonode() {
   const nuevosArchivos = recursosSeleccionados.value.map((file) => ({
     id: Math.floor(Math.random() * 1000000000000000000000),
     nombre: file.title,
-    tipo: obtenerTipoArchivo(file.title),
-    // archivo: file, // Objeto File original
+    tipo: file.resource_type === 'dataset' ? 'CSV' : obtenerTipoArchivo(file.title),
     archivo: null,
-    categoria:
-      resourceType.value === 'document'
-        ? 'Documento'
-        : resourceType.value === 'dataLayer'
-          ? 'Capa'
-          : 'Tabla',
     origen: 'Catálogo',
-    download_url: file.download_url,
-    embed_url: file.embed_url,
     pk: file.pk,
-    uuid: file.uuid,
-    category:
-      resourceType.value === 'document'
-        ? 'Documento'
-        : resourceType.value === 'dataLayer'
-          ? 'Capa'
-          : 'Tabla',
-    alternate: file.alternate,
-    links_csv: file.links.filter((d) => d.extension === 'csv'), // para las tablas
+    category: file.resource_type + 's',
   }));
 
   archivosGeonode.value = [...archivosGeonode.value, ...nuevosArchivos];
   archivosTabla.value = [...archivosSeleccionados.value, ...archivosGeonode.value];
 }
 
+const recursosCargando = ref(false);
 async function seleccionarCategoria(categoria) {
   if (categoriaSeleccionada.value !== categoriesDict.value[categoria].label) {
+    // reseteando recursos filtrados por categoría y valores
+    recursosCargando.value = true;
+    storeFilters.updateFilter('inputSearch', '');
     totalCategoria.value = 0;
     storeResources.resetByType(resourceType.value);
     categoriesDict.value[categoria].page = 1;
     categoriaSeleccionada.value = categoriesDict.value[categoria].label;
+    // actualizando filtro por categoría
     storeFilters.updateFilter('categories', [categoriesDict.value[categoria].name]);
-    await storeFilters.buildQueryParams(resourceType.value);
+    // construyendo parámetros para la petición
+    storeFilters.buildQueryParams(resourceType.value);
+    totalCategoria.value = categoriesDict.value[categoriaSeleccionada.value].total;
+
+    // fetch de recursos paginados totales
     await storeResources.fetchByCategory(resourceType.value, 1, params.value);
     storeResources.setNthElements(resourceType.value, [
-      recursos.value[recursos.value.length - nthElement].pk,
+      recursos.value[recursos.value.length - nthElement]?.pk,
     ]);
-    totalCategoria.value = categoriesDict.value[categoriaSeleccionada.value].total;
+    recursosCargando.value = false;
   }
 }
-
-watch(resourceType, async (nv, ov) => {
-  storeResources.resetSelectedByType(ov);
-  storeResources.resetByType(ov);
-  totalCategoria.value = 0;
-  storeFilters.buildQueryParams(nv);
-  await buildCategoriesDict();
-});
 
 const storeIA = useIAStore();
 
@@ -214,9 +166,6 @@ const loaderTitle = ref('');
 const loaderMsg = ref('');
 
 onMounted(async () => {
-  storeFilters.buildQueryParams(resourceType.value);
-  await buildCategoriesDict();
-
   loaderTitle.value = 'Cargando';
   loaderMsg.value = 'Espera mientras se cargan tus archivos';
   await nextTick();
@@ -238,13 +187,14 @@ onMounted(async () => {
       nombre: archivo.filename,
       tipo: obtenerTipoArchivo(archivo.filename),
       archivo: null,
-      categoria: archivo.geonode_category,
+      category: archivo.geonode_category,
       origen: archivo.geonode_type,
     }));
     // console.log('arraySources', arraySources);
 
     archivosSeleccionados.value = [...archivosSeleccionados.value, ...archivosBackend];
     archivosTabla.value = [...archivosSeleccionados.value];
+    // console.log('archivosTabla.value', archivosTabla.value);
   }
 
   window.addEventListener('keydown', preventEscape);
@@ -264,7 +214,7 @@ const manejarSeleccionArchivos = (event) => {
     nombre: file.name,
     tipo: obtenerTipoArchivo(file.name),
     archivo: file, // Objeto File original
-    categoria: 'Archivo',
+    category: 'documents',
     origen: 'Propio',
   }));
 
@@ -363,7 +313,10 @@ const editarProyecto = async () => {
 
     loaderModal.value?.cerrarModal();
 
+    // navigateTo(`/ia/proyectos/${route.params.id}`);
+    console.log('acá');
     navigateTo('/ia/proyectos');
+    storeIA.proyectoSeleccionado = { id: route.params.id };
   } catch (error) {
     console.error('Error al actualizar: ' + error.message);
   }
@@ -374,6 +327,69 @@ function preventEscape(event) {
     event.preventDefault();
     event.stopPropagation();
   }
+}
+
+async function buscarRecurso() {
+  if (categoriaSeleccionada.value !== null) {
+    // reseteando recursos filtrados por categoría y valores
+    recursosCargando.value = true;
+    mensajeAyudaBuscador.value = '';
+    totalCategoria.value = 0;
+    storeResources.resetByType(resourceType.value);
+    categoriesDict.value[categoriaSeleccionada.value].page = 1;
+    // contruyendo parámetros
+    storeFilters.buildQueryParams(resourceType.value);
+    totalCategoria.value = await fetchTotalByCategory(
+      categoriesValues[categoriaSeleccionada.value]
+    );
+    // fetch de recursos paginados filtrados
+    await storeResources.fetchByCategory(resourceType.value, 1, params.value);
+    storeResources.setNthElements(resourceType.value, [
+      recursos.value[recursos.value.length - nthElement].pk,
+    ]);
+    recursosCargando.value = false;
+  } else {
+    mensajeAyudaBuscador.value = 'Falta seleccionar categoría.';
+  }
+}
+
+async function removerBusqueda() {
+  storeFilters.updateFilter('inputSearch', '');
+  if (categoriaSeleccionada.value !== null && inputSearch.value === '') {
+    recursosCargando.value = true;
+    totalCategoria.value = 0;
+    storeResources.resetByType(resourceType.value);
+    categoriesDict.value[categoriaSeleccionada.value].page = 1;
+    // contruyendo parámetros
+    storeFilters.buildQueryParams(resourceType.value);
+    totalCategoria.value = categoriesDict.value[categoriaSeleccionada.value].total;
+    // fetch de recursos paginados totales
+    await storeResources.fetchByCategory(resourceType.value, 1, params.value);
+    storeResources.setNthElements(resourceType.value, [
+      recursos.value[recursos.value.length - nthElement].pk,
+    ]);
+    recursosCargando.value = false;
+  }
+}
+
+function agregarFuentesCatalogo() {
+  // limpiando recursos filtrados por categoría y seleccionados
+  storeFilters.updateFilter('inputSearch', '');
+  categoriaSeleccionada.value = null;
+  totalCategoria.value = 0;
+  storeResources.resetByType(resourceType.value);
+  storeResources.resetSelectedByType(resourceType.value);
+  agregaCatalogoModal.value?.abrirModal();
+}
+
+async function siguenteAgregar() {
+  agregaCatalogoModal.value.cerrarModal();
+  seleccionCatalogoModal.value.abrirModal();
+  totalCategoria.value = 0;
+  storeResources.resetByType(resourceType.value);
+  storeResources.resetSelectedByType(resourceType.value);
+  storeFilters.buildQueryParams(resourceType.value);
+  await buildCategoriesDict();
 }
 </script>
 
@@ -438,7 +454,7 @@ function preventEscape(event) {
                 <button
                   class="boton-pictograma boton-primario m-r-2"
                   aria-label="Agregar fuentes del catalogo"
-                  @click="agregaCatalogoModal?.abrirModal()"
+                  @click="agregarFuentesCatalogo"
                 >
                   Agregar del catálogo
                   <span class="pictograma-agregar" aria-hidden="true" />
@@ -482,15 +498,19 @@ function preventEscape(event) {
                     </td>
                     <td class="p-3 flex flex-contenido-centrado">
                       <p
-                        class="texto-centrado fondo-color-acento p-1 texto-color-acento borde borde-redondeado-12"
+                        class="texto-centrado fondo-color-acento p-1 m-0 texto-color-acento borde borde-redondeado-12"
                         style="width: max-content"
                       >
-                        <span v-if="archivo.categoria === 'Documento'">
-                          <span class="pictograma-documento" />{{ archivo.categoria }}
+                        <span v-if="archivo.category === 'Documento'">
+                          <!-- propio -->
+                          <span class="pictograma-documento" />{{ archivo.category }}s
                         </span>
-
-                        <span v-if="archivo.categoria === 'Tabla'">
-                          <span class="pictograma-tabla" />{{ archivo.categoria }}
+                        <span v-if="archivo.category === 'documents'">
+                          <!-- catalogo -->
+                          <span class="pictograma-documento" />{{ dictCategoria[archivo.category] }}
+                        </span>
+                        <span v-if="archivo.category === 'datasets'">
+                          <span class="pictograma-tabla" />{{ dictCategoria[archivo.category] }}
                         </span>
                       </p>
                     </td>
@@ -540,20 +560,8 @@ function preventEscape(event) {
           </template>
           <template #cuerpo>
             <p>Selecciona el tipo de fuente de información que deseas agregar a tu proyecto</p>
-            <form
-              @keydown.enter.prevent="
-                agregaCatalogoModal.cerrarModal();
-                seleccionCatalogoModal.abrirModal();
-              "
-            >
+            <form @keydown.enter.prevent="siguenteAgregar">
               <SisdaiGrupoBotonesRadio class="radio-catalogo" leyenda="" :es_vertical="true">
-                <SisdaiBotonRadio
-                  v-model="resourceType"
-                  etiqueta="Capas geográficas"
-                  value="dataLayer"
-                  name="tipodefuente"
-                  :es_obligatorio="true"
-                />
                 <SisdaiBotonRadio
                   v-model="resourceType"
                   etiqueta="Tabulados de datos"
@@ -572,14 +580,7 @@ function preventEscape(event) {
             </form>
           </template>
           <template #pie>
-            <button
-              class="boton-primario boton-chico"
-              type="button"
-              @click="
-                agregaCatalogoModal.cerrarModal();
-                seleccionCatalogoModal.abrirModal();
-              "
-            >
+            <button class="boton-primario boton-chico" type="button" @click="siguenteAgregar">
               Siguiente
             </button>
           </template>
@@ -592,8 +593,8 @@ function preventEscape(event) {
           <template #cuerpo>
             <div class="p-r-2">
               <p>Explora el catálogo y selecciona fuentes de información para el proyecto</p>
-              <!-- <ClientOnly>
-                <form class="campo-busqueda m-y-3" @submit.prevent>
+              <ClientOnly>
+                <form class="campo-busqueda m-y-3" @submit.prevent="buscarRecurso">
                   <input
                     id="idcampobusquedaialistas"
                     v-model="inputSearch"
@@ -605,7 +606,7 @@ function preventEscape(event) {
                     class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
                     aria-label="Borrar"
                     type="button"
-                    @click="storeFilters.updateFilter('inputSearch', '')"
+                    @click="removerBusqueda"
                   >
                     <span aria-hidden="true" class="pictograma-cerrar" />
                   </button>
@@ -613,11 +614,13 @@ function preventEscape(event) {
                     class="boton-primario boton-pictograma campo-busqueda-buscar"
                     aria-label="Buscar"
                     type="button"
+                    @click="buscarRecurso"
                   >
                     <span class="pictograma-buscar" aria-hidden="true" />
                   </button>
                 </form>
-              </ClientOnly> -->
+                <p class="formulario-ayuda">{{ mensajeAyudaBuscador }}</p>
+              </ClientOnly>
 
               <div class="flex flex-contenido-separado">
                 <div class="columna-5">
@@ -649,7 +652,17 @@ function preventEscape(event) {
                         </button>
                       </li>
                     </ul>
-                    <p v-else>...cargando</p>
+                    <div v-else class="flex flex-contenido-centrado">
+                      <figure class="">
+                        <img
+                          class="color-invertir"
+                          src="/img/loader.gif"
+                          alt="Loader de SIGIC"
+                          height="128px"
+                        />
+                        <figcaption class="texto-centrado">Cargando categorías</figcaption>
+                      </figure>
+                    </div>
                   </div>
                 </div>
 
@@ -665,6 +678,17 @@ function preventEscape(event) {
                       "
                       class="m-b-3"
                     />
+                    <div v-if="recursosCargando" class="flex flex-contenido-centrado">
+                      <figure class="">
+                        <img
+                          class="color-invertir"
+                          src="/img/loader.gif"
+                          alt="Loader de SIGIC"
+                          height="128px"
+                        />
+                        <figcaption class="texto-centrado">Cargando recursos</figcaption>
+                      </figure>
+                    </div>
                     <ul class="lista-sin-estilo overflowYAutoHeight">
                       <li v-for="(recurso, index) in recursos" :key="index" class="m-y-0">
                         <IaElementoCatalogo
@@ -674,6 +698,19 @@ function preventEscape(event) {
                           @trigger-fetch="fetchNewData"
                         />
                       </li>
+                      <figure
+                        v-if="
+                          categoriaSeleccionada && categoriesDict[categoriaSeleccionada].isLoading
+                        "
+                        class="flex flex-contenido-centrado"
+                      >
+                        <img
+                          class="color-invertir"
+                          src="/img/loader.gif"
+                          alt="Loader de SIGIC"
+                          height="64px"
+                        />
+                      </figure>
                     </ul>
                   </div>
                 </div>
@@ -705,18 +742,7 @@ function preventEscape(event) {
                           <div class="m-b-1">
                             {{ categoriesDict[recurso.category.gn_description]?.inSpanish }}
                           </div>
-                          <div v-if="resourceType === 'dataLayer'" class="icono">
-                            <span
-                              class="m-r-1"
-                              :class="[
-                                geomDict[recurso.geomType].class,
-                                'pictograma-mediano picto',
-                              ]"
-                              aria-hidden="true"
-                            />
-                            <span>{{ geomDict[recurso.geomType].tooltipText }}</span>
-                          </div>
-                          <div v-else class="icono">
+                          <div class="icono">
                             <span
                               v-globo-informacion:derecha="recurso.raw_abstract"
                               class="pictograma-informacion pictograma-mediano picto m-r-1"
