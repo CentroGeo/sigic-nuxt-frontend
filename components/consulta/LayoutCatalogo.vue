@@ -71,6 +71,7 @@ async function buildCategoriesDict() {
             total: totalByCat,
             page: 1,
             isLoading: false,
+            wasFetchSuccesful: true,
           };
         }
         return totalByCat;
@@ -90,6 +91,7 @@ async function buildCategoriesDict() {
             total: totalByCat,
             page: 1,
             isLoading: false,
+            wasFetchSuccesful: true,
           };
         }
         return totalByCat;
@@ -115,12 +117,15 @@ async function callResources(categoria) {
     categoriesDict.value[categoria].isLoading = true;
     const preParams = params.value;
     preParams['filter{category.identifier.in}'] = categoriesValues[categoria];
-    await storeResources.fillByCategory(
+    const status = await storeResources.fillByCategory(
       storeConsulta.resourceType,
       categoriesDict.value[categoria].page,
       preParams
     );
-    categoriesDict.value[categoria].page += 1;
+    if (status === true) {
+      categoriesDict.value[categoria].page += 1;
+    }
+    categoriesDict.value[categoria]['wasFetchSuccesful'] = status;
     categoriesDict.value[categoria].isLoading = false;
   }
 }
@@ -233,6 +238,7 @@ onMounted(async () => {
       <div class="m-x-2 m-y-1">
         <p v-if="!isLoggedIn" class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
 
+        <!--Selector de propiedad-->
         <ClientOnly>
           <SisdaiSelector
             v-if="isLoggedIn"
@@ -250,6 +256,7 @@ onMounted(async () => {
           </SisdaiSelector>
         </ClientOnly>
 
+        <!--Búsqueda-->
         <ClientOnly>
           <div class="flex flex-contenido-centrado m-y-3">
             <form class="campo-busqueda columna-12" @submit.prevent>
@@ -297,6 +304,8 @@ onMounted(async () => {
             </button>
           </div>
         </ClientOnly>
+
+        <!--CSW y Catálogos externos-->
         <div
           v-if="storeConsulta.resourceType === 'dataLayer'"
           class="flex flex-contenido-centrado"
@@ -325,10 +334,12 @@ onMounted(async () => {
         </div>
         <UiNumeroElementos :numero="totalResources" :etiqueta="etiquetaElementos" />
       </div>
+      <!--Spinner general-->
       <div v-if="isLoading" class="flex flex-contenido-centrado m-t-3">
         <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
       </div>
 
+      <!--Si no hay resultados que coincidan con la busqueda-->
       <div v-if="orderedCategories.length === 0 && !isLoading">
         <div class="borde-redondeado-16 m-2 fondo-color-informacion texto-color-informacion p-2">
           <p class="nota texto-color-informacion m-2">
@@ -339,6 +350,7 @@ onMounted(async () => {
 
       <div v-if="orderedCategories.length > 0 && !isLoading">
         <div v-for="category in orderedCategories" :key="category" class="m-y-1">
+          <!--Tarjetas de categoría-->
           <ConsultaElementoCategoria
             :title="categoriesDict[category]?.inSpanish"
             :tag="etiquetaElementos"
@@ -346,6 +358,7 @@ onMounted(async () => {
             @click="setSelectedCategory(category)"
           />
 
+          <!--Tarjetas de recursos-->
           <div
             v-for="(resource, index) in categorizedResources[category]"
             :key="index"
@@ -360,6 +373,27 @@ onMounted(async () => {
               @trigger-fetch="fetchNewData"
             />
           </div>
+
+          <!--Boton de reintentar-->
+          <div
+            v-if="
+              !categoriesDict[category]?.isLoading &&
+              categoriesDict[category]?.wasFetchSuccesful === false
+            "
+            class="flex flex-contenido-centrado m-y-1"
+          >
+            <button
+              type="button"
+              class="boton-secundario boton-chico flex"
+              style="gap: 8px"
+              aria-label="Reintentar"
+              @click="fetchNewData(category)"
+            >
+              <span aria-hidden="true" class="pictograma-restablecer" /> Reintentar
+            </button>
+          </div>
+
+          <!--Spinner por categoría-->
           <div
             v-if="categoriesDict[category]?.isLoading && selectedCategories.includes(category)"
             class="flex flex-contenido-centrado"
