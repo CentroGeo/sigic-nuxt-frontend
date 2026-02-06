@@ -63,16 +63,15 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
       const queryParams = {
         'filter{complete_metadata}': 'true',
         page: pageNum,
-        page_size: 10,
+        page_size: 2,
         ...params,
       };
       const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
-
       try {
         const resourcesRequest = await gnoxyFetch(url);
         if (!resourcesRequest.ok) {
           console.error('Falló la petición inicial por recursos con categoría');
-          return;
+          return false;
         }
 
         const resourcesRes = await resourcesRequest.json();
@@ -92,10 +91,10 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
         }
         const data = resourcesRes.resources;
         resources[resourceType] = [...resources[resourceType], ...data];
-        return;
+        return true;
       } catch {
         console.error('Fracasó la petición de recursos por categoría');
-        return;
+        return false;
       }
     },
     /**
