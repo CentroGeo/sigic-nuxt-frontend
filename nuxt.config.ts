@@ -15,8 +15,6 @@ export default defineNuxtConfig({
   ssr: true,
 
   app: {
-    baseURL: appBasePath,
-    buildAssetsDir: '_nuxt/',
     head: {
       link: [
         {
@@ -56,7 +54,6 @@ export default defineNuxtConfig({
   },
 
   nitro: {
-    baseURL: appBasePath,
     preset: 'node-server',
     compressPublicAssets: false,
   },
