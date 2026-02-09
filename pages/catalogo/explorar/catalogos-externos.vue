@@ -1,11 +1,14 @@
 <script setup>
-definePageMeta({
-  middleware: 'sidebase-auth',
-  bodyAttrs: {
-    class: '',
-  },
-});
+const { data } = useAuth();
 const storeCatalogo = useCatalogoStore();
+const isLoggedIn = ref(data.value ? true : false);
+onMounted(() => {
+  if (isLoggedIn.value === false) {
+    navigateTo({
+      path: `/catalogo/servicios-remotos/servicios-sugeridos`,
+    });
+  }
+});
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeCatalogo.catalogoColapsado">
@@ -13,10 +16,9 @@ const storeCatalogo = useCatalogoStore();
       <CatalogoListaMenuLateral />
     </template>
     <template #visualizador>
-      <main id="principal" class="contenedor">
-        <!--         <h2>Servicios remotos</h2>
- -->
-        <!-- <CatalogoCatalogosInstitucionales /> -->
+      <main v-if="isLoggedIn" id="principal" class="contenedor">
+        <h2>Servicios remotos</h2>
+        <CatalogoCatalogosInstitucionales />
         <CatalogoCatalogosUsuarios />
       </main>
     </template>
