@@ -1,19 +1,72 @@
 <script setup>
-import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { catalogosSugeridos } from '~/utils/catalogo';
 
 const storeCatalogo = useCatalogoStore();
 const { status, signIn } = useAuth();
 const route = useRoute();
-const servicios = ref(catalogosSugeridos);
-const serviciosFiltrados = ref(servicios.value);
-const seleccionOrden = ref('titulo');
+const servicios = ref([]);
+const seleccionOrden = ref('title');
+const inputBusqueda = ref('');
+const modalServiciosExternos = ref(null);
+const modalService = ref({});
+
+/**
+ * Manda a iniciar sesión
+ */
 async function iniciarSesion() {
   await signIn('keycloak', {
     callbackUrl: route.fullPath,
   });
 }
+
+/**
+ * Resetea el input del buscador
+ */
+function resetInput() {
+  inputBusqueda.value = '';
+}
+
+/**
+ * Filtra los servicios remotos según el input y el orden seleccionado
+ * */
+function filterServices() {
+  const input = inputBusqueda.value.trim().toLowerCase();
+  let data;
+  if (input.length > 0) {
+    data = catalogosSugeridos.filter(
+      (d) =>
+        d.abstract.toLowerCase().includes(input) ||
+        d.title.toLowerCase().includes(input) ||
+        d.descripcion.toLowerCase().includes(input)
+    );
+  } else {
+    data = catalogosSugeridos;
+  }
+
+  const serviciosOrdenados = data.sort((a, b) =>
+    a[seleccionOrden.value].localeCompare(b[seleccionOrden.value])
+  );
+  servicios.value = serviciosOrdenados;
+}
+
+/**
+ * Define el servicio escogido y abre el modal de información.
+ */
+function showModal(servicio) {
+  modalService.value = servicio;
+  nextTick(() => {
+    modalServiciosExternos.value?.abrirModalCatalogoExterno();
+  });
+}
+
+watch([inputBusqueda, seleccionOrden], () => {
+  filterServices();
+});
+
+onMounted(() => {
+  filterServices();
+});
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeCatalogo.catalogoColapsado">
@@ -41,24 +94,45 @@ async function iniciarSesion() {
           <div class="columna-8">
             <ClientOnly>
               <SisdaiSelector v-model="seleccionOrden" etiqueta="Ordenar por">
-                <option value="titulo">Título</option>
-                <option value="categoria">Categoría</option>
-                <option value="fecha_descendente">Más Reciente</option>
-                <option value="fecha_ascendente">Más Antiguo</option>
+                <option value="title">Título</option>
+                <option value="origen">Origen</option>
+                <option value="tipo">Tipo</option>
               </SisdaiSelector>
             </ClientOnly>
           </div>
           <div class="columna-8">
             <ClientOnly>
-              <label for="busquedaServicios"> Campo de búsqueda </label>
-              <SisdaiCampoBusqueda
-                id="busquedaServicios"
-                etiqueta="Buscar..."
-                :catalogo="servicios"
-                propiedad-busqueda="title"
-                style="max-height: 40px"
-                @al-filtrar="(r) => (serviciosFiltrados = r)"
-              />
+              <ClientOnly>
+                <label for="idunicobusqueda"> Campo de búsqueda </label>
+                <form class="campo-busqueda" style="height: 40px" @submit.prevent>
+                  <input
+                    id="idunicobusqueda"
+                    v-model="inputBusqueda"
+                    type="search"
+                    class="campo-busqueda-entrada"
+                    placeholder="Campo de búsqueda"
+                  />
+
+                  <button
+                    style="margin: 0; margin-right: 4px"
+                    class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
+                    aria-label="Borrar"
+                    type="button"
+                    @click="resetInput"
+                  >
+                    <span aria-hidden="true" class="pictograma-cerrar" />
+                  </button>
+
+                  <button
+                    class="boton-primario boton-pictograma campo-busqueda-buscar"
+                    aria-label="Buscar"
+                    type="button"
+                    @click="filterServices"
+                  >
+                    <span class="pictograma-buscar" aria-hidden="true" />
+                  </button>
+                </form>
+              </ClientOnly>
             </ClientOnly>
           </div>
         </div>
@@ -75,10 +149,18 @@ async function iniciarSesion() {
         <div class="flex">
           <CatalogoTarjetaServicio
             v-for="catalogo in servicios"
-            :key="catalogo.id"
+            :key="`${catalogo.id}-${seleccionOrden}`"
             :service="catalogo"
+            @service-details-clicked="(servicio) => showModal(servicio)"
           />
         </div>
+
+        <CatalogoModalCatalogoExterno
+          v-if="modalService.id"
+          :id="modalService.id"
+          ref="modalServiciosExternos"
+          :service="modalService"
+        />
       </main>
     </template>
   </UiLayoutPaneles>

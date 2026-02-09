@@ -7,12 +7,12 @@ const props = defineProps({
   },
 });
 const { service } = toRefs(props);
-
 const modalCatalogoExterno = ref(null);
+
 function abrirModalCatalogoExterno() {
   modalCatalogoExterno.value?.abrirModal();
 }
-console.log(service.value);
+
 defineExpose({
   abrirModalCatalogoExterno,
 });
