@@ -1,6 +1,7 @@
 <script setup>
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
+import { catalogosSugeridos } from '~/utils/catalogo';
 
 const storeCatalogo = useCatalogoStore();
 definePageMeta({
@@ -9,17 +10,13 @@ definePageMeta({
     class: '',
   },
 });
-//const config = useRuntimeConfig();
-//const { gnoxyFetch } = useGnoxyUrl();
+
 const campoTipo = ref('');
 const campoURL = ref('');
-//const urlYaExiste = ref(null);
 const campoNombre = ref('');
 const campoDescripcion = ref('');
 const responseOk = ref(null);
-//const harvesterStatus = ref(null);
 const importingResources = ref(false);
-//const newHarvester = ref();
 const tiposFuente = [
   {
     id: 0,
@@ -66,17 +63,12 @@ const tiposFuente = [
 ];
 const isLoading = ref(false);
 const error = ref(null);
+const route = useRoute();
+const selectedServiceId = route.query.id || null;
 
 function irAImportarRecursos() {
   navigateTo({
     path: `/catalogo/explorar/catalogos-externos`,
-    /* path: `/catalogo/servicios-remotos/importar`,
-    query: {
-      id: newHarvester.value?.id,
-      title: newHarvester.value?.name,
-      //unique_identifier: 'v.unique_identifier',
-      //remote_resource_type: 'v.remote_resource_type',
-    }, */
   });
 }
 
@@ -153,6 +145,18 @@ async function registrar() {
   }
   isLoading.value = false;
 }
+onMounted(() => {
+  if (selectedServiceId) {
+    const service = catalogosSugeridos.find((d) => d.id === Number(selectedServiceId));
+    campoNombre.value = service.title;
+    campoURL.value = service.service_url;
+    campoTipo.value = service.tipo;
+    campoDescripcion.value = service.abstract
+      .split(' ')
+      .filter((d) => d !== '')
+      .join(' ');
+  }
+});
 </script>
 
 <template>
