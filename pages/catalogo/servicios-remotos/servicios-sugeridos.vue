@@ -76,7 +76,7 @@ async function iniciarSesion() {
           <CatalogoTarjetaServicio
             v-for="catalogo in servicios"
             :key="catalogo.id"
-            :harvester="catalogo"
+            :service="catalogo"
           />
         </div>
       </main>

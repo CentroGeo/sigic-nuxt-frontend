@@ -1,20 +1,21 @@
 <script setup>
 const props = defineProps({
-  harvester: {
+  service: {
     type: Object,
     default: () => {},
   },
 });
 const { data } = useAuth();
+const { service } = toRefs(props);
+const emit = defineEmits(['serviceDetailsClicked']);
 const isLoggedIn = ref(data.value ? true : false);
-const { harvester } = toRefs(props);
-const etiquetas = harvester.value.etiquetas.split(',');
+const etiquetas = service.value.etiquetas.split(',');
 
 function irARutaQuery() {
   navigateTo({
     path: `/catalogo/servicios-remotos/agregar`,
     query: {
-      id: harvester.value.id,
+      id: service.value.id,
     },
   });
 }
@@ -38,11 +39,11 @@ function irARutaQuery() {
           width="40px"
           class="m-0 color-invertir"
         />
-        <p class="m-0" style="font-weight: bold">{{ harvester.title }}</p>
+        <p class="m-0" style="font-weight: bold">{{ service.title }}</p>
       </div>
 
-      <p>{{ harvester.descripcion }}</p>
-      <!-- <UiNumeroElementos :numero="harvester.total_resources" :etiqueta="'Capas'" /> -->
+      <p>{{ service.descripcion }}</p>
+      <!-- <UiNumeroElementos :numero="service.total_resources" :etiqueta="'Capas'" /> -->
       <button
         class="boton-primario flex flex-contenido-centrado"
         style="width: 100%; margin: 8px"
@@ -54,6 +55,7 @@ function irARutaQuery() {
       <button
         class="boton-secundario flex flex-contenido-centrado"
         style="width: 100%; margin: 8px"
+        @click="emit('serviceDetailsClicked', service)"
       >
         Más Información
       </button>
@@ -63,7 +65,8 @@ function irARutaQuery() {
 </template>
 <style lang="scss" scoped>
 .etiquetas {
-  color: var(--boton-secundario-color);
-  border: solid 1px var(--boton-secundario-color);
+  background-color: var(--color-secundario-2);
+  color: var(--color-primario-4);
+  border: solid 1px var(--color-primario-4);
 }
 </style>

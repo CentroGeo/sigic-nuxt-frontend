@@ -34,7 +34,7 @@ export const catalogosSugeridos = [
   {
     id: 3,
     total_resources: 137,
-    title: 'SEIEG Chiapas',
+    title: 'CEIEG Chiapas',
     descripcion: 'Comité Estatal de Información Estadística y Geográfica',
     abstract: `Es el conjunto de unidades productoras e integradoras de información estadística y 
     geográfica de la administración pública estatal y federal, del sector académico y de la sociedad 

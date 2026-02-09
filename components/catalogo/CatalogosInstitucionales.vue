@@ -2,6 +2,15 @@
 import { catalogosSugeridos } from '~/utils/catalogo';
 
 const harvesters = catalogosSugeridos.slice(0, 3);
+const modalServiciosExternos = ref(null);
+const modalService = ref({});
+
+function showModal(servicio) {
+  modalService.value = servicio;
+  nextTick(() => {
+    modalServiciosExternos.value?.abrirModalCatalogoExterno();
+  });
+}
 </script>
 <template>
   <div id="servicios-institucionales">
@@ -17,7 +26,8 @@ const harvesters = catalogosSugeridos.slice(0, 3);
       <CatalogoTarjetaServicio
         v-for="catalogo in harvesters"
         :key="catalogo.id"
-        :harvester="catalogo"
+        :service="catalogo"
+        @service-details-clicked="(servicio) => showModal(servicio)"
       />
     </div>
 
@@ -26,5 +36,12 @@ const harvesters = catalogosSugeridos.slice(0, 3);
         Ver todos los catálogos externos preconectados
       </NuxtLink>
     </div>
+
+    <CatalogoModalCatalogoExterno
+      v-if="modalService.id"
+      :id="modalService.id"
+      ref="modalServiciosExternos"
+      :service="modalService"
+    />
   </div>
 </template>
