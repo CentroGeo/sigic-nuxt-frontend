@@ -7,6 +7,16 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.9.3] - 09-02-2026
+
+### Arreglado (Fix)
+
+- Se agregó `NUXT_APP_BASE_URL` como argumento de tiempo de compilación y como variable de entorno en el `Dockerfile`, tanto en la etapa de construcción como en la de ejecución, asegurando que la URL base esté explícitamente definida y disponible durante la compilación y en tiempo de ejecución.
+- Se actualizó `nuxt.config.ts` para usar `NUXT_APP_BASE_URL` (en lugar de `NUXT_PUBLIC_APP_BASE_PATH`) al establecer `appBasePath`, que ahora es la fuente principal de la URL base de la aplicación.
+- Se modificó la configuración pública en tiempo de ejecución para usar `NUXT_APP_BASE_URL` en `basePath`, garantizando que el cliente reciba la ruta base correcta.
+- Se habilitó el renderizado del lado del servidor (`ssr: true`) en la configuración de Nuxt y se estableció el `baseURL` de la aplicación Nuxt para que utilice el nuevo `appBasePath`.
+- Se actualizó la configuración del servidor Nitro para usar `appBasePath` como su `baseURL`, se estableció el `preset` en `node-server` y se deshabilitó la compresión de los assets públicos para lograr un comportamiento del servidor más predecible.
+
 ## [0.9.2] - 09-02-2026
 
 ### Arreglado (Fix)
