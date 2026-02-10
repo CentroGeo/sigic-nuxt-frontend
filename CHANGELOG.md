@@ -7,6 +7,14 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.9.2] - 09-02-2026
+
+### Arreglado (Fix)
+
+- Se hicieron ajustes para que la sección de servicios remotos dirija automáticamente a la sección de servicios remotos sugeridos cuando no se ha iniciado sesión.
+- En las tarjetas de los catálogos remotos sugeridos, se cambió el botón de Importar recursos por Registrar Servicio. Este aparece deshabilitado en caso de que no se haya iniciado sesión y, cuando sí se ha iniciado sesión, redirije a la sección de registro de servicios remotos y se autocompletan los campos.
+- Se implementó un modal con información extra. Este se abre al hacer clic en Más Información en las tarjetas de catálogos externos sugeridos.
+
 ## [0.9.1] - 06-02-2026
 
 ### Arreglado (Fix)
@@ -144,6 +152,7 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.9.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.8.1...v0.9.0
 [0.8.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.8.0...v0.8.1

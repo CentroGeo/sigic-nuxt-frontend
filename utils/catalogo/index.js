@@ -1,3 +1,72 @@
+export const catalogosSugeridos = [
+  {
+    id: 1,
+    total_resources: 598,
+    title: 'GEMA',
+    descripcion: 'Infraestructura de Conocimiento Geoespacial',
+    abstract: `Infraestructura de Conocimiento Geoespacial, creada en un entorno abierto y con criterios 
+    de accesibilidad, integra un modelo de datos libres, así como herramientas para que las personas 
+    usuarias puedan consultar, recopilar, visualizar y compartir información geoespacial relacionada con la 
+    actividad humanística, científica y tecnológica.`,
+    etiquetas: 'Etiqueta',
+    tipo: 'WMS',
+    origen: 'GEMA',
+    origen_url: 'https://gema.conahcyt.mx/',
+    service_url: 'https://gema.conahcyt.mx/geoserver/wms',
+  },
+  {
+    id: 2,
+    total_resources: 358,
+    title: 'Mide MTY',
+    descripcion: 'Monterrey Infraestructura de Datos Espaciales',
+    abstract: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi tempor vehicula blandit. 
+    Aliquam at ante urna. Vestibulum finibus magna nunc, nec consequat justo convallis a. Sed a lorem 
+    nec dui congue vulputate eu ac sem. Vivamus sed urna nisl. Curabitur et tortor nisl. Vestibulum 
+    ac pulvinar arcu, eu tempor erat. Phasellus maximus, neque nec ultricies suscipit, lectus arcu 
+    aliquam libero, eget tincidunt est purus sed orci. Donec facilisis, est posuere luctus malesuada, 
+    lacus odio auctor purus, sed malesuada mi lacus sed nulla.`,
+    etiquetas: 'Etiqueta',
+    tipo: 'OWS',
+    origen: 'mide+',
+    origen_url: 'https://mide.monterrey.gob.mx/',
+    service_url: 'https://mide.monterrey.gob.mx/geoserver/ows',
+  },
+  {
+    id: 3,
+    total_resources: 137,
+    title: 'CEIEG Chiapas',
+    descripcion: 'Comité Estatal de Información Estadística y Geográfica',
+    abstract: `Es el conjunto de unidades productoras e integradoras de información estadística y 
+    geográfica de la administración pública estatal y federal, del sector académico y de la sociedad 
+    civil, organizadas para generar y difundir información Sociodemográfica, económica y del medio 
+    ambiente de la entidad, con la finalidad de sustentar la planeación y toma de decisiones de los 
+    sectores público, social y privado, en congruencia con el Sistema Nacional de Información Estadística 
+    y Geográfica (SNIEG). `,
+    tipo: 'WMS',
+    etiquetas: 'Etiqueta',
+    origen: 'CEIEG',
+    origen_url: 'https://www.ceieg.chiapas.gob.mx/',
+    service_url: 'https://mapas.siese.chiapas.gob.mx/geoserver/POSTGISSER/wms',
+  },
+  {
+    id: 4,
+    total_resources: 5375,
+    title: 'IDE SEDATU',
+    descripcion: 'Infraestructura de Datos Espaciales',
+    abstract: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi tempor vehicula blandit. 
+    Aliquam at ante urna. Vestibulum finibus magna nunc, nec consequat justo convallis a. Sed a lorem 
+    nec dui congue vulputate eu ac sem. Vivamus sed urna nisl. Curabitur et tortor nisl. Vestibulum 
+    ac pulvinar arcu, eu tempor erat. Phasellus maximus, neque nec ultricies suscipit, lectus arcu 
+    aliquam libero, eget tincidunt est purus sed orci. Donec facilisis, est posuere luctus malesuada, 
+    lacus odio auctor purus, sed malesuada mi lacus sed nulla.`,
+    tipo: 'GN_WMS',
+    etiquetas: 'Etiqueta',
+    origen: 'Secretaría de Desarrollo Agrario, Territorial y Urbano',
+    origen_url: 'https://www.gob.mx/sedatu',
+    service_url: 'https://ide.sedatu.gob.mx/',
+  },
+];
+
 /**
  * Valida si el tipo de recurso es documento o dataset con geometría o no
  * @param recurso del catálogo

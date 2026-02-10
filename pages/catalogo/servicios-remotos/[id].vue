@@ -86,6 +86,7 @@ onMounted(() => {
 
     <template #visualizador>
       <main id="principal" class="contenedor m-b-10 m-y-3">
+        <!--Boton de redireccionamiento-->
         <div class="flex">
           <nuxt-link
             to="/catalogo/explorar/catalogos-externos"
