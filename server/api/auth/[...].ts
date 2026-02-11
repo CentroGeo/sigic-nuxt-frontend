@@ -81,6 +81,8 @@ export default NuxtAuthHandler({
       // @ts-expect-error extendiendo Session con campos propios
       session.accessToken = token.accessToken;
       // @ts-expect-error extendiendo Session con campos propios
+      session.idToken = token.idToken;
+      // @ts-expect-error extendiendo Session con campos propios
       session.error = token.error;
       return session;
     },
