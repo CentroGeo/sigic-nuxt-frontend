@@ -27,9 +27,9 @@ const obtenerMasRecientes = (type) => {
 const isLoading = ref(true);
 const capasMasRecientes = obtenerMasRecientes('dataLayer');
 
-async function updateSelection(newPk) {
+async function updateSelection(newPk, style) {
   storeSelected.reset();
-  storeSelected.add(new SelectedLayer({ pk: newPk }), 'dataLayer');
+  storeSelected.add(new SelectedLayer({ pk: newPk }), style, 'dataLayer');
 
   nextTick(async () => {
     await navigateTo('/consulta/capas');
@@ -315,7 +315,7 @@ watch(
                     class="boton boton-primario boton-chico"
                     aria-label="Ver capa en visualizador"
                     :to="`/consulta/capas?capas=${capa.pk}`"
-                    @click.prevent="updateSelection(capa.pk)"
+                    @click.prevent="updateSelection(capa.pk, capa.default_style)"
                   >
                     Ver Capa en visualizador
                   </nuxt-link>
