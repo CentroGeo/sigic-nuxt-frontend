@@ -97,6 +97,8 @@ export default defineNuxtConfig({
 
     // Variables públicas (disponibles en el cliente)
     public: {
+      keycloakIssuer: process.env.KEYCLOAK_ISSUER,
+      keycloakClientId: process.env.KEYCLOAK_CLIENT_ID,
       baseURL: process.env.NUXT_PUBLIC_BASE_URL || 'http://localhost:3000',
       basePath: process.env.NUXT_APP_BASE_URL,
       ollamaModel: process.env.NUXT_PUBLIC_OLLAMA_MODEL || 'deepseek-r1',
