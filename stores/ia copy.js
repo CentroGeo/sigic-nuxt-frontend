@@ -118,11 +118,19 @@ export const useIAStore = defineStore('ia', {
     async crearContexto(formData) {
       const token = this.authToken;
       const userEmail = this.userEmail;
+
       formData.append('user_id', userEmail);
+      //this.existeContexto = true;
 
       console.log('crear crearContexto');
-
       try {
+        /*         const formData = new FormData();
+        formData.append("title", title);
+        formData.append("description", description);
+        //formData.append('visibility', visibilidadProyecto.value);
+        formData.append("public", isPublic === "publico" ? "True" : "False");
+ */
+
         const response = await fetch(
           this.backend + '/api/fileuploads/workspaces/admin/contexts/create',
           {
@@ -133,6 +141,7 @@ export const useIAStore = defineStore('ia', {
             body: formData,
           }
         );
+
         console.log(response);
 
         if (!response.ok) {
@@ -141,6 +150,10 @@ export const useIAStore = defineStore('ia', {
 
         const data = await response.json();
         console.log('Contexto guardado:', data);
+
+        // Redirigir después de guardar
+        //this.existenProyectos = true;
+        //navigateTo('/ia/proyectos');
       } catch (error) {
         console.error('Error:', error);
         throw error;
@@ -181,14 +194,7 @@ export const useIAStore = defineStore('ia', {
 
       // si data es mayor a cero selecciona el primer proyecto de la lista
       if (data.length > 0) {
-        // console.log('this.proyectoSeleccionado', this.proyectoSeleccionado);
-        if (this.proyectoSeleccionado !== null) {
-          // eslint-disable-next-line no-self-assign
-          this.proyectoSeleccionado = this.proyectoSeleccionado;
-        } else {
-          this.proyectoSeleccionado = data[0];
-        }
-
+        this.proyectoSeleccionado = data[0];
         this.existenProyectos = true;
       } else {
         this.proyectoSeleccionado = null;
@@ -202,7 +208,7 @@ export const useIAStore = defineStore('ia', {
       const token = this.authToken;
 
       const response = await fetch(
-        this.backend + `/api/fileuploads/workspaces/admin/${project_id}/files`,
+        this.backend + '/api/fileuploads/workspaces/admin/' + project_id + '/files',
         {
           method: 'POST',
           headers: {
@@ -352,7 +358,6 @@ export const useIAStore = defineStore('ia', {
     },
     async getProjectById(project_id) {
       const token = this.authToken;
-
       const response = await fetch(
         this.backend + `/api/fileuploads/workspaces/admin/register/${project_id}`,
         {
@@ -513,6 +518,7 @@ export const useIAStore = defineStore('ia', {
       try {
         const token = this.authToken;
         const userEmail = this.userEmail;
+
         formData.append('user_id', userEmail);
 
         const response = await fetch(
@@ -525,6 +531,7 @@ export const useIAStore = defineStore('ia', {
             body: formData,
           }
         );
+
         console.log(response);
 
         if (!response.ok) {
@@ -578,6 +585,7 @@ export const useIAStore = defineStore('ia', {
             },
           }
         );
+
         console.log(response);
 
         if (!response.ok) {
