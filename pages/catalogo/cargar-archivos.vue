@@ -19,8 +19,10 @@ const hayCargas = ref(false);
 const { data } = useAuth();
 const { gnoxyFetch } = useGnoxyUrl();
 
-const base_files = ['.geojson', '.gpkg', '.zip', '.csv'];
-const docs_files = ['.txt', '.pdf', '.xls', '.xlsx'];
+//const base_files = ['.geojson', '.gpkg', '.zip', '.csv'];
+//const docs_files = ['.txt', '.pdf', '.xls', '.xlsx'];
+const base_files = ['.geojson', '.gpkg', '.csv'];
+const docs_files = ['.txt', '.pdf'];
 
 async function guardarArchivo(files) {
   hayCargas.value = true;
@@ -166,7 +168,7 @@ async function monitorLayerImport(executionId, archivo) {
           <h2>Carga archivo</h2>
           <p>
             <!-- <b>Solo archivos GeoJSON, Geopaquetes, CSV, XML, PDF, JPG y PNG.</b> -->
-            <b>Solo archivos GeoJSON, Geopaquetes, CSV, y PDF.</b>
+            <b>Solo archivos GeoJSON, Geopaquetes, csv, pdf y txt.</b>
           </p>
 
           <ClientOnly>
