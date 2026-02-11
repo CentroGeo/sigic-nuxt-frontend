@@ -7,7 +7,7 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
-## [0.9.3] - 09-02-2026
+## [0.9.3] - 10-02-2026
 
 ### Arreglado (Fix)
 
@@ -162,6 +162,7 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.9.3]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.2...v0.9.3
 [0.9.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.8.1...v0.9.0
