@@ -132,7 +132,6 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
           // Agregamos los estilos
           if (resourceData.resource_type === 'dataset') {
             const { defaultStyle, styleList } = await getSLDs(resourceData);
-            console.log(defaultStyle);
             resourceData.default_style = defaultStyle;
             resourceData.styles = styleList;
           }
