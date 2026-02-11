@@ -27,8 +27,6 @@ const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion',
 const paginaActual = ref(0);
 const tamanioPagina = 10;
 const totalPags = computed(() => Math.ceil(totalResources.value / tamanioPagina));
-const modalFiltroAvanzado = ref(null);
-const isFilterActive = ref(false);
 const seleccionOrden = computed({
   get: () => storeFilters.filters.sort,
   set: (value) => storeFilters.updateFilter('sort', value),
@@ -84,19 +82,6 @@ async function fetchNewData() {
   isLoading.value = false;
 }
 
-function applyAdvancedFilter() {
-  isFilterActive.value = true;
-  modalFiltroAvanzado.value.cerrarModalBusqueda();
-  storeFilters.buildQueryParams(seleccionTipoArchivo.value);
-}
-
-function resetAdvancedFilter() {
-  isFilterActive.value = false;
-  storeFilters.resetFilters();
-  modalFiltroAvanzado.value.cerrarModalBusqueda();
-  storeFilters.buildQueryParams(seleccionTipoArchivo.value);
-}
-
 watch([seleccionTipoArchivo, seleccionOrden], () => {
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
 });
@@ -124,8 +109,6 @@ onMounted(async () => {
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
   storeResources.getMyTotal('disponibles', params.value);
   storeResources.getMyTotal('publicacion', params.value);
-  //storeResources.getMyTotal('pendientes', params.value);
-  //await fetchNewData();
 });
 </script>
 
@@ -195,20 +178,6 @@ onMounted(async () => {
                   </form>
                 </ClientOnly>
               </div>
-              <!--               <div class="columna-2 flex-vertical-final">
-                <button
-                  :class="
-                    isFilterActive
-                      ? 'boton-primario boton-pictograma boton-grande'
-                      : 'boton-secundario boton-pictograma boton-grande'
-                  "
-                  aria-label="Filtro Avanzado"
-                  type="button"
-                  @click="modalFiltroAvanzado.abrirModalBusqueda"
-                >
-                  <span class="pictograma-filtro" aria-hidden="true" />
-                </button>
-              </div> -->
             </div>
           </div>
         </div>
@@ -253,13 +222,6 @@ onMounted(async () => {
           </div>
         </div>
       </main>
-
-      <!-- Modal Búsqueda avanzada -->
-      <ConsultaModalBusqueda
-        ref="modalFiltroAvanzado"
-        @apply-filter="applyAdvancedFilter"
-        @reset-filter="resetAdvancedFilter"
-      />
     </template>
   </UiLayoutPaneles>
 </template>
