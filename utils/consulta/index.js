@@ -472,7 +472,7 @@ export async function fetchRemoteStyles(resource) {
 /**
  * Obtiene la lista de estilos asociados a un recurso y el estilo por default
  * @param {Object} resource
- * @returns {String, Array}
+ * @returns {Promise<String, Array>}
  */
 export async function getSLDs(resource) {
   const config = useRuntimeConfig();
