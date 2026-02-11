@@ -7,6 +7,14 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.9.4] - 10-02-2026
+
+### Arreglado (Fix)
+
+- Se añadieron keycloakIssuer y keycloakClientId a la configuración pública de runtime en nuxt.config.ts
+- Se modificó el flujo de cierre de sesión en pages/mi-cuenta.vue para primero cerrar la sesión localmente y luego redirigir al usuario al endpoint de logout de Keycloak con los parámetros requeridos (id_token_hint y client_id).
+- Se extendió el objeto de sesión en server/api/auth/[...].ts para incluir idToken, permitiendo que el flujo de cierre de sesión proporcione a Keycloak la pista de token necesaria (id_token_hint).
+
 ## [0.9.3] - 10-02-2026
 
 ### Arreglado (Fix)
