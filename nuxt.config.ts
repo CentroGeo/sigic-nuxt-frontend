@@ -3,7 +3,6 @@ import { defineNuxtConfig } from 'nuxt/config';
 
 const isDev = process.env.NODE_ENV !== 'production';
 const appBasePath = process.env.NUXT_APP_BASE_URL || '/';
-const appBaseUrl = process.env.NUXT_PUBLIC_BASE_URL;
 const authBaseUrl = process.env.NUXT_PUBLIC_AUTH_BASE_URL;
 const originEnvKey = isDev ? undefined : 'NUXT_AUTH_ORIGIN';
 
