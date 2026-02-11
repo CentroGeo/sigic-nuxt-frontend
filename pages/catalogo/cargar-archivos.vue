@@ -4,6 +4,13 @@ import { useCatalogoStore } from '@/stores/catalogo';
 import { reactive, ref } from 'vue';
 import { convertirBytes } from '~/utils/catalogo';
 
+definePageMeta({
+  middleware: 'sidebase-auth',
+  bodyAttrs: {
+    class: '',
+  },
+});
+
 const storeCatalogo = useCatalogoStore();
 const configEnv = useRuntimeConfig();
 const statusOk = ref(false);
