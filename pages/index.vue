@@ -24,6 +24,7 @@ const obtenerMasRecientes = (type) => {
   return computed(() => storeResources.resourcesByType(type) || [{}]);
 };
 
+const isLoading = ref(true);
 const capasMasRecientes = obtenerMasRecientes('dataLayer');
 
 async function updateSelection(newPk) {
@@ -34,6 +35,13 @@ async function updateSelection(newPk) {
     await navigateTo('/consulta/capas');
   });
 }
+watch(
+  capasMasRecientes,
+  () => {
+    isLoading.value = false;
+  },
+  { deep: true }
+);
 </script>
 <template>
   <div>
@@ -289,7 +297,10 @@ async function updateSelection(newPk) {
           </p>
         </div>
         <div class="contenedor ancho-fijo">
-          <div class="flex">
+          <div v-if="isLoading" class="flex flex-contenido-centrado m-t-3">
+            <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
+          </div>
+          <div v-if="!isLoading" class="flex">
             <div v-for="(capa, i) in capasMasRecientes" :key="i" class="columna-4">
               <div class="tarjeta">
                 <img class="tarjeta-imagen" :src="capa.thumbnail_url" alt="" />
