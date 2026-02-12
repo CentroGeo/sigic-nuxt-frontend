@@ -63,7 +63,7 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
       const queryParams = {
         'filter{complete_metadata}': 'true',
         page: pageNum,
-        page_size: 2,
+        page_size: 10,
         ...params,
       };
       const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
