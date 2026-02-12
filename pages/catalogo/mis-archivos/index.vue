@@ -131,12 +131,12 @@ function activateAdvancedFilter() {
 function applyAdvancedFilter() {
   modalFiltroAvanzado.value.cerrarModalBusqueda();
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
-  activateAdvancedFilter();
+  activateAdvancedFilter(seleccionTipoArchivo.value);
 }
 
 function resetSearch() {
   storeFilters.updateFilter('inputSearch', '');
-  storeFilters.buildQueryParams();
+  storeFilters.buildQueryParams(seleccionTipoArchivo.value);
 }
 
 function resetAdvancedFilter() {
@@ -221,6 +221,7 @@ onMounted(async () => {
                       type="search"
                       class="campo-busqueda-entrada"
                       placeholder="Campo de búsqueda"
+                      @keyup.enter="storeFilters.buildQueryParams(seleccionTipoArchivo)"
                     />
 
                     <button
@@ -237,7 +238,7 @@ onMounted(async () => {
                       class="boton-primario boton-pictograma campo-busqueda-buscar"
                       aria-label="Buscar"
                       type="button"
-                      @click="storeFilters.buildQueryParams"
+                      @click="storeFilters.buildQueryParams(seleccionTipoArchivo)"
                     >
                       <span class="pictograma-buscar" aria-hidden="true" />
                     </button>

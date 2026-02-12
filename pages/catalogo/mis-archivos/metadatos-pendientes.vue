@@ -31,7 +31,7 @@ const seleccionOrden = computed({
   get: () => storeFilters.filters.sort,
   set: (value) => storeFilters.updateFilter('sort', value),
 });
-const seleccionTipoArchivo = ref('');
+const seleccionTipoArchivo = ref('all');
 const inputSearch = computed({
   get: () => storeFilters.filters.inputSearch,
   set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
@@ -155,6 +155,7 @@ onMounted(async () => {
                       type="search"
                       class="campo-busqueda-entrada"
                       placeholder="Campo de búsqueda"
+                      @keyup.enter="storeFilters.buildQueryParams(seleccionTipoArchivo)"
                     />
 
                     <button
@@ -171,7 +172,7 @@ onMounted(async () => {
                       class="boton-primario boton-pictograma campo-busqueda-buscar"
                       aria-label="Buscar"
                       type="button"
-                      @click="storeFilters.buildQueryParams"
+                      @click="storeFilters.buildQueryParams(seleccionTipoArchivo)"
                     >
                       <span class="pictograma-buscar" aria-hidden="true" />
                     </button>
