@@ -4,17 +4,15 @@ import { cleanInput, resourceTypeDic } from '~/utils/consulta';
 
 const storeResources = useResourcesCatalogoStore();
 const storeCatalogo = useCatalogoStore();
-const storeConsulta = useConsultaStore();
 const storeFilters = useFilteredResources();
-storeConsulta.resourceType = resourceTypeDic.dataLayer;
 const params = computed(() => storeFilters.filters.queryParams);
 const isLoading = computed(() => storeResources.isLoading);
-const totalResources = computed(() => storeResources.totalByType());
+const totalResources = computed(() => storeResources.totalByType(resourceTypeDic.dataLayer));
 const paginaActual = ref(0);
 const tamanioPagina = 10;
 const totalPags = computed(() => Math.ceil(totalResources.value / tamanioPagina));
 const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'acciones'];
-const resources = computed(() => storeResources.resourcesByType());
+const resources = computed(() => storeResources.resourcesByType(resourceTypeDic.dataLayer));
 const tableResources = ref([]);
 const modalFiltroAvanzado = ref(null);
 const isFilterActive = ref(false);
@@ -42,6 +40,7 @@ function setTipoRecurso(resource) {
     return 'Capa Geográfica';
   }
 }
+
 function updateResources() {
   // obteniendo datos por las props de la tabla
   tableResources.value = resources.value.map((d) => ({
@@ -55,10 +54,11 @@ function updateResources() {
     recurso_completo: d,
   }));
 }
-function fetchNewData() {
-  storeResources.resetByType();
-  storeResources.getResourcesByPage(
-    storeConsulta.resourceType,
+
+async function fetchNewData() {
+  storeResources.resetByType(resourceTypeDic.dataLayer);
+  await storeResources.getResourcesByPage(
+    resourceTypeDic.dataLayer,
     paginaActual.value + 1,
     tamanioPagina,
     params.value
@@ -100,7 +100,7 @@ function activateAdvancedFilter() {
 
 function applyAdvancedFilter() {
   modalFiltroAvanzado.value.cerrarModalBusqueda();
-  storeFilters.buildQueryParams();
+  storeFilters.buildQueryParams(resourceTypeDic.dataLayer);
   activateAdvancedFilter();
 }
 
@@ -113,20 +113,23 @@ function resetAdvancedFilter() {
   isFilterActive.value = false;
   storeFilters.resetFilters();
   modalFiltroAvanzado.value.cerrarModalBusqueda();
-  storeFilters.buildQueryParams();
+  storeFilters.buildQueryParams(resourceTypeDic.dataLayer);
 }
 
 watch(paginaActual, () => {
   fetchNewData();
 });
+
 watch(seleccionOrden, () => {
-  storeFilters.buildQueryParams();
+  storeFilters.buildQueryParams(resourceTypeDic.dataLayer);
 });
-watch(params, () => {
+
+watch(params, async () => {
   paginaActual.value = 0;
-  storeResources.getTotalResources(storeConsulta.resourceType, params.value);
+  storeResources.getTotalResources(resourceTypeDic.dataLayer, params.value);
   fetchNewData();
 });
+
 watch(
   resources,
   () => {
@@ -137,7 +140,7 @@ watch(
 
 onMounted(async () => {
   storeFilters.resetAll();
-  storeFilters.buildQueryParams();
+  storeFilters.buildQueryParams(resourceTypeDic.dataLayer);
 });
 </script>
 
@@ -174,6 +177,7 @@ onMounted(async () => {
                       type="search"
                       class="campo-busqueda-entrada"
                       placeholder="Campo de búsqueda"
+                      @keyup.enter="storeFilters.buildQueryParams(resourceTypeDic.dataLayer)"
                     />
 
                     <button
@@ -190,7 +194,7 @@ onMounted(async () => {
                       class="boton-primario boton-pictograma campo-busqueda-buscar"
                       aria-label="Buscar"
                       type="button"
-                      @click="storeFilters.buildQueryParams"
+                      @click="storeFilters.buildQueryParams(resourceTypeDic.dataLayer)"
                     >
                       <span class="pictograma-buscar" aria-hidden="true" />
                     </button>

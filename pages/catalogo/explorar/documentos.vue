@@ -4,17 +4,15 @@ import { cleanInput, resourceTypeDic } from '~/utils/consulta';
 
 const storeResources = useResourcesCatalogoStore();
 const storeCatalogo = useCatalogoStore();
-const storeConsulta = useConsultaStore();
 const storeFilters = useFilteredResources();
-storeConsulta.resourceType = resourceTypeDic.document;
 const params = computed(() => storeFilters.filters.queryParams);
 const isLoading = computed(() => storeResources.isLoading);
-const totalResources = computed(() => storeResources.totalByType());
+const totalResources = computed(() => storeResources.totalByType(resourceTypeDic.document));
 const paginaActual = ref(0);
 const tamanioPagina = 10;
 const totalPags = computed(() => Math.ceil(totalResources.value / tamanioPagina));
 const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'acciones'];
-const resources = computed(() => storeResources.resourcesByType());
+const resources = computed(() => storeResources.resourcesByType(resourceTypeDic.document));
 const tableResources = ref([]);
 const modalFiltroAvanzado = ref(null);
 const isFilterActive = ref(false);
@@ -26,6 +24,7 @@ const inputSearch = computed({
   get: () => storeFilters.filters.inputSearch,
   set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
 });
+
 function updateResources() {
   // obteniendo datos por las props de la tabla
   tableResources.value = resources.value.map((d) => ({
@@ -39,10 +38,11 @@ function updateResources() {
     recurso_completo: d,
   }));
 }
-function fetchNewData() {
-  storeResources.resetByType();
-  storeResources.getResourcesByPage(
-    storeConsulta.resourceType,
+
+async function fetchNewData() {
+  storeResources.resetByType(resourceTypeDic.document);
+  await storeResources.getResourcesByPage(
+    resourceTypeDic.document,
     paginaActual.value + 1,
     tamanioPagina,
     params.value
@@ -84,33 +84,36 @@ function activateAdvancedFilter() {
 
 function applyAdvancedFilter() {
   modalFiltroAvanzado.value.cerrarModalBusqueda();
-  storeFilters.buildQueryParams();
+  storeFilters.buildQueryParams(resourceTypeDic.document);
   activateAdvancedFilter();
 }
 
 function resetSearch() {
   storeFilters.updateFilter('inputSearch', '');
-  storeFilters.buildQueryParams();
+  storeFilters.buildQueryParams(resourceTypeDic.document);
 }
 
 function resetAdvancedFilter() {
   isFilterActive.value = false;
   storeFilters.resetFilters();
   modalFiltroAvanzado.value.cerrarModalBusqueda();
-  storeFilters.buildQueryParams();
+  storeFilters.buildQueryParams(resourceTypeDic.document);
 }
 
 watch(paginaActual, () => {
   fetchNewData();
 });
+
 watch(seleccionOrden, () => {
-  storeFilters.buildQueryParams();
+  storeFilters.buildQueryParams(resourceTypeDic.document);
 });
+
 watch(params, () => {
   paginaActual.value = 0;
-  storeResources.getTotalResources(storeConsulta.resourceType, params.value);
+  storeResources.getTotalResources(resourceTypeDic.document, params.value);
   fetchNewData();
 });
+
 watch(
   resources,
   () => {
@@ -121,7 +124,7 @@ watch(
 
 onMounted(async () => {
   storeFilters.resetAll();
-  storeFilters.buildQueryParams();
+  storeFilters.buildQueryParams(resourceTypeDic.document);
 });
 </script>
 
@@ -159,6 +162,7 @@ onMounted(async () => {
                       type="search"
                       class="campo-busqueda-entrada"
                       placeholder="Campo de búsqueda"
+                      @keyup.enter="storeFilters.buildQueryParams(resourceTypeDic.document)"
                     />
 
                     <button
@@ -175,7 +179,7 @@ onMounted(async () => {
                       class="boton-primario boton-pictograma campo-busqueda-buscar"
                       aria-label="Buscar"
                       type="button"
-                      @click="storeFilters.buildQueryParams"
+                      @click="storeFilters.buildQueryParams(resourceTypeDic.document)"
                     >
                       <span class="pictograma-buscar" aria-hidden="true" />
                     </button>

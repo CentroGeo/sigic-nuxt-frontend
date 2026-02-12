@@ -300,6 +300,7 @@ onMounted(async () => {
                 type="search"
                 class="campo-busqueda-entrada"
                 placeholder="Campo de búsqueda"
+                @keyup.enter="storeFilters.buildQueryParams(storeConsulta.resourceType)"
               />
 
               <button
@@ -315,7 +316,7 @@ onMounted(async () => {
                 aria-label="Buscar"
                 class="boton-primario boton-pictograma campo-busqueda-buscar"
                 type="button"
-                @click="storeFilters.buildQueryParams"
+                @click="storeFilters.buildQueryParams(storeConsulta.resourceType)"
               >
                 <span class="pictograma-buscar" aria-hidden="true" />
               </button>
