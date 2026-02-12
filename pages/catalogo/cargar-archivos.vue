@@ -1,9 +1,8 @@
 <script setup>
-import { convertirBytes } from '~/utils/catalogo';
-
 import { useAuth, useRuntimeConfig } from '#imports';
 import { useCatalogoStore } from '@/stores/catalogo';
 import { reactive, ref } from 'vue';
+import { convertirBytes } from '~/utils/catalogo';
 
 const storeCatalogo = useCatalogoStore();
 const configEnv = useRuntimeConfig();
@@ -77,11 +76,8 @@ async function guardarArchivo(files) {
         monitorLayerImport(result.execution_id, archivo);
       } else if (result.url) {
         // Caso: documento cargado
-        archivo.estatus = 'carga_finalizada';
-        archivo.mensaje = 'Archivo cargado correctamente';
         archivo.IdRutaArchivo = result.url.split('/').slice(-1)[0];
-        statusOk.value = true;
-
+        // Se recupera la información necesaria para cada tipo de archivo
         let tipo;
         if (base_files.includes('.' + file.name.split('.').slice(-1)[0])) {
           const request_geonode = await gnoxyFetch(
@@ -89,12 +85,10 @@ async function guardarArchivo(files) {
           );
           const res_geonode = await request_geonode.json();
           tipo = isGeometricExtension(res_geonode.dataset.extent) ? 'dataLayer' : 'dataTable';
-
           if (tipo === 'dataLayer') {
             archivo.tipo_recurso = tipo;
-
             const request_geoserver = await gnoxyFetch(
-              `${configEnv.public.geoserverUrl}/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=${res_geonode.dataset.alternate}&resultType=hits`
+              `${configEnv.public.geonodeUrl}/gs/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=${res_geonode.dataset.alternate}&resultType=hits`
             );
             const proyeccion = res_geonode?.dataset?.srid;
             const res_geoserver = await request_geoserver.text();
@@ -106,6 +100,10 @@ async function guardarArchivo(files) {
           tipo = 'document';
           archivo.tipo_recurso = tipo;
         }
+        // Se actualizan las banderas de carga
+        archivo.estatus = 'carga_finalizada';
+        archivo.mensaje = 'Archivo cargado correctamente';
+        statusOk.value = true;
       } else {
         archivo.estatus = 'error_carga';
         archivo.mensaje = 'Respuesta inesperada del servidor';
@@ -217,12 +215,18 @@ async function monitorLayerImport(executionId, archivo) {
                     <b>{{ archivo.mensaje }}</b>
                   </div>
 
-                  <div v-if="archivo.numero_geometrias" class="nota">
+                  <div
+                    v-if="archivo.numero_geometrias && archivo.estatus === 'carga_finalizada'"
+                    class="nota"
+                  >
                     Se detectaron {{ archivo.numero_geometrias }} geometrías <br />
                     Sistema de referencia {{ archivo.proyeccion }}
                   </div>
 
-                  <div v-if="archivo.IdRutaArchivo" class="flex flex-contenido-inicio">
+                  <div
+                    v-if="archivo.IdRutaArchivo && archivo.estatus === 'carga_finalizada'"
+                    class="flex flex-contenido-inicio"
+                  >
                     <div class="m-x-2 m-y-1">
                       <NuxtLink
                         :to="`/catalogo/mis-archivos/editar/MetadatosBasicos?data=${archivo.IdRutaArchivo}&type=${archivo.tipo_recurso}`"

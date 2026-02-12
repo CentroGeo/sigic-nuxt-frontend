@@ -19,6 +19,7 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
     existenDescargasEnRevision: ref(false),
     esEdicionFormulario: ref(true),
     proyectosCompartidos: ref([]),
+    esRevisor: ref(false),
 
     async obtenerProyectosPublicos() {
       try {
@@ -326,6 +327,23 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
     },
     obtenerTotalProyectosCompartidos() {
       return this.proyectosCompartidos.length;
+    },
+    async obtenerEsRevisor(email) {
+      try {
+        const body = {
+          email: email,
+        };
+
+        const data = await $fetch(`${apiUrl}/notifications/user/rol`, {
+          method: 'POST',
+          body: body,
+        });
+
+        console.log(data);
+        this.esRevisor = data.is_reviewer;
+      } catch (err) {
+        console.error('Error cargando rol usuario:', err);
+      }
     },
   };
 });

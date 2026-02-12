@@ -87,7 +87,6 @@ watch(
 );
 
 onMounted(async () => {
-  console.log('Aceptadas');
   await storeCatalogo.getUserInfo();
   userReviewerPk.value = storeCatalogo.userInfo.pk;
   storeFilters.resetAll();

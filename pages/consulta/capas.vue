@@ -279,6 +279,7 @@ onMounted(async () => {
             :fuente="findServer(resource).replace('?', '')"
             :capa="resource.alternate.split(':')[1]"
             :mosaicos="true"
+            :lado="storeSelected.byPk(resource.pk).lado"
             :opacidad="storeSelected.byPk(resource.pk).opacidad"
             :posicion="storeSelected.byPk(resource.pk).posicion + 1"
             :visible="storeSelected.byPk(resource.pk).visible"

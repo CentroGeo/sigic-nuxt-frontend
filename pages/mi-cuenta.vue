@@ -5,13 +5,26 @@ definePageMeta({
   middleware: 'auth',
 });
 
-const { status, signOut } = useAuth();
+const { status, signOut, data } = useAuth();
 const route = useRoute();
 const router = useRouter();
 const modalConfirmarCierre = ref();
+const config = useRuntimeConfig();
+
 async function cerrarSesion() {
-  // Cierra sesión y redirige al inicio
-  await signOut({ callbackUrl: '/' });
+  const idToken = data.value?.idToken;
+
+  // 1) Cerrar sesión local sin redirección
+  await signOut({ redirect: false });
+
+  // 2) Redirigir al logout de Keycloak
+  const logoutUrl =
+    `${config.public.keycloakIssuer}/protocol/openid-connect/logout` +
+    `?post_logout_redirect_uri=${encodeURIComponent(window.location.origin)}` +
+    `&id_token_hint=${idToken}` +
+    `&client_id=${config.public.keycloakClientId}`;
+
+  window.location.href = logoutUrl;
 }
 
 if (route.path === '/mi-cuenta') {

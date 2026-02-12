@@ -157,7 +157,7 @@ export function buildUrl(endpoint, query) {
 }
 
 /**
- * Regresa el servidor en el que esta alojado un recurso remoto
+ * Regresa el servidor en el que esta alojado un recurso
  * @param {Object} resource
  * @returns {String}
  */
@@ -185,7 +185,7 @@ export function findServer(resource) {
 /**
  * Construye la url para solicitar info de un recurso
  * @param {Object} resource
- * @returns
+ * @returns {String}
  */
 export function buildArcgisLayerRequest(resource) {
   const restObject = resource.links.find((link) => link.url.toLowerCase().includes('arcgis'));
@@ -204,11 +204,11 @@ export function buildArcgisLayerRequest(resource) {
  * @param {Object} resource Es el recurso del que se desea obtener más informacion
  * @param {String} service Se relaciona con el uso que se le dará a la informacion.
  * Puede ser map, table o geometry
- * @returns {Boolean}
+ * @returns {Promise<Boolean>}
  */
 export async function hasWFS(resource, service) {
   const { gnoxyFetch } = useGnoxyUrl();
-  const maxAttempts = 1;
+  const maxAttempts = 3;
   const url = new URL(findServer(resource));
   url.search = new URLSearchParams({
     service: 'WFS',
@@ -218,11 +218,15 @@ export async function hasWFS(resource, service) {
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
       const res = await gnoxyFetch(url.toString());
+      // Si la petición fracasa
       if (!res.ok) {
-        console.error('Fracasó la petición getCapabilities');
-        continue;
+        if (attempt === maxAttempts - 1) {
+          return false;
+        } else {
+          continue;
+        }
       }
-
+      // Si la petición es exitosa
       const data = await res.text();
       if (data.includes('ExceptionReport')) {
         console.error('No se puede usar el WMS', url, resource.alternate, resource.title);
@@ -235,13 +239,16 @@ export async function hasWFS(resource, service) {
           return true;
         } else return false;
       } else {
-        console.error('No se reconoce el tipo de petición que se necesita', url);
+        //console.error('No se reconoce el tipo de petición que se necesita', url);
         return false;
       }
     } catch {
-      console.error(`fracaso la peticion para ${resource.alternate}`);
+      if (attempt === maxAttempts - 1) {
+        return false;
+      } else {
+        console.error(`fracaso la peticion para ${resource.alternate}`);
+      }
     }
-    return false;
   }
 }
 
@@ -249,25 +256,29 @@ export async function hasWFS(resource, service) {
  * Esta funcion revisa si el servidor de arcgis que aloja un servicio remoto
  * permite consultar la tabla de atributos
  * @param {Object} resource
- * @returns
+ * @returns {Promise<Boolean>}
  */
 
 export async function hasFeatureServer(resource) {
   const { gnoxyFetch } = useGnoxyUrl();
   let hasFeatureService;
-  const url = await buildArcgisLayerRequest(resource);
+  const url = buildArcgisLayerRequest(resource);
   if (url.includes('ImageServer')) {
     hasFeatureService = false;
   } else {
     const base = url.split('/services/')[0];
     const nameSpace = url.split('/services/')[1].split('/')[0];
     const serviceUrl = `${base}/services/?f=pjson`;
-    const res = await gnoxyFetch(serviceUrl);
-    const data = await res.json();
-    const linkedServices = data.services.filter((d) => d.name === nameSpace);
-    if (linkedServices.map((d) => d.type).includes('FeatureServer')) {
-      hasFeatureService = true;
-    } else {
+    try {
+      const res = await gnoxyFetch(serviceUrl);
+      const data = await res.json();
+      const linkedServices = data.services.filter((d) => d.name === nameSpace);
+      if (linkedServices.map((d) => d.type).includes('FeatureServer')) {
+        hasFeatureService = true;
+      } else {
+        hasFeatureService = false;
+      }
+    } catch {
       hasFeatureService = false;
     }
   }
@@ -277,11 +288,11 @@ export async function hasFeatureServer(resource) {
  * Consulta al servidor WMS que aloja un recurso remoto o de tipo vectorail para
  * obtener el tipo de geometria del mismo
  * @param {Object} resource
- * @returns {String}
+ * @returns {Promise<string>}
  */
 export async function fetchGeometryWMS(resource) {
   const { gnoxyFetch } = useGnoxyUrl();
-  const maxAttempts = 5;
+  const maxAttempts = 3;
   const url = new URL(findServer(resource));
 
   url.search = new URLSearchParams({
@@ -299,7 +310,11 @@ export async function fetchGeometryWMS(resource) {
     try {
       const res = await gnoxyFetch(url.toString());
       if (!res.ok) {
-        return 'Error';
+        if (attempt === maxAttempts - 1) {
+          return 'Error';
+        } else {
+          continue;
+        }
       }
       const data = await res.json();
       if (
@@ -308,47 +323,55 @@ export async function fetchGeometryWMS(resource) {
         data.features[0]?.geometry?.type
       ) {
         return data.features[0].geometry.type;
+      } else {
+        return 'Error';
       }
     } catch {
-      console.warn('Se está intentando una vez más');
+      if (attempt === maxAttempts - 1) {
+        return 'Error';
+      } else {
+        console.warn('Se está intentando una vez más');
+      }
     }
-    // Si fracasa en todos los intentos
-    return 'Error';
   }
 }
 
 /**
- * Consulta al servidor ArcGis que aloja un recurso remoto o de tipo vectorail para
+ * Consulta al servidor ArcGis que aloja un recurso remoto o de tipo vectorial para
  * obtener el tipo de geometria del mismo
  * @param {Object} resource
  * @returns {String}
  * @param {*} resource
- * @returns
+ * @returns {Promise<String>}
  */
 export async function fetchGeometryArcgis(resource) {
   const { gnoxyFetch } = useGnoxyUrl();
   const maxAttempts = 5;
-  const url = await buildArcgisLayerRequest(resource);
-  await hasFeatureServer(resource);
+  const url = buildArcgisLayerRequest(resource);
 
   if (url.includes('ImageServer')) {
     return 'Raster';
   } else {
-    // Como a veces hace timeout, lo intentamos tres veces
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       try {
         const res = await gnoxyFetch(`${url}?f=pjson`);
         if (!res.ok) {
-          return 'Error';
+          if (attempt === maxAttempts - 1) {
+            return 'Error';
+          } else {
+            continue;
+          }
         }
         const json = await res.json();
-        const geometry = json.geometryType;
+        const geometry = json.geometryType || 'Error';
         return geometry;
       } catch {
-        console.warn('Se está intentando una vez más');
+        if (attempt === maxAttempts - 1) {
+          return 'Error';
+        } else {
+          console.warn('Se está intentando una vez más');
+        }
       }
-      // Si fracasa en todos los intentos
-      return 'Error';
     }
   }
 }
@@ -357,7 +380,7 @@ export async function fetchGeometryArcgis(resource) {
  * Define el tipo de geometría de un archivo de tipo dataset
  * sin importar si es remoto o local, raster o vectoria
  * @param {Object} resource
- * @returns
+ * @returns {Promise<string>}
  */
 export async function defineGeomType(resource) {
   let geomType;
@@ -388,7 +411,7 @@ export async function defineGeomType(resource) {
  * para obtener una lista de estilos y un estilo por default
  * para capas que viven en servidores externos
  * @param {Object} resource
- * @returns { String, Array }
+ * @returns {Promise<String, Array>}
  */
 export async function fetchRemoteStyles(resource) {
   const { gnoxyFetch } = useGnoxyUrl();
@@ -404,42 +427,45 @@ export async function fetchRemoteStyles(resource) {
 
   // Los servicios ogc sí lo permiten
   const url = `${server}service=wms&request=getCapabilities`;
-  const request = await gnoxyFetch(url);
+  try {
+    const request = await gnoxyFetch(url);
+    if (!request.ok) {
+      return { targetLayerDefaultStyle, targetLayerStyles };
+    } else {
+      const res = await request.text();
+      const parser = new DOMParser();
+      const parsedRes = parser.parseFromString(res, 'application/xml');
+      const capabilitiesTags = parsedRes.getElementsByTagName('Capability');
+      const rootLayers = Array.from(capabilitiesTags[0].children).filter(
+        (d) => d.tagName === 'Layer'
+      );
 
-  if (!request.ok) {
-    console.error('Fracasó la petición de estilos remotos');
-  } else {
-    const res = await request.text();
-    const parser = new DOMParser();
-    const parsedRes = parser.parseFromString(res, 'application/xml');
-    const capabilitiesTags = parsedRes.getElementsByTagName('Capability');
-    const rootLayers = Array.from(capabilitiesTags[0].children).filter(
-      (d) => d.tagName === 'Layer'
-    );
-
-    let layers = [];
-    for (const layer of rootLayers) {
-      const subLayers = Array.from(layer.children).filter((d) => d.tagName === 'Layer');
-      layers = [...layers, ...subLayers];
-    }
-    for (const layer of layers) {
-      const nameEl = layer.getElementsByTagName('Name')[0];
-      if (nameEl.textContent === targetLayerName) {
-        const styleTags = layer.getElementsByTagName('Style');
-        for (const style of Array.from(styleTags)) {
-          const nameTag = style.getElementsByTagName('Name')[0];
-          const name = nameTag.textContent;
-          if (!targetLayerStyles.includes(name)) {
-            targetLayerStyles.push(name);
-          }
-        }
-        break;
+      let layers = [];
+      for (const layer of rootLayers) {
+        const subLayers = Array.from(layer.children).filter((d) => d.tagName === 'Layer');
+        layers = [...layers, ...subLayers];
       }
-    }
+      for (const layer of layers) {
+        const nameEl = layer.getElementsByTagName('Name')[0];
+        if (nameEl.textContent === targetLayerName) {
+          const styleTags = layer.getElementsByTagName('Style');
+          for (const style of Array.from(styleTags)) {
+            const nameTag = style.getElementsByTagName('Name')[0];
+            const name = nameTag.textContent;
+            if (!targetLayerStyles.includes(name)) {
+              targetLayerStyles.push(name);
+            }
+          }
+          break;
+        }
+      }
 
-    if (targetLayerStyles.length > 0) {
-      targetLayerDefaultStyle = targetLayerStyles[0];
+      if (targetLayerStyles.length > 0) {
+        targetLayerDefaultStyle = targetLayerStyles[0];
+      }
+      return { targetLayerDefaultStyle, targetLayerStyles };
     }
+  } catch {
     return { targetLayerDefaultStyle, targetLayerStyles };
   }
 }
@@ -466,7 +492,6 @@ export async function getSLDs(resource) {
 
       const stylesData = await stylesRes.json();
       defaultStyle = stylesData.default_style;
-      //styleList = stylesData.styles;
       stylesData.styles.forEach((d) => {
         const optionList = d.split(':');
         if (optionList.length > 1 && !styleList.includes(optionList[1])) {
@@ -495,33 +520,43 @@ export async function getSLDs(resource) {
 /**
  * Crea una url autenticada que permite visualizar documentos
  * @param {String} url
- * @returns
+ * @returns {Promise<string>}
  */
 export async function fetchDoc(url) {
-  const { data } = useAuth();
-  const token = data.value?.accessToken;
+  //const { data } = useAuth();
+  //const token = data.value?.accessToken;
+  const { gnoxyFetch } = useGnoxyUrl();
+
   const maxAttempts = 5;
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
-      let res;
+      const res = await gnoxyFetch(url);
+      /* let res;
       if (token) {
         res = await fetch(url, {
           headers: { Authorization: `Bearer ${token}` },
         });
       } else {
         res = await fetch(url);
-      }
+      } */
       if (!res.ok) {
-        throw new Error(`Fetchfailed: ${res.status}`);
+        if (attempt === maxAttempts - 1) {
+          return 'Error';
+        } else {
+          continue;
+        }
       }
       const blob = await res.blob();
       const newUrl = URL.createObjectURL(blob);
       return newUrl;
     } catch {
-      console.warn('Se está intentando una vez más');
+      if (attempt === maxAttempts - 1) {
+        return 'Error';
+      } else {
+        console.warn('Se está intentando una vez más');
+      }
     }
   }
-  return 'Error';
 }
 
 /**
@@ -543,7 +578,11 @@ export async function downloadDocs(resource) {
     try {
       const res = await gnoxyFetch(url);
       if (!res.ok) {
-        return 'Error';
+        if (attempt === maxAttempts - 1) {
+          return 'Error';
+        } else {
+          continue;
+        }
       }
       const blob = await res.blob();
       const newUrl = URL.createObjectURL(blob);
@@ -556,16 +595,19 @@ export async function downloadDocs(resource) {
       URL.revokeObjectURL(newUrl);
       return 'Ok';
     } catch {
-      console.warn(`Falló el intento ${attempt + 1}.`);
+      if (attempt === maxAttempts - 1) {
+        return 'Error';
+      } else {
+        console.warn(`Falló el intento ${attempt + 1}.`);
+      }
     }
   }
-  return 'Error';
 }
 
 /**
  * Crea un link de para descargar los metadatos de un recurso
  * @param {Object} resource
- * @returns
+ * @returns {Promise<string>}
  */
 export async function downloadMetadata(resource) {
   const { gnoxyFetch } = useGnoxyUrl();
@@ -585,7 +627,11 @@ export async function downloadMetadata(resource) {
     try {
       const res = await gnoxyFetch(api.toString());
       if (!res.ok) {
-        return 'Error';
+        if (attempt === maxAttempts - 1) {
+          return 'Error';
+        } else {
+          console.warn(`Falló el intento ${attempt + 1}.`);
+        }
       }
       const dataBlob = await res.blob();
       const blobLink = URL.createObjectURL(dataBlob);
@@ -599,10 +645,13 @@ export async function downloadMetadata(resource) {
       URL.revokeObjectURL(blobLink);
       return 'Ok';
     } catch {
-      console.warn(`Falló el intento ${attempt + 1}.`);
+      if (attempt === maxAttempts - 1) {
+        return 'Error';
+      } else {
+        console.warn(`Falló el intento ${attempt + 1}.`);
+      }
     }
   }
-  return 'Error';
 }
 
 /**
@@ -652,7 +701,11 @@ export async function downloadWMS(resource, format, featureTypes) {
       console.warn(`Vamos en el intento: ${attempt}.`);
       const res = await gnoxyFetch(`${url}`);
       if (!res.ok) {
-        return 'Error';
+        if (attempt === maxAttempts - 1) {
+          return 'Error';
+        } else {
+          console.warn(`Falló el intento ${attempt + 1}.`);
+        }
       }
       const blob = await res.blob();
       const anchor = document.createElement('a');
@@ -666,10 +719,13 @@ export async function downloadWMS(resource, format, featureTypes) {
       URL.revokeObjectURL(downloadUrl);
       return 'Ok';
     } catch {
-      console.warn(`Falló el intento ${attempt + 1}.`);
+      if (attempt === maxAttempts - 1) {
+        return 'Error';
+      } else {
+        console.warn(`Falló el intento ${attempt + 1}.`);
+      }
     }
   }
-  return 'Error';
 }
 
 /**
@@ -677,7 +733,7 @@ export async function downloadWMS(resource, format, featureTypes) {
  * Las peticiones pueden ser autenticadas o no.
  * @param {Object} resource
  * @param {String} format
- * @returns
+ * @returns {Promise<Array>}
  */
 export async function getFeatures(resource) {
   const { gnoxyFetch } = useGnoxyUrl();
@@ -695,7 +751,11 @@ export async function getFeatures(resource) {
     try {
       const res = await gnoxyFetch(describeFeatureUrl.toString());
       if (!res.ok) {
-        throw new Error(`getFeatures falló: ${res.status}`);
+        if (attempt === maxAttempts - 1) {
+          return 'Error';
+        } else {
+          console.error(`getFeatures falló: ${res.status}`);
+        }
       }
       const fileData = await res.json();
       const features = fileData.featureTypes[0]['properties'];
@@ -706,7 +766,11 @@ export async function getFeatures(resource) {
         .map((prop) => prop.name);
       return props;
     } catch {
-      console.warn(`Falló el intento ${attempt + 1}.`);
+      if (attempt === maxAttempts - 1) {
+        return 'Error';
+      } else {
+        console.warn(`Falló el intento ${attempt + 1}.`);
+      }
     }
   }
 }
@@ -716,7 +780,7 @@ export async function getFeatures(resource) {
  * Las peticiones pueden ser autenticadas o no.
  * @param {Object} resource
  * @param {String} format
- * @returns
+ * @returns {Promise<string>}
  */
 
 export async function downloadNoGeometry(resource, format) {

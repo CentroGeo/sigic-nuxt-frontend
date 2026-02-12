@@ -162,6 +162,23 @@ Las variables que debe incluir el archivo .env deben ser nombradas como sigue
 
 ```bash
 
+# ID del cliente de autenticación
+KEYCLOAK_CLIENT_ID = <Id client>
+KEYCLOAK_ISSUER = https://iam.dev.geoint.mx/realms/sigic
+# Clave secreta del servicio de autenticación
+KEYCLOAK_CLIENT_SECRET = <Clave secreta>
+NUXT_AUTH_SECRET = <clave alfanumérica definida por la persona desarrolladora>
+NUXT_PUBLIC_IA_BACKEND_URL = https://sigic.ia.dev.geoint.mx/
+
+NUXT_PUBLIC_KEYCLOAK_BASE_URL = <URL principal de keycloak>
+NUXT_PUBLIC_KEYCLOAK_REALM = <Realm de keycloak>
+NUXT_PUBLIC_KEYCLOAK = <URL de autenticación oidc de keycloak>
+
+```
+
+Para el despliegue en producción se debe hacer un archivo `.env.production`
+
+```bash
 # Api del geonode fuente del catálogo
 NUXT_PUBLIC_GEONODE_API = <geonode api de producción>
 # Url del geonode fuente del catálogo
@@ -197,6 +214,10 @@ NUXT_PUBLIC_ENABLE_CATALOGO_CARGA = true
 NUXT_PUBLIC_ENABLE_CONSULTA = true
 NUXT_PUBLIC_ENABLE_IAA = true
 NUXT_PUBLIC_ENABLE_LEVANTAMIENTO = true
+NUXT_PUBLIC_KEYCLOAK_BASE_URL = <URL principal de keycloak>
+NUXT_PUBLIC_KEYCLOAK_REALM = <Realm de keycloak>
+NUXT_PUBLIC_KEYCLOAK = <URL de autenticación oidc de keycloak>
+
 ```
 
 ##  Cómo contribuir al SIGIC

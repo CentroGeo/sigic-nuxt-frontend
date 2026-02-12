@@ -7,6 +7,53 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.9.4] - 10-02-2026
+
+### Arreglado (Fix)
+
+- Se añadieron keycloakIssuer y keycloakClientId a la configuración pública de runtime en nuxt.config.ts
+- Se modificó el flujo de cierre de sesión en pages/mi-cuenta.vue para primero cerrar la sesión localmente y luego redirigir al usuario al endpoint de logout de Keycloak con los parámetros requeridos (id_token_hint y client_id).
+- Se extendió el objeto de sesión en server/api/auth/[...].ts para incluir idToken, permitiendo que el flujo de cierre de sesión proporcione a Keycloak la pista de token necesaria (id_token_hint).
+
+## [0.9.3] - 10-02-2026
+
+### Arreglado (Fix)
+
+- Se agregó `NUXT_APP_BASE_URL` como argumento de tiempo de compilación y como variable de entorno en el `Dockerfile`, tanto en la etapa de construcción como en la de ejecución, asegurando que la URL base esté explícitamente definida y disponible durante la compilación y en tiempo de ejecución.
+- Se actualizó `nuxt.config.ts` para usar `NUXT_APP_BASE_URL` (en lugar de `NUXT_PUBLIC_APP_BASE_PATH`) al establecer `appBasePath`, que ahora es la fuente principal de la URL base de la aplicación.
+- Se modificó la configuración pública en tiempo de ejecución para usar `NUXT_APP_BASE_URL` en `basePath`, garantizando que el cliente reciba la ruta base correcta.
+- Se habilitó el renderizado del lado del servidor (`ssr: true`) en la configuración de Nuxt y se estableció el `baseURL` de la aplicación Nuxt para que utilice el nuevo `appBasePath`.
+- Se actualizó la configuración del servidor Nitro para usar `appBasePath` como su `baseURL`, se estableció el `preset` en `node-server` y se deshabilitó la compresión de los assets públicos para lograr un comportamiento del servidor más predecible.
+
+## [0.9.2] - 09-02-2026
+
+### Arreglado (Fix)
+
+- Se hicieron ajustes para que la sección de servicios remotos dirija automáticamente a la sección de servicios remotos sugeridos cuando no se ha iniciado sesión.
+- En las tarjetas de los catálogos remotos sugeridos, se cambió el botón de Importar recursos por Registrar Servicio. Este aparece deshabilitado en caso de que no se haya iniciado sesión y, cuando sí se ha iniciado sesión, redirije a la sección de registro de servicios remotos y se autocompletan los campos.
+- Se implementó un modal con información extra. Este se abre al hacer clic en Más Información en las tarjetas de catálogos externos sugeridos.
+
+## [0.9.1] - 06-02-2026
+
+### Arreglado (Fix)
+
+- Se mejoró el manejo de errores de las funciones para solicitar geometrías, tablas, etc.
+- Se agregó un botón para reintentar la petición de recursos en consulta cuando esta falla.
+
+## [0.9.0] - 05-02-2026
+
+### Agregado (Added)
+
+- Se agregan las rutas para la sección de revisor en el módulo de levantamiento
+
+## [0.8.1] - 05-02-2026
+
+### Arreglado (Fix)
+
+- Se resuelve un bug que hacía que se marcara como cargado un documento antes de obtener la información necesaria para construir todos los elementos de la tarjeta.
+- Se agrega manejo de errores en la función que revisa si un servidor arcgis tiene FeatureServer.
+- Se reactiva la función de seleccionar visualizar una capa de un servidor arcgis únicamente en un lado de una capa.
+
 ## [0.8.0] - 04-02-2026
 
 ### Agregado (Added)
@@ -123,6 +170,12 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.9.4]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.3...v0.9.4
+[0.9.3]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.2...v0.9.3
+[0.9.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.1...v0.9.2
+[0.9.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.0...v0.9.1
+[0.9.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.8.1...v0.9.0
+[0.8.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.8.0...v0.8.1
 [0.7.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.7.2...v0.8.0
 [0.7.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.7.0...v0.7.1
