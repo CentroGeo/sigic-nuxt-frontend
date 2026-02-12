@@ -51,13 +51,37 @@ onMounted(async () => {
         :class="{ revisor: storeLevantamiento.esRevisor }"
       >
         <li>
-          <nuxt-link to="/levantamiento/revision-proyectos">Revisión de proyectos</nuxt-link>
+          <nuxt-link
+            :class="{
+              ['router-link-active router-link-exact-active']: route.path.includes(
+                '/levantamiento/revision-proyectos'
+              ),
+            }"
+            to="/levantamiento/revision-proyectos"
+            >Revisión de proyectos</nuxt-link
+          >
         </li>
         <li>
-          <nuxt-link to="/levantamiento/revision-aportes">Revisión de aportes</nuxt-link>
+          <nuxt-link
+            :class="{
+              ['router-link-active router-link-exact-active']: route.path.includes(
+                '/levantamiento/revision-aportes'
+              ),
+            }"
+            to="/levantamiento/revision-aportes"
+            >Revisión de aportes</nuxt-link
+          >
         </li>
         <li>
-          <nuxt-link to="/levantamiento/revision-descargas">Revisión de descargar</nuxt-link>
+          <nuxt-link
+            :class="{
+              ['router-link-active router-link-exact-active']: route.path.includes(
+                '/levantamiento/revision-descargas'
+              ),
+            }"
+            to="/levantamiento/revision-descargas"
+            >Revisión de descargar</nuxt-link
+          >
         </li>
       </ul>
     </div>
