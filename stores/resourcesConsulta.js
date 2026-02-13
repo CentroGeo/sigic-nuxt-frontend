@@ -63,7 +63,7 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
       const queryParams = {
         'filter{complete_metadata}': 'true',
         page: pageNum,
-        page_size: 2,
+        page_size: 10,
         ...params,
       };
       const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
@@ -114,13 +114,17 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
       const { gnoxyFetch } = useGnoxyUrl();
       const maxAttempts = 3;
       const url = `${config.public.geonodeApi}/sigic-resources/${pkToFind}`;
-      // TODO: Si la petición falla porque el recurso es privado, eliminarlo de la store de seleccion
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         try {
           const resourceRes = await gnoxyFetch(url);
+
           if (!resourceRes.ok) {
-            console.error(`Resource fetch failed: ${resourceRes.status}`);
-            return 'Error';
+            if (attempt === maxAttempts - 1) {
+              console.error(`Resource fetch failed: ${resourceRes.status}`);
+              return 'Error';
+            } else {
+              continue;
+            }
           }
           const resource = await resourceRes.json();
           const resourceData = resource.resource;
@@ -134,10 +138,13 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
 
           return resourceData;
         } catch {
-          console.warn(`Falló el intento ${attempt + 1}.`);
+          if (attempt === maxAttempts - 1) {
+            return 'Error';
+          } else {
+            console.warn(`Reintentando recuperar la información de ${pkToFind}`);
+          }
         }
       }
-      return;
     },
 
     /**

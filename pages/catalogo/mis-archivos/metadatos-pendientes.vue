@@ -27,13 +27,11 @@ const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion',
 const paginaActual = ref(0);
 const tamanioPagina = 10;
 const totalPags = computed(() => Math.ceil(totalResources.value / tamanioPagina));
-const modalFiltroAvanzado = ref(null);
-const isFilterActive = ref(false);
 const seleccionOrden = computed({
   get: () => storeFilters.filters.sort,
   set: (value) => storeFilters.updateFilter('sort', value),
 });
-const seleccionTipoArchivo = ref('');
+const seleccionTipoArchivo = ref('all');
 const inputSearch = computed({
   get: () => storeFilters.filters.inputSearch,
   set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
@@ -84,19 +82,6 @@ async function fetchNewData() {
   isLoading.value = false;
 }
 
-function applyAdvancedFilter() {
-  isFilterActive.value = true;
-  modalFiltroAvanzado.value.cerrarModalBusqueda();
-  storeFilters.buildQueryParams(seleccionTipoArchivo.value);
-}
-
-function resetAdvancedFilter() {
-  isFilterActive.value = false;
-  storeFilters.resetFilters();
-  modalFiltroAvanzado.value.cerrarModalBusqueda();
-  storeFilters.buildQueryParams(seleccionTipoArchivo.value);
-}
-
 watch([seleccionTipoArchivo, seleccionOrden], () => {
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
 });
@@ -124,8 +109,6 @@ onMounted(async () => {
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
   storeResources.getMyTotal('disponibles', params.value);
   storeResources.getMyTotal('publicacion', params.value);
-  //storeResources.getMyTotal('pendientes', params.value);
-  //await fetchNewData();
 });
 </script>
 
@@ -172,6 +155,7 @@ onMounted(async () => {
                       type="search"
                       class="campo-busqueda-entrada"
                       placeholder="Campo de búsqueda"
+                      @keyup.enter="storeFilters.buildQueryParams(seleccionTipoArchivo)"
                     />
 
                     <button
@@ -188,27 +172,13 @@ onMounted(async () => {
                       class="boton-primario boton-pictograma campo-busqueda-buscar"
                       aria-label="Buscar"
                       type="button"
-                      @click="storeFilters.buildQueryParams"
+                      @click="storeFilters.buildQueryParams(seleccionTipoArchivo)"
                     >
                       <span class="pictograma-buscar" aria-hidden="true" />
                     </button>
                   </form>
                 </ClientOnly>
               </div>
-              <!--               <div class="columna-2 flex-vertical-final">
-                <button
-                  :class="
-                    isFilterActive
-                      ? 'boton-primario boton-pictograma boton-grande'
-                      : 'boton-secundario boton-pictograma boton-grande'
-                  "
-                  aria-label="Filtro Avanzado"
-                  type="button"
-                  @click="modalFiltroAvanzado.abrirModalBusqueda"
-                >
-                  <span class="pictograma-filtro" aria-hidden="true" />
-                </button>
-              </div> -->
             </div>
           </div>
         </div>
@@ -253,13 +223,6 @@ onMounted(async () => {
           </div>
         </div>
       </main>
-
-      <!-- Modal Búsqueda avanzada -->
-      <ConsultaModalBusqueda
-        ref="modalFiltroAvanzado"
-        @apply-filter="applyAdvancedFilter"
-        @reset-filter="resetAdvancedFilter"
-      />
     </template>
   </UiLayoutPaneles>
 </template>

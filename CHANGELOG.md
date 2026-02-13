@@ -7,7 +7,20 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
-## [0.9.5] - 10-02-2026
+## [0.9.6] - 13-02-2026
+
+### Arreglado (Fix)
+
+- Se agregó un spinner en la vista de inicio para esperar la carga de las capas.
+- Se agregó el estilo de la capa en el redireccionamiento de inicio a capas.
+- Se reimplementó el middleware que redirige a inicio de sesión si es necesario en los botones que llevan de inicio a carga de recursos.
+- Se ajustó el manejo de errores y reintentos en las peticiones de recursos en consulta.
+- Se eliminó la opción de categoría Sin Clasificar en el modal de búsqueda avanzada.
+- Se hicieron ajustes en la interfaz para cuando no se encuentran resultados que coincidan con la búsqueda.
+- Ajustando el marcador de activo en el filtro avanzado.
+- Se implementó la búsqueda al hacer enter en los módulos de consulta y catálogo.
+
+## [0.9.5] - 12-02-2026
 
 ### Arreglado (Fix)
 
@@ -180,6 +193,7 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.9.6]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.5...v0.9.6
 [0.9.5]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.4...v0.9.5
 [0.9.4]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.3...v0.9.4
 [0.9.3]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.2...v0.9.3

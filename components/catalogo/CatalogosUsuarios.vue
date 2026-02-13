@@ -1,6 +1,6 @@
 <script setup>
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { fetchHarvesters } from '~/utils/catalogo';
+import { fetchRemoteServices } from '~/utils/catalogo';
 const { gnoxyFetch } = useGnoxyUrl();
 const config = useRuntimeConfig();
 const userID = ref(null);
@@ -12,7 +12,7 @@ const fetchStatus = ref(null);
 const seleccionOrden = ref('-created');
 const inputSearch = ref(null);
 const paginaActual = ref(0);
-const tamanioPagina = 10;
+const tamanioPagina = 5;
 const totalHarvesters = ref();
 const totalPags = computed(() => Math.ceil(totalHarvesters.value / tamanioPagina));
 const queryParams = ref({
@@ -47,7 +47,12 @@ async function getUserInfo() {
  * Esta petición obtiene el total de servicios externos
  */
 async function getTotal() {
-  const url = `${config.public.geonodeApi}/services/`;
+  let url;
+  if (inputSearch.value) {
+    url = `${config.public.geonodeApi}/services/?title=${inputSearch.value.trim()}`;
+  } else {
+    url = `${config.public.geonodeApi}/services/`;
+  }
   const requestServices = await gnoxyFetch(url);
   if (!requestServices.ok) {
     const error = await requestServices.json();
@@ -63,7 +68,8 @@ async function getTotal() {
  */
 async function fetchResources() {
   isLoadingPage.value = true;
-  const { status, data } = await fetchHarvesters(queryParams.value);
+  totalHarvesters.value = await getTotal();
+  const { status, data } = await fetchRemoteServices(queryParams.value);
   harvesters.value = data;
   fetchStatus.value = status;
   isLoadingPage.value = false;
@@ -175,6 +181,7 @@ onMounted(async () => {
                     type="search"
                     class="campo-busqueda-entrada"
                     placeholder="Campo de búsqueda"
+                    @keyup.enter="searchByName"
                   />
 
                   <button
@@ -220,7 +227,7 @@ onMounted(async () => {
 
     <!--Si aun no hay servicios catgados por usuarios-->
     <div
-      v-if="!isLoadingGeneral && fetchStatus === 'ok' && harvesters.length === 0"
+      v-if="!isLoadingGeneral && !isLoadingPage && fetchStatus === 'ok' && harvesters.length === 0"
       class="flex flex-contenido-centrado"
     >
       <div class="texto-color-error borde-redondeado-8 sin-recursos" style="max-width: 50%">
@@ -236,6 +243,12 @@ onMounted(async () => {
       </div>
     </div>
 
+    <div
+      v-if="!isLoadingGeneral && isLoadingPage && harvesters.length === 0"
+      class="flex flex-contenido-centrado m-y-5"
+    >
+      <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
+    </div>
     <!--La tabla de servicios remotos-->
     <div
       v-if="!isLoadingGeneral && fetchStatus === 'ok' && harvesters.length > 0"
