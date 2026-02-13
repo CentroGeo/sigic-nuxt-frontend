@@ -161,13 +161,10 @@ export const useIAStore = defineStore('ia', {
       }
     },
 
-    /**
-     * Obtiene la lista de proyectos guardados por user_id
-     * y selecciona un proyecto si la lista no está vacía
-     * @returns {Array}
-     */
     async getProjectsList() {
+      //this.existeContexto = true;
       const token = this.authToken;
+
       const userEmail = this.userEmail;
 
       const formData = new FormData();
@@ -184,23 +181,20 @@ export const useIAStore = defineStore('ia', {
       if (!response.ok) {
         throw new Error('Error al consultar proyectos');
       }
+
       const data = await response.json();
-
-      // Para que el último sea siempre el primero
-      this.data = data.reverse();
-
-      // asigna data a proyectos
       this.proyectos = data;
 
-      // si data es mayor a cero selecciona el primer proyecto de la lista
       if (data.length > 0) {
-        this.proyectoSeleccionado = data[0];
+        // this.proyectoSeleccionado = data[0];
+        this.proyectoSeleccionado = data[data.length - 1];
         this.existenProyectos = true;
       } else {
         this.proyectoSeleccionado = null;
         this.existenProyectos = false;
       }
 
+      //console.log('Proyectos:', data);
       return data;
     },
 

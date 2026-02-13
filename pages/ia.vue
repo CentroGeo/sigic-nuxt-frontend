@@ -8,14 +8,14 @@ definePageMeta({
     <UiNavegacionLateral
       :id-colapsable="`uinavegacionlateral-` + Math.random().toString(36).substring(2)"
       :sub-paginas="[
-        // {
-        //   pictograma: 'pictograma-chat',
-        //   ruta: 'ia/chats',
-        //   globo: 'Chats',
-        // },
+        {
+          pictograma: 'pictograma-chat',
+          ruta: '/ia/chats',
+          globo: 'Chats',
+        },
         {
           pictograma: 'pictograma-proyectos',
-          ruta: 'ia/proyectos',
+          ruta: '/ia/proyectos',
           globo: 'Proyectos',
         },
       ]"

@@ -275,13 +275,9 @@ export const useIAStore = defineStore('ia', {
      * @param {Number} user_id
      * @returns {Array} data con los chats
      */
-    async getChatList(user_id) {
+    async getChatList() {
       const token = this.authToken;
-      //this.existeContexto = true;
-      console.log(user_id);
-
       const userEmail = this.userEmail;
-
       const formData = new FormData();
       formData.append('user_id', userEmail);
 
@@ -299,14 +295,7 @@ export const useIAStore = defineStore('ia', {
 
       const data = await response.json();
       this.chats = data;
-
-      /*       if (data.length > 0) {
-        this.proyectoSeleccionado = data[0];
-      } else {
-        this.proyectoSeleccionado = null;
-      } */
-      //this.existenProyectos = true;
-      //console.log('Proyectos:', data);
+      console.log('Chats', this.chats);
       return data;
     },
 

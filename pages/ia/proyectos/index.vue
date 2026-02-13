@@ -1,9 +1,7 @@
 <script setup>
 const router = useRouter();
 const storeIA = useIAStore();
-const idSeleccionado = computed(() => storeIA.proyectoSeleccionado?.id);
 
-const proyectos = ref([]);
 const campoBusqueda = ref('');
 
 // Función para consultar lista de proyectos
@@ -13,14 +11,14 @@ const loadProjectList = async () => {
   // Consulta proyectos
   arrayProjects = await storeIA.getProjectsList();
 
-  proyectos.value = arrayProjects;
   // Ir a proyecto seleccionado
-  if (proyectos.value.length > 0) {
-    router.push(`/ia/proyecto/${idSeleccionado.value}`);
+  if (arrayProjects.length > 0) {
+    router.push(`/ia/proyecto/${arrayProjects[0].id}`);
   }
 };
 
 onMounted(() => {
+  // Recuperando la lista de proyectos
   loadProjectList();
 });
 </script>
