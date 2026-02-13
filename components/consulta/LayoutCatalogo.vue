@@ -294,13 +294,13 @@ onMounted(async () => {
           <div class="flex flex-contenido-centrado m-y-3">
             <form class="campo-busqueda columna-12" @submit.prevent>
               <label for="idunicobusqueda" class="a11y-solo-lectura"> Campo de búsqueda </label>
+              <!--:disabled="isLoading"-->
               <input
                 id="input-busqueda-consulta"
                 v-model="inputSearch"
                 type="search"
                 class="campo-busqueda-entrada"
                 placeholder="Campo de búsqueda"
-                :disabled="isLoading"
                 @keyup.enter="storeFilters.buildQueryParams(storeConsulta.resourceType)"
               />
 
@@ -308,7 +308,6 @@ onMounted(async () => {
                 aria-label="Borrar"
                 class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
                 type="button"
-                :disabled="isLoading"
                 @click="resetSearch"
               >
                 <span aria-hidden="true" class="pictograma-cerrar" />
@@ -318,7 +317,6 @@ onMounted(async () => {
                 aria-label="Buscar"
                 class="boton-primario boton-pictograma campo-busqueda-buscar"
                 type="button"
-                :disabled="isLoading"
                 @click="storeFilters.buildQueryParams(storeConsulta.resourceType)"
               >
                 <span class="pictograma-buscar" aria-hidden="true" />
@@ -334,7 +332,6 @@ onMounted(async () => {
               "
               aria-label="Filtro Avanzado"
               style="position: relative"
-              :disabled="isLoading"
               @click="modalFiltroAvanzado.abrirModalBusqueda"
             >
               <div v-if="isFilterActive" class="circulo"></div>
