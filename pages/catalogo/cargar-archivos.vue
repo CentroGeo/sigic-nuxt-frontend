@@ -19,9 +19,9 @@ const hayCargas = ref(false);
 const { data } = useAuth();
 const { gnoxyFetch } = useGnoxyUrl();
 
-const base_files = ['.geojson', '.gpkg', '.csv'];
+//const base_files = ['.geojson', '.gpkg', '.csv'];
 const docs_files = ['.txt', '.pdf'];
-//const base_files = ['.geojson', '.gpkg', '.zip', '.csv'];
+const base_files = ['.geojson', '.gpkg', '.zip', '.csv'];
 //const docs_files = ['.txt', '.pdf', '.xls', '.xlsx'];
 
 async function guardarArchivo(files) {
