@@ -28,3 +28,11 @@ services:
       NUXT_PUBLIC_KEYCLOAK_CLIENT_ID: ${NUXT_PUBLIC_KEYCLOAK_CLIENT_ID}
       NUXT_AUTH_SECRET: ${NUXT_AUTH_SECRET}
       NUXT_PUBLIC_APP_BASE_PATH: ${NUXT_PUBLIC_APP_BASE_PATH}
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1400
