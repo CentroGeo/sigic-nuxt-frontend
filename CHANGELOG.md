@@ -7,6 +7,16 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.9.5] - 10-02-2026
+
+### Arreglado (Fix)
+
+- Se reemplazaron todas las instancias de `NUXT_PUBLIC_APP_BASE_PATH` por `NUXT_APP_BASE_URL` en `.github/workflows/docker-compose-develop.yml`, incluyendo argumentos de build, generación del archivo de entorno e inyección de variables en el entorno de docker-compose.
+- Se actualizó el `Dockerfile` para eliminar `NUXT_PUBLIC_APP_BASE_PATH` y establecer `NUXT_APP_BASE_URL` con un valor predeterminado vacío, reflejando la nueva convención de nombres y el valor por defecto.
+- Se modificó `env_sample` para eliminar `NUXT_PUBLIC_APP_BASE_PATH` y agregar `NUXT_APP_BASE_URL`, junto con otros ajustes menores en el orden y la incorporación de variables.
+- Se agregaron `NUXT_PUBLIC_KEYCLOAK_ISSUER` y `NUXT_PUBLIC_KEYCLOAK_CLIENT_ID` al entorno de los servicios en `docker-compose-ghcr.yml`, `docker-compose-local.yml` y `docker-compose-minimal.yml` para asegurar que los valores de Keycloak estén disponibles en el cliente.
+- Se actualizó `nuxt.config.ts` para referenciar `NUXT_PUBLIC_KEYCLOAK_ISSUER` y `NUXT_PUBLIC_KEYCLOAK_CLIENT_ID` en lugar de las variables exclusivas del servidor, garantizando su correcta exposición en la configuración de runtime de Nuxt.
+
 ## [0.9.4] - 10-02-2026
 
 ### Arreglado (Fix)
