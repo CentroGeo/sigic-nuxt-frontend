@@ -55,7 +55,6 @@ export default defineNuxtConfig({
 
   nitro: {
     baseURL: appBasePath,
-    preset: 'node-server',
     compressPublicAssets: false,
   },
 
