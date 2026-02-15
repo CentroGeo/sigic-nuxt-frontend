@@ -283,7 +283,7 @@ watch(
                     seleccionado: proyect.id === +idSeleccionado || proyect.title === '',
                   }"
                 >
-                  <div class="proyecto-titulo m-b-1">{{ proyect.title }} - {{ proyect.id }}</div>
+                  <div class="proyecto-titulo m-b-1">{{ proyect.title }}</div>
                   <div class="flex">
                     <UiNumeroElementos :numero="proyect.numero_contextos" etiqueta="Contextos" />
                     <UiNumeroElementos :numero="proyect.numero_fuentes" etiqueta="Fuentes" />
@@ -377,18 +377,19 @@ watch(
                           alt="Imagen contexto"
                         />
                         <div class="tarjeta-cuerpo">
-                          <p class="tarjeta-titulo">{{ contexto.title }} - {{ contexto.id }}</p>
+                          <p class="tarjeta-titulo">{{ contexto.title }}</p>
                           <UiNumeroElementos :numero="contexto.num_files" etiqueta="Fuentes" />
                         </div>
                         <div class="tarjeta-pie">
-                          <!-- <nuxt-link
-                            class="boton-primario boton-chico"
+                          <button
+                            class="boton boton-primario boton-chico flex flex-contenido-separado"
+                            aria-label="Iniciar chat"
                             type="button"
-                            :to="`/ia/chat/dinamica?context_id=${contexto.id}`"
+                            @click="router.push(`/ia/chat/0/contexto/${contexto.id}`)"
                           >
                             Iniciar chat
                             <span class="pictograma-chat" aria-hidden="true" />
-                          </nuxt-link> -->
+                          </button>
 
                           <nuxt-link
                             class="boton-secundario boton-chico"

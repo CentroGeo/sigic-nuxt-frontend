@@ -48,7 +48,7 @@ const controlDeslizante = ref(null);
 const areaTextoRef = ref(null);
 const isSubmitting = ref(false);
 
-const chatID = computed(() => parseInt(route.params.id));
+const chatID = computed(() => parseInt(route.params.id) || 0);
 const contextID = computed(() => parseInt(route.params.idx));
 
 const idAleatorio = () => {
@@ -249,9 +249,9 @@ function renderMarkdown(content) {
   return DOMPurify.sanitize(marked.parse(content));
 }
 
-function enfocarAreaTexto() {
-  areaTextoRef.value.focus();
-}
+// function enfocarAreaTexto() {
+//   areaTextoRef.value.focus();
+// }
 
 // Función para hacer scroll al final solo si el usuario no ha hecho scroll manual
 function scrollToBottomIfNeeded() {
@@ -280,15 +280,12 @@ const submitMensaje = async () => {
   // Configuración inicial del chat
   const body = {
     user_id: userEmail,
-    //type: "Preguntar",
     type: 'RAG',
-    //context_id: parseInt(contextId),
     context_id: contextID.value,
-    //context_id: 9,
     // model: 'deepseek-r1',
     // model: 'qwen2:1.5b',
+    // model: "llama3.1",
     model: config.public.ollamaModel,
-    //model: "llama3.1",
     messages: [
       {
         role: 'system',
@@ -362,8 +359,6 @@ const submitMensaje = async () => {
   let mensajeRespuesta = '';
   // Hacer streaming de la respuesta
   try {
-    // const token = data.value?.accessToken;
-
     const streamRes = await fetch(`${config.public.iaBackendUrl}/queue/stream/${jobId}`, {
       method: 'GET',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -457,6 +452,13 @@ const submitMensaje = async () => {
 watch(seleccionProyecto, (nv) => {
   loadContexts(nv);
 });
+
+watch(
+  () => storeIA.chatsVersion,
+  () => {
+    loadChatsList();
+  }
+);
 
 onMounted(() => {
   // Recuperando la lista de chats
@@ -560,6 +562,7 @@ onMounted(() => {
       <main id="principal" class="">
         <div class="grid">
           <div class="columna-2" />
+
           <div class="columna-12">
             <div class="contenedor-chat">
               <div class="contenedor-chat-contenido">
@@ -577,21 +580,9 @@ onMounted(() => {
                             style="background-color: var(--boton-primario-deshabilitado-fondo)"
                           />
                         </div>
-                        <div>
-                          <!-- Mensaje chat -->
-                          <!--                     <p
-                      class="m-0 markdown-content"
-                      :class="
-                        m.actor == 'Humano' ? 'fondo-color-neutro p-2 borde-redondeado-20' : ''
-                      "
-                      :style="m.actor == 'Humano' ? 'max-width: 592px' : ''"
-                    >
-                      {{ m.message }}
-                      
-                    </p> -->
 
+                        <div>
                           <!-- Mensaje chat con markdown -->
-                          <!-- TO DO: corregir altura de contenedor de mensaje  -->
                           <!-- eslint-disable vue/no-v-html -->
                           <div
                             class="m-0 markdown-content"
@@ -605,14 +596,12 @@ onMounted(() => {
                           ></div>
                           <!-- eslint-enable -->
 
-                          <!-- Reporte -->
-                          <div v-if="m.actor == 'AI' && m.reporte" class="">
+                          <!-- <div v-if="m.actor == 'AI' && m.reporte" class="">
                             <p>
                               ¿Te gustaría que genere un reporte con esta información o prefieres
                               seguir consultando?
                             </p>
                             <div class="flex">
-                              <!-- Abril modal -->
                               <button
                                 class="boton-primario boton-chico"
                                 aria-label="Generar reporte"
@@ -622,7 +611,7 @@ onMounted(() => {
                                 Generar reporte
                                 <span class="pictograma-reporte" aria-hidden="true" />
                               </button>
-                              <!-- Enfocar Area Texto -->
+                              
                               <button
                                 class="boton-secundario boton-chico"
                                 aria-label="Seguir consultando"
@@ -633,7 +622,7 @@ onMounted(() => {
                                 <span class="pictograma-actualizar" aria-hidden="true" />
                               </button>
                             </div>
-                          </div>
+                          </div> -->
                         </div>
                       </div>
                     </div>
@@ -713,18 +702,10 @@ onMounted(() => {
               aria-label="Iniciar chat"
               type="button"
               :disabled="seleccionContexto === ''"
+              @click="router.push(`/ia/chat/0/contexto/${seleccionContexto}`)"
             >
               Iniciar chat
             </button>
-            <!-- <button
-              class="boton boton-primario boton-chico"
-              aria-label="Iniciar chat"
-              type="button"
-              :disabled="seleccionContexto === ''"
-              @click="router.push(`/ia/chat/dinamica?context_id=${seleccionContexto}`)"
-            >
-              Iniciar chat
-            </button> -->
           </template>
         </SisdaiModal>
 
@@ -785,6 +766,7 @@ onMounted(() => {
           </template>
         </SisdaiModal>
 
+        <!-- TODO: actualizar modal de reporte -->
         <SisdaiModal ref="reporteModal">
           <template #encabezado>
             <h2>

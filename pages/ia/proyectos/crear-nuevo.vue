@@ -407,7 +407,7 @@ onMounted(() => {
               @click="seleccionarProyecto(proyect)"
             >
               <div class="proyecto p-l-4 p-r-2 p-y-1">
-                <div class="proyecto-titulo m-b-1">{{ proyecto.title }} - {{ proyecto.id }}</div>
+                <div class="proyecto-titulo m-b-1">{{ proyecto.title }}</div>
                 <div class="flex">
                   <UiNumeroElementos :numero="proyecto.numero_contextos" etiqueta="Contextos" />
                   <UiNumeroElementos :numero="proyecto.numero_fuentes" etiqueta="Fuentes" />

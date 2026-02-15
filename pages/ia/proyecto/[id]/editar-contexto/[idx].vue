@@ -278,7 +278,7 @@ onUnmounted(() => {
                     seleccionado: proyect.id === +idProyectoSeleccionado || proyect.title === '',
                   }"
                 >
-                  <div class="proyecto-titulo m-b-1">{{ proyect.title }} - {{ proyect.id }}</div>
+                  <div class="proyecto-titulo m-b-1">{{ proyect.title }}</div>
                   <div class="flex">
                     <UiNumeroElementos :numero="proyect.numero_contextos" etiqueta="Contextos" />
                     <UiNumeroElementos :numero="proyect.numero_fuentes" etiqueta="Fuentes" />

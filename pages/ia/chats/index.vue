@@ -394,19 +394,10 @@ onMounted(() => {
               class="boton boton-primario boton-chico"
               aria-label="Iniciar chat"
               type="button"
-              :disabled="seleccionContexto === ''"
+              @click="router.push(`/ia/chat/0/contexto/${seleccionContexto}`)"
             >
               Iniciar chat
             </button>
-            <!-- <button
-              class="boton boton-primario boton-chico"
-              aria-label="Iniciar chat"
-              type="button"
-              :disabled="seleccionContexto === ''"
-              @click="router.push(`/ia/chat/dinamica?context_id=${seleccionContexto}`)"
-            >
-              Iniciar chat
-            </button> -->
           </template>
         </SisdaiModal>
 
