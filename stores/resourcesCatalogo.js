@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
-import { buildUrl, getSLDs, resourceTypeDic, resourceTypeGeonode } from '~/utils/consulta';
+import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
+import { buildUrl, resourceTypeDic, resourceTypeGeonode } from '~/utils/consulta';
 
 export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => {
   const config = useRuntimeConfig();
@@ -82,6 +83,8 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
      */
     async getTotalResources(resourceType = storeConsulta.resourceType, query) {
       const { gnoxyFetch } = useGnoxyUrl();
+      const { getSLDs } = useResourcesSupplements();
+
       const queryParams = {
         'sort[]': '-last_updated',
         page_size: 1,
@@ -110,6 +113,8 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
      */
     async getResourcesByPage(resourceType = storeConsulta.resourceType, pageNum, pageSize, params) {
       const { gnoxyFetch } = useGnoxyUrl();
+      const { getSLDs } = useResourcesSupplements();
+
       this.isLoading = true;
       const queryParams = {
         page: pageNum,
@@ -201,6 +206,8 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
      */
     async getMyResourcesByPage(section, pageNum, pageSize, query) {
       const { gnoxyFetch } = useGnoxyUrl();
+      const { getSLDs } = useResourcesSupplements();
+
       this.isLoading = true;
       const endpoint = section === 'publicacion' ? '/sigic/requests/' : '/api/v2/sigic-resources/';
       const queryParams = {

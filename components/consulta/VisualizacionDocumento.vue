@@ -1,9 +1,11 @@
 <script setup>
 import { onBeforeUnmount, ref } from 'vue';
-import { fetchDoc, resourceTypeDic } from '~/utils/consulta';
+import { useDownloadResources } from '~/composables/useDownloadResources';
+import { resourceTypeDic } from '~/utils/consulta';
 
 const storeResources = useResourcesConsultaStore();
 const storeSelected = useSelectedResources2Store();
+const { fetchDoc } = useDownloadResources();
 const resourceType = resourceTypeDic.document;
 const embedRef = ref(null);
 const selectedPk = computed(() => storeSelected.lastVisible()?.pk ?? null);

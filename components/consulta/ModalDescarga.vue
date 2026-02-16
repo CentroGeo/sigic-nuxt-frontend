@@ -1,12 +1,6 @@
 <script setup>
-import {
-  downloadDocs,
-  downloadMetadata,
-  downloadNoGeometry,
-  downloadRaster,
-  downloadWMS,
-} from '@/utils/consulta';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+import { useDownloadResources } from '~/composables/useDownloadResources';
 const props = defineProps({
   resourceType: { type: String, required: true },
   selectedElement: {
@@ -15,6 +9,8 @@ const props = defineProps({
   },
 });
 const { resourceType, selectedElement } = toRefs(props);
+const { downloadDocs, downloadMetadata, downloadWMS, downloadNoGeometry, downloadRaster } =
+  useDownloadResources();
 const modalDescarga = ref(null);
 const optionsList = ref(null);
 const selectedOption = ref();

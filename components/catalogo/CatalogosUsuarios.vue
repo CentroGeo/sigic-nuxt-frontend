@@ -1,7 +1,9 @@
 <script setup>
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { fetchRemoteServices } from '~/utils/catalogo';
+import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
 const { gnoxyFetch } = useGnoxyUrl();
+const { fetchRemoteServices } = useResourcesSupplements();
+
 const config = useRuntimeConfig();
 const userID = ref(null);
 const harvesters = ref([]);
