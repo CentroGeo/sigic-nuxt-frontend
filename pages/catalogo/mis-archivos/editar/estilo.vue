@@ -1,6 +1,5 @@
 <script setup>
 import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
-//import { getSLDs, wait } from '~/utils/consulta';
 
 definePageMeta({
   middleware: 'sidebase-auth',
