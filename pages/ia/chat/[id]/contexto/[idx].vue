@@ -81,7 +81,7 @@ if (contextID.value) {
     loadExistentChat(chatID.value);
   }
 } else {
-  console.log('Chat no válido');
+  console.warn('Chat no válido');
 }
 
 // Configurar marked (opcional)
@@ -149,7 +149,7 @@ const loadChatsList = async () => {
 
   // Consulta proyectos
   arrayChats = await storeIA.getChatList();
-  console.log('arrayChats', arrayChats);
+  // console.log('arrayChats', arrayChats);
 
   transformarHistorial(arrayChats);
 };
@@ -166,7 +166,7 @@ const loadProjectList = async () => {
 
 // Función para abrir y nevegar a la vista del chat
 function openChat(chat) {
-  console.log('openChat: ', chat);
+  // console.log('openChat: ', chat);
   storeIA.setChatActual(chat);
 
   router.push(`/ia/chat/${chat.id}/contexto/${chat.id_contexto}`);
@@ -198,8 +198,7 @@ const handleEdit = async () => {
 
     editarChatModal.value?.cerrarModal();
   } catch (err) {
-    console.error('Error al editar el chat.');
-    console.log(err);
+    console.error('Error al editar el chat.', err);
   }
 };
 
@@ -228,8 +227,7 @@ const handleDelete = async () => {
 
     idChat.value = null;
   } catch (err) {
-    console.error('Error al eliminar el chat.');
-    console.log(err);
+    console.error('Error al eliminar el chat.', err);
   }
 };
 
@@ -398,8 +396,8 @@ const submitMensaje = async () => {
             //const statusObj = JSON.parse(statusStr);
             //console.log(statusObj["status"])
           } catch (err) {
-            console.log('Error Leyendo status: ' + err);
-            console.log(resultElement);
+            console.error('Error Leyendo status: ' + err);
+            console.error(resultElement);
           }
         }
 
@@ -428,8 +426,8 @@ const submitMensaje = async () => {
                 scrollToBottomIfNeeded();
               }
             } catch (err) {
-              console.log('Error Leyendo data: ' + err);
-              console.log(resultElement);
+              console.error('Error Leyendo data: ' + err);
+              console.error(resultElement);
             }
           }
         }
@@ -438,8 +436,8 @@ const submitMensaje = async () => {
   } catch (err) {
     //resultado.value = 'Error en el streaming: ' + err
     //mensajes.value[aiMessageIndex].message = 'Error en el streaming: ' + err
-    console.log('Error en el streaming: ' + err);
-    console.log(mensajeRespuesta);
+    console.error('Error en el streaming: ' + err);
+    console.error(mensajeRespuesta);
 
     scrollToBottomIfNeeded();
   } finally {

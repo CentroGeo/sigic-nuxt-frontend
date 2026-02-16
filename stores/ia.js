@@ -44,7 +44,7 @@ export const useIAStore = defineStore('ia', {
         //formData.append('visibility', visibilidadProyecto.value);
         formData.append('public', isPublic === 'publico' ? 'True' : 'False');
 
-        console.log(archivos);
+        console.log('archivos:', archivos);
 
         // Agregar archivos si existen
         archivos.forEach((archivo) => {
@@ -85,7 +85,7 @@ export const useIAStore = defineStore('ia', {
             this.isUploading = false;
             if (xhr.status >= 200 && xhr.status < 300) {
               const data = JSON.parse(xhr.responseText);
-              console.log('Proyecto guardado:', data);
+              console.log('Proyecto guardado correctamente:', data);
               this.existenProyectos = true;
               resolve(data);
             } else {
@@ -116,11 +116,16 @@ export const useIAStore = defineStore('ia', {
     },
 
     async crearContexto(formData) {
+      console.log('crear contexto');
+
       const token = this.authToken;
       const userEmail = this.userEmail;
       formData.append('user_id', userEmail);
 
-      console.log('crear crearContexto');
+      // Log para depuración
+      for (const pair of formData.entries()) {
+        console.log(`${pair[0]}: ${pair[1]}`);
+      }
 
       try {
         const response = await fetch(
@@ -133,14 +138,14 @@ export const useIAStore = defineStore('ia', {
             body: formData,
           }
         );
-        console.log(response);
+        // console.log(response);
 
         if (!response.ok) {
           throw new Error('Error al guardar el contexto');
         }
 
         const data = await response.json();
-        console.log('Contexto guardado:', data);
+        console.log('Contexto guardado exitosamente:', data);
       } catch (error) {
         console.error('Error:', error);
         throw error;
@@ -295,14 +300,14 @@ export const useIAStore = defineStore('ia', {
 
       const data = await response.json();
       this.chats = data;
-      console.log('Chats', this.chats);
+      console.log('Chats:', this.chats);
       return data;
     },
 
     async getChat(chat_id) {
       const token = this.authToken;
       //this.existeContexto = true;
-      console.log(chat_id);
+      console.log('chat_id', chat_id);
 
       const response = await fetch(this.backend + '/api/chat/history/user', {
         method: 'POST',
@@ -318,7 +323,8 @@ export const useIAStore = defineStore('ia', {
       }
 
       const data = await response.json();
-      console.log(data);
+      // console.log(data);
+      console.log('openChat: ', data);
       //this.chats = data;
 
       /*       if (data.length > 0) {
@@ -504,6 +510,11 @@ export const useIAStore = defineStore('ia', {
         const userEmail = this.userEmail;
         formData.append('user_id', userEmail);
 
+        // imprime lo que va en el formData
+        for (const pair of formData.entries()) {
+          console.log(`${pair[0]}: ${pair[1]}`);
+        }
+
         const response = await fetch(
           this.backend + `/api/fileuploads/workspaces/admin/contexts/edit/${contexto_id}`,
           {
@@ -514,14 +525,14 @@ export const useIAStore = defineStore('ia', {
             body: formData,
           }
         );
-        console.log(response);
+        // console.log(response);
 
         if (!response.ok) {
           throw new Error('Error al actualizar el contexto');
         }
 
         const data = await response.json();
-        console.log('Contexto actualizado:', data);
+        console.log('Contexto actualizado exitosamente:', data);
       } catch (error) {
         console.error('Error:', error);
         throw error;
@@ -540,8 +551,7 @@ export const useIAStore = defineStore('ia', {
             },
           }
         );
-
-        console.log(response);
+        // console.log(response);
 
         if (!response.ok) {
           throw new Error('Error al eliminar el proyecto');
@@ -567,7 +577,7 @@ export const useIAStore = defineStore('ia', {
             },
           }
         );
-        console.log(response);
+        // console.log(response);
 
         if (!response.ok) {
           throw new Error('Error al eliminar el contexto');
@@ -597,7 +607,7 @@ export const useIAStore = defineStore('ia', {
       }
 
       const data = await response.json();
-      console.log(data);
+      console.log('Chat actualizado:', data);
 
       return data;
     },

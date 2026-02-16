@@ -261,8 +261,6 @@ function cargarArchivosGeonode() {
 
   archivosGeonode.value = [...archivosGeonode.value, ...nuevosArchivos];
   archivosTabla.value = [...archivosSeleccionados.value, ...archivosGeonode.value];
-  console.log('recursosSeleccionados.value', recursosSeleccionados.value);
-  console.log('archivosTabla.value', archivosTabla.value);
 }
 
 // Método para manejar la selección de archivos
@@ -279,8 +277,6 @@ const manejarSeleccionArchivos = (event) => {
 
   archivosSeleccionados.value = [...archivosSeleccionados.value, ...nuevosArchivos];
   archivosTabla.value = [...archivosSeleccionados.value, ...archivosGeonode.value];
-  console.log('Array.from(event.target.files)', Array.from(event.target.files));
-  console.log('archivosTabla.value', archivosTabla.value);
 
   event.target.value = ''; // Resetear el input para permitir seleccionar el mismo archivo otra vez
 };
@@ -326,9 +322,6 @@ const guardarProyecto = async () => {
       archivosSeleccionados.value,
       archivosGeonode.value
     );
-
-    // Notificación de éxito
-    console.log('Proyecto guardado correctamente');
 
     loaderModal.value?.cerrarModal();
     // Navega al proyecto guardado

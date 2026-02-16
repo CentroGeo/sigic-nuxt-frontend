@@ -90,7 +90,7 @@ const loadChatsList = async () => {
 
   // Consulta proyectos
   arrayChats = await storeIA.getChatList();
-  console.log('arrayChats', arrayChats);
+  // console.log('arrayChats', arrayChats);
   listaChats.value = arrayChats;
 
   transformarHistorial(arrayChats);
@@ -108,7 +108,7 @@ const loadProjectList = async () => {
 
 // Función para abrir y nevegar a la vista del chat
 function openChat(chat) {
-  console.log('openChat: ', chat);
+  // console.log('openChat: ', chat);
   storeIA.setChatActual(chat);
   router.push(`/ia/chat/${chat.id}/contexto/${chat.id_contexto}`);
 
@@ -147,8 +147,7 @@ const handleEdit = async () => {
 
     editarChatModal.value?.cerrarModal();
   } catch (err) {
-    console.error('Error al editar el chat.');
-    console.log(err);
+    console.error('Error al editar el chat.', err);
   }
 };
 
@@ -177,8 +176,7 @@ const handleDelete = async () => {
 
     idChat.value = null;
   } catch (err) {
-    console.error('Error al eliminar el chat.');
-    console.log(err);
+    console.error('Error al eliminar el chat.', err);
   }
 };
 

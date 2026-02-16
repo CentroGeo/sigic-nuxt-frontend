@@ -5,6 +5,8 @@ const props = defineProps({
     default: null,
   },
 });
+const { selectedElementPk } = toRefs(props);
+
 const storeResources = useResourcesIAStore();
 const emit = defineEmits(['tablaCargada']);
 
@@ -12,7 +14,7 @@ const paginaActual = ref(0);
 const tamanioPagina = 6;
 
 const resourceByPk = ref();
-resourceByPk.value = await storeResources.fetchResourceByPk(props.selectedElementPk);
+resourceByPk.value = await storeResources.fetchResourceByPk(selectedElementPk.value);
 
 const {
   variables,
@@ -33,8 +35,23 @@ watch([paginaActual], () => {
   });
 });
 
-watch(datos, () => {
-  emit('tablaCargada');
+watch(datos, (nv) => {
+  if (nv.length !== 0) {
+    emit('tablaCargada');
+  }
+});
+
+watch(selectedElementPk, async (nv) => {
+  variables.value = [];
+  datos.value = [];
+  totalFeatures.value = 0;
+  //
+  resourceByPk.value = await storeResources.fetchResourceByPk(nv);
+  fetchTable({
+    paginaActual: paginaActual.value,
+    tamanioPagina: tamanioPagina,
+    resource: resourceByPk.value,
+  });
 });
 </script>
 

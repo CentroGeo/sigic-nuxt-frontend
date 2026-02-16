@@ -121,11 +121,19 @@ const modalDocumento = ref(null);
 const blobeTitle = ref('');
 const modalDocResourcePk = ref();
 const isDocumentoReading = ref(false);
+const idDocGuardado = ref();
 /**
  * Abre un modal con la vista del documento embed
  * @param resource del que se toma el pk para la visualización
  */
 async function openResourceViewEmbed(resource) {
+  if (idDocGuardado.value === resource.geonode_id) {
+    isDocumentoReading.value = true;
+  } else {
+    idDocGuardado.value = resource.geonode_id;
+    isDocumentoReading.value = false;
+  }
+
   blobeTitle.value = resource.filename;
   modalDocResourcePk.value = resource.geonode_id;
 
@@ -137,7 +145,6 @@ async function openResourceViewEmbed(resource) {
     isDocumentoReading.value = false;
     resourceFilename.value = resource.filename;
     modalNoPublico.value?.abrirModal();
-
     console.warn(`El recurso "${resource.filename}" no está público.`);
   }
 }
@@ -146,11 +153,19 @@ const modalTabla = ref(null);
 const tableTitle = ref('');
 const modalTableResourcePk = ref('');
 const isDataTableReading = ref(false);
+const idTablaGuardado = ref();
 /**
  * Abre un modal con la vista del tabla de atributos
  * @param resource del que se toma el pk para la visualización
  */
 async function openResourceViewTable(resource) {
+  if (idTablaGuardado.value === resource.geonode_id) {
+    isDataTableReading.value = true;
+  } else {
+    idTablaGuardado.value = resource.geonode_id;
+    isDataTableReading.value = false;
+  }
+
   tableTitle.value = resource.filename;
   modalTableResourcePk.value = resource.geonode_id;
 
@@ -181,8 +196,7 @@ function openEliminarModal(element_id, type) {
 
 // Método para remover contexto o proyecto
 const handleDelete = async () => {
-  console.log(eliminarLabel.value);
-  console.log(delete_id.value);
+  console.log('eliminar', eliminarLabel.value, delete_id.value);
 
   if (eliminarLabel.value === 'contexto') {
     await storeIA.eliminarContexto(delete_id.value);

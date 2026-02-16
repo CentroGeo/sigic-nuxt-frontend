@@ -93,17 +93,12 @@ const editarContexto = async () => {
     mensajeError.value = '';
     mensajeExito.value = '';
 
-    // imprime lo que va en el formData
-    for (const pair of formData.entries()) {
-      console.log(`${pair[0]}: ${pair[1]}`);
-    }
-
     // Llamar a la acción del store
     await storeIA.actualizarContexto(formData, idContextoSeleccionado.value);
 
     // Éxito
     mensajeExito.value = 'Contexto actualizado exitosamente';
-    console.log('Contexto actualizado exitosamente');
+    // console.log('Contexto actualizado exitosamente');
 
     // Navega a la vista del proyecto en cuestión
     navigateTo(`/ia/proyecto/${idProyectoSeleccionado.value}`);

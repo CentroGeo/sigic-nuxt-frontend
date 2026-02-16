@@ -62,7 +62,7 @@ const toggleSeleccionFuente = (fuente) => {
 
 // Método para crear el contexto
 const crearContexto = async () => {
-  console.log(idSeleccionado.value);
+  // console.log(idSeleccionado.value);
 
   // Validaciones
   if (!idSeleccionado.value) {
@@ -80,8 +80,8 @@ const crearContexto = async () => {
 
   loaderModal.value?.abrirModal();
 
-  console.log('proyecto:' + idSeleccionado.value);
-  console.log(portadaContexto.value);
+  console.log('proyecto seleccionado:', idSeleccionado.value);
+  console.log('imagen seleccionada:', portadaContexto.value);
 
   // Preparar datos del formulario
   const formData = new FormData();
@@ -100,17 +100,12 @@ const crearContexto = async () => {
     mensajeError.value = '';
     mensajeExito.value = '';
 
-    // imprime lo que va en el formData
-    for (const pair of formData.entries()) {
-      console.log(`${pair[0]}: ${pair[1]}`);
-    }
-
     // Llamar a la acción del store
     await storeIA.crearContexto(formData);
 
     // Éxito
     mensajeExito.value = 'Contexto creado exitosamente';
-    console.log('Contexto creado exitosamente');
+    // console.log('Contexto creado exitosamente');
 
     // Navega a la vista del proyecto en cuestión
     navigateTo(`/ia/proyecto/${idSeleccionado.value}`);
@@ -414,13 +409,15 @@ onUnmounted(() => {
             </div>
 
             <div class="flex flex-contenido-final m-b-10">
-              <NuxtLink
+              <button
+                type="button"
                 class="boton boton-primario boton-chico"
                 aria-label="Guardar contexto"
+                :disabled="fuentesSeleccionadas.length === 0"
                 @click.prevent="crearContexto"
               >
                 Guardar contexto
-              </NuxtLink>
+              </button>
 
               <button
                 type="button"
