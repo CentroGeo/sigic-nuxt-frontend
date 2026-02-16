@@ -7,6 +7,13 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.9.7] - 16-02-2026
+
+### Arreglado (Fix)
+
+- Se refactorizó el módulo de ia para reestructurar las rutas de manera más consistente
+- Se resolvieron algunos que tenían que ver con la creación de nuevos chats, selección de proyectos, creación de contextos, remover fuentes del contexto y bugs en la visualización de tablas y docs
+
 ## [0.9.6] - 13-02-2026
 
 ### Arreglado (Fix)
@@ -193,6 +200,7 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.9.6]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.6...v0.9.7
 [0.9.6]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.5...v0.9.6
 [0.9.5]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.4...v0.9.5
 [0.9.4]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.3...v0.9.4
