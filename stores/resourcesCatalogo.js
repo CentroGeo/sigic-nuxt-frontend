@@ -170,6 +170,11 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
         page_size: 1,
       };
 
+      //TODO: Eliminar cuando se habilite el filtro de orden en el endpointde solicitudes de publicación
+      if (section === 'publicacion') {
+        delete queryParams['sort[]'];
+      }
+
       // Agregar toda la lógica de queryparams correspondientes por sección
       if (section === 'disponibles') {
         queryParams['filter{complete_metadata}'] = 'true';
@@ -215,6 +220,12 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
         page: pageNum,
         page_size: pageSize,
       };
+
+      //TODO: Eliminar cuando se habilite el filtro de orden en el endpointde solicitudes de publicación
+      if (section === 'publicacion') {
+        delete queryParams['sort[]'];
+      }
+
       // Agregar toda la lógica de queryparams correspondientes por sección
       if (section === 'disponibles') {
         queryParams['filter{complete_metadata}'] = 'true';

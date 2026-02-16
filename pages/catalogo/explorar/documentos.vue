@@ -123,7 +123,6 @@ watch(
 
 onMounted(async () => {
   storeFilters.resetAll();
-  storeFilters.updateFilter('sort', 'fecha_descendente');
   storeFilters.buildQueryParams(resourceTypeDic.document);
 });
 </script>
