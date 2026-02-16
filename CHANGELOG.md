@@ -12,7 +12,7 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 ### Arreglado (Fix)
 
 - Se crearon dos composables nuevos para migrar las funciones de utils que usaban instancias de nuxt.
-- Se implementó un bloqueo de los filtros de búsqueda mientras hay una petición de recursos en proceso para evitar comportamientos no deseados al mostrar los resultados.
+- Se implementó un bloqueo de los filtros de búsqueda mientras hay una petición de recursos en proceso para evitar comportamientos no deseados al mostrar los resultados en las secciones de consulta y catálogo.
 
 ## [0.9.7] - 16-02-2026
 
