@@ -1,12 +1,7 @@
 <script setup>
 definePageMeta({
   middleware: 'redireccionar-modulo-ia',
-  bodyAttrs: {
-    class: '',
-  },
 });
-const ruta = '/ia';
-onMounted(() => (document.querySelector('body').className = ''));
 </script>
 <template>
   <div class="modulo-ia flex">
@@ -15,12 +10,12 @@ onMounted(() => (document.querySelector('body').className = ''));
       :sub-paginas="[
         {
           pictograma: 'pictograma-chat',
-          ruta: `${ruta}/chats`,
+          ruta: '/ia/chats',
           globo: 'Chats',
         },
         {
           pictograma: 'pictograma-proyectos',
-          ruta: `${ruta}/proyectos`,
+          ruta: '/ia/proyectos',
           globo: 'Proyectos',
         },
       ]"
