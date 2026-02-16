@@ -103,7 +103,7 @@ function fetchNewData() {
 }
 
 watch([seleccionTipoArchivo], () => {
-  storeFilters.buildQueryParams();
+  storeFilters.buildQueryParams('all');
 });
 
 watch(paginaActual, () => {

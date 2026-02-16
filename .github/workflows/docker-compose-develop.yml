@@ -74,7 +74,7 @@ jobs:
         run: |
           docker build --no-cache \
             --build-arg NODE_ENV=${{ steps.env.outputs.NODE_ENV }} \
-            --build-arg NUXT_PUBLIC_APP_BASE_PATH=${{ steps.env.outputs.NUXT_PUBLIC_APP_BASE_PATH }} \
+            --build-arg NUXT_APP_BASE_URL=${{ steps.env.outputs.NUXT_APP_BASE_URL }} \
             --build-arg NUXT_PUBLIC_AUTH_BASE_URL=${{ steps.env.outputs.NUXT_PUBLIC_AUTH_BASE_URL }} \
             --build-arg NUXT_PUBLIC_BASE_URL=${{ steps.env.outputs.NUXT_PUBLIC_BASE_URL }} \
             -t ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.branch }} \
@@ -134,7 +134,7 @@ jobs:
           echo "KEYCLOAK_CLIENT_ID=${{ secrets.KEYCLOAK_CLIENT_ID }}" >> .env
           echo "KEYCLOAK_CLIENT_SECRET=${{ secrets.KEYCLOAK_CLIENT_SECRET }}" >> .env
           echo "NUXT_AUTH_SECRET=${{ secrets.NUXT_AUTH_SECRET }}" >> .env
-          echo "NUXT_PUBLIC_APP_BASE_PATH=${{ vars.NUXT_PUBLIC_APP_BASE_PATH }}" >> .env
+          echo "NUXT_APP_BASE_URL=${{ vars.NUXT_APP_BASE_URL }}" >> .env
           echo "VIRTUAL_PORT=3000" >> .env
 
       - name: Docker Compose up
@@ -162,7 +162,7 @@ jobs:
           KEYCLOAK_CLIENT_ID: ${{ secrets.KEYCLOAK_CLIENT_ID }}
           KEYCLOAK_CLIENT_SECRET: ${{ secrets.KEYCLOAK_CLIENT_SECRET }}
           NUXT_AUTH_SECRET: ${{ secrets.NUXT_AUTH_SECRET }}
-          NUXT_PUBLIC_APP_BASE_PATH: ${{ vars.NUXT_PUBLIC_APP_BASE_PATH }}
+          NUXT_APP_BASE_URL: ${{ vars.NUXT_APP_BASE_URL }}
           VIRTUAL_PORT: '3000'
 
       - name: Docker Cleanup

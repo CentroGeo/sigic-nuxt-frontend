@@ -52,7 +52,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
   });
 
   return {
-    isLoading: ref(false),
+    isLoading: ref(true),
     totals,
     myTotalsByType,
     resources,
@@ -93,7 +93,7 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       const res = await request.json();
 
       // Agregamos los estilos
-      if (res.resources[0].resource_type === 'dataset') {
+      if (res.resources[0]?.resource_type === 'dataset') {
         const { defaultStyle, styleList } = await getSLDs(res.resources[0]);
         res.resources[0].default_style = defaultStyle;
         res.resources[0].styles = styleList;

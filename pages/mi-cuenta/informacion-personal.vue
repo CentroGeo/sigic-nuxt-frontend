@@ -304,7 +304,7 @@ async function updateInfo() {
   const body = {};
 
   for (const key of Object.keys(userInfo.value)) {
-    if (invalidValues.includes(userInfo.value[key].trim())) {
+    if (invalidValues.includes(userInfo.value[key]?.trim())) {
       body[key] = null;
     } else {
       body[key] = userInfo.value[key];

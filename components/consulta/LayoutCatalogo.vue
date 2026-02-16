@@ -189,10 +189,43 @@ async function fetchNewData(category) {
   }
 }
 
+function activateAdvancedFilter() {
+  let activeFilters = 0;
+  if (
+    Object.keys(params.value).includes('filter{category.identifier.in}') &&
+    params.value['filter{category.identifier.in}'].length > 0
+  ) {
+    activeFilters += 1;
+  }
+  if (
+    Object.keys(params.value).includes('filter{year}') &&
+    params.value['filter{year}'].length > 0
+  ) {
+    activeFilters += 1;
+  }
+  if (
+    Object.keys(params.value).includes('filter{institution}') &&
+    params.value['filter{institution}'].length > 0
+  ) {
+    activeFilters += 1;
+  }
+  if (
+    Object.keys(params.value).includes('filter{keywords.name.in}') &&
+    params.value['filter{keywords.name.in}'].length > 0
+  ) {
+    activeFilters += 1;
+  }
+  if (activeFilters > 0) {
+    isFilterActive.value = true;
+  } else {
+    isFilterActive.value = false;
+  }
+}
+
 async function applyAdvancedFilter() {
-  isFilterActive.value = true;
   modalFiltroAvanzado.value.cerrarModalBusqueda();
   storeFilters.buildQueryParams();
+  activateAdvancedFilter();
 }
 
 function resetSearch() {
@@ -261,12 +294,14 @@ onMounted(async () => {
           <div class="flex flex-contenido-centrado m-y-3">
             <form class="campo-busqueda columna-12" @submit.prevent>
               <label for="idunicobusqueda" class="a11y-solo-lectura"> Campo de búsqueda </label>
+              <!--:disabled="isLoading"-->
               <input
                 id="input-busqueda-consulta"
                 v-model="inputSearch"
                 type="search"
                 class="campo-busqueda-entrada"
                 placeholder="Campo de búsqueda"
+                @keyup.enter="storeFilters.buildQueryParams(storeConsulta.resourceType)"
               />
 
               <button
@@ -282,7 +317,7 @@ onMounted(async () => {
                 aria-label="Buscar"
                 class="boton-primario boton-pictograma campo-busqueda-buscar"
                 type="button"
-                @click="storeFilters.buildQueryParams"
+                @click="storeFilters.buildQueryParams(storeConsulta.resourceType)"
               >
                 <span class="pictograma-buscar" aria-hidden="true" />
               </button>

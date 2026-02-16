@@ -2,8 +2,7 @@
 import { defineNuxtConfig } from 'nuxt/config';
 
 const isDev = process.env.NODE_ENV !== 'production';
-const appBasePath = process.env.NUXT_PUBLIC_APP_BASE_PATH || '/';
-const basePath = appBasePath.replace(/\/+$/, '');
+const appBasePath = process.env.NUXT_APP_BASE_URL || '/';
 const authBaseUrl = process.env.NUXT_PUBLIC_AUTH_BASE_URL;
 const originEnvKey = isDev ? undefined : 'NUXT_AUTH_ORIGIN';
 
@@ -12,6 +11,8 @@ const metaDescription =
   'Sistema Integral de Gestión de Información Científica. Integra, visualiza y aprovecha el conocimiento científico de México.';
 
 export default defineNuxtConfig({
+  ssr: true,
+
   app: {
     baseURL: appBasePath,
     head: {
@@ -54,6 +55,8 @@ export default defineNuxtConfig({
 
   nitro: {
     baseURL: appBasePath,
+    preset: 'node-server',
+    compressPublicAssets: false,
   },
 
   modules: [
@@ -94,8 +97,10 @@ export default defineNuxtConfig({
 
     // Variables públicas (disponibles en el cliente)
     public: {
+      keycloakIssuer: process.env.NUXT_PUBLIC_KEYCLOAK_ISSUER,
+      keycloakClientId: process.env.NUXT_PUBLIC_KEYCLOAK_CLIENT_ID,
       baseURL: process.env.NUXT_PUBLIC_BASE_URL || 'http://localhost:3000',
-      basePath: basePath,
+      basePath: process.env.NUXT_APP_BASE_URL,
       ollamaModel: process.env.NUXT_PUBLIC_OLLAMA_MODEL || 'deepseek-r1',
       geonodeUrl: process.env.NUXT_PUBLIC_GEONODE_URL || 'https://geonode.dev.geoint.mx',
       geonodeApi: process.env.NUXT_PUBLIC_GEONODE_API || 'https://geonode.dev.geoint.mx/api/v2',

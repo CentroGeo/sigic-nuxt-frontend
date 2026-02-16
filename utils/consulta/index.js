@@ -330,7 +330,7 @@ export async function fetchGeometryWMS(resource) {
       if (attempt === maxAttempts - 1) {
         return 'Error';
       } else {
-        console.warn('Se está intentando una vez más');
+        console.warn(`Falló el intento ${attempt + 1}.`);
       }
     }
   }
@@ -472,7 +472,7 @@ export async function fetchRemoteStyles(resource) {
 /**
  * Obtiene la lista de estilos asociados a un recurso y el estilo por default
  * @param {Object} resource
- * @returns {String, Array}
+ * @returns {Promise<String, Array>}
  */
 export async function getSLDs(resource) {
   const config = useRuntimeConfig();
@@ -698,7 +698,6 @@ export async function downloadWMS(resource, format, featureTypes) {
   url.search = new URLSearchParams(params).toString();
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
-      console.warn(`Vamos en el intento: ${attempt}.`);
       const res = await gnoxyFetch(`${url}`);
       if (!res.ok) {
         if (attempt === maxAttempts - 1) {
@@ -826,7 +825,7 @@ export async function downloadRaster(resource) {
       console.warn(`Falló el intento ${attempt + 1}.`);
     }
   }
-  console.warn(`La descarga fracasó después de ${maxAttempts} intentos`);
+  console.error(`La descarga fracasó después de ${maxAttempts} intentos`);
   return error;
 }
 
