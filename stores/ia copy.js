@@ -1,3 +1,4 @@
+/**
 import { defineStore } from 'pinia';
 
 export const useIAStore = defineStore('ia', {
@@ -124,12 +125,12 @@ export const useIAStore = defineStore('ia', {
 
       console.log('crear crearContexto');
       try {
-        /*         const formData = new FormData();
-        formData.append("title", title);
-        formData.append("description", description);
-        //formData.append('visibility', visibilidadProyecto.value);
-        formData.append("public", isPublic === "publico" ? "True" : "False");
- */
+        // const formData = new FormData();
+        // formData.append("title", title);
+        // formData.append("description", description);
+        // //formData.append('visibility', visibilidadProyecto.value);
+        // formData.append("public", isPublic === "publico" ? "True" : "False");
+ 
 
         const response = await fetch(
           this.backend + '/api/fileuploads/workspaces/admin/contexts/create',
@@ -220,13 +221,12 @@ export const useIAStore = defineStore('ia', {
       const data = await response.json();
       this.fuentesProyecto = data;
 
-      /*    if (data.length > 0) {
-        this.proyectoSeleccionado = data[0];
-      } else {
-        this.proyectoSeleccionado = null;
-      }
-
-      this.existenProyectos = true; */
+      // if (data.length > 0) {
+      //   this.proyectoSeleccionado = data[0];
+      // } else {
+      //   this.proyectoSeleccionado = null;
+      // }
+      // this.existenProyectos = true;
       //console.log('Proyectos:', data);
       return data;
     },
@@ -259,22 +259,19 @@ export const useIAStore = defineStore('ia', {
 
       // this.existeContexto = true;
 
-      /*    if (data.length > 0) {
-        this.proyectoSeleccionado = data[0];
-      } else {
-        this.proyectoSeleccionado = null;
-      }
-
-      this.existenProyectos = true; */
+      // if (data.length > 0) {
+      //   this.proyectoSeleccionado = data[0];
+      // } else {
+      //   this.proyectoSeleccionado = null;
+      // }
+      // this.existenProyectos = true;
       //console.log('Proyectos:', data);
       return data;
     },
 
-    /**
-     * Devuelve la lista de chats con fetch al backend
-     * @param {Number} user_id
-     * @returns {Array} data con los chats
-     */
+    // Devuelve la lista de chats con fetch al backend
+    // @param {Number} user_id
+    // @returns {Array} data con los chats
     async getChatList(user_id) {
       const token = this.authToken;
       //this.existeContexto = true;
@@ -300,11 +297,11 @@ export const useIAStore = defineStore('ia', {
       const data = await response.json();
       this.chats = data;
 
-      /*       if (data.length > 0) {
-        this.proyectoSeleccionado = data[0];
-      } else {
-        this.proyectoSeleccionado = null;
-      } */
+      // if (data.length > 0) {
+      //   this.proyectoSeleccionado = data[0];
+      // } else {
+      //   this.proyectoSeleccionado = null;
+      // }
       //this.existenProyectos = true;
       //console.log('Proyectos:', data);
       return data;
@@ -332,11 +329,11 @@ export const useIAStore = defineStore('ia', {
       console.log(data);
       //this.chats = data;
 
-      /*       if (data.length > 0) {
-        this.proyectoSeleccionado = data[0];
-      } else {
-        this.proyectoSeleccionado = null;
-      } */
+      // if (data.length > 0) {
+      //   this.proyectoSeleccionado = data[0];
+      // } else {
+      //   this.proyectoSeleccionado = null;
+      // }
 
       //this.existenProyectos = true;
       //console.log('Proyectos:', data);
@@ -455,9 +452,9 @@ export const useIAStore = defineStore('ia', {
         }
 
         // Log para depuración
-        /* for (const pair of formData.entries()) {
-          console.log(pair[0] + ', ' + (pair[1] instanceof File ? pair[1].name : pair[1]));
-        } */
+        // for (const pair of formData.entries()) {
+        //   console.log(pair[0] + ', ' + (pair[1] instanceof File ? pair[1].name : pair[1]));
+        // }
 
         const token = this.authToken;
 
@@ -650,3 +647,4 @@ export const useIAStore = defineStore('ia', {
     },
   },
 });
+ */
