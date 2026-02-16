@@ -1,5 +1,4 @@
 <script setup>
-//import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import {
   buildUrl,
   categoriesInSpanish,
@@ -272,16 +271,22 @@ onMounted(async () => {
         <p v-if="!isLoggedIn" class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
 
         <!--Selector de propiedad-->
-        <div v-if="isLoggedIn"></div>
-        <label for="selector-origen">Buscar en catálogo y tus archivos</label>
-        <select class="m-b-2" :disabled="isLoading">
-          <option value="catalogo">Archivos del Catálogo</option>
-          <option v-if="storeConsulta.resourceType === 'dataLayer'" value="remotos">
-            Catálogos Externos
-          </option>
-          <option value="privados">Mis Archivos</option>
-          <option value="todos">Todos los Conjuntos de Datos</option>
-        </select>
+        <div v-if="isLoggedIn">
+          <label for="selector-origen">Buscar en catálogo y tus archivos</label>
+          <select
+            v-model="selectedOwner"
+            name="selector-origen"
+            class="m-b-2"
+            :disabled="isLoading"
+          >
+            <option value="catalogo">Archivos del Catálogo</option>
+            <option v-if="storeConsulta.resourceType === 'dataLayer'" value="remotos">
+              Catálogos Externos
+            </option>
+            <option value="privados">Mis Archivos</option>
+            <option value="todos">Todos los Conjuntos de Datos</option>
+          </select>
+        </div>
 
         <!--Búsqueda-->
         <ClientOnly>

@@ -1,5 +1,4 @@
 <script setup>
-import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { cleanInput, resourceTypeDic } from '~/utils/consulta';
 
 const storeResources = useResourcesCatalogoStore();
@@ -124,6 +123,7 @@ watch(
 
 onMounted(async () => {
   storeFilters.resetAll();
+  storeFilters.updateFilter('sort', 'fecha_descendente');
   storeFilters.buildQueryParams(resourceTypeDic.document);
 });
 </script>
@@ -140,12 +140,18 @@ onMounted(async () => {
           <!-- Selector Orden -->
           <div class="columna-8">
             <ClientOnly>
-              <SisdaiSelector v-model="seleccionOrden" etiqueta="Ordenar por">
+              <label for="selector-orden-documentos">Ordenar por</label>
+              <select
+                v-model="seleccionOrden"
+                name="selector-orden-documentos"
+                class="m-b-2"
+                :disabled="isLoading"
+              >
                 <option value="titulo">Título</option>
                 <option value="categoria">Categoría</option>
                 <option value="fecha_descendente">Más Reciente</option>
                 <option value="fecha_ascendente">Más Antiguo</option>
-              </SisdaiSelector>
+              </select>
             </ClientOnly>
           </div>
 
@@ -162,6 +168,7 @@ onMounted(async () => {
                       type="search"
                       class="campo-busqueda-entrada"
                       placeholder="Campo de búsqueda"
+                      :disabled="isLoading"
                       @keyup.enter="storeFilters.buildQueryParams(resourceTypeDic.document)"
                     />
 
@@ -170,6 +177,7 @@ onMounted(async () => {
                       class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
                       aria-label="Borrar"
                       type="button"
+                      :disabled="isLoading"
                       @click="resetSearch"
                     >
                       <span aria-hidden="true" class="pictograma-cerrar" />
@@ -179,6 +187,7 @@ onMounted(async () => {
                       class="boton-primario boton-pictograma campo-busqueda-buscar"
                       aria-label="Buscar"
                       type="button"
+                      :disabled="isLoading"
                       @click="storeFilters.buildQueryParams(resourceTypeDic.document)"
                     >
                       <span class="pictograma-buscar" aria-hidden="true" />
@@ -196,6 +205,7 @@ onMounted(async () => {
                   aria-label="Filtro Avanzado"
                   type="button"
                   style="position: relative; align-self: center"
+                  :disabled="isLoading"
                   @click="modalFiltroAvanzado.abrirModalBusqueda"
                 >
                   <div v-if="isFilterActive" class="circulo"></div>
