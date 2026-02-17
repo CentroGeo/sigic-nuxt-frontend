@@ -1,11 +1,69 @@
 <script setup>
+const config = useRuntimeConfig();
+const { data: userData } = useAuth();
+const { gnoxyFetch } = useGnoxyUrl();
+
+const limiteDescripcion = 250;
+
 const colorPrimario = ref('#000000');
 const colorSecundario = ref('#ffffff');
-const distribucionLayout = ref(50);
+
+const formulario = reactive({
+  url_id: '',
+  name: '',
+  description: '',
+  is_public: false,
+  scenes_layout_styles: {
+    text_panel: 50,
+    map_panel: 50,
+    timeline_position: 'top',
+  },
+});
+
+const nombre = computed({
+  get: () => formulario.name,
+  set(nuevoValor) {
+    formulario.name = nuevoValor;
+    formulario.url_id = nuevoValor
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      // eslint-disable-next-line no-useless-escape
+      .replace(/[^a-z0-9\-]/g, '');
+  },
+});
+
+const distribucionLayout = computed({
+  get: () => formulario.scenes_layout_styles.text_panel,
+  set(nuevoValor) {
+    formulario.scenes_layout_styles.text_panel = Number(nuevoValor);
+    formulario.scenes_layout_styles.map_panel = 100 - nuevoValor;
+  },
+});
+
+async function guardarCambios() {
+  // Aquí iría la lógica para guardar los cambios realizados en el escenario
+  // console.log('Cambios guardados:', toRaw(formulario));
+
+  const respuesta = await gnoxyFetch(`${config.public.geonodeApi}/scenarios//`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${userData.value?.accessToken}`,
+    },
+    body: JSON.stringify(formulario),
+  });
+
+  if (!respuesta.ok || respuesta.status !== 201 || respuesta.statusText !== 'Created') {
+    console.error('Error al guardar el escenario:', respuesta.statusText);
+    return;
+  }
+
+  // const data = await respuesta.json();
+}
 </script>
 
 <template>
-  <form @submit.prevent>
+  <form @submit.prevent="guardarCambios">
     <section>
       <div class="flex p-y-3">
         <NuxtLink to="/geocontenidos/geohistorias" class="boton boton-secundario boton-chico">
@@ -17,19 +75,49 @@ const distribucionLayout = ref(50);
 
       <div class="m-b-4">
         <label for="nombre">Nombre de la historia</label>
-        <input id="nombre" type="text" name="nombre" />
+        <input
+          id="nombre"
+          v-model="nombre"
+          type="text"
+          placeholder="Ej: Análisis de Zonas Urbanas 2024"
+          required
+        />
       </div>
 
       <div class="m-b-4">
-        <label for="descripcion">Descripción (0 / 50)</label>
-        <textarea id="descripcion" name="descripcion"></textarea>
+        <label for="descripcion">
+          Descripción ({{ formulario.description.length }} / {{ limiteDescripcion }})
+        </label>
+        <textarea
+          id="descripcion"
+          v-model="formulario.description"
+          placeholder="Describa brevemente de qué trata este escenario"
+          :maxlength="limiteDescripcion"
+          required
+        />
+        <p class="formulario-ayuda" aria-live="polite" role="status">
+          Usa esta sección para una breve descripción que ayudará a otros a entender el propósito de
+          este escenario.
+        </p>
+      </div>
+
+      <div class="m-b-4">
+        <input id="casilla-identificadorgrupaluno" v-model="formulario.is_public" type="checkbox" />
+        <label for="casilla-identificadorgrupaluno">Hacer público este escenario</label>
+        <p class="formulario-ayuda" aria-live="polite" role="status">
+          Si está marcada, cualquier usuario podrá ver este escenario.
+        </p>
       </div>
 
       <div class="m-b-4">
         <label for="posicion">Posición de la línea del tiempo</label>
-        <select id="posicion" name="posicion">
-          <option value="arriba">Arriba</option>
-          <option value="abajo">Abajo</option>
+        <select
+          id="posicion"
+          v-model="formulario.scenes_layout_styles.timeline_position"
+          name="posicion"
+        >
+          <option value="top">Arriba</option>
+          <option value="bottom">Abajo</option>
         </select>
       </div>
     </section>
@@ -72,7 +160,7 @@ const distribucionLayout = ref(50);
       <div>
         <label for="" class="flex flex-contenido-separado">
           <span>Panel de texto: {{ distribucionLayout }}%</span>
-          <span>Panel del mapa: {{ 100 - distribucionLayout }}%</span>
+          <span>Panel del mapa: {{ formulario.scenes_layout_styles.map_panel }}%</span>
         </label>
         <input v-model="distribucionLayout" type="range" min="20" max="80" />
       </div>
@@ -82,7 +170,7 @@ const distribucionLayout = ref(50);
         <div class="flex texto-tamanio-10" style="height: 200px; gap: 0">
           <span
             class="pictograma-reporte borde borde-color-secundario borde-l-redondeado-8 borde-r-redondeado-0"
-            :style="{ width: distribucionLayout + '%' }"
+            :style="{ width: formulario.scenes_layout_styles.text_panel + '%' }"
             style="align-items: center; justify-content: center"
           />
           <span
@@ -97,8 +185,8 @@ const distribucionLayout = ref(50);
       <NuxtLink to="/geocontenidos/geohistorias" class="boton boton-secundario">
         Cancelar
       </NuxtLink>
-      <button class="boton-primario">Guardar</button>
-      <button class="boton-primario">Guardar y Editar escenas</button>
+      <input type="submit" class="boton-primario" value="Guardar" />
+      <!-- <button class="boton-primario">Guardar y Editar escenas</button> -->
     </section>
   </form>
 </template>
