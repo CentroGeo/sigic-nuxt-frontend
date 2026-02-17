@@ -94,15 +94,49 @@ async function fetchNewData() {
   );
   isLoading.value = false;
 }
+
+function activateAdvancedFilter() {
+  let activeFilters = 0;
+  if (
+    Object.keys(params.value).includes('filter{category.identifier.in}') &&
+    params.value['filter{category.identifier.in}'].length > 0
+  ) {
+    activeFilters += 1;
+  }
+  if (
+    Object.keys(params.value).includes('filter{year}') &&
+    params.value['filter{year}'].length > 0
+  ) {
+    activeFilters += 1;
+  }
+  if (
+    Object.keys(params.value).includes('filter{institution}') &&
+    params.value['filter{institution}'].length > 0
+  ) {
+    activeFilters += 1;
+  }
+  if (
+    Object.keys(params.value).includes('filter{keywords.name.in}') &&
+    params.value['filter{keywords.name.in}'].length > 0
+  ) {
+    activeFilters += 1;
+  }
+  if (activeFilters > 0) {
+    isFilterActive.value = true;
+  } else {
+    isFilterActive.value = false;
+  }
+}
+
 function applyAdvancedFilter() {
-  isFilterActive.value = true;
   modalFiltroAvanzado.value.cerrarModalBusqueda();
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
+  activateAdvancedFilter(seleccionTipoArchivo.value);
 }
 
 function resetSearch() {
   storeFilters.updateFilter('inputSearch', '');
-  storeFilters.buildQueryParams();
+  storeFilters.buildQueryParams(seleccionTipoArchivo.value);
 }
 
 function resetAdvancedFilter() {
@@ -187,6 +221,7 @@ onMounted(async () => {
                       type="search"
                       class="campo-busqueda-entrada"
                       placeholder="Campo de búsqueda"
+                      @keyup.enter="storeFilters.buildQueryParams(seleccionTipoArchivo)"
                     />
 
                     <button
@@ -203,7 +238,7 @@ onMounted(async () => {
                       class="boton-primario boton-pictograma campo-busqueda-buscar"
                       aria-label="Buscar"
                       type="button"
-                      @click="storeFilters.buildQueryParams"
+                      @click="storeFilters.buildQueryParams(seleccionTipoArchivo)"
                     >
                       <span class="pictograma-buscar" aria-hidden="true" />
                     </button>

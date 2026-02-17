@@ -110,9 +110,9 @@ export function convertirBytes(bytes) {
  * Esta función recupera información de los harvesters registrados en el sigic
  * @param {Boolean} limited
  * @param {Object} params
- * @returns {Object} Objeto que permite construit las tarjetas y tablas de servicios remotos
+ * @returns {Promise<Object>} Objeto que permite construit las tarjetas y tablas de servicios remotos
  */
-export async function fetchHarvesters(params) {
+export async function fetchRemoteServices(params) {
   if (!params.title || params.title.trim().length === 0) {
     delete params.title;
   }
@@ -137,8 +137,8 @@ export async function fetchHarvesters(params) {
     await Promise.all(
       services.map(async (h, index) => {
         const harvesterUrl = `${config.public.geonodeApi}/harvesters/${h.harvester_id}`;
-        const fetchHarvesterStatus = await gnoxyFetch(harvesterUrl);
-        const resHarvesterStatus = await fetchHarvesterStatus.json();
+        const fetchRemoteServicestatus = await gnoxyFetch(harvesterUrl);
+        const resHarvesterStatus = await fetchRemoteServicestatus.json();
         const harvesterStatus = resHarvesterStatus.harvester.status;
 
         const fetchHarvestableResources = await gnoxyFetch(

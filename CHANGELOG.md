@@ -7,6 +7,44 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.9.7] - 16-02-2026
+
+### Arreglado (Fix)
+
+- Se refactorizó el módulo de ia para reestructurar las rutas de manera más consistente
+- Se resolvieron algunos que tenían que ver con la creación de nuevos chats, selección de proyectos, creación de contextos, remover fuentes del contexto y bugs en la visualización de tablas y docs
+
+## [0.9.6] - 13-02-2026
+
+### Arreglado (Fix)
+
+- Se agregó un spinner en la vista de inicio para esperar la carga de las capas.
+- Se agregó el estilo de la capa en el redireccionamiento de inicio a capas.
+- Se reimplementó el middleware que redirige a inicio de sesión si es necesario en los botones que llevan de inicio a carga de recursos.
+- Se ajustó el manejo de errores y reintentos en las peticiones de recursos en consulta.
+- Se eliminó la opción de categoría Sin Clasificar en el modal de búsqueda avanzada.
+- Se hicieron ajustes en la interfaz para cuando no se encuentran resultados que coincidan con la búsqueda.
+- Ajustando el marcador de activo en el filtro avanzado.
+- Se implementó la búsqueda al hacer enter en los módulos de consulta y catálogo.
+
+## [0.9.5] - 12-02-2026
+
+### Arreglado (Fix)
+
+- Se reemplazaron todas las instancias de `NUXT_PUBLIC_APP_BASE_PATH` por `NUXT_APP_BASE_URL` en `.github/workflows/docker-compose-develop.yml`, incluyendo argumentos de build, generación del archivo de entorno e inyección de variables en el entorno de docker-compose.
+- Se actualizó el `Dockerfile` para eliminar `NUXT_PUBLIC_APP_BASE_PATH` y establecer `NUXT_APP_BASE_URL` con un valor predeterminado vacío, reflejando la nueva convención de nombres y el valor por defecto.
+- Se modificó `env_sample` para eliminar `NUXT_PUBLIC_APP_BASE_PATH` y agregar `NUXT_APP_BASE_URL`, junto con otros ajustes menores en el orden y la incorporación de variables.
+- Se agregaron `NUXT_PUBLIC_KEYCLOAK_ISSUER` y `NUXT_PUBLIC_KEYCLOAK_CLIENT_ID` al entorno de los servicios en `docker-compose-ghcr.yml`, `docker-compose-local.yml` y `docker-compose-minimal.yml` para asegurar que los valores de Keycloak estén disponibles en el cliente.
+- Se actualizó `nuxt.config.ts` para referenciar `NUXT_PUBLIC_KEYCLOAK_ISSUER` y `NUXT_PUBLIC_KEYCLOAK_CLIENT_ID` en lugar de las variables exclusivas del servidor, garantizando su correcta exposición en la configuración de runtime de Nuxt.
+
+## [0.9.4] - 10-02-2026
+
+### Arreglado (Fix)
+
+- Se añadieron keycloakIssuer y keycloakClientId a la configuración pública de runtime en nuxt.config.ts
+- Se modificó el flujo de cierre de sesión en pages/mi-cuenta.vue para primero cerrar la sesión localmente y luego redirigir al usuario al endpoint de logout de Keycloak con los parámetros requeridos (id_token_hint y client_id).
+- Se extendió el objeto de sesión en server/api/auth/[...].ts para incluir idToken, permitiendo que el flujo de cierre de sesión proporcione a Keycloak la pista de token necesaria (id_token_hint).
+
 ## [0.9.3] - 10-02-2026
 
 ### Arreglado (Fix)
@@ -162,6 +200,10 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.9.6]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.6...v0.9.7
+[0.9.6]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.5...v0.9.6
+[0.9.5]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.4...v0.9.5
+[0.9.4]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.3...v0.9.4
 [0.9.3]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.2...v0.9.3
 [0.9.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.0...v0.9.1
