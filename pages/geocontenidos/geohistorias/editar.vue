@@ -1,11 +1,19 @@
 <script setup>
+const colorPrimario = ref('#000000');
+const colorSecundario = ref('#ffffff');
 const distribucionLayout = ref(50);
 </script>
 
 <template>
-  <form action="">
+  <form @submit.prevent>
     <section>
-      <h2>Edición de la historia</h2>
+      <div class="flex p-y-3">
+        <NuxtLink to="/geocontenidos/geohistorias" class="boton boton-secundario boton-chico">
+          <span class="pictograma-flecha-izquierda m-r-1" />
+        </NuxtLink>
+
+        <h2 class="m-0">Edición del escenario</h2>
+      </div>
 
       <div class="m-b-4">
         <label for="nombre">Nombre de la historia</label>
@@ -30,6 +38,30 @@ const distribucionLayout = ref(50);
       <h2>Colores del Tema</h2>
 
       <p>Personaliza los colores de la línea del tiempo</p>
+
+      <div class="flex flex-contenido-separado m-b-2">
+        <div>
+          <label for="color-primario">Color primario</label>
+          <input id="color-primario" v-model="colorPrimario" type="color" name="color-primario" />
+        </div>
+
+        <div>
+          <label for="color-secundario">Color secundario</label>
+          <input
+            id="color-secundario"
+            v-model="colorSecundario"
+            type="color"
+            name="color-secundario"
+          />
+        </div>
+      </div>
+
+      <label>Vista previa del gradiente</label>
+      <div
+        class="borde borde-color-secundario borde-redondeado-8 m-b-4"
+        :style="{ background: `linear-gradient(to right, ${colorPrimario}, ${colorSecundario})` }"
+        style="height: 200px"
+      />
     </section>
 
     <section>
@@ -62,8 +94,11 @@ const distribucionLayout = ref(50);
     </section>
 
     <section class="flex flex-contenido-final">
-      <button class="boton-secundario">Cancelar</button>
+      <NuxtLink to="/geocontenidos/geohistorias" class="boton boton-secundario">
+        Cancelar
+      </NuxtLink>
       <button class="boton-primario">Guardar</button>
+      <button class="boton-primario">Guardar y Editar escenas</button>
     </section>
   </form>
 </template>

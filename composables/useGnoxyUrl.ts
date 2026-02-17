@@ -17,6 +17,6 @@ export function useGnoxyUrl() {
 
   return {
     gnoxyUrl,
-    gnoxyFetch: (url: string) => fetch(gnoxyUrl(url)),
+    gnoxyFetch: (url: string, params: object = {}) => fetch(gnoxyUrl(url), params),
   };
 }

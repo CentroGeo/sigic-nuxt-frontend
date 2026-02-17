@@ -1,5 +1,7 @@
 <script setup>
 definePageMeta({ middleware: 'redireccionar-modulo-geocontenidos' });
+
+const ruta = '/geocontenidos';
 </script>
 
 <template>
@@ -36,15 +38,15 @@ definePageMeta({ middleware: 'redireccionar-modulo-geocontenidos' });
                   v-for="item in [
                     {
                       nombre: 'Mapas',
-                      ruta: '/geocontenidos/mapas',
+                      // ruta: '/geocontenidos/mapas',
                     },
                     {
                       nombre: 'Panoramas',
-                      ruta: '/geocontenidos/panoramas',
+                      // ruta: '/geocontenidos/panoramas',
                     },
                     {
                       nombre: 'Geo-historias',
-                      ruta: '/geocontenidos/geohistorias',
+                      ruta: `${ruta}/geohistorias`,
                       // subMenu: [
                       //   {
                       //     nombre: 'Escenas',
@@ -54,16 +56,16 @@ definePageMeta({ middleware: 'redireccionar-modulo-geocontenidos' });
                     },
                     {
                       nombre: 'Tableros de datos',
-                      ruta: '/geocontenidos/tableros-datos',
+                      // ruta: '/geocontenidos/tableros-datos',
                     },
                     {
                       nombre: 'Micrositios',
-                      ruta: '/geocontenidos/micrositios',
+                      // ruta: '/geocontenidos/micrositios',
                     },
                   ]"
                   :key="item.nombre"
                 >
-                  <NuxtLink>{{ item.nombre }}</NuxtLink>
+                  <NuxtLink :to="item.ruta">{{ item.nombre }}</NuxtLink>
 
                   <!-- <ul v-if="item.subMenu">
                     <li v-for="subItem in item.subMenu" :key="subItem.nombre">

@@ -1,30 +1,59 @@
+<script setup>
+const { gnoxyFetch } = useGnoxyUrl();
+const config = useRuntimeConfig();
+
+const escenarios = ref([]);
+
+onMounted(async () => {
+  const respuesta = await gnoxyFetch(`${config.public.geonodeApi}/scenarios/`);
+
+  const data = await respuesta.json();
+  escenarios.value = data.results;
+});
+</script>
+
 <template>
   <div>
     <div>
-      <NuxtLink to="/geocontenidos/geohistorias/editar" class="boton boton-primario m-y-3">
+      <h2>Bienvenido a Escenarios</h2>
+
+      <p
+        class="fondo-color-acento borde-redondeado-8 borde-l borde-grosor-4 p-4"
+        style="border-color: var(--color-primario-4)"
+      >
+        Los Escenarios son presentaciones interactivas dónde puedes mostrar mapas que cuentan una
+        historia con capas de información y texto descriptivo.
+      </p>
+
+      <NuxtLink to="/geocontenidos/geohistorias/editar" class="boton boton-primario m-b-4">
         <span class="pictograma-agregar m-r-1" />
         Crear geo-historia
       </NuxtLink>
     </div>
 
-    <div class="grid reticula-12">
-      <div v-for="_ in [1, 2, 3]" :key="_" class="columna-8 columna-4-esc">
+    <div v-if="escenarios.length > 0" class="grid reticula-12">
+      <div v-for="escenario in escenarios" :key="escenario.id" class="columna-8 columna-4-esc">
         <div class="tarjeta">
           <div class="tarjeta-cuerpo">
-            <p class="tarjeta-titulo">Nombre de la geo-historia</p>
+            <p class="tarjeta-titulo">{{ escenario.name }}</p>
 
-            <p class="tarjeta-etiqueta">Creado: xx de xxxxxxx de 202x</p>
+            <p class="tarjeta-etiqueta">Creado: {{ escenario.created_at }}</p>
           </div>
 
           <div class="tarjeta-pie flex">
             <button class="boton boton-chico boton-secundario m-t-3">
               <span class="pictograma-ojo-ver m-r-1" />
-              Ver escenario
+              Ver
             </button>
-            <button class="boton boton-chico boton-secundario">
+
+            <NuxtLink
+              to="/geocontenidos/geohistorias/editar"
+              class="boton boton-chico boton-secundario"
+            >
               <span class="pictograma-editar m-r-1" />
               Editar escenario
-            </button>
+            </NuxtLink>
+
             <button class="boton boton-chico boton-secundario">
               <span class="pictograma-editar m-r-1" />
               Editar escenas
@@ -41,6 +70,10 @@
         </div>
       </div>
     </div>
+
+    <div v-else class="texto-centrado">
+      <p class="h3">No hay escenarios disponibles.</p>
+    </div>
   </div>
 </template>
 
@@ -56,7 +89,8 @@
     }
     &-pie {
       flex-direction: column;
-      button {
+      button,
+      a {
         display: block;
       }
     }
