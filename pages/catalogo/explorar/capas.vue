@@ -1,5 +1,4 @@
 <script setup>
-import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { cleanInput, resourceTypeDic } from '~/utils/consulta';
 
 const storeResources = useResourcesCatalogoStore();
@@ -156,12 +155,18 @@ onMounted(async () => {
           <!-- Selector Orden -->
           <div class="columna-8">
             <ClientOnly>
-              <SisdaiSelector v-model="seleccionOrden" etiqueta="Ordenar por">
+              <label for="selector-orden">Ordenar por</label>
+              <select
+                v-model="seleccionOrden"
+                name="selector-orden"
+                class="m-b-2"
+                :disabled="isLoading"
+              >
                 <option value="titulo">Título</option>
                 <option value="categoria">Categoría</option>
                 <option value="fecha_descendente">Más Reciente</option>
                 <option value="fecha_ascendente">Más Antiguo</option>
-              </SisdaiSelector>
+              </select>
             </ClientOnly>
           </div>
           <!-- Campo de búsqueda avanzada -->
@@ -177,6 +182,7 @@ onMounted(async () => {
                       type="search"
                       class="campo-busqueda-entrada"
                       placeholder="Campo de búsqueda"
+                      :disabled="isLoading"
                       @keyup.enter="storeFilters.buildQueryParams(resourceTypeDic.dataLayer)"
                     />
 
@@ -185,6 +191,7 @@ onMounted(async () => {
                       class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
                       aria-label="Borrar"
                       type="button"
+                      :disabled="isLoading"
                       @click="resetSearch"
                     >
                       <span aria-hidden="true" class="pictograma-cerrar" />
@@ -194,6 +201,7 @@ onMounted(async () => {
                       class="boton-primario boton-pictograma campo-busqueda-buscar"
                       aria-label="Buscar"
                       type="button"
+                      :disabled="isLoading"
                       @click="storeFilters.buildQueryParams(resourceTypeDic.dataLayer)"
                     >
                       <span class="pictograma-buscar" aria-hidden="true" />
@@ -211,6 +219,7 @@ onMounted(async () => {
                   aria-label="Filtro Avanzado"
                   style="position: relative; align-self: center"
                   type="button"
+                  :disabled="isLoading"
                   @click="modalFiltroAvanzado.abrirModalBusqueda"
                 >
                   <div v-if="isFilterActive" class="circulo"></div>

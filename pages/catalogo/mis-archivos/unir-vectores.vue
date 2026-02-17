@@ -3,9 +3,9 @@ import SisdaiCasillaVerificacion from '@centrogeomx/sisdai-componentes/src/compo
 import SisdaiColapsableNavegacion from '@centrogeomx/sisdai-componentes/src/componentes/colapsable-navegacion/SisdaiColapsableNavegacion.vue';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
+import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
 
-import { fetchByPk } from '~/utils/catalogo';
-import { getWMSserver, hasWFS } from '~/utils/consulta';
+const { getWMSserver, hasWFS, fetchByPk } = useResourcesSupplements();
 
 const { data } = useAuth();
 const token = data.value?.accessToken;

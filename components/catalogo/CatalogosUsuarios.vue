@@ -1,7 +1,8 @@
 <script setup>
-import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { fetchRemoteServices } from '~/utils/catalogo';
+import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
 const { gnoxyFetch } = useGnoxyUrl();
+const { fetchRemoteServices } = useResourcesSupplements();
+
 const config = useRuntimeConfig();
 const userID = ref(null);
 const harvesters = ref([]);
@@ -12,7 +13,7 @@ const fetchStatus = ref(null);
 const seleccionOrden = ref('-created');
 const inputSearch = ref(null);
 const paginaActual = ref(0);
-const tamanioPagina = 5;
+const tamanioPagina = 10;
 const totalHarvesters = ref();
 const totalPags = computed(() => Math.ceil(totalHarvesters.value / tamanioPagina));
 const queryParams = ref({
@@ -160,13 +161,18 @@ onMounted(async () => {
       <div class="flex m-t-3 m-b-2">
         <!-- Selector Orden -->
         <div class="columna-8">
-          <ClientOnly>
-            <SisdaiSelector v-model="seleccionOrden" etiqueta="Ordenar por">
-              <option value="created">Más Antiguo</option>
-              <option value="-created">Más Reciente</option>
-              <option value="title">Nombre</option>
-            </SisdaiSelector>
-          </ClientOnly>
+          <label for="selector-orden-remotos">Ordenar por</label>
+          <select
+            v-model="seleccionOrden"
+            name="selector-orden-remotos"
+            class="m-b-2"
+            :disabled="isLoadingPage || isLoadingGeneral"
+          >
+            <option value="created">Más Antiguo</option>
+            <option value="-created">Más Reciente</option>
+            <option value="title">Nombre</option>
+          </select>
+          <ClientOnly> </ClientOnly>
         </div>
         <!-- Campo de búsqueda -->
         <div class="columna-8">
@@ -181,6 +187,7 @@ onMounted(async () => {
                     type="search"
                     class="campo-busqueda-entrada"
                     placeholder="Campo de búsqueda"
+                    :disabled="isLoadingPage || isLoadingGeneral"
                     @keyup.enter="searchByName"
                   />
 
@@ -189,6 +196,7 @@ onMounted(async () => {
                     class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
                     aria-label="Borrar"
                     type="button"
+                    :disabled="isLoadingPage || isLoadingGeneral"
                     @click="resetSearch"
                   >
                     <span aria-hidden="true" class="pictograma-cerrar" />
@@ -198,6 +206,7 @@ onMounted(async () => {
                     class="boton-primario boton-pictograma campo-busqueda-buscar"
                     aria-label="Buscar"
                     type="button"
+                    :disabled="isLoadingPage || isLoadingGeneral"
                     @click="searchByName"
                   >
                     <span class="pictograma-buscar" aria-hidden="true" />

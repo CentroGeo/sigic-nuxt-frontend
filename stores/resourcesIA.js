@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
-import { buildUrl, defineGeomType, resourceTypeDic } from '~/utils/consulta';
+import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
+import { buildUrl, resourceTypeDic } from '~/utils/consulta';
 
 export const useResourcesIAStore = defineStore('resourcesIA', () => {
   const config = useRuntimeConfig();
@@ -76,6 +77,7 @@ export const useResourcesIAStore = defineStore('resourcesIA', () => {
      */
     async fetchByCategory(resourceType = storeConsulta.resourceType, pageNum, params) {
       const { gnoxyFetch } = useGnoxyUrl();
+      const { defineGeomType } = useResourcesSupplements();
       const queryParams = {
         page: pageNum,
         page_size: 2,

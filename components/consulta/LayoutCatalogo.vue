@@ -1,5 +1,4 @@
 <script setup>
-import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import {
   buildUrl,
   categoriesInSpanish,
@@ -272,13 +271,13 @@ onMounted(async () => {
         <p v-if="!isLoggedIn" class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
 
         <!--Selector de propiedad-->
-        <ClientOnly>
-          <SisdaiSelector
-            v-if="isLoggedIn"
+        <div v-if="isLoggedIn">
+          <label for="selector-origen">Buscar en catálogo y tus archivos</label>
+          <select
             v-model="selectedOwner"
-            class="m-y-2"
-            etiqueta="Buscar en catálogo y tus archivos:"
-            instruccional="Selecciona los recursos por permisos"
+            name="selector-origen"
+            class="m-b-2"
+            :disabled="isLoading"
           >
             <option value="catalogo">Archivos del Catálogo</option>
             <option v-if="storeConsulta.resourceType === 'dataLayer'" value="remotos">
@@ -286,26 +285,27 @@ onMounted(async () => {
             </option>
             <option value="privados">Mis Archivos</option>
             <option value="todos">Todos los Conjuntos de Datos</option>
-          </SisdaiSelector>
-        </ClientOnly>
+          </select>
+        </div>
 
         <!--Búsqueda-->
         <ClientOnly>
           <div class="flex flex-contenido-centrado m-y-3">
             <form class="campo-busqueda columna-12" @submit.prevent>
               <label for="idunicobusqueda" class="a11y-solo-lectura"> Campo de búsqueda </label>
-              <!--:disabled="isLoading"-->
               <input
                 id="input-busqueda-consulta"
                 v-model="inputSearch"
                 type="search"
                 class="campo-busqueda-entrada"
                 placeholder="Campo de búsqueda"
+                :disabled="isLoading"
                 @keyup.enter="storeFilters.buildQueryParams(storeConsulta.resourceType)"
               />
 
               <button
                 aria-label="Borrar"
+                :disabled="isLoading"
                 class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
                 type="button"
                 @click="resetSearch"
@@ -315,6 +315,7 @@ onMounted(async () => {
 
               <button
                 aria-label="Buscar"
+                :disabled="isLoading"
                 class="boton-primario boton-pictograma campo-busqueda-buscar"
                 type="button"
                 @click="storeFilters.buildQueryParams(storeConsulta.resourceType)"
@@ -325,6 +326,7 @@ onMounted(async () => {
 
             <button
               type="button"
+              :disabled="isLoading"
               :class="
                 isFilterActive
                   ? 'boton-primario boton-pictograma boton-grande'

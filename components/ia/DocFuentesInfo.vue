@@ -1,14 +1,15 @@
 <script setup>
-import { fetchDoc } from '~/utils/consulta';
+import { useDownloadResources } from '~/composables/useDownloadResources';
 const props = defineProps({
   selectedElementPk: {
     type: Number,
     default: null,
   },
 });
-const { selectedElementPk } = toRefs(props);
 
+const { selectedElementPk } = toRefs(props);
 const storeResources = useResourcesIAStore();
+const { fetchDoc } = useDownloadResources();
 const emit = defineEmits(['docCargado']);
 
 const blobedUrl = ref('');

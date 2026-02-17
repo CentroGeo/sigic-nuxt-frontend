@@ -1,5 +1,4 @@
 <script setup>
-import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { cleanInput } from '~/utils/consulta';
 
 definePageMeta({
@@ -82,6 +81,11 @@ async function fetchNewData() {
   isLoading.value = false;
 }
 
+function resetSearch() {
+  storeFilters.updateFilter('inputSearch', '');
+  storeFilters.buildQueryParams(seleccionTipoArchivo.value);
+}
+
 watch([seleccionTipoArchivo, seleccionOrden], () => {
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
 });
@@ -124,23 +128,29 @@ onMounted(async () => {
         <div class="flex">
           <div class="columna-5">
             <ClientOnly>
-              <SisdaiSelector v-model="seleccionTipoArchivo" etiqueta="Tipo de archivo">
+              <label for="selector-tipo-meta-pendientes">Tipo de archivo</label>
+              <select
+                v-model="seleccionTipoArchivo"
+                name="selector-tipo-meta-pendientes"
+                class="m-b-2"
+                :disabled="isLoading"
+              >
                 <option value="all">Todos los Archivos</option>
                 <option value="remotes">Catálogos Externos</option>
                 <option value="dataLayer">Capas Geográficas</option>
                 <option value="dataTable">Datos Tabulados</option>
                 <option value="document">Documentos</option>
-              </SisdaiSelector>
+              </select>
             </ClientOnly>
           </div>
           <div class="columna-5">
             <ClientOnly>
-              <SisdaiSelector v-model="seleccionOrden" etiqueta="Ordenar por">
+              <label for="selector-ordenar-completos">Ordenar por</label>
+              <select v-model="seleccionOrden" class="m-b-2" :disabled="isLoading">
                 <option value="titulo">Título</option>
-                <!--                 <option value="categoria">Categoría</option>-->
-                <option value="fecha_descendente">Más reciente</option>
-                <option value="fecha_ascendente">Más antiguo</option>
-              </SisdaiSelector>
+                <option value="fecha_descendente">Más Reciente</option>
+                <option value="fecha_ascendente">Más Antiguo</option>
+              </select>
             </ClientOnly>
           </div>
           <div class="columna-6">
@@ -155,6 +165,7 @@ onMounted(async () => {
                       type="search"
                       class="campo-busqueda-entrada"
                       placeholder="Campo de búsqueda"
+                      :disabled="isLoading"
                       @keyup.enter="storeFilters.buildQueryParams(seleccionTipoArchivo)"
                     />
 
@@ -163,6 +174,7 @@ onMounted(async () => {
                       class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
                       aria-label="Borrar"
                       type="button"
+                      :disabled="isLoading"
                       @click="resetSearch"
                     >
                       <span aria-hidden="true" class="pictograma-cerrar" />
@@ -172,6 +184,7 @@ onMounted(async () => {
                       class="boton-primario boton-pictograma campo-busqueda-buscar"
                       aria-label="Buscar"
                       type="button"
+                      :disabled="isLoading"
                       @click="storeFilters.buildQueryParams(seleccionTipoArchivo)"
                     >
                       <span class="pictograma-buscar" aria-hidden="true" />
