@@ -7,6 +7,14 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.10.0] - 17-02-2026
+
+### Agregado (Added)
+
+- Se oculta la sección de productos y colaboraciones en Mi-Cuenta
+- Se implementa la funcionalidad de cambio de contraseña redirigiendo a la pagina de cambio de contraseña de keycloak
+- Se implementa la funcionalidad de vincular cuentas, mas no la de desvincular cuentas.
+
 ## [0.9.8] - 16-02-2026
 
 ### Arreglado (Fix)
@@ -207,6 +215,7 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.10.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.8...v0.10.0
 [0.9.8]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.7...v0.9.8
 [0.9.7]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.6...v0.9.7
 [0.9.6]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.5...v0.9.6
