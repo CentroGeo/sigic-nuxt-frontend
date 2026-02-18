@@ -1,8 +1,10 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
-import { categoriesInSpanish, getSLDs, resourceTypeDic, wait } from '~/utils/consulta';
+import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
+import { categoriesInSpanish, resourceTypeDic, wait } from '~/utils/consulta';
 import SelectedLayer from '~/utils/consulta/SelectedLayer';
 import SelectedResource from '~/utils/consulta/SelectedResource';
+
 /**
  * @typedef {Object} Props
  * @property {Array} [variables=[]] - Indica las variables del encabezado thead tr th.
@@ -23,6 +25,7 @@ const config = useRuntimeConfig();
 const route = useRoute();
 const router = useRouter();
 const { gnoxyFetch } = useGnoxyUrl();
+const { getSLDs } = useResourcesSupplements();
 
 const { data } = useAuth();
 const token = data.value?.accessToken;

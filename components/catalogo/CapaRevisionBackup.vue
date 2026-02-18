@@ -1,4 +1,6 @@
 <script setup>
+import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
+
 import {
   SisdaiCapaWms,
   SisdaiCapaXyz,
@@ -10,8 +12,6 @@ import {
 import {
   arrayNewsOlds,
   categoriesInSpanish,
-  findServer,
-  hasWFS,
   resourceTypeDic,
   tooltipContent,
 } from '~/utils/consulta';
@@ -21,6 +21,8 @@ const storeResources = useResourcesConsultaStore();
 const storeSelected = useSelectedResources2Store();
 const config = useRuntimeConfig();
 const { gnoxyFetch } = useGnoxyUrl();
+const { findServer, hasWFS } = useResourcesSupplements();
+
 const route = useRoute();
 const router = useRouter();
 storeConsulta.resourceType = resourceTypeDic.dataLayer;

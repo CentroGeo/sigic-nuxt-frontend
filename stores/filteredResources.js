@@ -12,7 +12,7 @@ export const useFilteredResources = defineStore('filteredResources', () => {
     institutions: null,
     keywords: null,
     resourceType: null,
-    sort: null,
+    sort: 'fecha_descendente',
     queryParams: {},
     requests: 'all',
     requestOwner: null,
@@ -38,9 +38,9 @@ export const useFilteredResources = defineStore('filteredResources', () => {
       filters.institutions = null;
       filters.keywords = null;
       filters.resourceType = null;
-      filters.sort = null;
+      filters.sort = 'fecha_descendente';
       filters.queryParams = {};
-      filters.requests = null;
+      filters.requests = 'all';
     },
     /**
      * Regresa los filtros del modal de búsqueda avanzada a su valor original

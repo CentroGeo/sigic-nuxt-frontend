@@ -1,9 +1,11 @@
 <script setup>
-import { downloadDocs, downloadMetadata, downloadNoGeometry, wait } from '@/utils/consulta';
+import { wait } from '@/utils/consulta';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+import { useDownloadResources } from '~/composables/useDownloadResources';
 
 const storeSelected = useSelectedResources2Store();
 const storeResources = useResourcesConsultaStore();
+const { downloadDocs, downloadMetadata, downloadNoGeometry } = useDownloadResources();
 
 const props = defineProps({
   resourceType: { type: String, required: true },
