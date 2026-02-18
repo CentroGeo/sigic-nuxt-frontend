@@ -16,6 +16,7 @@ KEYCLOAK_ISSUER=https://iam.dev.geoint.mx/realms/sigic
 
 NUXT_PUBLIC_KEYCLOAK_CLIENT_ID=XXXXXXXX-XXXXX-XXXXX
 NUXT_PUBLIC_KEYCLOAK_ISSUER=https://iam.dev.geoint.mx/realms/sigic
+SOCIALACCOUNT_OIDC_ID_TOKEN_ISSUER=https://iam.dev.geoint.mx/realms/sigic
 
 NUXT_PUBLIC_AUTH_BASE_URL=http://localhost:3000/api/auth
 
@@ -31,3 +32,5 @@ NUXT_PUBLIC_ENABLE_LEVANTAMIENTO=true
 # NUXT_APP_BASE_URL='/app'
 NUXT_APP_BASE_URL=''
 NUXT_PUBLIC_LEVANTAMIENTO_URL=http://localhost:4009
+
+NGINX_BASE_URL=https://sigic.dev.geoint.mx
