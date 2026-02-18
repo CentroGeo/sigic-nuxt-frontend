@@ -1,11 +1,13 @@
 <script setup>
-import { fetchDoc } from '~/utils/consulta';
+import { useDownloadResources } from '~/composables/useDownloadResources';
 const props = defineProps({
   selectedElementPk: {
     type: String,
     default: null,
   },
 });
+
+const { fetchDoc } = useDownloadResources();
 const storeResources = useResourcesCatalogoStore();
 const emit = defineEmits(['docCargado']);
 

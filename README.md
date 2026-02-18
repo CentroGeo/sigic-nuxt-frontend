@@ -105,9 +105,10 @@ KEYCLOAK_CLIENT_SECRET = <Clave secreta>
 NUXT_AUTH_SECRET = <clave alfanumérica definida por la persona desarrolladora>
 NUXT_PUBLIC_IA_BACKEND_URL = https://sigic.ia.dev.geoint.mx/
 
-NUXT_PUBLIC_KEYCLOAK_BASE_URL = <URL principal de keycloak>
-NUXT_PUBLIC_KEYCLOAK_REALM = <Realm de keycloak>
-NUXT_PUBLIC_KEYCLOAK = <URL de autenticación oidc de keycloak>
+
+NUXT_PUBLIC_KEYCLOAK_ISSUER = <https://iam.dev.geoint.mx/realms/sigic>
+NUXT_PUBLIC_KEYCLOAK_CLIENT_ID = <Clave secreta>
+NUXT_PUBLIC_KEYCLOAK_IDPS = <Diccionario de los idps de keycloak escrito como cadena>
 
 ```
 
@@ -131,9 +132,10 @@ NUXT_AUTH_SECRET = <clave alfanumérica>
 NUXT_PUBLIC_BASE_URL = <sigic url de producción>
 NUXT_PUBLIC_IA_BACKEND_URL = <ulr del back de IA>
 
-NUXT_PUBLIC_KEYCLOAK_BASE_URL = <URL principal de keycloak>
-NUXT_PUBLIC_KEYCLOAK_REALM = <Realm de keycloak>
-NUXT_PUBLIC_KEYCLOAK = <URL de autenticación oidc de keycloak>
+
+NUXT_PUBLIC_KEYCLOAK_ISSUER = <https://iam.dev.geoint.mx/realms/sigic>
+NUXT_PUBLIC_KEYCLOAK_CLIENT_ID = <Clave secreta>
+NUXT_PUBLIC_KEYCLOAK_IDPS = <Diccionario de los idps de keycloak escrito como cadena>
 
 ```
 

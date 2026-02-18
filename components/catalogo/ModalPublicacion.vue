@@ -7,7 +7,7 @@ import {
   SisdaiCapaXyz,
   SisdaiMapa,
 } from '@centrogeomx/sisdai-mapas';
-import { findServer } from '~/utils/consulta';
+import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
 
 const props = defineProps({
   resourceType: { type: String, required: true },
@@ -18,6 +18,7 @@ const props = defineProps({
 });
 const { resourceType, selectedElement } = toRefs(props);
 const { gnoxyFetch } = useGnoxyUrl();
+const { findServer } = useResourcesSupplements();
 const serverType = ref(null);
 const seleccionVarDisponibles = ref(selectedElement.value.default_style);
 const hasAttrTable = computed(() => {
