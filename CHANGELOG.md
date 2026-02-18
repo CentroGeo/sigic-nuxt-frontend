@@ -7,7 +7,54 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
-## [0.9.5] - 10-02-2026
+## [0.10.1] - 17-02-2026
+
+### Agregado (Added)
+
+- Se agregaron NUXT_PUBLIC_LEVANTAMIENTO_URL y NUXT_PUBLIC_KEYCLOAK_CLIENT_ID como argumentos de build y variables de entorno en el Dockerfile, con valores por defecto.
+- Se agregó NUXT_PUBLIC_LEVANTAMIENTO_URL al archivo env_sample para facilitar la configuración local y el proceso de incorporación.
+
+### Arreglado (Fix)
+
+- Se eliminó completamente el archivo docker-compose-minimal.yml, eliminando configuraciones redundantes de Compose y concentrándose en los archivos principales.
+- Se actualizaron tanto docker-compose-ghcr.yml como docker-compose-local.yml para pasar nuevos argumentos de build y variables de entorno, incluyendo las variables de levantamiento y Keycloak, y para establecer valores predeterminados razonables para varias variables como NUXT_PUBLIC_DEFAULT_PAGE y NUXT_PUBLIC_GEONODE_API_DEFAULT_FILTER.
+
+## [0.10.0] - 17-02-2026
+
+### Agregado (Added)
+
+- Se oculta la sección de productos y colaboraciones en Mi-Cuenta
+- Se implementa la funcionalidad de cambio de contraseña redirigiendo a la pagina de cambio de contraseña de keycloak
+- Se implementa la funcionalidad de vincular cuentas, mas no la de desvincular cuentas.
+
+## [0.9.8] - 16-02-2026
+
+### Arreglado (Fix)
+
+- Se crearon dos composables nuevos para migrar las funciones de utils que usaban instancias de nuxt.
+- Se implementó un bloqueo de los filtros de búsqueda mientras hay una petición de recursos en proceso para evitar comportamientos no deseados al mostrar los resultados en las secciones de consulta y catálogo.
+
+## [0.9.7] - 16-02-2026
+
+### Arreglado (Fix)
+
+- Se refactorizó el módulo de ia para reestructurar las rutas de manera más consistente
+- Se resolvieron algunos que tenían que ver con la creación de nuevos chats, selección de proyectos, creación de contextos, remover fuentes del contexto y bugs en la visualización de tablas y docs
+
+## [0.9.6] - 13-02-2026
+
+### Arreglado (Fix)
+
+- Se agregó un spinner en la vista de inicio para esperar la carga de las capas.
+- Se agregó el estilo de la capa en el redireccionamiento de inicio a capas.
+- Se reimplementó el middleware que redirige a inicio de sesión si es necesario en los botones que llevan de inicio a carga de recursos.
+- Se ajustó el manejo de errores y reintentos en las peticiones de recursos en consulta.
+- Se eliminó la opción de categoría Sin Clasificar en el modal de búsqueda avanzada.
+- Se hicieron ajustes en la interfaz para cuando no se encuentran resultados que coincidan con la búsqueda.
+- Ajustando el marcador de activo en el filtro avanzado.
+- Se implementó la búsqueda al hacer enter en los módulos de consulta y catálogo.
+
+## [0.9.5] - 12-02-2026
 
 ### Arreglado (Fix)
 
@@ -180,6 +227,11 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.10.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.10.0...v0.10.1
+[0.10.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.8...v0.10.0
+[0.9.8]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.7...v0.9.8
+[0.9.7]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.6...v0.9.7
+[0.9.6]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.5...v0.9.6
 [0.9.5]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.4...v0.9.5
 [0.9.4]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.3...v0.9.4
 [0.9.3]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.2...v0.9.3
