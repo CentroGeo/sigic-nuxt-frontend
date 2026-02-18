@@ -2,6 +2,7 @@
 import SisdaiControlDeslizante from '@centrogeomx/sisdai-componentes/src/componentes/control-deslizante/SisdaiControlDeslizante.vue';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
+import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
 
 import {
   SisdaiCapaArcgis,
@@ -11,20 +12,14 @@ import {
   SisdaiLeyendaWms,
   SisdaiMapa,
 } from '@centrogeomx/sisdai-mapas';
-import {
-  categoriesInSpanish,
-  findServer,
-  getSLDs,
-  hasWFS,
-  resourceTypeDic,
-  tooltipContent,
-} from '~/utils/consulta';
+import { categoriesInSpanish, resourceTypeDic, tooltipContent } from '~/utils/consulta';
 
 const storeConsulta = useConsultaStore();
 storeConsulta.resourceType = resourceTypeDic.dataLayer;
 
 const storeCatalogo = useResourcesCatalogoStore();
 const { gnoxyFetch } = useGnoxyUrl();
+const { findServer, hasWFS, getSLDs } = useResourcesSupplements();
 const route = useRoute();
 const selectedPk = route.query.pk;
 const isLoading = ref(true);

@@ -1,6 +1,5 @@
 <script setup>
-//import { getSLDs, wait } from '~/utils/consulta';
-import { getSLDs } from '~/utils/consulta';
+import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
 
 definePageMeta({
   middleware: 'sidebase-auth',
@@ -10,6 +9,8 @@ definePageMeta({
 });
 const storeCatalogo = useCatalogoStore();
 const storeResources = useResourcesCatalogoStore();
+const { getSLDs } = useResourcesSupplements();
+
 const { data } = useAuth();
 const route = useRoute();
 const selectedPk = route.query.data;

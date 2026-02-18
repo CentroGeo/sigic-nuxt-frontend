@@ -1,24 +1,42 @@
 <script setup>
-import { fetchDoc } from '~/utils/consulta';
+import { useDownloadResources } from '~/composables/useDownloadResources';
 const props = defineProps({
   selectedElementPk: {
     type: Number,
     default: null,
   },
 });
+
+const { selectedElementPk } = toRefs(props);
 const storeResources = useResourcesIAStore();
+const { fetchDoc } = useDownloadResources();
 const emit = defineEmits(['docCargado']);
 
 const blobedUrl = ref('');
 const extensionDocumento = ref();
-
 const resourceByPk = ref();
-resourceByPk.value = await storeResources.fetchResourceByPk(props.selectedElementPk);
+const linkCargado = ref();
+const resourceEmbedURL = ref();
 
-const linkCargado = resourceByPk.value?.links.find((link) => link.link_type === 'uploaded');
-extensionDocumento.value = linkCargado?.extension;
-const resourceEmbedURL = resourceByPk.value?.embed_url.replace('/embed', '/link');
-blobedUrl.value = await fetchDoc(resourceEmbedURL);
+async function cargarPDF(pk) {
+  blobedUrl.value = '';
+  resourceByPk.value = {};
+  linkCargado.value = {};
+  extensionDocumento.value = '';
+  resourceEmbedURL.value = '';
+  blobedUrl.value = '';
+  //
+  resourceByPk.value = await storeResources.fetchResourceByPk(pk);
+  linkCargado.value = resourceByPk.value?.links.find((link) => link.link_type === 'uploaded');
+  extensionDocumento.value = linkCargado.value?.extension;
+  resourceEmbedURL.value = resourceByPk.value?.embed_url.replace('/embed', '/link');
+  blobedUrl.value = await fetchDoc(resourceEmbedURL.value);
+}
+await cargarPDF(selectedElementPk.value);
+
+watch(selectedElementPk, async (nv) => {
+  await cargarPDF(nv);
+});
 </script>
 
 <template>

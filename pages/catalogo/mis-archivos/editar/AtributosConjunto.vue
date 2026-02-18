@@ -1,5 +1,5 @@
 <script setup>
-import { fetchByPk } from '~/utils/catalogo';
+import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
 
 definePageMeta({
   middleware: 'sidebase-auth',
@@ -10,6 +10,7 @@ definePageMeta({
 
 const storeCatalogo = useCatalogoStore();
 const storeMetadatos = useEditedMetadataStore();
+const { fetchByPk } = useResourcesSupplements();
 // Recuperamos información a partir de la url
 const route = useRoute();
 const selectedPk = route.query.data;

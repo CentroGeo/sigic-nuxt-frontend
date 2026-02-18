@@ -2,7 +2,8 @@
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
-import { findServer, resourceTypeDic } from '~/utils/consulta';
+import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
+import { resourceTypeDic } from '~/utils/consulta';
 import SelectedLayer from '~/utils/consulta/SelectedLayer';
 
 const props = defineProps({
@@ -12,6 +13,7 @@ const props = defineProps({
   },
 });
 const { gnoxyFetch } = useGnoxyUrl();
+const { findServer } = useResourcesSupplements();
 const storeSelected = useSelectedResources2Store();
 const extentMap = ref(undefined);
 const modalMapa = ref(null);

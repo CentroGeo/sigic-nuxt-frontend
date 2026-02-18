@@ -6,13 +6,15 @@ import {
   SisdaiMapa,
   utiles,
 } from '@centrogeomx/sisdai-mapas';
-import { arrayNewsOlds, findServer, resourceTypeDic } from '~/utils/consulta';
+import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
+import { arrayNewsOlds, resourceTypeDic } from '~/utils/consulta';
 
 const storeConsulta = useConsultaStore();
 const storeResources = useResourcesConsultaStore();
 const storeSelected = useSelectedResources2Store();
 const config = useRuntimeConfig();
 const { gnoxyFetch } = useGnoxyUrl();
+const { findServer } = useResourcesSupplements();
 const route = useRoute();
 const router = useRouter();
 storeConsulta.resourceType = resourceTypeDic.dataLayer;

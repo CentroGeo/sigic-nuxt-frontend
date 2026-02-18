@@ -46,7 +46,7 @@ const categoriesDict = {
   Structure: 'structure',
   Transportation: 'transportation',
   'Utilities Communication': 'utilitiesCommunication',
-  'Sin Clasificar': 'Sin clasificar',
+  //'Sin Clasificar': 'Sin clasificar',
 };
 function abrirModalBusqueda() {
   modalBusqueda.value?.abrirModal();
@@ -70,16 +70,19 @@ defineExpose({
 
       <template #cuerpo>
         <label for="filtro-categoria">Categoria</label>
-        <div class="grupo-categoria flex p-1">
-          <SisdaiCasillaVerificacion
-            v-for="(category, index) in Object.keys(categoriesDict)"
-            :key="`${index}-category`"
-            v-model="inputCategories"
-            name="filtro-categoria"
-            :value="categoriesDict[category]"
-            :etiqueta="categoriesInSpanish[category]"
-            class="opcion-checkbox"
-          />
+        <div class="grupo-categoria p-1">
+          <div class="flex p-1" style="gap: 0px">
+            <SisdaiCasillaVerificacion
+              v-for="(category, index) in Object.keys(categoriesDict)"
+              :key="`${index}-category`"
+              v-model="inputCategories"
+              name="filtro-categoria"
+              :value="categoriesDict[category]"
+              :etiqueta="categoriesInSpanish[category]"
+              class="opcion-checkbox"
+            />
+          </div>
+
           <button
             class="boton-chico opcion-checkbox boton-secundario"
             aria-label="Limpiar Selección"

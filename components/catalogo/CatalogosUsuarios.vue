@@ -1,7 +1,8 @@
 <script setup>
-import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { fetchHarvesters } from '~/utils/catalogo';
+import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
 const { gnoxyFetch } = useGnoxyUrl();
+const { fetchRemoteServices } = useResourcesSupplements();
+
 const config = useRuntimeConfig();
 const userID = ref(null);
 const harvesters = ref([]);
@@ -47,7 +48,12 @@ async function getUserInfo() {
  * Esta petición obtiene el total de servicios externos
  */
 async function getTotal() {
-  const url = `${config.public.geonodeApi}/services/`;
+  let url;
+  if (inputSearch.value) {
+    url = `${config.public.geonodeApi}/services/?title=${inputSearch.value.trim()}`;
+  } else {
+    url = `${config.public.geonodeApi}/services/`;
+  }
   const requestServices = await gnoxyFetch(url);
   if (!requestServices.ok) {
     const error = await requestServices.json();
@@ -63,7 +69,8 @@ async function getTotal() {
  */
 async function fetchResources() {
   isLoadingPage.value = true;
-  const { status, data } = await fetchHarvesters(queryParams.value);
+  totalHarvesters.value = await getTotal();
+  const { status, data } = await fetchRemoteServices(queryParams.value);
   harvesters.value = data;
   fetchStatus.value = status;
   isLoadingPage.value = false;
@@ -154,13 +161,18 @@ onMounted(async () => {
       <div class="flex m-t-3 m-b-2">
         <!-- Selector Orden -->
         <div class="columna-8">
-          <ClientOnly>
-            <SisdaiSelector v-model="seleccionOrden" etiqueta="Ordenar por">
-              <option value="created">Más Antiguo</option>
-              <option value="-created">Más Reciente</option>
-              <option value="title">Nombre</option>
-            </SisdaiSelector>
-          </ClientOnly>
+          <label for="selector-orden-remotos">Ordenar por</label>
+          <select
+            v-model="seleccionOrden"
+            name="selector-orden-remotos"
+            class="m-b-2"
+            :disabled="isLoadingPage || isLoadingGeneral"
+          >
+            <option value="created">Más Antiguo</option>
+            <option value="-created">Más Reciente</option>
+            <option value="title">Nombre</option>
+          </select>
+          <ClientOnly> </ClientOnly>
         </div>
         <!-- Campo de búsqueda -->
         <div class="columna-8">
@@ -175,6 +187,8 @@ onMounted(async () => {
                     type="search"
                     class="campo-busqueda-entrada"
                     placeholder="Campo de búsqueda"
+                    :disabled="isLoadingPage || isLoadingGeneral"
+                    @keyup.enter="searchByName"
                   />
 
                   <button
@@ -182,6 +196,7 @@ onMounted(async () => {
                     class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
                     aria-label="Borrar"
                     type="button"
+                    :disabled="isLoadingPage || isLoadingGeneral"
                     @click="resetSearch"
                   >
                     <span aria-hidden="true" class="pictograma-cerrar" />
@@ -191,6 +206,7 @@ onMounted(async () => {
                     class="boton-primario boton-pictograma campo-busqueda-buscar"
                     aria-label="Buscar"
                     type="button"
+                    :disabled="isLoadingPage || isLoadingGeneral"
                     @click="searchByName"
                   >
                     <span class="pictograma-buscar" aria-hidden="true" />
@@ -220,7 +236,7 @@ onMounted(async () => {
 
     <!--Si aun no hay servicios catgados por usuarios-->
     <div
-      v-if="!isLoadingGeneral && fetchStatus === 'ok' && harvesters.length === 0"
+      v-if="!isLoadingGeneral && !isLoadingPage && fetchStatus === 'ok' && harvesters.length === 0"
       class="flex flex-contenido-centrado"
     >
       <div class="texto-color-error borde-redondeado-8 sin-recursos" style="max-width: 50%">
@@ -236,6 +252,12 @@ onMounted(async () => {
       </div>
     </div>
 
+    <div
+      v-if="!isLoadingGeneral && isLoadingPage && harvesters.length === 0"
+      class="flex flex-contenido-centrado m-y-5"
+    >
+      <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
+    </div>
     <!--La tabla de servicios remotos-->
     <div
       v-if="!isLoadingGeneral && fetchStatus === 'ok' && harvesters.length > 0"

@@ -88,8 +88,7 @@ if (route.path === '/mi-cuenta') {
       <div class="p-t-5 p-b-3">
         <div class="flex menu-mis-archivos">
           <NuxtLink to="/mi-cuenta/informacion-personal">Información personal</NuxtLink>
-          <NuxtLink to="/mi-cuenta/produccion-colaboraciones">Producción y colaboraciones</NuxtLink>
-
+          <!-- <NuxtLink to="/mi-cuenta/produccion-colaboraciones">Producción y colaboraciones</NuxtLink> -->
           <NuxtLink to="/mi-cuenta/seguridad">Seguridad</NuxtLink>
         </div>
       </div>
