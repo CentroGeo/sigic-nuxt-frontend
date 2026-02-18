@@ -3,13 +3,17 @@ const { gnoxyFetch } = useGnoxyUrl();
 const config = useRuntimeConfig();
 
 const escenarios = ref([]);
+const estaCargando = ref(false);
 
-onMounted(async () => {
+async function cargarEscenarios() {
+  estaCargando.value = true;
   const respuesta = await gnoxyFetch(`${config.public.geonodeApi}/scenarios/`);
 
   const data = await respuesta.json();
   escenarios.value = data.results;
-});
+  estaCargando.value = false;
+}
+cargarEscenarios();
 </script>
 
 <template>
@@ -27,11 +31,13 @@ onMounted(async () => {
 
       <NuxtLink to="/geocontenidos/geohistorias/editar" class="boton boton-primario m-b-4">
         <span class="pictograma-agregar m-r-1" />
-        Crear geo-historia
+        Crear Escenario
       </NuxtLink>
     </div>
 
-    <div v-if="escenarios.length > 0" class="grid reticula-12">
+    <GeocontenidosLoader v-if="estaCargando" />
+
+    <div v-else-if="escenarios.length > 0" class="grid reticula-12">
       <div v-for="escenario in escenarios" :key="escenario.id" class="columna-8 columna-4-esc">
         <div class="tarjeta">
           <div class="tarjeta-cuerpo">
@@ -47,17 +53,20 @@ onMounted(async () => {
             </button>
 
             <NuxtLink
-              to="/geocontenidos/geohistorias/editar"
               class="boton boton-chico boton-secundario"
+              to="/geocontenidos/geohistorias/editar"
             >
               <span class="pictograma-editar m-r-1" />
               Editar escenario
             </NuxtLink>
 
-            <button class="boton boton-chico boton-secundario">
+            <NuxtLink
+              class="boton boton-chico boton-secundario"
+              to="/geocontenidos/geohistorias/escenas"
+            >
               <span class="pictograma-editar m-r-1" />
               Editar escenas
-            </button>
+            </NuxtLink>
             <button class="boton boton-chico boton-secundario">
               <span class="pictograma-agregar m-r-1" />
               Crear escena
