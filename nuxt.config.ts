@@ -14,7 +14,7 @@ export default defineNuxtConfig({
   ssr: true,
 
   app: {
-    baseURL: appBasePath,
+    baseURL: appBasePath + '/',
     head: {
       link: [
         {
@@ -54,7 +54,7 @@ export default defineNuxtConfig({
   },
 
   nitro: {
-    baseURL: appBasePath,
+    baseURL: appBasePath + '/',
     preset: 'node-server',
     compressPublicAssets: false,
   },
@@ -75,7 +75,7 @@ export default defineNuxtConfig({
     isEnabled: true,
     baseURL: authBaseUrl,
     originEnvKey: originEnvKey,
-    basePath: appBasePath,
+    basePath: appBasePath + '/',
     globalAppMiddleware: false,
     provider: {
       type: 'authjs',
