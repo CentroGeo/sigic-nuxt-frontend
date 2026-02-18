@@ -207,8 +207,8 @@ const handleDelete = async () => {
 
     storeIA.triggerProjectReload();
 
-    // Navega al proyecto anterior más reciente
-    router.push(`/ia/proyecto/${catalogo.value[1].id}`);
+    // Navega al proyecto más reciente
+    router.push(`/ia/proyectos/`);
   }
 
   eliminarModal.value?.cerrarModal();
