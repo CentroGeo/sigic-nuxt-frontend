@@ -314,6 +314,7 @@ onMounted(async () => {
               </button>
 
               <button
+                v-globo-informacion:derecha="'Buscar'"
                 aria-label="Buscar"
                 :disabled="isLoading"
                 class="boton-primario boton-pictograma campo-busqueda-buscar"
@@ -325,6 +326,7 @@ onMounted(async () => {
             </form>
 
             <button
+              v-globo-informacion:derecha="'Búsqueda avanzada'"
               type="button"
               :disabled="isLoading"
               :class="
@@ -349,6 +351,7 @@ onMounted(async () => {
           style="gap: 0px"
         >
           <button
+            v-globo-informacion:derecha="'Enlace CSW'"
             type="button"
             class="boton-secundario columna-16 boton-chico flex flex-contenido-centrado"
             aria-label="Enlace Catalogue Service for the Web"
@@ -365,7 +368,11 @@ onMounted(async () => {
               style="align-self: center"
               to="/catalogo/servicios-remotos/agregar"
             >
-              <span aria-hidden="true" class="pictograma-colaborar" />
+              <span
+                v-globo-informacion:derecha="'Conectar Catálogo Externo'"
+                aria-hidden="true"
+                class="pictograma-colaborar"
+              />
             </nuxt-link>
           </div>
         </div>
