@@ -496,14 +496,14 @@ const arrayContextSources = ref([]);
 
 // Función para cargar las fuentes del contexto
 const loadSources = async () => {
-  console.log('loadSources');
+  // console.log('loadSources');
   let contextById = {};
   contextById = await storeIA.getContextById(contextID.value);
   arrayContextSources.value = contextById.files;
 };
 
 async function abrirModalReporteInfo() {
-  console.log('reporte modal info');
+  // console.log('reporte modal info');
   modalReporteInfo.value.abrirModal();
   // Recupera las fuentes del contexto
   await loadSources();
@@ -527,8 +527,8 @@ function abrirModalReporteInstrucciones() {
     // seleccionando todas las fuentes del contexto
     arrayContextSources.value.forEach((d) => toggleSeleccionFuente(d));
   }
-  console.log('campoNombreReporte.value', campoNombreReporte.value);
-  console.log('fuentesSeleccionadas.value', fuentesSeleccionadas.value);
+  // console.log('campoNombreReporte.value', campoNombreReporte.value);
+  // console.log('fuentesSeleccionadas.value', fuentesSeleccionadas.value);
 }
 
 // Función para determinar el tipo de archivo
@@ -552,109 +552,118 @@ const obtenerTipoArchivo = (nombre) => {
 const areaReporteInstrucciones = ref('');
 const seleccionTipoReporte = ref('');
 const seleccionTipoArchivo = ref('');
+const botonRadioHojaMembretada = ref('si');
 function generarReporte() {
   console.log('generar reporte');
+
+  console.log('campoNombreReporte.value', campoNombreReporte.value);
+  console.log('fuentesSeleccionadas.value', fuentesSeleccionadas.value);
   console.log('areaReporteInstrucciones.value', areaReporteInstrucciones.value);
   console.log('seleccionTipoReporte.value', seleccionTipoReporte.value);
   console.log('seleccionTipoArchivo.value', seleccionTipoArchivo.value);
-  console.log('campoNombreReporte.value', campoNombreReporte.value);
-  console.log('fuentesSeleccionadas.value', fuentesSeleccionadas.value);
+  console.log('botonRadioHojaMembretada.value', botonRadioHojaMembretada.value);
 
   modalReporteInstrucciones.value.cerrarModal();
 }
+const opTipoArchivo = ref({ pdf: 'PDF', word: 'WORD', pptx: 'PPTX', csv: 'CSV' });
+watch(seleccionTipoReporte, (nv) => {
+  if (nv === 'presentacion') {
+    opTipoArchivo.value = { pptx: 'PPTX' };
+  } else {
+    opTipoArchivo.value = { pdf: 'PDF', word: 'WORD', pptx: 'PPTX', csv: 'CSV' };
+  }
+});
 </script>
 
 <template>
   <IaLayoutPaneles>
     <template #catalogo>
-      <div>
-        <div class="overflowYAuto">
-          <div class="positionSticky">
-            <div class="fondo-color-acento p-x-3 p-y-1">
-              <h5>Chats</h5>
-            </div>
-
-            <div class="p-x-3 p-t-3">
-              <button
-                class="boton-listas boton boton-primario"
-                aria-label="Crear nuevo chat"
-                type="button"
-                @click="nuevoChatModal?.abrirModal()"
-              >
-                Nuevo chat
-              </button>
-
-              <ClientOnly>
-                <SisdaiCampoBusqueda
-                  class="m-y-3"
-                  etiqueta="Buscar chats"
-                  :catalogo="catalogo"
-                  :catalogo-anidado="true"
-                  catalogo-anidado-propiedad-elementos="chat"
-                  propiedad-busqueda="titulo"
-                  @al-filtrar="(r) => (catalogoFiltrado = r)"
-                />
-              </ClientOnly>
-            </div>
+      <div class="overflowYAuto">
+        <div class="positionSticky">
+          <div class="fondo-color-acento p-x-3 p-y-1">
+            <h5>Chats</h5>
           </div>
 
-          <div>
-            <h6 class="p-x-3">Selecciona un chat para empezar a interactuar con el asistente.</h6>
+          <div class="p-x-3 p-t-3">
+            <button
+              class="boton-listas boton boton-primario"
+              aria-label="Crear nuevo chat"
+              type="button"
+              @click="nuevoChatModal?.abrirModal()"
+            >
+              Nuevo chat
+            </button>
 
-            <ul class="lista-sin-estilo m-x-3">
-              <li v-for="grupo in catalogoFiltrado" :id="grupo.id" :key="grupo.id">
-                <p class="fecha-grupo">
-                  {{ grupo.fecha == fechaHoy ? 'Hoy' : grupo.fecha }}
-                </p>
+            <ClientOnly>
+              <SisdaiCampoBusqueda
+                class="m-y-3"
+                etiqueta="Buscar chats"
+                :catalogo="catalogo"
+                :catalogo-anidado="true"
+                catalogo-anidado-propiedad-elementos="chat"
+                propiedad-busqueda="titulo"
+                @al-filtrar="(r) => (catalogoFiltrado = r)"
+              />
+            </ClientOnly>
+          </div>
+        </div>
 
-                <ul class="lista-sin-estilo m-b-5">
-                  <li v-for="chat in grupo.chat" :id="chat.id" :key="chat.id">
-                    <div class="tarjeta-chat p-3 borde borde-redondeado-20" @click="openChat(chat)">
-                      <h5 class="tarjeta-titulo m-t-0 m-b-2">
-                        {{ chat.titulo }}
-                      </h5>
+        <div>
+          <h6 class="p-x-3">Selecciona un chat para empezar a interactuar con el asistente.</h6>
 
-                      <p class="tarjeta-nombre-proyecto m-t-0 m-b-1">
-                        {{ chat.proyecto }}
-                      </p>
+          <ul class="lista-sin-estilo m-x-3">
+            <li v-for="grupo in catalogoFiltrado" :id="grupo.id" :key="grupo.id">
+              <p class="fecha-grupo">
+                {{ grupo.fecha == fechaHoy ? 'Hoy' : grupo.fecha }}
+              </p>
 
-                      <p class="tarjeta-nombre-contexto m-t-0 m-b-2">
-                        {{ chat.contexto }}
-                      </p>
+              <ul class="lista-sin-estilo m-b-5">
+                <li v-for="chat in grupo.chat" :id="chat.id" :key="chat.id">
+                  <div class="tarjeta-chat p-3 borde borde-redondeado-20" @click="openChat(chat)">
+                    <h5 class="tarjeta-titulo m-t-0 m-b-2">
+                      {{ chat.titulo }}
+                    </h5>
 
-                      <div class="flex flex-contenido-final">
-                        <div>
-                          <button
-                            class="boton-pictograma boton-sin-contenedor-secundario"
-                            aria-label="Editar chat"
-                            type="button"
-                            @click.stop="openEditModal(chat.titulo, chat.id)"
-                          >
-                            <span class="pictograma-editar" aria-hidden="true" />
-                          </button>
+                    <p class="tarjeta-nombre-proyecto m-t-0 m-b-1">
+                      {{ chat.proyecto }}
+                    </p>
 
-                          <button
-                            class="boton-pictograma boton-sin-contenedor-secundario"
-                            aria-label="Remover chat"
-                            type="button"
-                            @click.stop="openEliminarModal(chat.id)"
-                          >
-                            <span class="pictograma-eliminar" aria-hidden="true" />
-                          </button>
-                        </div>
+                    <p class="tarjeta-nombre-contexto m-t-0 m-b-2">
+                      {{ chat.contexto }}
+                    </p>
+
+                    <div class="flex flex-contenido-final">
+                      <div>
+                        <button
+                          class="boton-pictograma boton-sin-contenedor-secundario"
+                          aria-label="Editar chat"
+                          type="button"
+                          @click.stop="openEditModal(chat.titulo, chat.id)"
+                        >
+                          <span class="pictograma-editar" aria-hidden="true" />
+                        </button>
+
+                        <button
+                          class="boton-pictograma boton-sin-contenedor-secundario"
+                          aria-label="Remover chat"
+                          type="button"
+                          @click.stop="openEliminarModal(chat.id)"
+                        >
+                          <span class="pictograma-eliminar" aria-hidden="true" />
+                        </button>
                       </div>
                     </div>
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </div>
+                  </div>
+                </li>
+              </ul>
+            </li>
+          </ul>
         </div>
       </div>
     </template>
 
     <template #visualizador>
-      <main id="principal" class="">
+      <main id="principal">
         <div class="grid">
           <div class="columna-1" />
 
@@ -1001,20 +1010,41 @@ function generarReporte() {
               >
                 <option value="1">Institucional</option>
                 <option value="2">Descriptivo</option>
-                <option value="3">Resumen</option>
-                <option value="4">Presentación</option>
+                <option value="resumen">Resumen</option>
+                <option value="presentacion">Presentación</option>
                 <option value="5">Evaluación</option>
               </SisdaiSelector>
+
               <SisdaiSelector
                 v-model="seleccionTipoArchivo"
                 etiqueta="Tipo de archivo"
                 :es_obligatorio="true"
               >
-                <option value="1">PDF</option>
-                <option value="2">WORD</option>
-                <option value="3">PPTX</option>
-                <option value="4">CSV</option>
+                <option
+                  v-for="(value, key, idx) in opTipoArchivo"
+                  :key="`optipoarchivo-${idx}`"
+                  :value="key"
+                >
+                  {{ value }}
+                </option>
               </SisdaiSelector>
+
+              <SisdaiBotonesRadioGrupo leyenda="Hoja membretada (Formato SECIHTI)">
+                <SisdaiBotonRadio
+                  v-model="botonRadioHojaMembretada"
+                  etiqueta="Sí"
+                  value="si"
+                  name="hojamembretada"
+                  :es_obligatorio="true"
+                />
+                <SisdaiBotonRadio
+                  v-model="botonRadioHojaMembretada"
+                  etiqueta="No"
+                  value="no"
+                  name="hojamembretada"
+                  :es_obligatorio="true"
+                />
+              </SisdaiBotonesRadioGrupo>
             </ClientOnly>
           </template>
 
@@ -1201,12 +1231,63 @@ function generarReporte() {
   </IaLayoutPaneles>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
+.overflowYAuto {
+  height: var(--altura-consulta-esc);
+  overflow-y: auto;
+
+  .positionSticky {
+    position: sticky;
+    top: 0;
+    background-color: var(--fondo);
+    padding-bottom: 8px;
+  }
+}
+
+.tarjeta-chat {
+  background-color: var(--fondo-acento);
+  border: 1px solid var(--borde-acento);
+  width: 100%;
+  cursor: pointer;
+  a {
+    &:hover {
+      text-decoration: none !important;
+      background-color: var(--fondo-acento);
+      border-color: var(--borde-acento);
+      box-shadow: none;
+      color: inherit;
+    }
+  }
+  h5 {
+    color: var(--texto-acento);
+  }
+  p {
+    color: var(--texto-primario);
+  }
+
+  .tarjeta-titulo {
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: var(--Tipos-Interlineado-Ttulos-y-subttulos-Nivel-6, 22.5px);
+  }
+
+  .tarjeta-nombre-proyecto,
+  .tarjeta-nombre-contexto {
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 18.2px;
+  }
+}
+
 .contenedor-chat {
   height: var(--altura-consulta-esc);
+
   .contenedor-chat-contenido {
     height: 100%;
     position: relative;
+
     .contenedor-log {
       position: absolute;
       top: 24px;
@@ -1214,6 +1295,7 @@ function generarReporte() {
       right: 0;
       height: calc(100% - 120px - 112px);
       overflow-y: auto;
+
       .contenedor-log-contenido {
         display: flex;
         gap: 24px;
@@ -1225,9 +1307,11 @@ function generarReporte() {
       bottom: 0;
       left: 0;
       right: 0;
+
       form.formulario-area-texto {
         position: relative;
         width: 100%;
+
         .formulario-boton {
           position: absolute;
           bottom: 8px;
@@ -1316,172 +1400,9 @@ function generarReporte() {
   }
 }
 
-.overflowYAuto {
-  height: var(--altura-consulta-esc);
-  overflow-y: auto;
-  .positionSticky {
-    position: sticky;
-    top: 0;
-    background-color: var(--fondo);
-    padding-bottom: 8px;
-  }
-}
-
-.tarjeta-chat {
-  background-color: var(--fondo-acento);
-  border: 1px solid var(--borde-acento);
-  width: 100%;
-  cursor: pointer;
-  a {
-    &:hover {
-      text-decoration: none !important;
-      background-color: var(--fondo-acento);
-      border-color: var(--borde-acento);
-      box-shadow: none;
-      color: inherit;
-    }
-  }
-  h5 {
-    color: var(--texto-acento);
-  }
-  p {
-    color: var(--texto-primario);
-  }
-
-  .tarjeta-titulo {
-    font-size: 18px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: var(--Tipos-Interlineado-Ttulos-y-subttulos-Nivel-6, 22.5px);
-  }
-
-  .tarjeta-nombre-proyecto,
-  .tarjeta-nombre-contexto {
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 18.2px;
-  }
-}
-.overflowYAuto {
-  overflow-y: auto;
-  height: var(--altura-consulta-esc);
-}
-.tarjeta {
-  background-color: var(--fondo-neutro);
-  .tarjeta-imagen {
-    height: 120px;
-  }
-  .tarjeta-pie {
-    display: inline-grid;
-    a {
-      display: flex;
-      justify-content: space-between;
-    }
-  }
-}
-
-.proyecto-encabezado {
-  align-items: center;
-}
-
-.separador {
-  width: 100%;
-  height: 1px;
-  background: #aaa;
-}
-
-.contexto-encabezado {
-  align-items: center;
-}
-
-.height-vh {
-  height: var(--altura-consulta-esc);
-}
-.overflowYAuto {
-  height: var(--altura-consulta-esc);
-  overflow-y: auto;
-  .positionSticky {
-    position: sticky;
-    top: 0;
-    background-color: var(--fondo);
-    padding-bottom: 8px;
-  }
-}
-
-.proyecto {
-  cursor: pointer;
-  border-left: var(--Escalas-Bordes-borde-8, 8px) solid transparent;
-
-  &.seleccionado {
-    border-left: var(--Escalas-Bordes-borde-8, 8px) solid var(--borde-acento);
-    background: var(--fondo-acento);
-  }
-
-  .proyecto-titulo {
-    color: var(--navegacion-secundaria-color);
-    font-size: 16px;
-    font-style: normal;
-    font-weight: 600;
-  }
-}
-.overflowYAuto {
-  overflow-y: auto;
-  height: var(--altura-consulta-esc);
-}
-.crear {
-  &.contexto-encabezado {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0px;
-
-    .boton-regresar {
-      display: flex;
-      align-items: center;
-      font-size: var(--Tipos-Tamao-Prrafos-Texto-alto, 20px);
-      font-style: normal;
-      font-weight: 400;
-      line-height: var(--Tipos-Interlineado-Prrafos-Texto-alto, 30px);
-    }
-  }
-}
-
-.mensaje-error {
-  color: var(--color-error);
-  background-color: var(--fondo-error);
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-  border-radius: 4px;
-}
-
-.mensaje-exito {
-  color: var(--color-exito);
-  background-color: var(--fondo-exito);
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-  border-radius: 4px;
-}
-
 button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-}
-
-.preview-imagen-contenedor {
-  margin-top: 1rem;
-  padding: 1rem;
-  border: 1px dashed #ccc;
-  border-radius: 4px;
-  text-align: center;
-}
-
-.preview-imagen {
-  max-width: 100%;
-  max-height: 200px;
-  display: block;
-  margin: 0 auto;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Asegúrate de que el input file no se vea cuando no es necesario */
@@ -1570,12 +1491,5 @@ input[type='file'] {
   border: solid white;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
-}
-
-.portada-texto {
-  font-size: var(--Tipos-Tamao-Prrafos-Prrafo-base, 16px);
-  font-style: normal;
-  font-weight: 600;
-  line-height: var(--Tipos-Interlineado-Prrafos-Prrafos, 24px);
 }
 </style>

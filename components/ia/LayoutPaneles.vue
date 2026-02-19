@@ -53,7 +53,7 @@ const route = useRoute();
     z-index: 1;
   }
   .columna-5 {
-    box-shadow: 4px 0 4px 3px var(--navegacion-primaria-sombra);
+    box-shadow: 4px -6px 8px 4px var(--navegacion-primaria-sombra);
     height: var(--altura-consulta-esc);
     z-index: 1;
   }

@@ -236,424 +236,383 @@ watch(
 <template>
   <UiLayoutPaneles>
     <template #catalogo>
-      <div>
-        <div class="overflowYAuto">
-          <div class="positionSticky">
-            <div class="fondo-color-acento p-x-3 p-y-1">
-              <h5>Proyectos</h5>
-            </div>
-
-            <div class="p-x-3 p-t-3">
-              <nuxt-link
-                class="boton-listas boton boton-primario m-b-3"
-                aria-label="Nuevo proyecto"
-                to="/ia/proyectos/crear-nuevo"
-              >
-                Nuevo proyecto
-              </nuxt-link>
-
-              <ClientOnly>
-                <form class="campo-busqueda" @submit.prevent>
-                  <input
-                    id="idcampobusquedaialistas"
-                    v-model="campoBusqueda"
-                    class="campo-busqueda-entrada"
-                    type="search"
-                    :placeholder="'Buscar un proyecto'"
-                  />
-                  <button
-                    v-if="campoBusqueda"
-                    class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
-                    aria-label="Borrar"
-                    type="button"
-                    @click="removerBusquedaFiltro"
-                  >
-                    <span aria-hidden="true" class="pictograma-cerrar" />
-                  </button>
-                  <button
-                    class="boton-primario boton-pictograma campo-busqueda-buscar"
-                    aria-label="Buscar"
-                    type="button"
-                  >
-                    <span class="pictograma-buscar" aria-hidden="true" />
-                  </button>
-                </form>
-              </ClientOnly>
-            </div>
+      <div class="overflowYAuto">
+        <div class="positionSticky">
+          <div class="fondo-color-acento p-x-3 p-y-1">
+            <h5>Proyectos</h5>
           </div>
 
-          <div>
-            <p class="m-x-3">Selecciona un proyecto para ver su contenido.</p>
-            <ul class="lista-chats lista-sin-estilo">
-              <li
-                v-for="proyect in catalogoFiltrado"
-                :key="proyect.id"
-                class="m-0"
-                @click="seleccionarProyecto(proyect)"
-              >
-                <div
-                  class="proyecto p-l-4 p-r-2 p-y-1"
-                  :class="{
-                    seleccionado: proyect.id === +idSeleccionado || proyect.title === '',
-                  }"
+          <div class="p-x-3 p-t-3">
+            <nuxt-link
+              class="boton-listas boton boton-primario m-b-3"
+              aria-label="Nuevo proyecto"
+              to="/ia/proyectos/crear-nuevo"
+            >
+              Nuevo proyecto
+            </nuxt-link>
+
+            <ClientOnly>
+              <form class="campo-busqueda" @submit.prevent>
+                <input
+                  id="idcampobusquedaialistas"
+                  v-model="campoBusqueda"
+                  class="campo-busqueda-entrada"
+                  type="search"
+                  :placeholder="'Buscar un proyecto'"
+                />
+                <button
+                  v-if="campoBusqueda"
+                  class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
+                  aria-label="Borrar"
+                  type="button"
+                  @click="removerBusquedaFiltro"
                 >
-                  <div class="proyecto-titulo m-b-1">{{ proyect.title }}</div>
-                  <div class="flex">
-                    <UiNumeroElementos :numero="proyect.numero_contextos" etiqueta="Contextos" />
-                    <UiNumeroElementos :numero="proyect.numero_fuentes" etiqueta="Fuentes" />
-                  </div>
-                </div>
-              </li>
-            </ul>
+                  <span aria-hidden="true" class="pictograma-cerrar" />
+                </button>
+                <button
+                  class="boton-primario boton-pictograma campo-busqueda-buscar"
+                  aria-label="Buscar"
+                  type="button"
+                >
+                  <span class="pictograma-buscar" aria-hidden="true" />
+                </button>
+              </form>
+            </ClientOnly>
           </div>
+        </div>
+
+        <div>
+          <p class="m-x-3">Selecciona un proyecto para ver su contenido.</p>
+          <ul class="lista-chats lista-sin-estilo">
+            <li
+              v-for="proyect in catalogoFiltrado"
+              :key="proyect.id"
+              class="m-0"
+              @click="seleccionarProyecto(proyect)"
+            >
+              <div
+                class="proyecto p-l-4 p-r-2 p-y-1"
+                :class="{
+                  seleccionado: proyect.id === +idSeleccionado || proyect.title === '',
+                }"
+              >
+                <div class="proyecto-titulo m-b-1">{{ proyect.title }}</div>
+                <div class="flex">
+                  <UiNumeroElementos :numero="proyect.numero_contextos" etiqueta="Contextos" />
+                  <UiNumeroElementos :numero="proyect.numero_fuentes" etiqueta="Fuentes" />
+                </div>
+              </div>
+            </li>
+          </ul>
         </div>
       </div>
     </template>
 
     <template #visualizador>
-      <main id="principal" class="">
-        <div>
-          <div class="contenedor overflowYAuto">
-            <div class="grid p-t-3">
-              <div class="columna-16">
-                <div class="flex flex-contenido-separado proyecto-encabezado">
-                  <div class="flex proyecto-encabezado">
-                    <h2>{{ proyecto.title }}</h2>
+      <main id="principal">
+        <div class="contenedor overflowYAuto">
+          <div class="grid p-t-3">
+            <div class="columna-16">
+              <div class="flex flex-contenido-separado proyecto-encabezado">
+                <div class="flex proyecto-encabezado">
+                  <h2>{{ proyecto.title }}</h2>
 
-                    <p
-                      class="p-x-1 p-y-minimo fondo-color-acento texto-color-secundario borde borde-color-acento borde-redondeado-8"
-                    >
-                      <span>{{ proyecto.public ? 'Público' : 'Privado' }}</span>
-                      <!-- TODO: agregar icono de para privado/publico -->
-                      <span class="pictograma-privado" aria-hidden="true" />
-                    </p>
-                  </div>
-
-                  <div class="flex">
-                    <nuxt-link
-                      class="boton boton-secundario boton-chico"
-                      aria-label="Configurar proyecto"
-                      :to="`/ia/proyecto/${proyecto.id}/configurar`"
-                    >
-                      Configurar proyecto
-                    </nuxt-link>
-
-                    <button
-                      class="boton boton-secundario boton-chico"
-                      @click="openEliminarModal(proyecto.id, 'proyecto')"
-                    >
-                      Eliminar proyecto
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="grid">
-              <div class="columna-10">
-                {{ proyecto.description }}
-              </div>
-            </div>
-
-            <div class="grid">
-              <div class="columna-16">
-                <p class="separador borde-b" />
-              </div>
-            </div>
-
-            <div class="grid">
-              <div class="flex flex-contenido-separado contexto-encabezado columna-16">
-                <h4>Contextos:</h4>
-
-                <NuxtLink
-                  class="boton boton-primario boton-chico"
-                  aria-label="Crear contexto"
-                  :to="`/ia/proyecto/${proyecto.id}/crear-contexto`"
-                >
-                  Crear contexto
-                </NuxtLink>
-              </div>
-            </div>
-
-            <div class="grid">
-              <div class="columna-16">
-                <div v-if="storeIA.existeContexto">
-                  <div class="flex m-y-3">
-                    <div
-                      v-for="contexto in contextos"
-                      :key="`contexto-${contexto.id}`"
-                      class="columna-4"
-                    >
-                      <div class="tarjeta">
-                        <img
-                          :src="`${config.public.geonodeUrl}/uploaded/ia/uploads/contexts/${contexto.image_type}`"
-                          class="tarjeta-imagen"
-                          alt="Imagen contexto"
-                        />
-                        <div class="tarjeta-cuerpo">
-                          <p class="tarjeta-titulo">{{ contexto.title }}</p>
-                          <UiNumeroElementos :numero="contexto.num_files" etiqueta="Fuentes" />
-                        </div>
-                        <div class="tarjeta-pie">
-                          <button
-                            class="boton boton-primario boton-chico flex flex-contenido-separado"
-                            aria-label="Iniciar chat"
-                            type="button"
-                            @click="router.push(`/ia/chat/0/contexto/${contexto.id}`)"
-                          >
-                            Iniciar chat
-                            <span class="pictograma-chat" aria-hidden="true" />
-                          </button>
-
-                          <nuxt-link
-                            class="boton-secundario boton-chico"
-                            type="button"
-                            :to="`/ia/proyecto/${proyecto.id}/editar-contexto/${contexto.id}`"
-                            @click="storeIA.seleccionarContexto(contexto)"
-                          >
-                            Editar contexto
-                            <span class="pictograma-editar" aria-hidden="true" />
-                          </nuxt-link>
-
-                          <nuxt-link
-                            class="boton-secundario boton-chico"
-                            type="button"
-                            @click="openEliminarModal(contexto.id, 'contexto')"
-                          >
-                            Eliminar contexto
-                            <span class="pictograma-eliminar" aria-hidden="true" />
-                          </nuxt-link>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div v-else class="flex flex-contenido-centrado">
-                  <div class="columna-8">
-                    <div class="nota fondo-color-neutro p-2 borde-redondeado-8 m-t-0">
-                      <h6 class="m-t-0 m-b-2">Aún no hay contextos en este proyecto.</h6>
-
-                      <p class="m-y-0">
-                        Para comenzar, haz clic en "Crear contexto" y selecciona las fuentes que
-                        quieres usar. Esto te permitirá activar el análisis dentro del chat.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="grid m-b-5">
-              <div class="columna-16">
-                <p class="separador borde-b" />
-                <div class="flex flex-contenido-separado fuentes-encabezado">
-                  <h4>Fuentes de información:</h4>
+                  <p
+                    class="p-x-1 p-y-minimo fondo-color-acento texto-color-secundario borde borde-color-acento borde-redondeado-8"
+                  >
+                    <span>{{ proyecto.public ? 'Público' : 'Privado' }}</span>
+                    <!-- TODO: agregar icono de para privado/publico -->
+                    <span class="pictograma-privado" aria-hidden="true" />
+                  </p>
                 </div>
 
-                <div v-if="arraySources.length > 0" class="tabla-archivos">
-                  <table class="tabla">
-                    <thead>
-                      <tr>
-                        <th class="p-x-3 p-y-2">Nombre</th>
-                        <th class="p-x-3 p-y-2">Tipo de archivo</th>
-                        <th>Categoría</th>
-                        <th>Origen</th>
-                      </tr>
-                    </thead>
+                <div class="flex">
+                  <nuxt-link
+                    class="boton boton-secundario boton-chico"
+                    aria-label="Configurar proyecto"
+                    :to="`/ia/proyecto/${proyecto.id}/configurar`"
+                  >
+                    Configurar proyecto
+                  </nuxt-link>
 
-                    <tbody>
-                      <tr v-for="archivo in arraySources" :key="archivo.id">
-                        <td class="p-3">
-                          <a
-                            @click="
-                              obtenerTipoArchivo(archivo.filename) === 'PDF'
-                                ? openResourceViewEmbed(archivo)
-                                : openResourceViewTable(archivo)
-                            "
-                            >{{ archivo.filename }}</a
-                          >
-                        </td>
-                        <td class="p-3 etiqueta-tabla">
-                          <span class="p-x-1 p-y-minimo">{{
-                            obtenerTipoArchivo(archivo.filename)
-                          }}</span>
-                        </td>
-                        <td class="p-3 flex flex-contenido-centrado">
-                          <p
-                            class="texto-centrado fondo-color-acento p-1 m-0 texto-color-acento borde borde-redondeado-12"
-                            style="width: max-content"
-                          >
-                            <span v-if="archivo.geonode_category === 'Documento'">
-                              <!-- propio -->
-                              <span class="pictograma-documento" />{{ archivo.geonode_category }}s
-                            </span>
-                            <span v-if="archivo.geonode_category === 'documents'">
-                              <!-- catalogo -->
-                              <span class="pictograma-documento" />{{
-                                dictCategoria[archivo.geonode_category]
-                              }}
-                            </span>
-                            <span v-if="archivo.geonode_category === 'datasets'">
-                              <span class="pictograma-tabla" />{{
-                                dictCategoria[archivo.geonode_category]
-                              }}
-                            </span>
-                          </p>
-                        </td>
-                        <td class="p-3 etiqueta-tabla">
-                          <span class="p-x-1 p-y-minimo">
-                            {{
-                              archivo.geonode_type === 'Catalogo'
-                                ? 'Catálogo'
-                                : archivo.geonode_type
-                            }}
-                          </span>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                  <button
+                    class="boton boton-secundario boton-chico"
+                    @click="openEliminarModal(proyecto.id, 'proyecto')"
+                  >
+                    Eliminar proyecto
+                  </button>
                 </div>
               </div>
             </div>
           </div>
 
-          <ClientOnly>
-            <SisdaiModal v-if="modalDocResourcePk" ref="modalDocumento" class="modal-grande">
-              <template #encabezado>
-                <h2>{{ isDocumentoReading ? blobeTitle : '' }}</h2>
-              </template>
+          <div class="grid">
+            <div class="columna-10">
+              {{ proyecto.description }}
+            </div>
+          </div>
 
-              <template #cuerpo>
-                <div v-if="!isDocumentoReading" class="flex flex-contenido-centrado">
-                  <figure>
-                    <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
-                    <figcaption class="texto-centrado">Cargando documento</figcaption>
-                  </figure>
-                </div>
+          <div class="grid">
+            <div class="columna-16">
+              <p class="separador borde-b" />
+            </div>
+          </div>
 
-                <IaDocFuentesInfo
-                  :selected-element-pk="modalDocResourcePk"
-                  @doc-cargado="isDocumentoReading = true"
-                />
-              </template>
+          <div class="grid">
+            <div class="flex flex-contenido-separado contexto-encabezado columna-16">
+              <h4>Contextos:</h4>
 
-              <template #pie> </template>
-            </SisdaiModal>
+              <NuxtLink
+                class="boton boton-primario boton-chico"
+                aria-label="Crear contexto"
+                :to="`/ia/proyecto/${proyecto.id}/crear-contexto`"
+              >
+                Crear contexto
+              </NuxtLink>
+            </div>
+          </div>
 
-            <SisdaiModal v-if="modalTableResourcePk" ref="modalTabla" class="modal-grande">
-              <template #encabezado>
-                <h2>{{ isDataTableReading ? tableTitle : '' }}</h2>
-              </template>
-
-              <template #cuerpo>
-                <div v-if="!isDataTableReading" class="flex flex-contenido-centrado">
-                  <figure>
-                    <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
-                    <figcaption class="texto-centrado">Cargando tabla</figcaption>
-                  </figure>
-                </div>
-
-                <IaTablaFuentesInfo
-                  :selected-element-pk="modalTableResourcePk"
-                  @tabla-cargada="isDataTableReading = true"
-                />
-              </template>
-
-              <template #pie> </template>
-            </SisdaiModal>
-
-            <SisdaiModal ref="modalNoPublico">
-              <template #encabezado>
-                <h2>{{ '' }}</h2>
-              </template>
-
-              <template #cuerpo>
-                <p
-                  class="fondo-color-alerta texto-color-alerta borde borde-color-alerta borde-redondeado-8 p-3"
-                >
-                  El recurso <b class="texto-peso-600">"{{ resourceFilename }}"</b> no está público
-                  en geonode.
-                  <nuxt-link to="/catalogo/mis-archivos/metadatos-pendientes"
-                    >Ver en mis archivos</nuxt-link
+          <div class="grid">
+            <div class="columna-16">
+              <div v-if="storeIA.existeContexto">
+                <div class="flex m-y-3">
+                  <div
+                    v-for="contexto in contextos"
+                    :key="`contexto-${contexto.id}`"
+                    class="columna-4"
                   >
-                </p>
-              </template>
+                    <div class="tarjeta">
+                      <img
+                        :src="`${config.public.geonodeUrl}/uploaded/ia/uploads/contexts/${contexto.image_type}`"
+                        class="tarjeta-imagen"
+                        alt="Imagen contexto"
+                      />
+                      <div class="tarjeta-cuerpo">
+                        <p class="tarjeta-titulo">{{ contexto.title }}</p>
+                        <UiNumeroElementos :numero="contexto.num_files" etiqueta="Fuentes" />
+                      </div>
+                      <div class="tarjeta-pie">
+                        <button
+                          class="boton boton-primario boton-chico flex flex-contenido-separado"
+                          aria-label="Iniciar chat"
+                          type="button"
+                          @click="router.push(`/ia/chat/0/contexto/${contexto.id}`)"
+                        >
+                          Iniciar chat
+                          <span class="pictograma-chat" aria-hidden="true" />
+                        </button>
 
-              <template #pie> </template>
-            </SisdaiModal>
+                        <nuxt-link
+                          class="boton-secundario boton-chico"
+                          type="button"
+                          :to="`/ia/proyecto/${proyecto.id}/editar-contexto/${contexto.id}`"
+                          @click="storeIA.seleccionarContexto(contexto)"
+                        >
+                          Editar contexto
+                          <span class="pictograma-editar" aria-hidden="true" />
+                        </nuxt-link>
 
-            <SisdaiModal ref="eliminarModal">
-              <template #encabezado>
-                <h4>Eliminar {{ eliminarLabel }}</h4>
-              </template>
+                        <nuxt-link
+                          class="boton-secundario boton-chico"
+                          type="button"
+                          @click="openEliminarModal(contexto.id, 'contexto')"
+                        >
+                          Eliminar contexto
+                          <span class="pictograma-eliminar" aria-hidden="true" />
+                        </nuxt-link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="flex flex-contenido-centrado">
+                <div class="columna-8">
+                  <div class="nota fondo-color-neutro p-2 borde-redondeado-8 m-t-0">
+                    <h6 class="m-t-0 m-b-2">Aún no hay contextos en este proyecto.</h6>
 
-              <template #cuerpo>
-                <p>
-                  ¿Deseas eliminar este {{ eliminarLabel }} de forma permanente? Una vez eliminado,
-                  se borrará de la memoria y no se podrá recuperar.
-                </p>
-              </template>
+                    <p class="m-y-0">
+                      Para comenzar, haz clic en "Crear contexto" y selecciona las fuentes que
+                      quieres usar. Esto te permitirá activar el análisis dentro del chat.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-              <template #pie>
-                <button
-                  type="button"
-                  class="boton-secundario boton-chico"
-                  @click="eliminarModal?.cerrarModal()"
-                >
-                  Cancelar
-                </button>
+          <div class="grid m-b-5">
+            <div class="columna-16">
+              <p class="separador borde-b" />
+              <div class="flex flex-contenido-separado fuentes-encabezado">
+                <h4>Fuentes de información:</h4>
+              </div>
 
-                <button type="button" class="boton-primario boton-chico" @click="handleDelete">
-                  Eliminar
-                </button>
-              </template>
-            </SisdaiModal>
-          </ClientOnly>
+              <div v-if="arraySources.length > 0" class="tabla-archivos">
+                <table class="tabla">
+                  <thead>
+                    <tr>
+                      <th class="p-x-3 p-y-2">Nombre</th>
+                      <th class="p-x-3 p-y-2">Tipo de archivo</th>
+                      <th>Categoría</th>
+                      <th>Origen</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr v-for="archivo in arraySources" :key="archivo.id">
+                      <td class="p-3">
+                        <a
+                          @click="
+                            obtenerTipoArchivo(archivo.filename) === 'PDF'
+                              ? openResourceViewEmbed(archivo)
+                              : openResourceViewTable(archivo)
+                          "
+                          >{{ archivo.filename }}</a
+                        >
+                      </td>
+                      <td class="p-3 etiqueta-tabla">
+                        <span class="p-x-1 p-y-minimo">{{
+                          obtenerTipoArchivo(archivo.filename)
+                        }}</span>
+                      </td>
+                      <td class="p-3 flex flex-contenido-centrado">
+                        <p
+                          class="texto-centrado fondo-color-acento p-1 m-0 texto-color-acento borde borde-redondeado-12"
+                          style="width: max-content"
+                        >
+                          <span v-if="archivo.geonode_category === 'Documento'">
+                            <!-- propio -->
+                            <span class="pictograma-documento" />{{ archivo.geonode_category }}s
+                          </span>
+                          <span v-if="archivo.geonode_category === 'documents'">
+                            <!-- catalogo -->
+                            <span class="pictograma-documento" />{{
+                              dictCategoria[archivo.geonode_category]
+                            }}
+                          </span>
+                          <span v-if="archivo.geonode_category === 'datasets'">
+                            <span class="pictograma-tabla" />{{
+                              dictCategoria[archivo.geonode_category]
+                            }}
+                          </span>
+                        </p>
+                      </td>
+                      <td class="p-3 etiqueta-tabla">
+                        <span class="p-x-1 p-y-minimo">
+                          {{
+                            archivo.geonode_type === 'Catalogo' ? 'Catálogo' : archivo.geonode_type
+                          }}
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
       </main>
+      <ClientOnly>
+        <SisdaiModal v-if="modalDocResourcePk" ref="modalDocumento" class="modal-grande">
+          <template #encabezado>
+            <h2>{{ isDocumentoReading ? blobeTitle : '' }}</h2>
+          </template>
+
+          <template #cuerpo>
+            <div v-if="!isDocumentoReading" class="flex flex-contenido-centrado">
+              <figure>
+                <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
+                <figcaption class="texto-centrado">Cargando documento</figcaption>
+              </figure>
+            </div>
+
+            <IaDocFuentesInfo
+              :selected-element-pk="modalDocResourcePk"
+              @doc-cargado="isDocumentoReading = true"
+            />
+          </template>
+
+          <template #pie> </template>
+        </SisdaiModal>
+
+        <SisdaiModal v-if="modalTableResourcePk" ref="modalTabla" class="modal-grande">
+          <template #encabezado>
+            <h2>{{ isDataTableReading ? tableTitle : '' }}</h2>
+          </template>
+
+          <template #cuerpo>
+            <div v-if="!isDataTableReading" class="flex flex-contenido-centrado">
+              <figure>
+                <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
+                <figcaption class="texto-centrado">Cargando tabla</figcaption>
+              </figure>
+            </div>
+
+            <IaTablaFuentesInfo
+              :selected-element-pk="modalTableResourcePk"
+              @tabla-cargada="isDataTableReading = true"
+            />
+          </template>
+
+          <template #pie> </template>
+        </SisdaiModal>
+
+        <SisdaiModal ref="modalNoPublico">
+          <template #encabezado>
+            <h2>{{ '' }}</h2>
+          </template>
+
+          <template #cuerpo>
+            <p
+              class="fondo-color-alerta texto-color-alerta borde borde-color-alerta borde-redondeado-8 p-3"
+            >
+              El recurso <b class="texto-peso-600">"{{ resourceFilename }}"</b> no está público en
+              geonode.
+              <nuxt-link to="/catalogo/mis-archivos/metadatos-pendientes"
+                >Ver en mis archivos</nuxt-link
+              >
+            </p>
+          </template>
+
+          <template #pie> </template>
+        </SisdaiModal>
+
+        <SisdaiModal ref="eliminarModal">
+          <template #encabezado>
+            <h4>Eliminar {{ eliminarLabel }}</h4>
+          </template>
+
+          <template #cuerpo>
+            <p>
+              ¿Deseas eliminar este {{ eliminarLabel }} de forma permanente? Una vez eliminado, se
+              borrará de la memoria y no se podrá recuperar.
+            </p>
+          </template>
+
+          <template #pie>
+            <button
+              type="button"
+              class="boton-secundario boton-chico"
+              @click="eliminarModal?.cerrarModal()"
+            >
+              Cancelar
+            </button>
+
+            <button type="button" class="boton-primario boton-chico" @click="handleDelete">
+              Eliminar
+            </button>
+          </template>
+        </SisdaiModal>
+      </ClientOnly>
     </template>
   </UiLayoutPaneles>
 </template>
 
-<style lang="scss">
-.overflowYAuto {
-  overflow-y: auto;
-  height: var(--altura-consulta-esc);
-}
-.tarjeta {
-  background-color: var(--fondo-neutro);
-  .tarjeta-imagen {
-    height: 120px;
-  }
-  .tarjeta-pie {
-    display: inline-grid;
-    a {
-      display: flex;
-      justify-content: space-between;
-    }
-  }
-}
-
-.proyecto-encabezado {
-  align-items: center;
-}
-
-.separador {
-  width: 100%;
-  height: 1px;
-  background: #aaa;
-}
-
-.contexto-encabezado {
-  align-items: center;
-}
-
-.height-vh {
-  height: var(--altura-consulta-esc);
-}
+<style lang="scss" scoped>
 .overflowYAuto {
   height: var(--altura-consulta-esc);
   overflow-y: auto;
+
   .positionSticky {
     position: sticky;
     top: 0;
@@ -676,6 +635,37 @@ watch(
     font-size: 16px;
     font-style: normal;
     font-weight: 600;
+  }
+}
+
+.proyecto-encabezado {
+  align-items: center;
+}
+
+.separador {
+  width: 100%;
+  height: 1px;
+  background: #aaa;
+}
+
+.contexto-encabezado {
+  align-items: center;
+}
+
+.tarjeta {
+  background-color: var(--fondo-neutro);
+
+  .tarjeta-imagen {
+    height: 120px;
+  }
+
+  .tarjeta-pie {
+    display: inline-grid;
+
+    a {
+      display: flex;
+      justify-content: space-between;
+    }
   }
 }
 </style>
