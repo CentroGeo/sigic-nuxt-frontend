@@ -5,6 +5,7 @@ const isDev = process.env.NODE_ENV !== 'production';
 const appBasePath = process.env.NUXT_APP_BASE_URL || '/';
 const authBaseUrl = process.env.NUXT_PUBLIC_AUTH_BASE_URL;
 const originEnvKey = isDev ? undefined : 'NUXT_AUTH_ORIGIN';
+const publicAppBasePath = appBasePath === '/' ? '' : appBasePath.replace(/\/$/, '');
 
 const metaImg = '/img/icono_sigic.png';
 const metaDescription =
@@ -101,7 +102,7 @@ export default defineNuxtConfig({
       keycloakClientId: process.env.NUXT_PUBLIC_KEYCLOAK_CLIENT_ID,
       keycloakIDPs: process.env.NUXT_PUBLIC_KEYCLOAK_IDPS,
       baseURL: process.env.NUXT_PUBLIC_BASE_URL || 'http://localhost:3000',
-      basePath: process.env.NUXT_APP_BASE_URL,
+      basePath: publicAppBasePath,
       ollamaModel: process.env.NUXT_PUBLIC_OLLAMA_MODEL || 'deepseek-r1',
       geonodeUrl: process.env.NUXT_PUBLIC_GEONODE_URL || 'https://geonode.dev.geoint.mx',
       geonodeApi: process.env.NUXT_PUBLIC_GEONODE_API || 'https://geonode.dev.geoint.mx/api/v2',
