@@ -7,6 +7,18 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.10.1] - 17-02-2026
+
+### Agregado (Added)
+
+- Se agregaron NUXT_PUBLIC_LEVANTAMIENTO_URL y NUXT_PUBLIC_KEYCLOAK_CLIENT_ID como argumentos de build y variables de entorno en el Dockerfile, con valores por defecto.
+- Se agregó NUXT_PUBLIC_LEVANTAMIENTO_URL al archivo env_sample para facilitar la configuración local y el proceso de incorporación.
+
+### Arreglado (Fix)
+
+- Se eliminó completamente el archivo docker-compose-minimal.yml, eliminando configuraciones redundantes de Compose y concentrándose en los archivos principales.
+- Se actualizaron tanto docker-compose-ghcr.yml como docker-compose-local.yml para pasar nuevos argumentos de build y variables de entorno, incluyendo las variables de levantamiento y Keycloak, y para establecer valores predeterminados razonables para varias variables como NUXT_PUBLIC_DEFAULT_PAGE y NUXT_PUBLIC_GEONODE_API_DEFAULT_FILTER.
+
 ## [0.10.0] - 17-02-2026
 
 ### Agregado (Added)
@@ -215,6 +227,7 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.10.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.8...v0.10.0
 [0.9.8]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.7...v0.9.8
 [0.9.7]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.6...v0.9.7
