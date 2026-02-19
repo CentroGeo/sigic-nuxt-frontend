@@ -11,6 +11,40 @@ const router = useRouter();
 function irAProyectosEnRevision() {
   router.push('/levantamiento/revision-proyectos/revision');
 }
+
+const preguntas = ref([
+  {
+    tipo: 'abierta',
+    etiqueta: 'Pregunta abierta',
+    pregunta: '¿Qué observaciones adicionales deseas compartir sobre este punto?',
+    obligatorio: true,
+    instrucciones:
+      'Describe con tus palabras cualquier detalle relevante: tipo de residuos, frecuencia con la que se acumulan o si hay personas afectadas.',
+  },
+  {
+    tipo: 'unica',
+    etiqueta: 'Opción única',
+    pregunta: '¿En qué momentos del día consideras que el riesgo es mayor?',
+    opciones: ['Mañana', 'Tarde', 'Mediodía', 'Noche'],
+    obligatorio: true,
+    instrucciones: 'Selecciona la opción que mejor describa el tipo de residuos observados.',
+  },
+  {
+    tipo: 'condicional',
+    etiqueta: 'Pregunta condicional',
+    pregunta: 'Has presenciado o vivido algún incidente en este cruce?',
+    opciones: [
+      {
+        opcion: 'Si',
+        subpregunta: { pregunta: 'Describe la situación' },
+        tipoCondicion: 'abierta',
+      },
+      { opcion: 'No' },
+    ],
+    obligatorio: true,
+    instrucciones: '',
+  },
+]);
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeLevantamiento.catalogoColapsado">
@@ -79,6 +113,43 @@ function irAProyectosEnRevision() {
                 5. Añadir observaciones (ejemplo: si la obra tiene temática social, cultural,
                 ambiental).
               </div>
+            </div>
+          </div>
+          <div class="columna-16 texto-tamanio-4 texto-color-acento flex flex-contenido-centrado">
+            Formulario del proyecto
+          </div>
+          <div class="">
+            <div v-for="(pregunta, index) in preguntas" :key="index">
+              <levantamiento-pregunta-abierta
+                v-if="pregunta.tipo === 'abierta'"
+                :pregunta="pregunta"
+                :es-edicion="false"
+                :indice="index"
+              />
+              <levantamiento-pregunta-unica
+                v-if="pregunta.tipo === 'unica'"
+                :pregunta="pregunta"
+                :es-edicion="false"
+                :indice="index"
+              />
+              <levantamiento-pregunta-multiple
+                v-if="pregunta.tipo === 'multiple'"
+                :pregunta="pregunta"
+                :es-edicion="false"
+                :indice="index"
+              />
+              <levantamiento-pregunta-condicional
+                v-if="pregunta.tipo === 'condicional'"
+                :pregunta="pregunta"
+                :es-edicion="false"
+                :indice="index"
+              />
+              <levantamiento-pregunta-multimedia
+                v-if="pregunta.tipo === 'multimedia'"
+                :pregunta="pregunta"
+                :es-edicion="false"
+                :indice="index"
+              />
             </div>
           </div>
         </div>
