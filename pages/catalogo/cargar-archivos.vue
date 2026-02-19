@@ -19,12 +19,11 @@ const hayCargas = ref(false);
 const { data } = useAuth();
 const { gnoxyFetch } = useGnoxyUrl();
 
-//const base_files = ['.geojson', '.gpkg', '.csv'];
+const base_files = ['.geojson', '.gpkg', '.csv'];
 const docs_files = ['.txt', '.pdf'];
-const base_files = ['.geojson', '.gpkg', '.zip', '.csv'];
-//const docs_files = ['.txt', '.pdf', '.xls', '.xlsx'];
 
 async function guardarArchivo(files) {
+  archivosEnCarga.value = [];
   hayCargas.value = true;
   const token = ref(data.value?.accessToken);
 
@@ -167,16 +166,8 @@ async function monitorLayerImport(executionId, archivo) {
         <div class="alineacion-izquierda ancho-lectura">
           <h2>Carga archivo</h2>
           <p class="m-y-1">
-            <!-- <b>Solo archivos GeoJSON, Geopaquetes, CSV, XML, PDF, JPG y PNG.</b> -->
             <b>Solo archivos GeoJSON, Geopaquetes, csv, pdf y txt.</b>
           </p>
-          <!-- <p
-            class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-8 p-2 m-t-0 m-b-2"
-          >
-            Para subir un archivo shp es necesario que la carpeta zip incluya los archivos .shp,
-            .shx, .dbf, .prj y .cpg. Además, el archivo .dbf debe usar codificación UTF-8.
-          </p> -->
-
           <ClientOnly>
             <CatalogoElementoDragNdDrop @pasar-archivo="(i) => guardarArchivo(i)" />
           </ClientOnly>

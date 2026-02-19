@@ -94,7 +94,7 @@ defineExpose({
             class="boton-primario boton-chico"
             aria-label="Guardar"
             type="button"
-            :disabled="false"
+            :disabled="!archivosArriba"
             @click="emit('pasarArchivo', archivos)"
           >
             Guardar
