@@ -20,7 +20,7 @@ async function onDrop() {
 const { open, onChange } = useFileDialog();
 onChange(async (files) => {
   // imprime el archivo que se suba mediante el diálogo
-  // console.log('files', files);
+  //console.log('files', files);
   archivos.value = files;
   archivosArriba.value = true;
   // const files = Array.from(files);
@@ -35,6 +35,18 @@ const removerArchivos = () => {
 const archivoNoValido = () => {
   archivoValido.value = true;
 };
+
+function deleteFile(file) {
+  const newFiles = new DataTransfer();
+  const arrayFiles = Array.from(archivos.value);
+  const newArray = arrayFiles.filter((d) => d.name !== file.name);
+  newArray.forEach((d) => newFiles.items.add(d));
+  archivos.value = newFiles.files;
+  if (archivos.value.length === 0) {
+    archivosArriba.value = false;
+    archivoValido.value = false;
+  }
+}
 
 defineExpose({
   archivoValido,
@@ -56,12 +68,24 @@ defineExpose({
           style="max-height: 184px; overflow-y: scroll"
         >
           <div v-for="archivo in archivos" :key="archivo.name" class="flex flex-contenido-separado">
-            <p class="flex flex-vertical-centrado m-y-1">{{ archivo.name }}</p>
+            <p class="nombre-archivo flex flex-vertical-centrado m-y-1 columna-9">
+              {{ archivo.name }}
+            </p>
+
             <div class="flex">
-              <p class="fondo-color-neutro borde borde-redondeado-8 m-y-1" style="padding: 4px">
+              <p
+                class="flex flex-vertical-centrado fondo-color-neutro borde borde-redondeado-8 m-y-1"
+                style="padding: 4px"
+              >
                 .{{ archivo.name.split('.')[1] }}
               </p>
               <p class="flex flex-vertical-centrado m-y-1">{{ convertirBytes(archivo.size) }}</p>
+              <button
+                class="boton-pictograma boton-sin-contenedor-secundario boton-chico"
+                @click.stop="deleteFile(archivo)"
+              >
+                <span class="pictograma-cerrar"></span>
+              </button>
             </div>
           </div>
         </div>
@@ -75,7 +99,7 @@ defineExpose({
                 <div>
                   <span class="pictograma-archivo-subir pictograma-mediano" />
                 </div>
-                <p>Arratra o suelta tu archivo</p>
+                <p>Arrastra o suelta tu archivo</p>
               </div>
 
               <label class="boton boton-secundario boton-chico" @click.stop="open()">
@@ -134,5 +158,10 @@ defineExpose({
 }
 #identificadorCAMPOFILE:focus + label,
 #identificadorCAMPOFILE + label:hover {
+}
+
+.nombre-archivo {
+  overflow-wrap: break-word;
+  white-space: normal;
 }
 </style>
