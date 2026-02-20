@@ -203,82 +203,80 @@ onUnmounted(() => {
 <template>
   <UiLayoutPaneles>
     <template #catalogo>
-      <div>
-        <div class="overflowYAuto">
-          <div class="positionSticky">
-            <div class="fondo-color-acento p-x-3 p-y-1">
-              <h5>Proyectos</h5>
-            </div>
-
-            <div class="p-x-3 p-t-3">
-              <nuxt-link
-                class="boton-listas boton boton-primario m-b-3"
-                aria-label="Nuevo proyecto"
-                to="/ia/proyectos/crear-nuevo"
-              >
-                Nuevo proyecto
-              </nuxt-link>
-
-              <ClientOnly>
-                <form class="campo-busqueda" @submit.prevent>
-                  <input
-                    id="idcampobusquedaialistas"
-                    v-model="campoBusqueda"
-                    class="campo-busqueda-entrada"
-                    type="search"
-                    :placeholder="'Buscar un proyecto'"
-                  />
-                  <button
-                    v-if="campoBusqueda"
-                    class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
-                    aria-label="Borrar"
-                    type="button"
-                    @click="removerBusquedaFiltro"
-                  >
-                    <span aria-hidden="true" class="pictograma-cerrar" />
-                  </button>
-                  <button
-                    class="boton-primario boton-pictograma campo-busqueda-buscar"
-                    aria-label="Buscar"
-                    type="button"
-                  >
-                    <span class="pictograma-buscar" aria-hidden="true" />
-                  </button>
-                </form>
-              </ClientOnly>
-            </div>
+      <div class="overflowYAuto">
+        <div class="positionSticky">
+          <div class="fondo-color-acento p-x-3 p-y-1">
+            <h5>Proyectos</h5>
           </div>
 
-          <div>
-            <p class="m-x-3">Selecciona un proyecto para ver su contenido.</p>
-            <ul class="lista-chats lista-sin-estilo">
-              <li
-                v-for="proyect in catalogoFiltrado"
-                :key="proyect.id"
-                class="m-0"
-                @click="seleccionarProyecto(proyect)"
-              >
-                <div
-                  class="proyecto p-l-4 p-r-2 p-y-1"
-                  :class="{
-                    seleccionado: proyect.id === +idSeleccionado || proyect.title === '',
-                  }"
+          <div class="p-x-3 p-t-3">
+            <nuxt-link
+              class="boton-listas boton boton-primario m-b-3"
+              aria-label="Nuevo proyecto"
+              to="/ia/proyectos/crear-nuevo"
+            >
+              Nuevo proyecto
+            </nuxt-link>
+
+            <ClientOnly>
+              <form class="campo-busqueda" @submit.prevent>
+                <input
+                  id="idcampobusquedaialistas"
+                  v-model="campoBusqueda"
+                  class="campo-busqueda-entrada"
+                  type="search"
+                  :placeholder="'Buscar un proyecto'"
+                />
+                <button
+                  v-if="campoBusqueda"
+                  class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
+                  aria-label="Borrar"
+                  type="button"
+                  @click="removerBusquedaFiltro"
                 >
-                  <div class="proyecto-titulo m-b-1">{{ proyect.title }}</div>
-                  <div class="flex">
-                    <UiNumeroElementos :numero="proyect.numero_contextos" etiqueta="Contextos" />
-                    <UiNumeroElementos :numero="proyect.numero_fuentes" etiqueta="Fuentes" />
-                  </div>
-                </div>
-              </li>
-            </ul>
+                  <span aria-hidden="true" class="pictograma-cerrar" />
+                </button>
+                <button
+                  class="boton-primario boton-pictograma campo-busqueda-buscar"
+                  aria-label="Buscar"
+                  type="button"
+                >
+                  <span class="pictograma-buscar" aria-hidden="true" />
+                </button>
+              </form>
+            </ClientOnly>
           </div>
+        </div>
+
+        <div>
+          <p class="m-x-3">Selecciona un proyecto para ver su contenido.</p>
+          <ul class="lista-chats lista-sin-estilo">
+            <li
+              v-for="proyect in catalogoFiltrado"
+              :key="proyect.id"
+              class="m-0"
+              @click="seleccionarProyecto(proyect)"
+            >
+              <div
+                class="proyecto p-l-4 p-r-2 p-y-1"
+                :class="{
+                  seleccionado: proyect.id === +idSeleccionado || proyect.title === '',
+                }"
+              >
+                <div class="proyecto-titulo m-b-1">{{ proyect.title }}</div>
+                <div class="flex">
+                  <UiNumeroElementos :numero="proyect.numero_contextos" etiqueta="Contextos" />
+                  <UiNumeroElementos :numero="proyect.numero_fuentes" etiqueta="Fuentes" />
+                </div>
+              </div>
+            </li>
+          </ul>
         </div>
       </div>
     </template>
 
     <template #visualizador>
-      <main id="principal" class="contenedor m-b-10 p-t-3 overflowYAuto">
+      <main id="principal" class="contenedor m-b-10 p-t-3">
         <div class="grid">
           <div class="columna-16 flex crear contexto-encabezado">
             <button
@@ -454,42 +452,7 @@ onUnmounted(() => {
   </UiLayoutPaneles>
 </template>
 
-<style lang="scss">
-.overflowYAuto {
-  overflow-y: auto;
-  height: var(--altura-consulta-esc);
-}
-.tarjeta {
-  background-color: var(--fondo-neutro);
-  .tarjeta-imagen {
-    height: 120px;
-  }
-  .tarjeta-pie {
-    display: inline-grid;
-    a {
-      display: flex;
-      justify-content: space-between;
-    }
-  }
-}
-
-.proyecto-encabezado {
-  align-items: center;
-}
-
-.separador {
-  width: 100%;
-  height: 1px;
-  background: #aaa;
-}
-
-.contexto-encabezado {
-  align-items: center;
-}
-
-.height-vh {
-  height: var(--altura-consulta-esc);
-}
+<style lang="scss" scoped>
 .overflowYAuto {
   height: var(--altura-consulta-esc);
   overflow-y: auto;
@@ -517,10 +480,7 @@ onUnmounted(() => {
     font-weight: 600;
   }
 }
-.overflowYAuto {
-  overflow-y: auto;
-  height: var(--altura-consulta-esc);
-}
+
 .crear {
   &.contexto-encabezado {
     flex-direction: column;
@@ -537,49 +497,10 @@ onUnmounted(() => {
     }
   }
 }
-
-.mensaje-error {
-  color: var(--color-error);
-  background-color: var(--fondo-error);
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-  border-radius: 4px;
-}
-
-.mensaje-exito {
-  color: var(--color-exito);
-  background-color: var(--fondo-exito);
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-  border-radius: 4px;
-}
-
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.preview-imagen-contenedor {
-  margin-top: 1rem;
-  padding: 1rem;
-  border: 1px dashed #ccc;
-  border-radius: 4px;
-  text-align: center;
-}
-
-.preview-imagen {
-  max-width: 100%;
-  max-height: 200px;
-  display: block;
-  margin: 0 auto;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Asegúrate de que el input file no se vea cuando no es necesario */
-input[type='file'] {
-  display: block;
-  margin-bottom: 1rem;
+.separador {
+  width: 100%;
+  height: 1px;
+  background: #aaa;
 }
 
 //tabla de archivos. TODO: estilo sisdai
@@ -662,6 +583,17 @@ input[type='file'] {
   border: solid white;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Asegúrate de que el input file no se vea cuando no es necesario */
+input[type='file'] {
+  display: block;
+  margin-bottom: 1rem;
 }
 
 .portada-texto {
