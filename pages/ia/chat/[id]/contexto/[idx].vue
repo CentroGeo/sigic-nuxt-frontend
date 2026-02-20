@@ -1,7 +1,10 @@
 <script setup>
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
-import SisdaiControlDeslizante from '@centrogeomx/sisdai-componentes/src/componentes/control-deslizante/SisdaiControlDeslizante.vue';
+// import SisdaiControlDeslizante from '@centrogeomx/sisdai-componentes/src/componentes/control-deslizante/SisdaiControlDeslizante.vue';
+import SisdaiAreaTexto from '@centrogeomx/sisdai-componentes/src/componentes/area-texto/SisdaiAreaTexto.vue';
+import SisdaiBotonesRadioGrupo from '@centrogeomx/sisdai-componentes/src/componentes/boton-radio-grupo/SisdaiBotonesRadioGrupo.vue';
+import SisdaiBotonRadio from '@centrogeomx/sisdai-componentes/src/componentes/boton-radio/SisdaiBotonRadio.vue';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
@@ -43,20 +46,22 @@ const usuarioHizoScroll = ref(false);
 const mensaje = ref('');
 const mensajes = ref([]);
 
-const reporteModal = ref(null);
-const controlDeslizante = ref(null);
-const areaTextoRef = ref(null);
+const modalReporteInfo = ref(null);
+const modalReporteInstrucciones = ref(null);
+// const controlDeslizante = ref(null);
+// const areaTextoRef = ref(null);
 const isSubmitting = ref(false);
 
-const chatID = computed(() => parseInt(route.params.id) || 0);
+const chatId = computed(() => parseInt(route.params.id) || 0);
 const contextID = computed(() => parseInt(route.params.idx));
+const chatID = ref(0);
 
 const idAleatorio = () => {
   return 'areatexto-' + Math.random().toString(36).substring(2);
 };
-const idAleatorioCD = () => {
-  return 'controldeslizante-' + Math.random().toString(36).substring(2);
-};
+// const idAleatorioCD = () => {
+//   return 'controldeslizante-' + Math.random().toString(36).substring(2);
+// };
 
 // Función para cargar historico de chat
 async function loadExistentChat(idchat) {
@@ -76,6 +81,8 @@ async function loadExistentChat(idchat) {
 }
 
 if (contextID.value) {
+  // volviendo reactivo el chat id del route params
+  chatID.value = chatId.value;
   if (chatID.value > 0) {
     console.log('chat existente');
     loadExistentChat(chatID.value);
@@ -143,6 +150,7 @@ function transformarHistorial(historiales) {
   //return resultado;
 }
 
+// const arrayChats = ref([]);
 // Función para consultar lista de chats
 const loadChatsList = async () => {
   let arrayChats = [];
@@ -166,7 +174,6 @@ const loadProjectList = async () => {
 
 // Función para abrir y nevegar a la vista del chat
 function openChat(chat) {
-  // console.log('openChat: ', chat);
   storeIA.setChatActual(chat);
 
   router.push(`/ia/chat/${chat.id}/contexto/${chat.id_contexto}`);
@@ -465,103 +472,202 @@ onMounted(() => {
   // Recuperando la lista de proyectos
   loadProjectList();
 });
+//
+const archivosEliminados = ref([]);
+const fuentesSeleccionadas = ref([]);
+// Manejar selección/deselección de fuentes
+const toggleSeleccionFuente = (fuente) => {
+  const index = fuentesSeleccionadas.value.findIndex((f) => f.id === fuente.id);
+  if (index === -1) {
+    fuentesSeleccionadas.value.push(fuente);
+    const eliminadoIndex = archivosEliminados.value.indexOf(fuente.id);
+    if (eliminadoIndex !== -1) {
+      archivosEliminados.value.splice(eliminadoIndex, 1);
+    }
+  } else {
+    fuentesSeleccionadas.value.splice(index, 1);
+    if (!archivosEliminados.value.includes(fuente.id)) {
+      archivosEliminados.value.push(fuente.id);
+    }
+  }
+};
+
+const arrayContextSources = ref([]);
+
+// Función para cargar las fuentes del contexto
+const loadSources = async () => {
+  // console.log('loadSources');
+  let contextById = {};
+  contextById = await storeIA.getContextById(contextID.value);
+  arrayContextSources.value = contextById.files;
+};
+
+async function abrirModalReporteInfo() {
+  // console.log('reporte modal info');
+  modalReporteInfo.value.abrirModal();
+  // Recupera las fuentes del contexto
+  await loadSources();
+}
+
+const campoNombreReporte = ref();
+const botonRadioReporte = ref('Uno');
+
+function cancelarReporte() {
+  modalReporteInfo.value.cerrarModal();
+  campoNombreReporte.value = '';
+  botonRadioReporte.value = 'Uno';
+  fuentesSeleccionadas.value = [];
+}
+
+function abrirModalReporteInstrucciones() {
+  modalReporteInfo.value.cerrarModal();
+  modalReporteInstrucciones.value.abrirModal();
+
+  if (botonRadioReporte.value === 'Uno') {
+    // seleccionando todas las fuentes del contexto
+    arrayContextSources.value.forEach((d) => toggleSeleccionFuente(d));
+  }
+  // console.log('campoNombreReporte.value', campoNombreReporte.value);
+  // console.log('fuentesSeleccionadas.value', fuentesSeleccionadas.value);
+}
+
+// Función para determinar el tipo de archivo
+const obtenerTipoArchivo = (nombre) => {
+  const extension = nombre.split('.').pop().toLowerCase();
+  const tipos = {
+    shp: 'Shapefile',
+    geojson: 'GeoJSON',
+    csv: 'CSV',
+    kml: 'KML',
+    zip: 'ZIP',
+    pdf: 'PDF',
+    doc: 'Word',
+    docx: 'Word',
+    xls: 'Excel',
+    xlsx: 'Excel',
+  };
+  return tipos[extension] || extension.toUpperCase();
+};
+
+const areaReporteInstrucciones = ref('');
+const seleccionTipoReporte = ref('');
+const seleccionTipoArchivo = ref('');
+const botonRadioHojaMembretada = ref('si');
+function generarReporte() {
+  console.log('generar reporte');
+
+  console.log('campoNombreReporte.value', campoNombreReporte.value);
+  console.log('fuentesSeleccionadas.value', fuentesSeleccionadas.value);
+  console.log('areaReporteInstrucciones.value', areaReporteInstrucciones.value);
+  console.log('seleccionTipoReporte.value', seleccionTipoReporte.value);
+  console.log('seleccionTipoArchivo.value', seleccionTipoArchivo.value);
+  console.log('botonRadioHojaMembretada.value', botonRadioHojaMembretada.value);
+
+  modalReporteInstrucciones.value.cerrarModal();
+}
+const opTipoArchivo = ref({ pdf: 'PDF', word: 'WORD', pptx: 'PPTX', csv: 'CSV' });
+watch(seleccionTipoReporte, (nv) => {
+  if (nv === 'presentacion') {
+    opTipoArchivo.value = { pptx: 'PPTX' };
+  } else {
+    opTipoArchivo.value = { pdf: 'PDF', word: 'WORD', pptx: 'PPTX', csv: 'CSV' };
+  }
+});
 </script>
 
 <template>
-  <UiLayoutPaneles>
+  <IaLayoutPaneles>
     <template #catalogo>
-      <div>
-        <div class="overflowYAuto">
-          <div class="positionSticky">
-            <div class="fondo-color-acento p-x-3 p-y-1">
-              <h5>Chats</h5>
-            </div>
-
-            <div class="p-x-3 p-t-3">
-              <button
-                class="boton-listas boton boton-primario"
-                aria-label="Crear nuevo chat"
-                type="button"
-                @click="nuevoChatModal?.abrirModal()"
-              >
-                Nuevo chat
-              </button>
-
-              <ClientOnly>
-                <SisdaiCampoBusqueda
-                  class="m-y-3"
-                  etiqueta="Buscar chats"
-                  :catalogo="catalogo"
-                  :catalogo-anidado="true"
-                  catalogo-anidado-propiedad-elementos="chat"
-                  propiedad-busqueda="titulo"
-                  @al-filtrar="(r) => (catalogoFiltrado = r)"
-                />
-              </ClientOnly>
-            </div>
+      <div class="overflowYAuto">
+        <div class="positionSticky">
+          <div class="fondo-color-acento p-x-3 p-y-1">
+            <h5>Chats</h5>
           </div>
 
-          <div>
-            <h6 class="p-x-3">Selecciona un chat para empezar a interactuar con el asistente.</h6>
+          <div class="p-x-3 p-t-3">
+            <button
+              class="boton-listas boton boton-primario"
+              aria-label="Crear nuevo chat"
+              type="button"
+              @click="nuevoChatModal?.abrirModal()"
+            >
+              Nuevo chat
+            </button>
 
-            <ul class="lista-sin-estilo m-x-3">
-              <li v-for="grupo in catalogoFiltrado" :id="grupo.id" :key="grupo.id">
-                <p class="fecha-grupo">
-                  {{ grupo.fecha == fechaHoy ? 'Hoy' : grupo.fecha }}
-                </p>
+            <ClientOnly>
+              <SisdaiCampoBusqueda
+                class="m-y-3"
+                etiqueta="Buscar chats"
+                :catalogo="catalogo"
+                :catalogo-anidado="true"
+                catalogo-anidado-propiedad-elementos="chat"
+                propiedad-busqueda="titulo"
+                @al-filtrar="(r) => (catalogoFiltrado = r)"
+              />
+            </ClientOnly>
+          </div>
+        </div>
 
-                <ul class="lista-sin-estilo m-b-5">
-                  <li v-for="chat in grupo.chat" :id="chat.id" :key="chat.id">
-                    <div class="tarjeta-chat p-3 borde borde-redondeado-20" @click="openChat(chat)">
-                      <h5 class="tarjeta-titulo m-t-0 m-b-2">
-                        {{ chat.titulo }}
-                      </h5>
+        <div>
+          <h6 class="p-x-3">Selecciona un chat para empezar a interactuar con el asistente.</h6>
 
-                      <p class="tarjeta-nombre-proyecto m-t-0 m-b-1">
-                        {{ chat.proyecto }}
-                      </p>
+          <ul class="lista-sin-estilo m-x-3">
+            <li v-for="grupo in catalogoFiltrado" :id="grupo.id" :key="grupo.id">
+              <p class="fecha-grupo">
+                {{ grupo.fecha == fechaHoy ? 'Hoy' : grupo.fecha }}
+              </p>
 
-                      <p class="tarjeta-nombre-contexto m-t-0 m-b-2">
-                        {{ chat.contexto }}
-                      </p>
+              <ul class="lista-sin-estilo m-b-5">
+                <li v-for="chat in grupo.chat" :id="chat.id" :key="chat.id">
+                  <div class="tarjeta-chat p-3 borde borde-redondeado-20" @click="openChat(chat)">
+                    <h5 class="tarjeta-titulo m-t-0 m-b-2">
+                      {{ chat.titulo }}
+                    </h5>
 
-                      <div class="flex flex-contenido-final">
-                        <div>
-                          <button
-                            class="boton-pictograma boton-sin-contenedor-secundario"
-                            aria-label="Editar chat"
-                            type="button"
-                            @click.stop="openEditModal(chat.titulo, chat.id)"
-                          >
-                            <span class="pictograma-editar" aria-hidden="true" />
-                          </button>
+                    <p class="tarjeta-nombre-proyecto m-t-0 m-b-1">
+                      {{ chat.proyecto }}
+                    </p>
 
-                          <button
-                            class="boton-pictograma boton-sin-contenedor-secundario"
-                            aria-label="Remover chat"
-                            type="button"
-                            @click.stop="openEliminarModal(chat.id)"
-                          >
-                            <span class="pictograma-eliminar" aria-hidden="true" />
-                          </button>
-                        </div>
+                    <p class="tarjeta-nombre-contexto m-t-0 m-b-2">
+                      {{ chat.contexto }}
+                    </p>
+
+                    <div class="flex flex-contenido-final">
+                      <div>
+                        <button
+                          class="boton-pictograma boton-sin-contenedor-secundario"
+                          aria-label="Editar chat"
+                          type="button"
+                          @click.stop="openEditModal(chat.titulo, chat.id)"
+                        >
+                          <span class="pictograma-editar" aria-hidden="true" />
+                        </button>
+
+                        <button
+                          class="boton-pictograma boton-sin-contenedor-secundario"
+                          aria-label="Remover chat"
+                          type="button"
+                          @click.stop="openEliminarModal(chat.id)"
+                        >
+                          <span class="pictograma-eliminar" aria-hidden="true" />
+                        </button>
                       </div>
                     </div>
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </div>
+                  </div>
+                </li>
+              </ul>
+            </li>
+          </ul>
         </div>
       </div>
     </template>
 
     <template #visualizador>
-      <main id="principal" class="">
+      <main id="principal">
         <div class="grid">
-          <div class="columna-2" />
+          <div class="columna-1" />
 
-          <div class="columna-12">
+          <div class="columna-14">
             <div class="contenedor-chat">
               <div class="contenedor-chat-contenido">
                 <div ref="contenedorChatRef" class="contenedor-log" @scroll="manejarScroll">
@@ -604,7 +710,7 @@ onMounted(() => {
                                 class="boton-primario boton-chico"
                                 aria-label="Generar reporte"
                                 type="button"
-                                @click="reporteModal?.abrirModal()"
+                                @click="modalReporteInfo?.abrirModal()"
                               >
                                 Generar reporte
                                 <span class="pictograma-reporte" aria-hidden="true" />
@@ -663,7 +769,7 @@ onMounted(() => {
             </div>
           </div>
 
-          <div class="columna-2" />
+          <div class="columna-1" />
         </div>
       </main>
 
@@ -764,90 +870,424 @@ onMounted(() => {
           </template>
         </SisdaiModal>
 
-        <!-- TODO: actualizar modal de reporte -->
-        <SisdaiModal ref="reporteModal">
+        <SisdaiModal ref="modalReporteInfo" class="modal-grande">
           <template #encabezado>
-            <h2>
-              {{
-                controlDeslizante?.valor_seleccionado < 100 ? 'Creando reporte' : 'Reporte listo'
-              }}
-            </h2>
+            <h2>Generar reporte</h2>
           </template>
 
           <template #cuerpo>
             <div>
-              <p v-if="controlDeslizante?.valor_seleccionado < 100">
-                Tu archivo se está creando espera a que la barra de progreso se complete
-              </p>
-              <div
-                v-if="controlDeslizante?.valor_seleccionado < 100"
-                class="fondo-color-informacion p-x-2 p-y-1 borde borde-color-informacion borde-redondeado-20"
-              >
-                <p class="texto-color-informacion">
-                  <span class="pictograma-informacion" />
-                  Verifica siempre los datos antes de usarlos.
-                </p>
-              </div>
-              <div
-                v-else-if="controlDeslizante?.valor_seleccionado == 100"
-                class="fondo-color-confirmacion p-x-2 p-y-1 borde borde-color-confirmacion borde-redondeado-20"
-              >
-                <p class="texto-color-confirmacion">
-                  <span class="pictograma-aprobado" />
-                  Tu reporte está listo para descagar
-                </p>
-              </div>
-            </div>
-            <div>
-              <p>Creando reporte.pdf</p>
-
-              <div>
-                <ClientOnly>
-                  <SisdaiControlDeslizante
-                    :id="idAleatorioCD"
-                    ref="controlDeslizante"
-                    :val_min="0"
-                    :val_max="100"
-                    :val_entrada="90"
-                    step="10"
-                    @blur="false"
-                    @update:val_entrada="
-                      ($event) => (controlDeslizante.valor_seleccionado = $event)
-                    "
+              <ClientOnly>
+                <SisdaiCampoBase
+                  v-model="campoNombreReporte"
+                  etiqueta="Nombre del reporte"
+                  ejemplo="Ej. Diagnóstico territorial del monitoreo marino en el Caribe mexicano"
+                  :es_obligatorio="true"
+                  :es_etiqueta_visible="true"
+                />
+                <SisdaiBotonesRadioGrupo
+                  leyenda="Fuentes de información"
+                  :es_vertical="true"
+                  :es_obligatorio="true"
+                >
+                  <SisdaiBotonRadio
+                    v-model="botonRadioReporte"
+                    etiqueta="Usar todas las fuentes disponibles en el contexto"
+                    value="Uno"
+                    name="fuentesdeinformacion"
+                    :es_obligatorio="true"
                   />
-                </ClientOnly>
-                <div class="flex flex-contenido-final">
-                  <label :for="idAleatorioCD"
-                    >{{ controlDeslizante?.valor_seleccionado < 100 ? 'Progreso' : 'Completado' }}
-                    {{ controlDeslizante?.valor_seleccionado }}%</label
-                  >
-                </div>
-              </div>
+                  <SisdaiBotonRadio
+                    v-model="botonRadioReporte"
+                    etiqueta="Seleccionar fuentes del contexto"
+                    value="Dos"
+                    name="fuentesdeinformacion"
+                    :es_obligatorio="true"
+                  />
+                </SisdaiBotonesRadioGrupo>
+              </ClientOnly>
+            </div>
+            <div
+              v-if="botonRadioReporte === 'Dos' && arrayContextSources.length > 0"
+              class="tabla-archivos m-y-3"
+            >
+              <table class="tabla">
+                <thead>
+                  <tr>
+                    <th class="checkbox-header p-x-3 p-y-2">Selección</th>
+                    <th class="p-x-3 p-y-2">Nombre</th>
+                    <th class="p-x-3 p-y-2">Tipo</th>
+                    <th class="p-x-3 p-y-2">Categoría</th>
+                    <th class="p-x-3 p-y-2">Origen</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr v-for="fuente in arrayContextSources" :key="`fila-fuentes-${fuente.id}`">
+                    <td class="checkbox-cell p-3">
+                      <label :for="`checkboxfuente${fuente.id}`" class="checkbox-wrapper">
+                        <input
+                          :id="`checkboxfuente${fuente.id}`"
+                          type="checkbox"
+                          :checked="fuentesSeleccionadas.some((f) => f.id === fuente.id)"
+                          @change="toggleSeleccionFuente(fuente)"
+                        />
+                        <span class="checkmark"></span>
+                      </label>
+                    </td>
+                    <td class="p-3">{{ fuente.filename }}</td>
+                    <td class="p-3 etiqueta-tabla">
+                      <span class="p-x-1 p-y-minimo">
+                        {{ obtenerTipoArchivo(fuente.filename) }}
+                      </span>
+                    </td>
+                    <td class="p-3 flex flex-contenido-centrado">
+                      <p
+                        class="texto-centrado fondo-color-acento p-1 m-0 texto-color-acento borde borde-redondeado-12"
+                        style="width: max-content"
+                      >
+                        <span v-if="fuente.document_type === 'application/pdf'">
+                          <span class="pictograma-documento" />
+                          Documentos
+                        </span>
+                        <span v-if="fuente.document_type === 'text/csv'">
+                          <span class="pictograma-tabla" />
+                          Datos tabulados
+                        </span>
+                      </p>
+                    </td>
+                    <td class="p-3 etiqueta-tabla">
+                      <span class="p-x-1 p-y-minimo"> Catálogo </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </template>
 
           <template #pie>
             <button
               class="boton-primario boton-chico"
-              aria-label="Descargar reporte"
+              aria-label="Ir a llenar instrucciones"
               type="button"
-              :disabled="controlDeslizante?.valor_seleccionado < 100"
+              :disabled="
+                !campoNombreReporte ||
+                (botonRadioReporte === 'Dos' && fuentesSeleccionadas.length === 0)
+              "
+              @click="abrirModalReporteInstrucciones"
             >
-              Descargar reporte
+              Siguiente
+            </button>
+            <button
+              class="boton-secundario boton-chico"
+              aria-label="Cancelar generar reporte"
+              type="button"
+              @click="cancelarReporte"
+            >
+              Cancelar
+            </button>
+          </template>
+        </SisdaiModal>
+
+        <SisdaiModal ref="modalReporteInstrucciones">
+          <template #encabezado>
+            <h2>Generar reporte</h2>
+          </template>
+
+          <template #cuerpo>
+            <ClientOnly>
+              <SisdaiAreaTexto
+                v-model="areaReporteInstrucciones"
+                etiqueta="Instrucciones para el reporte"
+                ejemplo="Ej. Genera un reporte que explique los principales retros del monitoreo marino, considerando la cobertura espacial y la integración de datos, con un lenguaje claro para tomadores de decisión."
+                :es_obligatorio="true"
+                :es_etiqueta_visible="true"
+              />
+              <SisdaiSelector
+                v-model="seleccionTipoReporte"
+                etiqueta="Tipo de reporte"
+                :es_obligatorio="true"
+              >
+                <option value="1">Institucional</option>
+                <option value="2">Descriptivo</option>
+                <option value="resumen">Resumen</option>
+                <option value="presentacion">Presentación</option>
+                <option value="5">Evaluación</option>
+              </SisdaiSelector>
+
+              <SisdaiSelector
+                v-model="seleccionTipoArchivo"
+                etiqueta="Tipo de archivo"
+                :es_obligatorio="true"
+              >
+                <option
+                  v-for="(value, key, idx) in opTipoArchivo"
+                  :key="`optipoarchivo-${idx}`"
+                  :value="key"
+                >
+                  {{ value }}
+                </option>
+              </SisdaiSelector>
+
+              <SisdaiBotonesRadioGrupo leyenda="Hoja membretada (Formato SECIHTI)">
+                <SisdaiBotonRadio
+                  v-model="botonRadioHojaMembretada"
+                  etiqueta="Sí"
+                  value="si"
+                  name="hojamembretada"
+                  :es_obligatorio="true"
+                />
+                <SisdaiBotonRadio
+                  v-model="botonRadioHojaMembretada"
+                  etiqueta="No"
+                  value="no"
+                  name="hojamembretada"
+                  :es_obligatorio="true"
+                />
+              </SisdaiBotonesRadioGrupo>
+            </ClientOnly>
+          </template>
+
+          <template #pie>
+            <button
+              class="boton-primario boton-chico"
+              aria-label="Generar reporte"
+              type="button"
+              :disabled="
+                !areaReporteInstrucciones || !seleccionTipoReporte || !seleccionTipoArchivo
+              "
+              @click="generarReporte"
+            >
+              Generar reporte
+            </button>
+            <button
+              class="boton-secundario boton-chico"
+              aria-label="Regresar a llenar información"
+              type="button"
+              :disabled="false"
+              @click="
+                modalReporteInstrucciones.cerrarModal();
+                modalReporteInfo.abrirModal();
+              "
+            >
+              Regresar
             </button>
           </template>
         </SisdaiModal>
       </ClientOnly>
     </template>
-  </UiLayoutPaneles>
+
+    <template #seleccion>
+      <div>
+        <div class="overflowYAuto">
+          <div class="positionSticky">
+            <div class="fondo-color-acento p-x-3 p-y-1">
+              <h5>Herramientas de IA</h5>
+            </div>
+
+            <div class="m-3">
+              <div class="flex">
+                <div class="columna-8">
+                  <div class="fondo-color-neutro borde-redondeado-8">
+                    <div class="flex p-2" style="row-gap: 8px">
+                      <div class="columna-16">
+                        <span class="pictograma-reporte texto-color-acento"></span>
+                      </div>
+                      <div class="columna-16">
+                        <div class="flex flex-contenido-separado">
+                          <div class="columna-8 flex-vertical-final">
+                            <p class="m-0">Generar reporte</p>
+                          </div>
+                          <div class="flex-vertical-final">
+                            <button
+                              class="boton-pictograma boton-con-contenedor-secundario boton-grande"
+                              aria-label="Generar reporte"
+                              type="button"
+                              @click="abrirModalReporteInfo"
+                            >
+                              <span class="pictograma-ia" aria-hidden="true" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="columna-8">
+                  <div class="fondo-color-neutro borde-redondeado-8">
+                    <div class="flex p-2" style="row-gap: 8px">
+                      <div class="columna-16">
+                        <span class="pictograma-mapa-generador texto-color-acento"></span>
+                      </div>
+                      <div class="columna-16">
+                        <div class="flex flex-contenido-separado">
+                          <div class="columna-8 flex-vertical-final">
+                            <p class="m-0">Espacializar información</p>
+                          </div>
+                          <div class="flex-vertical-final">
+                            <button
+                              class="boton-pictograma boton-con-contenedor-secundario boton-grande"
+                              aria-label="Espacializar información"
+                              type="button"
+                            >
+                              <span class="pictograma-ia" aria-hidden="true" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="columna-8">
+                  <div class="fondo-color-neutro borde-redondeado-8">
+                    <div class="flex p-2" style="row-gap: 8px">
+                      <div class="columna-16">
+                        <span class="pictograma-estrella texto-color-acento"></span>
+                      </div>
+                      <div class="columna-16">
+                        <div class="flex flex-contenido-separado">
+                          <div class="columna-8 flex-vertical-final">
+                            <p class="m-0">Herramienta</p>
+                          </div>
+                          <div class="flex-vertical-final">
+                            <button
+                              class="boton-pictograma boton-con-contenedor-secundario boton-grande"
+                              aria-label="Acción a realizar"
+                              type="button"
+                            >
+                              <span class="pictograma-ia" aria-hidden="true" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="columna-8">
+                  <div class="fondo-color-neutro borde-redondeado-8">
+                    <div class="flex p-2" style="row-gap: 8px">
+                      <div class="columna-16">
+                        <span class="pictograma-estrella texto-color-acento"></span>
+                      </div>
+                      <div class="columna-16">
+                        <div class="flex flex-contenido-separado">
+                          <div class="columna-8 flex-vertical-final">
+                            <p class="m-0">Herramienta</p>
+                          </div>
+                          <div class="flex-vertical-final">
+                            <button
+                              class="boton-pictograma boton-con-contenedor-secundario boton-grande"
+                              aria-label="Acción a realizar"
+                              type="button"
+                            >
+                              <span class="pictograma-ia" aria-hidden="true" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="m-x-3">
+            <div class="fondo-color-acento borde-redondeado-8 m-b-2">
+              <div class="flex p-2">
+                <span class="texto-color-acento flex-vertical-centrado pictograma-reporte" />
+                <p class="flex-vertical-centrado m-0">Generando reporte</p>
+              </div>
+            </div>
+            <div class="fondo-color-acento borde-redondeado-8 m-b-2">
+              <div class="flex flex-contenido-separado p-2">
+                <div class="flex">
+                  <span class="texto-color-acento flex-vertical-centrado pictograma-reporte" />
+                  <p class="flex-vertical-centrado m-0">Título del reporte</p>
+                </div>
+
+                <div>
+                  <button
+                    class="boton-pictograma boton-sin-contenedor-secundario"
+                    aria-label="Descargar reporte"
+                    type="button"
+                  >
+                    <span class="pictograma-archivo-descargar" aria-hidden="true" />
+                  </button>
+                  <button
+                    class="boton-pictograma boton-sin-contenedor-secundario"
+                    aria-label="Remover reporte"
+                    type="button"
+                  >
+                    <span class="pictograma-eliminar" aria-hidden="true" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+  </IaLayoutPaneles>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
+.overflowYAuto {
+  height: var(--altura-consulta-esc);
+  overflow-y: auto;
+
+  .positionSticky {
+    position: sticky;
+    top: 0;
+    background-color: var(--fondo);
+    padding-bottom: 8px;
+  }
+}
+
+.tarjeta-chat {
+  background-color: var(--fondo-acento);
+  border: 1px solid var(--borde-acento);
+  width: 100%;
+  cursor: pointer;
+  a {
+    &:hover {
+      text-decoration: none !important;
+      background-color: var(--fondo-acento);
+      border-color: var(--borde-acento);
+      box-shadow: none;
+      color: inherit;
+    }
+  }
+  h5 {
+    color: var(--texto-acento);
+  }
+  p {
+    color: var(--texto-primario);
+  }
+
+  .tarjeta-titulo {
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: var(--Tipos-Interlineado-Ttulos-y-subttulos-Nivel-6, 22.5px);
+  }
+
+  .tarjeta-nombre-proyecto,
+  .tarjeta-nombre-contexto {
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 18.2px;
+  }
+}
+
 .contenedor-chat {
   height: var(--altura-consulta-esc);
+
   .contenedor-chat-contenido {
     height: 100%;
     position: relative;
+
     .contenedor-log {
       position: absolute;
       top: 24px;
@@ -855,6 +1295,7 @@ onMounted(() => {
       right: 0;
       height: calc(100% - 120px - 112px);
       overflow-y: auto;
+
       .contenedor-log-contenido {
         display: flex;
         gap: 24px;
@@ -866,9 +1307,11 @@ onMounted(() => {
       bottom: 0;
       left: 0;
       right: 0;
+
       form.formulario-area-texto {
         position: relative;
         width: 100%;
+
         .formulario-boton {
           position: absolute;
           bottom: 8px;
@@ -957,51 +1400,96 @@ onMounted(() => {
   }
 }
 
-.overflowYAuto {
-  height: var(--altura-consulta-esc);
-  overflow-y: auto;
-  .positionSticky {
-    position: sticky;
-    top: 0;
-    background-color: var(--fondo);
-    padding-bottom: 8px;
-  }
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-.tarjeta-chat {
-  background-color: var(--fondo-acento);
-  border: 1px solid var(--borde-acento);
+/* Asegúrate de que el input file no se vea cuando no es necesario */
+input[type='file'] {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+//tabla de archivos. TODO: estilo sisdai
+/* Estilos para la tabla */
+/* .tabla {
   width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla th, .tabla td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #e0e0e0;
+} */
+
+/* Cabecera del checkbox */
+.checkbox-header {
+  width: 60px;
+  text-align: center;
+}
+
+/* Celda del checkbox */
+.checkbox-cell {
+  vertical-align: middle;
+  text-align: center;
+  padding: 0 10px;
+}
+
+/* Contenedor del checkbox */
+.checkbox-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
   cursor: pointer;
-  a {
-    &:hover {
-      text-decoration: none !important;
-      background-color: var(--fondo-acento);
-      border-color: var(--borde-acento);
-      box-shadow: none;
-      color: inherit;
-    }
-  }
-  h5 {
-    color: var(--texto-acento);
-  }
-  p {
-    color: var(--texto-primario);
-  }
+}
 
-  .tarjeta-titulo {
-    font-size: 18px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: var(--Tipos-Interlineado-Ttulos-y-subttulos-Nivel-6, 22.5px);
-  }
+/* Checkbox personalizado */
+.checkbox-wrapper input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
 
-  .tarjeta-nombre-proyecto,
-  .tarjeta-nombre-contexto {
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 18.2px;
-  }
+.checkmark {
+  display: inline-block;
+  height: 18px;
+  width: 18px;
+  background-color: #fff;
+  border: 2px solid #ddd;
+  border-radius: 3px;
+  transition: all 0.2s;
+}
+
+.checkbox-wrapper:hover input ~ .checkmark {
+  background-color: #f1f1f1;
+}
+
+.checkbox-wrapper input:checked ~ .checkmark {
+  background-color: #2196f3;
+  border-color: #2196f3;
+}
+
+.checkmark:after {
+  content: '';
+  position: absolute;
+  display: none;
+}
+
+.checkbox-wrapper input:checked ~ .checkmark:after {
+  display: block;
+}
+
+.checkbox-wrapper .checkmark:after {
+  left: 5px;
+  top: 1px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
 }
 </style>
