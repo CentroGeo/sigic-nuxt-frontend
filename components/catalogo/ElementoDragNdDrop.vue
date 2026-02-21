@@ -10,20 +10,14 @@ const archivoValido = ref(false);
 const onDropZone = ref(null);
 const { files } = useDropZone(onDropZone, { onDrop });
 async function onDrop() {
-  // imprime el archivo que se suba mediante el drop
-  // console.log('files', files.value);
   archivos.value = files.value;
   archivosArriba.value = true;
-  // files.value = Array.from(files.value);
 }
 
 const { open, onChange } = useFileDialog();
 onChange(async (files) => {
-  // imprime el archivo que se suba mediante el diálogo
-  //console.log('files', files);
   archivos.value = files;
   archivosArriba.value = true;
-  // const files = Array.from(files);
 });
 
 const removerArchivos = () => {

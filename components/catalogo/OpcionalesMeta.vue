@@ -53,18 +53,18 @@ const seleccionFrecuenciaActual = computed({
 });
 
 const dictFrecuenciaActual = [
-  { unknown: 'se desconoce la frecuencia de actualización de los datos' },
-  { continual: 'los datos se actualizan repetida y frecuentemente' },
-  { notPlanned: 'no existen planes de actualizar los datos' },
-  { daily: 'los datos se actualizan a diario' },
-  { annually: 'los datos se actualizan cada año' },
-  { asNeeded: 'los datos se actualizan cuando se considera necesario' },
-  { monthly: 'los datos se actualizan todos los meses' },
-  { fortnightly: 'los datos se actualizan cada dos semanas' },
-  { irregular: 'los datos se actualizan a intervalos de duración irregular' },
-  { weekly: 'los datos se actualizan semanalmente' },
-  { biannually: 'los datos se actualizan dos veces al año' },
-  { quarterly: 'los datos se actualizan cada tres meses' },
+  { unknown: 'Se desconoce la frecuencia de actualización de los datos' },
+  { continual: 'Los datos se actualizan repetida y frecuentemente' },
+  { notPlanned: 'No existen planes de actualizar los datos' },
+  { daily: 'Los datos se actualizan a diario' },
+  { annually: 'Los datos se actualizan cada año' },
+  { asNeeded: 'Los datos se actualizan cuando se considera necesario' },
+  { monthly: 'Los datos se actualizan todos los meses' },
+  { fortnightly: 'Los datos se actualizan cada dos semanas' },
+  { irregular: 'Los datos se actualizan a intervalos de duración irregular' },
+  { weekly: 'Los datos se actualizan semanalmente' },
+  { biannually: 'Los datos se actualizan dos veces al año' },
+  { quarterly: 'Los datos se actualizan cada tres meses' },
 ];
 </script>
 <template>

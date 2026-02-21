@@ -168,6 +168,13 @@ async function monitorLayerImport(executionId, archivo) {
           <p class="m-y-1">
             <b>Solo archivos GeoJSON, Geopaquetes, csv, pdf y txt.</b>
           </p>
+          <p
+            class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-2 p-2 m-y-2"
+          >
+            Para subir archivos csv verifica que el nombre de las columnas de geometría corresponda
+            con alguna de las siguientes ipciones en caso de tenerla: x, y; long, lat o longitude,
+            latitude.
+          </p>
           <ClientOnly>
             <CatalogoElementoDragNdDrop @pasar-archivo="(i) => guardarArchivo(i)" />
           </ClientOnly>

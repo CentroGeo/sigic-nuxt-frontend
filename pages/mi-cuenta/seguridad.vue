@@ -1,23 +1,44 @@
 <script setup>
-import { wait } from '@/utils/consulta';
+//import { wait } from '@/utils/consulta';
 
 definePageMeta({
   middleware: 'auth',
 });
 const config = useRuntimeConfig();
-const idps = JSON.parse(config.public.keycloakIDPs);
-const idpsInfo = ref(null);
-const isLoading = ref(true);
+const { data } = useAuth();
+
+const idps = ref([]);
+const isLoading = ref(null);
 
 async function buildIDPsInfo() {
-  idpsInfo.value = idps.map((d) => {
-    return {
-      alias: d.alias.trim(),
-      idp_value: d.idp_value,
-      status: d.alias.trim() === 'Google' ? 'Vinculada' : 'No Vinculada',
-    };
+  isLoading.value = true;
+  const urlConnected = `${config.public.keycloakIssuer}/account/linked-accounts?first=0&linked=true`;
+  const urlNotConnected = `${config.public.keycloakIssuer}/account/linked-accounts?first=0&linked=false`;
+  const token = ref(data.value?.accessToken);
+  // Obtenemos los conectados
+  const requestConnected = await fetch(urlConnected, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token.value}`,
+      'Content-Type': 'application/json',
+    },
   });
-  await wait(3000);
+  const resConnected = await requestConnected.json();
+
+  //Obtenemos los no conectados
+  const requestNotConnected = await fetch(urlNotConnected, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${data.value?.accessToken}`,
+      'Content-Type': 'application/json',
+    },
+  });
+  const resNotConnected = await requestNotConnected.json();
+
+  // Juntamos los servicios y los ordenamos alfabéticamente
+  idps.value = [...resNotConnected, ...resConnected];
+  idps.value = idps.value.sort((a, b) => a.displayName.localeCompare(b.displayName));
+
   isLoading.value = false;
 }
 
@@ -31,6 +52,23 @@ function linkSocialAccount(idp) {
   navigateTo(url, { external: true });
 }
 
+async function unlinkSocialAccount(idp) {
+  // Eliminamos el recurso
+  const url = `${config.public.keycloakIssuer}/account/linked-accounts/${idp}/`;
+  const token = ref(data.value?.accessToken);
+  const deleteIDP = await fetch(url, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${token.value}`,
+      'Content-Type': 'application/json',
+    },
+  });
+  if (deleteIDP.status !== 'ok') {
+    console.warn('Fracasó la eliminación de cuenta');
+  }
+  // Reconstruimos el diccionario de información
+  buildIDPsInfo();
+}
 onMounted(() => {
   buildIDPsInfo();
 });
@@ -112,28 +150,32 @@ onMounted(() => {
       </div>
       <div v-else>
         <!-- Las tarjetas de cuentas vinculadas -->
-        <div v-for="broker in idpsInfo" :key="broker.idp_value" class="tarjeta m-y-3">
+        <div v-for="broker in idps" :key="broker.providerAlias" class="tarjeta m-y-3">
           <div class="tarjeta-cuerpo">
             <div class="flex flex-contenido-separado">
-              <div class="flex-vertical-centrado">{{ broker.alias }}</div>
+              <div class="flex-vertical-centrado">{{ broker.displayName }}</div>
               <div class="flex">
                 <span
-                  v-if="broker.status === 'Vinculada'"
+                  v-if="broker.connected === true"
                   class="flex flex-vertical-centrado texto-color-confirmacion fondo-color-confirmacion borde borde-color-confirmacion borde-redondeado-4 p-x-1"
                   >Vinculada</span
                 >
                 <span
-                  v-if="broker.status === 'No Vinculada'"
+                  v-if="broker.connected === false"
                   class="flex flex-vertical-centrado texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-4 p-x-1"
                   >No vinculada</span
                 >
-                <button v-if="broker.status === 'Vinculada'" class="boton-chico boton-secundario">
+                <button
+                  v-if="broker.connected === true"
+                  class="boton-chico boton-secundario"
+                  @click="unlinkSocialAccount(broker.providerName)"
+                >
                   Desvincular
                 </button>
                 <button
-                  v-if="broker.status === 'No Vinculada'"
+                  v-if="broker.connected === false"
                   class="boton-chico boton-primario"
-                  @click="linkSocialAccount(broker.idp_value)"
+                  @click="linkSocialAccount(broker.providerName)"
                 >
                   Vincular
                 </button>
