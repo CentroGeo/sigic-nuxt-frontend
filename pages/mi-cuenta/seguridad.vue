@@ -76,7 +76,6 @@ async function unlinkSocialAccount(idp) {
   });
   if (deleteIDP.status !== 'ok') {
     deteleStatus.value = 'fail';
-    console.warn('Fracasó la eliminación de cuenta');
   } else {
     deteleStatus.value = 'ok';
     // Reconstruimos el diccionario de información
