@@ -1,6 +1,4 @@
 <script setup>
-//import { wait } from '@/utils/consulta';
-
 definePageMeta({
   middleware: 'auth',
 });
@@ -9,35 +7,46 @@ const { data } = useAuth();
 
 const idps = ref([]);
 const isLoading = ref(null);
+const fetchingStatus = ref(null);
 
 async function buildIDPsInfo() {
   isLoading.value = true;
+  fetchingStatus.value = null;
+
   const urlConnected = `${config.public.keycloakIssuer}/account/linked-accounts?first=0&linked=true`;
   const urlNotConnected = `${config.public.keycloakIssuer}/account/linked-accounts?first=0&linked=false`;
   const token = ref(data.value?.accessToken);
-  // Obtenemos los conectados
-  const requestConnected = await fetch(urlConnected, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${token.value}`,
-      'Content-Type': 'application/json',
-    },
-  });
-  const resConnected = await requestConnected.json();
+  try {
+    // Obtenemos los conectados
+    const requestConnected = await fetch(urlConnected, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+        'Content-Type': 'application/json',
+      },
+    });
 
-  //Obtenemos los no conectados
-  const requestNotConnected = await fetch(urlNotConnected, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${data.value?.accessToken}`,
-      'Content-Type': 'application/json',
-    },
-  });
-  const resNotConnected = await requestNotConnected.json();
-
-  // Juntamos los servicios y los ordenamos alfabéticamente
-  idps.value = [...resNotConnected, ...resConnected];
-  idps.value = idps.value.sort((a, b) => a.displayName.localeCompare(b.displayName));
+    //Obtenemos los no conectados
+    const requestNotConnected = await fetch(urlNotConnected, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${data.value?.accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!requestConnected.ok || !requestNotConnected.ok) {
+      fetchingStatus.value = 'fail';
+    } else {
+      const resConnected = await requestConnected.json();
+      const resNotConnected = await requestNotConnected.json();
+      // Juntamos los servicios y los ordenamos alfabéticamente
+      idps.value = [...resNotConnected, ...resConnected];
+      idps.value = idps.value.sort((a, b) => a.displayName.localeCompare(b.displayName));
+      fetchingStatus.value = 'ok';
+    }
+  } catch {
+    fetchingStatus.value = 'fail';
+  }
 
   isLoading.value = false;
 }
@@ -144,12 +153,26 @@ onMounted(() => {
         Puedes conectar tus cuentas para facilitar el inicio de sesión y mantener sincronizada tu
         información profesional.
       </p>
+
       <!-- Spinner-->
       <div v-if="isLoading" class="flex flex-contenido-centrado m-y-5">
         <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
       </div>
-      <div v-else>
-        <!-- Las tarjetas de cuentas vinculadas -->
+
+      <!-- Fracasaron las peticiones -->
+      <div v-else-if="!isLoading && fetchingStatus === 'fail'">
+        <div
+          class="fondo-color-error flex flex-contenido-centrado ancho-lectura borde-redondeado-16 sin-seleccion"
+        >
+          <p class="texto-color-error m-1">
+            No se pudo recuperar la información. Revisa tu conexión a internet e intentalo de nuevo
+            más tarde.
+          </p>
+        </div>
+      </div>
+
+      <!-- Las tarjetas de cuentas vinculadas -->
+      <div v-else-if="!isLoading && fetchingStatus === 'ok'">
         <div v-for="broker in idps" :key="broker.providerAlias" class="tarjeta m-y-3">
           <div class="tarjeta-cuerpo">
             <div class="flex flex-contenido-separado">
