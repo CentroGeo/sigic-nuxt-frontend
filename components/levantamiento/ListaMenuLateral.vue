@@ -1,9 +1,14 @@
 <script setup>
+import { tieneRolAdministrador } from '~/utils/levantamiento';
+
 const route = useRoute();
 const { data } = useAuth();
 const storeLevantamiento = useLevantamientoStore();
 
+const esAdministradorLevantamiento = ref(false);
+
 onMounted(async () => {
+  esAdministradorLevantamiento.value = tieneRolAdministrador(data.value?.accessToken);
   await storeLevantamiento.obtenerEsRevisor(data.value?.user.email);
 });
 </script>
@@ -50,7 +55,7 @@ onMounted(async () => {
         class="lista-subpagina"
         :class="{ revisor: storeLevantamiento.esRevisor }"
       >
-        <li>
+        <li v-if="esAdministradorLevantamiento">
           <nuxt-link
             :class="{
               ['router-link-active router-link-exact-active']: route.path.includes(
