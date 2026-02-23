@@ -180,7 +180,7 @@ onMounted(() => {
       <div v-else-if="!isLoading && fetchingStatus === 'ok'">
         <!--Alerta de que fracasó la desvinculación de servicios-->
         <div
-          v-if="deleteStatus === 'fail'"
+          v-if="deteleStatus === 'fail'"
           class="flex m-y-2 borde-redondeado-16 flex-contenido-centrado fondo-color-error texto-color-error p-1"
           style="gap: 0px"
         >
