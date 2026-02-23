@@ -241,6 +241,7 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.12.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.10.1...v0.11.0
 [0.10.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.8...v0.10.0
