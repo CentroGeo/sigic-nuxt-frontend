@@ -7,6 +7,20 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.12.0] - 23-02-2026
+
+### Agregado (Added)
+
+- Se agregó la funcionalidad de desvincular cuentas de github, google, rizoma y orcid.
+- Se hicieron ajustes en botones de consulta y catálogo para deshabilitarlos en caso de que no existan las condiciones para su uso.
+- Se agregó un botón para eliminar cada archivo individualmente en el drag and drop para cargar archivos.
+
+## [0.11.0] - 19-02-2026
+
+### Agregado (Added)
+
+- Se agregó un panel lateral en la sección de chats del módulo de ia con herramientas para generar reportes, así como dos modales para nombrar el reporte, asignar las fuentes, darle instrucciones y tipo de archivo.
+
 ## [0.10.1] - 17-02-2026
 
 ### Agregado (Added)
@@ -227,6 +241,8 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.12.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.11.0...v0.12.0
+[0.11.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.10.1...v0.11.0
 [0.10.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.8...v0.10.0
 [0.9.8]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.7...v0.9.8

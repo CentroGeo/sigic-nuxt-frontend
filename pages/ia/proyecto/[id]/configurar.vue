@@ -463,7 +463,7 @@ onBeforeUnmount(() => {
     </template>
 
     <template #visualizador>
-      <main id="principal" class="contenedor m-b-10 p-t-3 overflowYAuto">
+      <main id="principal" class="contenedor m-b-10 p-t-3">
         <h2>Configuración de proyecto</h2>
 
         <div class="grid">
@@ -867,18 +867,73 @@ onBeforeUnmount(() => {
   </UiLayoutPaneles>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .overflowYAuto {
-  overflow-y: auto;
   height: var(--altura-consulta-esc);
-}
-.overflowYAutoHeight {
   overflow-y: auto;
-  height: 300px;
+
+  .positionSticky {
+    position: sticky;
+    top: 0;
+    background-color: var(--fondo);
+    padding-bottom: 8px;
+  }
+}
+
+.proyecto {
+  cursor: pointer;
+  border-left: var(--Escalas-Bordes-borde-8, 8px) solid transparent;
+
+  &.seleccionado {
+    border-left: var(--Escalas-Bordes-borde-8, 8px) solid var(--borde-acento);
+    background: var(--fondo-acento);
+  }
+
+  .proyecto-titulo {
+    color: var(--navegacion-secundaria-color);
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+  }
 }
 
 .fuentes-encabezado {
   align-items: center;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    text-align: center;
+  }
+
+  th {
+    border-bottom: 1px solid var(--borde);
+    text-align: center;
+    font-size: var(--Tipos-Tamao-Prrafos-Prrafo-base, 16px);
+    font-style: normal;
+    font-weight: 600;
+    line-height: var(--Tipos-Interlineado-Prrafos-Prrafos, 24px);
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  .etiqueta-tabla span {
+    border-radius: var(--Escalas-Bordes-redondeados-br-2, 8px);
+    border: 1px solid var(--Base-Borde---borde-acento, #53323c);
+    background: var(--Base-Fondo---fondo-acento, #fcf3f5);
+
+    color: var(--Base-Tipografa---texto-secundario, #5f3e47);
+    font-size: var(--Tipos-Tamao-Prrafos-Prrafo-base, 16px);
+    font-style: normal;
+    font-weight: 400;
+    line-height: var(--Tipos-Interlineado-Prrafos-Prrafos, 24px);
+  }
 }
 
 .radio-catalogo {
@@ -906,6 +961,11 @@ onBeforeUnmount(() => {
   }
 }
 
+.overflowYAutoHeight {
+  overflow-y: auto;
+  height: 300px;
+}
+
 .capa {
   background: var(--fondo-acento);
   color: var(--texto-secundario);
@@ -917,42 +977,6 @@ onBeforeUnmount(() => {
   .icono {
     display: flex;
     align-items: center;
-  }
-}
-
-.tabla {
-  width: 100%;
-  border-collapse: collapse;
-
-  th,
-  td {
-    /* padding: 0.75rem 1rem; */
-    text-align: center;
-  }
-
-  th {
-    border-bottom: 1px solid var(--borde);
-    text-align: center;
-    font-size: var(--Tipos-Tamao-Prrafos-Prrafo-base, 16px);
-    font-style: normal;
-    font-weight: 600;
-    line-height: var(--Tipos-Interlineado-Prrafos-Prrafos, 24px);
-  }
-
-  tr:last-child td {
-    border-bottom: none;
-  }
-
-  .etiqueta-tabla span {
-    border-radius: var(--Escalas-Bordes-redondeados-br-2, 8px);
-    border: 1px solid var(--Base-Borde---borde-acento, #53323c);
-    background: var(--Base-Fondo---fondo-acento, #fcf3f5);
-
-    color: var(--Base-Tipografa---texto-secundario, #5f3e47);
-    font-size: var(--Tipos-Tamao-Prrafos-Prrafo-base, 16px);
-    font-style: normal;
-    font-weight: 400;
-    line-height: var(--Tipos-Interlineado-Prrafos-Prrafos, 24px);
   }
 }
 

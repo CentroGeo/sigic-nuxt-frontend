@@ -402,7 +402,7 @@ onMounted(async () => {
           class="m-b-2"
         >
           <label class="m-0">{{ tagsDict[campo] }}</label>
-          <p v-if="campo === 'country'" class="m-0">
+          <p v-if="campo === 'country' && userInfo[campo] !== 'No suministrado'" class="m-0">
             {{ countriesDict[userInfo['country']] }}
           </p>
           <p v-else class="m-0">

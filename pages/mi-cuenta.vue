@@ -34,43 +34,46 @@ if (route.path === '/mi-cuenta') {
 
 <template>
   <div class="contenedor ancho-lectura">
-    <SisdaiModal ref="modalConfirmarCierre">
-      <template #encabezado>
-        <p class="h4">¿Confirmas que deseas cerrar sesión?</p>
-        <p></p>
-      </template>
-      <template #cuerpo>
-        <p>
-          Si cierras sesión, tendrás que volver a ingresar tu correo y contraseña para acceder
-          nuevamente.
-        </p>
-      </template>
-      <template #pie>
-        <div class="flex flex-contenido-centrado contenedor contenedor-botones">
-          <div class="columna-8">
-            <button
-              aria-label="Cancelar"
-              type="button"
-              class="boton-secundario texto-centrado"
-              @click="modalConfirmarCierre.cerrarModal()"
-            >
-              <span class="flex">Cancelar</span>
-            </button>
+    <ClientOnly>
+      <SisdaiModal ref="modalConfirmarCierre">
+        <template #encabezado>
+          <p class="h4">¿Confirmas que deseas cerrar sesión?</p>
+          <p></p>
+        </template>
+        <template #cuerpo>
+          <p>
+            Si cierras sesión, tendrás que volver a ingresar tu correo y contraseña para acceder
+            nuevamente.
+          </p>
+        </template>
+        <template #pie>
+          <div class="flex flex-contenido-centrado contenedor contenedor-botones">
+            <div class="columna-8">
+              <button
+                aria-label="Cancelar"
+                type="button"
+                class="boton-secundario texto-centrado"
+                @click="modalConfirmarCierre.cerrarModal()"
+              >
+                <span class="flex">Cancelar</span>
+              </button>
+            </div>
+            <div class="columna-8">
+              <button
+                v-if="status === 'authenticated'"
+                aria-label="Cerrar sesión"
+                type="button"
+                class="boton-primario texto-centrado"
+                @click="cerrarSesion"
+              >
+                <span class="flex">Cerrar sesión</span>
+              </button>
+            </div>
           </div>
-          <div class="columna-8">
-            <button
-              v-if="status === 'authenticated'"
-              aria-label="Cerrar sesión"
-              type="button"
-              class="boton-primario texto-centrado"
-              @click="cerrarSesion"
-            >
-              <span class="flex">Cerrar sesión</span>
-            </button>
-          </div>
-        </div>
-      </template>
-    </SisdaiModal>
+        </template>
+      </SisdaiModal>
+    </ClientOnly>
+
     <div class="flex flex-contenido-separado">
       <div class="flex"><h1>Mi Cuenta</h1></div>
       <div class="flex-vertical-centrado">
