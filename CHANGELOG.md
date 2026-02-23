@@ -7,6 +7,14 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.12.0] - 23-02-2026
+
+### Agregado (Added)
+
+- Se agregó la funcionalidad de desvincular cuentas de github, google, rizoma y orcid.
+- Se hicieron ajustes en botones de consulta y catálogo para deshabilitarlos en caso de que no existan las condiciones para su uso.
+- Se agregó un botón para eliminar cada archivo individualmente en el drag and drop para cargar archivos.
+
 ## [0.11.0] - 19-02-2026
 
 ### Agregado (Added)

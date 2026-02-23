@@ -8,6 +8,7 @@ const { data } = useAuth();
 const idps = ref([]);
 const isLoading = ref(null);
 const fetchingStatus = ref(null);
+const deteleStatus = ref(null);
 
 async function buildIDPsInfo() {
   isLoading.value = true;
@@ -63,6 +64,7 @@ function linkSocialAccount(idp) {
 
 async function unlinkSocialAccount(idp) {
   // Eliminamos el recurso
+  deteleStatus.value = null;
   const url = `${config.public.keycloakIssuer}/account/linked-accounts/${idp}/`;
   const token = ref(data.value?.accessToken);
   const deleteIDP = await fetch(url, {
@@ -73,10 +75,13 @@ async function unlinkSocialAccount(idp) {
     },
   });
   if (deleteIDP.status !== 'ok') {
+    deteleStatus.value = 'fail';
     console.warn('Fracasó la eliminación de cuenta');
+  } else {
+    deteleStatus.value = 'ok';
+    // Reconstruimos el diccionario de información
+    buildIDPsInfo();
   }
-  // Reconstruimos el diccionario de información
-  buildIDPsInfo();
 }
 onMounted(() => {
   buildIDPsInfo();
@@ -173,6 +178,20 @@ onMounted(() => {
 
       <!-- Las tarjetas de cuentas vinculadas -->
       <div v-else-if="!isLoading && fetchingStatus === 'ok'">
+        <!--Alerta de que fracasó la desvinculación de servicios-->
+        <div
+          v-if="deleteStatus === 'fail'"
+          class="flex m-y-2 borde-redondeado-16 flex-contenido-centrado fondo-color-error texto-color-error p-1"
+          style="gap: 0px"
+        >
+          <div class="columna-3 flex-vertical-centrado m-x-0">
+            <span class="pictograma-alerta pictograma-grande"></span>
+          </div>
+          <p class="columna-13">
+            No se pudo completar la acción. Verifica tu conexión a internet e inténtalo de nuevo.
+          </p>
+        </div>
+        <!-- Tarjetas de servicios -->
         <div v-for="broker in idps" :key="broker.providerAlias" class="tarjeta m-y-3">
           <div class="tarjeta-cuerpo">
             <div class="flex flex-contenido-separado">
