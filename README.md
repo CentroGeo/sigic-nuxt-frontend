@@ -108,7 +108,6 @@ NUXT_PUBLIC_IA_BACKEND_URL = https://sigic.ia.dev.geoint.mx/
 
 NUXT_PUBLIC_KEYCLOAK_ISSUER = <https://iam.dev.geoint.mx/realms/sigic>
 NUXT_PUBLIC_KEYCLOAK_CLIENT_ID = <Clave secreta>
-NUXT_PUBLIC_KEYCLOAK_IDPS = <Diccionario de los idps de keycloak escrito como cadena>
 
 ```
 
@@ -135,7 +134,6 @@ NUXT_PUBLIC_IA_BACKEND_URL = <ulr del back de IA>
 
 NUXT_PUBLIC_KEYCLOAK_ISSUER = <https://iam.dev.geoint.mx/realms/sigic>
 NUXT_PUBLIC_KEYCLOAK_CLIENT_ID = <Clave secreta>
-NUXT_PUBLIC_KEYCLOAK_IDPS = <Diccionario de los idps de keycloak escrito como cadena>
 
 ```
 
