@@ -118,39 +118,38 @@ const preguntas = ref([
           <div class="columna-16 texto-tamanio-4 texto-color-acento flex flex-contenido-centrado">
             Formulario del proyecto
           </div>
-          <div class="">
-            <div v-for="(pregunta, index) in preguntas" :key="index">
-              <levantamiento-pregunta-abierta
-                v-if="pregunta.tipo === 'abierta'"
-                :pregunta="pregunta"
-                :es-edicion="false"
-                :indice="index"
-              />
-              <levantamiento-pregunta-unica
-                v-if="pregunta.tipo === 'unica'"
-                :pregunta="pregunta"
-                :es-edicion="false"
-                :indice="index"
-              />
-              <levantamiento-pregunta-multiple
-                v-if="pregunta.tipo === 'multiple'"
-                :pregunta="pregunta"
-                :es-edicion="false"
-                :indice="index"
-              />
-              <levantamiento-pregunta-condicional
-                v-if="pregunta.tipo === 'condicional'"
-                :pregunta="pregunta"
-                :es-edicion="false"
-                :indice="index"
-              />
-              <levantamiento-pregunta-multimedia
-                v-if="pregunta.tipo === 'multimedia'"
-                :pregunta="pregunta"
-                :es-edicion="false"
-                :indice="index"
-              />
-            </div>
+
+          <div v-for="(pregunta, index) in preguntas" :key="index" class="columna-16">
+            <levantamiento-pregunta-abierta
+              v-if="pregunta.tipo === 'abierta'"
+              :pregunta="pregunta"
+              :es-edicion="false"
+              :indice="index"
+            />
+            <levantamiento-pregunta-unica
+              v-if="pregunta.tipo === 'unica'"
+              :pregunta="pregunta"
+              :es-edicion="false"
+              :indice="index"
+            />
+            <levantamiento-pregunta-multiple
+              v-if="pregunta.tipo === 'multiple'"
+              :pregunta="pregunta"
+              :es-edicion="false"
+              :indice="index"
+            />
+            <levantamiento-pregunta-condicional
+              v-if="pregunta.tipo === 'condicional'"
+              :pregunta="pregunta"
+              :es-edicion="false"
+              :indice="index"
+            />
+            <levantamiento-pregunta-multimedia
+              v-if="pregunta.tipo === 'multimedia'"
+              :pregunta="pregunta"
+              :es-edicion="false"
+              :indice="index"
+            />
           </div>
         </div>
       </main>

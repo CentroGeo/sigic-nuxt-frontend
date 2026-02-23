@@ -5,10 +5,9 @@ const route = useRoute();
 const { data } = useAuth();
 const storeLevantamiento = useLevantamientoStore();
 
-const esAdministradorLevantamiento = ref(false);
+const esAdministradorLevantamiento = computed(() => tieneRolAdministrador(data.value?.accessToken));
 
 onMounted(async () => {
-  esAdministradorLevantamiento.value = tieneRolAdministrador(data.value?.accessToken);
   await storeLevantamiento.obtenerEsRevisor(data.value?.user.email);
 });
 </script>
