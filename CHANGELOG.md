@@ -7,6 +7,14 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.12.1] - 24-02-2026
+
+### Arreglado (Fix)
+
+- Se implementó la traducción de valores de restricciones en la edición de metadatos.
+- Se resolvió un pequeño bug en la desvinculación de cuentas en mi-cuenta/seguridad.
+- Se agregaron alertas de que no se ha subido archivos en las secciones de disponibles y metadatos pendientes en catálogo.
+
 ## [0.12.0] - 23-02-2026
 
 ### Agregado (Added)
@@ -241,6 +249,7 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.12.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.10.1...v0.11.0
 [0.10.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.10.0...v0.10.1
