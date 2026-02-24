@@ -1,6 +1,4 @@
 <script setup>
-import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-
 definePageMeta({
   middleware: 'sidebase-auth',
   bodyAttrs: {
@@ -103,7 +101,7 @@ function fetchNewData() {
 }
 
 watch([seleccionTipoArchivo], () => {
-  storeFilters.buildQueryParams();
+  storeFilters.buildQueryParams('all');
 });
 
 watch(paginaActual, () => {
@@ -148,24 +146,36 @@ onMounted(async () => {
           <!--class="columna-4"-->
           <div class="columna-7">
             <ClientOnly>
-              <SisdaiSelector v-model="seleccionTipoArchivo" etiqueta="Estatus">
+              <label for="selector-tipo-solicitudes">Estatus</label>
+              <select
+                v-model="seleccionTipoArchivo"
+                name="selector-tipo-solicitudes"
+                class="m-b-2"
+                :disabled="isLoading"
+              >
                 <option value="all">Todos los estatus</option>
                 <option value="on_review">En revisión</option>
                 <option value="published">Aceptados</option>
                 <option value="pending">Pendientes</option>
                 <option value="rejected">No Aceptados</option>
-              </SisdaiSelector>
+              </select>
             </ClientOnly>
           </div>
           <!--class="columna-4"-->
           <div class="columna-7">
             <ClientOnly>
-              <SisdaiSelector v-model="seleccionOrden" etiqueta="Ordenar por">
+              <label for="selector-orden-solicitudes">Ordenar por</label>
+              <select
+                v-model="seleccionOrden"
+                name="selector-tipo-solicitudes"
+                class="m-b-2"
+                :disabled="isLoading"
+              >
                 <option value="titulo">Título</option>
                 <option value="categoria">Categoría</option>
                 <option value="fecha_descendente">Más reciente</option>
                 <option value="fecha_ascendente">Más antiguo</option>
-              </SisdaiSelector>
+              </select>
             </ClientOnly>
           </div>
           <div class="columna-8">

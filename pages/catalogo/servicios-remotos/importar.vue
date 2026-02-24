@@ -206,23 +206,6 @@ onMounted(async () => {
 
         <!-- Recursos cosechables listos -->
         <div v-else>
-          <!--Cuadro de información de inicio de sesión-->
-          <div
-            v-if="status !== 'authenticated'"
-            class="fondo-color-informacion texto-color-informacion borde-redondeado-16 borde -color-informacion m-t-2"
-            style="padding: 21px"
-          >
-            <h6 class="m-y-2">¿Quieres visualizar capas de este catálogo?</h6>
-            <p class="m-y-1">
-              Puedes importar recursos de información para visualizarlos en la plataforma SIGIC,
-              para ello debes iniciar sesión con una cuenta existente o crear una y completar el
-              proceso de importación.
-            </p>
-            <a href="#" style="font-weight: bold" @click.prevent="iniciarSesion(event)"
-              >Iniciar sesión</a
-            >
-          </div>
-
           <!--Cuadro de información de que el servicio no está listo-->
           <div
             v-if="harvesterStatus !== 'ready' && !importingActive && status === 'authenticated'"

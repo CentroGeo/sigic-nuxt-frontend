@@ -8,9 +8,18 @@ import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/S
 import { buildUrl, categoriesInSpanish, categoriesValues, cleanInput } from '~/utils/consulta';
 
 const config = useRuntimeConfig();
+const router = useRouter();
+const route = useRoute();
+const storeIA = useIAStore();
 const storeFilters = useFilteredResources();
 const storeResources = useResourcesIAStore();
 const { gnoxyFetch } = useGnoxyUrl();
+
+const idSeleccionado = computed(() => route.params.id);
+const proyectoById = ref(null);
+
+const catalogo = ref([]);
+const catalogoFiltrado = ref(catalogo.value);
 
 const resourceType = ref('dataTable');
 const recursos = computed(() => storeResources.resources[resourceType.value]);
@@ -20,6 +29,7 @@ const inputSearch = computed({
   set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
 });
 const mensajeAyudaBuscador = ref('');
+const campoBusqueda = ref('');
 
 const agregaCatalogoModal = ref(null);
 const seleccionCatalogoModal = ref(null);
@@ -33,11 +43,14 @@ const dictCategoria = {
   documents: 'Documentos',
 };
 
+// Datos para selección
 const archivosSeleccionados = ref([]);
 const categoriaSeleccionada = ref(null);
+const archivosEliminados = ref([]);
 const archivosGeonode = ref([]);
 const archivosTabla = ref([]);
 
+// Datos para modal para agregar fuentes del catálogo
 const totalResources = ref(0);
 const params = computed(() => storeFilters.filters.queryParams);
 const apiCategorias = `${config.public.geonodeApi}/facets/category?page_size=30`;
@@ -45,6 +58,18 @@ const categoriesDict = ref({});
 const totalCategoria = ref(0);
 const nthElement = 1;
 
+const recursosCargando = ref(false);
+
+// Datos del formulario
+const nombreProyecto = ref('');
+const descripcionProyecto = ref('');
+const visibilidadProyecto = ref('publico'); // Valor por defecto
+
+const loaderModal = ref(null);
+const loaderTitle = ref('');
+const loaderMsg = ref('');
+
+// Método para obtener el total de categorías de recursos con metadatos completos y publicados
 async function fetchTotalByCategory(category) {
   const preParams = params.value;
   preParams['filter{category.identifier.in}'] = category;
@@ -56,6 +81,7 @@ async function fetchTotalByCategory(category) {
   return res.total;
 }
 
+// Método para construir el diccionario de categorías para el modal
 async function buildCategoriesDict() {
   categoriesDict.value = {};
   // Esta parte es para obtener todas las categorias
@@ -105,24 +131,7 @@ async function fetchNewData() {
   }
 }
 
-function cargarArchivosGeonode() {
-  seleccionCatalogoModal?.value.cerrarModal();
-  // console.log('recursosSeleccionados', recursosSeleccionados.value);
-  const nuevosArchivos = recursosSeleccionados.value.map((file) => ({
-    id: Math.floor(Math.random() * 1000000000000000000000),
-    nombre: file.title,
-    tipo: file.resource_type === 'dataset' ? 'CSV' : obtenerTipoArchivo(file.title),
-    archivo: null,
-    origen: 'Catálogo',
-    pk: file.pk,
-    category: file.resource_type + 's',
-  }));
-
-  archivosGeonode.value = [...archivosGeonode.value, ...nuevosArchivos];
-  archivosTabla.value = [...archivosSeleccionados.value, ...archivosGeonode.value];
-}
-
-const recursosCargando = ref(false);
+// Selecciona la categoría en el modal de fuentes de catálogo
 async function seleccionarCategoria(categoria) {
   if (categoriaSeleccionada.value !== categoriesDict.value[categoria].label) {
     // reseteando recursos filtrados por categoría y valores
@@ -147,64 +156,116 @@ async function seleccionarCategoria(categoria) {
   }
 }
 
-const storeIA = useIAStore();
+// Método para remover la búsqueda en el filtro de proyectos
+function removerBusquedaFiltro() {
+  campoBusqueda.value = '';
+  catalogoFiltrado.value = catalogo.value;
+}
 
-// Datos del formulario
-const nombreProyecto = ref('');
-const descripcionProyecto = ref('');
-const visibilidadProyecto = ref('publico'); // Valor por defecto
-
-const route = useRoute();
-const esEdicion = ref(false);
-
-const proyecto = ref(null);
-
-const archivosEliminados = ref([]);
-
-const loaderModal = ref(null);
-const loaderTitle = ref('');
-const loaderMsg = ref('');
-
-onMounted(async () => {
-  loaderTitle.value = 'Cargando';
-  loaderMsg.value = 'Espera mientras se cargan tus archivos';
-  await nextTick();
-  loaderModal.value?.abrirModal();
-
-  if (route.params.id !== 'nuevo') {
-    esEdicion.value = true;
-
-    proyecto.value = await storeIA.getProjectById(route.params.id);
-
-    nombreProyecto.value = proyecto.value.workspace.title;
-    descripcionProyecto.value = proyecto.value.workspace.description;
-    visibilidadProyecto.value = proyecto.value.workspace.public ? 'publico' : 'privado';
-
-    const arraySources = await storeIA.getProjectSources(route.params.id);
-
-    const archivosBackend = arraySources.map((archivo) => ({
-      id: archivo.id,
-      nombre: archivo.filename,
-      tipo: obtenerTipoArchivo(archivo.filename),
-      archivo: null,
-      category: archivo.geonode_category,
-      origen: archivo.geonode_type,
-    }));
-    // console.log('arraySources', arraySources);
-
-    archivosSeleccionados.value = [...archivosSeleccionados.value, ...archivosBackend];
-    archivosTabla.value = [...archivosSeleccionados.value];
-    // console.log('archivosTabla.value', archivosTabla.value);
+// Método para buscar el recurso con filtro el modal de fuentes de catálogo
+async function buscarRecurso() {
+  if (categoriaSeleccionada.value !== null) {
+    // reseteando recursos filtrados por categoría y valores
+    recursosCargando.value = true;
+    mensajeAyudaBuscador.value = '';
+    totalCategoria.value = 0;
+    storeResources.resetByType(resourceType.value);
+    categoriesDict.value[categoriaSeleccionada.value].page = 1;
+    // contruyendo parámetros
+    storeFilters.buildQueryParams(resourceType.value);
+    totalCategoria.value = await fetchTotalByCategory(
+      categoriesValues[categoriaSeleccionada.value]
+    );
+    // fetch de recursos paginados filtrados
+    await storeResources.fetchByCategory(resourceType.value, 1, params.value);
+    storeResources.setNthElements(resourceType.value, [
+      recursos.value[recursos.value.length - nthElement].pk,
+    ]);
+    recursosCargando.value = false;
+  } else {
+    mensajeAyudaBuscador.value = 'Falta seleccionar categoría.';
   }
+}
 
-  window.addEventListener('keydown', preventEscape);
+// Remueve la búsqueda en el filtro del modal de fuentes de catálogo
+async function removerBusqueda() {
+  storeFilters.updateFilter('inputSearch', '');
+  if (categoriaSeleccionada.value !== null && inputSearch.value === '') {
+    recursosCargando.value = true;
+    totalCategoria.value = 0;
+    storeResources.resetByType(resourceType.value);
+    categoriesDict.value[categoriaSeleccionada.value].page = 1;
+    // contruyendo parámetros
+    storeFilters.buildQueryParams(resourceType.value);
+    totalCategoria.value = categoriesDict.value[categoriaSeleccionada.value].total;
+    // fetch de recursos paginados totales
+    await storeResources.fetchByCategory(resourceType.value, 1, params.value);
+    storeResources.setNthElements(resourceType.value, [
+      recursos.value[recursos.value.length - nthElement].pk,
+    ]);
+    recursosCargando.value = false;
+  }
+}
 
-  loaderModal.value?.cerrarModal();
-});
+// Abre el modal para elegir el tipo de fuente del catálogo
+function agregarFuentesCatalogo() {
+  // limpiando recursos filtrados por categoría y seleccionados
+  storeFilters.updateFilter('inputSearch', '');
+  categoriaSeleccionada.value = null;
+  totalCategoria.value = 0;
+  storeResources.resetByType(resourceType.value);
+  storeResources.resetSelectedByType(resourceType.value);
+  agregaCatalogoModal.value?.abrirModal();
+}
 
-onBeforeUnmount(() => {
-  window.removeEventListener('keydown', preventEscape);
-});
+// Abre el modal para agregar fuentes del catálogo
+async function siguenteAgregar() {
+  agregaCatalogoModal.value.cerrarModal();
+  seleccionCatalogoModal.value.abrirModal();
+  totalCategoria.value = 0;
+  storeResources.resetByType(resourceType.value);
+  storeResources.resetSelectedByType(resourceType.value);
+  storeFilters.buildQueryParams(resourceType.value);
+  await buildCategoriesDict();
+}
+
+// Función para consultar lista de proyectos
+const loadProjectList = async () => {
+  let arrayProjects = [];
+
+  // Consulta proyectos
+  arrayProjects = await storeIA.getProjectsList();
+
+  catalogo.value = arrayProjects;
+  catalogoFiltrado.value = arrayProjects;
+};
+
+// Función para seleccionar proyecto y navegar
+function seleccionarProyecto(proyecto) {
+  storeIA.seleccionarProyecto(proyecto);
+
+  const idSeleccionado = proyecto.id.toString();
+  // Navega a ruta
+  router.push(`/ia/proyecto/${idSeleccionado}`);
+}
+
+// Método para manejar los archivos seleccionados del catálogo de geonode
+function cargarArchivosGeonode() {
+  seleccionCatalogoModal?.value.cerrarModal();
+  // se obtiene primero del geonode
+  const nuevosArchivos = recursosSeleccionados.value.map((file) => ({
+    id: Math.floor(Math.random() * 1000000000000000000000),
+    nombre: file.title,
+    tipo: file.resource_type === 'dataset' ? 'CSV' : obtenerTipoArchivo(file.title),
+    archivo: null,
+    origen: 'Catálogo',
+    pk: file.pk,
+    category: file.resource_type + 's',
+  }));
+
+  archivosGeonode.value = [...archivosGeonode.value, ...nuevosArchivos];
+  archivosTabla.value = [...archivosSeleccionados.value, ...archivosGeonode.value];
+}
 
 // Método para manejar la selección de archivos
 const manejarSeleccionArchivos = (event) => {
@@ -251,57 +312,14 @@ const eliminarArchivo = (id) => {
   archivosEliminados.value.push(id);
 };
 
-// Función para guardar el proyecto
-const guardarProyecto = async () => {
-  try {
-    loaderTitle.value = 'Procesando';
-    loaderMsg.value = 'Indexando archivo';
-    loaderModal.value?.abrirModal();
-    // Mostrar notificación de inicio
-    /*     notificacion.mostrar({
-      tipo: 'info',
-      mensaje: 'Iniciando subida del proyecto...',
-      duracion: 3000
-    }); */
-
-    await storeIA.crearProyecto(
-      nombreProyecto.value,
-      descripcionProyecto.value,
-      visibilidadProyecto.value,
-      archivosSeleccionados.value,
-      archivosGeonode.value
-    );
-
-    // Notificación de éxito
-    //alert("Proyecto guardado correctamente")
-    console.log('Proyecto guardado correctamente');
-
-    loaderModal.value?.cerrarModal();
-    /*    notificacion.mostrar({
-      tipo: 'exito',
-      mensaje: 'Proyecto guardado correctamente',
-      duracion: 5000
-    }); */
-
-    navigateTo('/ia/proyectos');
-  } catch (error) {
-    //alert('Error al guardar: ' + error.message);
-    console.error('Error al guardar: ' + error.message);
-    /* notificacion.mostrar({
-      tipo: 'error',
-      mensaje: 'Error al guardar: ' + error.message,
-      duracion: 7000,
-    }); */
-  }
-};
-
+// Función para editar proyecto
 const editarProyecto = async () => {
   try {
     loaderTitle.value = 'Procesando';
     loaderMsg.value = 'Indexando archivo';
     loaderModal.value?.abrirModal();
 
-    await storeIA.actualizarProyecto(
+    const res = await storeIA.actualizarProyecto(
       nombreProyecto.value,
       descripcionProyecto.value,
       visibilidadProyecto.value,
@@ -313,10 +331,8 @@ const editarProyecto = async () => {
 
     loaderModal.value?.cerrarModal();
 
-    // navigateTo(`/ia/proyectos/${route.params.id}`);
-    console.log('acá');
-    navigateTo('/ia/proyectos');
-    storeIA.proyectoSeleccionado = { id: route.params.id };
+    navigateTo(`/ia/proyecto/${res.id}`);
+    storeIA.proyectoSeleccionado = { id: res.id };
   } catch (error) {
     console.error('Error al actualizar: ' + error.message);
   }
@@ -329,83 +345,127 @@ function preventEscape(event) {
   }
 }
 
-async function buscarRecurso() {
-  if (categoriaSeleccionada.value !== null) {
-    // reseteando recursos filtrados por categoría y valores
-    recursosCargando.value = true;
-    mensajeAyudaBuscador.value = '';
-    totalCategoria.value = 0;
-    storeResources.resetByType(resourceType.value);
-    categoriesDict.value[categoriaSeleccionada.value].page = 1;
-    // contruyendo parámetros
-    storeFilters.buildQueryParams(resourceType.value);
-    totalCategoria.value = await fetchTotalByCategory(
-      categoriesValues[categoriaSeleccionada.value]
-    );
-    // fetch de recursos paginados filtrados
-    await storeResources.fetchByCategory(resourceType.value, 1, params.value);
-    storeResources.setNthElements(resourceType.value, [
-      recursos.value[recursos.value.length - nthElement].pk,
-    ]);
-    recursosCargando.value = false;
-  } else {
-    mensajeAyudaBuscador.value = 'Falta seleccionar categoría.';
-  }
-}
+onMounted(async () => {
+  // Recuperando la lista de proyectos
+  loadProjectList();
 
-async function removerBusqueda() {
-  storeFilters.updateFilter('inputSearch', '');
-  if (categoriaSeleccionada.value !== null && inputSearch.value === '') {
-    recursosCargando.value = true;
-    totalCategoria.value = 0;
-    storeResources.resetByType(resourceType.value);
-    categoriesDict.value[categoriaSeleccionada.value].page = 1;
-    // contruyendo parámetros
-    storeFilters.buildQueryParams(resourceType.value);
-    totalCategoria.value = categoriesDict.value[categoriaSeleccionada.value].total;
-    // fetch de recursos paginados totales
-    await storeResources.fetchByCategory(resourceType.value, 1, params.value);
-    storeResources.setNthElements(resourceType.value, [
-      recursos.value[recursos.value.length - nthElement].pk,
-    ]);
-    recursosCargando.value = false;
-  }
-}
+  // Modal para cargar información
+  loaderTitle.value = 'Cargando';
+  loaderMsg.value = 'Espera mientras se cargan tus archivos';
+  await nextTick();
+  loaderModal.value?.abrirModal();
+  // Recuperando nombre, descripción y visibilidad del proyecto
+  proyectoById.value = await storeIA.getProjectById(route.params.id);
+  nombreProyecto.value = proyectoById.value.workspace.title;
+  descripcionProyecto.value = proyectoById.value.workspace.description;
+  visibilidadProyecto.value = proyectoById.value.workspace.public ? 'publico' : 'privado';
 
-function agregarFuentesCatalogo() {
-  // limpiando recursos filtrados por categoría y seleccionados
-  storeFilters.updateFilter('inputSearch', '');
-  categoriaSeleccionada.value = null;
-  totalCategoria.value = 0;
-  storeResources.resetByType(resourceType.value);
-  storeResources.resetSelectedByType(resourceType.value);
-  agregaCatalogoModal.value?.abrirModal();
-}
+  // Recuperando fuentes de información del proyecto
+  const arraySources = await storeIA.getProjectSources(route.params.id);
+  const archivosBackend = arraySources.map((archivo) => ({
+    id: archivo.id,
+    nombre: archivo.filename,
+    tipo: obtenerTipoArchivo(archivo.filename),
+    archivo: null,
+    category: archivo.geonode_category,
+    origen: archivo.geonode_type,
+  }));
+  // Asignando a tabla
+  archivosSeleccionados.value = [...archivosSeleccionados.value, ...archivosBackend];
+  archivosTabla.value = [...archivosSeleccionados.value];
 
-async function siguenteAgregar() {
-  agregaCatalogoModal.value.cerrarModal();
-  seleccionCatalogoModal.value.abrirModal();
-  totalCategoria.value = 0;
-  storeResources.resetByType(resourceType.value);
-  storeResources.resetSelectedByType(resourceType.value);
-  storeFilters.buildQueryParams(resourceType.value);
-  await buildCategoriesDict();
-}
+  window.addEventListener('keydown', preventEscape);
+  // Cerrando modal
+  loaderModal.value?.cerrarModal();
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', preventEscape);
+});
 </script>
 
 <template>
   <UiLayoutPaneles>
     <template #catalogo>
-      <IaLayoutListas
-        titulo="Proyectos"
-        texto-boton="Nuevo proyecto"
-        etiqueta-busqueda="Buscar un proyecto"
-      />
+      <div class="overflowYAuto">
+        <div class="positionSticky">
+          <div class="fondo-color-acento p-x-3 p-y-1">
+            <h5>Proyectos</h5>
+          </div>
+
+          <div class="p-x-3 p-t-3">
+            <nuxt-link
+              class="boton-listas boton boton-primario m-b-3"
+              aria-label="Nuevo proyecto"
+              to="/ia/proyectos/crear-nuevo"
+            >
+              Nuevo proyecto
+            </nuxt-link>
+
+            <ClientOnly>
+              <form class="campo-busqueda" @submit.prevent>
+                <input
+                  id="idcampobusquedaialistas"
+                  v-model="campoBusqueda"
+                  class="campo-busqueda-entrada"
+                  type="search"
+                  :placeholder="'Buscar un proyecto'"
+                  :disabled="catalogoFiltrado.length === 0"
+                />
+                <button
+                  v-if="campoBusqueda"
+                  class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
+                  aria-label="Borrar"
+                  type="button"
+                  :disabled="catalogoFiltrado.length === 0"
+                  @click="removerBusquedaFiltro"
+                >
+                  <span aria-hidden="true" class="pictograma-cerrar" />
+                </button>
+                <button
+                  class="boton-primario boton-pictograma campo-busqueda-buscar"
+                  aria-label="Buscar"
+                  type="button"
+                  :disabled="catalogoFiltrado.length === 0"
+                >
+                  <span class="pictograma-buscar" aria-hidden="true" />
+                </button>
+              </form>
+            </ClientOnly>
+          </div>
+        </div>
+
+        <div>
+          <p class="m-x-3">Selecciona un proyecto para ver su contenido.</p>
+          <ul class="lista-chats lista-sin-estilo">
+            <li
+              v-for="proyecto in catalogoFiltrado"
+              :key="`proyecto-${proyecto.id}`"
+              class="m-0"
+              @click="seleccionarProyecto(proyecto)"
+            >
+              <div
+                class="proyecto p-l-4 p-r-2 p-y-1"
+                :class="{
+                  seleccionado: proyecto.id === +idSeleccionado || proyecto.title === '',
+                }"
+              >
+                <div class="proyecto-titulo m-b-1">{{ proyecto.title }}</div>
+                <div class="flex">
+                  <UiNumeroElementos :numero="proyecto.numero_contextos" etiqueta="Contextos" />
+                  <UiNumeroElementos :numero="proyecto.numero_fuentes" etiqueta="Fuentes" />
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
     </template>
 
     <template #visualizador>
-      <main id="principal" class="contenedor m-b-10 p-t-3 overflowYAuto">
+      <main id="principal" class="contenedor m-b-10 p-t-3">
         <h2>Configuración de proyecto</h2>
+
         <div class="grid">
           <div class="columna-10">
             <form action="">
@@ -447,9 +507,10 @@ async function siguenteAgregar() {
 
         <div class="grid">
           <div class="columna-16">
-            <p class="seperador borde-b" />
+            <p class="borde-b" />
             <div class="flex flex-contenido-separado fuentes-encabezado">
               <h2>Agregar fuentes de información</h2>
+
               <div>
                 <button
                   class="boton-pictograma boton-primario m-r-2"
@@ -459,6 +520,7 @@ async function siguenteAgregar() {
                   Agregar del catálogo
                   <span class="pictograma-agregar" aria-hidden="true" />
                 </button>
+
                 <button
                   class="boton-pictograma boton-primario"
                   aria-label="Subir archivos"
@@ -480,6 +542,7 @@ async function siguenteAgregar() {
 
             <div v-if="archivosTabla.length > 0" class="tabla-archivos m-y-3">
               <h3>Archivos a subir</h3>
+
               <table class="tabla">
                 <thead>
                   <tr>
@@ -490,29 +553,25 @@ async function siguenteAgregar() {
                     <th class="p-x-3 p-y-2">Acciones</th>
                   </tr>
                 </thead>
+
                 <tbody>
-                  <tr v-for="archivo in archivosTabla" :key="archivo.id">
+                  <tr v-for="archivo in archivosTabla" :key="`fila-${archivo.id}`">
                     <td class="p-3">{{ archivo.nombre }}</td>
                     <td class="p-3 etiqueta-tabla">
                       <span class="p-x-1 p-y-minimo">{{ archivo.tipo }}</span>
                     </td>
                     <td class="p-3 flex flex-contenido-centrado">
-                      <p
+                      <div
                         class="texto-centrado fondo-color-acento p-1 m-0 texto-color-acento borde borde-redondeado-12"
                         style="width: max-content"
                       >
-                        <span v-if="archivo.category === 'Documento'">
-                          <!-- propio -->
-                          <span class="pictograma-documento" />{{ archivo.category }}s
-                        </span>
                         <span v-if="archivo.category === 'documents'">
-                          <!-- catalogo -->
                           <span class="pictograma-documento" />{{ dictCategoria[archivo.category] }}
                         </span>
                         <span v-if="archivo.category === 'datasets'">
                           <span class="pictograma-tabla" />{{ dictCategoria[archivo.category] }}
                         </span>
-                      </p>
+                      </div>
                     </td>
                     <td class="p-3 etiqueta-tabla">
                       <span class="p-x-1 p-y-minimo">{{
@@ -537,17 +596,19 @@ async function siguenteAgregar() {
               <NuxtLink
                 class="boton boton-chico boton-primario"
                 aria-label="Guardar proyecto"
-                @click.prevent="esEdicion ? editarProyecto() : guardarProyecto()"
+                @click.prevent="editarProyecto"
               >
                 Guardar proyecto
               </NuxtLink>
-              <nuxt-link
+
+              <button
+                type="button"
                 class="boton boton-chico boton-secundario"
                 aria-label="Cancelar"
-                to="/ia/proyectos/"
+                @click="router.back"
               >
                 Cancelar
-              </nuxt-link>
+              </button>
             </div>
           </div>
         </div>
@@ -558,8 +619,10 @@ async function siguenteAgregar() {
           <template #encabezado>
             <h2>Agregar información del catálogo</h2>
           </template>
+
           <template #cuerpo>
             <p>Selecciona el tipo de fuente de información que deseas agregar a tu proyecto</p>
+
             <form @keydown.enter.prevent="siguenteAgregar">
               <SisdaiGrupoBotonesRadio class="radio-catalogo" leyenda="" :es_vertical="true">
                 <SisdaiBotonRadio
@@ -579,6 +642,7 @@ async function siguenteAgregar() {
               </SisdaiGrupoBotonesRadio>
             </form>
           </template>
+
           <template #pie>
             <button class="boton-primario boton-chico" type="button" @click="siguenteAgregar">
               Siguiente
@@ -590,9 +654,11 @@ async function siguenteAgregar() {
           <template #encabezado>
             <h2>Agregar {{ dictTipoRecurso[resourceType] }} del catálogo</h2>
           </template>
+
           <template #cuerpo>
             <div class="p-r-2">
               <p>Explora el catálogo y selecciona fuentes de información para el proyecto</p>
+
               <ClientOnly>
                 <form class="campo-busqueda m-y-3" @submit.prevent="buscarRecurso">
                   <input
@@ -767,6 +833,7 @@ async function siguenteAgregar() {
               </div>
             </div>
           </template>
+
           <template #pie>
             <button
               class="boton-primario boton-chico"
@@ -783,14 +850,16 @@ async function siguenteAgregar() {
           <template #encabezado>
             <h1 class="m-t-0 texto-tamanio-6">{{ loaderTitle }}</h1>
           </template>
+
           <template #cuerpo>
             <div class="flex flex-contenido-centrado">
               <figure>
-                <img src="/img/loader.gif" alt="Loader de SIGIC" />
+                <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
                 <figcaption class="texto-centrado">{{ loaderMsg }}</figcaption>
               </figure>
             </div>
           </template>
+
           <template #pie> </template>
         </SisdaiModal>
       </ClientOnly>
@@ -798,24 +867,73 @@ async function siguenteAgregar() {
   </UiLayoutPaneles>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .overflowYAuto {
-  overflow-y: auto;
   height: var(--altura-consulta-esc);
-}
-.overflowYAutoHeight {
   overflow-y: auto;
-  height: 300px;
+
+  .positionSticky {
+    position: sticky;
+    top: 0;
+    background-color: var(--fondo);
+    padding-bottom: 8px;
+  }
 }
 
-.separador {
-  width: 100%;
-  height: 1px;
-  background: #aaa;
+.proyecto {
+  cursor: pointer;
+  border-left: var(--Escalas-Bordes-borde-8, 8px) solid transparent;
+
+  &.seleccionado {
+    border-left: var(--Escalas-Bordes-borde-8, 8px) solid var(--borde-acento);
+    background: var(--fondo-acento);
+  }
+
+  .proyecto-titulo {
+    color: var(--navegacion-secundaria-color);
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+  }
 }
 
 .fuentes-encabezado {
   align-items: center;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    text-align: center;
+  }
+
+  th {
+    border-bottom: 1px solid var(--borde);
+    text-align: center;
+    font-size: var(--Tipos-Tamao-Prrafos-Prrafo-base, 16px);
+    font-style: normal;
+    font-weight: 600;
+    line-height: var(--Tipos-Interlineado-Prrafos-Prrafos, 24px);
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  .etiqueta-tabla span {
+    border-radius: var(--Escalas-Bordes-redondeados-br-2, 8px);
+    border: 1px solid var(--Base-Borde---borde-acento, #53323c);
+    background: var(--Base-Fondo---fondo-acento, #fcf3f5);
+
+    color: var(--Base-Tipografa---texto-secundario, #5f3e47);
+    font-size: var(--Tipos-Tamao-Prrafos-Prrafo-base, 16px);
+    font-style: normal;
+    font-weight: 400;
+    line-height: var(--Tipos-Interlineado-Prrafos-Prrafos, 24px);
+  }
 }
 
 .radio-catalogo {
@@ -843,6 +961,11 @@ async function siguenteAgregar() {
   }
 }
 
+.overflowYAutoHeight {
+  overflow-y: auto;
+  height: 300px;
+}
+
 .capa {
   background: var(--fondo-acento);
   color: var(--texto-secundario);
@@ -854,42 +977,6 @@ async function siguenteAgregar() {
   .icono {
     display: flex;
     align-items: center;
-  }
-}
-
-.tabla {
-  width: 100%;
-  border-collapse: collapse;
-
-  th,
-  td {
-    /* padding: 0.75rem 1rem; */
-    text-align: center;
-  }
-
-  th {
-    border-bottom: 1px solid var(--borde);
-    text-align: center;
-    font-size: var(--Tipos-Tamao-Prrafos-Prrafo-base, 16px);
-    font-style: normal;
-    font-weight: 600;
-    line-height: var(--Tipos-Interlineado-Prrafos-Prrafos, 24px);
-  }
-
-  tr:last-child td {
-    border-bottom: none;
-  }
-
-  .etiqueta-tabla span {
-    border-radius: var(--Escalas-Bordes-redondeados-br-2, 8px);
-    border: 1px solid var(--Base-Borde---borde-acento, #53323c);
-    background: var(--Base-Fondo---fondo-acento, #fcf3f5);
-
-    color: var(--Base-Tipografa---texto-secundario, #5f3e47);
-    font-size: var(--Tipos-Tamao-Prrafos-Prrafo-base, 16px);
-    font-style: normal;
-    font-weight: 400;
-    line-height: var(--Tipos-Interlineado-Prrafos-Prrafos, 24px);
   }
 }
 

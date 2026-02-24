@@ -74,9 +74,10 @@ jobs:
         run: |
           docker build --no-cache \
             --build-arg NODE_ENV=${{ steps.env.outputs.NODE_ENV }} \
-            --build-arg NUXT_PUBLIC_APP_BASE_PATH=${{ steps.env.outputs.NUXT_PUBLIC_APP_BASE_PATH }} \
+            --build-arg NUXT_APP_BASE_URL=${{ steps.env.outputs.NUXT_APP_BASE_URL }} \
             --build-arg NUXT_PUBLIC_AUTH_BASE_URL=${{ steps.env.outputs.NUXT_PUBLIC_AUTH_BASE_URL }} \
             --build-arg NUXT_PUBLIC_BASE_URL=${{ steps.env.outputs.NUXT_PUBLIC_BASE_URL }} \
+            --build-arg NUXT_PUBLIC_LEVANTAMIENTO_URL=${{ steps.env.outputs.NUXT_PUBLIC_LEVANTAMIENTO_URL }} \
             -t ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.branch }} \
             -t ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.sha }} \
             -f Dockerfile .
@@ -120,6 +121,7 @@ jobs:
           echo "NUXT_PUBLIC_GEONODE_API=${{ vars.NUXT_PUBLIC_GEONODE_API }}" >> .env          
           echo "NUXT_PUBLIC_GEOSERVER_URL=${{ vars.NUXT_PUBLIC_GEOSERVER_URL }}" >> .env
           echo "NUXT_PUBLIC_IA_BACKEND_URL=${{ vars.NUXT_PUBLIC_IA_BACKEND_URL }}" >> .env
+          echo "NUXT_PUBLIC_LEVANTAMIENTO_URL=${{ vars.NUXT_PUBLIC_LEVANTAMIENTO_URL }}" >> .env
           echo "NUXT_PUBLIC_DEFAULT_PAGE=${{ vars.NUXT_PUBLIC_DEFAULT_PAGE }}" >> .env
           echo "NUXT_PUBLIC_GEONODE_API_DEFAULT_FILTER=${{ vars.NUXT_PUBLIC_GEONODE_API_DEFAULT_FILTER }}" >> .env
           echo "NUXT_PUBLIC_ENABLE_AUTH=${{ vars.NUXT_PUBLIC_ENABLE_AUTH }}" >> .env
@@ -133,8 +135,10 @@ jobs:
           echo "KEYCLOAK_ISSUER=${{ vars.KEYCLOAK_ISSUER }}" >> .env
           echo "KEYCLOAK_CLIENT_ID=${{ secrets.KEYCLOAK_CLIENT_ID }}" >> .env
           echo "KEYCLOAK_CLIENT_SECRET=${{ secrets.KEYCLOAK_CLIENT_SECRET }}" >> .env
+          echo "NUXT_PUBLIC_KEYCLOAK_ISSUER=${{ vars.NUXT_PUBLIC_KEYCLOAK_ISSUER }}" >> .env
+          echo "NUXT_PUBLIC_KEYCLOAK_CLIENT_ID=${{ secrets.NUXT_PUBLIC_KEYCLOAK_CLIENT_ID }}" >> .env
           echo "NUXT_AUTH_SECRET=${{ secrets.NUXT_AUTH_SECRET }}" >> .env
-          echo "NUXT_PUBLIC_APP_BASE_PATH=${{ vars.NUXT_PUBLIC_APP_BASE_PATH }}" >> .env
+          echo "NUXT_APP_BASE_URL=${{ vars.NUXT_APP_BASE_URL }}" >> .env
           echo "VIRTUAL_PORT=3000" >> .env
 
       - name: Docker Compose up
@@ -148,6 +152,7 @@ jobs:
           NUXT_PUBLIC_GEONODE_API: ${{ vars.NUXT_PUBLIC_GEONODE_API }}
           NUXT_PUBLIC_GEOSERVER_URL: ${{ vars.NUXT_PUBLIC_GEOSERVER_URL }}
           NUXT_PUBLIC_IA_BACKEND_URL: ${{ vars.NUXT_PUBLIC_IA_BACKEND_URL }}
+          NUXT_PUBLIC_LEVANTAMIENTO_URL: ${{ vars.NUXT_PUBLIC_LEVANTAMIENTO_URL }}
           NUXT_PUBLIC_DEFAULT_PAGE: ${{ vars.NUXT_PUBLIC_DEFAULT_PAGE }}
           NUXT_PUBLIC_GEONODE_API_DEFAULT_FILTER: ${{ vars.NUXT_PUBLIC_GEONODE_API_DEFAULT_FILTER }}
           NUXT_PUBLIC_ENABLE_AUTH: ${{ vars.NUXT_PUBLIC_ENABLE_AUTH }}
@@ -161,8 +166,10 @@ jobs:
           KEYCLOAK_ISSUER: ${{ vars.KEYCLOAK_ISSUER }}
           KEYCLOAK_CLIENT_ID: ${{ secrets.KEYCLOAK_CLIENT_ID }}
           KEYCLOAK_CLIENT_SECRET: ${{ secrets.KEYCLOAK_CLIENT_SECRET }}
+          NUXT_PUBLIC_KEYCLOAK_ISSUER: ${{ vars.NUXT_PUBLIC_KEYCLOAK_ISSUER }}
+          NUXT_PUBLIC_KEYCLOAK_CLIENT_ID: ${{ secrets.NUXT_PUBLIC_KEYCLOAK_CLIENT_ID }}
           NUXT_AUTH_SECRET: ${{ secrets.NUXT_AUTH_SECRET }}
-          NUXT_PUBLIC_APP_BASE_PATH: ${{ vars.NUXT_PUBLIC_APP_BASE_PATH }}
+          NUXT_APP_BASE_URL: ${{ vars.NUXT_APP_BASE_URL }}
           VIRTUAL_PORT: '3000'
 
       - name: Docker Cleanup
