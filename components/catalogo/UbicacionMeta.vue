@@ -147,7 +147,7 @@ const dictIdiomas = [
   { snd: 'Sindi' },
   { som: 'Somalí' },
   { swa: 'Suajili' },
-  { ssw: 'Suazi' },
+  { ssw: 'Suazilandés' },
   { sun: 'Sudanés' },
   { san: 'Sánscrito' },
   { tgl: 'Tagalo' },
@@ -186,30 +186,31 @@ const dictLicencia = [
 
 const dictRestricciones = [
   {
-    copyright:
-      'exclusive right to the publication, production, or sale of the rights to a literary, dramatic, musical, or artistic work, or to the use of a commercial print or label, granted by law for a specified period of time to an author, composer, artist, distributor',
+    copyright: `Derecho exclusivo a la publicación, producción o venta de los derechos de una obra literaria, 
+    dramática, musical o artística, o al uso de una marca o etiqueta comercial, otorgado por la ley 
+    durante un periodo específico de tiempo a la persona autora, compositora, artista o distribuidora.`,
   },
   {
-    patent:
-      'government has granted exclusive right to make, sell, use or license an invention or discovery',
+    patent: `El gobierno ha otorgado el derecho exclusivo de hacer, vender, usar u otorgar licencia de patente 
+    de alguna invención o descubrimiento.`,
   },
   {
-    patentPending: 'produced or sold information awaiting a patent',
+    patentPending: `Información producida o vendida en espera de recibir una patente.`,
   },
   {
-    trademark:
-      'a name, symbol, or other device identifying a product, officially registered and legally restricted to the use of the owner or manufacturer',
+    trademark: `El nombre, símbolo u otro dispositivo que identifique a un producto. Éste debe estar registrado 
+    oficialmente y su uso está limitado jurídicamente al dueño o fabricante del producto.`,
   },
-  { license: 'formal permission to do something' },
+  { license: 'Permiso formal para hacer algo.' },
   {
-    intellectualPropertyRights:
-      'rights to financial benefit from and control of distribution of non-tangible property that is a result of creativity',
-  },
-  {
-    restricted: 'withheld from general circulation or disclosure',
+    intellectualPropertyRights: `Derechos para controlar y lucrar con la distribución de propiedad no tangible 
+    proveniente de actividades creativas.`,
   },
   {
-    otherRestrictions: 'otherRestrictions',
+    restricted: 'No se permite su circulación en general.',
+  },
+  {
+    otherRestrictions: 'Otras restricciones.',
   },
 ];
 </script>
@@ -287,7 +288,11 @@ const dictRestricciones = [
         </div>
         <div class="columna-16">
           <ClientOnly>
-            <SisdaiSelector v-model="seleccionRestricciones" etiqueta="Restricciones">
+            <SisdaiSelector
+              v-model="seleccionRestricciones"
+              etiqueta="Restricciones"
+              class="selector-restricciones"
+            >
               <option value="">----</option>
               <option
                 v-for="value in dictRestricciones"
