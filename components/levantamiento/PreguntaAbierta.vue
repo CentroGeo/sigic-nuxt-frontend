@@ -94,13 +94,15 @@ function bajarPregunta() {
       <div class="m-b-1 texto-color-secundario texto-peso-500">
         {{ props.pregunta.instrucciones }}
       </div>
-      <SisdaiCampoBase
-        class="m-b-2"
-        etiqueta="Respuesta"
-        ejemplo="Responde la pregunta"
-        :es_etiqueta_visible="false"
-        :autofocus="false"
-      />
+      <ClientOnly>
+        <SisdaiCampoBase
+          class="m-b-2"
+          etiqueta="Respuesta"
+          ejemplo="Responde la pregunta"
+          :es_etiqueta_visible="false"
+          :autofocus="false"
+        />
+      </ClientOnly>
       <div v-if="props.pregunta.obligatorio">Obligatoria*</div>
     </div>
   </div>
