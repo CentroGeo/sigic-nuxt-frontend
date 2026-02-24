@@ -90,50 +90,93 @@ Check out the [deployment documentation](https://nuxt.com/docs/getting-started/d
 Las variables que debe incluir el archivo .env deben ser nombradas como sigue
 
 ```bash
-# Api del geonode fuente del catálogo
-NUXT_PUBLIC_GEONODE_API = https://geonode.dev.geoint.mx/api/v2
-# Url del geonode fuente del catálogo
-NUXT_PUBLIC_GEONODE_URL = https://geonode.dev.geoint.mx
-# Url del geoserver fuente de capas geográficas
-NUXT_PUBLIC_GEOSERVER_URL = https://geonode.dev.geoint.mx/geoserver
+NUXT_AUTH_SECRET = <clave alfanumérica definida por la persona desarrolladora>
+NODE_ENV = 'development'
 
 # ID del cliente de autenticación
 KEYCLOAK_CLIENT_ID = <Id client>
-KEYCLOAK_ISSUER = https://iam.dev.geoint.mx/realms/sigic
 # Clave secreta del servicio de autenticación
 KEYCLOAK_CLIENT_SECRET = <Clave secreta>
-NUXT_AUTH_SECRET = <clave alfanumérica definida por la persona desarrolladora>
-NUXT_PUBLIC_IA_BACKEND_URL = https://sigic.ia.dev.geoint.mx/
+KEYCLOAK_ISSUER = <keycloak>
+
+# Api del geonode fuente del catálogo
+NUXT_PUBLIC_GEONODE_API = <geonode api de desarrollo>
+# Url del geonode fuente del catálogo
+NUXT_PUBLIC_GEONODE_URL = <geonode url de desarrollo>
+# Url del geoserver fuente de capas geográficas
+NUXT_PUBLIC_GEOSERVER_URL = <geoserver url de desarrollo>
+# Url del backend de IA
+NUXT_PUBLIC_IA_BACKEND_URL = <Url del back de IA>
+# Url de backend de levantamiento
+NUXT_PUBLIC_LEVANTAMIENTO_URL = <Url del back de levantamiento>
+
+NUXT_PUBLIC_BASE_URL = <url de desarrollo>
+NUXT_PUBLIC_AUTH_BASE_URL = http://localhost:3000/api/auth
+SOCIALACCOUNT_OIDC_ID_TOKEN_ISSUER = <keycloak>
+
+NUXT_PUBLIC_KEYCLOAK_CLIENT_ID = = <Clave secreta>
+NUXT_PUBLIC_KEYCLOAK_ISSUER = <keycloak>
+NUXT_PUBLIC_KEYCLOAK = <Url de autorización de keycloack>
+NUXT_PUBLIC_KEYCLOAK_BASE_URL = <Url base de keycloak>
+NUXT_PUBLIC_KEYCLOAK_REALM = <Realm de keycloak>
 
 
-NUXT_PUBLIC_KEYCLOAK_ISSUER = <https://iam.dev.geoint.mx/realms/sigic>
-NUXT_PUBLIC_KEYCLOAK_CLIENT_ID = <Clave secreta>
+NUXT_PUBLIC_ENABLE_AUTH = <boolean>
+NUXT_PUBLIC_ENABLE_CATALOGO_VISTA = <boolean>
+NUXT_PUBLIC_ENABLE_CATALOGO_CARGA = <boolean>
+NUXT_PUBLIC_ENABLE_CONSULTA = <boolean>
+NUXT_PUBLIC_ENABLE_IAA = <boolean>
+NUXT_PUBLIC_ENABLE_LEVANTAMIENTO = <boolean>
 
+NUXT_APP_BASE_URL = /
+NGINX_BASE_URL = <url base>
 ```
 
 Para el despliegue en producción se debe hacer un archivo `.env.production`
 
 ```bash
+NUXT_AUTH_SECRET = <clave alfanumérica>
+NODE_ENV = 'production'
+
+# ID del cliente de autenticación
+KEYCLOAK_CLIENT_ID = <Id client>
+# Clave secreta del servicio de autenticación
+KEYCLOAK_CLIENT_SECRET = <Clave secreta>
+# Url del keycloak de producción
+KEYCLOAK_ISSUER = <keycloak de producción>
+
+
 # Api del geonode fuente del catálogo
 NUXT_PUBLIC_GEONODE_API = <geonode api de producción>
 # Url del geonode fuente del catálogo
 NUXT_PUBLIC_GEONODE_URL = <geonode url de producción>
 # Url del geoserver fuente de capas geográficas
 NUXT_PUBLIC_GEOSERVER_URL = <geoserver url de producción>
+# Url del backend de IA
+NUXT_PUBLIC_IA_BACKEND_URL = <Url del back de IA>
+# Url de backend de levantamiento
+NUXT_PUBLIC_LEVANTAMIENTO_URL = <Url del back de levantamiento>
 
-# ID del cliente de autenticación
-KEYCLOAK_CLIENT_ID = <Id client>
-KEYCLOAK_ISSUER = <keycloak de produccón>
-# Clave secreta del servicio de autenticación
-KEYCLOAK_CLIENT_SECRET = <Clave secreta>
-NUXT_AUTH_SECRET = <clave alfanumérica>
 # Url del proyecto sigic
 NUXT_PUBLIC_BASE_URL = <sigic url de producción>
-NUXT_PUBLIC_IA_BACKEND_URL = <ulr del back de IA>
+NUXT_PUBLIC_AUTH_BASE_URL = <Url de autenticación>
+SOCIALACCOUNT_OIDC_ID_TOKEN_ISSUER = <Keycloak>
 
-
-NUXT_PUBLIC_KEYCLOAK_ISSUER = <https://iam.dev.geoint.mx/realms/sigic>
+NUXT_PUBLIC_KEYCLOAK_ISSUER = <keycloak de producción>
 NUXT_PUBLIC_KEYCLOAK_CLIENT_ID = <Clave secreta>
+NUXT_PUBLIC_KEYCLOAK = <Url de autorización de keycloack>
+NUXT_PUBLIC_KEYCLOAK_BASE_URL = <Url base de keycloak>
+NUXT_PUBLIC_KEYCLOAK_REALM = <Realm de keycloak>
+
+NUXT_PUBLIC_ENABLE_AUTH = <boolean>
+NUXT_PUBLIC_ENABLE_CATALOGO_VISTA = <boolean>
+NUXT_PUBLIC_ENABLE_CATALOGO_CARGA = <boolean>
+NUXT_PUBLIC_ENABLE_CONSULTA = <boolean>
+NUXT_PUBLIC_ENABLE_IAA = <boolean>
+NUXT_PUBLIC_ENABLE_LEVANTAMIENTO = <boolean>
+
+NUXT_APP_BASE_URL = /
+NGINX_BASE_URL = <Url base de sigic>
 
 ```
 
