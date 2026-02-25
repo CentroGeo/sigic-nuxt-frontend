@@ -155,9 +155,9 @@ onMounted(async () => {
               >
                 <option value="all">Todos los estatus</option>
                 <option value="on_review">En revisión</option>
-                <option value="published">Aceptados</option>
+                <option value="published">Publicados</option>
                 <option value="pending">Pendientes</option>
-                <option value="rejected">No Aceptados</option>
+                <option value="rejected">No aceptados</option>
               </select>
             </ClientOnly>
           </div>
@@ -169,7 +169,7 @@ onMounted(async () => {
                 v-model="seleccionOrden"
                 name="selector-tipo-solicitudes"
                 class="m-b-2"
-                :disabled="isLoading"
+                :disabled="true"
               >
                 <option value="titulo">Título</option>
                 <option value="categoria">Categoría</option>
