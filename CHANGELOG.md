@@ -11,7 +11,7 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Arreglado (Fix)
 
-- Se corrigió un error en los filtros que se enviaban al solicitar recursos en la sección de revisión de solicitudes.
+- Se corrigió un error en los filtros que se enviaban al solicitar recursos en la sección de revisión de solicitudes al cambiar de página.
 - Se corrigió un error en la forma de obtener el formato del recurso en el modal de exito al generar una solicitud de revisión.
 - Se eliminó el botón de descarga de recursos cuando estos provienen de servicios externo en la sección de revisión de solicitudes.
 - Se modificó la forma de obtener el link de descarga de documentos.
