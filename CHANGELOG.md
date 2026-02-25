@@ -7,6 +7,20 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.12.2] - 24-02-2026
+
+### Arreglado (Fix)
+
+- Se creo un plugin para watchear cuando el refreshToken expira y cerrar la sesión automáticamente redirigiendo al inicio
+
+## [0.12.1] - 24-02-2026
+
+### Arreglado (Fix)
+
+- Se implementó la traducción de valores de restricciones en la edición de metadatos.
+- Se resolvió un pequeño bug en la desvinculación de cuentas en mi-cuenta/seguridad.
+- Se agregaron alertas de que no se ha subido archivos en las secciones de disponibles y metadatos pendientes en catálogo.
+
 ## [0.12.0] - 23-02-2026
 
 ### Agregado (Added)
@@ -241,6 +255,8 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.12.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.1...v0.12.2
+[0.12.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.10.1...v0.11.0
 [0.10.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.10.0...v0.10.1
@@ -256,7 +272,6 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 [0.9.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.8.1...v0.9.0
 [0.8.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.8.0...v0.8.1
 [0.7.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.7.2...v0.8.0
-[0.7.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.6.0...v0.6.1

@@ -71,7 +71,15 @@ export default NuxtAuthHandler({
           // });
         } catch (err) {
           console.error('Error refrescando token:', err);
-          token.error = 'RefreshAccessTokenError';
+
+          // Invalida completamente el token
+          return {
+            ...token,
+            accessToken: undefined,
+            refreshToken: undefined,
+            expires_at: 0,
+            error: 'RefreshAccessTokenError',
+          };
         }
       }
       return token;

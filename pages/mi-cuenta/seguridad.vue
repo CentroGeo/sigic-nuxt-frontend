@@ -74,7 +74,7 @@ async function unlinkSocialAccount(idp) {
       'Content-Type': 'application/json',
     },
   });
-  if (deleteIDP.status !== 'ok') {
+  if (!deleteIDP.status) {
     deteleStatus.value = 'fail';
   } else {
     deteleStatus.value = 'ok';
