@@ -678,7 +678,6 @@ async function removerRevision() {
                   class="boton-pictograma boton-secundario"
                   aria-label="Cancelar solicitud"
                   type="button"
-                  :disabled="true"
                   @click="abrirModalCancelarRevision(datum)"
                 >
                   <span class="pictograma-cerrar"></span>
