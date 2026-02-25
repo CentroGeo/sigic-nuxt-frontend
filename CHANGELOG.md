@@ -7,6 +7,15 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.12.3] - 25-02-2026
+
+### Arreglado (Fix)
+
+- Se corrigió un error en los filtros que se enviaban al solicitar recursos en la sección de revisión de solicitudes.
+- Se corrigió un error en la forma de obtener el formato del recurso en el modal de exito al generar una solicitud de revisión.
+- Se eliminó el botón de descarga de recursos cuando estos provienen de servicios externo en la sección de revisión de solicitudes.
+- Se modificó la forma de obtener el link de descarga de documentos.
+
 ## [0.12.2] - 24-02-2026
 
 ### Arreglado (Fix)
@@ -255,6 +264,7 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.12.3]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.2...v0.12.3
 [0.12.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.1...v0.12.2
 [0.12.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.11.0...v0.12.0
