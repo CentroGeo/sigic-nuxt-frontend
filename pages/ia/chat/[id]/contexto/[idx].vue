@@ -48,6 +48,7 @@ const mensajes = ref([]);
 
 const modalReporteInfo = ref(null);
 const modalReporteInstrucciones = ref(null);
+const modalEspacializarInstrucciones = ref(null);
 // const controlDeslizante = ref(null);
 // const areaTextoRef = ref(null);
 const isSubmitting = ref(false);
@@ -502,8 +503,23 @@ const loadSources = async () => {
   arrayContextSources.value = contextById.files;
 };
 
-async function abrirModalReporteInfo() {
+const tituloReporteModal = ref('');
+const campoNombreVisible = ref(false);
+const leyendaRadioGrupoReporteModal = ref('');
+async function abrirModalReporteInfo(modo) {
   // console.log('reporte modal info');
+  if (modo === 'reporte') {
+    tituloReporteModal.value = 'Generar reporte';
+    campoNombreVisible.value = true;
+    leyendaRadioGrupoReporteModal.value = 'Fuentes de información';
+  } else {
+    if (modo === 'espacializar') {
+      tituloReporteModal.value = 'Espacializar información';
+      campoNombreVisible.value = false;
+      leyendaRadioGrupoReporteModal.value =
+        'Selecciona los documentos o tabulados que quieras espacializar';
+    }
+  }
   modalReporteInfo.value.abrirModal();
   // Recupera las fuentes del contexto
   await loadSources();
@@ -519,9 +535,18 @@ function cancelarReporte() {
   fuentesSeleccionadas.value = [];
 }
 
-function abrirModalReporteInstrucciones() {
+const botonGenerarReporte = ref('');
+function abrirModalInstrucciones() {
   modalReporteInfo.value.cerrarModal();
-  modalReporteInstrucciones.value.abrirModal();
+  if (tituloReporteModal.value === 'Generar reporte') {
+    botonGenerarReporte.value = 'Generar reporte';
+    modalReporteInstrucciones.value.abrirModal();
+  } else {
+    if (tituloReporteModal.value === 'Espacializar información') {
+      botonGenerarReporte.value = 'Espacializar';
+      modalEspacializarInstrucciones.value.abrirModal();
+    }
+  }
 
   if (botonRadioReporte.value === 'Uno') {
     // seleccionando todas las fuentes del contexto
@@ -553,15 +578,28 @@ const areaReporteInstrucciones = ref('');
 const seleccionTipoReporte = ref('');
 const seleccionTipoArchivo = ref('');
 const botonRadioHojaMembretada = ref('si');
-function generarReporte() {
-  console.log('generar reporte');
-
-  console.log('campoNombreReporte.value', campoNombreReporte.value);
-  console.log('fuentesSeleccionadas.value', fuentesSeleccionadas.value);
-  console.log('areaReporteInstrucciones.value', areaReporteInstrucciones.value);
-  console.log('seleccionTipoReporte.value', seleccionTipoReporte.value);
-  console.log('seleccionTipoArchivo.value', seleccionTipoArchivo.value);
-  console.log('botonRadioHojaMembretada.value', botonRadioHojaMembretada.value);
+const casillaArregloUbicaciones = ref([]);
+const botonRadioRepresentacion = ref('centroide');
+const botonRadioUbicacion = ref('resolver_auto');
+const botonRadioFormato = ref('capa_visualizador');
+function generarReporte(modo) {
+  // console.log('generar reporte');
+  if (modo === 'reporte') {
+    console.log('campoNombreReporte.value', campoNombreReporte.value);
+    console.log('fuentesSeleccionadas.value', fuentesSeleccionadas.value);
+    console.log('areaReporteInstrucciones.value', areaReporteInstrucciones.value);
+    console.log('seleccionTipoReporte.value', seleccionTipoReporte.value);
+    console.log('seleccionTipoArchivo.value', seleccionTipoArchivo.value);
+    console.log('botonRadioHojaMembretada.value', botonRadioHojaMembretada.value);
+  } else {
+    if (modo === 'espacializar') {
+      console.log('fuentesSeleccionadas.value', fuentesSeleccionadas.value);
+      console.log('casillaArregloUbicaciones.value', casillaArregloUbicaciones.value);
+      console.log('botonRadioRepresentacion.value', botonRadioRepresentacion.value);
+      console.log('botonRadioUbicacion.value', botonRadioUbicacion.value);
+      console.log('botonRadioFormato.value', botonRadioFormato.value);
+    }
+  }
 
   modalReporteInstrucciones.value.cerrarModal();
 }
@@ -872,13 +910,14 @@ watch(seleccionTipoReporte, (nv) => {
 
         <SisdaiModal ref="modalReporteInfo" class="modal-grande">
           <template #encabezado>
-            <h2>Generar reporte</h2>
+            <h2>{{ tituloReporteModal }}</h2>
           </template>
 
           <template #cuerpo>
             <div>
               <ClientOnly>
                 <SisdaiCampoBase
+                  v-if="campoNombreVisible"
                   v-model="campoNombreReporte"
                   etiqueta="Nombre del reporte"
                   ejemplo="Ej. Diagnóstico territorial del monitoreo marino en el Caribe mexicano"
@@ -886,7 +925,7 @@ watch(seleccionTipoReporte, (nv) => {
                   :es_etiqueta_visible="true"
                 />
                 <SisdaiBotonesRadioGrupo
-                  leyenda="Fuentes de información"
+                  :leyenda="leyendaRadioGrupoReporteModal"
                   :es_vertical="true"
                   :es_obligatorio="true"
                 >
@@ -971,10 +1010,10 @@ watch(seleccionTipoReporte, (nv) => {
               aria-label="Ir a llenar instrucciones"
               type="button"
               :disabled="
-                !campoNombreReporte ||
+                (campoNombreVisible && !campoNombreReporte) ||
                 (botonRadioReporte === 'Dos' && fuentesSeleccionadas.length === 0)
               "
-              @click="abrirModalReporteInstrucciones"
+              @click="abrirModalInstrucciones"
             >
               Siguiente
             </button>
@@ -1056,9 +1095,9 @@ watch(seleccionTipoReporte, (nv) => {
               :disabled="
                 !areaReporteInstrucciones || !seleccionTipoReporte || !seleccionTipoArchivo
               "
-              @click="generarReporte"
+              @click="generarReporte('reporte')"
             >
-              Generar reporte
+              {{ botonGenerarReporte }}
             </button>
             <button
               class="boton-secundario boton-chico"
@@ -1074,115 +1113,326 @@ watch(seleccionTipoReporte, (nv) => {
             </button>
           </template>
         </SisdaiModal>
+
+        <SisdaiModal ref="modalEspacializarInstrucciones" class="modal-grande">
+          <template #encabezado>
+            <h2>Espacializar información</h2>
+          </template>
+
+          <template #cuerpo>
+            <p>
+              Ahora, define cómo la IA debe identificar y representar las ubicaciones detectadas.
+            </p>
+            <div class="flex">
+              <div class="columna-8">
+                <div class="fondo-color-neutro borde-redondeado-8 p-x-2 p-y-1">
+                  <div class="tarjeta-modal-espacializar">
+                    <ClientOnly>
+                      <form @submit.prevent>
+                        <fieldset class="grupo-formulario grupo-formulario-vertical">
+                          <legend>1. Selecciona los tipos de ubicaciones a identificar</legend>
+
+                          <div class="flex">
+                            <div class="columna-8">
+                              <div class="grupo-formulario grupo-formulario-vertical">
+                                <span>
+                                  <input
+                                    id="casilla-identificadorgrupaluno"
+                                    v-model="casillaArregloUbicaciones"
+                                    type="checkbox"
+                                    value="paises"
+                                    :required="!casillaArregloUbicaciones.length"
+                                  />
+                                  <label for="casilla-identificadorgrupaluno"> Países </label>
+                                </span>
+                                <span>
+                                  <input
+                                    id="casilla-identificadorgrupaldos"
+                                    v-model="casillaArregloUbicaciones"
+                                    type="checkbox"
+                                    value="estados"
+                                    :required="!casillaArregloUbicaciones.length"
+                                  />
+                                  <label for="casilla-identificadorgrupaldos"> Estados </label>
+                                </span>
+                                <span>
+                                  <input
+                                    id="casilla-identificadorgrupaltre"
+                                    v-model="casillaArregloUbicaciones"
+                                    type="checkbox"
+                                    value="municipios"
+                                    :required="!casillaArregloUbicaciones.length"
+                                  />
+                                  <label for="casilla-identificadorgrupaltre"> Municipios </label>
+                                </span>
+                              </div>
+                            </div>
+                            <div class="columna-8">
+                              <div class="grupo-formulario grupo-formulario-vertical">
+                                <span>
+                                  <input
+                                    id="casilla-identificadorgrupalcuatro"
+                                    v-model="casillaArregloUbicaciones"
+                                    type="checkbox"
+                                    value="localidades"
+                                    :required="!casillaArregloUbicaciones.length"
+                                  />
+                                  <label for="casilla-identificadorgrupalcuatro">
+                                    Localidades
+                                  </label>
+                                </span>
+                                <span>
+                                  <input
+                                    id="casilla-identificadorgrupalcinco"
+                                    v-model="casillaArregloUbicaciones"
+                                    type="checkbox"
+                                    value="infraestructura"
+                                    :required="!casillaArregloUbicaciones.length"
+                                  />
+                                  <label for="casilla-identificadorgrupalcinco">
+                                    Infraestructura
+                                  </label>
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </fieldset>
+                        <p aria-live="polite" class="formulario-ayuda" role="status"></p>
+                      </form>
+                    </ClientOnly>
+                  </div>
+                </div>
+              </div>
+              <div class="columna-8">
+                <div class="fondo-color-neutro borde-redondeado-8 p-x-2 p-y-1">
+                  <div class="tarjeta-modal-espacializar">
+                    <ClientOnly>
+                      <SisdaiBotonesRadioGrupo
+                        leyenda="2. Define cómo se mostrarán las ubicaciones detectadas"
+                        es_vertical
+                      >
+                        <SisdaiBotonRadio
+                          v-model="botonRadioRepresentacion"
+                          etiqueta="Centroide"
+                          value="centroide"
+                          name="representacion"
+                          :es_obligatorio="true"
+                        />
+                        <SisdaiBotonRadio
+                          v-model="botonRadioRepresentacion"
+                          etiqueta="Geometría completa"
+                          value="geometria"
+                          name="representacion"
+                          :es_obligatorio="true"
+                        />
+                        <SisdaiBotonRadio
+                          v-model="botonRadioRepresentacion"
+                          etiqueta="Punto con nivel de confianza"
+                          value="punto"
+                          name="representacion"
+                          :es_obligatorio="true"
+                        />
+                      </SisdaiBotonesRadioGrupo>
+                    </ClientOnly>
+                  </div>
+                </div>
+              </div>
+              <div class="columna-8">
+                <div class="fondo-color-neutro borde-redondeado-8 p-x-2 p-y-1">
+                  <div class="tarjeta-modal-espacializar">
+                    <ClientOnly>
+                      <SisdaiBotonesRadioGrupo
+                        leyenda="3. Define qué debe hacer la IA cuando la ubicación no sea clara"
+                        es_vertical
+                      >
+                        <SisdaiBotonRadio
+                          v-model="botonRadioUbicacion"
+                          etiqueta="Resolver automáticamente"
+                          value="resolver_auto"
+                          name="ubicacion"
+                          :es_obligatorio="true"
+                        />
+                        <SisdaiBotonRadio
+                          v-model="botonRadioUbicacion"
+                          etiqueta="Marcar para revisión manual"
+                          value="marcar_manual"
+                          name="ubicacion"
+                          :es_obligatorio="true"
+                        />
+                      </SisdaiBotonesRadioGrupo>
+                    </ClientOnly>
+                  </div>
+                </div>
+              </div>
+              <div class="columna-8">
+                <div class="fondo-color-neutro borde-redondeado-8 p-x-2 p-y-1">
+                  <div class="tarjeta-modal-espacializar">
+                    <ClientOnly>
+                      <SisdaiBotonesRadioGrupo
+                        leyenda="4. Selecciona el formato de salida"
+                        es_vertical
+                      >
+                        <SisdaiBotonRadio
+                          v-model="botonRadioFormato"
+                          etiqueta="Mostrar como capa en el visualizador"
+                          value="capa_visualizador"
+                          name="formatosalida"
+                          :es_obligatorio="true"
+                        />
+                        <SisdaiBotonRadio
+                          v-model="botonRadioFormato"
+                          etiqueta="Guardar como capa en el catálogo"
+                          value="capa_catalogo"
+                          name="formatosalida"
+                          :es_obligatorio="true"
+                        />
+                        <SisdaiBotonRadio
+                          v-model="botonRadioFormato"
+                          etiqueta="Descargar como archivo GeoJSON"
+                          value="descargar_geojson"
+                          name="formatosalida"
+                          :es_obligatorio="true"
+                        />
+                      </SisdaiBotonesRadioGrupo>
+                    </ClientOnly>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <template #pie>
+            <button
+              class="boton-primario boton-chico"
+              aria-label="Generar reporte"
+              type="button"
+              :disabled="!casillaArregloUbicaciones.length"
+              @click="generarReporte('espacializar')"
+            >
+              {{ botonGenerarReporte }}
+            </button>
+            <button
+              class="boton-secundario boton-chico"
+              aria-label="Regresar a llenar información"
+              type="button"
+              :disabled="false"
+              @click="
+                modalEspacializarInstrucciones.cerrarModal();
+                modalReporteInfo.abrirModal();
+              "
+            >
+              Regresar
+            </button>
+          </template>
+        </SisdaiModal>
       </ClientOnly>
     </template>
 
     <template #seleccion>
-      <div>
-        <div class="overflowYAuto">
-          <div class="positionSticky">
-            <div class="fondo-color-acento p-x-3 p-y-1">
-              <h5>Herramientas de IA</h5>
-            </div>
+      <div class="overflowYAuto">
+        <div class="positionSticky">
+          <div class="fondo-color-acento p-x-3 p-y-1">
+            <h5>Herramientas de IA</h5>
+          </div>
 
-            <div class="m-3">
-              <div class="flex">
-                <div class="columna-8">
-                  <div class="fondo-color-neutro borde-redondeado-8">
-                    <div class="flex p-2" style="row-gap: 8px">
-                      <div class="columna-16">
-                        <span class="pictograma-reporte texto-color-acento"></span>
-                      </div>
-                      <div class="columna-16">
-                        <div class="flex flex-contenido-separado">
-                          <div class="columna-8 flex-vertical-final">
-                            <p class="m-0">Generar reporte</p>
-                          </div>
-                          <div class="flex-vertical-final">
-                            <button
-                              class="boton-pictograma boton-con-contenedor-secundario boton-grande"
-                              aria-label="Generar reporte"
-                              type="button"
-                              @click="abrirModalReporteInfo"
-                            >
-                              <span class="pictograma-ia" aria-hidden="true" />
-                            </button>
-                          </div>
+          <div class="m-3">
+            <div class="flex">
+              <div class="columna-8">
+                <div class="fondo-color-neutro borde-redondeado-8">
+                  <div class="flex p-2" style="row-gap: 8px">
+                    <div class="columna-16">
+                      <span class="pictograma-reporte texto-color-acento"></span>
+                    </div>
+                    <div class="columna-16">
+                      <div class="flex flex-contenido-separado">
+                        <div class="columna-8 flex-vertical-final">
+                          <p class="m-0">Generar reporte</p>
+                        </div>
+                        <div class="flex-vertical-final">
+                          <button
+                            class="boton-pictograma boton-con-contenedor-secundario boton-grande"
+                            aria-label="Generar reporte"
+                            type="button"
+                            @click="abrirModalReporteInfo('reporte')"
+                          >
+                            <span class="pictograma-ia" aria-hidden="true" />
+                          </button>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div class="columna-8">
-                  <div class="fondo-color-neutro borde-redondeado-8">
-                    <div class="flex p-2" style="row-gap: 8px">
-                      <div class="columna-16">
-                        <span class="pictograma-mapa-generador texto-color-acento"></span>
-                      </div>
-                      <div class="columna-16">
-                        <div class="flex flex-contenido-separado">
-                          <div class="columna-8 flex-vertical-final">
-                            <p class="m-0">Espacializar información</p>
-                          </div>
-                          <div class="flex-vertical-final">
-                            <button
-                              class="boton-pictograma boton-con-contenedor-secundario boton-grande"
-                              aria-label="Espacializar información"
-                              type="button"
-                            >
-                              <span class="pictograma-ia" aria-hidden="true" />
-                            </button>
-                          </div>
+              </div>
+              <div class="columna-8">
+                <div class="fondo-color-neutro borde-redondeado-8">
+                  <div class="flex p-2" style="row-gap: 8px">
+                    <div class="columna-16">
+                      <span class="pictograma-mapa-generador texto-color-acento"></span>
+                    </div>
+                    <div class="columna-16">
+                      <div class="flex flex-contenido-separado">
+                        <div class="columna-8 flex-vertical-final">
+                          <p class="m-0">Espacializar información</p>
+                        </div>
+                        <div class="flex-vertical-final">
+                          <button
+                            class="boton-pictograma boton-con-contenedor-secundario boton-grande"
+                            aria-label="Espacializar información"
+                            type="button"
+                            @click="abrirModalReporteInfo('espacializar')"
+                          >
+                            <span class="pictograma-ia" aria-hidden="true" />
+                          </button>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div class="columna-8">
-                  <div class="fondo-color-neutro borde-redondeado-8">
-                    <div class="flex p-2" style="row-gap: 8px">
-                      <div class="columna-16">
-                        <span class="pictograma-estrella texto-color-acento"></span>
-                      </div>
-                      <div class="columna-16">
-                        <div class="flex flex-contenido-separado">
-                          <div class="columna-8 flex-vertical-final">
-                            <p class="m-0">Herramienta</p>
-                          </div>
-                          <div class="flex-vertical-final">
-                            <button
-                              class="boton-pictograma boton-con-contenedor-secundario boton-grande"
-                              aria-label="Acción a realizar"
-                              type="button"
-                            >
-                              <span class="pictograma-ia" aria-hidden="true" />
-                            </button>
-                          </div>
+              </div>
+              <div class="columna-8">
+                <div class="fondo-color-neutro borde-redondeado-8">
+                  <div class="flex p-2" style="row-gap: 8px">
+                    <div class="columna-16">
+                      <span class="pictograma-estrella texto-color-acento"></span>
+                    </div>
+                    <div class="columna-16">
+                      <div class="flex flex-contenido-separado">
+                        <div class="columna-8 flex-vertical-final">
+                          <p class="m-0">Herramienta</p>
+                        </div>
+                        <div class="flex-vertical-final">
+                          <button
+                            class="boton-pictograma boton-con-contenedor-secundario boton-grande"
+                            aria-label="Acción a realizar"
+                            type="button"
+                          >
+                            <span class="pictograma-ia" aria-hidden="true" />
+                          </button>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div class="columna-8">
-                  <div class="fondo-color-neutro borde-redondeado-8">
-                    <div class="flex p-2" style="row-gap: 8px">
-                      <div class="columna-16">
-                        <span class="pictograma-estrella texto-color-acento"></span>
-                      </div>
-                      <div class="columna-16">
-                        <div class="flex flex-contenido-separado">
-                          <div class="columna-8 flex-vertical-final">
-                            <p class="m-0">Herramienta</p>
-                          </div>
-                          <div class="flex-vertical-final">
-                            <button
-                              class="boton-pictograma boton-con-contenedor-secundario boton-grande"
-                              aria-label="Acción a realizar"
-                              type="button"
-                            >
-                              <span class="pictograma-ia" aria-hidden="true" />
-                            </button>
-                          </div>
+              </div>
+              <div class="columna-8">
+                <div class="fondo-color-neutro borde-redondeado-8">
+                  <div class="flex p-2" style="row-gap: 8px">
+                    <div class="columna-16">
+                      <span class="pictograma-estrella texto-color-acento"></span>
+                    </div>
+                    <div class="columna-16">
+                      <div class="flex flex-contenido-separado">
+                        <div class="columna-8 flex-vertical-final">
+                          <p class="m-0">Herramienta</p>
+                        </div>
+                        <div class="flex-vertical-final">
+                          <button
+                            class="boton-pictograma boton-con-contenedor-secundario boton-grande"
+                            aria-label="Acción a realizar"
+                            type="button"
+                          >
+                            <span class="pictograma-ia" aria-hidden="true" />
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -1191,37 +1441,37 @@ watch(seleccionTipoReporte, (nv) => {
               </div>
             </div>
           </div>
+        </div>
 
-          <div class="m-x-3">
-            <div class="fondo-color-acento borde-redondeado-8 m-b-2">
-              <div class="flex p-2">
-                <span class="texto-color-acento flex-vertical-centrado pictograma-reporte" />
-                <p class="flex-vertical-centrado m-0">Generando reporte</p>
-              </div>
+        <div class="m-x-3">
+          <div class="fondo-color-acento borde-redondeado-8 m-b-2">
+            <div class="flex p-2">
+              <span class="texto-color-acento flex-vertical-centrado pictograma-reporte" />
+              <p class="flex-vertical-centrado m-0">Generando reporte</p>
             </div>
-            <div class="fondo-color-acento borde-redondeado-8 m-b-2">
-              <div class="flex flex-contenido-separado p-2">
-                <div class="flex">
-                  <span class="texto-color-acento flex-vertical-centrado pictograma-reporte" />
-                  <p class="flex-vertical-centrado m-0">Título del reporte</p>
-                </div>
+          </div>
+          <div class="fondo-color-acento borde-redondeado-8 m-b-2">
+            <div class="flex flex-contenido-separado p-2">
+              <div class="flex">
+                <span class="texto-color-acento flex-vertical-centrado pictograma-reporte" />
+                <p class="flex-vertical-centrado m-0">Título del reporte</p>
+              </div>
 
-                <div>
-                  <button
-                    class="boton-pictograma boton-sin-contenedor-secundario"
-                    aria-label="Descargar reporte"
-                    type="button"
-                  >
-                    <span class="pictograma-archivo-descargar" aria-hidden="true" />
-                  </button>
-                  <button
-                    class="boton-pictograma boton-sin-contenedor-secundario"
-                    aria-label="Remover reporte"
-                    type="button"
-                  >
-                    <span class="pictograma-eliminar" aria-hidden="true" />
-                  </button>
-                </div>
+              <div>
+                <button
+                  class="boton-pictograma boton-sin-contenedor-secundario"
+                  aria-label="Descargar reporte"
+                  type="button"
+                >
+                  <span class="pictograma-archivo-descargar" aria-hidden="true" />
+                </button>
+                <button
+                  class="boton-pictograma boton-sin-contenedor-secundario"
+                  aria-label="Remover reporte"
+                  type="button"
+                >
+                  <span class="pictograma-eliminar" aria-hidden="true" />
+                </button>
               </div>
             </div>
           </div>
@@ -1232,6 +1482,12 @@ watch(seleccionTipoReporte, (nv) => {
 </template>
 
 <style lang="scss" scoped>
+fieldset:has([type='checkbox']:required):invalid + .formulario-ayuda::before {
+  content: 'Una o más casillas necesitan estar verificadas. ';
+}
+.tarjeta-modal-espacializar {
+  height: 190px;
+}
 .overflowYAuto {
   height: var(--altura-consulta-esc);
   overflow-y: auto;

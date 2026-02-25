@@ -252,7 +252,7 @@ onMounted(() => {
         </div>
 
         <div v-if="listaChats.length === 0">
-          <div class="nota fondo-color-neutro p-2 borde-redondeado-8">
+          <div class="nota fondo-color-neutro p-2 borde-redondeado-8 m-x-3">
             <h6 class="m-t-0">Crea un contexto para iniciar un chat</h6>
 
             <p class="m-b-0">
