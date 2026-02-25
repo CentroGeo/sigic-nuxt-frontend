@@ -43,12 +43,7 @@ export function useDownloadResources() {
   async function downloadDocs(resource) {
     const maxAttempts = 5;
     const extension = resource.links?.find((link) => link.link_type === 'uploaded').extension;
-    let url;
-    if (extension === 'pdf') {
-      url = resource.download_url;
-    } else {
-      url = resource.embed_url.replace('/embed', '/link');
-    }
+    const url = resource.download_url.replace('/download', '/link');
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       try {
         const res = await gnoxyFetch(url);

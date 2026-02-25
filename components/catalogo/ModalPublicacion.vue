@@ -121,14 +121,9 @@ function defineExtension() {
   if (selectedElement.value.sourcetype === 'REMOTE') {
     return 'Remoto';
   } else {
-    selectedElement.value.links.forEach((d) => {
-      const keys = Object.keys(d);
-      if (keys.includes('extras')) {
-        return `.${d.extras.content.type}`;
-      } else {
-        return 'Desconocido';
-      }
-    });
+    const link = selectedElement.value.links.find((d) => Object.keys(d).includes('extras'));
+    const extension = link ? `.${link.extras.content.type}` : 'Desconocido';
+    return extension;
   }
 }
 defineExpose({

@@ -45,9 +45,13 @@ const storeFilters = useFilteredResources();
  * @param status de la solicitud
  * @return {String} con las acciones
  */
-const obtenerAcciones = (status) => {
+const obtenerAcciones = (status, resource) => {
   if (status === 'on_review') {
-    return 'Revisar, Descargar, Cancelar';
+    if (tipoRecurso(resource).includes('Catálogo Externo')) {
+      return 'Revisar, Cancelar';
+    } else {
+      return 'Revisar, Descargar, Cancelar';
+    }
   }
 };
 
@@ -62,7 +66,7 @@ function updateResources() {
       tipo_recurso: tipoRecurso(d.resource),
       actualizacion: d.updated_at,
       propietario: d.owner.username,
-      acciones: obtenerAcciones(d.status),
+      acciones: obtenerAcciones(d.status, d.resource),
       comentarios: d.rejection_reason,
       revisor: d.reviewer ? d.reviewer.username : 'Nombre apellido',
       previous_path: route.path,

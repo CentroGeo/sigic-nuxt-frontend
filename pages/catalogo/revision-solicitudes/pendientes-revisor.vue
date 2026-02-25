@@ -43,9 +43,13 @@ const totalPags = computed(() => Math.ceil(totalResources.value / tamanioPagina)
  * @param status de la solicitud
  * @return {String} con las acciones
  */
-const obtenerAcciones = (status) => {
+const obtenerAcciones = (status, resource) => {
   if (status === 'pending') {
-    return 'Visualizar, Añadir, Descargar';
+    if (tipoRecurso(resource).includes('Catálogo Externo')) {
+      return 'Visualizar, Añadir';
+    } else {
+      return 'Visualizar, Añadir, Descargar';
+    }
   }
 };
 
@@ -59,7 +63,7 @@ function updateResources() {
       tipo_recurso: tipoRecurso(d.resource),
       actualizacion: d.updated_at,
       propietario: d.owner.username,
-      acciones: obtenerAcciones(d.status),
+      acciones: obtenerAcciones(d.status, d.resource),
       recurso_completo: d.resource,
     };
   });

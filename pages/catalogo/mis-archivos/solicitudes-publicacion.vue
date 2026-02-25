@@ -97,7 +97,10 @@ function updateResources() {
 
 function fetchNewData() {
   storeResources.resetBySection(section);
-  storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, params.value);
+  storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, {
+    ...params.value,
+    'filter{owner}': storeCatalogo.userInfo.pk,
+  });
 }
 
 watch([seleccionTipoArchivo], () => {
@@ -110,7 +113,10 @@ watch(paginaActual, () => {
 
 watch(params, () => {
   paginaActual.value = 0;
-  storeResources.getMyTotal('publicacion', params.value);
+  storeResources.getMyTotal('publicacion', {
+    ...params.value,
+    'filter{owner}': storeCatalogo.userInfo.pk,
+  });
   fetchNewData();
 });
 
@@ -126,10 +132,14 @@ onMounted(async () => {
   await storeCatalogo.getUserInfo();
   storeFilters.resetAll();
   storeFilters.buildQueryParams('all');
-  storeResources.getMyTotal('disponibles', params.value);
-  storeResources.getMyTotal('pendientes', params.value);
-  //storeResources.getMyTotal('publicacion', params.value);
-  //fetchNewData();
+  storeResources.getMyTotal('disponibles', {
+    ...params.value,
+    'filter{owner}': storeCatalogo.userInfo.pk,
+  });
+  storeResources.getMyTotal('pendientes', {
+    ...params.value,
+    'filter{owner}': storeCatalogo.userInfo.pk,
+  });
 });
 </script>
 
@@ -155,9 +165,9 @@ onMounted(async () => {
               >
                 <option value="all">Todos los estatus</option>
                 <option value="on_review">En revisión</option>
-                <option value="published">Aceptados</option>
+                <option value="published">Publicados</option>
                 <option value="pending">Pendientes</option>
-                <option value="rejected">No Aceptados</option>
+                <option value="rejected">No aceptados</option>
               </select>
             </ClientOnly>
           </div>
@@ -169,7 +179,7 @@ onMounted(async () => {
                 v-model="seleccionOrden"
                 name="selector-tipo-solicitudes"
                 class="m-b-2"
-                :disabled="isLoading"
+                :disabled="true"
               >
                 <option value="titulo">Título</option>
                 <option value="categoria">Categoría</option>
