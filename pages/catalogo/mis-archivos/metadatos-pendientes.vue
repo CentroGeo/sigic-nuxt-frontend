@@ -128,7 +128,10 @@ onMounted(async () => {
   storeFilters.resetAll();
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
   storeResources.getMyTotal('disponibles', params.value);
-  storeResources.getMyTotal('publicacion', params.value);
+  storeResources.getMyTotal('publicacion', {
+    ...params.value,
+    'filter{owner}': storeCatalogo.userInfo.pk,
+  });
 });
 </script>
 

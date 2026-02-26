@@ -27,10 +27,12 @@ const seleccionTipoArchivo = computed({
   get: () => storeFilters.filters.requests,
   set: (value) => storeFilters.updateFilter('requests', value),
 });
-const seleccionOrden = computed({
+
+const seleccionOrden = ref('updated_at');
+/* const seleccionOrden = computed({
   get: () => storeFilters.filters.sort,
   set: (value) => storeFilters.updateFilter('sort', value),
-});
+}); */
 
 /* const inputSearch = computed({
   get: () => storeFilters.filters.inputSearch,
@@ -100,6 +102,7 @@ function fetchNewData() {
   storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, {
     ...params.value,
     'filter{owner}': storeCatalogo.userInfo.pk,
+    ordering: seleccionOrden.value,
   });
 }
 
@@ -111,11 +114,12 @@ watch(paginaActual, () => {
   fetchNewData();
 });
 
-watch(params, () => {
+watch([params, seleccionOrden], () => {
   paginaActual.value = 0;
   storeResources.getMyTotal('publicacion', {
     ...params.value,
     'filter{owner}': storeCatalogo.userInfo.pk,
+    ordering: seleccionOrden.value,
   });
   fetchNewData();
 });
@@ -132,14 +136,8 @@ onMounted(async () => {
   await storeCatalogo.getUserInfo();
   storeFilters.resetAll();
   storeFilters.buildQueryParams('all');
-  storeResources.getMyTotal('disponibles', {
-    ...params.value,
-    'filter{owner}': storeCatalogo.userInfo.pk,
-  });
-  storeResources.getMyTotal('pendientes', {
-    ...params.value,
-    'filter{owner}': storeCatalogo.userInfo.pk,
-  });
+  storeResources.getMyTotal('disponibles', params.value);
+  storeResources.getMyTotal('pendientes', params.value);
 });
 </script>
 
@@ -175,16 +173,17 @@ onMounted(async () => {
           <div class="columna-7">
             <ClientOnly>
               <label for="selector-orden-solicitudes">Ordenar por</label>
+              <!-- :disabled="isLoading"-->
               <select
                 v-model="seleccionOrden"
                 name="selector-tipo-solicitudes"
                 class="m-b-2"
                 :disabled="true"
               >
-                <option value="titulo">Título</option>
-                <option value="categoria">Categoría</option>
-                <option value="fecha_descendente">Más reciente</option>
-                <option value="fecha_ascendente">Más antiguo</option>
+                <option value="title">Título</option>
+                <option value="category">Categoría</option>
+                <option value="updated_at">Más reciente</option>
+                <option value="-updated_at">Más antiguo</option>
               </select>
             </ClientOnly>
           </div>
