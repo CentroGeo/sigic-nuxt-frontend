@@ -12,6 +12,8 @@ const route = useRoute();
 const selectedPk = route.query.pk;
 const selectedPkRequest = route.query.pk_request;
 const selectedResourceType = route.query.resource_type;
+const processingRequest = ref(false);
+const acceptingFailed = ref(false);
 
 const previousPath = computed(() => storeCatalogo.previousPath || '');
 
@@ -28,23 +30,55 @@ const { data } = useAuth();
 const token = data.value?.accessToken;
 const configEnv = useRuntimeConfig();
 
+function abrirModalAceptar() {
+  acceptingFailed.value = false;
+  processingRequest.value = false;
+  modalAceptar.value.abrirModal();
+}
+
+/**
+ * Aprueba la solicitud y actualiza los permisos del recurso recién publicado
+ */
 async function aceptarSolicitud() {
+  processingRequest.value = true;
   try {
-    // petición para aceptar y publicar la solicitud del recurso
-    const response = await $fetch(`${configEnv.public.basePath}/api/solicitudes`, {
+    // Actualizamos permisos
+    const updatePermissions = await $fetch('/api/actualizar-permisos', {
       method: 'POST',
-      body: {
-        pk: selectedPkRequest,
-        token: token,
-        status: 'published',
-        rejection_reason:
-          areaMensajeAceptar.value === '' ? 'Sin comentarios' : areaMensajeAceptar.value,
-      },
+      headers: { token: token },
+      body: { pk: selectedPk },
     });
-    console.warn(response);
-    modalAceptar.value.cerrarModal();
-    await navigateTo('/catalogo/revision-solicitudes/aceptadas');
+    if (updatePermissions === 'Error') {
+      console.error('No se pudieron actualizar los permisos');
+      processingRequest.value = false;
+      acceptingFailed.value = true;
+      return;
+    } else {
+      // petición para aceptar y publicar la solicitud del recurso
+      const response = await $fetch(`${configEnv.public.basePath}/api/solicitudes`, {
+        method: 'POST',
+        body: {
+          pk: selectedPkRequest,
+          token: token,
+          status: 'published',
+          rejection_reason:
+            areaMensajeAceptar.value === '' ? 'Sin comentarios' : areaMensajeAceptar.value,
+        },
+      });
+      if (response === 'Error') {
+        console.error('No se pudo aceptar la solicitud');
+        processingRequest.value = false;
+        acceptingFailed.value = true;
+        return;
+      } else {
+        processingRequest.value = false;
+        acceptingFailed.value = false;
+        modalAceptar.value.cerrarModal();
+        await navigateTo('/catalogo/revision-solicitudes/aceptadas');
+      }
+    }
   } catch (error) {
+    processingRequest.value = false;
     console.error(error);
   }
 }
@@ -137,7 +171,7 @@ onMounted(() => {
           </nuxt-link>
 
           <div v-if="previousPath === `${baseUrl}/mis-revisiones`" class="flex">
-            <button type="button" @click="modalAceptar.abrirModal()">
+            <button type="button" @click="abrirModalAceptar">
               Aceptar<span class="pictograma-aprobado" aria-hidden="true" />
             </button>
             <button type="button" @click="modalNoAceptar.abrirModal()">
@@ -208,23 +242,54 @@ onMounted(() => {
         <SisdaiModal ref="modalAceptar">
           <template #encabezado> <h2>Aceptar solicitud</h2> </template>
           <template #cuerpo>
-            <SisdaiAreaTexto
-              v-model="areaMensajeAceptar"
-              etiqueta="Mensaje (opcional)"
-              ejemplo="Escribe un mensaje"
-              :es_obligatorio="false"
-              :es_etiqueta_visible="true"
-            />
+            <!--Alerta de proceso activo-->
+            <div
+              v-if="processingRequest"
+              class="flex m-y-2 p-1 borde-redondeado-16 fondo-color-informacion texto-color-informacion borde borde-color-informacion"
+            >
+              <div class="columna-3 flex-vertical-centrado">
+                <img src="/img/loader.gif" alt="...Cargando" class="loader" />
+              </div>
+              <p class="columna-12">Procesando solicitud</p>
+            </div>
+            <!--Alerta de proceso fallido-->
+
+            <div
+              v-if="acceptingFailed"
+              class="flex m-y-2 p-1 borde-redondeado-16 fondo-color-error texto-color-error borde borde-color-error"
+            >
+              <p class="columna-12">
+                <span class="pictograma-alerta"></span> No se pudo completar el proceso
+              </p>
+            </div>
+
+            <!--Cuadro de texto y botones-->
+            <div>
+              <label for="textarea1">Escribe un mensaje</label>
+              <textarea
+                id="textarea1"
+                v-model="areaMensajeAceptar"
+                name="textarea1"
+                placeholder="Mensaje (opcional)"
+                :disabled="processingRequest || acceptingFailed"
+              ></textarea>
+            </div>
           </template>
           <template #pie>
             <button
               class="boton-secundario boton-chico"
               type="button"
+              :disabled="processingRequest || acceptingFailed"
               @click="modalAceptar.cerrarModal()"
             >
               Cerrar
             </button>
-            <button class="boton-primario boton-chico" type="button" @click="aceptarSolicitud">
+            <button
+              class="boton-primario boton-chico"
+              type="button"
+              :disabled="processingRequest || acceptingFailed"
+              @click="aceptarSolicitud"
+            >
               Enviar
             </button>
           </template>
