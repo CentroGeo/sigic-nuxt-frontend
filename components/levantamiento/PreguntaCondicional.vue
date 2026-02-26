@@ -73,7 +73,6 @@ const opcionSeleccionada = ref({});
 function handleChangeRadio(e) {
   const selected = e.target.value;
   const optSelected = props.pregunta.opciones.find((opt) => opt.opcion === selected);
-  console.log(optSelected);
   opcionSeleccionada.value = optSelected;
 }
 </script>

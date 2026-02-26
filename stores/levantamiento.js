@@ -24,6 +24,8 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
     proyectosAprobados: ref([]),
     existenProyectosEnRevision: ref(false),
     proyectosEnRevision: ref([]),
+    existenProyectosRechazados: ref(false),
+    proyectosRechazados: ref([]),
 
     async obtenerProyectosPublicos() {
       try {
@@ -361,6 +363,17 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
 
       this.proyectosEnRevision.push(proyecto);
       this.existenProyectosEnRevision = true;
+    },
+    async obtenerProyectosRechazados() {
+      const proyecto = {
+        id: 1,
+        nombre: 'Registro de arte urbano en la ciudad de Mérida, Yucatán',
+        institucion: 'Dirección de Cultura',
+        lider: 'Daniela Acuña',
+      };
+
+      this.proyectosRechazados.push(proyecto);
+      this.existenProyectosRechazados = true;
     },
   };
 });
