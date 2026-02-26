@@ -7,6 +7,52 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.12.4] - 26-02-2026
+
+### Arreglado (Fix)
+
+- Se eliminaron los valores por defecto para NUXT_APP_BASE_URL y NUXT_PUBLIC_OLLAMA_MODEL en docker-compose-ghcr.yml y docker-compose-local.yml, requiriendo que se establezcan valores explícitos desde el entorno.
+- Se eliminaron los valores por defecto para NUXT_PUBLIC_DEFAULT_PAGE y NUXT_PUBLIC_GEONODE_API_DEFAULT_FILTER en docker-compose-ghcr.yml y docker-compose-local.yml, obligando a la asignación explícita de estas variables de entorno.
+- Se actualizó el argumento de build NUXT_APP_BASE_URL en docker-compose-ghcr.yml para que utilice la variable de entorno en lugar de un valor por defecto codificado.
+- Se agregó NUXT_PUBLIC_OLLAMA_MODEL a la configuración del archivo .env y como variable de entorno en el workflow docker-compose-develop.yml, asegurando que esta variable se pase correctamente a los entornos de build y ejecución.
+
+## [0.12.3] - 25-02-2026
+
+### Arreglado (Fix)
+
+- Se corrigió un error en los filtros que se enviaban al solicitar recursos en la sección de revisión de solicitudes al cambiar de página.
+- Se corrigió un error en la forma de obtener el formato del recurso en el modal de exito al generar una solicitud de revisión.
+- Se eliminó el botón de descarga de recursos cuando estos provienen de servicios externo en la sección de revisión de solicitudes.
+- Se modificó la forma de obtener el link de descarga de documentos.
+
+## [0.12.2] - 24-02-2026
+
+### Arreglado (Fix)
+
+- Se creo un plugin para watchear cuando el refreshToken expira y cerrar la sesión automáticamente redirigiendo al inicio
+
+## [0.12.1] - 24-02-2026
+
+### Arreglado (Fix)
+
+- Se implementó la traducción de valores de restricciones en la edición de metadatos.
+- Se resolvió un pequeño bug en la desvinculación de cuentas en mi-cuenta/seguridad.
+- Se agregaron alertas de que no se ha subido archivos en las secciones de disponibles y metadatos pendientes en catálogo.
+
+## [0.12.0] - 23-02-2026
+
+### Agregado (Added)
+
+- Se agregó la funcionalidad de desvincular cuentas de github, google, rizoma y orcid.
+- Se hicieron ajustes en botones de consulta y catálogo para deshabilitarlos en caso de que no existan las condiciones para su uso.
+- Se agregó un botón para eliminar cada archivo individualmente en el drag and drop para cargar archivos.
+
+## [0.11.0] - 19-02-2026
+
+### Agregado (Added)
+
+- Se agregó un panel lateral en la sección de chats del módulo de ia con herramientas para generar reportes, así como dos modales para nombrar el reporte, asignar las fuentes, darle instrucciones y tipo de archivo.
+
 ## [0.10.1] - 17-02-2026
 
 ### Agregado (Added)
@@ -227,6 +273,12 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.12.4]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.3...v0.12.4
+[0.12.3]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.2...v0.12.3
+[0.12.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.1...v0.12.2
+[0.12.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.0...v0.12.1
+[0.12.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.11.0...v0.12.0
+[0.11.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.10.1...v0.11.0
 [0.10.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.8...v0.10.0
 [0.9.8]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.7...v0.9.8
@@ -240,7 +292,6 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 [0.9.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.8.1...v0.9.0
 [0.8.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.8.0...v0.8.1
 [0.7.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.7.2...v0.8.0
-[0.7.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.6.0...v0.6.1
