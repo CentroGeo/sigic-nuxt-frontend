@@ -91,6 +91,7 @@ function irARutaConQuery(recurso) {
  * Redirige a la vista de revisión de un recurso
  * */
 async function openResourceReview(resource) {
+  console.log(route.path);
   if (resource.tipo_recurso === 'Documentos') {
     storeCatalogo.previousPath = route.path;
     await navigateTo({

@@ -11,7 +11,7 @@ const storeCatalogo = useCatalogoStore();
 const storeResources = useResourcesCatalogoStore();
 const storeFilters = useFilteredResources();
 const section = 'publicacion';
-const isLoading = computed(() => storeResources.isLoading);
+const isLoading = ref(true);
 const totalResources = computed(() => storeResources.myTotalBySection(section));
 const resources = computed(() => storeResources.mineBySection(section));
 const tableResources = ref([]);
@@ -43,15 +43,22 @@ const totalPags = computed(() => Math.ceil(totalResources.value / tamanioPagina)
  * @param status de la solicitud
  * @return {String} con las acciones
  */
-const obtenerAcciones = (status, resource) => {
-  if (status === 'pending') {
-    if (tipoRecurso(resource).includes('Catálogo Externo')) {
-      return 'Visualizar, Añadir';
-    } else {
-      return 'Visualizar, Añadir, Descargar';
-    }
+const obtenerAcciones = (resource) => {
+  if (tipoRecurso(resource).includes('Catálogo Externo')) {
+    return 'Visualizar, Añadir';
+  } else {
+    return 'Visualizar, Añadir, Descargar';
   }
 };
+
+async function fetchNewData() {
+  isLoading.value = true;
+  storeResources.resetBySection(section);
+  await storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, {
+    'filter{status}': 'pending',
+  });
+  isLoading.value = false;
+}
 
 function updateResources() {
   // obteniendo datos por las props de la tabla
@@ -63,16 +70,9 @@ function updateResources() {
       tipo_recurso: tipoRecurso(d.resource),
       actualizacion: d.updated_at,
       propietario: d.owner.username,
-      acciones: obtenerAcciones(d.status, d.resource),
+      acciones: obtenerAcciones(d.resource),
       recurso_completo: d.resource,
     };
-  });
-}
-
-function fetchNewData() {
-  storeResources.resetBySection(section);
-  storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, {
-    'filter{status}': 'pending',
   });
 }
 

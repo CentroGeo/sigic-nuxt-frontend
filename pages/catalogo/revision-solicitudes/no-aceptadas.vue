@@ -12,7 +12,7 @@ const storeResources = useResourcesCatalogoStore();
 const storeFilters = useFilteredResources();
 const section = 'publicacion';
 const userReviewerPk = ref(null);
-const isLoading = computed(() => storeResources.isLoading);
+const isLoading = ref(true);
 const totalResources = computed(() => storeResources.myTotalBySection(section));
 const resources = computed(() => storeResources.mineBySection(section));
 const tableResources = ref([]);
@@ -39,16 +39,15 @@ const totalPags = computed(() => Math.ceil(totalResources.value / tamanioPagina)
 //   storeFilters.buildQueryParams();
 // }
 
-/**
- * Obtiene las acciones dependiendo del estatus
- * @param status de la solicitud
- * @return {String} con las acciones
- */
-const obtenerAcciones = (status) => {
-  if (status === 'rejected') {
-    return 'Visualizar, Comentarios';
-  }
-};
+async function fetchNewData() {
+  isLoading.value = true;
+  storeResources.resetBySection(section);
+  await storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, {
+    'filter{status}': 'rejected',
+    'filter{reviewer}': `${userReviewerPk.value}`,
+  });
+  isLoading.value = false;
+}
 
 function updateResources() {
   // obteniendo datos por las props de la tabla
@@ -59,18 +58,10 @@ function updateResources() {
       tipo_recurso: tipoRecurso(d.resource),
       actualizacion: d.updated_at,
       propietario: d.owner.username,
-      acciones: obtenerAcciones(d.status),
+      acciones: 'Visualizar, Comentarios',
       comentarios: d.rejection_reason,
       revisor: d.reviewer?.username,
     };
-  });
-}
-
-function fetchNewData() {
-  storeResources.resetBySection(section);
-  storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, {
-    'filter{status}': 'rejected',
-    'filter{reviewer}': `${userReviewerPk.value}`,
   });
 }
 
