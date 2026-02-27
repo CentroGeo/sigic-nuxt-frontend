@@ -1,6 +1,5 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
-
 import { dictIdiomas } from '~/utils/catalogo';
 import { categoriesInSpanish } from '~/utils/consulta';
 const props = defineProps({
@@ -14,9 +13,10 @@ const props = defineProps({
   },
 });
 
-const config = useRuntimeConfig();
 const { gnoxyFetch } = useGnoxyUrl();
+const config = useRuntimeConfig();
 const isLoading = ref(false);
+const fetchFailed = ref(false);
 const resource = ref({});
 const modalRevisionBasicos = ref(null);
 const modalRevisionLicencias = ref(null);
@@ -54,6 +54,7 @@ const dictRestricciones = {
   restricted: 'No se permite su circulación en general.',
   otherRestrictions: 'Otras restricciones.',
 };
+
 const dictFrecuencia = {
   unknown: 'Se desconoce la frecuencia de actualización de los datos',
   continual: 'Los datos se actualizan repetida y frecuentemente',
@@ -77,6 +78,10 @@ const variables = {
   visible: 'Visible',
 };
 
+/**
+ * Crea una cadena de palabras clave iterando sobre el array de keywords
+ * @param resourceKeywords
+ */
 function getKeywords(resourceKeywords) {
   const keywords = resourceKeywords.map((d) => d.name);
   return keywords.join(', ');
@@ -87,51 +92,70 @@ function findLanguage(language) {
   return languageDict[language];
 }
 
-async function fetchResource() {
-  isLoading.value = true;
+/** Pide los metadatos del recurso a revisar */
+async function fetchMetadata() {
   const type = props.resourceType === 'documents' ? 'document' : 'dataset';
   const url = `${config.public.geonodeApi}/${props.resourceType}/${props.reviewPk}`;
-  const request = await gnoxyFetch(url);
-  const res = await request.json();
-  const data = res[type];
-  console.log(data);
+  try {
+    const request = await gnoxyFetch(url);
+    if (!request.ok) {
+      return 'Error';
+    } else {
+      const res = await request.json();
+      return res[type];
+    }
+  } catch {
+    ('Error');
+  }
+}
 
-  resource.value['title'] = data.title;
-  resource.value['sourcetype'] = data.sourcetype;
-  resource.value['abstract'] = data.raw_abstract;
-  resource.value['date_type'] = dateTypeDict[data.date_type];
-  resource.value['date'] = data.date;
-  resource.value['category'] = categoriesInSpanish[data.category.gn_description];
-  resource.value['keywords'] = getKeywords(data.keywords);
-  resource.value['language'] = findLanguage(data.language);
-  resource.value['license'] =
-    dictLicencia[data.license?.identifier] || 'Información no proporcionada';
-  resource.value['attribution'] = data.attribution;
-  resource.value['data_quality_statement'] =
-    data.raw_data_quality_statement?.length > 0
-      ? data.raw_data_quality_statement
-      : 'Información no proporcionada';
-  resource.value['restrictions'] =
-    dictRestricciones[data.restriction_code_type?.identifier] || 'Información no proporcionada';
-  resource.value['constraints_other'] =
-    data.raw_constraints_other?.length > 0
-      ? data.raw_constraints_other
-      : 'Información no proporcionada';
-  resource.value['edition'] =
-    data.edition?.length > 0 ? data.edition : 'Información no proporcionada';
-  resource.value['doi'] = data.doi?.length > 0 ? data.doi : 'Información no proporcionada';
-  resource.value['purpose'] =
-    data.raw_purpose?.length > 0 ? data.raw_purpose : 'Información no proporcionada';
-  resource.value['supplemental_information'] =
-    data.raw_supplemental_information?.length > 0
-      ? data.raw_supplemental_information
-      : 'Información no proporcionada';
-  resource.value['maintenance_frequency'] =
-    dictFrecuencia[data.maintenance_frequency] || 'Información no proporcionada';
-  resource.value['attribute_set'] = data['attribute_set'].sort(
-    (a, b) => a.display_order - b.display_order
-  );
-
+/** Se encarga de construir el objeto de metadatos
+ * obteniendo los valores como se les desea mostrar en la UI.
+ * O crea la alerta de que hubo un error.
+ **/
+async function buildResourceInfo() {
+  isLoading.value = true;
+  const data = await fetchMetadata();
+  if (data === 'Error') {
+    fetchFailed.value = true;
+  } else {
+    fetchFailed.value = false;
+    resource.value['title'] = data.title;
+    resource.value['sourcetype'] = data.sourcetype;
+    resource.value['abstract'] = data.raw_abstract;
+    resource.value['date_type'] = dateTypeDict[data.date_type];
+    resource.value['date'] = data.date;
+    resource.value['category'] = categoriesInSpanish[data.category.gn_description];
+    resource.value['keywords'] = getKeywords(data.keywords);
+    resource.value['language'] = findLanguage(data.language);
+    resource.value['license'] =
+      dictLicencia[data.license?.identifier] || 'Información no proporcionada';
+    resource.value['attribution'] = data.attribution;
+    resource.value['data_quality_statement'] =
+      data.raw_data_quality_statement?.length > 0
+        ? data.raw_data_quality_statement
+        : 'Información no proporcionada';
+    resource.value['restrictions'] =
+      dictRestricciones[data.restriction_code_type?.identifier] || 'Información no proporcionada';
+    resource.value['constraints_other'] =
+      data.raw_constraints_other?.length > 0
+        ? data.raw_constraints_other
+        : 'Información no proporcionada';
+    resource.value['edition'] =
+      data.edition?.length > 0 ? data.edition : 'Información no proporcionada';
+    resource.value['doi'] = data.doi?.length > 0 ? data.doi : 'Información no proporcionada';
+    resource.value['purpose'] =
+      data.raw_purpose?.length > 0 ? data.raw_purpose : 'Información no proporcionada';
+    resource.value['supplemental_information'] =
+      data.raw_supplemental_information?.length > 0
+        ? data.raw_supplemental_information
+        : 'Información no proporcionada';
+    resource.value['maintenance_frequency'] =
+      dictFrecuencia[data.maintenance_frequency] || 'Información no proporcionada';
+    resource.value['attribute_set'] = data['attribute_set'].sort(
+      (a, b) => a.display_order - b.display_order
+    );
+  }
   isLoading.value = false;
 }
 
@@ -144,7 +168,7 @@ defineExpose({
 });
 
 onMounted(async () => {
-  fetchResource();
+  buildResourceInfo();
 });
 </script>
 <template>
@@ -164,7 +188,7 @@ onMounted(async () => {
       </template>
 
       <!--Cuerpo de metadatos básicos-->
-      <template v-else #cuerpo>
+      <template v-else-if="!isLoading && !fetchFailed" #cuerpo>
         <CatalogoHeaderMetadatos
           :resource="resource"
           :title="'Metadatos básicos'"
@@ -210,8 +234,22 @@ onMounted(async () => {
           </div>
         </div>
       </template>
+
+      <!--Cuerpo si fracasa la petición-->
+      <template v-else-if="!isLoading && fetchFailed" #cuerpo>
+        <div
+          class="flex m-y-2 borde-redondeado-16 flex-contenido-centrado fondo-color-error texto-color-error borde p-1"
+        >
+          <div class="columna-3 flex-vertical-centrado">
+            <span class="pictograma-alerta pictograma-grande"></span>
+          </div>
+          <p class="columna-13">
+            No pudimos recuperar la información. Revisa tu conexión e intentalo de nuevo más tarde.
+          </p>
+        </div>
+      </template>
       <!--Botones-->
-      <template v-if="!isLoading" #pie>
+      <template v-if="!isLoading && !fetchFailed" #pie>
         <div class="flex flex-contenido-separado m-t-3">
           <div class="columna-8">
             <button

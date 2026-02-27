@@ -788,7 +788,7 @@ async function removerRevision() {
               class="columna-14 texto-color-error fondo-color-error borde borde-color-error p-2 borde-redondeado-8"
             >
               <span class="pictograma-alerta" /> No pudimos eliminar {{ resourceToDeleteTitle }}.
-              Revisa tu conexión e intentalo de nuevo más tarde.
+              exión e intentalo de nuevo más tarde.
             </p>
             <div class="columna-14 flex flex-contenido-final">
               <button class="boton-primario boton-chico" @click="irAmisArchivos">Regresar</button>
