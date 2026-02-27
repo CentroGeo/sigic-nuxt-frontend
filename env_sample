@@ -34,3 +34,4 @@ NUXT_APP_BASE_URL=/
 NUXT_PUBLIC_LEVANTAMIENTO_URL=http://localhost:4009
 
 NGINX_BASE_URL=https://sigic.dev.geoint.mx
+NUXT_PUBLIC_OLLAMA_MODEL=deepseek-r1
