@@ -6,13 +6,13 @@ import { tipoRecurso } from '~/utils/catalogo';
 definePageMeta({
   middleware: 'auth',
 });
-
+const route = useRoute();
 const storeCatalogo = useCatalogoStore();
 const storeResources = useResourcesCatalogoStore();
 
 const userReviewerPk = ref(null);
 const section = 'publicacion';
-const isLoading = computed(() => storeResources.isLoading);
+const isLoading = ref(true);
 const totalResources = computed(() => storeResources.myTotalBySection(section));
 const resources = computed(() => storeResources.mineBySection(section));
 const tableResources = ref([]);
@@ -45,17 +45,24 @@ const storeFilters = useFilteredResources();
  * @param status de la solicitud
  * @return {String} con las acciones
  */
-const obtenerAcciones = (status, resource) => {
-  if (status === 'on_review') {
-    if (tipoRecurso(resource).includes('Catálogo Externo')) {
-      return 'Revisar, Cancelar';
-    } else {
-      return 'Revisar, Descargar, Cancelar';
-    }
+const obtenerAcciones = (resource) => {
+  if (tipoRecurso(resource).includes('Catálogo Externo')) {
+    return 'Revisar, Cancelar';
+  } else {
+    return 'Revisar, Descargar, Cancelar';
   }
 };
 
-const route = useRoute();
+async function fetchNewData() {
+  isLoading.value = true;
+  storeResources.resetBySection(section);
+  await storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, {
+    'filter{status}': 'on_review',
+    'filter{reviewer}': `${userReviewerPk.value}`,
+  });
+  isLoading.value = false;
+}
+
 function updateResources() {
   // obteniendo datos por las props de la tabla
   tableResources.value = resources.value.map((d) => {
@@ -66,20 +73,12 @@ function updateResources() {
       tipo_recurso: tipoRecurso(d.resource),
       actualizacion: d.updated_at,
       propietario: d.owner.username,
-      acciones: obtenerAcciones(d.status, d.resource),
+      acciones: obtenerAcciones(d.resource),
       comentarios: d.rejection_reason,
       revisor: d.reviewer ? d.reviewer.username : 'Nombre apellido',
       previous_path: route.path,
       recurso_completo: d.resource,
     };
-  });
-}
-
-function fetchNewData() {
-  storeResources.resetBySection(section);
-  storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, {
-    'filter{status}': 'on_review',
-    'filter{reviewer}': `${userReviewerPk.value}`,
   });
 }
 
@@ -99,7 +98,6 @@ onMounted(async () => {
   await storeCatalogo.getUserInfo();
   userReviewerPk.value = storeCatalogo.userInfo.pk;
   storeFilters.resetAll();
-  storeCatalogo.userInfo = {};
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
   storeResources.getMyTotal('publicacion', {
     'filter{status}': 'on_review',

@@ -15,14 +15,14 @@ export default defineEventHandler(async (event) => {
     // console.log('response', response)
 
     if (!response.ok) {
-      throw new Error(`Error PATCH (${pk}): ${response.status}`);
+      //throw new Error(`Error PATCH (${pk}): ${response.status}`);
+      return 'Error';
     }
     console.warn('response status:', response.status);
-
     const json = await response.json();
-
     return json;
   } catch (error) {
     console.error('Error al subir al GeoNode:', error);
+    return 'Error';
   }
 });

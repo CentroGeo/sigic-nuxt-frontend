@@ -8,7 +8,11 @@ const storeCatalogo = useCatalogoStore();
 const esSuperusuaria = computed(() => storeCatalogo.userInfo.is_superuser);
 
 onMounted(async () => {
-  await storeCatalogo.getUserInfo();
+  if (!estaLogueado.value) {
+    storeCatalogo.userInfo = {};
+  } else if (estaLogueado.value && !storeCatalogo.userInfo?.is_superuser) {
+    await storeCatalogo.getUserInfo();
+  }
 });
 </script>
 <template>
