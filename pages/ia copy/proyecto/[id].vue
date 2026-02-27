@@ -800,8 +800,8 @@ async function siguenteAgregar() {
 
 <style lang="scss">
 .overflowYAuto {
-  overflow-y: auto;
-  height: var(--altura-consulta-esc);
+  // overflow-y: auto;
+  // height: var(--altura-consulta-esc);
 }
 .overflowYAutoHeight {
   overflow-y: auto;

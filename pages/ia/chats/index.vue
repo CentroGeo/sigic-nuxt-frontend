@@ -111,14 +111,6 @@ function openChat(chat) {
   // console.log('openChat: ', chat);
   storeIA.setChatActual(chat);
   router.push(`/ia/chat/${chat.id}/contexto/${chat.id_contexto}`);
-
-  // router.push({
-  //   path: '/ia/chat/dinamica',
-  //   query: {
-  //     chat_id: chat.id,
-  //     context_id: chat.id_contexto,
-  //   },
-  // });
 }
 
 // Método para abrir el modal de editar chat
@@ -196,137 +188,135 @@ onMounted(() => {
 <template>
   <UiLayoutPaneles>
     <template #catalogo>
-      <div>
-        <div class="overflowYAuto">
-          <div class="positionSticky">
-            <div class="fondo-color-acento p-x-3 p-y-1">
-              <h5>Chats</h5>
-            </div>
+      <div class="overflowYAuto">
+        <div class="positionSticky">
+          <div class="fondo-color-acento p-x-3 p-y-1">
+            <h5>Chats</h5>
+          </div>
 
-            <div class="p-x-3 p-t-3">
-              <div v-if="listaChats.length === 0">
-                <button
-                  type="button"
-                  class="boton-listas boton boton-primario m-b-3"
-                  aria-label="Crear nuevo chat"
-                  disabled
-                >
-                  Nuevo chat
-                </button>
+          <div class="p-x-3 p-t-3">
+            <div v-if="listaChats.length === 0">
+              <button
+                type="button"
+                class="boton-listas boton boton-primario m-b-3"
+                aria-label="Crear nuevo chat"
+                disabled
+              >
+                Nuevo chat
+              </button>
 
-                <ClientOnly>
-                  <form class="campo-busqueda" @submit.prevent>
-                    <input
-                      id="idcampobusquedaia"
-                      v-model="campoBusqueda"
-                      type="search"
-                      class="campo-busqueda-entrada"
-                      placeholder="Buscar chats"
-                      disabled
-                    />
-                    <button
-                      class="boton-primario boton-pictograma campo-busqueda-buscar"
-                      aria-label="Buscar"
-                      type="button"
-                      disabled
-                    >
-                      <span class="pictograma-buscar" aria-hidden="true" />
-                    </button>
-                  </form>
-                </ClientOnly>
-              </div>
-              <div v-else>
-                <button
-                  class="boton-listas boton boton-primario"
-                  aria-label="Crear nuevo chat"
-                  type="button"
-                  @click="nuevoChatModal?.abrirModal()"
-                >
-                  Nuevo chat
-                </button>
-
-                <ClientOnly>
-                  <SisdaiCampoBusqueda
-                    class="m-y-3"
-                    etiqueta="Buscar chats"
-                    :catalogo="catalogo"
-                    :catalogo-anidado="true"
-                    catalogo-anidado-propiedad-elementos="chat"
-                    propiedad-busqueda="titulo"
-                    @al-filtrar="(r) => (catalogoFiltrado = r)"
+              <ClientOnly>
+                <form class="campo-busqueda" @submit.prevent>
+                  <input
+                    id="idcampobusquedaia"
+                    v-model="campoBusqueda"
+                    type="search"
+                    class="campo-busqueda-entrada"
+                    placeholder="Buscar chats"
+                    disabled
                   />
-                </ClientOnly>
-              </div>
+                  <button
+                    class="boton-primario boton-pictograma campo-busqueda-buscar"
+                    aria-label="Buscar"
+                    type="button"
+                    disabled
+                  >
+                    <span class="pictograma-buscar" aria-hidden="true" />
+                  </button>
+                </form>
+              </ClientOnly>
+            </div>
+            <div v-else>
+              <button
+                class="boton-listas boton boton-primario"
+                aria-label="Crear nuevo chat"
+                type="button"
+                @click="nuevoChatModal?.abrirModal()"
+              >
+                Nuevo chat
+              </button>
+
+              <ClientOnly>
+                <SisdaiCampoBusqueda
+                  class="m-y-3"
+                  etiqueta="Buscar chats"
+                  :catalogo="catalogo"
+                  :catalogo-anidado="true"
+                  catalogo-anidado-propiedad-elementos="chat"
+                  propiedad-busqueda="titulo"
+                  @al-filtrar="(r) => (catalogoFiltrado = r)"
+                />
+              </ClientOnly>
             </div>
           </div>
+        </div>
 
-          <div v-if="listaChats.length === 0">
-            <div class="nota fondo-color-neutro p-2 borde-redondeado-8">
-              <h6 class="m-t-0">Crea un contexto para iniciar un chat</h6>
+        <div v-if="listaChats.length === 0">
+          <div class="nota fondo-color-neutro p-2 borde-redondeado-8">
+            <h6 class="m-t-0">Crea un contexto para iniciar un chat</h6>
 
-              <p class="m-b-0">
-                Después de crear un proyecto, crea un contexto para iniciar un chat. Los nuevos
-                chats aparecerán en esta sección.
+            <p class="m-b-0">
+              Después de crear un proyecto, crea un contexto para iniciar un chat. Los nuevos chats
+              aparecerán en esta sección.
+            </p>
+          </div>
+        </div>
+        <div v-else>
+          <h6 class="p-x-3">Selecciona un chat para empezar a interactuar con el asistente.</h6>
+
+          <ul class="lista-sin-estilo m-x-3">
+            <li v-for="grupo in catalogoFiltrado" :id="grupo.id" :key="grupo.id">
+              <p class="fecha-grupo">
+                {{ grupo.fecha == fechaHoy ? 'Hoy' : grupo.fecha }}
               </p>
-            </div>
-          </div>
-          <div v-else>
-            <h6 class="p-x-3">Selecciona un chat para empezar a interactuar con el asistente.</h6>
 
-            <ul class="lista-sin-estilo m-x-3">
-              <li v-for="grupo in catalogoFiltrado" :id="grupo.id" :key="grupo.id">
-                <p class="fecha-grupo">
-                  {{ grupo.fecha == fechaHoy ? 'Hoy' : grupo.fecha }}
-                </p>
+              <ul class="lista-sin-estilo m-b-5">
+                <li v-for="chat in grupo.chat" :id="chat.id" :key="chat.id">
+                  <div class="tarjeta-chat p-3 borde borde-redondeado-20" @click="openChat(chat)">
+                    <h5 class="tarjeta-titulo m-t-0 m-b-2">
+                      {{ chat.titulo }}
+                    </h5>
 
-                <ul class="lista-sin-estilo m-b-5">
-                  <li v-for="chat in grupo.chat" :id="chat.id" :key="chat.id">
-                    <div class="tarjeta-chat p-3 borde borde-redondeado-20" @click="openChat(chat)">
-                      <h5 class="tarjeta-titulo m-t-0 m-b-2">
-                        {{ chat.titulo }}
-                      </h5>
+                    <p class="tarjeta-nombre-proyecto m-t-0 m-b-1">
+                      {{ chat.proyecto }}
+                    </p>
 
-                      <p class="tarjeta-nombre-proyecto m-t-0 m-b-1">
-                        {{ chat.proyecto }}
-                      </p>
+                    <p class="tarjeta-nombre-contexto m-t-0 m-b-2">
+                      {{ chat.contexto }}
+                    </p>
 
-                      <p class="tarjeta-nombre-contexto m-t-0 m-b-2">
-                        {{ chat.contexto }}
-                      </p>
+                    <div class="flex flex-contenido-final">
+                      <div>
+                        <button
+                          class="boton-pictograma boton-sin-contenedor-secundario"
+                          aria-label="Editar chat"
+                          type="button"
+                          @click.stop="openEditModal(chat.titulo, chat.id)"
+                        >
+                          <span class="pictograma-editar" aria-hidden="true" />
+                        </button>
 
-                      <div class="flex flex-contenido-final">
-                        <div>
-                          <button
-                            class="boton-pictograma boton-sin-contenedor-secundario"
-                            aria-label="Editar chat"
-                            type="button"
-                            @click.stop="openEditModal(chat.titulo, chat.id)"
-                          >
-                            <span class="pictograma-editar" aria-hidden="true" />
-                          </button>
-
-                          <button
-                            class="boton-pictograma boton-sin-contenedor-secundario"
-                            aria-label="Remover chat"
-                            type="button"
-                            @click.stop="openEliminarModal(chat.id)"
-                          >
-                            <span class="pictograma-eliminar" aria-hidden="true" />
-                          </button>
-                        </div>
+                        <button
+                          class="boton-pictograma boton-sin-contenedor-secundario"
+                          aria-label="Remover chat"
+                          type="button"
+                          @click.stop="openEliminarModal(chat.id)"
+                        >
+                          <span class="pictograma-eliminar" aria-hidden="true" />
+                        </button>
                       </div>
                     </div>
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </div>
+                  </div>
+                </li>
+              </ul>
+            </li>
+          </ul>
         </div>
       </div>
     </template>
 
     <template #visualizador>
-      <main id="principal" class="">
+      <main id="principal">
         <div v-if="listaChats.length === 0">
           <div class="flex">
             <div class="columna-4"></div>
@@ -460,10 +450,11 @@ onMounted(() => {
   </UiLayoutPaneles>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .overflowYAuto {
   height: var(--altura-consulta-esc);
   overflow-y: auto;
+
   .positionSticky {
     position: sticky;
     top: 0;
@@ -477,6 +468,7 @@ onMounted(() => {
   border: 1px solid var(--borde-acento);
   width: 100%;
   cursor: pointer;
+
   a {
     &:hover {
       text-decoration: none !important;
@@ -486,9 +478,11 @@ onMounted(() => {
       color: inherit;
     }
   }
+
   h5 {
     color: var(--texto-acento);
   }
+
   p {
     color: var(--texto-primario);
   }
@@ -507,5 +501,9 @@ onMounted(() => {
     font-weight: 400;
     line-height: 18.2px;
   }
+}
+
+.height-vh {
+  height: var(--altura-consulta-esc);
 }
 </style>
