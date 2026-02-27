@@ -7,6 +7,15 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.12.4] - 26-02-2026
+
+### Arreglado (Fix)
+
+- Se eliminaron los valores por defecto para NUXT_APP_BASE_URL y NUXT_PUBLIC_OLLAMA_MODEL en docker-compose-ghcr.yml y docker-compose-local.yml, requiriendo que se establezcan valores explícitos desde el entorno.
+- Se eliminaron los valores por defecto para NUXT_PUBLIC_DEFAULT_PAGE y NUXT_PUBLIC_GEONODE_API_DEFAULT_FILTER en docker-compose-ghcr.yml y docker-compose-local.yml, obligando a la asignación explícita de estas variables de entorno.
+- Se actualizó el argumento de build NUXT_APP_BASE_URL en docker-compose-ghcr.yml para que utilice la variable de entorno en lugar de un valor por defecto codificado.
+- Se agregó NUXT_PUBLIC_OLLAMA_MODEL a la configuración del archivo .env y como variable de entorno en el workflow docker-compose-develop.yml, asegurando que esta variable se pase correctamente a los entornos de build y ejecución.
+
 ## [0.12.3] - 25-02-2026
 
 ### Arreglado (Fix)
@@ -264,6 +273,7 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.12.3]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.3...v0.12.4
 [0.12.3]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.2...v0.12.3
 [0.12.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.1...v0.12.2
 [0.12.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.0...v0.12.1
