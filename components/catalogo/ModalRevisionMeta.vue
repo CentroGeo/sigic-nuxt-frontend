@@ -17,6 +17,10 @@ const config = useRuntimeConfig();
 const { gnoxyFetch } = useGnoxyUrl();
 const isLoading = ref(false);
 const resource = ref({});
+const modalRevisionBasicos = ref(null);
+const modalRevisionLicencias = ref(null);
+const modalRevisionOpcionales = ref(null);
+const modalRevisionAtributos = ref(null);
 
 const dateTypeDict = {
   creation: 'Creación',
@@ -34,10 +38,35 @@ const dictLicencia = {
   nextview: 'NextView',
 };
 
-const modalRevisionBasicos = ref(null);
-const modalRevisionLicencias = ref(null);
-const modalRevisionOpcionales = ref(null);
-const modalRevisionAtributos = ref(null);
+const dictRestricciones = {
+  copyright: `Derecho exclusivo a la publicación, producción o venta de los derechos de una obra literaria, 
+    dramática, musical o artística, o al uso de una marca o etiqueta comercial, otorgado por la ley 
+    durante un periodo específico de tiempo a la persona autora, compositora, artista o distribuidora.`,
+  patent: `El gobierno ha otorgado el derecho exclusivo de hacer, vender, usar u otorgar licencia de patente 
+    de alguna invención o descubrimiento.`,
+  patentPending: `Información producida o vendida en espera de recibir una patente.`,
+  trademark: `El nombre, símbolo u otro dispositivo que identifique a un producto. Éste debe estar registrado 
+    oficialmente y su uso está limitado jurídicamente al dueño o fabricante del producto.`,
+  license: 'Permiso formal para hacer algo.',
+  intellectualPropertyRights: `Derechos para controlar y lucrar con la distribución de propiedad no tangible 
+    proveniente de actividades creativas.`,
+  restricted: 'No se permite su circulación en general.',
+  otherRestrictions: 'Otras restricciones.',
+};
+const dictFrecuencia = {
+  unknown: 'Se desconoce la frecuencia de actualización de los datos',
+  continual: 'Los datos se actualizan repetida y frecuentemente',
+  notPlanned: 'No existen planes de actualizar los datos',
+  daily: 'Los datos se actualizan a diario',
+  annually: 'Los datos se actualizan cada año',
+  asNeeded: 'Los datos se actualizan cuando se considera necesario',
+  monthly: 'Los datos se actualizan todos los meses',
+  fortnightly: 'Los datos se actualizan cada dos semanas',
+  irregular: 'Los datos se actualizan a intervalos de duración irregular',
+  weekly: 'Los datos se actualizan semanalmente',
+  biannually: 'Los datos se actualizan dos veces al año',
+  quarterly: 'Los datos se actualizan cada tres meses',
+};
 
 function getKeywords(resourceKeywords) {
   const keywords = resourceKeywords.map((d) => d.name);
@@ -59,18 +88,37 @@ async function fetchResource() {
   console.log(data);
 
   resource.value['title'] = data.title;
+  resource.value['sourcetype'] = data.sourcetype;
   resource.value['abstract'] = data.raw_abstract;
   resource.value['date_type'] = dateTypeDict[data.date_type];
   resource.value['date'] = data.date;
   resource.value['category'] = categoriesInSpanish[data.category.gn_description];
   resource.value['keywords'] = getKeywords(data.keywords);
   resource.value['language'] = findLanguage(data.language);
-  resource.value['license'] = dictLicencia[data.license.identifier];
+  resource.value['license'] =
+    dictLicencia[data.license?.identifier] || 'Información no proporcionada';
   resource.value['attribution'] = data.attribution;
-  resource.value['data_quality_statement'] = data.raw_data_quality_statement;
-  resource.value['restrictions'] = data.restriction_code_type.identifier;
-  resource.value['constraints_others'] = data.raw_constraints_other;
-
+  resource.value['data_quality_statement'] =
+    data.raw_data_quality_statement?.length > 0
+      ? data.raw_data_quality_statement
+      : 'Información no proporcionada';
+  resource.value['restrictions'] =
+    dictRestricciones[data.restriction_code_type?.identifier] || 'Información no proporcionada';
+  resource.value['constraints_other'] =
+    data.raw_constraints_other?.length > 0
+      ? data.raw_constraints_other
+      : 'Información no proporcionada';
+  resource.value['edition'] =
+    data.edition?.length > 0 ? data.edition : 'Información no proporcionada';
+  resource.value['doi'] = data.doi?.length > 0 ? data.doi : 'Información no proporcionada';
+  resource.value['purpose'] =
+    data.raw_purpose?.length > 0 ? data.raw_purpose : 'Información no proporcionada';
+  resource.value['supplemental_information'] =
+    data.raw_supplemental_information?.length > 0
+      ? data.raw_supplemental_information
+      : 'Información no proporcionada';
+  resource.value['maintenance_frequency'] =
+    dictFrecuencia[data.maintenance_frequency] || 'Información no proporcionada';
   isLoading.value = false;
 }
 
@@ -261,6 +309,7 @@ onMounted(async () => {
         <p style="color: transparent">.</p>
       </template>
 
+      <!--Cuerpo de metadatos opcionales-->
       <template #cuerpo>
         <CatalogoHeaderMetadatos
           :resource="resource"
@@ -268,10 +317,44 @@ onMounted(async () => {
           :exclude-links="true"
         />
 
-        <!--Cuerpo de metadatos básicos-->
+        <div class="m-t-3">
+          <div class="flex">
+            <div class="m-b-2 columna-16">
+              <label class="m-0">Edición</label>
+              <p class="m-0">
+                {{ resource.edition }}
+              </p>
+            </div>
+            <div class="m-b-2 columna-16">
+              <label class="m-0">DOI</label>
+              <p class="m-0">
+                {{ resource.doi }}
+              </p>
+            </div>
+            <div class="m-b-2 columna-16">
+              <label class="m-0">Propósito</label>
+              <p class="m-0">
+                {{ resource.purpose }}
+              </p>
+            </div>
+            <div class="m-b-2 columna-16">
+              <label class="m-0">Información Adicional</label>
+              <p class="m-0">
+                {{ resource.supplemental_information }}
+              </p>
+            </div>
+            <div class="m-b-2 columna-16">
+              <label class="m-0">Frecuencia de actualización</label>
+              <p class="m-0">
+                {{ resource.maintenance_frequency }}
+              </p>
+            </div>
+          </div>
+        </div>
       </template>
+
+      <!--Botones-->
       <template #pie>
-        <!--Botones-->
         <div class="flex flex-contenido-separado m-t-3">
           <div class="columna-8 texto-centrado">
             <button
@@ -286,7 +369,10 @@ onMounted(async () => {
               Regresar
             </button>
           </div>
-          <div v-if="props.resourceType !== 'documents'" class="columna-8">
+          <div
+            v-if="props.resourceType !== 'documents' && resource.sourcetype === 'LOCAL'"
+            class="columna-8"
+          >
             <button
               aria-label="Siguiente"
               type="button"
@@ -313,7 +399,7 @@ onMounted(async () => {
       </template>
     </SisdaiModal>
 
-    <SisdaiModal v-if="!isLoading" ref="modalRevisionAtributos">
+    <SisdaiModal v-if="!isLoading && resource.sourcetype === 'LOCAL'" ref="modalRevisionAtributos">
       <template #encabezado>
         <p style="color: transparent">.</p>
       </template>
