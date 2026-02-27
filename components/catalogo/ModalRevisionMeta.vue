@@ -403,18 +403,16 @@ onMounted(async () => {
       <template #encabezado>
         <p style="color: transparent">.</p>
       </template>
-
+      <!--Cuerpo de attributos-->
       <template #cuerpo>
         <CatalogoHeaderMetadatos
           :resource="resource"
           :title="'Atributos del Conjunto de Datos'"
           :exclude-links="true"
         />
-
-        <!--Cuerpo de metadatos básicos-->
       </template>
+      <!--Botones-->
       <template #pie>
-        <!--Botones-->
         <div class="flex flex-contenido-separado m-t-3">
           <div class="columna-8 texto-centrado">
             <button
