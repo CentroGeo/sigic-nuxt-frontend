@@ -57,6 +57,9 @@ const chatId = computed(() => parseInt(route.params.id) || 0);
 const contextID = computed(() => parseInt(route.params.idx));
 const chatID = ref(0);
 
+const modalPreviewReporte = ref(null);
+const previewReporte = ref(null);
+
 const idAleatorio = () => {
   return 'areatexto-' + Math.random().toString(36).substring(2);
 };
@@ -643,6 +646,7 @@ const fetchInitialReports = async () => {
         status: r.status,
         report_name: r.report_name,
         download_url: r.download_url,
+        file_format: r.file_format,
       }));
 
       // Resume polling for any report that's still pending/processing
@@ -692,6 +696,7 @@ async function generarReporte(modo) {
           task_id: data.task_id,
           status: data.status,
           report_name: payload.report_name,
+          file_format: payload.file_format,
         });
 
         // Start polling for this specific task
@@ -714,6 +719,17 @@ async function generarReporte(modo) {
   fuentesSeleccionadas.value = [];
   modalReporteInstrucciones.value.cerrarModal();
 }
+
+function abrirPreviewReporte(reporte) {
+  previewReporte.value = reporte;
+  modalPreviewReporte.value?.abrirModal();
+}
+
+function cerrarPreviewReporte() {
+  modalPreviewReporte.value?.cerrarModal();
+  previewReporte.value = null;
+}
+
 const opTipoArchivo = ref({ pdf: 'PDF', word: 'WORD', pptx: 'PPTX', csv: 'CSV' });
 watch(seleccionTipoReporte, (nv) => {
   if (nv === 'presentation') {
@@ -1436,6 +1452,58 @@ watch(seleccionTipoReporte, (nv) => {
             </button>
           </template>
         </SisdaiModal>
+
+        <SisdaiModal ref="modalPreviewReporte" class="modal-grande">
+          <template #encabezado>
+            <h2>Reporte</h2>
+          </template>
+          <template #cuerpo>
+            <div v-if="previewReporte" class="m-y-2" style="width: 100%; height: 60vh">
+              <!-- El iframe renderizará nativamente PDFs y TXT que el navegador soporte -->
+              <iframe
+                v-if="['pdf', 'txt'].includes(previewReporte.file_format)"
+                :src="previewReporte.download_url"
+                style="width: 100%; height: 100%; border: none; border-radius: 8px"
+                title="Previsualización del reporte"
+              >
+              </iframe>
+              <div
+                v-else
+                class="flex flex-contenido-centrado flex-vertical-centrado fondo-color-neutro borde-redondeado-8"
+                style="height: 100%; flex-direction: column"
+              >
+                <span
+                  class="pictograma-archivo-descargar texto-color-acento"
+                  style="font-size: 4rem"
+                ></span>
+                <p class="m-t-3 texto-centrado">
+                  <strong>Formato no compatible para previsualización.</strong><br />
+                  Los documentos en formato PowerPoint y Word no se pueden mostrar visualmente
+                  dentro del navegador.<br />
+                  Por favor, descárgalo para revisarlo en tu equipo.
+                </p>
+              </div>
+            </div>
+          </template>
+          <template #pie>
+            <button
+              class="boton-secundario boton-chico"
+              aria-label="Cerrar modal"
+              type="button"
+              @click="cerrarPreviewReporte"
+            >
+              Cerrar
+            </button>
+            <a
+              :href="previewReporte?.download_url"
+              target="_blank"
+              class="boton-primario boton-chico m-l-2"
+              style="text-decoration: none"
+            >
+              Descargar
+            </a>
+          </template>
+        </SisdaiModal>
       </ClientOnly>
     </template>
 
@@ -1576,9 +1644,15 @@ watch(seleccionTipoReporte, (nv) => {
 
             <!-- Estado: COMPLETADO -->
             <div v-else-if="reporte.status === 'done'" class="flex flex-contenido-separado p-2">
-              <div class="flex">
+              <div
+                class="flex cursor-pointer hover-texto-acento"
+                style="cursor: pointer"
+                @click="abrirPreviewReporte(reporte)"
+              >
                 <span class="texto-color-acento flex-vertical-centrado pictograma-reporte" />
-                <p class="flex-vertical-centrado m-0">{{ reporte.report_name }}</p>
+                <p class="flex-vertical-centrado m-0" style="text-decoration: underline">
+                  {{ reporte.report_name }}
+                </p>
               </div>
 
               <div>
