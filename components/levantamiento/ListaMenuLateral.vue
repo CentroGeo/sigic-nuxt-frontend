@@ -4,7 +4,6 @@ import { tieneRolAdministrador } from '~/utils/levantamiento';
 const route = useRoute();
 const { data } = useAuth();
 const storeLevantamiento = useLevantamientoStore();
-
 const esAdministradorLevantamiento = computed(() => tieneRolAdministrador(data.value?.accessToken));
 
 onMounted(async () => {
@@ -50,9 +49,9 @@ onMounted(async () => {
         </li>
       </ul>
       <ul
-        v-if="storeLevantamiento.esRevisor"
+        v-if="storeLevantamiento.esRevisor || esAdministradorLevantamiento"
         class="lista-subpagina"
-        :class="{ revisor: storeLevantamiento.esRevisor }"
+        :class="{ revisor: storeLevantamiento.esRevisor || esAdministradorLevantamiento }"
       >
         <li v-if="esAdministradorLevantamiento">
           <nuxt-link

@@ -5,8 +5,10 @@ definePageMeta({
 
 const storeLevantamiento = useLevantamientoStore();
 
+const { data } = useAuth();
+
 onMounted(() => {
-  storeLevantamiento.obtenerProyectosEnRevision();
+  storeLevantamiento.obtenerProyectosEnRevision(data.value?.user.email);
 });
 </script>
 <template>

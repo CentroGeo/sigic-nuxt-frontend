@@ -345,6 +345,7 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
           body: body,
         });
 
+        console.log(data);
         this.esRevisor = data.is_reviewer;
       } catch (err) {
         console.error('Error cargando rol usuario:', err);
@@ -353,16 +354,24 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
     obtenerTotalProyectosEnRevision() {
       return this.proyectosEnRevision.length;
     },
-    async obtenerProyectosEnRevision() {
-      const proyecto = {
-        id: 1,
-        nombre: 'Registro de arte urbano en la ciudad de Mérida, Yucatán',
-        institucion: 'Dirección de Cultura',
-        lider: 'Daniela Acuña',
-      };
+    async obtenerProyectosEnRevision(email) {
+      try {
+        const body = {
+          email: email,
+          status: 'EN REVISION',
+        };
 
-      this.proyectosEnRevision.push(proyecto);
-      this.existenProyectosEnRevision = true;
+        const data = await $fetch(`${apiUrl}/projects/reviewer/list`, {
+          method: 'POST',
+          body: body,
+        });
+
+        console.log(data);
+        this.proyectosEnRevision = data.proyectos;
+        this.existenProyectosEnRevision = true;
+      } catch (err) {
+        console.error('Error obteniendo proyectos por status:', err);
+      }
     },
     async obtenerProyectosRechazados() {
       const proyecto = {
@@ -374,6 +383,27 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
 
       this.proyectosRechazados.push(proyecto);
       this.existenProyectosRechazados = true;
+    },
+    async actualizarStatusProyecto(payload, idProyecto) {
+      try {
+        const response = await fetch(`${apiUrl}/projects/reviewer/status/${idProyecto}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al actualizar el proyecto');
+        }
+
+        const data = await response.json();
+        console.log('Proyecto enviado a aprobación:', data);
+      } catch (error) {
+        console.error('Error:', error);
+        throw error;
+      }
     },
   };
 });

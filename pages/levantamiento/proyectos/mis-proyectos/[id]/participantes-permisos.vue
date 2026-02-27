@@ -150,10 +150,11 @@ const modalSolicitarAprobacion = ref(null);
 
 const solicitarAprobacion = async () => {
   const payload = {
-    isPrivate: false,
+    status: 'EN REVISION',
+    user_id: data.value?.user.email,
   };
 
-  await storeLevantamiento.actualizarFormularioParticipantesProyecto(payload, route.params.id);
+  await storeLevantamiento.actualizarStatusProyecto(payload, route.params.id);
 
   modalSolicitarAprobacion.value.abrirModal();
 };

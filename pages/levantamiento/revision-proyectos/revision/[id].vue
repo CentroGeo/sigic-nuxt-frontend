@@ -2,6 +2,7 @@
 import SisdaiAreaTexto from '@centrogeomx/sisdai-componentes/src/componentes/area-texto/SisdaiAreaTexto.vue';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import { useRouter } from 'vue-router';
+import { formatDate } from '~/utils/levantamiento';
 
 definePageMeta({
   middleware: 'auth',
@@ -9,44 +10,54 @@ definePageMeta({
 
 const storeLevantamiento = useLevantamientoStore();
 const router = useRouter();
+const { data } = useAuth();
+const route = useRoute();
+
+const proyecto = ref(null);
+const preguntas = ref([]);
+const fechaParseada = ref('');
+
+watch(
+  [() => data.value?.user?.email, () => route.params.id],
+  async ([email, id]) => {
+    if (!import.meta.client) return;
+
+    if (!email || !id) return;
+
+    try {
+      const res = await storeLevantamiento.obtenerProyectoPorId(email, id);
+      proyecto.value = res;
+
+      if (!proyecto.value) return;
+
+      preguntas.value = proyecto.value.ficha_proyecto ?? [];
+
+      const raw = proyecto.value?.fecha_creacion;
+
+      const d = raw ? new Date(raw) : null;
+
+      if (!d || Number.isNaN(d.getTime())) {
+        console.warn('Fecha inválida tras parseo:', raw);
+        fechaParseada.value = '';
+        return;
+      }
+
+      try {
+        fechaParseada.value = formatDate(d);
+      } catch (e) {
+        console.error('formatDate falló con Date:', d, 'raw:', raw, e);
+        fechaParseada.value = '';
+      }
+    } catch (error) {
+      console.error('Error en watcher:', error);
+    }
+  },
+  { immediate: true }
+);
 
 function irAProyectosEnRevision() {
   router.push('/levantamiento/revision-proyectos/revision');
 }
-
-const preguntas = ref([
-  {
-    tipo: 'abierta',
-    etiqueta: 'Pregunta abierta',
-    pregunta: '¿Qué observaciones adicionales deseas compartir sobre este punto?',
-    obligatorio: true,
-    instrucciones:
-      'Describe con tus palabras cualquier detalle relevante: tipo de residuos, frecuencia con la que se acumulan o si hay personas afectadas.',
-  },
-  {
-    tipo: 'unica',
-    etiqueta: 'Opción única',
-    pregunta: '¿En qué momentos del día consideras que el riesgo es mayor?',
-    opciones: ['Mañana', 'Tarde', 'Mediodía', 'Noche'],
-    obligatorio: true,
-    instrucciones: 'Selecciona la opción que mejor describa el tipo de residuos observados.',
-  },
-  {
-    tipo: 'condicional',
-    etiqueta: 'Pregunta condicional',
-    pregunta: 'Has presenciado o vivido algún incidente en este cruce?',
-    opciones: [
-      {
-        opcion: 'Si',
-        subpregunta: { pregunta: 'Describe la situación' },
-        tipoCondicion: 'abierta',
-      },
-      { opcion: 'No' },
-    ],
-    obligatorio: true,
-    instrucciones: '',
-  },
-]);
 
 const modalAprobarProyecto = ref(null);
 
@@ -114,39 +125,31 @@ function irAProyectosAprobados() {
             <div class="columna-16 flex">
               <div class="columna-8 texto-color-secundario">Nombre del proyecto:</div>
               <div class="columna-8">
-                Registro de arte urbano en la Ciudad de Mérida, Yucatán (2025)
+                {{ proyecto?.nombre }}
               </div>
             </div>
             <div class="columna-16 flex">
               <div class="columna-8 texto-color-secundario">Institución:</div>
-              <div class="columna-8">Dirección de Cultura</div>
+              <div class="columna-8">{{ proyecto?.institucion }}</div>
             </div>
             <div class="columna-16 flex">
               <div class="columna-8 texto-color-secundario">Autor:</div>
-              <div class="columna-8">Daniela Acuña</div>
+              <div class="columna-8">{{ proyecto?.lider }}</div>
             </div>
             <div class="columna-16 flex">
               <div class="columna-8 texto-color-secundario">Fecha de creación:</div>
-              <div class="columna-8">2/12/2025</div>
+              <div class="columna-8">{{ fechaParseada }}</div>
             </div>
             <div class="columna-16 flex">
               <div class="columna-16 texto-color-secundario">Objetivo del proyecto:</div>
               <div class="columna-16">
-                Generar un inventario actualizado de murales, grafitis y expresiones de arte urbano
-                en espacios públicos, con el fin de documentar su ubicación, estado y valor
-                cultural, además de fomentar la participación ciudadana en la conservación del
-                patrimonio artístico contemporáneo.
+                {{ proyecto?.objetivo }}
               </div>
             </div>
             <div class="columna-16 flex">
               <div class="columna-16 texto-color-secundario">Instrucciones del formulario:</div>
               <div class="columna-16">
-                1. Subir una fotografía clara del mural o pieza de arte urbano.<br />
-                2. Señalar el tipo de obra (mural, grafiti, stencil, instalación temporal, otro).<br />
-                3. Reportar estado de conservación (bueno, regular, deteriorado).<br />
-                4. Compartir, si se conoce, el nombre del artista o colectivo.<br />
-                5. Añadir observaciones (ejemplo: si la obra tiene temática social, cultural,
-                ambiental).
+                {{ proyecto?.institucion }}
               </div>
             </div>
           </div>
