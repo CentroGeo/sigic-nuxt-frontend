@@ -120,7 +120,6 @@ NUXT_PUBLIC_KEYCLOAK = <Url de autorización de keycloack>
 NUXT_PUBLIC_KEYCLOAK_BASE_URL = <Url base de keycloak>
 NUXT_PUBLIC_KEYCLOAK_REALM = <Realm de keycloak>
 
-
 NUXT_PUBLIC_ENABLE_AUTH = <boolean>
 NUXT_PUBLIC_ENABLE_CATALOGO_VISTA = <boolean>
 NUXT_PUBLIC_ENABLE_CATALOGO_CARGA = <boolean>
@@ -130,6 +129,7 @@ NUXT_PUBLIC_ENABLE_LEVANTAMIENTO = <boolean>
 
 NUXT_APP_BASE_URL = /
 NGINX_BASE_URL = <url base>
+NUXT_PUBLIC_OLLAMA_MODEL = <modelo llm>
 ```
 
 Para el despliegue en producción se debe hacer un archivo `.env.production`
