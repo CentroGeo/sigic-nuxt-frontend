@@ -1,5 +1,6 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+
 import { dictIdiomas } from '~/utils/catalogo';
 import { categoriesInSpanish } from '~/utils/consulta';
 const props = defineProps({
@@ -68,6 +69,14 @@ const dictFrecuencia = {
   quarterly: 'Los datos se actualizan cada tres meses',
 };
 
+const variables = {
+  attribute: 'Atributo',
+  attribute_label: 'Etiqueta',
+  description: 'Descripción',
+  display_order: 'Mostrar Orden',
+  visible: 'Visible',
+};
+
 function getKeywords(resourceKeywords) {
   const keywords = resourceKeywords.map((d) => d.name);
   return keywords.join(', ');
@@ -119,6 +128,10 @@ async function fetchResource() {
       : 'Información no proporcionada';
   resource.value['maintenance_frequency'] =
     dictFrecuencia[data.maintenance_frequency] || 'Información no proporcionada';
+  resource.value['attribute_set'] = data['attribute_set'].sort(
+    (a, b) => a.display_order - b.display_order
+  );
+
   isLoading.value = false;
 }
 
@@ -410,6 +423,32 @@ onMounted(async () => {
           :title="'Atributos del Conjunto de Datos'"
           :exclude-links="true"
         />
+
+        <div class="contenedor-tabla p-2">
+          <table v-if="resource.attribute_set.length > 0">
+            <thead>
+              <tr>
+                <th
+                  v-for="(variable, v) in Object.keys(variables)"
+                  :id="`${variable}-col-${v}`"
+                  :key="v"
+                  scope="col"
+                >
+                  {{ variables[variable] }}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(datum, d) in resource.attribute_set" :id="`${datum}-ren-${d}`" :key="d">
+                <td>{{ datum['attribute'] }}</td>
+                <td>{{ datum['attribute_label'] }}</td>
+                <td>{{ datum['description'] }}</td>
+                <td>{{ datum['display_order'] }}</td>
+                <td>{{ datum['visible'] ? 'Visible' : 'No visible' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </template>
       <!--Botones-->
       <template #pie>
