@@ -580,7 +580,7 @@ const obtenerTipoArchivo = (nombre) => {
 const areaReporteInstrucciones = ref('');
 const seleccionTipoReporte = ref('');
 const seleccionTipoArchivo = ref('');
-const botonRadioHojaMembretada = ref(true);
+const botonRadioHojaMembretada = ref(false);
 const casillaArregloUbicaciones = ref([]);
 const botonRadioRepresentacion = ref('centroide');
 const botonRadioUbicacion = ref('resolver_auto');
@@ -675,7 +675,7 @@ async function generarReporte(modo) {
       report_type: seleccionTipoReporte.value,
       file_format: seleccionTipoArchivo.value,
       instructions: areaReporteInstrucciones.value,
-      use_letterhead: false, // Defaulting as per original mock
+      use_letterhead: botonRadioHojaMembretada.value,
     };
 
     try {
@@ -733,9 +733,16 @@ function cerrarPreviewReporte() {
 const opTipoArchivo = ref({ pdf: 'PDF', word: 'WORD', pptx: 'PPTX', csv: 'CSV' });
 watch(seleccionTipoReporte, (nv) => {
   if (nv === 'presentation') {
+    seleccionTipoArchivo.value = 'pptx';
     opTipoArchivo.value = { pptx: 'PPTX' };
+    botonRadioHojaMembretada.value = false;
   } else {
     opTipoArchivo.value = { pdf: 'PDF', word: 'WORD', pptx: 'PPTX', csv: 'CSV' };
+  }
+});
+watch(seleccionTipoArchivo, (nv) => {
+  if (!['pdf', 'word'].includes(nv)) {
+    botonRadioHojaMembretada.value = false;
   }
 });
 </script>
@@ -1195,7 +1202,11 @@ watch(seleccionTipoReporte, (nv) => {
                 </option>
               </SisdaiSelector>
 
-              <SisdaiBotonesRadioGrupo leyenda="Hoja membretada (Formato SECIHTI)">
+              <SisdaiBotonesRadioGrupo
+                v-show="['pdf', 'word'].includes(seleccionTipoArchivo)"
+                leyenda="Hoja membretada (Formato SECIHTI)"
+                :es_vertical="false"
+              >
                 <SisdaiBotonRadio
                   v-model="botonRadioHojaMembretada"
                   etiqueta="Sí"
