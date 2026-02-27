@@ -586,7 +586,6 @@ const botonRadioFormato = ref('capa_visualizador');
 // --- Nueva Lógica de Integración para Reportes ---
 const reportesGenerados = ref([]); // Lista reactiva de reportes en sesión actual
 
-// Poll backend for report status updates
 const pollStatus = async (reportId) => {
   const token = data.value?.accessToken;
   const interval = setInterval(async () => {
@@ -619,6 +618,48 @@ const pollStatus = async (reportId) => {
     }
   }, 10000); // Poll every 10 seconds
 };
+
+// Fetch initial reports for this context when the component mounts
+const fetchInitialReports = async () => {
+  if (!contextID.value || !data.value?.accessToken) return;
+
+  try {
+    const res = await fetch(
+      `${config.public.iaBackendUrl}/api/reports/?context_id=${contextID.value}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${data.value.accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (res.ok) {
+      const reports = await res.json();
+      // Map the returned data to our reactive format
+      reportesGenerados.value = reports.map((r) => ({
+        id: r.id,
+        status: r.status,
+        report_name: r.report_name,
+        download_url: r.download_url,
+      }));
+
+      // Resume polling for any report that's still pending/processing
+      reportesGenerados.value.forEach((r) => {
+        if (r.status === 'pending' || r.status === 'processing') {
+          pollStatus(r.id);
+        }
+      });
+    }
+  } catch (err) {
+    console.error('Error fetching initial reports:', err);
+  }
+};
+
+onMounted(() => {
+  fetchInitialReports();
+});
 
 async function generarReporte(modo) {
   if (modo === 'reporte') {
@@ -1525,7 +1566,8 @@ watch(seleccionTipoReporte, (nv) => {
               class="flex p-2"
             >
               <span
-                class="texto-color-acento flex-vertical-centrado pictograma-actualizar animacion-rotar m-r-1"
+                class="texto-color-acento flex-vertical-centrado pictograma-actualizar m-r-1 rotar"
+                style="animation: spin 2s linear infinite"
               />
               <p class="flex-vertical-centrado m-0">
                 Generando reporte: {{ reporte.report_name }}...
@@ -1562,6 +1604,14 @@ watch(seleccionTipoReporte, (nv) => {
     </template>
   </IaLayoutPaneles>
 </template>
+
+<style scoped>
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+</style>
 
 <style lang="scss" scoped>
 fieldset:has([type='checkbox']:required):invalid + .formulario-ayuda::before {
