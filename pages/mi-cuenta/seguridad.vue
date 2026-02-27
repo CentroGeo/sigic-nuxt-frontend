@@ -97,30 +97,6 @@ onMounted(() => {
       </p>
       <p>Es posible que se cierre tu sesión en otros dispositivos.</p>
 
-      <!--       <div class="m-y-2">
-        <label for="current-password">Contraseña actual</label>
-        <input
-          id="current-password"
-          type="password"
-          name="current-password"
-          minlength="8"
-          placeholder="Introduce la contaseña actual"
-          :disabled="true"
-        />
-      </div>
-
-      <div class="m-y-2">
-        <label for="new-password">Contraseña nueva</label>
-        <input
-          id="new-password"
-          type="password"
-          name="current-password"
-          minlength="8"
-          placeholder="Introduce la contaseña nueva"
-          :disabled="true"
-        />
-      </div> -->
-
       <button class="boton-primario boton-chico m-b-3" @click="updatePassword">
         Cambiar Contraseña
       </button>
