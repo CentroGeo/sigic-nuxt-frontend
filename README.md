@@ -136,6 +136,9 @@ NUXT_PUBLIC_IA_BACKEND_URL = <ulr del back de IA>
 NUXT_PUBLIC_KEYCLOAK_ISSUER = <https://iam.dev.geoint.mx/realms/sigic>
 NUXT_PUBLIC_KEYCLOAK_CLIENT_ID = <Clave secreta>
 NUXT_PUBLIC_KEYCLOAK_IDPS = <Diccionario de los idps de keycloak escrito como cadena>
+NUXT_PUBLIC_DEFAULT_PAGE = <Página de inicio por defecto>
+NUXT_APP_BASE_URL = <sigic url de producción>
+NUXT_PUBLIC_OLLAMA_MODEL = <Nombre del modelo de ollama a usar en producción>
 
 ```
 
