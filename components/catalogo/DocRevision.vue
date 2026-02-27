@@ -9,6 +9,7 @@ const props = defineProps({
 
 const { fetchDoc } = useDownloadResources();
 const storeResources = useResourcesCatalogoStore();
+const revisionMetadatos = ref(null);
 const emit = defineEmits(['docCargado']);
 
 const documentRef = ref(null);
@@ -32,12 +33,22 @@ onMounted(async () => {
 
 <template>
   <div v-if="blobedUrl !== ''" class="contenedor-doc-embed">
+    <button class="boton-primario m-y-2" @click="revisionMetadatos?.abrirModalRevision">
+      Ver metadatos
+    </button>
+
     <embed
       ref="documentRef"
       class="documento-embebido"
       :src="blobedUrl"
       :type="extensionDocumento === 'pdf' ? 'application/pdf' : 'text/plain'"
       :onload="emit('docCargado')"
+    />
+
+    <CatalogoModalRevisionMeta
+      ref="revisionMetadatos"
+      :review-pk="selectedElementPk"
+      :resource-type="'documents'"
     />
   </div>
 </template>
