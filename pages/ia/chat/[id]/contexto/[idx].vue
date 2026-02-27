@@ -577,7 +577,7 @@ const obtenerTipoArchivo = (nombre) => {
 const areaReporteInstrucciones = ref('');
 const seleccionTipoReporte = ref('');
 const seleccionTipoArchivo = ref('');
-const botonRadioHojaMembretada = ref('si');
+const botonRadioHojaMembretada = ref(true);
 const casillaArregloUbicaciones = ref([]);
 const botonRadioRepresentacion = ref('centroide');
 const botonRadioUbicacion = ref('resolver_auto');
@@ -585,27 +585,32 @@ const botonRadioFormato = ref('capa_visualizador');
 function generarReporte(modo) {
   // console.log('generar reporte');
   if (modo === 'reporte') {
-    console.log('campoNombreReporte.value', campoNombreReporte.value);
-    console.log('fuentesSeleccionadas.value', fuentesSeleccionadas.value);
-    console.log('areaReporteInstrucciones.value', areaReporteInstrucciones.value);
-    console.log('seleccionTipoReporte.value', seleccionTipoReporte.value);
-    console.log('seleccionTipoArchivo.value', seleccionTipoArchivo.value);
-    console.log('botonRadioHojaMembretada.value', botonRadioHojaMembretada.value);
+    console.log('context_id', contextID.value);
+    console.log(
+      'file_ids',
+      fuentesSeleccionadas.value.map((d) => d.geonode_id)
+    );
+    console.log('report_name', campoNombreReporte.value);
+    console.log('report_type', seleccionTipoReporte.value);
+    console.log('file_format', seleccionTipoArchivo.value);
+    console.log('instructions', areaReporteInstrucciones.value);
+    //console.log('use_letterhead', botonRadioHojaMembretada.value);
+    console.log('use_letterhead', false);
   } else {
     if (modo === 'espacializar') {
-      console.log('fuentesSeleccionadas.value', fuentesSeleccionadas.value);
+      console.log('file_ids', fuentesSeleccionadas.value);
       console.log('casillaArregloUbicaciones.value', casillaArregloUbicaciones.value);
       console.log('botonRadioRepresentacion.value', botonRadioRepresentacion.value);
       console.log('botonRadioUbicacion.value', botonRadioUbicacion.value);
       console.log('botonRadioFormato.value', botonRadioFormato.value);
     }
   }
-
+  fuentesSeleccionadas.value = [];
   modalReporteInstrucciones.value.cerrarModal();
 }
 const opTipoArchivo = ref({ pdf: 'PDF', word: 'WORD', pptx: 'PPTX', csv: 'CSV' });
 watch(seleccionTipoReporte, (nv) => {
-  if (nv === 'presentacion') {
+  if (nv === 'presentation') {
     opTipoArchivo.value = { pptx: 'PPTX' };
   } else {
     opTipoArchivo.value = { pdf: 'PDF', word: 'WORD', pptx: 'PPTX', csv: 'CSV' };
@@ -1047,11 +1052,11 @@ watch(seleccionTipoReporte, (nv) => {
                 etiqueta="Tipo de reporte"
                 :es_obligatorio="true"
               >
-                <option value="1">Institucional</option>
-                <option value="2">Descriptivo</option>
-                <option value="resumen">Resumen</option>
-                <option value="presentacion">Presentación</option>
-                <option value="5">Evaluación</option>
+                <option value="institutional">Institucional</option>
+                <option value="descriptive">Descriptivo</option>
+                <option value="summary">Resumen</option>
+                <option value="presentation">Presentación</option>
+                <option value="evaluation">Evaluación</option>
               </SisdaiSelector>
 
               <SisdaiSelector
@@ -1072,14 +1077,14 @@ watch(seleccionTipoReporte, (nv) => {
                 <SisdaiBotonRadio
                   v-model="botonRadioHojaMembretada"
                   etiqueta="Sí"
-                  value="si"
+                  :value="true"
                   name="hojamembretada"
                   :es_obligatorio="true"
                 />
                 <SisdaiBotonRadio
                   v-model="botonRadioHojaMembretada"
                   etiqueta="No"
-                  value="no"
+                  :value="false"
                   name="hojamembretada"
                   :es_obligatorio="true"
                 />
