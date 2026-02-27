@@ -81,7 +81,6 @@ onMounted(async () => {
   await storeCatalogo.getUserInfo();
   userReviewerPk.value = storeCatalogo.userInfo.pk;
   storeFilters.resetAll();
-  storeCatalogo.userInfo = {};
   storeFilters.buildQueryParams('all');
   storeResources.getMyTotal('publicacion', {
     'filter{status}': 'published',

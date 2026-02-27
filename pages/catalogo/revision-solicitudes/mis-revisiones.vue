@@ -98,7 +98,6 @@ onMounted(async () => {
   await storeCatalogo.getUserInfo();
   userReviewerPk.value = storeCatalogo.userInfo.pk;
   storeFilters.resetAll();
-  storeCatalogo.userInfo = {};
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
   storeResources.getMyTotal('publicacion', {
     'filter{status}': 'on_review',

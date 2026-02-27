@@ -90,7 +90,6 @@ watch(
 
 onMounted(async () => {
   storeFilters.resetAll();
-  storeCatalogo.userInfo = {};
   storeFilters.buildQueryParams('all');
   storeResources.getMyTotal('publicacion', { 'filter{status}': 'pending' });
   fetchNewData();
