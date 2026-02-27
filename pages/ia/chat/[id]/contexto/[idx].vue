@@ -582,29 +582,94 @@ const casillaArregloUbicaciones = ref([]);
 const botonRadioRepresentacion = ref('centroide');
 const botonRadioUbicacion = ref('resolver_auto');
 const botonRadioFormato = ref('capa_visualizador');
-function generarReporte(modo) {
-  // console.log('generar reporte');
-  if (modo === 'reporte') {
-    console.log('context_id', contextID.value);
-    console.log(
-      'file_ids',
-      fuentesSeleccionadas.value.map((d) => d.geonode_id)
-    );
-    console.log('report_name', campoNombreReporte.value);
-    console.log('report_type', seleccionTipoReporte.value);
-    console.log('file_format', seleccionTipoArchivo.value);
-    console.log('instructions', areaReporteInstrucciones.value);
-    //console.log('use_letterhead', botonRadioHojaMembretada.value);
-    console.log('use_letterhead', false);
-  } else {
-    if (modo === 'espacializar') {
-      console.log('file_ids', fuentesSeleccionadas.value);
-      console.log('casillaArregloUbicaciones.value', casillaArregloUbicaciones.value);
-      console.log('botonRadioRepresentacion.value', botonRadioRepresentacion.value);
-      console.log('botonRadioUbicacion.value', botonRadioUbicacion.value);
-      console.log('botonRadioFormato.value', botonRadioFormato.value);
+
+// --- Nueva Lógica de Integración para Reportes ---
+const reportesGenerados = ref([]); // Lista reactiva de reportes en sesión actual
+
+// Poll backend for report status updates
+const pollStatus = async (reportId) => {
+  const token = data.value?.accessToken;
+  const interval = setInterval(async () => {
+    try {
+      const res = await fetch(`${config.public.iaBackendUrl}/api/reports/${reportId}/`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (res.ok) {
+        const reportData = await res.json();
+
+        // Find and update the local report tracking object
+        const idx = reportesGenerados.value.findIndex((r) => r.id === reportId);
+        if (idx !== -1) {
+          reportesGenerados.value[idx] = { ...reportesGenerados.value[idx], ...reportData };
+
+          if (reportData.status === 'done' || reportData.status === 'error') {
+            clearInterval(interval);
+          }
+        } else {
+          // Not found in our current session array? stop polling
+          clearInterval(interval);
+        }
+      }
+    } catch (err) {
+      console.error(`Error polling status for report ${reportId}:`, err);
     }
+  }, 10000); // Poll every 10 seconds
+};
+
+async function generarReporte(modo) {
+  if (modo === 'reporte') {
+    const token = data.value?.accessToken;
+    const payload = {
+      context_id: contextID.value,
+      file_ids: fuentesSeleccionadas.value.map((d) => d.id), // Ensure we only send the DB id
+      report_name: campoNombreReporte.value,
+      report_type: seleccionTipoReporte.value,
+      file_format: seleccionTipoArchivo.value,
+      instructions: areaReporteInstrucciones.value,
+      use_letterhead: false, // Defaulting as per original mock
+    };
+
+    try {
+      const res = await fetch(`${config.public.iaBackendUrl}/api/reports/generate/`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.status === 202) {
+        const data = await res.json();
+        // Add to our reactive list of pending tasks
+        reportesGenerados.value.push({
+          id: data.report_id,
+          task_id: data.task_id,
+          status: data.status,
+          report_name: payload.report_name,
+        });
+
+        // Start polling for this specific task
+        pollStatus(data.report_id);
+      } else {
+        const errorData = await res.json();
+        console.error('Error generando reporte:', errorData);
+      }
+    } catch (error) {
+      console.error('Network error triggering report generation:', error);
+    }
+  } else if (modo === 'espacializar') {
+    console.log('file_ids', fuentesSeleccionadas.value);
+    console.log('casillaArregloUbicaciones.value', casillaArregloUbicaciones.value);
+    console.log('botonRadioRepresentacion.value', botonRadioRepresentacion.value);
+    console.log('botonRadioUbicacion.value', botonRadioUbicacion.value);
+    console.log('botonRadioFormato.value', botonRadioFormato.value);
   }
+
   fuentesSeleccionadas.value = [];
   modalReporteInstrucciones.value.cerrarModal();
 }
@@ -1449,35 +1514,47 @@ watch(seleccionTipoReporte, (nv) => {
         </div>
 
         <div class="m-x-3">
-          <div class="fondo-color-acento borde-redondeado-8 m-b-2">
-            <div class="flex p-2">
-              <span class="texto-color-acento flex-vertical-centrado pictograma-reporte" />
-              <p class="flex-vertical-centrado m-0">Generando reporte</p>
+          <div
+            v-for="(reporte, index) in reportesGenerados"
+            :key="reporte.id || index"
+            class="fondo-color-acento borde-redondeado-8 m-b-2"
+          >
+            <!-- Estado: PROCESANDO o PENDIENTE -->
+            <div
+              v-if="reporte.status === 'processing' || reporte.status === 'pending'"
+              class="flex p-2"
+            >
+              <span
+                class="texto-color-acento flex-vertical-centrado pictograma-actualizar animacion-rotar m-r-1"
+              />
+              <p class="flex-vertical-centrado m-0">
+                Generando reporte: {{ reporte.report_name }}...
+              </p>
             </div>
-          </div>
-          <div class="fondo-color-acento borde-redondeado-8 m-b-2">
-            <div class="flex flex-contenido-separado p-2">
+
+            <!-- Estado: COMPLETADO -->
+            <div v-else-if="reporte.status === 'done'" class="flex flex-contenido-separado p-2">
               <div class="flex">
                 <span class="texto-color-acento flex-vertical-centrado pictograma-reporte" />
-                <p class="flex-vertical-centrado m-0">Título del reporte</p>
+                <p class="flex-vertical-centrado m-0">{{ reporte.report_name }}</p>
               </div>
 
               <div>
-                <button
+                <a
+                  :href="reporte.download_url"
+                  target="_blank"
                   class="boton-pictograma boton-sin-contenedor-secundario"
                   aria-label="Descargar reporte"
-                  type="button"
                 >
                   <span class="pictograma-archivo-descargar" aria-hidden="true" />
-                </button>
-                <button
-                  class="boton-pictograma boton-sin-contenedor-secundario"
-                  aria-label="Remover reporte"
-                  type="button"
-                >
-                  <span class="pictograma-eliminar" aria-hidden="true" />
-                </button>
+                </a>
               </div>
+            </div>
+
+            <!-- Estado: ERROR -->
+            <div v-else-if="reporte.status === 'error'" class="flex p-2">
+              <span class="texto-color-acento flex-vertical-centrado pictograma-cerrar m-r-1" />
+              <p class="flex-vertical-centrado m-0">Error generando: {{ reporte.report_name }}</p>
             </div>
           </div>
         </div>
