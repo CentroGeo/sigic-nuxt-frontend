@@ -1,10 +1,9 @@
 <script setup>
-import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
-import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
-// import SisdaiControlDeslizante from '@centrogeomx/sisdai-componentes/src/componentes/control-deslizante/SisdaiControlDeslizante.vue';
 import SisdaiAreaTexto from '@centrogeomx/sisdai-componentes/src/componentes/area-texto/SisdaiAreaTexto.vue';
 import SisdaiBotonesRadioGrupo from '@centrogeomx/sisdai-componentes/src/componentes/boton-radio-grupo/SisdaiBotonesRadioGrupo.vue';
 import SisdaiBotonRadio from '@centrogeomx/sisdai-componentes/src/componentes/boton-radio/SisdaiBotonRadio.vue';
+import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
+import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes/campo-busqueda/SisdaiCampoBusqueda.vue';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
@@ -49,8 +48,6 @@ const mensajes = ref([]);
 const modalReporteInfo = ref(null);
 const modalReporteInstrucciones = ref(null);
 const modalEspacializarInstrucciones = ref(null);
-// const controlDeslizante = ref(null);
-// const areaTextoRef = ref(null);
 const isSubmitting = ref(false);
 
 const chatId = computed(() => parseInt(route.params.id) || 0);
@@ -63,9 +60,6 @@ const previewReporte = ref(null);
 const idAleatorio = () => {
   return 'areatexto-' + Math.random().toString(36).substring(2);
 };
-// const idAleatorioCD = () => {
-//   return 'controldeslizante-' + Math.random().toString(36).substring(2);
-// };
 
 // Función para cargar historico de chat
 async function loadExistentChat(idchat) {
@@ -257,10 +251,6 @@ function manejarScroll() {
 function renderMarkdown(content) {
   return DOMPurify.sanitize(marked.parse(content));
 }
-
-// function enfocarAreaTexto() {
-//   areaTextoRef.value.focus();
-// }
 
 // Función para hacer scroll al final solo si el usuario no ha hecho scroll manual
 function scrollToBottomIfNeeded() {
@@ -1468,6 +1458,7 @@ watch(seleccionTipoArchivo, (nv) => {
           <template #encabezado>
             <h2>Reporte</h2>
           </template>
+
           <template #cuerpo>
             <div v-if="previewReporte" class="m-y-2" style="width: 100%; height: 60vh">
               <!-- El iframe renderizará nativamente PDFs y TXT que el navegador soporte -->
@@ -1496,6 +1487,7 @@ watch(seleccionTipoArchivo, (nv) => {
               </div>
             </div>
           </template>
+
           <template #pie>
             <button
               class="boton-secundario boton-chico"
