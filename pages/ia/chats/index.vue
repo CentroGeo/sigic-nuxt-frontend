@@ -4,6 +4,13 @@ import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
+definePageMeta({
+  middleware: 'sidebase-auth',
+  bodyAttrs: {
+    class: '',
+  },
+});
+
 const storeIA = useIAStore();
 const router = useRouter();
 
