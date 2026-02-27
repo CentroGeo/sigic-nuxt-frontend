@@ -1,5 +1,6 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+import { dictIdiomas } from '~/utils/catalogo';
 import { categoriesInSpanish } from '~/utils/consulta';
 const props = defineProps({
   reviewPk: {
@@ -15,7 +16,7 @@ const props = defineProps({
 const config = useRuntimeConfig();
 const { gnoxyFetch } = useGnoxyUrl();
 const isLoading = ref(false);
-const resource = ref(null);
+const resource = ref({});
 
 const dateTypeDict = {
   creation: 'Creación',
@@ -23,10 +24,30 @@ const dateTypeDict = {
   revision: 'Revision',
 };
 
+const dictLicencia = {
+  not_specified: 'No especificado(a)',
+  varied_original: 'Varios / Original',
+  varied_derived: 'Varios / Derivados(as)',
+  public_domain: 'Dominio público',
+  public_domain_usg: 'Dominio público / Gobierno de EUA',
+  odbl: 'Licencia abierta de bases de datos abiertos',
+  nextview: 'NextView',
+};
+
 const modalRevisionBasicos = ref(null);
 const modalRevisionLicencias = ref(null);
 const modalRevisionOpcionales = ref(null);
 const modalRevisionAtributos = ref(null);
+
+function getKeywords(resourceKeywords) {
+  const keywords = resourceKeywords.map((d) => d.name);
+  return keywords.join(', ');
+}
+
+function findLanguage(language) {
+  const languageDict = dictIdiomas.find((d) => Object.keys(d).includes(language));
+  return languageDict[language];
+}
 
 async function fetchResource() {
   isLoading.value = true;
@@ -34,19 +55,29 @@ async function fetchResource() {
   const url = `${config.public.geonodeApi}/${props.resourceType}/${props.reviewPk}`;
   const request = await gnoxyFetch(url);
   const res = await request.json();
-  resource.value = res[type];
-  console.log(resource.value);
-  isLoading.value = false;
-}
+  const data = res[type];
+  console.log(data);
 
-function getKeywords() {
-  const keywords = resource.value.keywords.map((d) => d.name);
-  return keywords.join(', ');
+  resource.value['title'] = data.title;
+  resource.value['abstract'] = data.raw_abstract;
+  resource.value['date_type'] = dateTypeDict[data.date_type];
+  resource.value['date'] = data.date;
+  resource.value['category'] = categoriesInSpanish[data.category.gn_description];
+  resource.value['keywords'] = getKeywords(data.keywords);
+  resource.value['language'] = findLanguage(data.language);
+  resource.value['license'] = dictLicencia[data.license.identifier];
+  resource.value['attribution'] = data.attribution;
+  resource.value['data_quality_statement'] = data.raw_data_quality_statement;
+  resource.value['restrictions'] = data.restriction_code_type.identifier;
+  resource.value['constraints_others'] = data.raw_constraints_other;
+
+  isLoading.value = false;
 }
 
 function abrirModalRevision() {
   modalRevisionBasicos.value?.abrirModal();
 }
+
 defineExpose({
   abrirModalRevision,
 });
@@ -95,7 +126,7 @@ onMounted(async () => {
           <div class="m-b-2 columna-8">
             <label class="m-0">Tipo de fecha</label>
             <p class="m-0">
-              {{ dateTypeDict[resource.date_type] }}
+              {{ resource.date_type }}
             </p>
           </div>
           <div class="m-b-2 columna-8">
@@ -107,13 +138,13 @@ onMounted(async () => {
           <div class="m-b-2 columna-16">
             <label class="m-0">Categoría</label>
             <p class="m-0">
-              {{ categoriesInSpanish[resource.category.gn_description] }}
+              {{ resource.category }}
             </p>
           </div>
           <div class="m-b-2 columna-16">
             <label class="m-0">Palabras clave</label>
             <p class="m-0">
-              {{ getKeywords() }}
+              {{ resource.keywords }}
             </p>
           </div>
         </div>
@@ -143,6 +174,7 @@ onMounted(async () => {
         <p style="color: transparent">.</p>
       </template>
 
+      <!--Cuerpo de Ubicación y Licencias-->
       <template #cuerpo>
         <CatalogoHeaderMetadatos
           :resource="resource"
@@ -150,7 +182,46 @@ onMounted(async () => {
           :exclude-links="true"
         />
 
-        <!--Cuerpo de metadatos básicos-->
+        <div class="m-t-3">
+          <div class="flex">
+            <div class="m-b-2 columna-8">
+              <label class="m-0">Idioma</label>
+              <p class="m-0">
+                {{ resource.language }}
+              </p>
+            </div>
+            <div class="m-b-2 columna-8">
+              <label class="m-0">Licencia</label>
+              <p class="m-0">
+                {{ resource.license }}
+              </p>
+            </div>
+            <div class="m-b-2 columna-16">
+              <label class="m-0">Autores o Institución</label>
+              <p class="m-0">
+                {{ resource.attribution }}
+              </p>
+            </div>
+            <div class="m-b-2 columna-16">
+              <label class="m-0">Estado de Calidad de datos</label>
+              <p class="m-0">
+                {{ resource.data_quality_statement }}
+              </p>
+            </div>
+            <div class="m-b-2 columna-16">
+              <label class="m-0">Resctricciones</label>
+              <p class="m-0">
+                {{ resource.restrictions }}
+              </p>
+            </div>
+            <div class="m-b-2 columna-16">
+              <label class="m-0">Otras restricciones</label>
+              <p class="m-0">
+                {{ resource.constraints_other }}
+              </p>
+            </div>
+          </div>
+        </div>
       </template>
       <template #pie>
         <!--Botones-->
