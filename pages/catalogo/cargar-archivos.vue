@@ -103,6 +103,8 @@ async function guardarArchivo(files) {
             const match = res_geoserver.match(/numberOfFeatures="(\d+)"/);
             archivo.numero_geometrias = match ? parseInt(match[1], 10) : null;
             archivo.proyeccion = proyeccion;
+          } else if (tipo === 'dataTable') {
+            archivo.tipo_recurso = tipo;
           }
         } else {
           tipo = 'document';

@@ -27,10 +27,12 @@ const seleccionTipoArchivo = computed({
   get: () => storeFilters.filters.requests,
   set: (value) => storeFilters.updateFilter('requests', value),
 });
-const seleccionOrden = computed({
+
+const seleccionOrden = ref('updated_at');
+/* const seleccionOrden = computed({
   get: () => storeFilters.filters.sort,
   set: (value) => storeFilters.updateFilter('sort', value),
-});
+}); */
 
 /* const inputSearch = computed({
   get: () => storeFilters.filters.inputSearch,
@@ -97,7 +99,11 @@ function updateResources() {
 
 function fetchNewData() {
   storeResources.resetBySection(section);
-  storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, params.value);
+  storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, {
+    ...params.value,
+    'filter{owner}': storeCatalogo.userInfo.pk,
+    ordering: seleccionOrden.value,
+  });
 }
 
 watch([seleccionTipoArchivo], () => {
@@ -108,9 +114,13 @@ watch(paginaActual, () => {
   fetchNewData();
 });
 
-watch(params, () => {
+watch([params, seleccionOrden], () => {
   paginaActual.value = 0;
-  storeResources.getMyTotal('publicacion', params.value);
+  storeResources.getMyTotal('publicacion', {
+    ...params.value,
+    'filter{owner}': storeCatalogo.userInfo.pk,
+    ordering: seleccionOrden.value,
+  });
   fetchNewData();
 });
 
@@ -128,8 +138,6 @@ onMounted(async () => {
   storeFilters.buildQueryParams('all');
   storeResources.getMyTotal('disponibles', params.value);
   storeResources.getMyTotal('pendientes', params.value);
-  //storeResources.getMyTotal('publicacion', params.value);
-  //fetchNewData();
 });
 </script>
 
@@ -155,9 +163,9 @@ onMounted(async () => {
               >
                 <option value="all">Todos los estatus</option>
                 <option value="on_review">En revisión</option>
-                <option value="published">Aceptados</option>
+                <option value="published">Publicados</option>
                 <option value="pending">Pendientes</option>
-                <option value="rejected">No Aceptados</option>
+                <option value="rejected">No aceptados</option>
               </select>
             </ClientOnly>
           </div>
@@ -165,16 +173,17 @@ onMounted(async () => {
           <div class="columna-7">
             <ClientOnly>
               <label for="selector-orden-solicitudes">Ordenar por</label>
+              <!-- :disabled="isLoading"-->
               <select
                 v-model="seleccionOrden"
                 name="selector-tipo-solicitudes"
                 class="m-b-2"
-                :disabled="isLoading"
+                :disabled="true"
               >
-                <option value="titulo">Título</option>
-                <option value="categoria">Categoría</option>
-                <option value="fecha_descendente">Más reciente</option>
-                <option value="fecha_ascendente">Más antiguo</option>
+                <option value="title">Título</option>
+                <option value="category">Categoría</option>
+                <option value="updated_at">Más reciente</option>
+                <option value="-updated_at">Más antiguo</option>
               </select>
             </ClientOnly>
           </div>

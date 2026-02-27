@@ -91,6 +91,7 @@ function irARutaConQuery(recurso) {
  * Redirige a la vista de revisión de un recurso
  * */
 async function openResourceReview(resource) {
+  console.log(route.path);
   if (resource.tipo_recurso === 'Documentos') {
     storeCatalogo.previousPath = route.path;
     await navigateTo({
@@ -783,7 +784,11 @@ async function removerRevision() {
             </div>
           </div>
           <!--Alerta de que fracasó la eliminación-->
-          <div v-if="wasDeletionSuccesful === false" class="flex" style="gap: 0px">
+          <div
+            v-if="wasDeletionSuccesful === false && !isBeingDeleted"
+            class="flex"
+            style="gap: 0px"
+          >
             <p
               class="columna-14 texto-color-error fondo-color-error borde borde-color-error p-2 borde-redondeado-8"
             >

@@ -10,6 +10,7 @@ const storeResources = useResourcesIAStore();
 const resourceByPk = ref();
 resourceByPk.value = await storeResources.fetchResourceByPk(props.selectedElementPk);
 
+const revisionMetadatos = ref(null);
 const paginaActual = ref(0);
 const tamanioPagina = 6;
 const {
@@ -40,13 +41,27 @@ watch([paginaActual], () => {
         <figcaption class="texto-centrado">Cargando tabla</figcaption>
       </figure>
     </div>
-    <div v-else class="contenedor-tabla">
-      <UiPaginador
-        :pagina-parent="paginaActual"
-        :total-paginas="Math.ceil(totalFeatures / tamanioPagina)"
-        @cambio="paginaActual = $event"
+    <div v-else>
+      <div class="columna-16">
+        <button class="boton-primario m-y-2" @click="revisionMetadatos?.abrirModalRevision">
+          Ver metadatos
+        </button>
+      </div>
+
+      <div class="contenedor-tabla">
+        <UiPaginador
+          :pagina-parent="paginaActual"
+          :total-paginas="Math.ceil(totalFeatures / tamanioPagina)"
+          @cambio="paginaActual = $event"
+        />
+        <UiTablaAccesible :variables="variables" :datos="datos" />
+      </div>
+
+      <CatalogoModalRevisionMeta
+        ref="revisionMetadatos"
+        :review-pk="props.selectedElementPk"
+        :resource-type="'datasets'"
       />
-      <UiTablaAccesible :variables="variables" :datos="datos" />
     </div>
   </div>
 </template>
