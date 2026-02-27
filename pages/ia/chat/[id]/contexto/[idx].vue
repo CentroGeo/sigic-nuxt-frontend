@@ -1635,7 +1635,6 @@ watch(seleccionTipoReporte, (nv) => {
             >
               <span
                 class="texto-color-acento flex-vertical-centrado pictograma-actualizar m-r-1 rotar"
-                style="animation: spin 2s linear infinite"
               />
               <p class="flex-vertical-centrado m-0">
                 Generando reporte: {{ reporte.report_name }}...
@@ -1684,6 +1683,15 @@ watch(seleccionTipoReporte, (nv) => {
   100% {
     transform: rotate(360deg);
   }
+}
+.rotar {
+  display: inline-flex;
+}
+.rotar::before {
+  display: inline-block;
+  animation: spin 2s linear infinite;
+  transform-origin: center;
+  line-height: inherit;
 }
 </style>
 
