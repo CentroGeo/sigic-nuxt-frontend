@@ -7,6 +7,12 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.14.0] - 27-02-2026
+
+### Agregado (Added)
+
+- Se agrega modal para espacializar y la funcionalidad para generar y consultar reportes en el módulo de IA.
+
 ## [0.13.0] - 27-02-2026
 
 ### Agregado (Added)
@@ -286,6 +292,7 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.14.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.4...v0.13.0
 [0.12.4]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.3...v0.12.4
 [0.12.3]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.2...v0.12.3

@@ -149,8 +149,8 @@ function openEliminarModal(element_id, type) {
 }
 
 const handleDelete = async () => {
-  console.log(eliminarLabel.value);
-  console.log(delete_id.value);
+  // console.log(eliminarLabel.value);
+  // console.log(delete_id.value);
   if (eliminarLabel.value === 'contexto') {
     await storeIA.eliminarContexto(delete_id.value);
 
