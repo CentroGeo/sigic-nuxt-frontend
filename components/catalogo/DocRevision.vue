@@ -33,9 +33,12 @@ onMounted(async () => {
 
 <template>
   <div v-if="blobedUrl !== ''" class="contenedor-doc-embed">
-    <button class="boton-primario m-y-2" @click="revisionMetadatos?.abrirModalRevision">
-      Ver metadatos
-    </button>
+    <div class="m-y-4 flex flex-contenido-separado">
+      <h2 class="m-0">{{ resourceByPk.title }}</h2>
+      <button class="boton-secundario p-1" @click="revisionMetadatos?.abrirModalRevision">
+        Ver metadatos
+      </button>
+    </div>
 
     <embed
       ref="documentRef"
