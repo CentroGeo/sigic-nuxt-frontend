@@ -171,11 +171,15 @@ async function monitorLayerImport(executionId, archivo) {
             <b>Solo archivos GeoJSON, Geopaquetes, csv, pdf y txt.</b>
           </p>
           <p
-            class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-2 p-2 m-y-2"
+            class="texto-color-informacion fondo-color-informacion borde borde-color-informacion borde-redondeado-2 p-2 m-y-2"
           >
-            Para subir archivos csv verifica que el nombre de las columnas de geometría corresponda
-            con alguna de las siguientes ipciones en caso de tenerla: x, y; long, lat o longitude,
-            latitude.
+            Los archivos en formato CSV se almacenan como datos tabulares, a menos que contengan
+            coordenadas que representen una ubicación puntual. Para que el sistema reconozca dichas
+            coordenadas, estas deben expresarse como valores numéricos en columnas cuyos nombres
+            correspondan a alguno de los siguientes pares admitidos: x, y; long, lat; o longitude,
+            latitude. Si el archivo contiene datos de coordenadas pero estos no siguen la
+            nomenclatura establecida, serán procesados como cualquier otro valor numérico sin
+            interpretación geoespacial.
           </p>
           <ClientOnly>
             <CatalogoElementoDragNdDrop @pasar-archivo="(i) => guardarArchivo(i)" />
