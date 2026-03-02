@@ -7,6 +7,14 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.14.1] - 02-03-2026
+
+### Fixed (Arreglado)
+
+- Al subir archivos sld, se agregó al nombre del archivo subido el pk de la capa asociada para evitar colisiones en geoserver.
+- Se editó el contenido del cuadro de información en la sección de carga de archivos para hacer algunas precisiones respecto al manejo de los csv.
+- Se modificó el estilo del botón de revisión de metadatos en la sección de revisión para publicación.
+
 ## [0.14.0] - 27-02-2026
 
 ### Agregado (Added)
@@ -292,6 +300,7 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.14.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.14.0...v0.14.1
 [0.14.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.4...v0.13.0
 [0.12.4]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.3...v0.12.4

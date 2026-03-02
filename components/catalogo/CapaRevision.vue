@@ -127,10 +127,13 @@ onMounted(async () => {
 
 <template>
   <div v-if="!isLoading">
-    <h2>{{ resourceElement.title }}</h2>
-    <button class="boton-primario m-b-2" @click="revisionMetadatos?.abrirModalRevision">
-      Ver metadatos
-    </button>
+    <div class="m-y-4 flex flex-contenido-separado">
+      <h2 class="m-0">{{ resourceElement.title }}</h2>
+      <button class="boton-secundario p-1" @click="revisionMetadatos?.abrirModalRevision">
+        Ver metadatos
+      </button>
+    </div>
+
     <ConsultaLayoutPaneles>
       <template #catalogo> </template>
 
