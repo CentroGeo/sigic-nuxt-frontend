@@ -96,7 +96,11 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
           body: body,
         });
 
-        /* console.log(data.proyectos[0]); */
+        if (data.proyectos[0].es_privada) {
+          this.existenParticipantes = false;
+        } else {
+          this.existenParticipantes = true;
+        }
         return data.proyectos[0];
       } catch (err) {
         console.error('Error cargando proyecto:', err);
@@ -374,16 +378,26 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
         console.error('Error obteniendo proyectos por status:', err);
       }
     },
-    async obtenerProyectosRechazados() {
-      const proyecto = {
-        id: 1,
-        nombre: 'Registro de arte urbano en la ciudad de Mérida, Yucatán',
-        institucion: 'Dirección de Cultura',
-        lider: 'Daniela Acuña',
-      };
+    async obtenerProyectosRechazados(email) {
+      try {
+        const body = {
+          email: email,
+          status: 'RECHAZADO',
+        };
 
-      this.proyectosRechazados.push(proyecto);
-      this.existenProyectosRechazados = true;
+        const data = await $fetch(`${apiUrl}/projects/reviewer/list`, {
+          method: 'POST',
+          body: body,
+        });
+
+        console.log(data.proyectos);
+        this.proyectosRechazados = data.proyectos;
+        if (data.proyectos.length > 0) {
+          this.existenProyectosRechazados = true;
+        }
+      } catch (err) {
+        console.error('Error obteniendo proyectos por status:', err);
+      }
     },
     async actualizarStatusProyecto(payload, idProyecto) {
       try {
@@ -426,6 +440,12 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
       } catch (err) {
         console.error('Error obteniendo proyectos por status:', err);
       }
+    },
+    obtenerTotalProyectosAprobados() {
+      return this.proyectosAprobados.length;
+    },
+    obtenerTotalProyectosRechazados() {
+      return this.proyectosRechazados.length;
     },
   };
 });

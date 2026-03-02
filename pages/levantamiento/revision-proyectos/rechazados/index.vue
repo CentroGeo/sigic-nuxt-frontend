@@ -6,11 +6,20 @@ definePageMeta({
 
 const storeLevantamiento = useLevantamientoStore();
 
+const { data } = useAuth();
+
 onMounted(() => {
-  storeLevantamiento.obtenerProyectosRechazados();
+  storeLevantamiento.obtenerProyectosRechazados(data.value?.user.email);
 });
 
 const modalComentarios = ref(null);
+
+const comentarioSeleccionado = ref('');
+
+const abrirComentarios = (comentarios) => {
+  comentarioSeleccionado.value = comentarios;
+  modalComentarios.value.abrirModal();
+};
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeLevantamiento.catalogoColapsado">
@@ -39,7 +48,7 @@ const modalComentarios = ref(null);
         <div class="flex titulo-contenido-levantamiento">
           <h2>Proyectos rechazados</h2>
           <UiNumeroElementos
-            :numero="storeLevantamiento.obtenerTotalProyectosEnRevision()"
+            :numero="storeLevantamiento.obtenerTotalProyectosRechazados()"
             etiqueta="Proyectos"
           />
         </div>
@@ -87,7 +96,7 @@ const modalComentarios = ref(null);
               <button
                 class="boton-secundario boton-chico boton-accion-proyecto fondo-color-primario"
                 type="button"
-                @click="modalComentarios.abrirModal()"
+                @click="abrirComentarios(proyecto.comentario_curador)"
               >
                 Ver comentarios
               </button>
@@ -103,9 +112,7 @@ const modalComentarios = ref(null);
             <p>El proyecto fue rechazado por los siguientes motivos:</p>
             <div class="fondo-color-error p-x-2 p-y-1 borde borde-color-error borde-redondeado-20">
               <p class="texto-color-error">
-                La configuración de la información general del proyecto no está completa <br />
-                El formulario de aportes tiene contenido no permitido <br />
-                El contenido de tu proyecto no cumple con las políticas de uso del sistema
+                {{ comentarioSeleccionado }}
               </p>
             </div>
           </template>

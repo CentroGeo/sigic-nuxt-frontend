@@ -37,7 +37,10 @@ onMounted(() => {
 
         <div class="flex titulo-contenido-levantamiento">
           <h2>Proyectos aprobados</h2>
-          <UiNumeroElementos :numero="0" etiqueta="Proyectos" />
+          <UiNumeroElementos
+            :numero="storeLevantamiento.obtenerTotalProyectosAprobados()"
+            etiqueta="Proyectos"
+          />
         </div>
         <div
           v-if="!storeLevantamiento.existenProyectosAprobados"
