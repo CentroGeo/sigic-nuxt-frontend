@@ -366,9 +366,10 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
           body: body,
         });
 
-        console.log(data);
         this.proyectosEnRevision = data.proyectos;
-        this.existenProyectosEnRevision = true;
+        if (data.proyectos.length > 0) {
+          this.existenProyectosEnRevision = true;
+        }
       } catch (err) {
         console.error('Error obteniendo proyectos por status:', err);
       }
@@ -403,6 +404,27 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
       } catch (error) {
         console.error('Error:', error);
         throw error;
+      }
+    },
+    async obtenerProyectosAprobados(email) {
+      try {
+        const body = {
+          email: email,
+          status: 'APROBADO',
+        };
+
+        const data = await $fetch(`${apiUrl}/projects/reviewer/list`, {
+          method: 'POST',
+          body: body,
+        });
+
+        console.log(data);
+        this.proyectosAprobados = data.proyectos;
+        if (data.proyectos.length > 0) {
+          this.existenProyectosAprobados = true;
+        }
+      } catch (err) {
+        console.error('Error obteniendo proyectos por status:', err);
       }
     },
   };

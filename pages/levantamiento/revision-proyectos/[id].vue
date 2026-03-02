@@ -1,6 +1,4 @@
 <script setup>
-import SisdaiAreaTexto from '@centrogeomx/sisdai-componentes/src/componentes/area-texto/SisdaiAreaTexto.vue';
-import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import { useRouter } from 'vue-router';
 import { formatDate } from '~/utils/levantamiento';
 
@@ -55,53 +53,6 @@ watch(
   { immediate: true }
 );
 
-function irAProyectosEnRevision() {
-  router.push('/levantamiento/revision-proyectos/revision');
-}
-
-const comentarios = ref('');
-
-const modalAprobarProyecto = ref(null);
-
-const modalProyectoAprobado = ref(null);
-
-const aprobarProyecto = async () => {
-  const payload = {
-    status: 'APROBADO',
-    user_id: data.value?.user.email,
-  };
-
-  await storeLevantamiento.actualizarStatusProyecto(payload, route.params.id);
-
-  const payloadPrivacidad = {
-    isPrivate: false,
-  };
-
-  await storeLevantamiento.actualizarFormularioParticipantesProyecto(
-    payloadPrivacidad,
-    route.params.id
-  );
-
-  modalAprobarProyecto.value.cerrarModal();
-  modalProyectoAprobado.value.abrirModal();
-};
-
-const modalRechazarProyecto = ref(null);
-const modalProyectoRechazado = ref(null);
-
-const rechazarProyecto = async () => {
-  const payload = {
-    status: 'RECHAZADO',
-    user_id: data.value?.user.email,
-    report: comentarios.value,
-  };
-
-  await storeLevantamiento.actualizarStatusProyecto(payload, route.params.id);
-
-  modalRechazarProyecto.value.cerrarModal();
-  modalProyectoRechazado.value.abrirModal();
-};
-
 function irAProyectosAprobados() {
   router.push('/levantamiento/revision-proyectos');
 }
@@ -121,28 +72,19 @@ function irAProyectosAprobados() {
                 class="boton-pictograma boton-sin-contenedor-secundario m-r-2"
                 aria-label="Regresar a proyectos"
                 type="button"
-                @click="irAProyectosEnRevision"
+                @click="irAProyectosAprobados"
               >
                 <span class="pictograma-flecha-izquierda" aria-hidden="true" />
               </button>
-              Proyectos en revisión
+              Proyectos aprobados
             </div>
           </div>
           <div class="flex">
-            <button
-              class="boton boton-primario boton-chico"
-              type="button"
-              @click="modalAprobarProyecto.abrirModal()"
+            <p
+              class="borde borde-redondeado-12 p-x-1 p-y-minimo fondo-color-confirmacion texto-color-confirmacion borde-color-confirmacion m-0"
             >
-              Aceptar
-            </button>
-            <button
-              class="boton boton-primario boton-chico"
-              type="button"
-              @click="modalRechazarProyecto.abrirModal()"
-            >
-              Rechazar
-            </button>
+              Aprobado
+            </p>
           </div>
         </div>
         <div class="flex p-6 fondo-color-acento">
@@ -217,104 +159,6 @@ function irAProyectosAprobados() {
           </div>
         </div>
       </main>
-
-      <ClientOnly>
-        <SisdaiModal ref="modalAprobarProyecto">
-          <template #encabezado><h3>Aprobar proyecto</h3></template>
-          <template #cuerpo>
-            <p>¿Estás seguro que deseas aprobar este proyecto?</p>
-            <div
-              class="fondo-color-informacion p-x-2 p-y-1 borde borde-color-informacion borde-redondeado-20"
-            >
-              <p class="texto-color-informacion">
-                Cuando un proyecto es aprobado se hace público, todas las personas podrán realizar
-                aportes.
-              </p>
-            </div>
-          </template>
-          <template #pie>
-            <button
-              class="boton-secundario boton-chico"
-              type="button"
-              @click="modalAprobarProyecto.cerrarModal()"
-            >
-              Cerrar
-            </button>
-            <button class="boton-primario boton-chico" type="button" @click="aprobarProyecto">
-              Aprobar proyecto
-            </button>
-          </template>
-        </SisdaiModal>
-
-        <SisdaiModal ref="modalProyectoAprobado">
-          <template #encabezado><h3>Proyecto aprobado</h3></template>
-          <template #cuerpo>
-            <div
-              class="fondo-color-confirmacion p-x-2 p-y-1 borde borde-color-confirmacion borde-redondeado-20"
-            >
-              <p class="texto-color-confirmacion">
-                El proyecto se ha aprobdo y ahora es público, todas las personas pueden realizar
-                aportes.
-              </p>
-            </div>
-          </template>
-          <template #pie>
-            <button
-              class="boton-secundario boton-chico"
-              type="button"
-              @click="irAProyectosAprobados"
-            >
-              Ir a proyectos aprobados
-            </button>
-            <button
-              class="boton-primario boton-chico"
-              type="button"
-              @click="modalProyectoAprobado.cerrarModal()"
-            >
-              Seguir revisando
-            </button>
-          </template>
-        </SisdaiModal>
-
-        <SisdaiModal ref="modalRechazarProyecto">
-          <template #encabezado><h3>Rechazar proyecto</h3></template>
-          <template #cuerpo>
-            <p>Agrega en los comentarios los motivos del dictamen.</p>
-            <SisdaiAreaTexto
-              v-model="comentarios"
-              etiqueta="Comentarios"
-              ejemplo="Etiqueta de ejemplo"
-              :es_etiqueta_visible="true"
-              :es_obligatorio="false"
-            />
-          </template>
-          <template #pie>
-            <button
-              class="boton-secundario boton-chico"
-              type="button"
-              @click="modalRechazarProyecto.cerrarModal()"
-            >
-              Cerrar
-            </button>
-            <button class="boton-primario boton-chico" type="button" @click="rechazarProyecto">
-              Rechazar proyecto
-            </button>
-          </template>
-        </SisdaiModal>
-
-        <SisdaiModal ref="modalProyectoRechazado">
-          <template #encabezado><h3>Proyecto rechazado</h3></template>
-          <template #cuerpo>
-            <div
-              class="fondo-color-informacion p-x-2 p-y-1 borde borde-color-informacion borde-redondeado-20"
-            >
-              <p class="texto-color-informacion">
-                El proyecto se ha rechazado y los comentarios han sido enviados.
-              </p>
-            </div>
-          </template>
-        </SisdaiModal>
-      </ClientOnly>
     </template>
   </UiLayoutPaneles>
 </template>

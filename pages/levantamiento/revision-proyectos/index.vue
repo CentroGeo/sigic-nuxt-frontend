@@ -4,6 +4,12 @@ definePageMeta({
 });
 
 const storeLevantamiento = useLevantamientoStore();
+
+const { data } = useAuth();
+
+onMounted(() => {
+  storeLevantamiento.obtenerProyectosAprobados(data.value?.user.email);
+});
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeLevantamiento.catalogoColapsado">
@@ -48,6 +54,36 @@ const storeLevantamiento = useLevantamientoStore();
           </div>
           <div class="columna-4"></div>
         </div>
+        <div v-else>
+          <div class="grid">
+            <div
+              v-for="proyecto in storeLevantamiento.proyectosAprobados"
+              :key="proyecto.id"
+              class="columna-5 fondo-color-neutro p-3 borde-redondeado-20"
+            >
+              <div class="flex flex-contenido-final m-b-1">
+                <p
+                  class="borde borde-redondeado-12 p-x-1 p-y-minimo fondo-color-confirmacion texto-color-confirmacion borde-color-confirmacion m-0"
+                >
+                  Aprobado
+                </p>
+              </div>
+              <img class="icono-proyecto m-b-minimo color-invertir" src="/img/icono_sigic.png" />
+              <div class="m-b-minimo texto-tamanio-4 nombre-proyecto">
+                <b>{{ proyecto.nombre }}</b>
+              </div>
+              <div class="m-b-minimo texto-color-secundario">{{ proyecto.institucion }}</div>
+              <div class="m-b-minimo texto-color-secundario">{{ proyecto.lider }}</div>
+              <NuxtLink
+                class="boton boton-primario boton-chico boton-accion-proyecto m-t-3"
+                aria-label="Revisar proyecto"
+                :to="`/levantamiento/revision-proyectos/${proyecto.id}`"
+              >
+                Ver proyecto
+              </NuxtLink>
+            </div>
+          </div>
+        </div>
       </main>
     </template>
   </UiLayoutPaneles>
@@ -65,5 +101,15 @@ const storeLevantamiento = useLevantamientoStore();
 .contenido-levantamiento {
   flex: 1;
   align-items: center;
+}
+
+.icono-proyecto {
+  width: 40px;
+  height: 40px;
+}
+
+.boton-accion-proyecto {
+  width: 100%;
+  justify-content: center;
 }
 </style>
