@@ -177,10 +177,11 @@ async function monitorLayerImport(executionId, archivo) {
             coordenadas que representen una ubicación puntual. Para que el sistema reconozca dichas
             coordenadas, estas deben expresarse como valores numéricos en columnas cuyos nombres
             correspondan a alguno de los siguientes pares admitidos: x, y; long, lat; o longitude,
-            latitude. Si el archivo contiene datos de coordenadas pero estos no siguen la
-            nomenclatura establecida, serán procesados como cualquier otro valor numérico sin
-            interpretación geoespacial.
+            latitude.
           </p>
+          <!-- Si el archivo contiene datos de coordenadas pero estos no siguen la
+            nomenclatura establecida, serán procesados como cualquier otro valor numérico sin
+            interpretación geoespacial.-->
           <ClientOnly>
             <CatalogoElementoDragNdDrop @pasar-archivo="(i) => guardarArchivo(i)" />
           </ClientOnly>
