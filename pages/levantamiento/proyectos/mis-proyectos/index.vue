@@ -54,8 +54,11 @@ const nuevoProyecto = reactive({
   instrucciones: '',
 });
 
-onMounted(() => {
-  storeLevantamiento.obtenerMisProyectos(data.value?.user.email);
+const proyectosFiltrado = ref([]);
+
+onMounted(async () => {
+  await storeLevantamiento.obtenerMisProyectos(data.value?.user.email);
+  proyectosFiltrado.value = storeLevantamiento.proyectos;
 });
 
 const modalDescargarDatos = ref(null);
@@ -149,7 +152,12 @@ onBeforeUnmount(() => {
             <div class="columna-8">
               <ClientOnly>
                 <label for="buscadoravanzado">Buscador</label>
-                <SisdaiCampoBusqueda etiqueta="" />
+                <SisdaiCampoBusqueda
+                  etiqueta=""
+                  :catalogo="storeLevantamiento.proyectos"
+                  propiedad-busqueda="nombre"
+                  @al-filtrar="(r) => (proyectosFiltrado = r)"
+                />
               </ClientOnly>
             </div>
             <div class="columna-8 flex flex-contenido-final">
@@ -164,7 +172,7 @@ onBeforeUnmount(() => {
           </div>
           <div class="grid">
             <div
-              v-for="proyecto in storeLevantamiento.proyectos"
+              v-for="proyecto in proyectosFiltrado"
               :key="proyecto.id"
               class="columna-4 fondo-color-neutro p-3 borde-redondeado-20"
             >

@@ -329,7 +329,7 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
           method: 'POST',
           body: body,
         });
-        console.log(data);
+
         this.proyectosCompartidos = data.proyectos;
       } catch (err) {
         console.error('Error cargando proyectos compartidos:', err);
@@ -349,7 +349,6 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
           body: body,
         });
 
-        console.log(data);
         this.esRevisor = data.is_reviewer;
       } catch (err) {
         console.error('Error cargando rol usuario:', err);
@@ -390,7 +389,6 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
           body: body,
         });
 
-        console.log(data.proyectos);
         this.proyectosRechazados = data.proyectos;
         if (data.proyectos.length > 0) {
           this.existenProyectosRechazados = true;
@@ -432,7 +430,6 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
           body: body,
         });
 
-        console.log(data);
         this.proyectosAprobados = data.proyectos;
         if (data.proyectos.length > 0) {
           this.existenProyectosAprobados = true;
