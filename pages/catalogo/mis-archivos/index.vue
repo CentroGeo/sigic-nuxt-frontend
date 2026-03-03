@@ -21,6 +21,7 @@ const haySolicitudesDeAprobacion = computed(() =>
 );
 const totalResources = computed(() => storeResources.myTotalBySection(section));
 const resources = computed(() => storeResources.mineBySection(section));
+const appliedFilters = ref(false);
 const tableResources = ref([]);
 const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'acciones'];
 const paginaActual = ref(0);
@@ -145,6 +146,19 @@ function resetAdvancedFilter() {
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
 }
 
+function updateAppliedFilters() {
+  if (
+    Object.keys(params.value).includes('filter{resource_type.in}') ||
+    Object.keys(params.value).includes('filter{subtype.in}') ||
+    Object.keys(params.value).includes('search') ||
+    isFilterActive.value
+  ) {
+    appliedFilters.value = true;
+  } else {
+    appliedFilters.value = false;
+  }
+}
+
 watch([seleccionTipoArchivo, seleccionOrden], () => {
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
 });
@@ -157,6 +171,7 @@ watch(params, () => {
   paginaActual.value = 0;
   storeResources.getMyTotal(section, params.value);
   fetchNewData();
+  updateAppliedFilters();
 });
 watch(
   resources,
@@ -167,13 +182,15 @@ watch(
 );
 
 onMounted(async () => {
+  appliedFilters.value = false;
   await storeCatalogo.getUserInfo();
   storeFilters.resetAll();
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
   storeResources.getMyTotal('pendientes', params.value);
-  storeResources.getMyTotal('publicacion', params.value);
-  //storeResources.getMyTotal('disponibles', params.value);
-  //  //await fetchNewData();
+  storeResources.getMyTotal('publicacion', {
+    ...params.value,
+    'filter{owner}': storeCatalogo.userInfo.pk,
+  });
 });
 </script>
 
@@ -306,7 +323,8 @@ onMounted(async () => {
           <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
         </div>
 
-        <div v-if="totalResources === 0 && !isLoading" class="flex">
+        <!--Cuando no se encontraron resultados que coincidan con la búsqueda-->
+        <div v-if="totalResources === 0 && !isLoading && appliedFilters" class="flex">
           <div
             class="flex flex-contenido-centrado columna-16 borde-redondeado-16 m-2 fondo-color-informacion texto-color-informacion p-2"
           >
@@ -315,6 +333,30 @@ onMounted(async () => {
             </p>
           </div>
         </div>
+
+        <!--Cuando no se hay archivos en la sección-->
+        <div v-if="totalResources === 0 && !isLoading && !appliedFilters">
+          <div class="flex flex-contenido-centrado">
+            <div class="columna-7">
+              <div class="fondo-color-acento borde-redondeado-8 p-x-3 p-y-1 m-b-3">
+                <p>Aún no hay archivos en esta sección.</p>
+                <p>
+                  No tienes archivos disponibles. Para iniciar, dirígete a Mis archivos > Metadatos
+                  pendientes y selecciona un archivo para completar sus metadatos.
+                </p>
+              </div>
+              <div class="flex flex-contenido-centrado">
+                <NuxtLink
+                  class="boton boton-primario"
+                  to="/catalogo/mis-archivos/metadatos-pendientes"
+                  >Metadatos pendientes
+                </NuxtLink>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!--Cuando si hay archivos-->
         <p v-if="totalResources !== 0 && !isLoading">
           En esta tabla se muestran los archivos disponibles para su consulta y uso.
         </p>

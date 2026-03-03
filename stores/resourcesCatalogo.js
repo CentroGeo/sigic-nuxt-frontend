@@ -233,10 +233,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       } else if (section === 'pendientes') {
         queryParams['filter{complete_metadata}'] = 'false';
         queryParams['filter{owner.username}'] = userEmail;
-      } else if (section === 'publicacion') {
-        if (storeCatalogo.userInfo.pk) {
-          queryParams['filter{owner}'] = storeCatalogo.userInfo.pk;
-        }
       }
 
       // Excluimos los servicios usando queryparams

@@ -4,6 +4,13 @@ import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
+definePageMeta({
+  middleware: 'sidebase-auth',
+  bodyAttrs: {
+    class: '',
+  },
+});
+
 const storeIA = useIAStore();
 const router = useRouter();
 
@@ -252,7 +259,7 @@ onMounted(() => {
         </div>
 
         <div v-if="listaChats.length === 0">
-          <div class="nota fondo-color-neutro p-2 borde-redondeado-8">
+          <div class="nota fondo-color-neutro p-2 borde-redondeado-8 m-x-3">
             <h6 class="m-t-0">Crea un contexto para iniciar un chat</h6>
 
             <p class="m-b-0">

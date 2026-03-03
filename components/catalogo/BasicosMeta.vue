@@ -62,26 +62,26 @@ const campoPalabrasClave = computed({
 });
 
 const dictCategoria = [
-  { imageryBaseMapsEarthCover: 'Mapas Base y Cobertura Terrestre' },
-  { society: 'Sociedad' },
+  { farming: 'Agricultura' },
+  { inlandWaters: 'Aguas Continentales' },
+  { biota: 'Biota' },
+  { climatologyMeteorologyAtmosphere: 'Climatología, Meteorología y Atmósfera' },
   { economy: 'Economía' },
-  { utilitiesCommunication: 'Servicios Públicos y Comunicación' },
+  { elevation: 'Elevación' },
+  { structure: 'Estructura' },
+  { boundaries: 'Fronteras' },
+  { geoscientificInformation: 'Información Geocientífica' },
+  { intelligenceMilitary: 'Inteligencia Militar' },
+  { imageryBaseMapsEarthCover: 'Mapas Base y Cobertura Terrestre' },
   { environment: 'Medio Ambiente' },
   { oceans: 'Océanos' },
-  { biota: 'Biota' },
-  { health: 'Salud' },
-  { elevation: 'Elevación' },
-  { geoscientificInformation: 'Información Geocientífica' },
   { planningCadastre: 'Planeación Catastral' },
-  { inlandWaters: 'Aguas Continentales' },
-  { boundaries: 'Fronteras' },
-  { structure: 'Estructura' },
-  { transportation: 'Transporte' },
-  { intelligenceMilitary: 'Inteligencia Militar' },
-  { location: 'Ubicación' },
-  { climatologyMeteorologyAtmosphere: 'Climatología, Meteorología y Atmósfera' },
-  { farming: 'Agricultura' },
   { population: 'Población' },
+  { health: 'Salud' },
+  { utilitiesCommunication: 'Servicios Públicos y Comunicación' },
+  { society: 'Sociedad' },
+  { transportation: 'Transporte' },
+  { location: 'Ubicación' },
 ];
 
 const dragNdDrop = ref(null);
@@ -161,7 +161,7 @@ async function guardarImagen(files) {
             >
               <option value="creation">Creación</option>
               <option value="publication">Publicación</option>
-              <option value="revison">Revisón</option>
+              <option value="revision">Revisón</option>
             </SisdaiSelector>
           </ClientOnly>
         </div>

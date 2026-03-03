@@ -1,6 +1,8 @@
 <script setup>
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
+import { dictIdiomas } from '~/utils/catalogo';
+
 /**
  * @typedef {Object} Props
  * @property {Object} [recurso={}] - Indica el recurso al que se le va a modificar los metadatos básicos.
@@ -56,124 +58,6 @@ const campoOtrasRestricciones = computed({
   set: (value) => storeMetadatos.updateAttr('constraints_other', value),
 });
 
-const dictIdiomas = [
-  { abk: 'Abjasio' },
-  { aar: 'Afar' },
-  { afr: 'Afrikáans' },
-  { aym: 'Aimara' },
-  { ger: 'Alemán' },
-  { amh: 'Amárico' },
-  { ara: 'Árabe' },
-  { asm: 'Asamés' },
-  { aze: 'Azerí' },
-  { bak: 'Baskir' },
-  { ben: 'Bengalí' },
-  { bel: 'Bielorruso' },
-  { bih: 'Bihari' },
-  { bis: 'Bislama' },
-  { bre: 'Bretón' },
-  { bul: 'Búlgaro' },
-  { kas: 'Cachemir' },
-  { kan: 'Canarés' },
-  { cat: 'Catalán' },
-  { chi: 'Chino' },
-  { twi: 'Chuí' },
-  { sin: 'Cingalés' },
-  { kor: 'Coreano' },
-  { cos: 'Corso' },
-  { dan: 'Danés' },
-  { dzo: 'Dzongkha' },
-  { slv: 'Esloveno' },
-  { spa: 'Español ' },
-  { epo: 'Esperanto' },
-  { est: 'Estonio' },
-  { fao: 'Faroés' },
-  { fin: 'Finés' },
-  { fij: 'Fiyiano' },
-  { fra: 'Francés ' },
-  { fry: 'Frisón' },
-  { glg: 'Gallego' },
-  { gre: 'Griego' },
-  { kal: 'Groenlandés' },
-  { grn: 'Guaraní' },
-  { guj: 'Guyarati' },
-  { hau: 'Hausa' },
-  { heb: 'Hebreo ' },
-  { hin: 'Hindi' },
-  { hun: 'Húngaro' },
-  { yid: 'Ídish' },
-  { ind: 'Indonesio' },
-  { eng: 'Inglés ' },
-  { ina: 'Interlingua' },
-  { iku: 'Inuktitut' },
-  { ita: 'Italiano' },
-  { ipk: 'Iñupiaq' },
-  { jpn: 'Japonés ' },
-  { khm: 'Jemer' },
-  { kaz: 'Kazajo' },
-  { kir: 'Kirguís' },
-  { run: 'Kirundi' },
-  { kin: 'Kiñaruanda' },
-  { kur: 'Kurdo' },
-  { lao: 'Laosiano' },
-  { lat: 'Latín' },
-  { lav: 'Letón' },
-  { lin: 'Lingala' },
-  { lit: 'Lituano' },
-  { mlg: 'Malgache' },
-  { mlt: 'Maltés' },
-  { mar: 'Maratí' },
-  { mol: 'Moldavo' },
-  { mon: 'Mongol' },
-  { nau: 'Nauruano' },
-  { nep: 'Nepalí' },
-  { nor: 'Noruego' },
-  { oci: 'Occitano' },
-  { ori: 'Odia' },
-  { orm: 'Oromo' },
-  { pus: 'Pastún' },
-  { pol: 'Polaco' },
-  { por: 'Portugués' },
-  { pan: 'Punyabí' },
-  { que: 'Quechua' },
-  { roh: 'Retorrománico' },
-  { rus: 'Ruso ' },
-  { smo: 'Samoano' },
-  { sag: 'Sango' },
-  { scr: 'Serbocroata' },
-  { sot: 'Sesotho' },
-  { tsn: 'Setsuana' },
-  { sna: 'Shona' },
-  { snd: 'Sindi' },
-  { som: 'Somalí' },
-  { swa: 'Suajili' },
-  { ssw: 'Suazi' },
-  { sun: 'Sudanés' },
-  { san: 'Sánscrito' },
-  { tgl: 'Tagalo' },
-  { tha: 'Tailandés' },
-  { tam: 'Tamil' },
-  { tgk: 'Tayiko' },
-  { tir: 'Tigriña' },
-  { tog: 'Tongano' },
-  { tso: 'Tsonga' },
-  { tur: 'Turco' },
-  { tuk: 'Turcomano' },
-  { tat: 'Tártaro' },
-  { tel: 'Télugu' },
-  { ukr: 'Ucraniano' },
-  { uig: 'Uigur' },
-  { urd: 'Urdu' },
-  { uzb: 'Uzbeko' },
-  { vie: 'Vietnamita' },
-  { vol: 'Volapük' },
-  { wol: 'Wólof' },
-  { xho: 'Xhosa' },
-  { yor: 'Yoruba' },
-  { zha: 'Zhuang' },
-  { zul: 'Zulu' },
-];
-
 const dictLicencia = [
   { not_specified: 'No especificado(a)' },
   { varied_original: 'Varios / Original' },
@@ -186,30 +70,31 @@ const dictLicencia = [
 
 const dictRestricciones = [
   {
-    copyright:
-      'exclusive right to the publication, production, or sale of the rights to a literary, dramatic, musical, or artistic work, or to the use of a commercial print or label, granted by law for a specified period of time to an author, composer, artist, distributor',
+    copyright: `Derecho exclusivo a la publicación, producción o venta de los derechos de una obra literaria, 
+    dramática, musical o artística, o al uso de una marca o etiqueta comercial, otorgado por la ley 
+    durante un periodo específico de tiempo a la persona autora, compositora, artista o distribuidora.`,
   },
   {
-    patent:
-      'government has granted exclusive right to make, sell, use or license an invention or discovery',
+    patent: `El gobierno ha otorgado el derecho exclusivo de hacer, vender, usar u otorgar licencia de patente 
+    de alguna invención o descubrimiento.`,
   },
   {
-    patentPending: 'produced or sold information awaiting a patent',
+    patentPending: `Información producida o vendida en espera de recibir una patente.`,
   },
   {
-    trademark:
-      'a name, symbol, or other device identifying a product, officially registered and legally restricted to the use of the owner or manufacturer',
+    trademark: `El nombre, símbolo u otro dispositivo que identifique a un producto. Éste debe estar registrado 
+    oficialmente y su uso está limitado jurídicamente al dueño o fabricante del producto.`,
   },
-  { license: 'formal permission to do something' },
+  { license: 'Permiso formal para hacer algo.' },
   {
-    intellectualPropertyRights:
-      'rights to financial benefit from and control of distribution of non-tangible property that is a result of creativity',
-  },
-  {
-    restricted: 'withheld from general circulation or disclosure',
+    intellectualPropertyRights: `Derechos para controlar y lucrar con la distribución de propiedad no tangible 
+    proveniente de actividades creativas.`,
   },
   {
-    otherRestrictions: 'otherRestrictions',
+    restricted: 'No se permite su circulación en general.',
+  },
+  {
+    otherRestrictions: 'Otras restricciones.',
   },
 ];
 </script>
@@ -287,7 +172,11 @@ const dictRestricciones = [
         </div>
         <div class="columna-16">
           <ClientOnly>
-            <SisdaiSelector v-model="seleccionRestricciones" etiqueta="Restricciones">
+            <SisdaiSelector
+              v-model="seleccionRestricciones"
+              etiqueta="Restricciones"
+              class="selector-restricciones"
+            >
               <option value="">----</option>
               <option
                 v-for="value in dictRestricciones"

@@ -17,12 +17,11 @@ export default defineEventHandler(async (event) => {
   const url = `${config.public.geonodeApi}/datasets/${datasetPk}/sldstyles/`;
 
   if (!base_file) {
-    //throw createError({ statusCode: 400, message: 'Archivo faltante' });
     return 'failed';
   }
 
   const formData = new FormData();
-  formData.append('name', base_file[0].originalFilename.replace('.sld', ''));
+  formData.append('name', `${datasetPk}_${base_file[0].originalFilename.replace('.sld', '')}`);
   formData.append(
     'sld_file',
     base_file[0].filepath
@@ -33,19 +32,26 @@ export default defineEventHandler(async (event) => {
     base_file[0].originalFilename.replace('.sld', '')
   );
 
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    body: formData,
-  });
-  console.warn(response);
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
 
-  if (!response.ok) {
-    //throw new Error(`Error POST: ${response.status}`);
+    //console.warn(response);
+    if (!response.ok) {
+      //const res = await response.text()
+      //console.warn(res)
+      return 'failed';
+    } else {
+      //const res = await response.json()
+      //console.warn(res)
+      return 'finished';
+    }
+  } catch {
     return 'failed';
-  } else {
-    return 'finished';
   }
 });

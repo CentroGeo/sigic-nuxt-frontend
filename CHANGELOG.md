@@ -7,6 +7,65 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.14.1] - 02-03-2026
+
+### Fixed (Arreglado)
+
+- Al subir archivos sld, se agregó al nombre del archivo subido el pk de la capa asociada para evitar colisiones en geoserver.
+- Se editó el contenido del cuadro de información en la sección de carga de archivos para hacer algunas precisiones respecto al manejo de los csv.
+- Se modificó el estilo del botón de revisión de metadatos en la sección de revisión para publicación.
+
+## [0.14.0] - 27-02-2026
+
+### Agregado (Added)
+
+- Se agrega modal para espacializar y la funcionalidad para generar y consultar reportes en el módulo de IA.
+
+## [0.13.0] - 27-02-2026
+
+### Agregado (Added)
+
+- Se agregó un botón que abre un modal para revisar los metadatos en la sección de revisión de archivos para su publicación.
+- Se agregó una petición que actualiza los permisos y manejo de errores al aprobar una solicitud de publicacion.
+- Se ocultaron los botones de las secciones de Inteligencia Artificial y Levantamiento cuando no hay sesión activa.
+- Se hizo una corrección en el uso de filtros de mis-archivos/solicitudes-publicación para eliminar un conflicto en el uso de las mismas funciones en la sección de revisiones al cambiar de página.
+- Se arregló un bug en el redireccionamiento a edicion de metadatos al cargar un csv.
+- Se arregló un bug que mostraba alerta de fracaso antes de que desapareciera el spinner en el modal de eliminar un recurso.
+- Se arregló un bug que ocurría al navegar entre las secciones de revision de documentos antes de que terminara de solicitar los recursos y evitaba que se visualizara la tabla.
+- Se arregló un bug que hacia que a veces no se viera en el menu lateral la opcion de Revisar Servicios en las vistas de revision de servicios
+
+## [0.12.4] - 26-02-2026
+
+### Arreglado (Fix)
+
+- Se eliminaron los valores por defecto para NUXT_APP_BASE_URL y NUXT_PUBLIC_OLLAMA_MODEL en docker-compose-ghcr.yml y docker-compose-local.yml, requiriendo que se establezcan valores explícitos desde el entorno.
+- Se eliminaron los valores por defecto para NUXT_PUBLIC_DEFAULT_PAGE y NUXT_PUBLIC_GEONODE_API_DEFAULT_FILTER en docker-compose-ghcr.yml y docker-compose-local.yml, obligando a la asignación explícita de estas variables de entorno.
+- Se actualizó el argumento de build NUXT_APP_BASE_URL en docker-compose-ghcr.yml para que utilice la variable de entorno en lugar de un valor por defecto codificado.
+- Se agregó NUXT_PUBLIC_OLLAMA_MODEL a la configuración del archivo .env y como variable de entorno en el workflow docker-compose-develop.yml, asegurando que esta variable se pase correctamente a los entornos de build y ejecución.
+
+## [0.12.3] - 25-02-2026
+
+### Arreglado (Fix)
+
+- Se corrigió un error en los filtros que se enviaban al solicitar recursos en la sección de revisión de solicitudes al cambiar de página.
+- Se corrigió un error en la forma de obtener el formato del recurso en el modal de exito al generar una solicitud de revisión.
+- Se eliminó el botón de descarga de recursos cuando estos provienen de servicios externo en la sección de revisión de solicitudes.
+- Se modificó la forma de obtener el link de descarga de documentos.
+
+## [0.12.2] - 24-02-2026
+
+### Arreglado (Fix)
+
+- Se creo un plugin para watchear cuando el refreshToken expira y cerrar la sesión automáticamente redirigiendo al inicio
+
+## [0.12.1] - 24-02-2026
+
+### Arreglado (Fix)
+
+- Se implementó la traducción de valores de restricciones en la edición de metadatos.
+- Se resolvió un pequeño bug en la desvinculación de cuentas en mi-cuenta/seguridad.
+- Se agregaron alertas de que no se ha subido archivos en las secciones de disponibles y metadatos pendientes en catálogo.
+
 ## [0.12.0] - 23-02-2026
 
 ### Agregado (Added)
@@ -241,6 +300,13 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.14.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.14.0...v0.14.1
+[0.14.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.13.0...v0.14.0
+[0.13.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.4...v0.13.0
+[0.12.4]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.3...v0.12.4
+[0.12.3]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.2...v0.12.3
+[0.12.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.1...v0.12.2
+[0.12.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.10.1...v0.11.0
 [0.10.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.10.0...v0.10.1
@@ -256,7 +322,6 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 [0.9.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.8.1...v0.9.0
 [0.8.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.8.0...v0.8.1
 [0.7.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.7.2...v0.8.0
-[0.7.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.6.0...v0.6.1
