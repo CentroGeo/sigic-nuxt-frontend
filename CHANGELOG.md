@@ -7,6 +7,13 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.14.2] - 02-03-2026
+
+### Fixed (Arreglado)
+
+- Al eliminó el filtro de ordenamiento en la sección de mis-archivos/publicacion-solicitudes
+- Se eliminó el botón de eliminar solicitud en la sección de mis-archivos/publicacion-solicitudes
+
 ## [0.14.1] - 02-03-2026
 
 ### Fixed (Arreglado)
