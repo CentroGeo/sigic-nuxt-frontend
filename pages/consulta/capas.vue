@@ -14,21 +14,28 @@ const storeResources = useResourcesConsultaStore();
 const storeSelected = useSelectedResources2Store();
 const config = useRuntimeConfig();
 const { gnoxyFetch } = useGnoxyUrl();
-const { findServer } = useResourcesSupplements();
+const { findServer, filteredByServerType } = useResourcesSupplements();
 const route = useRoute();
 const router = useRouter();
 storeConsulta.resourceType = resourceTypeDic.dataLayer;
 const isSwipeActive = computed(() => storeConsulta.divisionMapaActivado());
-
 const vistaDelMapa = ref({ extension: storeConsulta.mapExtent });
 const selectorDivisionAbierto = ref(undefined);
 const estaAbiertoSelectorDivisionMapa = (lado) => selectorDivisionAbierto.value === lado;
+const owsLayers = computed(() =>
+  filteredByServerType(storeResources.findResources(storeSelected.pks), 'ogc')
+);
+
+const arcgisLayers = computed(() =>
+  filteredByServerType(storeResources.findResources(storeSelected.pks), 'arcgis')
+);
+const linkExportaMapa = ref();
+const attributes = ref({});
+
 function alAbrirSelectorDivisionMapa(lado) {
   selectorDivisionAbierto.value = estaAbiertoSelectorDivisionMapa(lado) ? undefined : lado;
 }
 
-const attributes = ref({});
-const linkExportaMapa = ref();
 function exportarMapa() {
   utiles.exportarHTMLComoPNG(
     document.querySelectorAll('.mapa .ol-viewport').item(0),
@@ -153,23 +160,6 @@ async function buildLayerInfo(url, alternate, title, sourcetype) {
   }
 }
 
-function filteredByServerType(resourcesList, serverType) {
-  const serverTypeCollection = [];
-  resourcesList.forEach((d) => {
-    const server = findServer(d);
-    if (serverType === 'arcgis') {
-      if (server.includes(serverType)) {
-        serverTypeCollection.push(d);
-      }
-    } else {
-      if (!server.toLowerCase().includes('arcgis')) {
-        serverTypeCollection.push(d);
-      }
-    }
-  });
-  return serverTypeCollection;
-}
-
 watch(
   () => storeSelected.resources[storeConsulta.resourceType],
   (nv_) => {
@@ -183,6 +173,7 @@ watch(
 );
 
 watch(() => storeSelected.asQueryParam(), updateQueryParam, { deep: true });
+
 watch(isSwipeActive, async (nv) => {
   await actualizarSwipeEnHash();
   if (nv === false) {
@@ -254,10 +245,7 @@ onMounted(async () => {
           <SisdaiCapaXyz :posicion="0" />
           <!---->
           <SisdaiCapaWms
-            v-for="resource in filteredByServerType(
-              storeResources.findResources(storeSelected.pks),
-              'ogc'
-            )"
+            v-for="resource in owsLayers"
             :key="`wms-${resource.pk}-${resource.position_}`"
             :capa="resource.alternate"
             :consulta="gnoxyFetch"
@@ -273,10 +261,7 @@ onMounted(async () => {
             "
           />
           <SisdaiCapaArcgis
-            v-for="resource in filteredByServerType(
-              storeResources.findResources(storeSelected.pks),
-              'arcgis'
-            )"
+            v-for="resource in arcgisLayers"
             :key="`arcgis-${resource.pk}-${resource.position_}`"
             :fuente="findServer(resource).replace('?', '')"
             :capa="resource.alternate.split(':')[1]"

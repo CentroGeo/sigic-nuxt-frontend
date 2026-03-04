@@ -430,6 +430,27 @@ export function useResourcesSupplements() {
     }
     return { status, data };
   }
+
+  /**Esta función regresa una lista con las capas dependiendo de
+   * si vienen de un servidor tipo arcgis o ows
+   */
+  function filteredByServerType(resourcesList, serverType) {
+    const serverTypeCollection = [];
+    resourcesList.forEach((d) => {
+      const server = findServer(d);
+      if (serverType === 'arcgis') {
+        if (server.includes(serverType)) {
+          serverTypeCollection.push(d);
+        }
+      } else {
+        if (!server.toLowerCase().includes('arcgis')) {
+          serverTypeCollection.push(d);
+        }
+      }
+    });
+    return serverTypeCollection;
+  }
+
   return {
     getWMSserver,
     findServer,
@@ -443,5 +464,6 @@ export function useResourcesSupplements() {
     getSLDs,
     fetchByPk,
     fetchRemoteServices,
+    filteredByServerType,
   };
 }
