@@ -25,7 +25,6 @@ const estaAbiertoSelectorDivisionMapa = (lado) => selectorDivisionAbierto.value 
 const owsLayers = computed(() =>
   filteredByServerType(storeResources.findResources(storeSelected.pks), 'ogc')
 );
-
 const arcgisLayers = computed(() =>
   filteredByServerType(storeResources.findResources(storeSelected.pks), 'arcgis')
 );
@@ -181,6 +180,7 @@ watch(isSwipeActive, async (nv) => {
     storeSelected.pks.forEach((pk) => storeSelected.byPk(pk).resetLado());
   }
 });
+
 watch(
   () => storeConsulta.mapExtent,
   (extension) => {
@@ -215,6 +215,7 @@ onMounted(async () => {
       </div>
       <ClientOnly v-else>
         <SisdaiMapa
+          :key="`mapa-`"
           class="gema"
           :vista="vistaDelMapa"
           :dividir="storeConsulta.divisionMapa"

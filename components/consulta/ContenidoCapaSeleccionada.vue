@@ -174,7 +174,7 @@ watch(selectedStyle, (nv) => {
       <SisdaiLeyendaWms
         v-if="serverType != 'arcgis'"
         :consulta="gnoxyFetch"
-        :fuente="findServer(resourceElement)"
+        :fuente="findServer(resourceElement).replace('?', '')"
         :estilo="storeSelected.byPk(resourceElement.pk).estilo"
         :nombre="resourceElement.alternate"
         :titulo="resourceElement.title || 'cargando...'"
