@@ -324,7 +324,7 @@ export function useResourcesSupplements() {
         const stylesRes = await gnoxyFetch(stylesURL);
 
         if (!stylesRes.ok) {
-          console.error('Falló la petición de estilos de:', resource.title);
+          //console.error('Falló la petición de estilos de:', resource.title);
           return { defaultStyle, styleList };
         }
 
@@ -350,7 +350,7 @@ export function useResourcesSupplements() {
         return { defaultStyle, styleList };
       }
     } catch {
-      console.error('Falló la petición general de estilos de:', resource.title);
+      //console.error('Falló la petición general de estilos de:', resource.title);
       return { defaultStyle, styleList };
     }
   }
