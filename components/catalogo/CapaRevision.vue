@@ -239,7 +239,7 @@ onMounted(async () => {
                     <SisdaiLeyendaWms
                       v-if="serverType === 'ogc'"
                       :consulta="gnoxyFetch"
-                      :fuente="findServer(resourceElement)"
+                      :fuente="findServer(resourceElement).replace('?', '')"
                       :nombre="resourceElement.alternate"
                       :titulo="resourceElement.title || 'cargando...'"
                       :estilo="selectedStyle"
