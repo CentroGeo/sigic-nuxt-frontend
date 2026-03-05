@@ -6,8 +6,11 @@ definePageMeta({
 });
 const storeLevantamiento = useLevantamientoStore();
 
-onMounted(() => {
-  storeLevantamiento.obtenerProyectosPublicos();
+const proyectosPublicosFiltrado = ref([]);
+
+onMounted(async () => {
+  await storeLevantamiento.obtenerProyectosPublicos();
+  proyectosPublicosFiltrado.value = storeLevantamiento.proyectosPublicos;
 });
 </script>
 <template>
@@ -45,13 +48,18 @@ onMounted(() => {
           <div class="columna-8">
             <ClientOnly>
               <label for="buscadoravanzado">Buscador</label>
-              <SisdaiCampoBusqueda etiqueta="" />
+              <SisdaiCampoBusqueda
+                etiqueta=""
+                :catalogo="storeLevantamiento.proyectosPublicos"
+                propiedad-busqueda="nombre"
+                @al-filtrar="(r) => (proyectosPublicosFiltrado = r)"
+              />
             </ClientOnly>
           </div>
         </div>
         <div class="grid">
           <div
-            v-for="proyecto in storeLevantamiento.proyectosPublicos"
+            v-for="proyecto in proyectosPublicosFiltrado"
             :key="proyecto.id"
             class="columna-4 fondo-color-neutro p-3 borde-redondeado-20"
           >

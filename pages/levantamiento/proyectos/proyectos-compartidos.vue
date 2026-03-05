@@ -31,8 +31,11 @@ const notificaciones = [
 const storeLevantamiento = useLevantamientoStore();
 const { data } = useAuth();
 
-onMounted(() => {
-  storeLevantamiento.obtenerProyectosCompartidos(data.value?.user.email);
+const proyectosCompartidosFiltrado = ref([]);
+
+onMounted(async () => {
+  await storeLevantamiento.obtenerProyectosCompartidos(data.value?.user.email);
+  proyectosCompartidosFiltrado.value = storeLevantamiento.proyectosCompartidos;
 });
 </script>
 <template>
@@ -60,7 +63,7 @@ onMounted(() => {
         />
 
         <div class="flex titulo-contenido-levantamiento">
-          <h2>Proyectos públicos</h2>
+          <h2>Proyectos compartidos</h2>
           <UiNumeroElementos
             :numero="storeLevantamiento.obtenerTotalProyectosCompartidos()"
             etiqueta="Proyectos"
@@ -70,7 +73,12 @@ onMounted(() => {
           <div class="columna-8">
             <ClientOnly>
               <label for="buscadoravanzado">Buscador</label>
-              <SisdaiCampoBusqueda etiqueta="" />
+              <SisdaiCampoBusqueda
+                etiqueta=""
+                :catalogo="storeLevantamiento.proyectosCompartidos"
+                propiedad-busqueda="nombre"
+                @al-filtrar="(r) => (proyectosCompartidosFiltrado = r)"
+              />
             </ClientOnly>
           </div>
         </div>
@@ -101,7 +109,7 @@ onMounted(() => {
         </div>
         <div class="grid">
           <div
-            v-for="proyecto in storeLevantamiento.proyectosCompartidos"
+            v-for="proyecto in proyectosCompartidosFiltrado"
             :key="proyecto.id"
             class="columna-4 fondo-color-neutro p-3 borde-redondeado-20"
           >

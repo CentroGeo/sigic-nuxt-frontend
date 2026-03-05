@@ -8,7 +8,7 @@ const storeLevantamiento = useLevantamientoStore();
 const { data } = useAuth();
 
 onMounted(() => {
-  storeLevantamiento.obtenerProyectosAprobados(data.value?.user.email);
+  storeLevantamiento.obtenerProyectosEnRevision(data.value?.user.email);
 });
 </script>
 <template>
@@ -36,39 +36,38 @@ onMounted(() => {
         />
 
         <div class="flex titulo-contenido-levantamiento">
-          <h2>Proyectos aprobados</h2>
+          <h2>Proyectos en revisión</h2>
           <UiNumeroElementos
-            :numero="storeLevantamiento.obtenerTotalProyectosAprobados()"
+            :numero="storeLevantamiento.obtenerTotalProyectosEnRevision()"
             etiqueta="Proyectos"
           />
         </div>
         <div
-          v-if="!storeLevantamiento.existenProyectosAprobados"
+          v-if="!storeLevantamiento.existenProyectosEnRevision"
           class="flex texto-centrado contenido-levantamiento"
         >
           <div class="columna-4"></div>
           <div class="columna-8 fondo-color-acento p-2 borde-redondeado-8">
             <span class="pictograma-archivo-descargar pictograma-grande texto-color-acento"></span>
-            <h6 class="m-t-0 m-b-1 texto-color-secundario">No has aprobado proyectos</h6>
-            <p class="m-t-0 m-b-1">Todos los proyectos que apruebes aparecerán en esta sección.</p>
-            <div class="texto-centrado">
-              <button class="boton-primario boton-chico">Revisar proyectos pendientes</button>
-            </div>
+            <h6 class="m-t-0 m-b-1 texto-color-secundario">No tienes proyectos por revisar</h6>
+            <p class="m-t-0 m-b-1">
+              Cuando algún proyecto sea enviado a aprobación lo podrás revisar en esta sección.
+            </p>
           </div>
           <div class="columna-4"></div>
         </div>
         <div v-else>
           <div class="grid">
             <div
-              v-for="proyecto in storeLevantamiento.proyectosAprobados"
+              v-for="proyecto in storeLevantamiento.proyectosEnRevision"
               :key="proyecto.id"
               class="columna-5 fondo-color-neutro p-3 borde-redondeado-20"
             >
               <div class="flex flex-contenido-final m-b-1">
                 <p
-                  class="borde borde-redondeado-12 p-x-1 p-y-minimo fondo-color-confirmacion texto-color-confirmacion borde-color-confirmacion m-0"
+                  class="borde borde-redondeado-12 p-x-1 p-y-minimo fondo-color-alerta texto-color-alerta borde-color-alerta m-0"
                 >
-                  Aprobado
+                  En revisión
                 </p>
               </div>
               <img class="icono-proyecto m-b-minimo color-invertir" src="/img/icono_sigic.png" />
@@ -80,9 +79,9 @@ onMounted(() => {
               <NuxtLink
                 class="boton boton-primario boton-chico boton-accion-proyecto m-t-3"
                 aria-label="Revisar proyecto"
-                :to="`/levantamiento/revision-proyectos/${proyecto.id}`"
+                :to="`/levantamiento/revision-proyectos/revision/${proyecto.id}`"
               >
-                Ver proyecto
+                Revisar
               </NuxtLink>
             </div>
           </div>
@@ -106,6 +105,20 @@ onMounted(() => {
   align-items: center;
 }
 
+.nombre-proyecto {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 22.5px;
+  min-height: calc(22.5px * 3);
+}
+
+.boton-crear-proyecto {
+  align-self: flex-end;
+}
+
 .icono-proyecto {
   width: 40px;
   height: 40px;
@@ -114,5 +127,9 @@ onMounted(() => {
 .boton-accion-proyecto {
   width: 100%;
   justify-content: center;
+}
+
+.proyecto-acciones {
+  gap: 8px;
 }
 </style>

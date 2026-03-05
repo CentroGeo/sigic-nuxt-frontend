@@ -47,6 +47,8 @@ function agregarOpcion() {
   const nuevasOpciones = [...props.pregunta.opciones, ''];
   emit('update:pregunta', { ...props.pregunta, opciones: nuevasOpciones });
 }
+
+const respuestaSeleccionada = ref('');
 </script>
 
 <template>
@@ -153,16 +155,19 @@ function agregarOpcion() {
         {{ props.pregunta.instrucciones }}
       </div>
       <p class="borde-b borde-color-secundario m-y-2" />
-      <SisdaiBotonesRadioGrupo leyenda="" :es_vertical="true">
-        <SisdaiBotonRadio
-          v-for="(opcion, index) in props.pregunta.opciones"
-          :key="index"
-          :etiqueta="opcion"
-          :value="opcion"
-          :name="`opcion-preg-${indice}`"
-          :autofocus="false"
-        />
-      </SisdaiBotonesRadioGrupo>
+      <ClientOnly>
+        <SisdaiBotonesRadioGrupo leyenda="" :es_vertical="true">
+          <SisdaiBotonRadio
+            v-for="(opcion, index) in props.pregunta.opciones"
+            :key="index"
+            v-model="respuestaSeleccionada"
+            :etiqueta="opcion"
+            :value="opcion"
+            :name="`opcion-preg-${indice}`"
+            :autofocus="false"
+          />
+        </SisdaiBotonesRadioGrupo>
+      </ClientOnly>
       <div v-if="props.pregunta.obligatorio">Obligatoria*</div>
     </div>
   </div>
