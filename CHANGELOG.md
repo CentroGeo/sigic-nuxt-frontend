@@ -7,6 +7,13 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.15.1] - 05-03-2026
+
+### Fixed (Arreglado)
+
+- Se crearon dos propiedades computadas con lo que se modifica la forma de distinguir las capas arcgis de las capas ows en el visor de capas.
+- Se modificó la forma en la que se pasa el servidor de origen al componente SisdaiLeyendaWMS para eliminar un doble signo de interrogación que evitaba que se mostrara la leyenda.
+
 ## [0.15.0] - 02-03-2026
 
 ### Agregado (Added)
@@ -313,6 +320,7 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.15.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.0...v0.15.1
 [0.15.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.14.2...v0.15.0
 [0.14.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.14.1...v0.14.2
 [0.14.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.14.0...v0.14.1
