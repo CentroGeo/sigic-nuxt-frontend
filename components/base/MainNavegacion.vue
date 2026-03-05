@@ -61,10 +61,10 @@ const mostrarAuth = computed(() => config.public.enableAuth);
       <li v-if="mostrarConsulta">
         <NuxtLink class="nav-hipervinculo" to="/consulta">Consulta</NuxtLink>
       </li>
-      <li v-if="mostrarIaa">
+      <li v-if="mostrarIaa && status === 'authenticated'">
         <NuxtLink class="nav-hipervinculo" to="/ia">Análisis Inteligencia Artificial</NuxtLink>
       </li>
-      <li v-if="mostrarLevantamiento">
+      <li v-if="mostrarLevantamiento && status === 'authenticated'">
         <NuxtLink class="nav-hipervinculo" to="/levantamiento">Levantamiento</NuxtLink>
       </li>
       <li>

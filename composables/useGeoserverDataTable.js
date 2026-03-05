@@ -2,11 +2,13 @@
 // TODO: Resolver las peticiones de información para mostrar capas y datasets privados
 // TODO: Manejo de errores en la petición
 import { ref } from 'vue';
-import { buildArcgisLayerRequest, getWMSserver } from '~/utils/consulta';
+import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
 
 export function useGeoserverDataTable({ paginaActual, tamanioPagina, resource } = {}) {
   const config = useRuntimeConfig();
   const { gnoxyFetch } = useGnoxyUrl();
+  const { getWMSserver, buildArcgisLayerRequest } = useResourcesSupplements();
+
   const variables = ref([]);
   const datos = ref([]);
   const totalFeatures = ref(0);

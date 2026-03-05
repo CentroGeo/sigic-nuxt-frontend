@@ -7,6 +7,126 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.15.1] - 05-03-2026
+
+### Fixed (Arreglado)
+
+- Se crearon dos propiedades computadas con lo que se modifica la forma de distinguir las capas arcgis de las capas ows en el visor de capas.
+- Se modificó la forma en la que se pasa el servidor de origen al componente SisdaiLeyendaWMS para eliminar un doble signo de interrogación que evitaba que se mostrara la leyenda.
+
+## [0.15.0] - 02-03-2026
+
+### Agregado (Added)
+
+- Se agregó la revisión de proyectos en la sección de levantamiento.
+
+## [0.14.2] - 02-03-2026
+
+### Fixed (Arreglado)
+
+- Al eliminó el filtro de ordenamiento en la sección de mis-archivos/publicacion-solicitudes
+- Se eliminó el botón de eliminar solicitud en la sección de mis-archivos/publicacion-solicitudes
+
+## [0.14.1] - 02-03-2026
+
+### Fixed (Arreglado)
+
+- Al subir archivos sld, se agregó al nombre del archivo subido el pk de la capa asociada para evitar colisiones en geoserver.
+- Se editó el contenido del cuadro de información en la sección de carga de archivos para hacer algunas precisiones respecto al manejo de los csv.
+- Se modificó el estilo del botón de revisión de metadatos en la sección de revisión para publicación.
+
+## [0.14.0] - 27-02-2026
+
+### Agregado (Added)
+
+- Se agrega modal para espacializar y la funcionalidad para generar y consultar reportes en el módulo de IA.
+
+## [0.13.0] - 27-02-2026
+
+### Agregado (Added)
+
+- Se agregó un botón que abre un modal para revisar los metadatos en la sección de revisión de archivos para su publicación.
+- Se agregó una petición que actualiza los permisos y manejo de errores al aprobar una solicitud de publicacion.
+- Se ocultaron los botones de las secciones de Inteligencia Artificial y Levantamiento cuando no hay sesión activa.
+- Se hizo una corrección en el uso de filtros de mis-archivos/solicitudes-publicación para eliminar un conflicto en el uso de las mismas funciones en la sección de revisiones al cambiar de página.
+- Se arregló un bug en el redireccionamiento a edicion de metadatos al cargar un csv.
+- Se arregló un bug que mostraba alerta de fracaso antes de que desapareciera el spinner en el modal de eliminar un recurso.
+- Se arregló un bug que ocurría al navegar entre las secciones de revision de documentos antes de que terminara de solicitar los recursos y evitaba que se visualizara la tabla.
+- Se arregló un bug que hacia que a veces no se viera en el menu lateral la opcion de Revisar Servicios en las vistas de revision de servicios
+
+## [0.12.4] - 26-02-2026
+
+### Arreglado (Fix)
+
+- Se eliminaron los valores por defecto para NUXT_APP_BASE_URL y NUXT_PUBLIC_OLLAMA_MODEL en docker-compose-ghcr.yml y docker-compose-local.yml, requiriendo que se establezcan valores explícitos desde el entorno.
+- Se eliminaron los valores por defecto para NUXT_PUBLIC_DEFAULT_PAGE y NUXT_PUBLIC_GEONODE_API_DEFAULT_FILTER en docker-compose-ghcr.yml y docker-compose-local.yml, obligando a la asignación explícita de estas variables de entorno.
+- Se actualizó el argumento de build NUXT_APP_BASE_URL en docker-compose-ghcr.yml para que utilice la variable de entorno en lugar de un valor por defecto codificado.
+- Se agregó NUXT_PUBLIC_OLLAMA_MODEL a la configuración del archivo .env y como variable de entorno en el workflow docker-compose-develop.yml, asegurando que esta variable se pase correctamente a los entornos de build y ejecución.
+
+## [0.12.3] - 25-02-2026
+
+### Arreglado (Fix)
+
+- Se corrigió un error en los filtros que se enviaban al solicitar recursos en la sección de revisión de solicitudes al cambiar de página.
+- Se corrigió un error en la forma de obtener el formato del recurso en el modal de exito al generar una solicitud de revisión.
+- Se eliminó el botón de descarga de recursos cuando estos provienen de servicios externo en la sección de revisión de solicitudes.
+- Se modificó la forma de obtener el link de descarga de documentos.
+
+## [0.12.2] - 24-02-2026
+
+### Arreglado (Fix)
+
+- Se creo un plugin para watchear cuando el refreshToken expira y cerrar la sesión automáticamente redirigiendo al inicio
+
+## [0.12.1] - 24-02-2026
+
+### Arreglado (Fix)
+
+- Se implementó la traducción de valores de restricciones en la edición de metadatos.
+- Se resolvió un pequeño bug en la desvinculación de cuentas en mi-cuenta/seguridad.
+- Se agregaron alertas de que no se ha subido archivos en las secciones de disponibles y metadatos pendientes en catálogo.
+
+## [0.12.0] - 23-02-2026
+
+### Agregado (Added)
+
+- Se agregó la funcionalidad de desvincular cuentas de github, google, rizoma y orcid.
+- Se hicieron ajustes en botones de consulta y catálogo para deshabilitarlos en caso de que no existan las condiciones para su uso.
+- Se agregó un botón para eliminar cada archivo individualmente en el drag and drop para cargar archivos.
+
+## [0.11.0] - 19-02-2026
+
+### Agregado (Added)
+
+- Se agregó un panel lateral en la sección de chats del módulo de ia con herramientas para generar reportes, así como dos modales para nombrar el reporte, asignar las fuentes, darle instrucciones y tipo de archivo.
+
+## [0.10.1] - 17-02-2026
+
+### Agregado (Added)
+
+- Se agregaron NUXT_PUBLIC_LEVANTAMIENTO_URL y NUXT_PUBLIC_KEYCLOAK_CLIENT_ID como argumentos de build y variables de entorno en el Dockerfile, con valores por defecto.
+- Se agregó NUXT_PUBLIC_LEVANTAMIENTO_URL al archivo env_sample para facilitar la configuración local y el proceso de incorporación.
+
+### Arreglado (Fix)
+
+- Se eliminó completamente el archivo docker-compose-minimal.yml, eliminando configuraciones redundantes de Compose y concentrándose en los archivos principales.
+- Se actualizaron tanto docker-compose-ghcr.yml como docker-compose-local.yml para pasar nuevos argumentos de build y variables de entorno, incluyendo las variables de levantamiento y Keycloak, y para establecer valores predeterminados razonables para varias variables como NUXT_PUBLIC_DEFAULT_PAGE y NUXT_PUBLIC_GEONODE_API_DEFAULT_FILTER.
+
+## [0.10.0] - 17-02-2026
+
+### Agregado (Added)
+
+- Se oculta la sección de productos y colaboraciones en Mi-Cuenta
+- Se implementa la funcionalidad de cambio de contraseña redirigiendo a la pagina de cambio de contraseña de keycloak
+- Se implementa la funcionalidad de vincular cuentas, mas no la de desvincular cuentas.
+
+## [0.9.8] - 16-02-2026
+
+### Arreglado (Fix)
+
+- Se crearon dos composables nuevos para migrar las funciones de utils que usaban instancias de nuxt.
+- Se implementó un bloqueo de los filtros de búsqueda mientras hay una petición de recursos en proceso para evitar comportamientos no deseados al mostrar los resultados en las secciones de consulta y catálogo.
+
 ## [0.9.7] - 16-02-2026
 
 ### Arreglado (Fix)
@@ -200,7 +320,22 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
-[0.9.6]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.6...v0.9.7
+[0.15.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.0...v0.15.1
+[0.15.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.14.2...v0.15.0
+[0.14.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.14.1...v0.14.2
+[0.14.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.14.0...v0.14.1
+[0.14.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.13.0...v0.14.0
+[0.13.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.4...v0.13.0
+[0.12.4]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.3...v0.12.4
+[0.12.3]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.2...v0.12.3
+[0.12.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.1...v0.12.2
+[0.12.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.0...v0.12.1
+[0.12.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.11.0...v0.12.0
+[0.11.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.10.1...v0.11.0
+[0.10.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.10.0...v0.10.1
+[0.10.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.8...v0.10.0
+[0.9.8]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.7...v0.9.8
+[0.9.7]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.6...v0.9.7
 [0.9.6]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.5...v0.9.6
 [0.9.5]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.4...v0.9.5
 [0.9.4]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.9.3...v0.9.4
@@ -210,7 +345,6 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 [0.9.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.8.1...v0.9.0
 [0.8.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.8.0...v0.8.1
 [0.7.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.7.2...v0.8.0
-[0.7.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.6.0...v0.6.1

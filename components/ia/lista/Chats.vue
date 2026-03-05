@@ -65,7 +65,7 @@ const loadChatsList = async () => {
 
   // Consulta proyectos
   arrayChats = await storeIA.getChatList(1);
-  console.log(arrayChats);
+  // console.log(arrayChats);
 
   transformarHistorial(arrayChats);
 };
@@ -163,8 +163,8 @@ const handleEdit = async () => {
 
     editarChatModal.value?.cerrarModal();
   } catch (err) {
-    console.error('Error al editar el chat.');
-    console.log(err);
+    console.error('Error al editar el chat.', err);
+    // console.log(err);
   }
 };
 
@@ -192,8 +192,8 @@ const handleDelete = async () => {
 
     idChat.value = null;
   } catch (err) {
-    console.error('Error al eliminar el chat.');
-    console.log(err);
+    console.error('Error al eliminar el chat.', err);
+    // console.log(err);
   }
 };
 

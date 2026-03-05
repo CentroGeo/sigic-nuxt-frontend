@@ -7,7 +7,7 @@ import {
   SisdaiCapaXyz,
   SisdaiMapa,
 } from '@centrogeomx/sisdai-mapas';
-import { findServer } from '~/utils/consulta';
+import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
 
 const props = defineProps({
   resourceType: { type: String, required: true },
@@ -18,6 +18,7 @@ const props = defineProps({
 });
 const { resourceType, selectedElement } = toRefs(props);
 const { gnoxyFetch } = useGnoxyUrl();
+const { findServer } = useResourcesSupplements();
 const serverType = ref(null);
 const seleccionVarDisponibles = ref(selectedElement.value.default_style);
 const hasAttrTable = computed(() => {
@@ -120,14 +121,9 @@ function defineExtension() {
   if (selectedElement.value.sourcetype === 'REMOTE') {
     return 'Remoto';
   } else {
-    selectedElement.value.links.forEach((d) => {
-      const keys = Object.keys(d);
-      if (keys.includes('extras')) {
-        return `.${d.extras.content.type}`;
-      } else {
-        return 'Desconocido';
-      }
-    });
+    const link = selectedElement.value.links.find((d) => Object.keys(d).includes('extras'));
+    const extension = link ? `.${link.extras.content.type}` : 'Desconocido';
+    return extension;
   }
 }
 defineExpose({

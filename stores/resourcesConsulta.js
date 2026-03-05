@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
-import { buildUrl, defineGeomType, getSLDs, resourceTypeDic } from '~/utils/consulta';
+import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
+import { buildUrl, resourceTypeDic } from '~/utils/consulta';
 
 export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => {
   const config = useRuntimeConfig();
@@ -60,6 +61,8 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
      */
     async fillByCategory(resourceType = storeConsulta.resourceType, pageNum, params) {
       const { gnoxyFetch } = useGnoxyUrl();
+      const { defineGeomType, getSLDs } = useResourcesSupplements();
+
       const queryParams = {
         'filter{complete_metadata}': 'true',
         page: pageNum,
@@ -112,6 +115,8 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
      */
     async fetchResourceByPk(pkToFind) {
       const { gnoxyFetch } = useGnoxyUrl();
+      const { getSLDs } = useResourcesSupplements();
+
       const maxAttempts = 3;
       const url = `${config.public.geonodeApi}/sigic-resources/${pkToFind}`;
       for (let attempt = 0; attempt < maxAttempts; attempt++) {

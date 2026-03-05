@@ -1,12 +1,15 @@
 <script setup>
-import { fetchDoc } from '~/utils/consulta';
+import { useDownloadResources } from '~/composables/useDownloadResources';
 const props = defineProps({
   selectedElementPk: {
     type: String,
     default: null,
   },
 });
+
+const { fetchDoc } = useDownloadResources();
 const storeResources = useResourcesCatalogoStore();
+const revisionMetadatos = ref(null);
 const emit = defineEmits(['docCargado']);
 
 const documentRef = ref(null);
@@ -30,12 +33,25 @@ onMounted(async () => {
 
 <template>
   <div v-if="blobedUrl !== ''" class="contenedor-doc-embed">
+    <div class="m-y-4 flex flex-contenido-separado">
+      <h2 class="m-0">{{ resourceByPk.title }}</h2>
+      <button class="boton-secundario p-1" @click="revisionMetadatos?.abrirModalRevision">
+        Ver metadatos
+      </button>
+    </div>
+
     <embed
       ref="documentRef"
       class="documento-embebido"
       :src="blobedUrl"
       :type="extensionDocumento === 'pdf' ? 'application/pdf' : 'text/plain'"
       :onload="emit('docCargado')"
+    />
+
+    <CatalogoModalRevisionMeta
+      ref="revisionMetadatos"
+      :review-pk="selectedElementPk"
+      :resource-type="'documents'"
     />
   </div>
 </template>

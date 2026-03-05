@@ -2,6 +2,7 @@
 import SisdaiControlDeslizante from '@centrogeomx/sisdai-componentes/src/componentes/control-deslizante/SisdaiControlDeslizante.vue';
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
+import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
 
 import {
   SisdaiCapaArcgis,
@@ -11,20 +12,14 @@ import {
   SisdaiLeyendaWms,
   SisdaiMapa,
 } from '@centrogeomx/sisdai-mapas';
-import {
-  categoriesInSpanish,
-  findServer,
-  getSLDs,
-  hasWFS,
-  resourceTypeDic,
-  tooltipContent,
-} from '~/utils/consulta';
+import { categoriesInSpanish, resourceTypeDic, tooltipContent } from '~/utils/consulta';
 
 const storeConsulta = useConsultaStore();
 storeConsulta.resourceType = resourceTypeDic.dataLayer;
 
 const storeCatalogo = useResourcesCatalogoStore();
 const { gnoxyFetch } = useGnoxyUrl();
+const { findServer, hasWFS, getSLDs } = useResourcesSupplements();
 const route = useRoute();
 const selectedPk = route.query.pk;
 const isLoading = ref(true);
@@ -36,6 +31,7 @@ const selectedStyle = ref();
 const predeterminedStyle = ref();
 const allStyles = ref();
 const serverType = ref();
+const revisionMetadatos = ref(null);
 const modalOpacidad = ref(null);
 const controlOpacidad = ref();
 const layerOpacity = ref(100);
@@ -131,7 +127,13 @@ onMounted(async () => {
 
 <template>
   <div v-if="!isLoading">
-    <h2>{{ resourceElement.title }}</h2>
+    <div class="m-y-4 flex flex-contenido-separado">
+      <h2 class="m-0">{{ resourceElement.title }}</h2>
+      <button class="boton-secundario p-1" @click="revisionMetadatos?.abrirModalRevision">
+        Ver metadatos
+      </button>
+    </div>
+
     <ConsultaLayoutPaneles>
       <template #catalogo> </template>
 
@@ -237,7 +239,7 @@ onMounted(async () => {
                     <SisdaiLeyendaWms
                       v-if="serverType === 'ogc'"
                       :consulta="gnoxyFetch"
-                      :fuente="findServer(resourceElement)"
+                      :fuente="findServer(resourceElement).replace('?', '')"
                       :nombre="resourceElement.alternate"
                       :titulo="resourceElement.title || 'cargando...'"
                       :estilo="selectedStyle"
@@ -349,6 +351,12 @@ onMounted(async () => {
       <figcaption class="texto-centrado">Cargando Capa Geográfica</figcaption>
     </figure>
   </div>
+
+  <CatalogoModalRevisionMeta
+    ref="revisionMetadatos"
+    :review-pk="selectedPk"
+    :resource-type="'datasets'"
+  />
 </template>
 
 <style lang="scss" scoped>

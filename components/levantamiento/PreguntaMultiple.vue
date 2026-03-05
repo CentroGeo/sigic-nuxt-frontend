@@ -152,15 +152,17 @@ function agregarOpcion() {
       </div>
       <p class="borde-b borde-color-secundario m-y-2" />
       <div class="grupo-categoria flex p-1">
-        <SisdaiCasilla
-          v-for="(opcion, index) in props.pregunta.opciones"
-          :key="index"
-          :name="`check-${index}-preg-${indice}`"
-          :value="opcion"
-          :etiqueta="opcion"
-          class="opcion-checkbox"
-          :autofocus="false"
-        />
+        <ClientOnly>
+          <SisdaiCasilla
+            v-for="(opcion, index) in props.pregunta.opciones"
+            :key="index"
+            :name="`check-${index}-preg-${indice}`"
+            :value="opcion"
+            :etiqueta="opcion"
+            class="opcion-checkbox"
+            :autofocus="false"
+          />
+        </ClientOnly>
       </div>
       <div v-if="props.pregunta.obligatorio">Obligatoria*</div>
     </div>

@@ -1,12 +1,14 @@
 <script setup>
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { SisdaiLeyendaArcgis, SisdaiLeyendaWms } from '@centrogeomx/sisdai-mapas';
-import { findServer, getWMSserver, hasFeatureServer, hasWFS } from '~/utils/consulta';
+import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
 
 const config = useRuntimeConfig();
 const storeConsulta = useConsultaStore();
 const storeSelected = useSelectedResources2Store();
 const { gnoxyFetch } = useGnoxyUrl();
+const { findServer, getWMSserver, hasWFS, hasFeatureServer } = useResourcesSupplements();
+
 const emit = defineEmits([
   'opacidadClicked',
   'descargaClicked',
@@ -172,7 +174,7 @@ watch(selectedStyle, (nv) => {
       <SisdaiLeyendaWms
         v-if="serverType != 'arcgis'"
         :consulta="gnoxyFetch"
-        :fuente="findServer(resourceElement)"
+        :fuente="findServer(resourceElement).replace('?', '')"
         :estilo="storeSelected.byPk(resourceElement.pk).estilo"
         :nombre="resourceElement.alternate"
         :titulo="resourceElement.title || 'cargando...'"

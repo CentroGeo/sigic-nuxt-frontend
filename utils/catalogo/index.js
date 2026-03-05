@@ -67,6 +67,124 @@ export const catalogosSugeridos = [
   },
 ];
 
+export const dictIdiomas = [
+  { abk: 'Abjasio' },
+  { aar: 'Afar' },
+  { afr: 'Afrikáans' },
+  { aym: 'Aimara' },
+  { ger: 'Alemán' },
+  { amh: 'Amárico' },
+  { ara: 'Árabe' },
+  { asm: 'Asamés' },
+  { aze: 'Azerí' },
+  { bak: 'Baskir' },
+  { ben: 'Bengalí' },
+  { bel: 'Bielorruso' },
+  { bih: 'Bihari' },
+  { bis: 'Bislama' },
+  { bre: 'Bretón' },
+  { bul: 'Búlgaro' },
+  { kas: 'Cachemir' },
+  { kan: 'Canarés' },
+  { cat: 'Catalán' },
+  { chi: 'Chino' },
+  { twi: 'Chuí' },
+  { sin: 'Cingalés' },
+  { kor: 'Coreano' },
+  { cos: 'Corso' },
+  { dan: 'Danés' },
+  { dzo: 'Dzongkha' },
+  { slv: 'Esloveno' },
+  { spa: 'Español ' },
+  { epo: 'Esperanto' },
+  { est: 'Estonio' },
+  { fao: 'Faroés' },
+  { fin: 'Finés' },
+  { fij: 'Fiyiano' },
+  { fra: 'Francés ' },
+  { fry: 'Frisón' },
+  { glg: 'Gallego' },
+  { gre: 'Griego' },
+  { kal: 'Groenlandés' },
+  { grn: 'Guaraní' },
+  { guj: 'Guyarati' },
+  { hau: 'Hausa' },
+  { heb: 'Hebreo ' },
+  { hin: 'Hindi' },
+  { hun: 'Húngaro' },
+  { yid: 'Ídish' },
+  { ind: 'Indonesio' },
+  { eng: 'Inglés ' },
+  { ina: 'Interlingua' },
+  { iku: 'Inuktitut' },
+  { ita: 'Italiano' },
+  { ipk: 'Iñupiaq' },
+  { jpn: 'Japonés ' },
+  { khm: 'Jemer' },
+  { kaz: 'Kazajo' },
+  { kir: 'Kirguís' },
+  { run: 'Kirundi' },
+  { kin: 'Kiñaruanda' },
+  { kur: 'Kurdo' },
+  { lao: 'Laosiano' },
+  { lat: 'Latín' },
+  { lav: 'Letón' },
+  { lin: 'Lingala' },
+  { lit: 'Lituano' },
+  { mlg: 'Malgache' },
+  { mlt: 'Maltés' },
+  { mar: 'Maratí' },
+  { mol: 'Moldavo' },
+  { mon: 'Mongol' },
+  { nau: 'Nauruano' },
+  { nep: 'Nepalí' },
+  { nor: 'Noruego' },
+  { oci: 'Occitano' },
+  { ori: 'Odia' },
+  { orm: 'Oromo' },
+  { pus: 'Pastún' },
+  { pol: 'Polaco' },
+  { por: 'Portugués' },
+  { pan: 'Punyabí' },
+  { que: 'Quechua' },
+  { roh: 'Retorrománico' },
+  { rus: 'Ruso ' },
+  { smo: 'Samoano' },
+  { sag: 'Sango' },
+  { scr: 'Serbocroata' },
+  { sot: 'Sesotho' },
+  { tsn: 'Setsuana' },
+  { sna: 'Shona' },
+  { snd: 'Sindi' },
+  { som: 'Somalí' },
+  { swa: 'Suajili' },
+  { ssw: 'Suazilandés' },
+  { sun: 'Sudanés' },
+  { san: 'Sánscrito' },
+  { tgl: 'Tagalo' },
+  { tha: 'Tailandés' },
+  { tam: 'Tamil' },
+  { tgk: 'Tayiko' },
+  { tir: 'Tigriña' },
+  { tog: 'Tongano' },
+  { tso: 'Tsonga' },
+  { tur: 'Turco' },
+  { tuk: 'Turcomano' },
+  { tat: 'Tártaro' },
+  { tel: 'Télugu' },
+  { ukr: 'Ucraniano' },
+  { uig: 'Uigur' },
+  { urd: 'Urdu' },
+  { uzb: 'Uzbeko' },
+  { vie: 'Vietnamita' },
+  { vol: 'Volapük' },
+  { wol: 'Wólof' },
+  { xho: 'Xhosa' },
+  { yor: 'Yoruba' },
+  { zha: 'Zhuang' },
+  { zul: 'Zulu' },
+];
+
 /**
  * Valida si el tipo de recurso es documento o dataset con geometría o no
  * @param recurso del catálogo
@@ -84,15 +202,6 @@ export function tipoRecurso(recurso) {
   return tipo;
 }
 
-export async function fetchByPk(pk) {
-  const config = useRuntimeConfig();
-  const { gnoxyUrl } = useGnoxyUrl();
-  const api = gnoxyUrl(`${config.public.geonodeApi}/resources/${pk}`);
-  const res = await fetch(api);
-  const response = await res.json();
-  return response.resource;
-}
-
 export function convertirBytes(bytes) {
   const decimals = 2;
   if (!+bytes) return '0 Bytes';
@@ -104,69 +213,4 @@ export function convertirBytes(bytes) {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
-}
-
-/**
- * Esta función recupera información de los harvesters registrados en el sigic
- * @param {Boolean} limited
- * @param {Object} params
- * @returns {Promise<Object>} Objeto que permite construit las tarjetas y tablas de servicios remotos
- */
-export async function fetchRemoteServices(params) {
-  if (!params.title || params.title.trim().length === 0) {
-    delete params.title;
-  }
-  const { gnoxyFetch } = useGnoxyUrl();
-  const config = useRuntimeConfig();
-  const dataParams = new URLSearchParams(params);
-  const url = `${config.public.geonodeApi}/services/?${dataParams.toString()}`;
-  const data = [];
-  let status = 'ok';
-
-  try {
-    // Obtenemos la información de todos los harvesters
-    const requestServices = await gnoxyFetch(url);
-    if (!requestServices.ok) {
-      const error = await requestServices.json();
-      console.error('Falló petición de harvesters:', error);
-    }
-    const resServices = await requestServices.json();
-    const services = [...resServices.results];
-
-    // Creamos el objeto con la información que nos interesa
-    await Promise.all(
-      services.map(async (h, index) => {
-        const harvesterUrl = `${config.public.geonodeApi}/harvesters/${h.harvester_id}`;
-        const fetchRemoteServicestatus = await gnoxyFetch(harvesterUrl);
-        const resHarvesterStatus = await fetchRemoteServicestatus.json();
-        const harvesterStatus = resHarvesterStatus.harvester.status;
-
-        const fetchHarvestableResources = await gnoxyFetch(
-          `${harvesterUrl}/harvestable-resources/?page_size=1`
-        );
-        const resHarvestableResources = await fetchHarvestableResources.json();
-        const totalResources = resHarvestableResources.total;
-
-        const harvesterDatasets = `${config.public.geonodeApi}/sigic-remote-datasets/?harvester_id=${h.harvester_id}`;
-        const fetchHarvesterDatasets = await gnoxyFetch(harvesterDatasets);
-        const dataB = await fetchHarvesterDatasets.json();
-        const importedResources = dataB.total;
-
-        data[index] = {
-          id: h.harvester_id,
-          title: h.title,
-          status: harvesterStatus,
-          total_resources: totalResources,
-          imported_resources: importedResources,
-          to_attend_resources: totalResources - importedResources,
-          remote_url: h.url,
-        };
-      })
-    );
-    status = 'ok';
-  } catch (err) {
-    console.warn('Error en el streaming: ' + err);
-    status = 'error';
-  }
-  return { status, data };
 }

@@ -1,6 +1,8 @@
 <script setup>
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
+import { dictIdiomas } from '~/utils/catalogo';
+
 /**
  * @typedef {Object} Props
  * @property {Object} [recurso={}] - Indica el recurso al que se le va a modificar los metadatos básicos.
@@ -27,8 +29,7 @@ const props = defineProps({
     default: false,
   },
 });
-// const storeCatalogo = useCatalogoStore();
-// console.log('props.recurso', props.recurso);
+
 const storeMetadatos = useEditedMetadataStore();
 storeMetadatos.checkFilling(props.resourcePk, props.resourceType);
 const seleccionIdioma = computed({
@@ -57,160 +58,43 @@ const campoOtrasRestricciones = computed({
   set: (value) => storeMetadatos.updateAttr('constraints_other', value),
 });
 
-const dictIdiomas = [
-  { abk: 'Abkhazian' },
-  { aar: 'Afar' },
-  { afr: 'Afrikaans' },
-  { amh: 'Amharic' },
-  { ara: 'Arabic' },
-  { asm: 'Assamese' },
-  { aym: 'Aymara' },
-  { aze: 'Azerbaijani' },
-  { bak: 'Bashkir' },
-  { ben: 'Bengali' },
-  { bih: 'Bihari' },
-  { bis: 'Bislama' },
-  { bre: 'Breton' },
-  { bul: 'Bulgarian' },
-  { bel: 'Byelorussian' },
-  { cat: 'Catalan' },
-  { chi: 'Chinese' },
-  { cos: 'Corsican' },
-  { dan: 'Danish' },
-  { dzo: 'Dzongkha' },
-  { eng: 'English' },
-  { fra: 'French' },
-  { epo: 'Esperanto' },
-  { est: 'Estonian' },
-  { fao: 'Faroese' },
-  { fij: 'Fijian' },
-  { fin: 'Finnish' },
-  { fry: 'Frisian' },
-  { glg: 'Gallegan' },
-  { ger: 'German' },
-  { gre: 'Greek' },
-  { kal: 'Greenlandic' },
-  { grn: 'Guarani' },
-  { guj: 'Gujarati' },
-  { hau: 'Hausa' },
-  { heb: 'Hebrew' },
-  { hin: 'Hindi' },
-  { hun: 'Hungarian' },
-  { ind: 'Indonesian' },
-  { ina: 'Interlingua (International Auxiliary language Association)' },
-  { iku: 'Inuktitut' },
-  { ipk: 'Inupiak' },
-  { ita: 'Italian' },
-  { jpn: 'Japanese' },
-  { kan: 'Kannada' },
-  { kas: 'Kashmiri' },
-  { kaz: 'Kazakh' },
-  { khm: 'Khmer' },
-  { kin: 'Kinyarwanda' },
-  { kir: 'Kirghiz' },
-  { kor: 'Korean' },
-  { kur: 'Kurdish' },
-  { oci: `Langue d 'Oc (post 1500)` },
-  { lao: 'Lao' },
-  { lat: 'Latin' },
-  { lav: 'Latvian' },
-  { lin: 'Lingala' },
-  { lit: 'Lithuanian' },
-  { mlg: 'Malagasy' },
-  { mlt: 'Maltese' },
-  { mar: 'Marathi' },
-  { mol: 'Moldavian' },
-  { mon: 'Mongolian' },
-  { nau: 'Nauru' },
-  { nep: 'Nepali' },
-  { nor: 'Norwegian' },
-  { ori: 'Oriya' },
-  { orm: 'Oromo' },
-  { pan: 'Panjabi' },
-  { pol: 'Polish' },
-  { por: 'Portuguese' },
-  { pus: 'Pushto' },
-  { que: 'Quechua' },
-  { roh: 'Rhaeto-Romance' },
-  { run: 'Rundi' },
-  { rus: 'Russian' },
-  { smo: 'Samoan' },
-  { sag: 'Sango' },
-  { san: 'Sanskrit' },
-  { scr: 'Serbo-Croatian' },
-  { sna: 'Shona' },
-  { snd: 'Sindhi' },
-  { sin: 'Singhalese' },
-  { ssw: 'Siswant' },
-  { slv: 'Slovenian' },
-  { som: 'Somali' },
-  { sot: 'Sotho' },
-  { spa: 'Spanish' },
-  { sun: 'Sudanese' },
-  { swa: 'Swahili' },
-  { tgl: 'Tagalog' },
-  { tgk: 'Tajik' },
-  { tam: 'Tamil' },
-  { tat: 'Tatar' },
-  { tel: 'Telugu' },
-  { tha: 'Thai' },
-  { tir: 'Tigrinya' },
-  { tog: 'Tonga (Nyasa)' },
-  { tso: 'Tsonga' },
-  { tsn: 'Tswana' },
-  { tur: 'Turkish' },
-  { tuk: 'Turkmen' },
-  { twi: 'Twi' },
-  { uig: 'Uighur' },
-  { ukr: 'Ukrainian' },
-  { urd: 'Urdu' },
-  { uzb: 'Uzbek' },
-  { vie: 'Vietnamese' },
-  { vol: 'Volapük' },
-  { wol: 'Wolof' },
-  { xho: 'Xhosa' },
-  { yid: 'Yiddish' },
-  { yor: 'Yoruba' },
-  { zha: 'Zhuang' },
-  { zul: 'Zulu' },
-];
-
 const dictLicencia = [
-  { not_specified: 'Not Specified' },
-  { varied_original: 'Varied / Original' },
-  { varied_derived: 'Varied / Derived' },
-  { public_domain: 'Public Domain' },
-  { public_domain_usg: 'Public Domain / USG' },
-  { odbl: 'Open Data Commons Open Database License / OSM' },
+  { not_specified: 'No especificado(a)' },
+  { varied_original: 'Varios / Original' },
+  { varied_derived: 'Varios / Derivados(as)' },
+  { public_domain: 'Dominio público' },
+  { public_domain_usg: 'Dominio público / Gobierno de EUA' },
+  { odbl: 'Licencia abierta de bases de datos abiertos' },
   { nextview: 'NextView' },
 ];
 
 const dictRestricciones = [
   {
-    copyright:
-      'exclusive right to the publication, production, or sale of the rights to a literary, dramatic, musical, or artistic work, or to the use of a commercial print or label, granted by law for a specified period of time to an author, composer, artist, distributor',
+    copyright: `Derecho exclusivo a la publicación, producción o venta de los derechos de una obra literaria, 
+    dramática, musical o artística, o al uso de una marca o etiqueta comercial, otorgado por la ley 
+    durante un periodo específico de tiempo a la persona autora, compositora, artista o distribuidora.`,
   },
   {
-    patent:
-      'government has granted exclusive right to make, sell, use or license an invention or discovery',
+    patent: `El gobierno ha otorgado el derecho exclusivo de hacer, vender, usar u otorgar licencia de patente 
+    de alguna invención o descubrimiento.`,
   },
   {
-    patentPending: 'produced or sold information awaiting a patent',
+    patentPending: `Información producida o vendida en espera de recibir una patente.`,
   },
   {
-    trademark:
-      'a name, symbol, or other device identifying a product, officially registered and legally restricted to the use of the owner or manufacturer',
+    trademark: `El nombre, símbolo u otro dispositivo que identifique a un producto. Éste debe estar registrado 
+    oficialmente y su uso está limitado jurídicamente al dueño o fabricante del producto.`,
   },
-  { license: 'formal permission to do something' },
+  { license: 'Permiso formal para hacer algo.' },
   {
-    intellectualPropertyRights:
-      'rights to financial benefit from and control of distribution of non-tangible property that is a result of creativity',
-  },
-  {
-    restricted: 'withheld from general circulation or disclosure',
+    intellectualPropertyRights: `Derechos para controlar y lucrar con la distribución de propiedad no tangible 
+    proveniente de actividades creativas.`,
   },
   {
-    otherRestrictions: 'otherRestrictions',
+    restricted: 'No se permite su circulación en general.',
+  },
+  {
+    otherRestrictions: 'Otras restricciones.',
   },
 ];
 </script>
@@ -288,7 +172,11 @@ const dictRestricciones = [
         </div>
         <div class="columna-16">
           <ClientOnly>
-            <SisdaiSelector v-model="seleccionRestricciones" etiqueta="Restricciones">
+            <SisdaiSelector
+              v-model="seleccionRestricciones"
+              etiqueta="Restricciones"
+              class="selector-restricciones"
+            >
               <option value="">----</option>
               <option
                 v-for="value in dictRestricciones"
