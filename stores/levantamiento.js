@@ -20,6 +20,12 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
     esEdicionFormulario: ref(true),
     proyectosCompartidos: ref([]),
     esRevisor: ref(false),
+    existenProyectosAprobados: ref(false),
+    proyectosAprobados: ref([]),
+    existenProyectosEnRevision: ref(false),
+    proyectosEnRevision: ref([]),
+    existenProyectosRechazados: ref(false),
+    proyectosRechazados: ref([]),
 
     async obtenerProyectosPublicos() {
       try {
@@ -90,7 +96,11 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
           body: body,
         });
 
-        /* console.log(data.proyectos[0]); */
+        if (data.proyectos[0].es_privada) {
+          this.existenParticipantes = false;
+        } else {
+          this.existenParticipantes = true;
+        }
         return data.proyectos[0];
       } catch (err) {
         console.error('Error cargando proyecto:', err);
@@ -319,7 +329,7 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
           method: 'POST',
           body: body,
         });
-        console.log(data);
+
         this.proyectosCompartidos = data.proyectos;
       } catch (err) {
         console.error('Error cargando proyectos compartidos:', err);
@@ -339,11 +349,100 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
           body: body,
         });
 
-        console.log(data);
         this.esRevisor = data.is_reviewer;
       } catch (err) {
         console.error('Error cargando rol usuario:', err);
       }
+    },
+    obtenerTotalProyectosEnRevision() {
+      return this.proyectosEnRevision.length;
+    },
+    async obtenerProyectosEnRevision(email) {
+      try {
+        const body = {
+          email: email,
+          status: 'EN REVISION',
+        };
+
+        const data = await $fetch(`${apiUrl}/projects/reviewer/list`, {
+          method: 'POST',
+          body: body,
+        });
+
+        this.proyectosEnRevision = data.proyectos;
+        if (data.proyectos.length > 0) {
+          this.existenProyectosEnRevision = true;
+        }
+      } catch (err) {
+        console.error('Error obteniendo proyectos por status:', err);
+      }
+    },
+    async obtenerProyectosRechazados(email) {
+      try {
+        const body = {
+          email: email,
+          status: 'RECHAZADO',
+        };
+
+        const data = await $fetch(`${apiUrl}/projects/reviewer/list`, {
+          method: 'POST',
+          body: body,
+        });
+
+        this.proyectosRechazados = data.proyectos;
+        if (data.proyectos.length > 0) {
+          this.existenProyectosRechazados = true;
+        }
+      } catch (err) {
+        console.error('Error obteniendo proyectos por status:', err);
+      }
+    },
+    async actualizarStatusProyecto(payload, idProyecto) {
+      try {
+        const response = await fetch(`${apiUrl}/projects/reviewer/status/${idProyecto}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al actualizar el proyecto');
+        }
+
+        const data = await response.json();
+        console.log('Proyecto enviado a aprobación:', data);
+      } catch (error) {
+        console.error('Error:', error);
+        throw error;
+      }
+    },
+    async obtenerProyectosAprobados(email) {
+      try {
+        const body = {
+          email: email,
+          status: 'APROBADO',
+        };
+
+        const data = await $fetch(`${apiUrl}/projects/reviewer/list`, {
+          method: 'POST',
+          body: body,
+        });
+
+        this.proyectosAprobados = data.proyectos;
+        if (data.proyectos.length > 0) {
+          this.existenProyectosAprobados = true;
+        }
+      } catch (err) {
+        console.error('Error obteniendo proyectos por status:', err);
+      }
+    },
+    obtenerTotalProyectosAprobados() {
+      return this.proyectosAprobados.length;
+    },
+    obtenerTotalProyectosRechazados() {
+      return this.proyectosRechazados.length;
     },
   };
 });
