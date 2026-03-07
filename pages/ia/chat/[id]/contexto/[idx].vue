@@ -9,6 +9,9 @@ import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/sele
 
 import DOMPurify from 'dompurify'; // Para seguridad XSS
 import { marked } from 'marked'; // Importar marked para mostrar formato markdown
+//
+
+import { init } from 'pptx-preview';
 
 const { data } = useAuth();
 const config = useRuntimeConfig();
@@ -54,8 +57,25 @@ const chatId = computed(() => parseInt(route.params.id) || 0);
 const contextID = computed(() => parseInt(route.params.idx));
 const chatID = ref(0);
 
+// datos para generar reportes
 const modalPreviewReporte = ref(null);
 const previewReporte = ref(null);
+
+const archivosEliminados = ref([]);
+const fuentesSeleccionadas = ref([]);
+
+const arrayContextSources = ref([]);
+
+const tituloReporteModal = ref('');
+const campoNombreVisible = ref(false);
+const leyendaRadioGrupoReporteModal = ref('');
+
+const campoNombreReporte = ref();
+const botonRadioReporte = ref('Uno');
+
+const botonGenerarReporte = ref('');
+
+const opTipoArchivo = ref({ pdf: 'PDF', word: 'WORD', pptx: 'PPTX', csv: 'CSV' });
 
 const idAleatorio = () => {
   return 'areatexto-' + Math.random().toString(36).substring(2);
@@ -448,27 +468,6 @@ const submitMensaje = async () => {
   }
 };
 
-watch(seleccionProyecto, (nv) => {
-  loadContexts(nv);
-});
-
-watch(
-  () => storeIA.chatsVersion,
-  () => {
-    loadChatsList();
-  }
-);
-
-onMounted(() => {
-  // Recuperando la lista de chats
-  loadChatsList();
-
-  // Recuperando la lista de proyectos
-  loadProjectList();
-});
-//
-const archivosEliminados = ref([]);
-const fuentesSeleccionadas = ref([]);
 // Manejar selección/deselección de fuentes
 const toggleSeleccionFuente = (fuente) => {
   const index = fuentesSeleccionadas.value.findIndex((f) => f.id === fuente.id);
@@ -486,21 +485,15 @@ const toggleSeleccionFuente = (fuente) => {
   }
 };
 
-const arrayContextSources = ref([]);
-
 // Función para cargar las fuentes del contexto
 const loadSources = async () => {
-  // console.log('loadSources');
   let contextById = {};
   contextById = await storeIA.getContextById(contextID.value);
   arrayContextSources.value = contextById.files;
 };
 
-const tituloReporteModal = ref('');
-const campoNombreVisible = ref(false);
-const leyendaRadioGrupoReporteModal = ref('');
+// Abre modal de reporte con la info según el modo
 async function abrirModalReporteInfo(modo) {
-  // console.log('reporte modal info');
   if (modo === 'reporte') {
     tituloReporteModal.value = 'Generar reporte';
     campoNombreVisible.value = true;
@@ -518,9 +511,7 @@ async function abrirModalReporteInfo(modo) {
   await loadSources();
 }
 
-const campoNombreReporte = ref();
-const botonRadioReporte = ref('Uno');
-
+// Cierra y resetea los campos de información del modal de reporte
 function cancelarReporte() {
   modalReporteInfo.value.cerrarModal();
   campoNombreReporte.value = '';
@@ -528,7 +519,7 @@ function cancelarReporte() {
   fuentesSeleccionadas.value = [];
 }
 
-const botonGenerarReporte = ref('');
+// Abre modal de instrucciones con la info según el título del modal
 function abrirModalInstrucciones() {
   modalReporteInfo.value.cerrarModal();
   if (tituloReporteModal.value === 'Generar reporte') {
@@ -545,8 +536,6 @@ function abrirModalInstrucciones() {
     // seleccionando todas las fuentes del contexto
     arrayContextSources.value.forEach((d) => toggleSeleccionFuente(d));
   }
-  // console.log('campoNombreReporte.value', campoNombreReporte.value);
-  // console.log('fuentesSeleccionadas.value', fuentesSeleccionadas.value);
 }
 
 // Función para determinar el tipo de archivo
@@ -638,6 +627,7 @@ const fetchInitialReports = async () => {
         download_url: r.download_url,
         file_format: r.file_format,
       }));
+      console.log('reportesGenerados', reportesGenerados.value);
 
       // Resume polling for any report that's still pending/processing
       reportesGenerados.value.forEach((r) => {
@@ -651,10 +641,7 @@ const fetchInitialReports = async () => {
   }
 };
 
-onMounted(() => {
-  fetchInitialReports();
-});
-
+// Función para hacer la petición de generar reporte según el modo
 async function generarReporte(modo) {
   if (modo === 'reporte') {
     const token = data.value?.accessToken;
@@ -710,9 +697,48 @@ async function generarReporte(modo) {
   modalReporteInstrucciones.value.cerrarModal();
 }
 
+const domRef = ref(null);
+const loading = ref(false);
+const pptxPreviewer = ref();
+function previewPPTX(url) {
+  loading.value = true;
+  const width = Math.min(window.innerWidth, 960);
+  // const height = window.innerHeight - 52;
+  const height = '100%';
+
+  pptxPreviewer.value = init(domRef.value, {
+    width: width,
+    height: height,
+  });
+  // 'https://geonode.dev.geoint.mx/uploaded/ia/uploads/documents/vida-artificial_20260302_210632.pptx'
+  fetch(url)
+    .then((response) => {
+      return response.arrayBuffer();
+    })
+    .then((res) => {
+      pptxPreviewer.value.preview(res).finally(() => {
+        loading.value = false;
+      });
+    });
+}
+const mostrarPPTX = ref(true);
+// Función para abrir el modal que visualiza el reporte según el formato
 function abrirPreviewReporte(reporte) {
   previewReporte.value = reporte;
   modalPreviewReporte.value?.abrirModal();
+
+  console.log('reporte', reporte);
+
+  if (reporte.file_format === 'pptx') {
+    mostrarPPTX.value = true;
+    previewPPTX(reporte.download_url);
+  } else {
+    mostrarPPTX.value = false;
+  }
+
+  if (reporte.file_format === 'docx') {
+    // previewDOCX();
+  }
 }
 
 function cerrarPreviewReporte() {
@@ -720,7 +746,17 @@ function cerrarPreviewReporte() {
   previewReporte.value = null;
 }
 
-const opTipoArchivo = ref({ pdf: 'PDF', word: 'WORD', pptx: 'PPTX', csv: 'CSV' });
+watch(seleccionProyecto, (nv) => {
+  loadContexts(nv);
+});
+
+watch(
+  () => storeIA.chatsVersion,
+  () => {
+    loadChatsList();
+  }
+);
+
 watch(seleccionTipoReporte, (nv) => {
   if (nv === 'presentation') {
     seleccionTipoArchivo.value = 'pptx';
@@ -730,10 +766,22 @@ watch(seleccionTipoReporte, (nv) => {
     opTipoArchivo.value = { pdf: 'PDF', word: 'WORD', pptx: 'PPTX', csv: 'CSV' };
   }
 });
+
 watch(seleccionTipoArchivo, (nv) => {
   if (!['pdf', 'word'].includes(nv)) {
     botonRadioHojaMembretada.value = false;
   }
+});
+
+onMounted(() => {
+  // Recuperando la lista de chats
+  loadChatsList();
+
+  // Recuperando la lista de proyectos
+  loadProjectList();
+
+  // Obteniendo los reportes
+  fetchInitialReports();
 });
 </script>
 
@@ -1109,11 +1157,15 @@ watch(seleccionTipoArchivo, (nv) => {
                         class="texto-centrado fondo-color-acento p-1 m-0 texto-color-acento borde borde-redondeado-12"
                         style="width: max-content"
                       >
-                        <span v-if="fuente.document_type === 'application/pdf'">
+                        <span
+                          v-if="
+                            ['application/pdf', 'application/json'].includes(fuente.document_type)
+                          "
+                        >
                           <span class="pictograma-documento" />
                           Documentos
                         </span>
-                        <span v-if="fuente.document_type === 'text/csv'">
+                        <span v-if="['text/csv'].includes(fuente.document_type)">
                           <span class="pictograma-tabla" />
                           Datos tabulados
                         </span>
@@ -1192,26 +1244,34 @@ watch(seleccionTipoArchivo, (nv) => {
                 </option>
               </SisdaiSelector>
 
-              <SisdaiBotonesRadioGrupo
-                v-show="['pdf', 'word'].includes(seleccionTipoArchivo)"
-                leyenda="Hoja membretada (Formato SECIHTI)"
-                :es_vertical="false"
-              >
-                <SisdaiBotonRadio
-                  v-model="botonRadioHojaMembretada"
-                  etiqueta="Sí"
-                  :value="true"
-                  name="hojamembretada"
-                  :es_obligatorio="true"
-                />
-                <SisdaiBotonRadio
-                  v-model="botonRadioHojaMembretada"
-                  etiqueta="No"
-                  :value="false"
-                  name="hojamembretada"
-                  :es_obligatorio="true"
-                />
-              </SisdaiBotonesRadioGrupo>
+              <form v-show="['pdf', 'word'].includes(seleccionTipoArchivo)" @submit.prevent>
+                <fieldset class="grupo-formulario" role="radiogroup">
+                  <legend>Hoja membretada (Formato SECIHTI)</legend>
+
+                  <span>
+                    <input
+                      id="radio-identificadorgrupaluno"
+                      v-model="botonRadioHojaMembretada"
+                      type="radio"
+                      :value="true"
+                      name="hojamembretada"
+                      required
+                    />
+                    <label for="radio-identificadorgrupaluno"> Sí </label>
+                  </span>
+                  <span>
+                    <input
+                      id="radio-identificadorgrupaldos"
+                      v-model="botonRadioHojaMembretada"
+                      type="radio"
+                      :value="false"
+                      name="hojamembretada"
+                      required
+                    />
+                    <label for="radio-identificadorgrupaldos"> No </label>
+                  </span>
+                </fieldset>
+              </form>
             </ClientOnly>
           </template>
 
@@ -1460,16 +1520,22 @@ watch(seleccionTipoArchivo, (nv) => {
           </template>
 
           <template #cuerpo>
-            <div v-if="previewReporte" class="m-y-2" style="width: 100%; height: 60vh">
-              <!-- El iframe renderizará nativamente PDFs y TXT que el navegador soporte -->
-              <iframe
-                v-if="['pdf', 'txt'].includes(previewReporte.file_format)"
-                :src="previewReporte.download_url"
-                style="width: 100%; height: 100%; border: none; border-radius: 8px"
-                title="Previsualización del reporte"
-              >
-              </iframe>
+            <div>
+              <div v-show="mostrarPPTX" ref="domRef" class="pptx-init-dom"></div>
               <div
+                v-if="previewReporte && !mostrarPPTX"
+                class="m-y-2"
+                style="width: 100%; height: 60vh"
+              >
+                <!-- El iframe renderizará nativamente PDFs y TXT que el navegador soporte -->
+                <iframe
+                  v-if="['pdf', 'txt'].includes(previewReporte.file_format)"
+                  :src="previewReporte.download_url"
+                  style="width: 100%; height: 100%; border: none; border-radius: 8px"
+                  title="Previsualización del reporte"
+                >
+                </iframe>
+                <!-- <div
                 v-else
                 class="flex flex-contenido-centrado flex-vertical-centrado fondo-color-neutro borde-redondeado-8"
                 style="height: 100%; flex-direction: column"
@@ -1484,6 +1550,7 @@ watch(seleccionTipoArchivo, (nv) => {
                   dentro del navegador.<br />
                   Por favor, descárgalo para revisarlo en tu equipo.
                 </p>
+              </div> -->
               </div>
             </div>
           </template>
