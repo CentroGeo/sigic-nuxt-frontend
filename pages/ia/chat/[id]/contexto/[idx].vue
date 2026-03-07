@@ -576,8 +576,9 @@ const botonRadioRepresentacion = ref('centroide');
 const botonRadioUbicacion = ref('resolver_auto');
 const botonRadioFormato = ref('capa_visualizador');
 
-// --- Nueva Lógica de Integración para Reportes ---
+// --- Nueva Lógica de Integración para Reportes y Espacialización ---
 const reportesGenerados = ref([]); // Lista reactiva de reportes en sesión actual
+const isEspacializando = ref(false); // Estado de carga para el modal de espacializar
 
 const pollStatus = async (reportId) => {
   const token = data.value?.accessToken;
@@ -699,11 +700,97 @@ async function generarReporte(modo) {
       console.error('Network error triggering report generation:', error);
     }
   } else if (modo === 'espacializar') {
-    console.log('file_ids', fuentesSeleccionadas.value);
-    console.log('casillaArregloUbicaciones.value', casillaArregloUbicaciones.value);
-    console.log('botonRadioRepresentacion.value', botonRadioRepresentacion.value);
-    console.log('botonRadioUbicacion.value', botonRadioUbicacion.value);
-    console.log('botonRadioFormato.value', botonRadioFormato.value);
+    isEspacializando.value = true;
+    const token = data.value?.accessToken;
+
+    // Traducir parámetros de la UI a los esperados por el Backend
+    // Representación: 'centroide' -> 'centroid', 'geometria' -> 'polygon', 'punto' -> 'point'
+    const geomMap = {
+      centroide: 'centroid',
+      geometria: 'polygon',
+      punto: 'point',
+    };
+    const geometryType = geomMap[botonRadioRepresentacion.value] || 'point';
+
+    // Ubicación: 'resolver_auto' -> 'auto', 'marcar_manual' -> 'México' (por defecto)
+    const focusValue = botonRadioUbicacion.value === 'resolver_auto' ? 'auto' : 'México';
+
+    // Formato de exportación: 'descargar_geojson' -> 'geojson', 'descargar_shp' -> 'shp'
+    let exportFormat = 'geojson';
+    if (botonRadioFormato.value === 'descargar_shp') exportFormat = 'shp';
+    if (botonRadioFormato.value === 'descargar_gpkg') exportFormat = 'gpkg';
+
+    const reportName =
+      fuentesSeleccionadas.value.length > 1
+        ? 'Mapa espacializado de varias fuentes'
+        : `Mapa espacializado: ${fuentesSeleccionadas.value[0]?.filename}`;
+    const selectedIds = fuentesSeleccionadas.value.map((d) => d.id);
+
+    // Crear un ID temporal para la tarjeta visual
+    const tempId = `esp-${Date.now()}`;
+
+    // Inyectar a la lista del sidebar
+    reportesGenerados.value.push({
+      id: tempId,
+      type: 'espacializacion',
+      status: 'processing',
+      report_name: reportName,
+      file_format: exportFormat,
+    });
+
+    // Cerrar el modal inmediatamente para no bloquear la UI
+    modalEspacializarInstrucciones.value.cerrarModal();
+    fuentesSeleccionadas.value = [];
+
+    const payload = {
+      context_id: contextID.value,
+      file_ids: selectedIds,
+      entity_types:
+        casillaArregloUbicaciones.value.length > 0 ? casillaArregloUbicaciones.value : undefined,
+      geometry_type: geometryType,
+      focus: focusValue,
+      export_format: exportFormat,
+    };
+
+    try {
+      const res = await fetch(`${config.public.iaBackendUrl}/api/localidades/detect/`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const elementIndex = reportesGenerados.value.findIndex((r) => r.id === tempId);
+
+      if (res.ok) {
+        const responseData = await res.json();
+
+        if (elementIndex !== -1) {
+          reportesGenerados.value[elementIndex].status = 'done';
+
+          if (responseData.download_url) {
+            let finalUrl = responseData.download_url.replace('/media/', '/media/');
+            if (!finalUrl.startsWith('http')) {
+              finalUrl = config.public.iaBackendUrl + finalUrl;
+            }
+            reportesGenerados.value[elementIndex].download_url = finalUrl;
+          }
+        }
+      } else {
+        const errorData = await res.json();
+        console.error('Error procesando ubicaciones:', errorData);
+        if (elementIndex !== -1) reportesGenerados.value[elementIndex].status = 'error';
+      }
+    } catch (error) {
+      console.error('Error de red al intentar espacializar:', error);
+      const elementIndex = reportesGenerados.value.findIndex((r) => r.id === tempId);
+      if (elementIndex !== -1) reportesGenerados.value[elementIndex].status = 'error';
+    } finally {
+      isEspacializando.value = false;
+    }
+    return; // Early return para no ejecutar el cleanup normal de generacion de reportes asíncronos
   }
 
   fuentesSeleccionadas.value = [];
@@ -1443,7 +1530,7 @@ watch(seleccionTipoArchivo, (nv) => {
               class="boton-secundario boton-chico"
               aria-label="Regresar a llenar información"
               type="button"
-              :disabled="false"
+              :disabled="isEspacializando"
               @click="
                 modalEspacializarInstrucciones.cerrarModal();
                 modalReporteInfo.abrirModal();
@@ -1637,10 +1724,20 @@ watch(seleccionTipoArchivo, (nv) => {
               class="flex p-2"
             >
               <span
-                class="texto-color-acento flex-vertical-centrado pictograma-actualizar m-r-1 rotar"
+                class="texto-color-acento flex-vertical-centrado rotar m-r-1"
+                :class="
+                  reporte.type === 'espacializacion'
+                    ? 'pictograma-mapa-generador'
+                    : 'pictograma-actualizar'
+                "
               />
               <p class="flex-vertical-centrado m-0">
-                Generando reporte: {{ reporte.report_name }}...
+                {{
+                  reporte.type === 'espacializacion'
+                    ? 'Espacializando información:'
+                    : 'Generando reporte:'
+                }}
+                {{ reporte.report_name }}
               </p>
             </div>
 
@@ -1648,11 +1745,21 @@ watch(seleccionTipoArchivo, (nv) => {
             <div v-else-if="reporte.status === 'done'" class="flex flex-contenido-separado p-2">
               <div
                 class="flex cursor-pointer hover-texto-acento"
-                style="cursor: pointer"
-                @click="abrirPreviewReporte(reporte)"
+                :style="reporte.type !== 'espacializacion' ? 'cursor: pointer' : ''"
+                @click="reporte.type !== 'espacializacion' ? abrirPreviewReporte(reporte) : null"
               >
-                <span class="texto-color-acento flex-vertical-centrado pictograma-reporte" />
-                <p class="flex-vertical-centrado m-0" style="text-decoration: underline">
+                <span
+                  class="texto-color-acento flex-vertical-centrado m-r-1"
+                  :class="
+                    reporte.type === 'espacializacion'
+                      ? 'pictograma-mapa-generador'
+                      : 'pictograma-reporte'
+                  "
+                />
+                <p
+                  class="flex-vertical-centrado m-0"
+                  :style="reporte.type !== 'espacializacion' ? 'text-decoration: underline' : ''"
+                >
                   {{ reporte.report_name }}
                 </p>
               </div>
@@ -1662,7 +1769,7 @@ watch(seleccionTipoArchivo, (nv) => {
                   :href="reporte.download_url"
                   target="_blank"
                   class="boton-pictograma boton-sin-contenedor-secundario"
-                  aria-label="Descargar reporte"
+                  aria-label="Descargar archivo"
                 >
                   <span class="pictograma-archivo-descargar" aria-hidden="true" />
                 </a>
@@ -1672,7 +1779,7 @@ watch(seleccionTipoArchivo, (nv) => {
             <!-- Estado: ERROR -->
             <div v-else-if="reporte.status === 'error'" class="flex p-2">
               <span class="texto-color-acento flex-vertical-centrado pictograma-cerrar m-r-1" />
-              <p class="flex-vertical-centrado m-0">Error generando: {{ reporte.report_name }}</p>
+              <p class="flex-vertical-centrado m-0">Error procesando: {{ reporte.report_name }}</p>
             </div>
           </div>
         </div>
