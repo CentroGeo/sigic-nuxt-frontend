@@ -10,7 +10,7 @@ import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/sele
 import DOMPurify from 'dompurify'; // Para seguridad XSS
 import { marked } from 'marked'; // Importar marked para mostrar formato markdown
 
-const { data } = useAuth();
+const { data, refresh } = useAuth();
 const config = useRuntimeConfig();
 
 const storeIA = useIAStore();
@@ -580,11 +580,15 @@ const botonRadioFormato = ref('capa_visualizador');
 const reportesGenerados = ref([]); // Lista reactiva de reportes en sesión actual
 const isEspacializando = ref(false); // Estado de carga para el modal de espacializar
 
-const pollStatus = async (reportId) => {
-  const token = data.value?.accessToken;
+const pollStatus = async (itemId, type = 'reporte') => {
+  const endpoint =
+    type === 'espacializacion' ? `/api/localidades/${itemId}/` : `/api/reports/${itemId}/`;
   const interval = setInterval(async () => {
+    const token = data.value?.accessToken;
+    if (!token) return;
+
     try {
-      const res = await fetch(`${config.public.iaBackendUrl}/api/reports/${reportId}/`, {
+      const res = await fetch(`${config.public.iaBackendUrl}${endpoint}`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -595,20 +599,35 @@ const pollStatus = async (reportId) => {
         const reportData = await res.json();
 
         // Find and update the local report tracking object
-        const idx = reportesGenerados.value.findIndex((r) => r.id === reportId);
+        const idx = reportesGenerados.value.findIndex((r) => r.id === itemId);
         if (idx !== -1) {
           reportesGenerados.value[idx] = { ...reportesGenerados.value[idx], ...reportData };
 
           if (reportData.status === 'done' || reportData.status === 'error') {
+            if (reportData.status === 'done' && type === 'espacializacion') {
+              reportesGenerados.value[idx].progress = 100;
+            }
             clearInterval(interval);
           }
         } else {
           // Not found in our current session array? stop polling
           clearInterval(interval);
         }
+      } else {
+        console.error(`pollStatus error - Status: ${res.status}`);
+        if (res.status === 401 || res.status === 403) {
+          console.log('Intentando refrescar la sesión local de Nuxt Auth...');
+          try {
+            await refresh();
+          } catch (refreshErr) {
+            console.error('Fallo al refrescar token local:', refreshErr);
+          }
+          // No limpiamos el intervalo ni marcamos error;
+          // El próximo ciclo de setInterval tomará el token fresco.
+        }
       }
     } catch (err) {
-      console.error(`Error polling status for report ${reportId}:`, err);
+      console.error(`Error polling status for ${type} ${itemId}:`, err);
     }
   }, 10000); // Poll every 10 seconds
 };
@@ -618,7 +637,7 @@ const fetchInitialReports = async () => {
   if (!contextID.value || !data.value?.accessToken) return;
 
   try {
-    const res = await fetch(
+    const resReports = await fetch(
       `${config.public.iaBackendUrl}/api/reports/?context_id=${contextID.value}`,
       {
         method: 'GET',
@@ -629,24 +648,51 @@ const fetchInitialReports = async () => {
       }
     );
 
-    if (res.ok) {
-      const reports = await res.json();
-      // Map the returned data to our reactive format
-      reportesGenerados.value = reports.map((r) => ({
-        id: r.id,
-        status: r.status,
-        report_name: r.report_name,
-        download_url: r.download_url,
-        file_format: r.file_format,
-      }));
+    const resSpatial = await fetch(
+      `${config.public.iaBackendUrl}/api/localidades/?context_id=${contextID.value}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${data.value.accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
-      // Resume polling for any report that's still pending/processing
-      reportesGenerados.value.forEach((r) => {
-        if (r.status === 'pending' || r.status === 'processing') {
-          pollStatus(r.id);
-        }
-      });
+    let combined = [];
+
+    if (resReports.ok) {
+      const reports = await resReports.json();
+      combined = combined.concat(
+        reports.map((r) => ({
+          ...r,
+          type: 'reporte',
+        }))
+      );
     }
+
+    if (resSpatial.ok) {
+      const spatial = await resSpatial.json();
+      combined = combined.concat(
+        spatial.map((s) => ({
+          ...s,
+          file_format: s.export_format,
+          type: 'espacializacion',
+          progress: s.progress || 0,
+        }))
+      );
+    }
+
+    // Sort by created_date descending if needed
+    combined.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+    reportesGenerados.value = combined;
+
+    // Resume polling for any report/spatialization that's still pending/processing
+    reportesGenerados.value.forEach((item) => {
+      if (item.status === 'pending' || item.status === 'processing') {
+        pollStatus(item.id, item.type);
+      }
+    });
   } catch (err) {
     console.error('Error fetching initial reports:', err);
   }
@@ -736,6 +782,7 @@ async function generarReporte(modo) {
       status: 'processing',
       report_name: reportName,
       file_format: exportFormat,
+      progress: 0,
     });
 
     // Cerrar el modal inmediatamente para no bloquear la UI
@@ -745,11 +792,13 @@ async function generarReporte(modo) {
     const payload = {
       context_id: contextID.value,
       file_ids: selectedIds,
+      report_name: reportName,
       entity_types:
         casillaArregloUbicaciones.value.length > 0 ? casillaArregloUbicaciones.value : undefined,
       geometry_type: geometryType,
       focus: focusValue,
       export_format: exportFormat,
+      refresh_token: data.value?.refreshToken,
     };
 
     try {
@@ -762,25 +811,20 @@ async function generarReporte(modo) {
         body: JSON.stringify(payload),
       });
 
-      const elementIndex = reportesGenerados.value.findIndex((r) => r.id === tempId);
-
       if (res.ok) {
         const responseData = await res.json();
+        const elementIndex = reportesGenerados.value.findIndex((r) => r.id === tempId);
 
         if (elementIndex !== -1) {
-          reportesGenerados.value[elementIndex].status = 'done';
-
-          if (responseData.download_url) {
-            let finalUrl = responseData.download_url.replace('/media/', '/media/');
-            if (!finalUrl.startsWith('http')) {
-              finalUrl = config.public.iaBackendUrl + finalUrl;
-            }
-            reportesGenerados.value[elementIndex].download_url = finalUrl;
-          }
+          // Reemplazamos tempId por el id real de base de datos e iniciamos polling
+          reportesGenerados.value[elementIndex].id = responseData.id;
+          reportesGenerados.value[elementIndex].status = responseData.status || 'processing';
+          pollStatus(responseData.id, 'espacializacion');
         }
       } else {
         const errorData = await res.json();
-        console.error('Error procesando ubicaciones:', errorData);
+        console.error('Error enviando ubicaciones:', errorData);
+        const elementIndex = reportesGenerados.value.findIndex((r) => r.id === tempId);
         if (elementIndex !== -1) reportesGenerados.value[elementIndex].status = 'error';
       }
     } catch (error) {
@@ -1719,26 +1763,46 @@ watch(seleccionTipoArchivo, (nv) => {
             class="fondo-color-acento borde-redondeado-8 m-b-2"
           >
             <!-- Estado: PROCESANDO o PENDIENTE -->
-            <div
-              v-if="reporte.status === 'processing' || reporte.status === 'pending'"
-              class="flex p-2"
-            >
-              <span
-                class="texto-color-acento flex-vertical-centrado rotar m-r-1"
-                :class="
-                  reporte.type === 'espacializacion'
-                    ? 'pictograma-mapa-generador'
-                    : 'pictograma-actualizar'
-                "
-              />
-              <p class="flex-vertical-centrado m-0">
-                {{
-                  reporte.type === 'espacializacion'
-                    ? 'Espacializando información:'
-                    : 'Generando reporte:'
-                }}
-                {{ reporte.report_name }}
-              </p>
+            <div v-if="reporte.status === 'processing' || reporte.status === 'pending'" class="p-2">
+              <div class="flex" :class="{ 'm-b-1': reporte.type === 'espacializacion' }">
+                <span
+                  class="texto-color-acento flex-vertical-centrado m-r-1"
+                  :class="
+                    reporte.type === 'espacializacion'
+                      ? 'pictograma-mapa-generador'
+                      : 'pictograma-actualizar rotar'
+                  "
+                />
+                <p class="flex-vertical-centrado m-0">
+                  <template v-if="reporte.type === 'espacializacion'">
+                    Espacializando información
+                  </template>
+                  <template v-else> Generando reporte: {{ reporte.report_name }} </template>
+                </p>
+              </div>
+
+              <!-- Barra de progreso para espacialización simulada -->
+              <div v-if="reporte.type === 'espacializacion'" class="m-t-2">
+                <div
+                  style="
+                    background: rgba(169, 67, 91, 0.2);
+                    height: 8px;
+                    border-radius: 4px;
+                    overflow: hidden;
+                    width: 100%;
+                  "
+                >
+                  <div
+                    :style="`width: ${Math.round(reporte.progress || 0)}%; background: #A9435B; height: 100%; transition: width 0.5s ease-in-out;`"
+                  ></div>
+                </div>
+                <p
+                  class="texto-derecha m-0 m-t-1 texto-color-acento"
+                  style="font-size: 11px; font-weight: 500"
+                >
+                  {{ Math.round(reporte.progress || 0) }}%
+                </p>
+              </div>
             </div>
 
             <!-- Estado: COMPLETADO -->
