@@ -1681,31 +1681,38 @@ watch(seleccionTipoArchivo, (nv) => {
 
         <SisdaiModal ref="modalPreviewEspacializacion" class="modal-grande">
           <template #encabezado>
-            <h2>{{ previewEspacializacionData?.report_name || 'Mapa espacializado' }}</h2>
-          </template>
-
-          <template #cuerpo>
+            <h4 class="m-0">
+              {{ previewEspacializacionData?.report_name || 'Mapa espacializado' }}
+            </h4>
             <div
-              class="flex flex-vertical-centrado p-2 m-b-3 borde-redondeado-8"
-              style="background-color: #e3ebfb; border: 1px solid #1440cc; color: #1440cc"
+              class="flex p-2 m-t-2 borde-redondeado-8"
+              style="
+                background-color: #e3ebfb;
+                border: 1px solid #1440cc;
+                color: #1440cc;
+                align-items: flex-start;
+              "
             >
               <span
                 class="pictograma-informacion m-r-2"
                 aria-hidden="true"
-                style="font-size: 1.5rem"
+                style="font-size: 1.25rem; flex-shrink: 0; line-height: 1.2"
               ></span>
-              <p class="m-0" style="font-size: 14px">
+              <p class="m-0" style="font-size: 14px; font-weight: normal; line-height: 1.3">
                 Este resultado es generado mediante herramientas de IA y puede contener
                 imprecisiones; se recomienda su revisión y validación.
               </p>
             </div>
+          </template>
 
+          <template #cuerpo>
             <div
               v-if="previewGeojsonUrl"
               class="m-y-2 posicion-relativa"
               style="
                 width: 100%;
-                height: 60vh;
+                height: 50vh;
+                min-height: 350px;
                 border: 1px solid var(--borde-neutro);
                 border-radius: 8px;
                 overflow: hidden;
@@ -1756,10 +1763,11 @@ watch(seleccionTipoArchivo, (nv) => {
                 </div>
               </div>
             </div>
+
             <div
-              v-else
+              v-if="!previewGeojsonUrl"
               class="flex flex-contenido-centrado flex-vertical-centrado fondo-color-neutro borde-redondeado-8 p-3 m-y-2"
-              style="height: 60vh"
+              style="height: 50vh; min-height: 350px"
             >
               <span class="pictograma-alerta texto-color-error" style="font-size: 4rem"></span>
               <p class="m-t-3 texto-centrado">
@@ -1770,22 +1778,22 @@ watch(seleccionTipoArchivo, (nv) => {
           </template>
 
           <template #pie>
+            <a
+              :href="previewEspacializacionData?.download_url"
+              target="_blank"
+              class="boton-primario boton-chico"
+              style="text-decoration: none"
+            >
+              <span class="pictograma-archivo-descargar m-r-1" aria-hidden="true" /> Descargar
+            </a>
             <button
-              class="boton-secundario boton-chico"
+              class="boton-secundario boton-chico m-l-2"
               aria-label="Cerrar modal"
               type="button"
               @click="cerrarPreviewEspacializacion"
             >
               Cerrar
             </button>
-            <a
-              :href="previewEspacializacionData?.download_url"
-              target="_blank"
-              class="boton-primario boton-chico m-l-2"
-              style="text-decoration: none"
-            >
-              <span class="pictograma-archivo-descargar m-r-1" aria-hidden="true" /> Descargar
-            </a>
           </template>
         </SisdaiModal>
       </ClientOnly>
