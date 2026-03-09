@@ -583,6 +583,9 @@ const isEspacializando = ref(false); // Estado de carga para el modal de espacia
 const pollStatus = async (itemId, type = 'reporte') => {
   const endpoint =
     type === 'espacializacion' ? `/api/localidades/${itemId}/` : `/api/reports/${itemId}/`;
+
+  let failedAttempts = 0; // Circuito preventivo para loops infinitos
+
   const interval = setInterval(async () => {
     const token = data.value?.accessToken;
     if (!token) return;
@@ -595,7 +598,9 @@ const pollStatus = async (itemId, type = 'reporte') => {
           'Content-Type': 'application/json',
         },
       });
+
       if (res.ok) {
+        failedAttempts = 0; // Reiniciamos contador si responde bien
         const reportData = await res.json();
 
         // Find and update the local report tracking object
@@ -616,14 +621,30 @@ const pollStatus = async (itemId, type = 'reporte') => {
       } else {
         console.error(`pollStatus error - Status: ${res.status}`);
         if (res.status === 401 || res.status === 403) {
+          failedAttempts++;
+          if (failedAttempts > 3) {
+            console.error(
+              `Demasiados fallos ${res.status} consecutivos, deteniendo polling para:`,
+              itemId
+            );
+            clearInterval(interval);
+            const idx = reportesGenerados.value.findIndex((r) => r.id === itemId);
+            if (idx !== -1) reportesGenerados.value[idx].status = 'error';
+            return;
+          }
+
           console.log('Intentando refrescar la sesión local de Nuxt Auth...');
           try {
             await refresh();
+            // Optional delay to let reactivity flush
+            await new Promise((r) => setTimeout(r, 500));
+            console.log(
+              'Token local refrescado a:',
+              data.value?.accessToken?.substring(0, 15) + '...'
+            );
           } catch (refreshErr) {
             console.error('Fallo al refrescar token local:', refreshErr);
           }
-          // No limpiamos el intervalo ni marcamos error;
-          // El próximo ciclo de setInterval tomará el token fresco.
         }
       }
     } catch (err) {
