@@ -10,6 +10,9 @@ import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/sele
 import DOMPurify from 'dompurify'; // Para seguridad XSS
 import { marked } from 'marked'; // Importar marked para mostrar formato markdown
 
+import { SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
+import SisdaiCapaVectorial from '@centrogeomx/sisdai-mapas/src/componentes/capa/vectorial/SisdaiCapaVectorial.vue';
+
 const { data, refresh } = useAuth();
 const config = useRuntimeConfig();
 
@@ -56,6 +59,10 @@ const chatID = ref(0);
 
 const modalPreviewReporte = ref(null);
 const previewReporte = ref(null);
+
+const modalPreviewEspacializacion = ref(null);
+const previewEspacializacionData = ref(null);
+const previewGeojsonUrl = ref(null);
 
 const idAleatorio = () => {
   return 'areatexto-' + Math.random().toString(36).substring(2);
@@ -872,6 +879,18 @@ function cerrarPreviewReporte() {
   previewReporte.value = null;
 }
 
+async function abrirPreviewEspacializacion(reporte) {
+  previewEspacializacionData.value = reporte;
+  previewGeojsonUrl.value = reporte.download_url;
+  modalPreviewEspacializacion.value?.abrirModal();
+}
+
+function cerrarPreviewEspacializacion() {
+  modalPreviewEspacializacion.value?.cerrarModal();
+  previewEspacializacionData.value = null;
+  previewGeojsonUrl.value = null;
+}
+
 const opTipoArchivo = ref({ pdf: 'PDF', word: 'WORD', pptx: 'PPTX', csv: 'CSV' });
 watch(seleccionTipoReporte, (nv) => {
   if (nv === 'presentation') {
@@ -1659,6 +1678,116 @@ watch(seleccionTipoArchivo, (nv) => {
             </a>
           </template>
         </SisdaiModal>
+
+        <SisdaiModal ref="modalPreviewEspacializacion" class="modal-grande">
+          <template #encabezado>
+            <h2>{{ previewEspacializacionData?.report_name || 'Mapa espacializado' }}</h2>
+          </template>
+
+          <template #cuerpo>
+            <div
+              class="flex flex-vertical-centrado p-2 m-b-3 borde-redondeado-8"
+              style="background-color: #e3ebfb; border: 1px solid #1440cc; color: #1440cc"
+            >
+              <span
+                class="pictograma-informacion m-r-2"
+                aria-hidden="true"
+                style="font-size: 1.5rem"
+              ></span>
+              <p class="m-0" style="font-size: 14px">
+                Este resultado es generado mediante herramientas de IA y puede contener
+                imprecisiones; se recomienda su revisión y validación.
+              </p>
+            </div>
+
+            <div
+              v-if="previewGeojsonUrl"
+              class="m-y-2 posicion-relativa"
+              style="
+                width: 100%;
+                height: 60vh;
+                border: 1px solid var(--borde-neutro);
+                border-radius: 8px;
+                overflow: hidden;
+              "
+            >
+              <!-- Mapa -->
+              <SisdaiMapa class="gema" :vista="{ centro: [-102.5, 23.6], zoom: 4.5 }">
+                <!-- Base grisácea clara -->
+                <SisdaiCapaXyz
+                  id="capa-base"
+                  url="https://{a-c}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                />
+                <!-- Vector sobrepuesto -->
+                <SisdaiCapaVectorial id="capa-preview-ia" :fuente="previewGeojsonUrl" />
+              </SisdaiMapa>
+
+              <!-- Leyenda superpuesta -->
+              <div
+                class="posicion-absoluta fondo-color-neutro p-3 borde-redondeado-8 sombra-1"
+                style="bottom: 16px; left: 16px; z-index: 10"
+              >
+                <p class="m-0 m-b-2" style="font-weight: 600; font-size: 14px">Leyenda</p>
+                <div class="flex flex-vertical-centrado m-b-1">
+                  <div
+                    style="
+                      width: 12px;
+                      height: 12px;
+                      border-radius: 50%;
+                      background-color: #a9435b;
+                      border: 1px solid white;
+                    "
+                    class="m-r-1"
+                  ></div>
+                  <span style="font-size: 12px">Ubicaciones detectadas</span>
+                </div>
+                <div class="flex flex-vertical-centrado">
+                  <div
+                    style="
+                      width: 12px;
+                      height: 12px;
+                      border-radius: 50%;
+                      background-color: #cccccc;
+                      border: 1px solid white;
+                    "
+                    class="m-r-1"
+                  ></div>
+                  <span style="font-size: 12px">Baja confianza</span>
+                </div>
+              </div>
+            </div>
+            <div
+              v-else
+              class="flex flex-contenido-centrado flex-vertical-centrado fondo-color-neutro borde-redondeado-8 p-3 m-y-2"
+              style="height: 60vh"
+            >
+              <span class="pictograma-alerta texto-color-error" style="font-size: 4rem"></span>
+              <p class="m-t-3 texto-centrado">
+                Error al intentar cargar el archivo de espacialización geográfico o archivo
+                inexistente/inválido.
+              </p>
+            </div>
+          </template>
+
+          <template #pie>
+            <button
+              class="boton-secundario boton-chico"
+              aria-label="Cerrar modal"
+              type="button"
+              @click="cerrarPreviewEspacializacion"
+            >
+              Cerrar
+            </button>
+            <a
+              :href="previewEspacializacionData?.download_url"
+              target="_blank"
+              class="boton-primario boton-chico m-l-2"
+              style="text-decoration: none"
+            >
+              <span class="pictograma-archivo-descargar m-r-1" aria-hidden="true" /> Descargar
+            </a>
+          </template>
+        </SisdaiModal>
       </ClientOnly>
     </template>
 
@@ -1830,8 +1959,12 @@ watch(seleccionTipoArchivo, (nv) => {
             <div v-else-if="reporte.status === 'done'" class="flex flex-contenido-separado p-2">
               <div
                 class="flex cursor-pointer hover-texto-acento"
-                :style="reporte.type !== 'espacializacion' ? 'cursor: pointer' : ''"
-                @click="reporte.type !== 'espacializacion' ? abrirPreviewReporte(reporte) : null"
+                style="cursor: pointer"
+                @click="
+                  reporte.type !== 'espacializacion'
+                    ? abrirPreviewReporte(reporte)
+                    : abrirPreviewEspacializacion(reporte)
+                "
               >
                 <span
                   class="texto-color-acento flex-vertical-centrado m-r-1"
