@@ -1,8 +1,17 @@
+<script setup>
+defineProps({
+  mensaje: {
+    type: String,
+    default: 'Cargando...',
+  },
+});
+</script>
+
 <template>
   <div class="loader flex flex-contenido-centrado">
-    <img src="/img/loader.gif" alt="Cargando..." />
+    <img src="/img/loader.gif" :alt="mensaje" />
 
-    <p>Cargando...</p>
+    <p>{{ mensaje }}</p>
   </div>
 </template>
 

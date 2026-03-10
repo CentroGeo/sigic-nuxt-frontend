@@ -1,24 +1,56 @@
 <script setup>
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+
 const config = useRuntimeConfig();
 const { data: userData } = useAuth();
 const { gnoxyFetch } = useGnoxyUrl();
 
-const limiteDescripcion = 250;
+const escenarioId = useRoute().params.id;
 
-const colorPrimario = ref('#000000');
-const colorSecundario = ref('#ffffff');
-
+const modalStatus = ref(null);
+const estatusAlGuardar = reactive({
+  cargando: false,
+  estado: undefined,
+  mensaje: '',
+  textoCargando: '',
+});
 const formulario = reactive({
-  url_id: '',
-  name: '',
   description: '',
   is_public: false,
+  name: '',
   scenes_layout_styles: {
-    text_panel: 50,
     map_panel: 50,
+    text_panel: 50,
     timeline_position: 'top',
+    gradient_end: '#e755f7',
+    gradient_start: '#9333ea',
   },
+  url_id: '',
 });
+
+async function cargarDatosEscenario() {
+  if (escenarioId === 'nuevo') return;
+
+  estatusAlGuardar.cargando = true;
+  estatusAlGuardar.textoCargando = 'Cargando escenario...';
+  modalStatus.value.abrirModal();
+
+  const respuesta = await gnoxyFetch(`${config.public.geonodeApi}/scenarios/${escenarioId}`);
+  const data = await respuesta.json();
+
+  // TODO: mostrar error si la respuesta no es ok o el escenario no existe
+
+  // console.log(data);
+  formulario.description = data.description;
+  formulario.is_public = data.is_public;
+  formulario.name = data.name;
+  formulario.scenes_layout_styles = data.scenes_layout_styles;
+  formulario.url_id = data.url_id;
+
+  estatusAlGuardar.cargando = false;
+  modalStatus.value.cerrarModal();
+}
+watch(modalStatus, cargarDatosEscenario);
 
 const nombre = computed({
   get: () => formulario.name,
@@ -43,22 +75,51 @@ const distribucionLayout = computed({
 async function guardarCambios() {
   // Aquí iría la lógica para guardar los cambios realizados en el escenario
   // console.log('Cambios guardados:', toRaw(formulario));
+  modalStatus.value?.abrirModal();
+  estatusAlGuardar.cargando = true;
+  estatusAlGuardar.textoCargando = 'Guardando...';
 
-  const respuesta = await gnoxyFetch(`${config.public.geonodeApi}/scenarios//`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${userData.value?.accessToken}`,
-    },
-    body: JSON.stringify(formulario),
-  });
+  const respuesta = await gnoxyFetch(
+    `${config.public.geonodeApi}/scenarios/${escenarioId !== 'nuevo' ? `${escenarioId}/` : ''}/`,
+    {
+      method: escenarioId === 'nuevo' ? 'POST' : 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${userData.value?.accessToken}`,
+      },
+      body: JSON.stringify(formulario),
+    }
+  );
 
-  if (!respuesta.ok || respuesta.status !== 201 || respuesta.statusText !== 'Created') {
-    console.error('Error al guardar el escenario:', respuesta.statusText);
-    return;
+  if (escenarioId === 'nuevo') {
+    if (!respuesta.ok || respuesta.status !== 201 || respuesta.statusText !== 'Created') {
+      console.error('Error al guardar el escenario:', respuesta.statusText);
+    }
+  } else {
+    if (!respuesta.ok || respuesta.status !== 200) {
+      console.error('Error al guardar el escenario:', respuesta.statusText);
+    }
   }
 
-  // const data = await respuesta.json();
+  const data = await respuesta.json();
+  // console.log(data);
+
+  // if (Object.hasOwn(data, 'success') && data.success === false) {
+  if (data?.success === false) {
+    estatusAlGuardar.cargando = false;
+    estatusAlGuardar.mensaje = data.errors.join(` `);
+    estatusAlGuardar.estado = data.success;
+  } else {
+    estatusAlGuardar.cargando = false;
+    estatusAlGuardar.estado = true;
+    setTimeout(() => {
+      modalStatus.value?.cerrarModal();
+
+      if (escenarioId === 'nuevo') {
+        navigateTo(`/geocontenidos/geohistorias/editar-${data.id}`);
+      }
+    }, 1500);
+  }
 }
 </script>
 
@@ -86,13 +147,13 @@ async function guardarCambios() {
 
       <div class="m-b-4">
         <label for="descripcion">
-          Descripción ({{ formulario.description.length }} / {{ limiteDescripcion }})
+          Descripción ({{ formulario.description.length }} / {{ 250 }})
         </label>
         <textarea
           id="descripcion"
           v-model="formulario.description"
           placeholder="Describa brevemente de qué trata este escenario"
-          :maxlength="limiteDescripcion"
+          :maxlength="250"
           required
         />
         <p class="formulario-ayuda" aria-live="polite" role="status">
@@ -130,14 +191,19 @@ async function guardarCambios() {
       <div class="flex flex-contenido-separado m-b-2">
         <div>
           <label for="color-primario">Color primario</label>
-          <input id="color-primario" v-model="colorPrimario" type="color" name="color-primario" />
+          <input
+            id="color-primario"
+            v-model="formulario.scenes_layout_styles.gradient_start"
+            type="color"
+            name="color-primario"
+          />
         </div>
 
         <div>
           <label for="color-secundario">Color secundario</label>
           <input
             id="color-secundario"
-            v-model="colorSecundario"
+            v-model="formulario.scenes_layout_styles.gradient_end"
             type="color"
             name="color-secundario"
           />
@@ -147,7 +213,9 @@ async function guardarCambios() {
       <label>Vista previa del gradiente</label>
       <div
         class="borde borde-color-secundario borde-redondeado-8 m-b-4"
-        :style="{ background: `linear-gradient(to right, ${colorPrimario}, ${colorSecundario})` }"
+        :style="{
+          background: `linear-gradient(to right, ${formulario.scenes_layout_styles.gradient_start}, ${formulario.scenes_layout_styles.gradient_end})`,
+        }"
         style="height: 200px"
       />
     </section>
@@ -182,11 +250,33 @@ async function guardarCambios() {
     </section>
 
     <section class="flex flex-contenido-final">
-      <NuxtLink to="/geocontenidos/geohistorias" class="boton boton-secundario">
-        Cancelar
-      </NuxtLink>
+      <NuxtLink to="/geocontenidos/geohistorias" class="boton boton-secundario">Volver</NuxtLink>
+
       <input type="submit" class="boton-primario" value="Guardar" />
-      <!-- <button class="boton-primario">Guardar y Editar escenas</button> -->
+
+      <button class="boton-primario" @click="modalStatus?.abrirModal()">
+        Guardar y Editar escenas
+      </button>
     </section>
+
+    <ClientOnly>
+      <SisdaiModal ref="modalStatus">
+        <template #encabezado>
+          <span v-if="estatusAlGuardar.cargando" />
+          <h2 v-else>{{ estatusAlGuardar.estado ? 'Guardado con éxito' : 'Error' }}</h2>
+        </template>
+
+        <template #cuerpo>
+          <GeocontenidosLoader
+            v-if="estatusAlGuardar.cargando"
+            :mensaje="estatusAlGuardar.textoCargando"
+          />
+
+          <p v-else-if="estatusAlGuardar.estado === false" v-text="estatusAlGuardar.mensaje" />
+
+          <p v-else><span class="pictograma-aprobado pictograma-grande" /></p>
+        </template>
+      </SisdaiModal>
+    </ClientOnly>
   </form>
 </template>
