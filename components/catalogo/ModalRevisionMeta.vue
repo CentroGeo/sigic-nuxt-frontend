@@ -152,9 +152,11 @@ async function buildResourceInfo() {
         : 'Información no proporcionada';
     resource.value['maintenance_frequency'] =
       dictFrecuencia[data.maintenance_frequency] || 'Información no proporcionada';
-    resource.value['attribute_set'] = data['attribute_set'].sort(
-      (a, b) => a.display_order - b.display_order
-    );
+
+    resource.value['attribute_set'] =
+      props.resourceType !== 'documents'
+        ? data['attribute_set'].sort((a, b) => a.display_order - b.display_order)
+        : [];
   }
   isLoading.value = false;
 }
