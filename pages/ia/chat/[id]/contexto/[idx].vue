@@ -50,6 +50,7 @@ const mensajes = ref([]);
 
 const modalReporteInfo = ref(null);
 const modalReporteInstrucciones = ref(null);
+const modalOperacionGeoespacialInstrucciones = ref(null);
 const modalEspacializarInstrucciones = ref(null);
 const isSubmitting = ref(false);
 
@@ -519,6 +520,13 @@ async function abrirModalReporteInfo(modo) {
       leyendaRadioGrupoReporteModal.value =
         'Selecciona los documentos o tabulados que quieras espacializar';
     }
+
+    if (modo === 'operacion-geospacial') {
+      tituloReporteModal.value = 'Operación geoespacial';
+      campoNombreVisible.value = false;
+      leyendaRadioGrupoReporteModal.value =
+        'Selecciona los documentos o tabulados que quieras espacializar';
+    }
   }
   modalReporteInfo.value.abrirModal();
   // Recupera las fuentes del contexto
@@ -545,6 +553,10 @@ function abrirModalInstrucciones() {
     if (tituloReporteModal.value === 'Espacializar información') {
       botonGenerarReporte.value = 'Espacializar';
       modalEspacializarInstrucciones.value.abrirModal();
+    }
+    if (tituloReporteModal.value === 'Operación geoespacial') {
+      botonGenerarReporte.value = 'Espacializar';
+      modalOperacionGeoespacialInstrucciones.value.abrirModal();
     }
   }
 
@@ -575,6 +587,7 @@ const obtenerTipoArchivo = (nombre) => {
 };
 
 const areaReporteInstrucciones = ref('');
+const areaOperacionGeoespacialInstrucciones = ref('');
 const seleccionTipoReporte = ref('');
 const seleccionTipoArchivo = ref('');
 const botonRadioHojaMembretada = ref(false);
@@ -861,6 +874,66 @@ async function generarReporte(modo) {
       if (elementIndex !== -1) reportesGenerados.value[elementIndex].status = 'error';
     } finally {
       isEspacializando.value = false;
+    }
+    return; // Early return para no ejecutar el cleanup normal de generacion de reportes asíncronos
+  } else if (modo === 'operacion_geoespacial') {
+    const token = data.value?.accessToken;
+
+    // Formato de exportación: 'descargar_geojson' -> 'geojson', 'descargar_shp' -> 'shp'
+    const exportFormat = 'geojson';
+    // if (botonRadioFormato.value === 'descargar_shp') exportFormat = 'shp';
+    // if (botonRadioFormato.value === 'descargar_gpkg') exportFormat = 'gpkg';
+
+    const reportName =
+      fuentesSeleccionadas.value.length > 1
+        ? 'Mapa espacializado de varias fuentes'
+        : `Mapa espacializado: ${fuentesSeleccionadas.value[0]?.filename}`;
+    const selectedIds = fuentesSeleccionadas.value.map((d) => d.id);
+
+    // Cerrar el modal inmediatamente para no bloquear la UI
+    modalOperacionGeoespacialInstrucciones.value.cerrarModal();
+    fuentesSeleccionadas.value = [];
+
+    const payload = {
+      context_id: contextID.value,
+      file_ids: selectedIds,
+      report_name: reportName,
+      instructions: areaOperacionGeoespacialInstrucciones.value,
+      export_format: exportFormat,
+      refresh_token: data.value?.refreshToken,
+    };
+
+    try {
+      const res = await fetch(`${config.public.iaBackendUrl}/api/geospatial/execute_async`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        // Add to our reactive list of pending tasks
+        reportesGenerados.value.push({
+          id: data.report_id,
+          task_id: data.task_id,
+          status: data.status,
+          report_name: payload.report_name,
+          file_format: payload.file_format,
+        });
+
+        console.log('DATA!!!', data);
+
+        // Start polling for this specific task
+        pollStatus(data.report_id);
+      } else {
+        const errorData = await res.json();
+        console.error('Error en la operación geoespacial:', errorData);
+      }
+    } catch (error) {
+      console.error('Error de red al intentar operacion geoespacial:', error);
     }
     return; // Early return para no ejecutar el cleanup normal de generacion de reportes asíncronos
   }
@@ -1625,6 +1698,48 @@ watch(seleccionTipoArchivo, (nv) => {
           </template>
         </SisdaiModal>
 
+        <SisdaiModal ref="modalOperacionGeoespacialInstrucciones">
+          <template #encabezado>
+            <h2>Generar reporte</h2>
+          </template>
+
+          <template #cuerpo>
+            <ClientOnly>
+              <SisdaiAreaTexto
+                v-model="areaOperacionGeoespacialInstrucciones"
+                etiqueta="Instrucciones para la operación"
+                ejemplo="Ej. Haz una unión entre las geometrías."
+                :es_obligatorio="true"
+                :es_etiqueta_visible="true"
+              />
+            </ClientOnly>
+          </template>
+
+          <template #pie>
+            <button
+              class="boton-primario boton-chico"
+              aria-label="Generar reporte"
+              type="button"
+              :disabled="!areaOperacionGeoespacialInstrucciones"
+              @click="generarReporte('operacion_geoespacial')"
+            >
+              {{ botonGenerarReporte }}
+            </button>
+            <button
+              class="boton-secundario boton-chico"
+              aria-label="Regresar a llenar información"
+              type="button"
+              :disabled="false"
+              @click="
+                modalOperacionGeoespacialInstrucciones.cerrarModal();
+                modalReporteInfo.abrirModal();
+              "
+            >
+              Regresar
+            </button>
+          </template>
+        </SisdaiModal>
+
         <SisdaiModal ref="modalPreviewReporte" class="modal-grande">
           <template #encabezado>
             <h2>Reporte</h2>
@@ -1869,13 +1984,14 @@ watch(seleccionTipoArchivo, (nv) => {
                     <div class="columna-16">
                       <div class="flex flex-contenido-separado">
                         <div class="columna-8 flex-vertical-final">
-                          <p class="m-0">Herramienta</p>
+                          <p class="m-0">Operación geospacial</p>
                         </div>
                         <div class="flex-vertical-final">
                           <button
                             class="boton-pictograma boton-con-contenedor-secundario boton-grande"
-                            aria-label="Acción a realizar"
+                            aria-label="Operación geospacial"
                             type="button"
+                            @click="abrirModalReporteInfo('operacion-geospacial')"
                           >
                             <span class="pictograma-ia" aria-hidden="true" />
                           </button>
