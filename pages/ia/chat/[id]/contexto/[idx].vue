@@ -1680,42 +1680,34 @@ watch(seleccionTipoArchivo, (nv) => {
           </template>
         </SisdaiModal>
 
-        <SisdaiModal ref="modalPreviewEspacializacion" class="modal-grande">
+        <SisdaiModal ref="modalPreviewEspacializacion" class="modal-grande modal-espacializacion">
           <template #encabezado>
-            <h4 class="m-0">
-              {{ previewEspacializacionData?.report_name || 'Mapa espacializado' }}
-            </h4>
-            <div
-              class="flex p-2 m-t-2 borde-redondeado-8"
-              style="
-                background-color: #e3ebfb;
-                border: 1px solid #1440cc;
-                color: #1440cc;
-                align-items: flex-start;
-              "
-            >
-              <span
-                class="pictograma-informacion m-r-2"
-                aria-hidden="true"
-                style="font-size: 1.25rem; flex-shrink: 0; line-height: 1.2"
-              ></span>
-              <p class="m-0" style="font-size: 14px; font-weight: normal; line-height: 1.3">
-                Este resultado es generado mediante herramientas de IA y puede contener
-                imprecisiones; se recomienda su revisión y validación.
-              </p>
+            <div style="padding: 0 24px">
+              <h4 class="m-0">
+                {{ previewEspacializacionData?.report_name || 'Mapa espacializado' }}
+              </h4>
+
+              <div class="mensaje-ia" role="note">
+                <span class="pictograma-informacion" aria-hidden="true"></span>
+                <p>
+                  Este resultado es generado mediante herramientas de IA y puede contener
+                  imprecisiones; se recomienda su revisión y validación.
+                </p>
+              </div>
             </div>
           </template>
 
           <template #cuerpo>
             <div
               v-if="previewGeojsonUrl"
-              class="m-y-2 posicion-relativa"
+              class="posicion-relativa"
               style="
                 width: 100%;
                 height: 50vh;
                 min-height: 350px;
-                border: 1px solid var(--borde-neutro);
-                border-radius: 8px;
+                border-top: 1px solid #d7dce2;
+                border-bottom: 1px solid #d7dce2;
+                border-radius: 0;
                 overflow: hidden;
               "
             >
@@ -2331,5 +2323,44 @@ input[type='file'] {
   max-width: 280px;
   white-space: normal;
   overflow-wrap: break-word;
+}
+
+/* Permitir que el mapa espacializado ocupe el 100% del ancho del modal sin márgenes */
+:deep(.modal-espacializacion .modal-contenedor) {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  padding-bottom: 0 !important;
+}
+:deep(.modal.modal-espacializacion .modal-cuerpo) {
+  padding: 0 !important;
+}
+:deep(.modal-espacializacion .modal-pie) {
+  padding: 0 24px 24px 24px !important;
+}
+
+.mensaje-ia {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 8px;
+
+  background-color: #e3ebfb;
+  border: 1px solid #1440cc;
+  color: #1440cc;
+  margin-top: 15px;
+
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.mensaje-ia p {
+  margin: 0;
+}
+
+.mensaje-ia .pictograma-informacion {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  line-height: 1.2;
 }
 </style>
