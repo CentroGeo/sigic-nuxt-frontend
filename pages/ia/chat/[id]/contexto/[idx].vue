@@ -1702,6 +1702,7 @@ watch(seleccionTipoArchivo, (nv) => {
               v-if="previewGeojsonUrl"
               class="posicion-relativa"
               style="
+                position: relative;
                 width: 100%;
                 height: 50vh;
                 min-height: 350px;
@@ -1722,6 +1723,14 @@ watch(seleccionTipoArchivo, (nv) => {
                 <SisdaiCapaVectorial
                   id="capa-preview-ia"
                   :fuente="previewGeojsonUrl"
+                  :estilo="{
+                    contorno: 'white', //para poligonos
+                    relleno: '#a9435b',
+                    'circulo-radio': 4, //para puntos
+                    'circulo-relleno-color': '#a9435b',
+                    'circulo-contorno-color': 'white',
+                    'circulo-contorno-width': 1,
+                  }"
                   :globo-informativo="
                     (d) =>
                       `<p><b>Info</b><br /><b>Nombre:</b> ${d['name'] || 'S/N'}<br /><b>Tipo:</b> ${d['type'] || 'S/T'}<br /><b>Contexto:</b> ${d['context'] || 'S/C'}</p>`
@@ -1734,11 +1743,19 @@ watch(seleccionTipoArchivo, (nv) => {
 
               <!-- Leyenda superpuesta -->
               <div
-                class="posicion-absoluta fondo-color-neutro p-3 borde-redondeado-8 sombra-1"
-                style="bottom: 16px; left: 16px; z-index: 10"
+                class="p-2 borde-redondeado-8 sombra-1"
+                style="
+                  position: absolute;
+                  bottom: 16px;
+                  left: 16px;
+                  z-index: 9999;
+                  background-color: #ffffff;
+                  pointer-events: none;
+                "
               >
                 <p class="m-0 m-b-2" style="font-weight: 600; font-size: 14px">Leyenda</p>
-                <div class="flex flex-vertical-centrado m-b-1">
+
+                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px">
                   <div
                     style="
                       width: 12px;
@@ -1746,12 +1763,13 @@ watch(seleccionTipoArchivo, (nv) => {
                       border-radius: 50%;
                       background-color: #a9435b;
                       border: 1px solid white;
+                      flex-shrink: 0;
                     "
-                    class="m-r-1"
                   ></div>
-                  <span style="font-size: 12px">Ubicaciones detectadas</span>
+                  <span style="font-size: 12px; line-height: 1">Ubicaciones detectadas</span>
                 </div>
-                <div class="flex flex-vertical-centrado">
+
+                <div style="display: flex; align-items: center; gap: 6px">
                   <div
                     style="
                       width: 12px;
@@ -1759,10 +1777,10 @@ watch(seleccionTipoArchivo, (nv) => {
                       border-radius: 50%;
                       background-color: #cccccc;
                       border: 1px solid white;
+                      flex-shrink: 0;
                     "
-                    class="m-r-1"
                   ></div>
-                  <span style="font-size: 12px">Baja confianza</span>
+                  <span style="font-size: 12px; line-height: 1">Baja confianza</span>
                 </div>
               </div>
             </div>
