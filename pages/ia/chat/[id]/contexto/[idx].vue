@@ -1730,7 +1730,10 @@ watch(seleccionTipoArchivo, (nv) => {
                 <SisdaiCapaVectorial
                   id="capa-preview-ia"
                   :fuente="previewGeojsonUrl"
-                  :globo-informativo="(d) => `<p><b>TopoJSON</b><br />Nombre: ${d['name']}</p>`"
+                  :globo-informativo="
+                    (d) =>
+                      `<p><b>Info</b><br /><b>Nombre:</b> ${d['name'] || 'S/N'}<br /><b>Tipo:</b> ${d['type'] || 'S/T'}<br /><b>Contexto:</b> ${d['context'] || 'S/C'}</p>`
+                  "
                 />
 
                 <!-- Globo Informativo (Tooltips en Hover) -->
@@ -2325,5 +2328,8 @@ input[type='file'] {
   padding: 8px 12px;
   color: white;
   font-size: 12px;
+  max-width: 280px;
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 </style>
