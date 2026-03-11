@@ -175,7 +175,7 @@ onMounted(() => {
               Aceptar<span class="pictograma-aprobado" aria-hidden="true" />
             </button>
             <button type="button" @click="modalNoAceptar.abrirModal()">
-              Rechazar<span class="pictograma-cerrar" aria-hidden="true" />
+              No Aceptar<span class="pictograma-cerrar" aria-hidden="true" />
             </button>
           </div>
 

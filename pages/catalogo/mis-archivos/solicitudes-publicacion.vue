@@ -28,7 +28,7 @@ const seleccionTipoArchivo = computed({
   set: (value) => storeFilters.updateFilter('requests', value),
 });
 
-const seleccionOrden = ref('updated_at');
+// const seleccionOrden = ref('updated_at');
 /* const seleccionOrden = computed({
   get: () => storeFilters.filters.sort,
   set: (value) => storeFilters.updateFilter('sort', value),
@@ -90,7 +90,8 @@ function updateResources() {
       categoria: d.resource.category,
       actualizacion: formatearFecha(d.updated_at),
       estatus: dictEstatus[d.status],
-      acciones: d.status === 'pending' ? 'Ver, Comentarios, Cancelar' : 'Ver, Comentarios',
+      //acciones: d.status === 'pending' ? 'Ver, Comentarios, Cancelar' : 'Ver, Comentarios',
+      acciones: 'Ver, Comentarios',
       comentarios: d.rejection_reason,
       revisor: d.reviewer?.username,
     };
@@ -102,7 +103,6 @@ function fetchNewData() {
   storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, {
     ...params.value,
     'filter{owner}': storeCatalogo.userInfo.pk,
-    ordering: seleccionOrden.value,
   });
 }
 
@@ -114,12 +114,11 @@ watch(paginaActual, () => {
   fetchNewData();
 });
 
-watch([params, seleccionOrden], () => {
+watch(params, () => {
   paginaActual.value = 0;
   storeResources.getMyTotal('publicacion', {
     ...params.value,
     'filter{owner}': storeCatalogo.userInfo.pk,
-    ordering: seleccionOrden.value,
   });
   fetchNewData();
 });
@@ -170,10 +169,9 @@ onMounted(async () => {
             </ClientOnly>
           </div>
           <!--class="columna-4"-->
-          <div class="columna-7">
+          <!-- <div class="columna-7">
             <ClientOnly>
               <label for="selector-orden-solicitudes">Ordenar por</label>
-              <!-- :disabled="isLoading"-->
               <select
                 v-model="seleccionOrden"
                 name="selector-tipo-solicitudes"
@@ -186,7 +184,7 @@ onMounted(async () => {
                 <option value="-updated_at">Más antiguo</option>
               </select>
             </ClientOnly>
-          </div>
+          </div> -->
           <div class="columna-8">
             <div class="flex flex-contenido-separado">
               <!--Campo de busqueda-->
