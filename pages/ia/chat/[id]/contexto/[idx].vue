@@ -581,8 +581,7 @@ const seleccionTipoArchivo = ref('');
 const botonRadioHojaMembretada = ref(false);
 const casillaArregloUbicaciones = ref([]);
 const botonRadioRepresentacion = ref('centroide');
-const botonRadioUbicacion = ref('resolver_auto');
-const botonRadioFormato = ref('capa_visualizador');
+const instruccionesAnalisis = ref('');
 
 // --- Nueva Lógica de Integración para Reportes y Espacialización ---
 const reportesGenerados = ref([]); // Lista reactiva de reportes en sesión actual
@@ -787,14 +786,6 @@ async function generarReporte(modo) {
     };
     const geometryType = geomMap[botonRadioRepresentacion.value] || 'point';
 
-    // Ubicación: 'resolver_auto' -> 'auto', 'marcar_manual' -> 'México' (por defecto)
-    const focusValue = botonRadioUbicacion.value === 'resolver_auto' ? 'auto' : 'México';
-
-    // Formato de exportación: 'descargar_geojson' -> 'geojson', 'descargar_shp' -> 'shp'
-    let exportFormat = 'geojson';
-    if (botonRadioFormato.value === 'descargar_shp') exportFormat = 'shp';
-    if (botonRadioFormato.value === 'descargar_gpkg') exportFormat = 'gpkg';
-
     const reportName =
       fuentesSeleccionadas.value.length > 1
         ? 'Mapa espacializado de varias fuentes'
@@ -810,7 +801,7 @@ async function generarReporte(modo) {
       type: 'espacializacion',
       status: 'processing',
       report_name: reportName,
-      file_format: exportFormat,
+      file_format: 'geojson',
       progress: 0,
     });
 
@@ -825,8 +816,7 @@ async function generarReporte(modo) {
       entity_types:
         casillaArregloUbicaciones.value.length > 0 ? casillaArregloUbicaciones.value : undefined,
       geometry_type: geometryType,
-      focus: focusValue,
-      export_format: exportFormat,
+      custom_instructions: instruccionesAnalisis.value,
       refresh_token: data.value?.refreshToken,
     };
 
@@ -1416,213 +1406,156 @@ watch(seleccionTipoArchivo, (nv) => {
 
         <SisdaiModal ref="modalEspacializarInstrucciones" class="modal-grande">
           <template #encabezado>
-            <h2>Espacializar información</h2>
+            <h2 class="m-0">Configura la espacialización</h2>
+            <p class="m-t-1 m-b-0" style="font-size: 16px">
+              Define cómo la IA debe identificar y representar las ubicaciones detectadas.
+            </p>
           </template>
 
           <template #cuerpo>
-            <p>
-              Ahora, define cómo la IA debe identificar y representar las ubicaciones detectadas.
-            </p>
-            <div class="flex">
-              <div class="columna-8">
-                <div class="fondo-color-neutro borde-redondeado-8 p-x-2 p-y-1">
-                  <div class="tarjeta-modal-espacializar">
-                    <ClientOnly>
-                      <form @submit.prevent>
-                        <fieldset class="grupo-formulario grupo-formulario-vertical">
-                          <legend>1. Selecciona los tipos de ubicaciones a identificar</legend>
+            <!-- Sección 1 -->
+            <div class="m-b-3">
+              <p style="font-weight: 600; font-size: 16px; margin-bottom: 16px">
+                Selecciona los tipos de ubicaciones a identificar
+              </p>
+              <div class="grupo-formulario flex m-x-2" style="gap: 24px; flex-wrap: wrap">
+                <span>
+                  <input
+                    id="casilla-identificadorgrupaluno"
+                    v-model="casillaArregloUbicaciones"
+                    type="checkbox"
+                    value="paises"
+                    :required="!casillaArregloUbicaciones.length"
+                  />
+                  <label for="casilla-identificadorgrupaluno"> Países </label>
+                </span>
+                <span>
+                  <input
+                    id="casilla-identificadorgrupaldos"
+                    v-model="casillaArregloUbicaciones"
+                    type="checkbox"
+                    value="estados"
+                    :required="!casillaArregloUbicaciones.length"
+                  />
+                  <label for="casilla-identificadorgrupaldos"> Estados </label>
+                </span>
+                <span>
+                  <input
+                    id="casilla-identificadorgrupaltre"
+                    v-model="casillaArregloUbicaciones"
+                    type="checkbox"
+                    value="municipios"
+                    :required="!casillaArregloUbicaciones.length"
+                  />
+                  <label for="casilla-identificadorgrupaltre"> Municipios </label>
+                </span>
+                <span>
+                  <input
+                    id="casilla-identificadorgrupalcuatro"
+                    v-model="casillaArregloUbicaciones"
+                    type="checkbox"
+                    value="localidades"
+                    :required="!casillaArregloUbicaciones.length"
+                  />
+                  <label for="casilla-identificadorgrupalcuatro"> Localidades </label>
+                </span>
+                <span>
+                  <input
+                    id="casilla-identificadorgrupalcinco"
+                    v-model="casillaArregloUbicaciones"
+                    type="checkbox"
+                    value="infraestructura"
+                    :required="!casillaArregloUbicaciones.length"
+                  />
+                  <label for="casilla-identificadorgrupalcinco"> Infraestructura </label>
+                </span>
+              </div>
+            </div>
 
-                          <div class="flex">
-                            <div class="columna-8">
-                              <div class="grupo-formulario grupo-formulario-vertical">
-                                <span>
-                                  <input
-                                    id="casilla-identificadorgrupaluno"
-                                    v-model="casillaArregloUbicaciones"
-                                    type="checkbox"
-                                    value="paises"
-                                    :required="!casillaArregloUbicaciones.length"
-                                  />
-                                  <label for="casilla-identificadorgrupaluno"> Países </label>
-                                </span>
-                                <span>
-                                  <input
-                                    id="casilla-identificadorgrupaldos"
-                                    v-model="casillaArregloUbicaciones"
-                                    type="checkbox"
-                                    value="estados"
-                                    :required="!casillaArregloUbicaciones.length"
-                                  />
-                                  <label for="casilla-identificadorgrupaldos"> Estados </label>
-                                </span>
-                                <span>
-                                  <input
-                                    id="casilla-identificadorgrupaltre"
-                                    v-model="casillaArregloUbicaciones"
-                                    type="checkbox"
-                                    value="municipios"
-                                    :required="!casillaArregloUbicaciones.length"
-                                  />
-                                  <label for="casilla-identificadorgrupaltre"> Municipios </label>
-                                </span>
-                              </div>
-                            </div>
-                            <div class="columna-8">
-                              <div class="grupo-formulario grupo-formulario-vertical">
-                                <span>
-                                  <input
-                                    id="casilla-identificadorgrupalcuatro"
-                                    v-model="casillaArregloUbicaciones"
-                                    type="checkbox"
-                                    value="localidades"
-                                    :required="!casillaArregloUbicaciones.length"
-                                  />
-                                  <label for="casilla-identificadorgrupalcuatro">
-                                    Localidades
-                                  </label>
-                                </span>
-                                <span>
-                                  <input
-                                    id="casilla-identificadorgrupalcinco"
-                                    v-model="casillaArregloUbicaciones"
-                                    type="checkbox"
-                                    value="infraestructura"
-                                    :required="!casillaArregloUbicaciones.length"
-                                  />
-                                  <label for="casilla-identificadorgrupalcinco">
-                                    Infraestructura
-                                  </label>
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        </fieldset>
-                        <p aria-live="polite" class="formulario-ayuda" role="status"></p>
-                      </form>
-                    </ClientOnly>
-                  </div>
-                </div>
-              </div>
-              <div class="columna-8">
-                <div class="fondo-color-neutro borde-redondeado-8 p-x-2 p-y-1">
-                  <div class="tarjeta-modal-espacializar">
-                    <ClientOnly>
-                      <SisdaiBotonesRadioGrupo
-                        leyenda="2. Define cómo se mostrarán las ubicaciones detectadas"
-                        es_vertical
-                      >
-                        <SisdaiBotonRadio
-                          v-model="botonRadioRepresentacion"
-                          etiqueta="Centroide"
-                          value="centroide"
-                          name="representacion"
-                          :es_obligatorio="true"
-                        />
-                        <SisdaiBotonRadio
-                          v-model="botonRadioRepresentacion"
-                          etiqueta="Geometría completa"
-                          value="geometria"
-                          name="representacion"
-                          :es_obligatorio="true"
-                        />
-                        <SisdaiBotonRadio
-                          v-model="botonRadioRepresentacion"
-                          etiqueta="Punto con nivel de confianza"
-                          value="punto"
-                          name="representacion"
-                          :es_obligatorio="true"
-                        />
-                      </SisdaiBotonesRadioGrupo>
-                    </ClientOnly>
-                  </div>
-                </div>
-              </div>
-              <div class="columna-8">
-                <div class="fondo-color-neutro borde-redondeado-8 p-x-2 p-y-1">
-                  <div class="tarjeta-modal-espacializar">
-                    <ClientOnly>
-                      <SisdaiBotonesRadioGrupo
-                        leyenda="3. Define qué debe hacer la IA cuando la ubicación no sea clara"
-                        es_vertical
-                      >
-                        <SisdaiBotonRadio
-                          v-model="botonRadioUbicacion"
-                          etiqueta="Resolver automáticamente"
-                          value="resolver_auto"
-                          name="ubicacion"
-                          :es_obligatorio="true"
-                        />
-                        <SisdaiBotonRadio
-                          v-model="botonRadioUbicacion"
-                          etiqueta="Marcar para revisión manual"
-                          value="marcar_manual"
-                          name="ubicacion"
-                          :es_obligatorio="true"
-                        />
-                      </SisdaiBotonesRadioGrupo>
-                    </ClientOnly>
-                  </div>
-                </div>
-              </div>
-              <div class="columna-8">
-                <div class="fondo-color-neutro borde-redondeado-8 p-x-2 p-y-1">
-                  <div class="tarjeta-modal-espacializar">
-                    <ClientOnly>
-                      <SisdaiBotonesRadioGrupo
-                        leyenda="4. Selecciona el formato de salida"
-                        es_vertical
-                      >
-                        <SisdaiBotonRadio
-                          v-model="botonRadioFormato"
-                          etiqueta="Mostrar como capa en el visualizador"
-                          value="capa_visualizador"
-                          name="formatosalida"
-                          :es_obligatorio="true"
-                        />
-                        <SisdaiBotonRadio
-                          v-model="botonRadioFormato"
-                          etiqueta="Guardar como capa en el catálogo"
-                          value="capa_catalogo"
-                          name="formatosalida"
-                          :es_obligatorio="true"
-                        />
-                        <SisdaiBotonRadio
-                          v-model="botonRadioFormato"
-                          etiqueta="Descargar como archivo GeoJSON"
-                          value="descargar_geojson"
-                          name="formatosalida"
-                          :es_obligatorio="true"
-                        />
-                      </SisdaiBotonesRadioGrupo>
-                    </ClientOnly>
-                  </div>
-                </div>
+            <hr style="border: none; border-top: 1px solid #d7dce2; margin-bottom: 24px" />
+
+            <!-- Sección 2 -->
+            <div class="m-b-3">
+              <ClientOnly>
+                <SisdaiBotonesRadioGrupo
+                  leyenda="Define cómo se mostrarán las ubicaciones detectadas"
+                  es_vertical
+                >
+                  <SisdaiBotonRadio
+                    v-model="botonRadioRepresentacion"
+                    etiqueta="Centroide"
+                    value="centroide"
+                    name="representacion"
+                    :es_obligatorio="true"
+                  />
+                  <SisdaiBotonRadio
+                    v-model="botonRadioRepresentacion"
+                    etiqueta="Geometría completa"
+                    value="geometria"
+                    name="representacion"
+                    :es_obligatorio="true"
+                  />
+                  <SisdaiBotonRadio
+                    v-model="botonRadioRepresentacion"
+                    etiqueta="Punto con nivel de confianza"
+                    value="punto"
+                    name="representacion"
+                    :es_obligatorio="true"
+                  />
+                </SisdaiBotonesRadioGrupo>
+              </ClientOnly>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid #d7dce2; margin-bottom: 24px" />
+
+            <!-- Sección 3 -->
+            <div>
+              <p style="font-weight: 600; font-size: 16px; margin-bottom: 4px">
+                Añade instrucciones para el análisis
+              </p>
+              <p style="font-size: 14px; margin-bottom: 16px; color: #444">
+                Puedes especificar qué elementos o palabras buscar para orientar la espacialización.
+              </p>
+
+              <textarea
+                v-model="instruccionesAnalisis"
+                class="area-texto ancho-100 p-2 borde-redondeado-4"
+                rows="4"
+                placeholder="Ej. Identifica las menciones de hospitales o centros de salud en los documentos y genera puntos en el mapa para cada ubicación encontrada."
+                style="border: 1px solid #6f7271; font-family: inherit; resize: vertical"
+              ></textarea>
+
+              <div class="mensaje-ia m-t-2" role="note">
+                <span class="pictograma-informacion" aria-hidden="true"></span>
+                <p>La IA aplicará esta instrucción sobre las fuentes seleccionadas.</p>
               </div>
             </div>
           </template>
 
           <template #pie>
-            <button
-              class="boton-primario boton-chico"
-              aria-label="Generar reporte"
-              type="button"
-              :disabled="!casillaArregloUbicaciones.length"
-              @click="generarReporte('espacializar')"
-            >
-              {{ botonGenerarReporte }}
-            </button>
-            <button
-              class="boton-secundario boton-chico"
-              aria-label="Regresar a llenar información"
-              type="button"
-              :disabled="isEspacializando"
-              @click="
-                modalEspacializarInstrucciones.cerrarModal();
-                modalReporteInfo.abrirModal();
-              "
-            >
-              Regresar
-            </button>
+            <div class="flex flex-contenido-final ancho-100">
+              <button
+                class="boton-secundario boton-chico m-r-2"
+                aria-label="Regresar a llenar información"
+                type="button"
+                :disabled="isEspacializando"
+                @click="
+                  modalEspacializarInstrucciones.cerrarModal();
+                  modalReporteInfo.abrirModal();
+                "
+              >
+                Regresar
+              </button>
+              <button
+                class="boton-primario boton-chico"
+                aria-label="Generar espacialización"
+                type="button"
+                :disabled="!casillaArregloUbicaciones.length"
+                @click="generarReporte('espacializar')"
+              >
+                Espacializar
+              </button>
+            </div>
           </template>
         </SisdaiModal>
 
