@@ -12,6 +12,7 @@ import { marked } from 'marked'; // Importar marked para mostrar formato markdow
 
 import { SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
 import SisdaiCapaVectorial from '@centrogeomx/sisdai-mapas/src/componentes/capa/vectorial/SisdaiCapaVectorial.vue';
+import GloboInformativo from '@centrogeomx/sisdai-mapas/src/componentes/mapa/elementos/info/GloboInformativo.vue';
 
 const { data, refresh } = useAuth();
 const config = useRuntimeConfig();
@@ -89,7 +90,7 @@ if (contextID.value) {
   // volviendo reactivo el chat id del route params
   chatID.value = chatId.value;
   if (chatID.value > 0) {
-    console.log('chat existente');
+    // console.log('chat existente');
     loadExistentChat(chatID.value);
   }
 } else {
@@ -640,15 +641,15 @@ const pollStatus = async (itemId, type = 'reporte') => {
             return;
           }
 
-          console.log('Intentando refrescar la sesión local de Nuxt Auth...');
+          // console.log('Intentando refrescar la sesión local de Nuxt Auth...');
           try {
             await refresh();
             // Optional delay to let reactivity flush
             await new Promise((r) => setTimeout(r, 500));
-            console.log(
-              'Token local refrescado a:',
-              data.value?.accessToken?.substring(0, 15) + '...'
-            );
+            // console.log(
+            //   'Token local refrescado a:',
+            //   data.value?.accessToken?.substring(0, 15) + '...'
+            // );
           } catch (refreshErr) {
             console.error('Fallo al refrescar token local:', refreshErr);
           }
@@ -1726,7 +1727,14 @@ watch(seleccionTipoArchivo, (nv) => {
                   url="https://{a-c}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
                 />
                 <!-- Vector sobrepuesto -->
-                <SisdaiCapaVectorial id="capa-preview-ia" :fuente="previewGeojsonUrl" />
+                <SisdaiCapaVectorial
+                  id="capa-preview-ia"
+                  :fuente="previewGeojsonUrl"
+                  :globo-informativo="(d) => `<p><b>TopoJSON</b><br />Nombre: ${d['name']}</p>`"
+                />
+
+                <!-- Globo Informativo (Tooltips en Hover) -->
+                <GloboInformativo />
               </SisdaiMapa>
 
               <!-- Leyenda superpuesta -->
@@ -2297,5 +2305,25 @@ input[type='file'] {
   border: solid white;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
+}
+
+/* Fix CSS para el Globo Informativo de Sisdai (Aparecía invisible al estar en el slot) */
+:deep(.globo-informacion-capa) {
+  position: absolute;
+  z-index: 1000;
+  display: block;
+  visibility: visible;
+  pointer-events: none;
+}
+:deep(.globo-informacion-capa.oculto) {
+  visibility: hidden;
+}
+:deep(.globo-informacion-cuerpo) {
+  background: #333333;
+  border-radius: 8px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+  padding: 8px 12px;
+  color: white;
+  font-size: 12px;
 }
 </style>
