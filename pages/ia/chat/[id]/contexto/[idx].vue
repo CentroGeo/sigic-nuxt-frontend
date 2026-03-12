@@ -725,6 +725,7 @@ const mostrarPPTX = ref(true);
 // Función para abrir el modal que visualiza el reporte según el formato
 function abrirPreviewReporte(reporte) {
   previewReporte.value = reporte;
+  // Añadir validación de url con google u microsoft
   modalPreviewReporte.value?.abrirModal();
 
   console.log('reporte', reporte);
@@ -736,9 +737,9 @@ function abrirPreviewReporte(reporte) {
     mostrarPPTX.value = false;
   }
 
-  if (reporte.file_format === 'docx') {
-    // previewDOCX();
-  }
+  // if (reporte.file_format === 'docx') {
+  //   // previewDOCX();
+  // }
 }
 
 function cerrarPreviewReporte() {
@@ -980,6 +981,7 @@ onMounted(() => {
           </div>
 
           <div class="columna-1" />
+          <div class="columna-16"></div>
         </div>
       </main>
 
@@ -1520,14 +1522,35 @@ onMounted(() => {
           </template>
 
           <template #cuerpo>
+            <!-- <IaPruebaFiles></IaPruebaFiles> -->
+            <ClientOnly
+              ><VueFilesPreview
+                v-if="false"
+                :url="'https://geonode.dev.geoint.mx/uploaded/ia/uploads/documents/vida-artificial_20260302_210632.pptx'"
+            /></ClientOnly>
             <div>
               <div v-show="mostrarPPTX" ref="domRef" class="pptx-init-dom"></div>
-              <div
-                v-if="previewReporte && !mostrarPPTX"
-                class="m-y-2"
-                style="width: 100%; height: 60vh"
-              >
+              <div v-if="previewReporte" class="m-y-2" style="width: 100%; height: 60vh">
                 <!-- El iframe renderizará nativamente PDFs y TXT que el navegador soporte -->
+                <!-- <iframe
+                  :src="`https://docs.google.com/gview?url=${previewReporte.download_url}&embedded=true`"
+                  style="width: 100%; height: 100%; border: none; border-radius: 8px"
+                  title="Previsualización del reporte"
+                >
+                </iframe> -->
+
+                <!-- <iframe
+                  :src="`https://view.officeapps.live.com/op/embed.aspx?src=${previewReporte.download_url}`"
+                  style="width: 100%; height: 100%; border: none; border-radius: 8px"
+                  frameborder="0"
+                  title="Previsualización del reporte2"
+                >
+                  This is an embedded
+                  <a target="_blank" href="http://office.com">Microsoft Office</a> document, powered
+                  by <a target="_blank" href="http://office.com/webapps">Office Online</a>.
+                </iframe> -->
+              </div>
+              <!-- <div v-if="previewReporte" class="m-y-2" style="width: 100%; height: 60vh">
                 <iframe
                   v-if="['pdf', 'txt'].includes(previewReporte.file_format)"
                   :src="previewReporte.download_url"
@@ -1535,23 +1558,23 @@ onMounted(() => {
                   title="Previsualización del reporte"
                 >
                 </iframe>
-                <!-- <div
-                v-else
-                class="flex flex-contenido-centrado flex-vertical-centrado fondo-color-neutro borde-redondeado-8"
-                style="height: 100%; flex-direction: column"
-              >
-                <span
-                  class="pictograma-archivo-descargar texto-color-acento"
-                  style="font-size: 4rem"
-                ></span>
-                <p class="m-t-3 texto-centrado">
-                  <strong>Formato no compatible para previsualización.</strong><br />
-                  Los documentos en formato PowerPoint y Word no se pueden mostrar visualmente
-                  dentro del navegador.<br />
-                  Por favor, descárgalo para revisarlo en tu equipo.
-                </p>
+                <div
+                  v-else
+                  class="flex flex-contenido-centrado flex-vertical-centrado fondo-color-neutro borde-redondeado-8"
+                  style="height: 100%; flex-direction: column"
+                >
+                  <span
+                    class="pictograma-archivo-descargar texto-color-acento"
+                    style="font-size: 4rem"
+                  ></span>
+                  <p class="m-t-3 texto-centrado">
+                    <strong>Formato no compatible para previsualización.</strong><br />
+                    Los documentos en formato PowerPoint y Word no se pueden mostrar visualmente
+                    dentro del navegador.<br />
+                    Por favor, descárgalo para revisarlo en tu equipo.
+                  </p>
+                </div>
               </div> -->
-              </div>
             </div>
           </template>
 
