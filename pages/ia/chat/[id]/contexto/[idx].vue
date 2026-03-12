@@ -12,6 +12,7 @@ import { marked } from 'marked'; // Importar marked para mostrar formato markdow
 //
 
 import { init } from 'pptx-preview';
+import { VueFilesPreview } from 'vue-files-preview';
 
 const { data } = useAuth();
 const config = useRuntimeConfig();
