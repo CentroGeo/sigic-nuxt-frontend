@@ -74,7 +74,7 @@ const handleDescarga = () => {
           >
             Arte y cultura
           </div>
-          <UiNumeroElementos :numero="proyecto?.aportes" etiqueta="Aportes" />
+          <UiNumeroElementos :numero="proyecto?.num_aportaciones" etiqueta="Aportes" />
           <div>{{ proyecto?.institucion }}</div>
           <div>{{ proyecto?.lider }}</div>
         </div>
@@ -141,9 +141,13 @@ const handleDescarga = () => {
                   Solicitar descarga
                   <span class="pictograma-archivo-descargar" aria-hidden="true"></span>
                 </button>
-                <button class="boton-primario boton-chico boton-accion-aportar" type="button">
+                <NuxtLink
+                  class="boton boton-primario boton-chico boton-accion-aportar"
+                  aria-label="Aportar"
+                  :to="`/levantamiento/proyectos/proyecto/${proyecto?.id}/aportar`"
+                >
                   Aportar
-                </button>
+                </NuxtLink>
               </div>
             </div>
           </div>
