@@ -42,31 +42,31 @@ function abrirModalAceptar() {
 async function aceptarSolicitud() {
   processingRequest.value = true;
   try {
-    // Actualizamos permisos
-    const updatePermissions = await $fetch('/api/actualizar-permisos', {
+    // Petición para aceptar la solicitud de publicación del recurso
+    const publishRequest = await $fetch(`${configEnv.public.basePath}/api/solicitudes`, {
       method: 'POST',
-      headers: { token: token },
-      body: { pk: selectedPk },
+      body: {
+        pk: selectedPkRequest,
+        token: token,
+        status: 'published',
+        rejection_reason:
+          areaMensajeAceptar.value === '' ? 'Sin comentarios' : areaMensajeAceptar.value,
+      },
     });
-    if (updatePermissions === 'Error') {
-      console.error('No se pudieron actualizar los permisos');
+    if (publishRequest === 'Error') {
+      console.error('No se pudo aceptar la solicitud');
       processingRequest.value = false;
       acceptingFailed.value = true;
       return;
     } else {
-      // petición para aceptar y publicar la solicitud del recurso
-      const response = await $fetch(`${configEnv.public.basePath}/api/solicitudes`, {
+      // Actualizamos permisos
+      const updatePermissions = await $fetch('/api/actualizar-permisos', {
         method: 'POST',
-        body: {
-          pk: selectedPkRequest,
-          token: token,
-          status: 'published',
-          rejection_reason:
-            areaMensajeAceptar.value === '' ? 'Sin comentarios' : areaMensajeAceptar.value,
-        },
+        headers: { token: token },
+        body: { pk: selectedPk },
       });
-      if (response === 'Error') {
-        console.error('No se pudo aceptar la solicitud');
+      if (updatePermissions === 'Error') {
+        console.error('No se pudieron actualizar los permisos');
         processingRequest.value = false;
         acceptingFailed.value = true;
         return;
