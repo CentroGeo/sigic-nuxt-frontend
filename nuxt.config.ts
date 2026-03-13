@@ -67,7 +67,25 @@ export default defineNuxtConfig({
     '@nuxt/test-utils',
     '@sidebase/nuxt-auth',
     '@vueuse/nuxt',
+    // '@vue-office/docx',
   ],
+
+  // buildModules: [
+  //   '@vue-office',
+  // ],
+
+  // build: {
+  //   // You can extend webpack config here
+  //   transpile: ['@vue-office'],
+  // },
+
+  // plugins: ['~/plugins/vue-office.js'],
+
+  // compilerOptions: {
+  //   types: [
+  //     "@vue-office",
+  //   ]
+  // },
 
   css: ['@centrogeomx/sisdai-css/dist/sisdai.min.css'],
 

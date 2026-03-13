@@ -11,8 +11,7 @@ import DOMPurify from 'dompurify'; // Para seguridad XSS
 import { marked } from 'marked'; // Importar marked para mostrar formato markdown
 //
 
-import { init } from 'pptx-preview';
-import { VueFilesPreview } from 'vue-files-preview';
+// import { init } from 'pptx-preview';
 
 const { data } = useAuth();
 const config = useRuntimeConfig();
@@ -698,31 +697,31 @@ async function generarReporte(modo) {
   modalReporteInstrucciones.value.cerrarModal();
 }
 
-const domRef = ref(null);
-const loading = ref(false);
-const pptxPreviewer = ref();
-function previewPPTX(url) {
-  loading.value = true;
-  const width = Math.min(window.innerWidth, 960);
-  // const height = window.innerHeight - 52;
-  const height = '100%';
+// const domRef = ref(null);
+// const loading = ref(false);
+// const pptxPreviewer = ref();
+// function previewPPTX(url) {
+//   loading.value = true;
+//   const width = Math.min(window.innerWidth, 960);
+//   // const height = window.innerHeight - 52;
+//   const height = '100%';
 
-  pptxPreviewer.value = init(domRef.value, {
-    width: width,
-    height: height,
-  });
-  // 'https://geonode.dev.geoint.mx/uploaded/ia/uploads/documents/vida-artificial_20260302_210632.pptx'
-  fetch(url)
-    .then((response) => {
-      return response.arrayBuffer();
-    })
-    .then((res) => {
-      pptxPreviewer.value.preview(res).finally(() => {
-        loading.value = false;
-      });
-    });
-}
-const mostrarPPTX = ref(true);
+//   pptxPreviewer.value = init(domRef.value, {
+//     width: width,
+//     height: height,
+//   });
+//   // 'https://geonode.dev.geoint.mx/uploaded/ia/uploads/documents/vida-artificial_20260302_210632.pptx'
+//   fetch(url)
+//     .then((response) => {
+//       return response.arrayBuffer();
+//     })
+//     .then((res) => {
+//       pptxPreviewer.value.preview(res).finally(() => {
+//         loading.value = false;
+//       });
+//     });
+// }
+// const mostrarPPTX = ref(true);
 // Función para abrir el modal que visualiza el reporte según el formato
 function abrirPreviewReporte(reporte) {
   previewReporte.value = reporte;
@@ -731,13 +730,12 @@ function abrirPreviewReporte(reporte) {
 
   console.log('reporte', reporte);
 
-  if (reporte.file_format === 'pptx') {
-    mostrarPPTX.value = true;
-    previewPPTX(reporte.download_url);
-  } else {
-    mostrarPPTX.value = false;
-  }
-
+  // if (reporte.file_format === 'pptx') {
+  //   mostrarPPTX.value = true;
+  //   previewPPTX(reporte.download_url);
+  // } else {
+  //   mostrarPPTX.value = false;
+  // }
   // if (reporte.file_format === 'docx') {
   //   // previewDOCX();
   // }
@@ -1523,15 +1521,21 @@ onMounted(() => {
           </template>
 
           <template #cuerpo>
-            <!-- <IaPruebaFiles></IaPruebaFiles> -->
-            <ClientOnly
-              ><VueFilesPreview
-                v-if="false"
-                :url="'https://geonode.dev.geoint.mx/uploaded/ia/uploads/documents/vida-artificial_20260302_210632.pptx'"
-            /></ClientOnly>
             <div>
-              <div v-show="mostrarPPTX" ref="domRef" class="pptx-init-dom"></div>
+              <!-- <div v-show="mostrarPPTX" ref="domRef" class="pptx-init-dom"></div> -->
               <div v-if="previewReporte" class="m-y-2" style="width: 100%; height: 60vh">
+                <IaPreviewFileDocx
+                  v-if="previewReporte.file_format === 'word'"
+                  :docx="previewReporte.download_url"
+                />
+                <IaPreviewFilePptx
+                  v-if="previewReporte.file_format === 'pptx'"
+                  :pptx="previewReporte.download_url"
+                />
+                <IaPreviewFilePdf
+                  v-if="previewReporte.file_format === 'pdf'"
+                  :pdf="previewReporte.download_url"
+                />
                 <!-- El iframe renderizará nativamente PDFs y TXT que el navegador soporte -->
                 <!-- <iframe
                   :src="`https://docs.google.com/gview?url=${previewReporte.download_url}&embedded=true`"
