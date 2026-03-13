@@ -1536,6 +1536,10 @@ onMounted(() => {
                   v-if="previewReporte.file_format === 'pdf'"
                   :pdf="previewReporte.download_url"
                 />
+                <IaPreviewFileExcel
+                  v-if="previewReporte.file_format === 'csv'"
+                  :excel="previewReporte.download_url"
+                />
                 <!-- El iframe renderizará nativamente PDFs y TXT que el navegador soporte -->
                 <!-- <iframe
                   :src="`https://docs.google.com/gview?url=${previewReporte.download_url}&embedded=true`"

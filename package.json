@@ -33,6 +33,7 @@
     "@sidebase/nuxt-auth": "1.1.1",
     "@unhead/vue": "^2.0.14",
     "@vue-office/docx": "^1.6.3",
+    "@vue-office/excel": "^1.7.14",
     "@vue-office/pdf": "^2.0.10",
     "@vue-office/pptx": "^1.0.1",
     "@vueuse/nuxt": "^13.5.0",
