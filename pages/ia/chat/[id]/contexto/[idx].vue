@@ -11,7 +11,27 @@ import DOMPurify from 'dompurify'; // Para seguridad XSS
 import { marked } from 'marked'; // Importar marked para mostrar formato markdown
 //
 
-// import { init } from 'pptx-preview';
+// módulo para previsualizar
+const VueFilesPreview = defineAsyncComponent(() =>
+  import.meta.client
+    ? import('vue-files-preview').then((m) => {
+        console.log('VueFilesPreview cargado:', m.VueFilesPreview);
+        return m.VueFilesPreview;
+      })
+    : Promise.resolve({ render: () => null })
+);
+const IaPreviewFileDocx = defineAsyncComponent(
+  () => import('../../../../../components/ia/PreviewFileDocx.vue')
+);
+const IaPreviewFilePptx = defineAsyncComponent(
+  () => import('../../../../../components/ia/PreviewFilePptx.vue')
+);
+// const IaPreviewFilePdf = defineAsyncComponent(
+//   () => import('../../../../../components/ia/PreviewFilePdf.vue')
+// );
+const IaPreviewFileExcel = defineAsyncComponent(
+  () => import('../../../../../components/ia/PreviewFileExcel.vue')
+);
 
 const { data } = useAuth();
 const config = useRuntimeConfig();
@@ -168,7 +188,6 @@ function transformarHistorial(historiales) {
   //return resultado;
 }
 
-// const arrayChats = ref([]);
 // Función para consultar lista de chats
 const loadChatsList = async () => {
   let arrayChats = [];
@@ -697,48 +716,12 @@ async function generarReporte(modo) {
   modalReporteInstrucciones.value.cerrarModal();
 }
 
-// const domRef = ref(null);
-// const loading = ref(false);
-// const pptxPreviewer = ref();
-// function previewPPTX(url) {
-//   loading.value = true;
-//   const width = Math.min(window.innerWidth, 960);
-//   // const height = window.innerHeight - 52;
-//   const height = '100%';
-
-//   pptxPreviewer.value = init(domRef.value, {
-//     width: width,
-//     height: height,
-//   });
-//   // 'https://geonode.dev.geoint.mx/uploaded/ia/uploads/documents/vida-artificial_20260302_210632.pptx'
-//   fetch(url)
-//     .then((response) => {
-//       return response.arrayBuffer();
-//     })
-//     .then((res) => {
-//       pptxPreviewer.value.preview(res).finally(() => {
-//         loading.value = false;
-//       });
-//     });
-// }
-// const mostrarPPTX = ref(true);
 // Función para abrir el modal que visualiza el reporte según el formato
 function abrirPreviewReporte(reporte) {
   previewReporte.value = reporte;
   // Añadir validación de url con google u microsoft
   modalPreviewReporte.value?.abrirModal();
-
-  console.log('reporte', reporte);
-
-  // if (reporte.file_format === 'pptx') {
-  //   mostrarPPTX.value = true;
-  //   previewPPTX(reporte.download_url);
-  // } else {
-  //   mostrarPPTX.value = false;
-  // }
-  // if (reporte.file_format === 'docx') {
-  //   // previewDOCX();
-  // }
+  // console.log('reporte', reporte);
 }
 
 function cerrarPreviewReporte() {
@@ -1522,51 +1505,46 @@ onMounted(() => {
 
           <template #cuerpo>
             <div>
-              <!-- <div v-show="mostrarPPTX" ref="domRef" class="pptx-init-dom"></div> -->
               <div v-if="previewReporte" class="m-y-2" style="width: 100%; height: 60vh">
-                <IaPreviewFileDocx
-                  v-if="previewReporte.file_format === 'word'"
-                  :docx="previewReporte.download_url"
-                />
-                <IaPreviewFilePptx
-                  v-if="previewReporte.file_format === 'pptx'"
-                  :pptx="previewReporte.download_url"
-                />
-                <IaPreviewFilePdf
-                  v-if="previewReporte.file_format === 'pdf'"
-                  :pdf="previewReporte.download_url"
-                />
-                <IaPreviewFileExcel
-                  v-if="previewReporte.file_format === 'csv'"
-                  :excel="previewReporte.download_url"
-                />
                 <!-- El iframe renderizará nativamente PDFs y TXT que el navegador soporte -->
-                <!-- <iframe
-                  :src="`https://docs.google.com/gview?url=${previewReporte.download_url}&embedded=true`"
-                  style="width: 100%; height: 100%; border: none; border-radius: 8px"
-                  title="Previsualización del reporte"
+                <div
+                  v-if="['word', 'pptx', 'csv', 'pdf', 'txt'].includes(previewReporte.file_format)"
                 >
-                </iframe> -->
-
-                <!-- <iframe
-                  :src="`https://view.officeapps.live.com/op/embed.aspx?src=${previewReporte.download_url}`"
-                  style="width: 100%; height: 100%; border: none; border-radius: 8px"
-                  frameborder="0"
-                  title="Previsualización del reporte2"
+                  <div v-if="['word', 'pptx', 'csv'].includes(previewReporte.file_format)">
+                    <IaPreviewFileDocx
+                      v-if="previewReporte.file_format === 'word'"
+                      :docx="previewReporte.download_url"
+                    />
+                    <IaPreviewFilePptx
+                      v-if="previewReporte.file_format === 'pptx'"
+                      :pptx="previewReporte.download_url"
+                    />
+                    <IaPreviewFileExcel
+                      v-if="previewReporte.file_format === 'csv'"
+                      :excel="previewReporte.download_url"
+                    />
+                  </div>
+                  <div
+                    v-if="['pdf', 'txt'].includes(previewReporte.file_format)"
+                    style="width: 100%; height: 60vh"
+                  >
+                    <iframe
+                      :src="previewReporte.download_url"
+                      style="width: 100%; height: 100%; border: none; border-radius: 8px"
+                      title="Previsualización del reporte"
+                    >
+                    </iframe>
+                  </div>
+                </div>
+                <div
+                  v-else-if="
+                    !['word', 'pptx', 'csv', 'pdf', 'txt'].includes(previewReporte.file_format)
+                  "
                 >
-                  This is an embedded
-                  <a target="_blank" href="http://office.com">Microsoft Office</a> document, powered
-                  by <a target="_blank" href="http://office.com/webapps">Office Online</a>.
-                </iframe> -->
-              </div>
-              <!-- <div v-if="previewReporte" class="m-y-2" style="width: 100%; height: 60vh">
-                <iframe
-                  v-if="['pdf', 'txt'].includes(previewReporte.file_format)"
-                  :src="previewReporte.download_url"
-                  style="width: 100%; height: 100%; border: none; border-radius: 8px"
-                  title="Previsualización del reporte"
-                >
-                </iframe>
+                  <ClientOnly>
+                    <VueFilesPreview :url="previewReporte.download_url" />
+                  </ClientOnly>
+                </div>
                 <div
                   v-else
                   class="flex flex-contenido-centrado flex-vertical-centrado fondo-color-neutro borde-redondeado-8"
@@ -1578,12 +1556,28 @@ onMounted(() => {
                   ></span>
                   <p class="m-t-3 texto-centrado">
                     <strong>Formato no compatible para previsualización.</strong><br />
-                    Los documentos en formato PowerPoint y Word no se pueden mostrar visualmente
-                    dentro del navegador.<br />
                     Por favor, descárgalo para revisarlo en tu equipo.
+                    {{ previewReporte.file_format }}
                   </p>
                 </div>
-              </div> -->
+
+                <!-- <iframe
+                  :src="`https://docs.google.com/gview?url=${previewReporte.download_url}&embedded=true`"
+                  style="width: 100%; height: 100%; border: none; border-radius: 8px"
+                  title="Previsualización del reporte"
+                >
+                </iframe> -->
+                <!-- <iframe
+                  :src="`https://view.officeapps.live.com/op/embed.aspx?src=${previewReporte.download_url}`"
+                  style="width: 100%; height: 100%; border: none; border-radius: 8px"
+                  frameborder="0"
+                  title="Previsualización del reporte2"
+                >
+                  This is an embedded
+                  <a target="_blank" href="http://office.com">Microsoft Office</a> document, powered
+                  by <a target="_blank" href="http://office.com/webapps">Office Online</a>.
+                </iframe> -->
+              </div>
             </div>
           </template>
 
