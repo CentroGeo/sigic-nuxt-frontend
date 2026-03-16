@@ -7,6 +7,9 @@ import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
+import { SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
+import SisdaiCapaVectorial from '@centrogeomx/sisdai-mapas/src/componentes/capa/vectorial/SisdaiCapaVectorial.vue';
+
 import DOMPurify from 'dompurify'; // Para seguridad XSS
 import { marked } from 'marked'; // Importar marked para mostrar formato markdown
 //
@@ -24,7 +27,7 @@ const IaPreviewFiles = defineAsyncComponent(
   () => import('../../../../../components/ia/PreviewFiles.vue')
 );
 
-const { data } = useAuth();
+const { data, refresh } = useAuth();
 const config = useRuntimeConfig();
 
 const storeIA = useIAStore();
@@ -60,7 +63,9 @@ const mensaje = ref('');
 const mensajes = ref([]);
 
 const modalReporteInfo = ref(null);
+const modalTipoOperacionGeo = ref(null);
 const modalReporteInstrucciones = ref(null);
+const modalOperacionGeoespacialInstrucciones = ref(null);
 const modalEspacializarInstrucciones = ref(null);
 const isSubmitting = ref(false);
 
@@ -71,6 +76,10 @@ const chatID = ref(0);
 // datos para generar reportes
 const modalPreviewReporte = ref(null);
 const previewReporte = ref(null);
+
+const modalPreviewEspacializacion = ref(null);
+const previewEspacializacionData = ref(null);
+const previewGeojsonUrl = ref(null);
 
 const archivosEliminados = ref([]);
 const fuentesSeleccionadas = ref([]);
@@ -508,37 +517,62 @@ async function abrirModalReporteInfo(modo) {
     tituloReporteModal.value = 'Generar reporte';
     campoNombreVisible.value = true;
     leyendaRadioGrupoReporteModal.value = 'Fuentes de información';
+    modalReporteInfo.value.abrirModal();
+    // Recupera las fuentes del contexto
+    await loadSources();
   } else {
     if (modo === 'espacializar') {
       tituloReporteModal.value = 'Espacializar información';
       campoNombreVisible.value = false;
       leyendaRadioGrupoReporteModal.value =
         'Selecciona los documentos o tabulados que quieras espacializar';
+      modalReporteInfo.value.abrirModal();
+      // Recupera las fuentes del contexto
+      await loadSources();
+    }
+
+    if (modo === 'operacion-geospacial') {
+      tituloReporteModal.value = 'Operación geoespacial';
+      campoNombreVisible.value = false;
+      leyendaRadioGrupoReporteModal.value =
+        'Selecciona los documentos o tabulados que quieras espacializar';
+      modalTipoOperacionGeo.value.abrirModal();
     }
   }
-  modalReporteInfo.value.abrirModal();
-  // Recupera las fuentes del contexto
-  await loadSources();
 }
 
 // Cierra y resetea los campos de información del modal de reporte
 function cancelarReporte() {
-  modalReporteInfo.value.cerrarModal();
-  campoNombreReporte.value = '';
-  botonRadioReporte.value = 'Uno';
-  fuentesSeleccionadas.value = [];
+  if (
+    tituloReporteModal.value === 'Generar reporte' ||
+    tituloReporteModal.value === 'Espacializar información'
+  ) {
+    modalReporteInfo.value.cerrarModal();
+    campoNombreReporte.value = '';
+    botonRadioReporte.value = 'Uno';
+    fuentesSeleccionadas.value = [];
+  } else {
+    modalTipoOperacionGeo.value.cerrarModal();
+  }
 }
 
 // Abre modal de instrucciones con la info según el título del modal
 function abrirModalInstrucciones() {
-  modalReporteInfo.value.cerrarModal();
   if (tituloReporteModal.value === 'Generar reporte') {
+    modalReporteInfo.value.cerrarModal();
     botonGenerarReporte.value = 'Generar reporte';
     modalReporteInstrucciones.value.abrirModal();
   } else {
     if (tituloReporteModal.value === 'Espacializar información') {
+      modalReporteInfo.value.cerrarModal();
       botonGenerarReporte.value = 'Espacializar';
       modalEspacializarInstrucciones.value.abrirModal();
+    }
+
+    if (tituloReporteModal.value === 'Operación geoespacial') {
+      modalTipoOperacionGeo.value.cerrarModal();
+      botonGenerarReporte.value = 'Espacializar';
+      modalOperacionGeoespacialInstrucciones.value.abrirModal();
     }
   }
 
@@ -567,6 +601,8 @@ const obtenerTipoArchivo = (nombre) => {
 };
 
 const areaReporteInstrucciones = ref('');
+const botonRadioTipoOperacionGeoespacial = ref('buffer');
+const areaOperacionGeoespacialInstrucciones = ref('');
 const seleccionTipoReporte = ref('');
 const seleccionTipoArchivo = ref('');
 const botonRadioHojaMembretada = ref(false);
@@ -575,14 +611,21 @@ const botonRadioRepresentacion = ref('centroide');
 const botonRadioUbicacion = ref('resolver_auto');
 const botonRadioFormato = ref('capa_visualizador');
 
-// --- Nueva Lógica de Integración para Reportes ---
+// --- Nueva Lógica de Integración para Reportes y Espacialización ---
 const reportesGenerados = ref([]); // Lista reactiva de reportes en sesión actual
+const isEspacializando = ref(false); // Estado de carga para el modal de espacializar
 
-const pollStatus = async (reportId) => {
-  const token = data.value?.accessToken;
+const pollStatus = async (itemId, type = 'reporte') => {
+  const endpoint =
+    type === 'espacializacion' ? `/api/localidades/${itemId}/` : `/api/reports/${itemId}/`;
+  let failedAttempts = 0; // Circuito preventivo para loops infinitos
+
   const interval = setInterval(async () => {
+    const token = data.value?.accessToken;
+    if (!token) return;
+
     try {
-      const res = await fetch(`${config.public.iaBackendUrl}/api/reports/${reportId}/`, {
+      const res = await fetch(`${config.public.iaBackendUrl}${endpoint}`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -590,23 +633,54 @@ const pollStatus = async (reportId) => {
         },
       });
       if (res.ok) {
+        failedAttempts = 0; // Reiniciamos contador si responde bien
         const reportData = await res.json();
 
         // Find and update the local report tracking object
-        const idx = reportesGenerados.value.findIndex((r) => r.id === reportId);
+        const idx = reportesGenerados.value.findIndex((r) => r.id === itemId);
         if (idx !== -1) {
           reportesGenerados.value[idx] = { ...reportesGenerados.value[idx], ...reportData };
 
           if (reportData.status === 'done' || reportData.status === 'error') {
+            if (reportData.status === 'done' && type === 'espacializacion') {
+              reportesGenerados.value[idx].progress = 100;
+            }
             clearInterval(interval);
           }
         } else {
           // Not found in our current session array? stop polling
           clearInterval(interval);
         }
+      } else {
+        console.error(`pollStatus error - Status: ${res.status}`);
+        if (res.status === 401 || res.status === 403) {
+          failedAttempts++;
+          if (failedAttempts > 3) {
+            console.error(
+              `Demasiados fallos ${res.status} consecutivos, deteniendo polling para:`,
+              itemId
+            );
+            clearInterval(interval);
+            const idx = reportesGenerados.value.findIndex((r) => r.id === itemId);
+            if (idx !== -1) reportesGenerados.value[idx].status = 'error';
+            return;
+          }
+          console.log('Intentando refrescar la sesión local de Nuxt Auth...');
+          try {
+            await refresh();
+            // Optional delay to let reactivity flush
+            await new Promise((r) => setTimeout(r, 500));
+            console.log(
+              'Token local refrescado a:',
+              data.value?.accessToken?.substring(0, 15) + '...'
+            );
+          } catch (refreshErr) {
+            console.error('Fallo al refrescar token local:', refreshErr);
+          }
+        }
       }
     } catch (err) {
-      console.error(`Error polling status for report ${reportId}:`, err);
+      console.error(`Error polling status for ${type} ${itemId}:`, err);
     }
   }, 10000); // Poll every 10 seconds
 };
@@ -616,7 +690,7 @@ const fetchInitialReports = async () => {
   if (!contextID.value || !data.value?.accessToken) return;
 
   try {
-    const res = await fetch(
+    const resReports = await fetch(
       `${config.public.iaBackendUrl}/api/reports/?context_id=${contextID.value}`,
       {
         method: 'GET',
@@ -627,25 +701,48 @@ const fetchInitialReports = async () => {
       }
     );
 
-    if (res.ok) {
-      const reports = await res.json();
-      // Map the returned data to our reactive format
-      reportesGenerados.value = reports.map((r) => ({
-        id: r.id,
-        status: r.status,
-        report_name: r.report_name,
-        download_url: r.download_url,
-        file_format: r.file_format,
-      }));
-      // console.log('reportesGenerados', reportesGenerados.value);
+    const resSpatial = await fetch(
+      `${config.public.iaBackendUrl}/api/localidades/?context_id=${contextID.value}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${data.value.accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
-      // Resume polling for any report that's still pending/processing
-      reportesGenerados.value.forEach((r) => {
-        if (r.status === 'pending' || r.status === 'processing') {
-          pollStatus(r.id);
-        }
-      });
+    let combined = [];
+    if (resReports.ok) {
+      const reports = await resReports.json();
+      combined = combined.concat(
+        reports.map((r) => ({
+          ...r,
+          type: 'reporte',
+        }))
+      );
     }
+    if (resSpatial.ok) {
+      const spatial = await resSpatial.json();
+      combined = combined.concat(
+        spatial.map((s) => ({
+          ...s,
+          file_format: s.export_format,
+          type: 'espacializacion',
+          progress: s.progress || 0,
+        }))
+      );
+    }
+
+    // Sort by created_date descending if needed
+    combined.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+    reportesGenerados.value = combined;
+    // Resume polling for any report/spatialization that's still pending/processing
+    reportesGenerados.value.forEach((item) => {
+      if (item.status === 'pending' || item.status === 'processing') {
+        pollStatus(item.id, item.type);
+      }
+    });
   } catch (err) {
     console.error('Error fetching initial reports:', err);
   }
@@ -696,15 +793,157 @@ async function generarReporte(modo) {
       console.error('Network error triggering report generation:', error);
     }
   } else if (modo === 'espacializar') {
-    console.log('file_ids', fuentesSeleccionadas.value);
-    console.log('casillaArregloUbicaciones.value', casillaArregloUbicaciones.value);
-    console.log('botonRadioRepresentacion.value', botonRadioRepresentacion.value);
-    console.log('botonRadioUbicacion.value', botonRadioUbicacion.value);
-    console.log('botonRadioFormato.value', botonRadioFormato.value);
+    // console.log('file_ids', fuentesSeleccionadas.value);
+    // console.log('casillaArregloUbicaciones.value', casillaArregloUbicaciones.value);
+    // console.log('botonRadioRepresentacion.value', botonRadioRepresentacion.value);
+    // console.log('botonRadioUbicacion.value', botonRadioUbicacion.value);
+    // console.log('botonRadioFormato.value', botonRadioFormato.value);
+    isEspacializando.value = true;
+    const token = data.value?.accessToken;
+
+    // Traducir parámetros de la UI a los esperados por el Backend
+    // Representación: 'centroide' -> 'centroid', 'geometria' -> 'polygon', 'punto' -> 'point'
+    const geomMap = {
+      centroide: 'centroid',
+      geometria: 'polygon',
+      punto: 'point',
+    };
+    const geometryType = geomMap[botonRadioRepresentacion.value] || 'point';
+    // Ubicación: 'resolver_auto' -> 'auto', 'marcar_manual' -> 'México' (por defecto)
+    const focusValue = botonRadioUbicacion.value === 'resolver_auto' ? 'auto' : 'México';
+    // Formato de exportación: 'descargar_geojson' -> 'geojson', 'descargar_shp' -> 'shp'
+    let exportFormat = 'geojson';
+    if (botonRadioFormato.value === 'descargar_shp') exportFormat = 'shp';
+    if (botonRadioFormato.value === 'descargar_gpkg') exportFormat = 'gpkg';
+    const reportName =
+      fuentesSeleccionadas.value.length > 1
+        ? 'Mapa espacializado de varias fuentes'
+        : `Mapa espacializado: ${fuentesSeleccionadas.value[0]?.filename}`;
+    const selectedIds = fuentesSeleccionadas.value.map((d) => d.id);
+    // Crear un ID temporal para la tarjeta visual
+    const tempId = `esp-${Date.now()}`;
+    // Inyectar a la lista del sidebar
+    reportesGenerados.value.push({
+      id: tempId,
+      type: 'espacializacion',
+      status: 'processing',
+      report_name: reportName,
+      file_format: exportFormat,
+      progress: 0,
+    });
+    // Cerrar el modal inmediatamente para no bloquear la UI
+    modalEspacializarInstrucciones.value.cerrarModal();
+    fuentesSeleccionadas.value = [];
+    const payload = {
+      context_id: contextID.value,
+      file_ids: selectedIds,
+      report_name: reportName,
+      entity_types:
+        casillaArregloUbicaciones.value.length > 0 ? casillaArregloUbicaciones.value : undefined,
+      geometry_type: geometryType,
+      focus: focusValue,
+      export_format: exportFormat,
+      refresh_token: data.value?.refreshToken,
+    };
+    try {
+      const res = await fetch(`${config.public.iaBackendUrl}/api/localidades/detect/`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        const responseData = await res.json();
+        const elementIndex = reportesGenerados.value.findIndex((r) => r.id === tempId);
+        if (elementIndex !== -1) {
+          // Reemplazamos tempId por el id real de base de datos e iniciamos polling
+          reportesGenerados.value[elementIndex].id = responseData.id;
+          reportesGenerados.value[elementIndex].status = responseData.status || 'processing';
+          pollStatus(responseData.id, 'espacializacion');
+        }
+      } else {
+        const errorData = await res.json();
+        console.error('Error enviando ubicaciones:', errorData);
+        const elementIndex = reportesGenerados.value.findIndex((r) => r.id === tempId);
+        if (elementIndex !== -1) reportesGenerados.value[elementIndex].status = 'error';
+      }
+    } catch (error) {
+      console.error('Error de red al intentar espacializar:', error);
+      const elementIndex = reportesGenerados.value.findIndex((r) => r.id === tempId);
+      if (elementIndex !== -1) reportesGenerados.value[elementIndex].status = 'error';
+    } finally {
+      isEspacializando.value = false;
+    }
+    return; // Early return para no ejecutar el cleanup normal de generacion de reportes asíncronos
+  } else if (modo === 'operacion_geoespacial') {
+    const token = data.value?.accessToken;
+    // Formato de exportación: 'descargar_geojson' -> 'geojson', 'descargar_shp' -> 'shp'
+    const exportFormat = 'geojson';
+    // if (botonRadioFormato.value === 'descargar_shp') exportFormat = 'shp';
+    // if (botonRadioFormato.value === 'descargar_gpkg') exportFormat = 'gpkg';
+    const reportName =
+      fuentesSeleccionadas.value.length > 1
+        ? 'Mapa espacializado de varias fuentes'
+        : `Mapa espacializado: ${fuentesSeleccionadas.value[0]?.filename}`;
+    const selectedIds = fuentesSeleccionadas.value.map((d) => d.id);
+    // Cerrar el modal inmediatamente para no bloquear la UI
+    modalOperacionGeoespacialInstrucciones.value.cerrarModal();
+    fuentesSeleccionadas.value = [];
+    const payload = {
+      context_id: contextID.value,
+      file_ids: selectedIds,
+      report_name: reportName,
+      instructions: areaOperacionGeoespacialInstrucciones.value,
+      export_format: exportFormat,
+      refresh_token: data.value?.refreshToken,
+    };
+    try {
+      const res = await fetch(`${config.public.iaBackendUrl}/api/geospatial/execute_async`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        // Add to our reactive list of pending tasks
+        reportesGenerados.value.push({
+          id: data.report_id,
+          task_id: data.task_id,
+          status: data.status,
+          report_name: payload.report_name,
+          file_format: payload.file_format,
+        });
+        console.log('DATA!!!', data);
+        // Start polling for this specific task
+        pollStatus(data.report_id);
+      } else {
+        const errorData = await res.json();
+        console.error('Error en la operación geoespacial:', errorData);
+      }
+    } catch (error) {
+      console.error('Error de red al intentar operacion geoespacial:', error);
+    }
+    return; // Early return para no ejecutar el cleanup normal de generacion de reportes asíncronos
   }
 
   fuentesSeleccionadas.value = [];
   modalReporteInstrucciones.value.cerrarModal();
+}
+
+async function abrirPreviewEspacializacion(reporte) {
+  previewEspacializacionData.value = reporte;
+  previewGeojsonUrl.value = reporte.download_url;
+  modalPreviewEspacializacion.value?.abrirModal();
+}
+function cerrarPreviewEspacializacion() {
+  modalPreviewEspacializacion.value?.cerrarModal();
+  previewEspacializacionData.value = null;
+  previewGeojsonUrl.value = null;
 }
 
 // Función para abrir el modal que visualiza el reporte según el formato
@@ -1179,6 +1418,144 @@ onMounted(() => {
           </template>
         </SisdaiModal>
 
+        <SisdaiModal ref="modalTipoOperacionGeo" class="modal-grande">
+          <template #encabezado>
+            <h2>Selecciona el tipo de análisis espacial</h2>
+            <p>Elige qué operación deseas realizar sobre tus capas geográficas.</p>
+          </template>
+
+          <template #cuerpo>
+            <ClientOnly>
+              <form @submit.prevent>
+                <fieldset
+                  class="grupo-formulario tarjetas-tipo-operacion-geo m-0"
+                  role="radiogroup"
+                >
+                  <legend></legend>
+                  <div class="flex flex-contenido-centrado p-x-1">
+                    <div class="columna-8">
+                      <input
+                        id="radio-tipooperaciongeoespacialuno"
+                        v-model="botonRadioTipoOperacionGeoespacial"
+                        type="radio"
+                        value="buffer"
+                        name="tipooperaciongeoespacial"
+                      />
+                      <label for="radio-tipooperaciongeoespacialuno">
+                        <div class="tarjeta tarjeta-hipervinculo-interno" href="#">
+                          <img
+                            class="tarjeta-imagen"
+                            src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/asha.jpg"
+                            alt="Tipo de operación geoespacial Buffer"
+                          />
+                          <div class="tarjeta-cuerpo">
+                            <p class="tarjeta-titulo">Buffer</p>
+                            <p class="tarjeta-etiqueta">
+                              Crea un área alrededor de elementos a una distancia determinada.
+                            </p>
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                    <div class="columna-8">
+                      <input
+                        id="radio-tipooperaciongeoespacialdos"
+                        v-model="botonRadioTipoOperacionGeoespacial"
+                        type="radio"
+                        value="interseccion"
+                        name="tipooperaciongeoespacial"
+                      />
+                      <label for="radio-tipooperaciongeoespacialdos">
+                        <div class="tarjeta tarjeta-hipervinculo-interno" href="#">
+                          <img
+                            class="tarjeta-imagen"
+                            src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/becka.jpg"
+                            alt="Tipo de operación geoespacial Intersección"
+                          />
+                          <div class="tarjeta-cuerpo">
+                            <p class="tarjeta-titulo">Intersección</p>
+                            <p class="tarjeta-etiqueta">
+                              Genera una nueva capa con las áreas donde dos capas coinciden.
+                            </p>
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                    <div class="columna-8">
+                      <input
+                        id="radio-tipooperaciongeoespacialtres"
+                        v-model="botonRadioTipoOperacionGeoespacial"
+                        type="radio"
+                        value="densidad"
+                        name="tipooperaciongeoespacial"
+                      />
+                      <label for="radio-tipooperaciongeoespacialtres">
+                        <div class="tarjeta tarjeta-hipervinculo-interno" href="#">
+                          <img
+                            class="tarjeta-imagen"
+                            src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/baghira.jpg"
+                            alt="Tipo de operación geoespacial Densidad"
+                          />
+                          <div class="tarjeta-cuerpo">
+                            <p class="tarjeta-titulo">Densidad</p>
+                            <p class="tarjeta-etiqueta">
+                              Calcula la concentración de puntos en un área.
+                            </p>
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                    <div class="columna-8">
+                      <input
+                        id="radio-tipooperaciongeoespacialcuatro"
+                        v-model="botonRadioTipoOperacionGeoespacial"
+                        type="radio"
+                        value="puntos"
+                        name="tipooperaciongeoespacial"
+                      />
+                      <label for="radio-tipooperaciongeoespacialcuatro">
+                        <div class="tarjeta tarjeta-hipervinculo-interno" href="#">
+                          <img
+                            class="tarjeta-imagen"
+                            src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/perro-3.jpg"
+                            alt="Tipo de operación geoespacial Puntos de calor"
+                          />
+                          <div class="tarjeta-cuerpo">
+                            <p class="tarjeta-titulo">Puntos de calor</p>
+                            <p class="tarjeta-etiqueta">
+                              Visualiza concentración mediante grandientes de color.
+                            </p>
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                </fieldset>
+              </form>
+            </ClientOnly>
+          </template>
+
+          <template #pie>
+            <button
+              class="boton-primario boton-chico"
+              aria-label="Ir a llenar instrucciones"
+              type="button"
+              :disabled="!botonRadioTipoOperacionGeoespacial"
+              @click="abrirModalInstrucciones"
+            >
+              Continuar
+            </button>
+            <button
+              class="boton-secundario boton-chico"
+              aria-label="Cancelar generar reporte"
+              type="button"
+              @click="cancelarReporte"
+            >
+              Cancelar
+            </button>
+          </template>
+        </SisdaiModal>
+
         <SisdaiModal ref="modalReporteInstrucciones">
           <template #encabezado>
             <h2>Generar reporte</h2>
@@ -1478,10 +1855,65 @@ onMounted(() => {
               class="boton-secundario boton-chico"
               aria-label="Regresar a llenar información"
               type="button"
-              :disabled="false"
+              :disabled="isEspacializando"
               @click="
                 modalEspacializarInstrucciones.cerrarModal();
                 modalReporteInfo.abrirModal();
+              "
+            >
+              Regresar
+            </button>
+          </template>
+        </SisdaiModal>
+
+        <SisdaiModal ref="modalOperacionGeoespacialInstrucciones">
+          <template #encabezado>
+            <h2>Configura la operación</h2>
+            <p>Define las capas e isntrucciones para l IA.</p>
+          </template>
+
+          <template #cuerpo>
+            <ul
+              class="fondo-color-acento texto-color-acento borde borde-color-acento borde-redondeado-8 p-x-4"
+              style="width: fit-content; font-weight: 800"
+            >
+              <li>{{ botonRadioTipoOperacionGeoespacial }}</li>
+            </ul>
+            <ClientOnly>
+              <SisdaiAreaTexto
+                v-model="areaOperacionGeoespacialInstrucciones"
+                etiqueta="Añade instrucciones para la operación"
+                ejemplo="Ej. Haz una unión entre las geometrías."
+                :es_obligatorio="true"
+                :es_etiqueta_visible="true"
+              />
+            </ClientOnly>
+            <p
+              class="fondo-color-informacion texto-color-informacion borde borde-color-informacion borde-redondeado-8 p-1"
+            >
+              <span class="pictograma-informacion" /> La IA aplicará esta instrucción sobre el
+              análisis seleccionado.
+            </p>
+          </template>
+
+          <template #pie>
+            <button
+              class="boton-primario boton-chico"
+              aria-label="Generar reporte"
+              type="button"
+              :disabled="!areaOperacionGeoespacialInstrucciones"
+              @click="generarReporte('operacion_geoespacial')"
+            >
+              {{ botonGenerarReporte }}
+            </button>
+            <button
+              class="boton-secundario boton-chico"
+              aria-label="Regresar a llenar información"
+              type="button"
+              :disabled="false"
+              @click="
+                modalOperacionGeoespacialInstrucciones.cerrarModal();
+                modalTipoOperacionGeo.abrirModal();
               "
             >
               Regresar
@@ -1566,6 +1998,120 @@ onMounted(() => {
             </a>
           </template>
         </SisdaiModal>
+
+        <SisdaiModal ref="modalPreviewEspacializacion" class="modal-grande">
+          <template #encabezado>
+            <h4 class="m-0">
+              {{ previewEspacializacionData?.report_name || 'Mapa espacializado' }}
+            </h4>
+            <div
+              class="flex p-2 m-t-2 borde-redondeado-8"
+              style="
+                background-color: #e3ebfb;
+                border: 1px solid #1440cc;
+                color: #1440cc;
+                align-items: flex-start;
+              "
+            >
+              <span
+                class="pictograma-informacion m-r-2"
+                aria-hidden="true"
+                style="font-size: 1.25rem; flex-shrink: 0; line-height: 1.2"
+              ></span>
+              <p class="m-0" style="font-size: 14px; font-weight: normal; line-height: 1.3">
+                Este resultado es generado mediante herramientas de IA y puede contener
+                imprecisiones; se recomienda su revisión y validación.
+              </p>
+            </div>
+          </template>
+          <template #cuerpo>
+            <div
+              v-if="previewGeojsonUrl"
+              class="m-y-2 posicion-relativa"
+              style="
+                width: 100%;
+                height: 50vh;
+                min-height: 350px;
+                border: 1px solid var(--borde-neutro);
+                border-radius: 8px;
+                overflow: hidden;
+              "
+            >
+              <!-- Mapa -->
+              <SisdaiMapa class="gema" :vista="{ centro: [-102.5, 23.6], zoom: 4.5 }">
+                <!-- Base grisácea clara -->
+                <SisdaiCapaXyz
+                  id="capa-base"
+                  url="https://{a-c}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                />
+                <!-- Vector sobrepuesto -->
+                <SisdaiCapaVectorial id="capa-preview-ia" :fuente="previewGeojsonUrl" />
+              </SisdaiMapa>
+              <!-- Leyenda superpuesta -->
+              <div
+                class="posicion-absoluta fondo-color-neutro p-3 borde-redondeado-8 sombra-1"
+                style="bottom: 16px; left: 16px; z-index: 10"
+              >
+                <p class="m-0 m-b-2" style="font-weight: 600; font-size: 14px">Leyenda</p>
+                <div class="flex flex-vertical-centrado m-b-1">
+                  <div
+                    style="
+                      width: 12px;
+                      height: 12px;
+                      border-radius: 50%;
+                      background-color: #a9435b;
+                      border: 1px solid white;
+                    "
+                    class="m-r-1"
+                  ></div>
+                  <span style="font-size: 12px">Ubicaciones detectadas</span>
+                </div>
+                <div class="flex flex-vertical-centrado">
+                  <div
+                    style="
+                      width: 12px;
+                      height: 12px;
+                      border-radius: 50%;
+                      background-color: #cccccc;
+                      border: 1px solid white;
+                    "
+                    class="m-r-1"
+                  ></div>
+                  <span style="font-size: 12px">Baja confianza</span>
+                </div>
+              </div>
+            </div>
+            <div
+              v-if="!previewGeojsonUrl"
+              class="flex flex-contenido-centrado flex-vertical-centrado fondo-color-neutro borde-redondeado-8 p-3 m-y-2"
+              style="height: 50vh; min-height: 350px"
+            >
+              <span class="pictograma-alerta texto-color-error" style="font-size: 4rem"></span>
+              <p class="m-t-3 texto-centrado">
+                Error al intentar cargar el archivo de espacialización geográfico o archivo
+                inexistente/inválido.
+              </p>
+            </div>
+          </template>
+          <template #pie>
+            <a
+              :href="previewEspacializacionData?.download_url"
+              target="_blank"
+              class="boton-primario boton-chico"
+              style="text-decoration: none"
+            >
+              <span class="pictograma-archivo-descargar m-r-1" aria-hidden="true" /> Descargar
+            </a>
+            <button
+              class="boton-secundario boton-chico m-l-2"
+              aria-label="Cerrar modal"
+              type="button"
+              @click="cerrarPreviewEspacializacion"
+            >
+              Cerrar
+            </button>
+          </template>
+        </SisdaiModal>
       </ClientOnly>
     </template>
 
@@ -1634,18 +2180,19 @@ onMounted(() => {
                 <div class="fondo-color-neutro borde-redondeado-8">
                   <div class="flex p-2" style="row-gap: 8px">
                     <div class="columna-16">
-                      <span class="pictograma-estrella texto-color-acento"></span>
+                      <span class="pictograma-visualizador texto-color-acento"></span>
                     </div>
                     <div class="columna-16">
                       <div class="flex flex-contenido-separado">
                         <div class="columna-8 flex-vertical-final">
-                          <p class="m-0">Herramienta</p>
+                          <p class="m-0">Operación geospacial</p>
                         </div>
                         <div class="flex-vertical-final">
                           <button
                             class="boton-pictograma boton-con-contenedor-secundario boton-grande"
-                            aria-label="Acción a realizar"
+                            aria-label="Operación geospacial"
                             type="button"
+                            @click="abrirModalReporteInfo('operacion-geospacial')"
                           >
                             <span class="pictograma-ia" aria-hidden="true" />
                           </button>
@@ -1691,16 +2238,45 @@ onMounted(() => {
             class="fondo-color-acento borde-redondeado-8 m-b-2"
           >
             <!-- Estado: PROCESANDO o PENDIENTE -->
-            <div
-              v-if="reporte.status === 'processing' || reporte.status === 'pending'"
-              class="flex p-2"
-            >
-              <span
-                class="texto-color-acento flex-vertical-centrado pictograma-actualizar m-r-1 rotar"
-              />
-              <p class="flex-vertical-centrado m-0">
-                Generando reporte: {{ reporte.report_name }}...
-              </p>
+            <div v-if="reporte.status === 'processing' || reporte.status === 'pending'" class="p-2">
+              <div class="flex" :class="{ 'm-b-1': reporte.type === 'espacializacion' }">
+                <span
+                  class="texto-color-acento flex-vertical-centrado m-r-1"
+                  :class="
+                    reporte.type === 'espacializacion'
+                      ? 'pictograma-mapa-generador'
+                      : 'pictograma-actualizar rotar'
+                  "
+                />
+                <p class="flex-vertical-centrado m-0">
+                  <template v-if="reporte.type === 'espacializacion'">
+                    Espacializando información
+                  </template>
+                  <template v-else> Generando reporte: {{ reporte.report_name }} </template>
+                </p>
+              </div>
+              <!-- Barra de progreso para espacialización simulada -->
+              <div v-if="reporte.type === 'espacializacion'" class="m-t-2">
+                <div
+                  style="
+                    background: rgba(169, 67, 91, 0.2);
+                    height: 8px;
+                    border-radius: 4px;
+                    overflow: hidden;
+                    width: 100%;
+                  "
+                >
+                  <div
+                    :style="`width: ${Math.round(reporte.progress || 0)}%; background: #A9435B; height: 100%; transition: width 0.5s ease-in-out;`"
+                  ></div>
+                </div>
+                <p
+                  class="texto-derecha m-0 m-t-1 texto-color-acento"
+                  style="font-size: 11px; font-weight: 500"
+                >
+                  {{ Math.round(reporte.progress || 0) }}%
+                </p>
+              </div>
             </div>
 
             <!-- Estado: COMPLETADO -->
@@ -1708,10 +2284,24 @@ onMounted(() => {
               <div
                 class="flex cursor-pointer hover-texto-acento"
                 style="cursor: pointer"
-                @click="abrirPreviewReporte(reporte)"
+                @click="
+                  reporte.type !== 'espacializacion'
+                    ? abrirPreviewReporte(reporte)
+                    : abrirPreviewEspacializacion(reporte)
+                "
               >
-                <span class="texto-color-acento flex-vertical-centrado pictograma-reporte" />
-                <p class="flex-vertical-centrado m-0" style="text-decoration: underline">
+                <span
+                  class="texto-color-acento flex-vertical-centrado m-r-1"
+                  :class="
+                    reporte.type === 'espacializacion'
+                      ? 'pictograma-mapa-generador'
+                      : 'pictograma-reporte'
+                  "
+                />
+                <p
+                  class="flex-vertical-centrado m-0"
+                  :style="reporte.type !== 'espacializacion' ? 'text-decoration: underline' : ''"
+                >
                   {{ reporte.report_name }}
                 </p>
               </div>
@@ -1721,7 +2311,7 @@ onMounted(() => {
                   :href="reporte.download_url"
                   target="_blank"
                   class="boton-pictograma boton-sin-contenedor-secundario"
-                  aria-label="Descargar reporte"
+                  aria-label="Descargar archivo"
                 >
                   <span class="pictograma-archivo-descargar" aria-hidden="true" />
                 </a>
@@ -1731,7 +2321,7 @@ onMounted(() => {
             <!-- Estado: ERROR -->
             <div v-else-if="reporte.status === 'error'" class="flex p-2">
               <span class="texto-color-acento flex-vertical-centrado pictograma-cerrar m-r-1" />
-              <p class="flex-vertical-centrado m-0">Error generando: {{ reporte.report_name }}</p>
+              <p class="flex-vertical-centrado m-0">Error procesando: {{ reporte.report_name }}</p>
             </div>
           </div>
         </div>
@@ -1758,6 +2348,31 @@ onMounted(() => {
 </style>
 
 <style lang="scss" scoped>
+.tarjetas-tipo-operacion-geo {
+  input[type='radio'] + label {
+    width: 100%;
+    padding: 0px;
+    border: none;
+    border-radius: 16px;
+    display: block;
+  }
+
+  input[type='radio']:checked + label {
+    box-shadow:
+      0 0 0 2px var(--tarjeta-enfoque-borde),
+      0 0 8px 1px var(--tarjeta-enfoque-sombra);
+  }
+
+  .tarjeta-hipervinculo-interno {
+    box-shadow: none;
+
+    &:hover,
+    &:focus,
+    &:focus-visible {
+      box-shadow: 0 0 8px var(--campo-enfoque-sombra);
+    }
+  }
+}
 fieldset:has([type='checkbox']:required):invalid + .formulario-ayuda::before {
   content: 'Una o más casillas necesitan estar verificadas. ';
 }

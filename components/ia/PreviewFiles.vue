@@ -68,6 +68,7 @@ function errorHandler() {
       v-if="fileFormat === 'pptx'"
       :src="src"
       class="archivo-previs"
+      :style="!loading ? 'visibility: visible' : 'visibility: hidden'"
       @rendered="renderedHandler"
       @error="errorHandler"
     />
