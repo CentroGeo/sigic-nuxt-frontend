@@ -20,17 +20,8 @@ const VueFilesPreview = defineAsyncComponent(() =>
       })
     : Promise.resolve({ render: () => null })
 );
-const IaPreviewFileDocx = defineAsyncComponent(
-  () => import('../../../../../components/ia/PreviewFileDocx.vue')
-);
-const IaPreviewFilePptx = defineAsyncComponent(
-  () => import('../../../../../components/ia/PreviewFilePptx.vue')
-);
-// const IaPreviewFilePdf = defineAsyncComponent(
-//   () => import('../../../../../components/ia/PreviewFilePdf.vue')
-// );
-const IaPreviewFileExcel = defineAsyncComponent(
-  () => import('../../../../../components/ia/PreviewFileExcel.vue')
+const IaPreviewFiles = defineAsyncComponent(
+  () => import('../../../../../components/ia/PreviewFiles.vue')
 );
 
 const { data } = useAuth();
@@ -646,7 +637,7 @@ const fetchInitialReports = async () => {
         download_url: r.download_url,
         file_format: r.file_format,
       }));
-      console.log('reportesGenerados', reportesGenerados.value);
+      // console.log('reportesGenerados', reportesGenerados.value);
 
       // Resume polling for any report that's still pending/processing
       reportesGenerados.value.forEach((r) => {
@@ -1511,17 +1502,9 @@ onMounted(() => {
                   v-if="['word', 'pptx', 'csv', 'pdf', 'txt'].includes(previewReporte.file_format)"
                 >
                   <div v-if="['word', 'pptx', 'csv'].includes(previewReporte.file_format)">
-                    <IaPreviewFileDocx
-                      v-if="previewReporte.file_format === 'word'"
-                      :docx="previewReporte.download_url"
-                    />
-                    <IaPreviewFilePptx
-                      v-if="previewReporte.file_format === 'pptx'"
-                      :pptx="previewReporte.download_url"
-                    />
-                    <IaPreviewFileExcel
-                      v-if="previewReporte.file_format === 'csv'"
-                      :excel="previewReporte.download_url"
+                    <IaPreviewFiles
+                      :src="previewReporte.download_url"
+                      :file-format="previewReporte.file_format"
                     />
                   </div>
                   <div
@@ -1560,23 +1543,6 @@ onMounted(() => {
                     {{ previewReporte.file_format }}
                   </p>
                 </div>
-
-                <!-- <iframe
-                  :src="`https://docs.google.com/gview?url=${previewReporte.download_url}&embedded=true`"
-                  style="width: 100%; height: 100%; border: none; border-radius: 8px"
-                  title="Previsualización del reporte"
-                >
-                </iframe> -->
-                <!-- <iframe
-                  :src="`https://view.officeapps.live.com/op/embed.aspx?src=${previewReporte.download_url}`"
-                  style="width: 100%; height: 100%; border: none; border-radius: 8px"
-                  frameborder="0"
-                  title="Previsualización del reporte2"
-                >
-                  This is an embedded
-                  <a target="_blank" href="http://office.com">Microsoft Office</a> document, powered
-                  by <a target="_blank" href="http://office.com/webapps">Office Online</a>.
-                </iframe> -->
               </div>
             </div>
           </template>

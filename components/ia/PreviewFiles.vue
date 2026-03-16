@@ -1,19 +1,31 @@
 <script setup>
+import VueOfficeDocx from '@vue-office/docx';
 import VueOfficeExcel from '@vue-office/excel';
+import VueOfficePdf from '@vue-office/pdf';
+import VueOfficePptx from '@vue-office/pptx';
 /**
  * @typedef {Object} Props
- * @property {String} [excel=''] - Indica la url del documento
+ * @property {String} [src=''] - Indica la url del documento
  */
 /** @type {Props} */
 const props = defineProps({
-  excel: {
+  src: {
+    type: String,
+    default: '',
+  },
+  fileFormat: {
     type: String,
     default: '',
   },
 });
-console.log('VueOfficeExcel', VueOfficeExcel);
-const { excel } = toRefs(props);
+// console.log('VueOfficeDocx', VueOfficeDocx);
+// console.log('VueOfficePptx', VueOfficePptx);
+// console.log('VueOfficeExcel', VueOfficeExcel);
+// console.log('VueOfficePdf', VueOfficePdf);
+
+const { src, fileFormat } = toRefs(props);
 const loading = ref(true);
+// opciones para excel
 const options = ref({
   xls: false, // preview xlsx file set to false; preview xls file set to true
   minColLength: 0, // how many columns render at least excel, if you want to implement the xlsx file content, you can render a few columns, you can set this value to 0.
@@ -30,21 +42,58 @@ const options = ref({
 
 function renderedHandler() {
   loading.value = false;
-  console.log('Rendering complete');
+  console.warn('Rendering complete');
 }
 function errorHandler() {
   loading.value = false;
-  console.log('Rendering failure');
+  console.error('Rendering failure');
 }
 </script>
 <template>
   <client-only>
+    <div v-if="loading" class="flex flex-contenido-centrado">
+      <figure>
+        <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
+        <figcaption class="texto-centrado">Cargando previsualización</figcaption>
+      </figure>
+    </div>
+    <vue-office-docx
+      v-if="fileFormat === 'word'"
+      :src="src"
+      class="archivo-previs"
+      @rendered="renderedHandler"
+      @error="errorHandler"
+    />
+    <vue-office-pptx
+      v-if="fileFormat === 'pptx'"
+      :src="src"
+      class="archivo-previs"
+      @rendered="renderedHandler"
+      @error="errorHandler"
+    />
     <vue-office-excel
-      :src="excel"
+      v-if="fileFormat === 'csv'"
+      :src="src"
       :options="options"
-      style="width: 100%; height: 100%; border: none; border-radius: 8px"
+      class="archivo-previs"
+      @rendered="renderedHandler"
+      @error="errorHandler"
+    />
+    <vue-office-pdf
+      v-if="fileFormat === 'pdf'"
+      :src="src"
+      class="archivo-previs"
       @rendered="renderedHandler"
       @error="errorHandler"
     />
   </client-only>
 </template>
+
+<style lang="scss" scoped>
+.archivo-previs {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 8px;
+}
+</style>
