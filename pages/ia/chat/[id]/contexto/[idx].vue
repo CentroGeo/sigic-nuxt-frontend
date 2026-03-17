@@ -29,6 +29,7 @@ const IaPreviewFiles = defineAsyncComponent(
 
 const { data, refresh } = useAuth();
 const config = useRuntimeConfig();
+const basePath = config.public.basePath;
 
 const storeIA = useIAStore();
 const router = useRouter();
@@ -66,6 +67,7 @@ const modalReporteInfo = ref(null);
 const modalTipoOperacionGeo = ref(null);
 const modalReporteInstrucciones = ref(null);
 const modalOperacionGeoespacialInstrucciones = ref(null);
+const modalConfirmaOperacionaGeoespacial = ref(null);
 const modalEspacializarInstrucciones = ref(null);
 const isSubmitting = ref(false);
 
@@ -96,6 +98,13 @@ const botonRadioReporte = ref('Uno');
 const botonGenerarReporte = ref('');
 
 const opTipoArchivo = ref({ pdf: 'PDF', word: 'WORD', pptx: 'PPTX', csv: 'CSV' });
+
+const dictTipoOperacionGeo = ref({
+  buffer: 'Buffer',
+  interseccion: 'Intersección',
+  densidad: 'Densidad',
+  puntos: 'Puntos de calor',
+});
 
 const idAleatorio = () => {
   return 'areatexto-' + Math.random().toString(36).substring(2);
@@ -518,8 +527,6 @@ async function abrirModalReporteInfo(modo) {
     campoNombreVisible.value = true;
     leyendaRadioGrupoReporteModal.value = 'Fuentes de información';
     modalReporteInfo.value.abrirModal();
-    // Recupera las fuentes del contexto
-    await loadSources();
   } else {
     if (modo === 'espacializar') {
       tituloReporteModal.value = 'Espacializar información';
@@ -527,8 +534,6 @@ async function abrirModalReporteInfo(modo) {
       leyendaRadioGrupoReporteModal.value =
         'Selecciona los documentos o tabulados que quieras espacializar';
       modalReporteInfo.value.abrirModal();
-      // Recupera las fuentes del contexto
-      await loadSources();
     }
 
     if (modo === 'operacion-geospacial') {
@@ -539,6 +544,8 @@ async function abrirModalReporteInfo(modo) {
       modalTipoOperacionGeo.value.abrirModal();
     }
   }
+  // Recupera las fuentes del contexto
+  await loadSources();
 }
 
 // Cierra y resetea los campos de información del modal de reporte
@@ -957,6 +964,19 @@ function abrirPreviewReporte(reporte) {
 function cerrarPreviewReporte() {
   modalPreviewReporte.value?.cerrarModal();
   previewReporte.value = null;
+}
+const confirmacionValida = ref(false);
+function confirmarOperacion() {
+  if (
+    !areaOperacionGeoespacialInstrucciones.value.trim() <= 0 &&
+    fuentesSeleccionadas.value.length
+  ) {
+    confirmacionValida.value = false;
+    modalOperacionGeoespacialInstrucciones.value.cerrarModal();
+    modalConfirmaOperacionaGeoespacial.value.abrirModal();
+  } else {
+    confirmacionValida.value = true;
+  }
 }
 
 watch(seleccionProyecto, (nv) => {
@@ -1445,7 +1465,7 @@ onMounted(() => {
                         <div class="tarjeta tarjeta-hipervinculo-interno" href="#">
                           <img
                             class="tarjeta-imagen"
-                            src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/asha.jpg"
+                            :src="`${basePath}/img/thumbnail-buffer.jpg`"
                             alt="Tipo de operación geoespacial Buffer"
                           />
                           <div class="tarjeta-cuerpo">
@@ -1469,7 +1489,7 @@ onMounted(() => {
                         <div class="tarjeta tarjeta-hipervinculo-interno" href="#">
                           <img
                             class="tarjeta-imagen"
-                            src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/becka.jpg"
+                            :src="`${basePath}/img/thumbnail-interseccion.jpg`"
                             alt="Tipo de operación geoespacial Intersección"
                           />
                           <div class="tarjeta-cuerpo">
@@ -1493,7 +1513,7 @@ onMounted(() => {
                         <div class="tarjeta tarjeta-hipervinculo-interno" href="#">
                           <img
                             class="tarjeta-imagen"
-                            src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/baghira.jpg"
+                            :src="`${basePath}/img/thumbnail-densidad.jpg`"
                             alt="Tipo de operación geoespacial Densidad"
                           />
                           <div class="tarjeta-cuerpo">
@@ -1517,7 +1537,7 @@ onMounted(() => {
                         <div class="tarjeta tarjeta-hipervinculo-interno" href="#">
                           <img
                             class="tarjeta-imagen"
-                            src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/perro-3.jpg"
+                            :src="`${basePath}/img/thumbnail-puntos-calor.jpg`"
                             alt="Tipo de operación geoespacial Puntos de calor"
                           />
                           <div class="tarjeta-cuerpo">
@@ -1866,10 +1886,10 @@ onMounted(() => {
           </template>
         </SisdaiModal>
 
-        <SisdaiModal ref="modalOperacionGeoespacialInstrucciones">
+        <SisdaiModal ref="modalOperacionGeoespacialInstrucciones" class="modal-grande">
           <template #encabezado>
             <h2>Configura la operación</h2>
-            <p>Define las capas e isntrucciones para l IA.</p>
+            <p>Define las capas e instrucciones para la IA.</p>
           </template>
 
           <template #cuerpo>
@@ -1877,18 +1897,111 @@ onMounted(() => {
               class="fondo-color-acento texto-color-acento borde borde-color-acento borde-redondeado-8 p-x-4"
               style="width: fit-content; font-weight: 800"
             >
-              <li>{{ botonRadioTipoOperacionGeoespacial }}</li>
+              <li>{{ dictTipoOperacionGeo[botonRadioTipoOperacionGeoespacial] }}</li>
             </ul>
+
+            <p class="titulo-tabla">Selecciona las capas necesarias</p>
+            <p class="texto-color-secundario">
+              Este análisis requiere {{ fuentesSeleccionadas.length }} capa{{
+                fuentesSeleccionadas.length > 1 || fuentesSeleccionadas.length === 0 ? 's' : ''
+              }}
+            </p>
+            <p class="texto-color-acento">
+              {{ fuentesSeleccionadas.length }}/{{ arrayContextSources.length }} selecionada{{
+                fuentesSeleccionadas.length > 1 || fuentesSeleccionadas.length === 0 ? 's' : ''
+              }}
+            </p>
+
+            <div
+              v-if="arrayContextSources.length > 0"
+              class="tabla-archivos m-y-3 borde"
+              style="width: 98%; height: 280px; overflow-y: auto"
+            >
+              <table class="tabla" style="width: 100%">
+                <!-- <caption>Selecciona las capas necesarias</caption> -->
+                <thead>
+                  <tr>
+                    <th class="checkbox-header p-x-3 p-y-2">Selección</th>
+                    <th class="p-x-3 p-y-2">Nombre</th>
+                    <th class="p-x-3 p-y-2">Tipo</th>
+                    <th class="p-x-3 p-y-2">Categoría</th>
+                    <th class="p-x-3 p-y-2">Origen</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr v-for="fuente in arrayContextSources" :key="`fila-fuentes-${fuente.id}`">
+                    <td class="checkbox-cell p-3">
+                      <label :for="`checkboxfuente${fuente.id}`" class="checkbox-wrapper">
+                        <input
+                          :id="`checkboxfuente${fuente.id}`"
+                          type="checkbox"
+                          :checked="fuentesSeleccionadas.some((f) => f.id === fuente.id)"
+                          @change="toggleSeleccionFuente(fuente)"
+                        />
+                        <span class="checkmark"></span>
+                      </label>
+                    </td>
+                    <td class="p-3">{{ fuente.filename }}</td>
+                    <td class="p-3 etiqueta-tabla">
+                      <span class="p-x-1 p-y-minimo">
+                        {{ obtenerTipoArchivo(fuente.filename) }}
+                      </span>
+                    </td>
+                    <td class="p-3 flex flex-contenido-centrado">
+                      <p
+                        class="texto-centrado fondo-color-acento p-1 m-0 texto-color-acento borde borde-redondeado-12"
+                        style="width: max-content"
+                      >
+                        <span
+                          v-if="
+                            ['application/pdf', 'application/json'].includes(fuente.document_type)
+                          "
+                        >
+                          <span class="pictograma-documento" />
+                          Documentos
+                        </span>
+                        <span v-if="['text/csv'].includes(fuente.document_type)">
+                          <span class="pictograma-tabla" />
+                          Datos tabulados
+                        </span>
+                      </p>
+                    </td>
+                    <td class="p-3 etiqueta-tabla">
+                      <span class="p-x-1 p-y-minimo"> Catálogo </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p class="borde-b m-t-5"></p>
+
+            <label class="h5" for="area-idcreadoautomaticamente">
+              Añade instrucciones para la operación
+            </label>
+            <p class="texto-color-secundario m-0">
+              Puedes especificar filtros o condiciones para personalizar el resultado.
+            </p>
             <ClientOnly>
               <SisdaiAreaTexto
+                id="area-idcreadoautomaticamente"
                 v-model="areaOperacionGeoespacialInstrucciones"
-                etiqueta="Añade instrucciones para la operación"
+                etiqueta="Instrucciones para la operación"
                 ejemplo="Ej. Haz una unión entre las geometrías."
                 :es_obligatorio="true"
-                :es_etiqueta_visible="true"
+                :es_etiqueta_visible="false"
               />
             </ClientOnly>
             <p
+              v-if="confirmacionValida"
+              class="fondo-color-error texto-color-error borde borde-color-error borde-redondeado-8 p-1"
+            >
+              <span class="pictograma-alerta" /> Es necesario seleccionar fuentes y añadir una
+              instrucción para la operación.
+            </p>
+            <p
+              v-else
               class="fondo-color-informacion texto-color-informacion borde borde-color-informacion borde-redondeado-8 p-1"
             >
               <span class="pictograma-informacion" /> La IA aplicará esta instrucción sobre el
@@ -1901,10 +2014,10 @@ onMounted(() => {
               class="boton-primario boton-chico"
               aria-label="Generar reporte"
               type="button"
-              :disabled="!areaOperacionGeoespacialInstrucciones"
-              @click="generarReporte('operacion_geoespacial')"
+              :disabled="false"
+              @click="confirmarOperacion"
             >
-              {{ botonGenerarReporte }}
+              Continuar
             </button>
             <button
               class="boton-secundario boton-chico"
@@ -1916,7 +2029,7 @@ onMounted(() => {
                 modalTipoOperacionGeo.abrirModal();
               "
             >
-              Regresar
+              Volver
             </button>
           </template>
         </SisdaiModal>
@@ -2109,6 +2222,58 @@ onMounted(() => {
               @click="cerrarPreviewEspacializacion"
             >
               Cerrar
+            </button>
+          </template>
+        </SisdaiModal>
+
+        <SisdaiModal ref="modalConfirmaOperacionaGeoespacial" class="modal-grande">
+          <template #encabezado>
+            <h2>Confirma la operación</h2>
+            <p>Revisa la configuración antes de ejecutaren análisis.</p>
+          </template>
+
+          <template #cuerpo>
+            <ul
+              class="fondo-color-acento texto-color-acento borde borde-color-acento borde-redondeado-8 p-x-4"
+              style="width: fit-content; font-weight: 800"
+            >
+              <li>{{ dictTipoOperacionGeo[botonRadioTipoOperacionGeoespacial] }}</li>
+            </ul>
+
+            <dl>
+              <dt>Capa seleccionada:</dt>
+              <dd v-for="value in fuentesSeleccionadas" :key="value.id" class="p-l-2">
+                {{ value.filename }}
+              </dd>
+            </dl>
+
+            <dl>
+              <dt>Instrucciones para el análisis:</dt>
+              <dd class="p-l-2">{{ areaOperacionGeoespacialInstrucciones }}</dd>
+            </dl>
+          </template>
+
+          <template #pie>
+            <button
+              class="boton-primario"
+              aria-label="Generar reporte"
+              type="button"
+              :disabled="!areaOperacionGeoespacialInstrucciones"
+              @click="generarReporte('operacion_geoespacial')"
+            >
+              {{ botonGenerarReporte }}
+            </button>
+            <button
+              class="boton-secundario"
+              aria-label="Regresar a llenar información"
+              type="button"
+              :disabled="false"
+              @click="
+                modalConfirmaOperacionaGeoespacial.cerrarModal();
+                modalOperacionGeoespacialInstrucciones.abrirModal();
+              "
+            >
+              Editar
             </button>
           </template>
         </SisdaiModal>
