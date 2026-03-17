@@ -64,6 +64,7 @@ const previewReporte = ref(null);
 const modalPreviewEspacializacion = ref(null);
 const previewEspacializacionData = ref(null);
 const previewGeojsonUrl = ref(null);
+const mapInstanceKey = ref(0); // Incrementar al abrir el modal fuerza remontaje limpio de SisdaiMapa
 
 const idAleatorio = () => {
   return 'areatexto-' + Math.random().toString(36).substring(2);
@@ -873,6 +874,7 @@ function cerrarPreviewReporte() {
 async function abrirPreviewEspacializacion(reporte) {
   previewEspacializacionData.value = reporte;
   previewGeojsonUrl.value = reporte.download_url;
+  mapInstanceKey.value += 1; // Fuerza desmontaje/remontaje de SisdaiMapa y sus capas
   modalPreviewEspacializacion.value?.abrirModal();
 }
 
@@ -1646,7 +1648,11 @@ watch(seleccionTipoArchivo, (nv) => {
               "
             >
               <!-- Mapa -->
-              <SisdaiMapa class="gema" :vista="{ centro: [-102.5, 23.6], zoom: 4.5 }">
+              <SisdaiMapa
+                :key="mapInstanceKey"
+                class="gema"
+                :vista="{ centro: [-102.5, 23.6], zoom: 4.5 }"
+              >
                 <!-- Base grisácea clara -->
                 <SisdaiCapaXyz
                   id="capa-base"
