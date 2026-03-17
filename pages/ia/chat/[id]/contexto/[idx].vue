@@ -583,7 +583,11 @@ function abrirModalInstrucciones() {
     }
   }
 
-  if (botonRadioReporte.value === 'Uno') {
+  if (
+    botonRadioReporte.value === 'Uno' &&
+    (tituloReporteModal.value === 'Generar reporte' ||
+      tituloReporteModal.value === 'Espacializar información')
+  ) {
     // seleccionando todas las fuentes del contexto
     arrayContextSources.value.forEach((d) => toggleSeleccionFuente(d));
   }
