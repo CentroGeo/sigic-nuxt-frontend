@@ -1672,7 +1672,10 @@ watch(seleccionTipoArchivo, (nv) => {
                   }"
                   :globo-informativo="
                     (d) =>
-                      `<p><b>Info</b><br /><b>Nombre:</b> ${d['name'] || 'S/N'}<br /><b>Tipo:</b> ${d['type'] || 'S/T'}<br /><b>Contexto:</b> ${d['context'] || 'S/C'}</p>`
+                      `<p><b>Información</b><br />
+                       <b>Nombre:</b> ${d['name'] || 'S/N'}<br />
+                       <b>Tipo:</b> ${d['type'] || 'S/T'}<br />
+                       <b>Contexto:</b> ${d['context'] || 'S/C'}</p>`
                   "
                 />
 
