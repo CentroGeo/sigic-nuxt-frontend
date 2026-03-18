@@ -1520,7 +1520,7 @@ watch(seleccionTipoArchivo, (nv) => {
               </p>
 
               <textarea
-                v-model="instruccionesAnalisis"
+                v-model.lazy="instruccionesAnalisis"
                 class="area-texto ancho-100 p-2 borde-redondeado-4"
                 rows="4"
                 placeholder="Ej. Identifica las menciones de hospitales o centros de salud en los documentos y genera puntos en el mapa para cada ubicación encontrada."
