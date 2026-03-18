@@ -900,7 +900,7 @@ async function generarReporte(modo) {
         : `Mapa espacializado: ${fuentesSeleccionadas.value[0]?.filename}`;
     const selectedIds = fuentesSeleccionadas.value.map((d) => d.id);
     // Cerrar el modal inmediatamente para no bloquear la UI
-    modalOperacionGeoespacialInstrucciones.value.cerrarModal();
+    modalConfirmaOperacionaGeoespacial.value.cerrarModal();
     fuentesSeleccionadas.value = [];
     const payload = {
       context_id: contextID.value,
