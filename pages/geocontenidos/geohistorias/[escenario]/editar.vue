@@ -4,8 +4,7 @@ import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/S
 const config = useRuntimeConfig();
 const { data: userData } = useAuth();
 const { gnoxyFetch } = useGnoxyUrl();
-
-const escenarioId = useRoute().params.id;
+const { escenario } = useRoute().params;
 
 const modalStatus = ref(null);
 const estatusAlGuardar = reactive({
@@ -29,13 +28,13 @@ const formulario = reactive({
 });
 
 async function cargarDatosEscenario() {
-  if (escenarioId === 'nuevo') return;
+  if (escenario === 'nuevo') return;
 
   estatusAlGuardar.cargando = true;
   estatusAlGuardar.textoCargando = 'Cargando escenario...';
   modalStatus.value.abrirModal();
 
-  const respuesta = await gnoxyFetch(`${config.public.geonodeApi}/scenarios/${escenarioId}`);
+  const respuesta = await gnoxyFetch(`${config.public.geonodeApi}/scenarios/${escenario}`);
   const data = await respuesta.json();
 
   // TODO: mostrar error si la respuesta no es ok o el escenario no existe
@@ -80,9 +79,9 @@ async function guardarCambios() {
   estatusAlGuardar.textoCargando = 'Guardando...';
 
   const respuesta = await gnoxyFetch(
-    `${config.public.geonodeApi}/scenarios/${escenarioId !== 'nuevo' ? `${escenarioId}/` : ''}/`,
+    `${config.public.geonodeApi}/scenarios/${escenario !== 'nuevo' ? `${escenario}/` : ''}/`,
     {
-      method: escenarioId === 'nuevo' ? 'POST' : 'PUT',
+      method: escenario === 'nuevo' ? 'POST' : 'PUT',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${userData.value?.accessToken}`,
@@ -91,7 +90,7 @@ async function guardarCambios() {
     }
   );
 
-  if (escenarioId === 'nuevo') {
+  if (escenario === 'nuevo') {
     if (!respuesta.ok || respuesta.status !== 201 || respuesta.statusText !== 'Created') {
       console.error('Error al guardar el escenario:', respuesta.statusText);
     }
@@ -115,8 +114,8 @@ async function guardarCambios() {
     setTimeout(() => {
       modalStatus.value?.cerrarModal();
 
-      if (escenarioId === 'nuevo') {
-        navigateTo(`/geocontenidos/geohistorias/editar-${data.id}`);
+      if (escenario === 'nuevo') {
+        navigateTo(`/geocontenidos/geohistorias/${data.id}/editar`);
       }
     }, 1500);
   }
@@ -158,7 +157,7 @@ async function guardarCambios() {
         />
         <p class="formulario-ayuda" aria-live="polite" role="status">
           Usa esta sección para una breve descripción que ayudará a otros a entender el propósito de
-          este escenario.
+          este escenario
         </p>
       </div>
 

@@ -41,7 +41,7 @@ function formatearFecha(fecha) {
 
       <NuxtLink
         v-if="estaLogueado"
-        to="/geocontenidos/geohistorias/editar-nuevo"
+        to="/geocontenidos/geohistorias/nuevo/editar"
         class="boton boton-primario m-b-4"
       >
         <span class="pictograma-agregar m-r-1" />
@@ -91,7 +91,7 @@ function formatearFecha(fecha) {
             <template v-if="estaLogueado">
               <NuxtLink
                 class="boton boton-chico boton-secundario"
-                :to="`/geocontenidos/geohistorias/editar-${escenario.id}`"
+                :to="`/geocontenidos/geohistorias/${escenario.id}/editar`"
               >
                 <span class="pictograma-editar m-r-1" />
                 Editar escenario
@@ -99,7 +99,7 @@ function formatearFecha(fecha) {
 
               <NuxtLink
                 class="boton boton-chico boton-secundario"
-                to="/geocontenidos/geohistorias/escenas"
+                :to="`/geocontenidos/geohistorias/${escenario.id}/escenas`"
               >
                 <span class="pictograma-editar m-r-1" />
                 Editar escenas
