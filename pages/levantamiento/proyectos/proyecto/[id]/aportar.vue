@@ -58,7 +58,7 @@ const paso = ref(1);
 const modalNoUbicacion = ref(null);
 
 function irPaso2() {
-  if (punto.value?.features?.length) {
+  if (punto.value?.features?.length < 1) {
     modalNoUbicacion.value.abrirModal();
     return;
   }
@@ -72,6 +72,10 @@ function regresarPaso1() {
 function continuarSinUbicacion() {
   modalNoUbicacion.value.cerrarModal();
   paso.value = 2;
+}
+
+function guardarBorrador() {
+  console.log(preguntas.value);
 }
 </script>
 <template>
@@ -151,7 +155,9 @@ function continuarSinUbicacion() {
                 *Aun no se han completado todas las preguntas obligatorias
               </p>
               <div class="m-b-2">
-                <button class="boton-secundario boton-chico">Guardar borrador</button>
+                <button class="boton-secundario boton-chico" @click="guardarBorrador">
+                  Guardar borrador
+                </button>
               </div>
               <div>
                 <button class="boton-secundario boton-chico m-r-2" @click="regresarPaso1">
@@ -168,6 +174,7 @@ function continuarSinUbicacion() {
                     :pregunta="pregunta"
                     :es-edicion="false"
                     :indice="index"
+                    @update:pregunta="preguntas[index] = $event"
                   />
                   <levantamiento-pregunta-unica
                     v-if="pregunta.tipo === 'unica'"

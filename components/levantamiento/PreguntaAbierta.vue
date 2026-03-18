@@ -28,6 +28,11 @@ function subirPregunta() {
 function bajarPregunta() {
   emit('mover', { indice: props.indice, direccion: 'abajo' });
 }
+
+function actualizarRespuesta(valor) {
+  console.log(valor);
+  emit('update:pregunta', { ...props.pregunta, respuesta: valor });
+}
 </script>
 
 <template>
@@ -101,6 +106,8 @@ function bajarPregunta() {
           ejemplo="Responde la pregunta"
           :es_etiqueta_visible="false"
           :autofocus="false"
+          :model-value="props.pregunta.respuesta"
+          @update:model-value="(valor) => actualizarRespuesta(valor)"
         />
       </ClientOnly>
       <div v-if="props.pregunta.obligatorio">Obligatoria*</div>
