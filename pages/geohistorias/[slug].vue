@@ -15,7 +15,8 @@ definePageMeta({
 const { gnoxyFetch } = useGnoxyUrl();
 const config = useRuntimeConfig();
 
-const escenario = ref(null);
+const escenario = reactive({});
+const escena = reactive({});
 const estaCargando = ref(false);
 
 async function cargarEscenario() {
@@ -23,67 +24,88 @@ async function cargarEscenario() {
   const respuesta = await gnoxyFetch(`${config.public.geonodeApi}/scenarios/${slug}`);
 
   const data = await respuesta.json();
-  escenario.value = data;
-  // console.log(data);
+  Object.assign(escenario, data);
+  console.log('escenario', data);
 
-  // estaCargando.value = false;
+  cargarEscena(data.scenes[0].id);
 }
 cargarEscenario();
+
+async function cargarEscena(escenaId) {
+  // console.log('cargar', escenaId);
+  const respuesta = await gnoxyFetch(`${config.public.geonodeApi}/scenes/${escenaId}`);
+
+  const data = await respuesta.json();
+  Object.assign(escena, data);
+  console.log('escena', data);
+
+  estaCargando.value = false;
+}
 </script>
 
 <template>
   <div class="vista-geohistorias escenario">
-    <div
-      v-if="escenario?.scenes_layout_styles.timeline_position === 'top'"
-      class="linea-tiempo"
-      :style="{
-        background: `linear-gradient(to right, ${escenario?.scenes_layout_styles.gradient_start}, ${escenario?.scenes_layout_styles.gradient_end})`,
-      }"
-    >
-      <!-- Gradiente -->
-    </div>
+    <GeocontenidosLoader v-if="estaCargando" />
 
-    <div class="escena flex">
-      <div
-        class="borde-r borde-color-secundario"
-        :style="`width: ${escenario?.scenes_layout_styles.text_panel}%;`"
-      >
-        <p v-for="_ in [, , , ,]" :key="_">
-          Lorem ipsum dolor, sit amet consectetur adipisicing elit. Laboriosam ducimus facilis
-          aspernatur, iure at quia labore hic illum quisquam, voluptatibus voluptas consequuntur
-          cupiditate velit fuga accusantium aliquid ex perferendis tempore.
-        </p>
+    <template v-else>
+      <GeocontenidosTab
+        v-if="escenario?.scenes_layout_styles.timeline_position === 'top'"
+        :layout-styles="escenario.scenes_layout_styles"
+        :tabs="escenario.scenes"
+        @al-click-tab="cargarEscena"
+      />
 
-        <div>Paginador</div>
+      <div class="escena flex">
+        <div
+          v-if="escena.text_position === 'left'"
+          class="borde-r borde-color-secundario"
+          :style="`width: ${escenario?.scenes_layout_styles.text_panel}%;`"
+        >
+          <div v-html="escena.text_content" />
+
+          <!-- <div>Paginador</div> -->
+        </div>
+
+        <div :style="`width: ${escenario?.scenes_layout_styles.map_panel}%;`">
+          <ClientOnly>
+            <SisdaiMapa
+              class="gema"
+              :vista="{
+                acercamiento: escena.zoom,
+                centro: [escena.map_center_long, escena.map_center_lat],
+              }"
+            >
+              <SisdaiCapaXyz :posicion="0" />
+            </SisdaiMapa>
+          </ClientOnly>
+        </div>
+
+        <div
+          v-if="escena.text_position === 'right'"
+          class="borde-l borde-color-secundario"
+          :style="`width: ${escenario?.scenes_layout_styles.text_panel}%;`"
+        >
+          <div v-html="escena.text_content" />
+
+          <!-- <div>Paginador</div> -->
+        </div>
       </div>
 
-      <div
-        class="borde-l borde-color-secundario"
-        :style="`width: ${escenario?.scenes_layout_styles.map_panel}%;`"
-      >
-        <!-- Mapa {{ escenario?.scenes_layout_styles.map_panel }}% -->
-        <ClientOnly>
-          <SisdaiMapa class="gema" :vista="{ extension: '-118.3651,14.5321,-86.7104,32.7187' }">
-            <SisdaiCapaXyz :posicion="0" />
-          </SisdaiMapa>
-        </ClientOnly>
-      </div>
-    </div>
-
-    <div
-      v-if="escenario?.scenes_layout_styles.timeline_position === 'bottom'"
-      class="linea-tiempo"
-      :style="{
-        background: `linear-gradient(to right, ${escenario?.scenes_layout_styles.gradient_start}, ${escenario?.scenes_layout_styles.gradient_end})`,
-      }"
-    >
-      <!-- Gradiente -->
-    </div>
+      <GeocontenidosTab
+        v-if="escenario?.scenes_layout_styles.timeline_position === 'bottom'"
+        :layout-styles="escenario.scenes_layout_styles"
+        :tabs="escenario.scenes"
+        @al-click-tab="cargarEscena"
+      />
+    </template>
   </div>
 </template>
 
 <style lang="scss" scoped>
 .vista-geohistorias.escenario {
+  min-height: 100vh;
+  align-content: center;
+
   .linea-tiempo {
     width: 100%;
     height: 100px;
