@@ -42,7 +42,7 @@ async function guardarCambios() {
     id,
     stack_order,
   }));
-  console.log(formulario);
+  // console.log(formulario);
 
   const respuesta = await gnoxyFetch(`${config.public.geonodeApi}/scenes/bulk-reorder//`, {
     method: 'POST',
@@ -55,6 +55,10 @@ async function guardarCambios() {
 
   const data = await respuesta.json();
   console.log(data);
+}
+
+function Eliminar(id) {
+  console.log('Eliminar', id);
 }
 </script>
 
@@ -81,7 +85,7 @@ async function guardarCambios() {
         Crear Escena
       </NuxtLink>
 
-      <NuxtLink class="boton boton-secundario" :to="`/geohistorias/${escenario}`">
+      <NuxtLink class="boton boton-secundario" :to="`/geohistorias/${escenario}`" target="_blank">
         <span class="pictograma-mapa-generador m-r-1" />
         Visualizar escenario
       </NuxtLink>
@@ -112,7 +116,7 @@ async function guardarCambios() {
               <p class="tarjeta-titulo">{{ escena.name }}</p>
 
               <button class="boton boton-chico boton-primario" style="margin-top: 0">
-                <span class="pictograma-mover pictograma-grande" style="padding: 0"></span>
+                <span class="pictograma-mover pictograma-grande" style="padding: 0" />
               </button>
             </div>
 
@@ -127,12 +131,15 @@ async function guardarCambios() {
                 Agregar marcadores
               </button>
 
-              <button class="boton boton-chico boton-secundario">
+              <NuxtLink
+                class="boton boton-chico boton-secundario"
+                :to="`/geocontenidos/geohistorias/${escenario}/escenas/${escena.id}/editar`"
+              >
                 <span class="pictograma-editar m-r-1" />
                 Editar escena
-              </button>
+              </NuxtLink>
 
-              <button class="boton boton-chico boton-primario">
+              <button class="boton boton-chico boton-primario" @click="Eliminar(escena.id)">
                 <span class="pictograma-eliminar m-r-1" />
                 Eliminar
               </button>

@@ -34,7 +34,8 @@ async function cargarDatosEscenario() {
   estatusAlGuardar.textoCargando = 'Cargando escenario...';
   modalStatus.value.abrirModal();
 
-  const respuesta = await gnoxyFetch(`${config.public.geonodeApi}/scenarios/${escenario}`);
+  const url = `${config.public.geonodeApi}/scenarios/${escenario}`;
+  const respuesta = await gnoxyFetch(url);
   const data = await respuesta.json();
 
   // TODO: mostrar error si la respuesta no es ok o el escenario no existe
@@ -171,11 +172,7 @@ async function guardarCambios() {
 
       <div class="m-b-4">
         <label for="posicion">Posición de la línea del tiempo</label>
-        <select
-          id="posicion"
-          v-model="formulario.scenes_layout_styles.timeline_position"
-          name="posicion"
-        >
+        <select id="posicion" v-model="formulario.scenes_layout_styles.timeline_position">
           <option value="top">Arriba</option>
           <option value="bottom">Abajo</option>
         </select>
