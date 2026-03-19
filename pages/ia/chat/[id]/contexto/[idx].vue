@@ -64,7 +64,9 @@ const previewReporte = ref(null);
 const modalPreviewEspacializacion = ref(null);
 const previewEspacializacionData = ref(null);
 const previewGeojsonUrl = ref(null);
-const mapInstanceKey = ref(0); // Incrementar al abrir el modal fuerza remontaje limpio de SisdaiMapa
+const mapInstanceKey = ref(0);
+const modalConfirmarEliminar = ref(null);
+const reporteParaEliminar = ref(null);
 
 const idAleatorio = () => {
   return 'areatexto-' + Math.random().toString(36).substring(2);
@@ -882,6 +884,43 @@ function cerrarPreviewEspacializacion() {
   modalPreviewEspacializacion.value?.cerrarModal();
   previewEspacializacionData.value = null;
   previewGeojsonUrl.value = null;
+}
+
+function pedirConfirmacionEliminar(reporte) {
+  reporteParaEliminar.value = reporte;
+  modalConfirmarEliminar.value?.abrirModal();
+}
+
+async function confirmarEliminar() {
+  const reporte = reporteParaEliminar.value;
+  if (!reporte) return;
+
+  const token = data.value?.accessToken;
+  if (!token) return;
+
+  const endpoint =
+    reporte.type === 'espacializacion'
+      ? `${config.public.iaBackendUrl}/api/localidades/${reporte.id}/delete/`
+      : `${config.public.iaBackendUrl}/api/reports/${reporte.id}/delete/`;
+
+  try {
+    const res = await fetch(endpoint, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (res.ok || res.status === 204) {
+      const idx = reportesGenerados.value.findIndex((r) => r.id === reporte.id);
+      if (idx !== -1) reportesGenerados.value.splice(idx, 1);
+    } else {
+      console.error('Error al eliminar:', res.status);
+    }
+  } catch (err) {
+    console.error('Error de red al eliminar:', err);
+  } finally {
+    modalConfirmarEliminar.value?.cerrarModal();
+    reporteParaEliminar.value = null;
+  }
 }
 
 const opTipoArchivo = ref({ pdf: 'PDF', word: 'WORD', pptx: 'PPTX', csv: 'CSV' });
@@ -1953,7 +1992,7 @@ watch(seleccionTipoArchivo, (nv) => {
                 </p>
               </div>
 
-              <div>
+              <div class="flex" style="gap: 2px; flex-shrink: 0">
                 <a
                   :href="reporte.download_url"
                   target="_blank"
@@ -1962,6 +2001,14 @@ watch(seleccionTipoArchivo, (nv) => {
                 >
                   <span class="pictograma-archivo-descargar" aria-hidden="true" />
                 </a>
+                <button
+                  class="boton-pictograma boton-sin-contenedor-secundario"
+                  :aria-label="`Eliminar ${reporte.type === 'espacializacion' ? 'espacialización' : 'reporte'}`"
+                  type="button"
+                  @click.stop="pedirConfirmacionEliminar(reporte)"
+                >
+                  <span class="pictograma-eliminar" aria-hidden="true" />
+                </button>
               </div>
             </div>
 
@@ -1972,6 +2019,34 @@ watch(seleccionTipoArchivo, (nv) => {
             </div>
           </div>
         </div>
+        <!-- Modal confirmación de eliminación -->
+        <SisdaiModal ref="modalConfirmarEliminar">
+          <template #encabezado>
+            <h2 class="m-0">Eliminar elemento</h2>
+          </template>
+          <template #cuerpo>
+            <p>
+              ¿Deseas eliminar
+              <strong>{{ reporteParaEliminar?.report_name }}</strong
+              >? Esta acción no se puede deshacer.
+            </p>
+          </template>
+          <template #pie>
+            <button class="boton-primario boton-chico" type="button" @click="confirmarEliminar">
+              Eliminar
+            </button>
+            <button
+              class="boton-secundario boton-chico"
+              type="button"
+              @click="
+                modalConfirmarEliminar.cerrarModal();
+                reporteParaEliminar = null;
+              "
+            >
+              Cancelar
+            </button>
+          </template>
+        </SisdaiModal>
       </div>
     </template>
   </IaLayoutPaneles>
