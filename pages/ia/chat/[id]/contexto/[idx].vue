@@ -1469,7 +1469,7 @@ onMounted(() => {
                         <div class="tarjeta tarjeta-hipervinculo-interno" href="#">
                           <img
                             class="tarjeta-imagen"
-                            :src="`${basePath}/img/thumbnail-buffer.jpg`"
+                            :src="`${basePath}/img/ia-buffer.jpg`"
                             alt="Tipo de operación geoespacial Buffer"
                           />
                           <div class="tarjeta-cuerpo">
@@ -1493,7 +1493,7 @@ onMounted(() => {
                         <div class="tarjeta tarjeta-hipervinculo-interno" href="#">
                           <img
                             class="tarjeta-imagen"
-                            :src="`${basePath}/img/thumbnail-interseccion.jpg`"
+                            :src="`${basePath}/img/ia-interseccion.jpg`"
                             alt="Tipo de operación geoespacial Intersección"
                           />
                           <div class="tarjeta-cuerpo">
@@ -1517,7 +1517,7 @@ onMounted(() => {
                         <div class="tarjeta tarjeta-hipervinculo-interno" href="#">
                           <img
                             class="tarjeta-imagen"
-                            :src="`${basePath}/img/thumbnail-densidad.jpg`"
+                            :src="`${basePath}/img/ia-densidad.jpg`"
                             alt="Tipo de operación geoespacial Densidad"
                           />
                           <div class="tarjeta-cuerpo">
@@ -1541,7 +1541,7 @@ onMounted(() => {
                         <div class="tarjeta tarjeta-hipervinculo-interno" href="#">
                           <img
                             class="tarjeta-imagen"
-                            :src="`${basePath}/img/thumbnail-puntos-calor.jpg`"
+                            :src="`${basePath}/img/ia-puntos-calor.jpg`"
                             alt="Tipo de operación geoespacial Puntos de calor"
                           />
                           <div class="tarjeta-cuerpo">
