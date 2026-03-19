@@ -98,7 +98,10 @@ async function guardarArchivo(archivo) {
       </div>
     </div>
     <div v-else>
-      <div class="m-b-2 texto-peso-500">{{ props.indice + 1 }}. {{ props.pregunta.pregunta }}</div>
+      <div class="m-b-2 texto-peso-500">{{ props.indice + 1 }}. Agrega fotografías</div>
+      <div class="m-b-1 texto-color-secundario texto-peso-500">
+        {{ props.pregunta.instrucciones }}
+      </div>
       <IaElementoDragNdDrop
         ref="dragNdDrop"
         class="m-b-2"

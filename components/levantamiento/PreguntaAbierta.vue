@@ -30,7 +30,6 @@ function bajarPregunta() {
 }
 
 function actualizarRespuesta(valor) {
-  console.log(valor);
   emit('update:pregunta', { ...props.pregunta, respuesta: valor });
 }
 </script>

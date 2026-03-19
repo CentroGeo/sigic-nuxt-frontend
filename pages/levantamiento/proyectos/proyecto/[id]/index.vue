@@ -101,15 +101,14 @@ const handleDescarga = () => {
                     :key="index"
                     class="p-3 borde-redondeado-20 fondo-color-primario columna-16"
                   >
-                    <div v-if="pregunta.tipo !== 'multimedia'" class="m-b-2 texto-peso-500">
-                      {{ index + 1 }}. {{ pregunta.pregunta }}
+                    <div class="m-b-2 texto-peso-500">
+                      {{ index + 1 }}.
+                      {{
+                        pregunta.tipo !== 'multimedia' ? pregunta.pregunta : 'Agrega fotografías'
+                      }}
                     </div>
                     <div class="m-b-1 texto-color-secundario texto-peso-500">
-                      {{
-                        pregunta.tipo === 'multimedia'
-                          ? `${index + 1}. ${pregunta.instrucciones}`
-                          : pregunta.instrucciones
-                      }}
+                      {{ pregunta.instrucciones }}
                     </div>
 
                     <div

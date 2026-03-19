@@ -181,12 +181,14 @@ function guardarBorrador() {
                     :pregunta="pregunta"
                     :es-edicion="false"
                     :indice="index"
+                    @update:pregunta="preguntas[index] = $event"
                   />
                   <levantamiento-pregunta-multiple
                     v-if="pregunta.tipo === 'multiple'"
                     :pregunta="pregunta"
                     :es-edicion="false"
                     :indice="index"
+                    @update:pregunta="preguntas[index] = $event"
                   />
                   <levantamiento-pregunta-condicional
                     v-if="pregunta.tipo === 'condicional'"

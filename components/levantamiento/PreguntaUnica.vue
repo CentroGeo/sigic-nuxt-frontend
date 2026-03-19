@@ -49,6 +49,10 @@ function agregarOpcion() {
 }
 
 const respuestaSeleccionada = ref('');
+
+function actualizarRespuesta(valor) {
+  emit('update:pregunta', { ...props.pregunta, respuesta: valor });
+}
 </script>
 
 <template>
@@ -165,6 +169,8 @@ const respuestaSeleccionada = ref('');
             :value="opcion"
             :name="`opcion-preg-${indice}`"
             :autofocus="false"
+            :model-value="props.pregunta.respuesta"
+            @update:model-value="(valor) => actualizarRespuesta(valor)"
           />
         </SisdaiBotonesRadioGrupo>
       </ClientOnly>

@@ -1,5 +1,6 @@
 <script setup>
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
+import SisdaiCasillasVerificacionGrupo from '@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion-grupo/SisdaiCasillasVerificacionGrupo.vue';
 import SisdaiCasilla from '@centrogeomx/sisdai-componentes/src/componentes/casilla-verificacion/SisdaiCasillaVerificacion.vue';
 
 const props = defineProps({
@@ -44,6 +45,25 @@ function eliminarOpcion(indice) {
 function agregarOpcion() {
   const nuevasOpciones = [...props.pregunta.opciones, ''];
   emit('update:pregunta', { ...props.pregunta, opciones: nuevasOpciones });
+}
+
+function actualizarRespuesta(valor, opcion) {
+  let respuestaActual = props.pregunta.respuesta || [];
+
+  if (valor) {
+    respuestaActual = [...respuestaActual, opcion].filter(
+      (item, index, self) => self.indexOf(item) === index
+    );
+  } else {
+    respuestaActual = respuestaActual.filter((item) => item !== opcion);
+  }
+
+  console.log(respuestaActual);
+
+  emit('update:pregunta', {
+    ...props.pregunta,
+    respuesta: respuestaActual,
+  });
 }
 </script>
 
@@ -153,15 +173,19 @@ function agregarOpcion() {
       <p class="borde-b borde-color-secundario m-y-2" />
       <div class="grupo-categoria flex p-1">
         <ClientOnly>
-          <SisdaiCasilla
-            v-for="(opcion, index) in props.pregunta.opciones"
-            :key="index"
-            :name="`check-${index}-preg-${indice}`"
-            :value="opcion"
-            :etiqueta="opcion"
-            class="opcion-checkbox"
-            :autofocus="false"
-          />
+          <SisdaiCasillasVerificacionGrupo :es_vertical="true">
+            <SisdaiCasilla
+              v-for="(opcion, index) in props.pregunta.opciones"
+              :key="index"
+              :name="`check-${index}-preg-${indice}`"
+              :value="opcion"
+              :etiqueta="opcion"
+              class="opcion-checkbox"
+              :autofocus="false"
+              :model-value="props.pregunta.respuesta?.includes(opcion)"
+              @update:model-value="(valor) => actualizarRespuesta(valor, opcion)"
+            />
+          </SisdaiCasillasVerificacionGrupo>
         </ClientOnly>
       </div>
       <div v-if="props.pregunta.obligatorio">Obligatoria*</div>
@@ -182,5 +206,10 @@ function agregarOpcion() {
   flex-direction: column;
   border-radius: 8px;
   gap: 0px;
+
+  :deep(fieldset.grupo-formulario-vertical) {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
 }
 </style>
