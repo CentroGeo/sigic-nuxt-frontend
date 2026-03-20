@@ -103,7 +103,7 @@ const dictTipoOperacionGeo = ref({
   buffer: 'Buffer',
   interseccion: 'Intersección',
   densidad: 'Densidad',
-  puntos: 'Puntos de calor',
+  avanzado: 'Avanzado',
 });
 
 const idAleatorio = () => {
@@ -905,6 +905,7 @@ async function generarReporte(modo) {
     const payload = {
       context_id: contextID.value,
       file_ids: selectedIds,
+      operation: botonRadioTipoOperacionGeoespacial.value,
       report_name: reportName,
       instructions: areaOperacionGeoespacialInstrucciones.value,
       export_format: exportFormat,
@@ -1534,7 +1535,7 @@ onMounted(() => {
                         id="radio-tipooperaciongeoespacialcuatro"
                         v-model="botonRadioTipoOperacionGeoespacial"
                         type="radio"
-                        value="puntos"
+                        value="avanzado"
                         name="tipooperaciongeoespacial"
                       />
                       <label for="radio-tipooperaciongeoespacialcuatro">
@@ -1545,10 +1546,8 @@ onMounted(() => {
                             alt="Tipo de operación geoespacial Puntos de calor"
                           />
                           <div class="tarjeta-cuerpo">
-                            <p class="tarjeta-titulo">Puntos de calor</p>
-                            <p class="tarjeta-etiqueta">
-                              Visualiza concentración mediante grandientes de color.
-                            </p>
+                            <p class="tarjeta-titulo">Avanzado</p>
+                            <p class="tarjeta-etiqueta">Operaciones Libre</p>
                           </div>
                         </div>
                       </label>
@@ -1992,7 +1991,7 @@ onMounted(() => {
                 id="area-idcreadoautomaticamente"
                 v-model="areaOperacionGeoespacialInstrucciones"
                 etiqueta="Instrucciones para la operación"
-                ejemplo="Ej. Haz una unión entre las geometrías."
+                ejemplo="Ej. Operación: puntos, instrucciones adicionales: Paso 1: Haz una operación union entre mi primera y segunda capa de puntos. Paso 2: Haz un buffer de 1000 metros alrededor del resultado de los puntos unidos. Paso 3: Haz un spatial_join entre ese buffer y mi capa de polígonos)."
                 :es_obligatorio="true"
                 :es_etiqueta_visible="false"
               />
@@ -2354,7 +2353,7 @@ onMounted(() => {
                     <div class="columna-16">
                       <div class="flex flex-contenido-separado">
                         <div class="columna-8 flex-vertical-final">
-                          <p class="m-0">Operación geospacial</p>
+                          <p class="m-0">Análisis espacial</p>
                         </div>
                         <div class="flex-vertical-final">
                           <button
