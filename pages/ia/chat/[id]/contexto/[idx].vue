@@ -9,6 +9,7 @@ import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/sele
 
 import { SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
 import SisdaiCapaVectorial from '@centrogeomx/sisdai-mapas/src/componentes/capa/vectorial/SisdaiCapaVectorial.vue';
+import GloboInformativo from '@centrogeomx/sisdai-mapas/src/componentes/mapa/elementos/info/GloboInformativo.vue';
 
 import DOMPurify from 'dompurify'; // Para seguridad XSS
 import { marked } from 'marked'; // Importar marked para mostrar formato markdown
@@ -105,6 +106,9 @@ const dictTipoOperacionGeo = ref({
   densidad: 'Densidad',
   avanzado: 'Avanzado',
 });
+const mapInstanceKey = ref(0);
+const modalConfirmarEliminar = ref(null);
+const reporteParaEliminar = ref(null);
 
 const idAleatorio = () => {
   return 'areatexto-' + Math.random().toString(36).substring(2);
@@ -131,7 +135,7 @@ if (contextID.value) {
   // volviendo reactivo el chat id del route params
   chatID.value = chatId.value;
   if (chatID.value > 0) {
-    console.log('chat existente');
+    // console.log('chat existente');
     loadExistentChat(chatID.value);
   }
 } else {
@@ -619,8 +623,7 @@ const seleccionTipoArchivo = ref('');
 const botonRadioHojaMembretada = ref(false);
 const casillaArregloUbicaciones = ref([]);
 const botonRadioRepresentacion = ref('centroide');
-const botonRadioUbicacion = ref('resolver_auto');
-const botonRadioFormato = ref('capa_visualizador');
+const instruccionesAnalisis = ref('');
 
 // --- Nueva Lógica de Integración para Reportes y Espacialización ---
 const reportesGenerados = ref([]); // Lista reactiva de reportes en sesión actual
@@ -643,6 +646,7 @@ const pollStatus = async (itemId, type = 'reporte') => {
           'Content-Type': 'application/json',
         },
       });
+
       if (res.ok) {
         failedAttempts = 0; // Reiniciamos contador si responde bien
         const reportData = await res.json();
@@ -676,15 +680,16 @@ const pollStatus = async (itemId, type = 'reporte') => {
             if (idx !== -1) reportesGenerados.value[idx].status = 'error';
             return;
           }
-          console.log('Intentando refrescar la sesión local de Nuxt Auth...');
+
+          // console.log('Intentando refrescar la sesión local de Nuxt Auth...');
           try {
             await refresh();
             // Optional delay to let reactivity flush
             await new Promise((r) => setTimeout(r, 500));
-            console.log(
-              'Token local refrescado a:',
-              data.value?.accessToken?.substring(0, 15) + '...'
-            );
+            // console.log(
+            //   'Token local refrescado a:',
+            //   data.value?.accessToken?.substring(0, 15) + '...'
+            // );
           } catch (refreshErr) {
             console.error('Fallo al refrescar token local:', refreshErr);
           }
@@ -804,11 +809,6 @@ async function generarReporte(modo) {
       console.error('Network error triggering report generation:', error);
     }
   } else if (modo === 'espacializar') {
-    // console.log('file_ids', fuentesSeleccionadas.value);
-    // console.log('casillaArregloUbicaciones.value', casillaArregloUbicaciones.value);
-    // console.log('botonRadioRepresentacion.value', botonRadioRepresentacion.value);
-    // console.log('botonRadioUbicacion.value', botonRadioUbicacion.value);
-    // console.log('botonRadioFormato.value', botonRadioFormato.value);
     isEspacializando.value = true;
     const token = data.value?.accessToken;
 
@@ -820,31 +820,29 @@ async function generarReporte(modo) {
       punto: 'point',
     };
     const geometryType = geomMap[botonRadioRepresentacion.value] || 'point';
-    // Ubicación: 'resolver_auto' -> 'auto', 'marcar_manual' -> 'México' (por defecto)
-    const focusValue = botonRadioUbicacion.value === 'resolver_auto' ? 'auto' : 'México';
-    // Formato de exportación: 'descargar_geojson' -> 'geojson', 'descargar_shp' -> 'shp'
-    let exportFormat = 'geojson';
-    if (botonRadioFormato.value === 'descargar_shp') exportFormat = 'shp';
-    if (botonRadioFormato.value === 'descargar_gpkg') exportFormat = 'gpkg';
     const reportName =
       fuentesSeleccionadas.value.length > 1
         ? 'Mapa espacializado de varias fuentes'
         : `Mapa espacializado: ${fuentesSeleccionadas.value[0]?.filename}`;
     const selectedIds = fuentesSeleccionadas.value.map((d) => d.id);
+
     // Crear un ID temporal para la tarjeta visual
     const tempId = `esp-${Date.now()}`;
+
     // Inyectar a la lista del sidebar
     reportesGenerados.value.push({
       id: tempId,
       type: 'espacializacion',
       status: 'processing',
       report_name: reportName,
-      file_format: exportFormat,
+      file_format: 'geojson',
       progress: 0,
     });
+
     // Cerrar el modal inmediatamente para no bloquear la UI
     modalEspacializarInstrucciones.value.cerrarModal();
     fuentesSeleccionadas.value = [];
+
     const payload = {
       context_id: contextID.value,
       file_ids: selectedIds,
@@ -852,10 +850,10 @@ async function generarReporte(modo) {
       entity_types:
         casillaArregloUbicaciones.value.length > 0 ? casillaArregloUbicaciones.value : undefined,
       geometry_type: geometryType,
-      focus: focusValue,
-      export_format: exportFormat,
+      custom_instructions: instruccionesAnalisis.value,
       refresh_token: data.value?.refreshToken,
     };
+
     try {
       const res = await fetch(`${config.public.iaBackendUrl}/api/localidades/detect/`, {
         method: 'POST',
@@ -865,9 +863,11 @@ async function generarReporte(modo) {
         },
         body: JSON.stringify(payload),
       });
+
       if (res.ok) {
         const responseData = await res.json();
         const elementIndex = reportesGenerados.value.findIndex((r) => r.id === tempId);
+
         if (elementIndex !== -1) {
           // Reemplazamos tempId por el id real de base de datos e iniciamos polling
           reportesGenerados.value[elementIndex].id = responseData.id;
@@ -947,16 +947,16 @@ async function generarReporte(modo) {
   modalReporteInstrucciones.value.cerrarModal();
 }
 
-async function abrirPreviewEspacializacion(reporte) {
-  previewEspacializacionData.value = reporte;
-  previewGeojsonUrl.value = reporte.download_url;
-  modalPreviewEspacializacion.value?.abrirModal();
-}
-function cerrarPreviewEspacializacion() {
-  modalPreviewEspacializacion.value?.cerrarModal();
-  previewEspacializacionData.value = null;
-  previewGeojsonUrl.value = null;
-}
+// async function abrirPreviewEspacializacion(reporte) {
+//   previewEspacializacionData.value = reporte;
+//   previewGeojsonUrl.value = reporte.download_url;
+//   modalPreviewEspacializacion.value?.abrirModal();
+// }
+// function cerrarPreviewEspacializacion() {
+//   modalPreviewEspacializacion.value?.cerrarModal();
+//   previewEspacializacionData.value = null;
+//   previewGeojsonUrl.value = null;
+// }
 
 // Función para abrir el modal que visualiza el reporte según el formato
 function abrirPreviewReporte(reporte) {
@@ -994,6 +994,56 @@ watch(
     loadChatsList();
   }
 );
+
+async function abrirPreviewEspacializacion(reporte) {
+  previewEspacializacionData.value = reporte;
+  previewGeojsonUrl.value = reporte.download_url;
+  mapInstanceKey.value += 1; // Fuerza desmontaje/remontaje de SisdaiMapa y sus capas
+  modalPreviewEspacializacion.value?.abrirModal();
+}
+
+function cerrarPreviewEspacializacion() {
+  modalPreviewEspacializacion.value?.cerrarModal();
+  previewEspacializacionData.value = null;
+  previewGeojsonUrl.value = null;
+}
+
+function pedirConfirmacionEliminar(reporte) {
+  reporteParaEliminar.value = reporte;
+  modalConfirmarEliminar.value?.abrirModal();
+}
+
+async function confirmarEliminar() {
+  const reporte = reporteParaEliminar.value;
+  if (!reporte) return;
+
+  const token = data.value?.accessToken;
+  if (!token) return;
+
+  const endpoint =
+    reporte.type === 'espacializacion'
+      ? `${config.public.iaBackendUrl}/api/localidades/${reporte.id}/delete/`
+      : `${config.public.iaBackendUrl}/api/reports/${reporte.id}/delete/`;
+
+  try {
+    const res = await fetch(endpoint, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (res.ok || res.status === 204) {
+      const idx = reportesGenerados.value.findIndex((r) => r.id === reporte.id);
+      if (idx !== -1) reportesGenerados.value.splice(idx, 1);
+    } else {
+      console.error('Error al eliminar:', res.status);
+    }
+  } catch (err) {
+    console.error('Error de red al eliminar:', err);
+  } finally {
+    modalConfirmarEliminar.value?.cerrarModal();
+    reporteParaEliminar.value = null;
+  }
+}
 
 watch(seleccionTipoReporte, (nv) => {
   if (nv === 'presentation') {
@@ -1679,213 +1729,156 @@ onMounted(() => {
 
         <SisdaiModal ref="modalEspacializarInstrucciones" class="modal-grande">
           <template #encabezado>
-            <h2>Espacializar información</h2>
+            <h2 class="m-0">Configura la espacialización</h2>
+            <p class="m-t-1 m-b-0" style="font-size: 16px">
+              Define cómo la IA debe identificar y representar las ubicaciones detectadas.
+            </p>
           </template>
 
           <template #cuerpo>
-            <p>
-              Ahora, define cómo la IA debe identificar y representar las ubicaciones detectadas.
-            </p>
-            <div class="flex">
-              <div class="columna-8">
-                <div class="fondo-color-neutro borde-redondeado-8 p-x-2 p-y-1">
-                  <div class="tarjeta-modal-espacializar">
-                    <ClientOnly>
-                      <form @submit.prevent>
-                        <fieldset class="grupo-formulario grupo-formulario-vertical">
-                          <legend>1. Selecciona los tipos de ubicaciones a identificar</legend>
+            <!-- Sección 1 -->
+            <div class="m-b-3">
+              <p style="font-weight: 600; font-size: 16px; margin-bottom: 16px">
+                Selecciona los tipos de ubicaciones a identificar
+              </p>
+              <div class="grupo-formulario flex m-x-2" style="gap: 24px; flex-wrap: wrap">
+                <span>
+                  <input
+                    id="casilla-identificadorgrupaluno"
+                    v-model="casillaArregloUbicaciones"
+                    type="checkbox"
+                    value="paises"
+                    :required="!casillaArregloUbicaciones.length"
+                  />
+                  <label for="casilla-identificadorgrupaluno"> Países </label>
+                </span>
+                <span>
+                  <input
+                    id="casilla-identificadorgrupaldos"
+                    v-model="casillaArregloUbicaciones"
+                    type="checkbox"
+                    value="estados"
+                    :required="!casillaArregloUbicaciones.length"
+                  />
+                  <label for="casilla-identificadorgrupaldos"> Estados </label>
+                </span>
+                <span>
+                  <input
+                    id="casilla-identificadorgrupaltre"
+                    v-model="casillaArregloUbicaciones"
+                    type="checkbox"
+                    value="municipios"
+                    :required="!casillaArregloUbicaciones.length"
+                  />
+                  <label for="casilla-identificadorgrupaltre"> Municipios </label>
+                </span>
+                <span>
+                  <input
+                    id="casilla-identificadorgrupalcuatro"
+                    v-model="casillaArregloUbicaciones"
+                    type="checkbox"
+                    value="localidades"
+                    :required="!casillaArregloUbicaciones.length"
+                  />
+                  <label for="casilla-identificadorgrupalcuatro"> Localidades </label>
+                </span>
+                <span>
+                  <input
+                    id="casilla-identificadorgrupalcinco"
+                    v-model="casillaArregloUbicaciones"
+                    type="checkbox"
+                    value="infraestructura"
+                    :required="!casillaArregloUbicaciones.length"
+                  />
+                  <label for="casilla-identificadorgrupalcinco"> Infraestructura </label>
+                </span>
+              </div>
+            </div>
 
-                          <div class="flex">
-                            <div class="columna-8">
-                              <div class="grupo-formulario grupo-formulario-vertical">
-                                <span>
-                                  <input
-                                    id="casilla-identificadorgrupaluno"
-                                    v-model="casillaArregloUbicaciones"
-                                    type="checkbox"
-                                    value="paises"
-                                    :required="!casillaArregloUbicaciones.length"
-                                  />
-                                  <label for="casilla-identificadorgrupaluno"> Países </label>
-                                </span>
-                                <span>
-                                  <input
-                                    id="casilla-identificadorgrupaldos"
-                                    v-model="casillaArregloUbicaciones"
-                                    type="checkbox"
-                                    value="estados"
-                                    :required="!casillaArregloUbicaciones.length"
-                                  />
-                                  <label for="casilla-identificadorgrupaldos"> Estados </label>
-                                </span>
-                                <span>
-                                  <input
-                                    id="casilla-identificadorgrupaltre"
-                                    v-model="casillaArregloUbicaciones"
-                                    type="checkbox"
-                                    value="municipios"
-                                    :required="!casillaArregloUbicaciones.length"
-                                  />
-                                  <label for="casilla-identificadorgrupaltre"> Municipios </label>
-                                </span>
-                              </div>
-                            </div>
-                            <div class="columna-8">
-                              <div class="grupo-formulario grupo-formulario-vertical">
-                                <span>
-                                  <input
-                                    id="casilla-identificadorgrupalcuatro"
-                                    v-model="casillaArregloUbicaciones"
-                                    type="checkbox"
-                                    value="localidades"
-                                    :required="!casillaArregloUbicaciones.length"
-                                  />
-                                  <label for="casilla-identificadorgrupalcuatro">
-                                    Localidades
-                                  </label>
-                                </span>
-                                <span>
-                                  <input
-                                    id="casilla-identificadorgrupalcinco"
-                                    v-model="casillaArregloUbicaciones"
-                                    type="checkbox"
-                                    value="infraestructura"
-                                    :required="!casillaArregloUbicaciones.length"
-                                  />
-                                  <label for="casilla-identificadorgrupalcinco">
-                                    Infraestructura
-                                  </label>
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        </fieldset>
-                        <p aria-live="polite" class="formulario-ayuda" role="status"></p>
-                      </form>
-                    </ClientOnly>
-                  </div>
-                </div>
-              </div>
-              <div class="columna-8">
-                <div class="fondo-color-neutro borde-redondeado-8 p-x-2 p-y-1">
-                  <div class="tarjeta-modal-espacializar">
-                    <ClientOnly>
-                      <SisdaiBotonesRadioGrupo
-                        leyenda="2. Define cómo se mostrarán las ubicaciones detectadas"
-                        es_vertical
-                      >
-                        <SisdaiBotonRadio
-                          v-model="botonRadioRepresentacion"
-                          etiqueta="Centroide"
-                          value="centroide"
-                          name="representacion"
-                          :es_obligatorio="true"
-                        />
-                        <SisdaiBotonRadio
-                          v-model="botonRadioRepresentacion"
-                          etiqueta="Geometría completa"
-                          value="geometria"
-                          name="representacion"
-                          :es_obligatorio="true"
-                        />
-                        <SisdaiBotonRadio
-                          v-model="botonRadioRepresentacion"
-                          etiqueta="Punto con nivel de confianza"
-                          value="punto"
-                          name="representacion"
-                          :es_obligatorio="true"
-                        />
-                      </SisdaiBotonesRadioGrupo>
-                    </ClientOnly>
-                  </div>
-                </div>
-              </div>
-              <div class="columna-8">
-                <div class="fondo-color-neutro borde-redondeado-8 p-x-2 p-y-1">
-                  <div class="tarjeta-modal-espacializar">
-                    <ClientOnly>
-                      <SisdaiBotonesRadioGrupo
-                        leyenda="3. Define qué debe hacer la IA cuando la ubicación no sea clara"
-                        es_vertical
-                      >
-                        <SisdaiBotonRadio
-                          v-model="botonRadioUbicacion"
-                          etiqueta="Resolver automáticamente"
-                          value="resolver_auto"
-                          name="ubicacion"
-                          :es_obligatorio="true"
-                        />
-                        <SisdaiBotonRadio
-                          v-model="botonRadioUbicacion"
-                          etiqueta="Marcar para revisión manual"
-                          value="marcar_manual"
-                          name="ubicacion"
-                          :es_obligatorio="true"
-                        />
-                      </SisdaiBotonesRadioGrupo>
-                    </ClientOnly>
-                  </div>
-                </div>
-              </div>
-              <div class="columna-8">
-                <div class="fondo-color-neutro borde-redondeado-8 p-x-2 p-y-1">
-                  <div class="tarjeta-modal-espacializar">
-                    <ClientOnly>
-                      <SisdaiBotonesRadioGrupo
-                        leyenda="4. Selecciona el formato de salida"
-                        es_vertical
-                      >
-                        <SisdaiBotonRadio
-                          v-model="botonRadioFormato"
-                          etiqueta="Mostrar como capa en el visualizador"
-                          value="capa_visualizador"
-                          name="formatosalida"
-                          :es_obligatorio="true"
-                        />
-                        <SisdaiBotonRadio
-                          v-model="botonRadioFormato"
-                          etiqueta="Guardar como capa en el catálogo"
-                          value="capa_catalogo"
-                          name="formatosalida"
-                          :es_obligatorio="true"
-                        />
-                        <SisdaiBotonRadio
-                          v-model="botonRadioFormato"
-                          etiqueta="Descargar como archivo GeoJSON"
-                          value="descargar_geojson"
-                          name="formatosalida"
-                          :es_obligatorio="true"
-                        />
-                      </SisdaiBotonesRadioGrupo>
-                    </ClientOnly>
-                  </div>
-                </div>
+            <hr style="border: none; border-top: 1px solid #d7dce2; margin-bottom: 24px" />
+
+            <!-- Sección 2 -->
+            <div class="m-b-3">
+              <ClientOnly>
+                <SisdaiBotonesRadioGrupo
+                  leyenda="Define cómo se mostrarán las ubicaciones detectadas"
+                  es_vertical
+                >
+                  <SisdaiBotonRadio
+                    v-model="botonRadioRepresentacion"
+                    etiqueta="Centroide"
+                    value="centroide"
+                    name="representacion"
+                    :es_obligatorio="true"
+                  />
+                  <SisdaiBotonRadio
+                    v-model="botonRadioRepresentacion"
+                    etiqueta="Geometría completa"
+                    value="geometria"
+                    name="representacion"
+                    :es_obligatorio="true"
+                  />
+                  <SisdaiBotonRadio
+                    v-model="botonRadioRepresentacion"
+                    etiqueta="Punto con nivel de confianza"
+                    value="punto"
+                    name="representacion"
+                    :es_obligatorio="true"
+                  />
+                </SisdaiBotonesRadioGrupo>
+              </ClientOnly>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid #d7dce2; margin-bottom: 24px" />
+
+            <!-- Sección 3 -->
+            <div>
+              <p style="font-weight: 600; font-size: 16px; margin-bottom: 4px">
+                Añade instrucciones para el análisis
+              </p>
+              <p style="font-size: 14px; margin-bottom: 16px; color: #444">
+                Puedes especificar qué elementos o palabras buscar para orientar la espacialización.
+              </p>
+
+              <textarea
+                v-model.lazy="instruccionesAnalisis"
+                class="area-texto ancho-100 p-2 borde-redondeado-4"
+                rows="4"
+                placeholder="Ej. Identifica las menciones de hospitales o centros de salud en los documentos y genera puntos en el mapa para cada ubicación encontrada."
+                style="border: 1px solid #6f7271; font-family: inherit; resize: vertical"
+              ></textarea>
+
+              <div class="mensaje-ia m-t-2" role="note">
+                <span class="pictograma-informacion" aria-hidden="true"></span>
+                <p>La IA aplicará esta instrucción sobre las fuentes seleccionadas.</p>
               </div>
             </div>
           </template>
 
           <template #pie>
-            <button
-              class="boton-primario boton-chico"
-              aria-label="Generar reporte"
-              type="button"
-              :disabled="!casillaArregloUbicaciones.length"
-              @click="generarReporte('espacializar')"
-            >
-              {{ botonGenerarReporte }}
-            </button>
-            <button
-              class="boton-secundario boton-chico"
-              aria-label="Regresar a llenar información"
-              type="button"
-              :disabled="isEspacializando"
-              @click="
-                modalEspacializarInstrucciones.cerrarModal();
-                modalReporteInfo.abrirModal();
-              "
-            >
-              Regresar
-            </button>
+            <div class="flex flex-contenido-final ancho-100">
+              <button
+                class="boton-secundario boton-chico m-r-2"
+                aria-label="Regresar a llenar información"
+                type="button"
+                :disabled="isEspacializando"
+                @click="
+                  modalEspacializarInstrucciones.cerrarModal();
+                  modalReporteInfo.abrirModal();
+                "
+              >
+                Regresar
+              </button>
+              <button
+                class="boton-primario boton-chico"
+                aria-label="Generar espacialización"
+                type="button"
+                :disabled="!casillaArregloUbicaciones.length"
+                @click="generarReporte('espacializar')"
+              >
+                Espacializar
+              </button>
+            </div>
           </template>
         </SisdaiModal>
 
@@ -2115,61 +2108,89 @@ onMounted(() => {
           </template>
         </SisdaiModal>
 
-        <SisdaiModal ref="modalPreviewEspacializacion" class="modal-grande">
+        <SisdaiModal ref="modalPreviewEspacializacion" class="modal-grande modal-espacializacion">
           <template #encabezado>
-            <h4 class="m-0">
-              {{ previewEspacializacionData?.report_name || 'Mapa espacializado' }}
-            </h4>
-            <div
-              class="flex p-2 m-t-2 borde-redondeado-8"
-              style="
-                background-color: #e3ebfb;
-                border: 1px solid #1440cc;
-                color: #1440cc;
-                align-items: flex-start;
-              "
-            >
-              <span
-                class="pictograma-informacion m-r-2"
-                aria-hidden="true"
-                style="font-size: 1.25rem; flex-shrink: 0; line-height: 1.2"
-              ></span>
-              <p class="m-0" style="font-size: 14px; font-weight: normal; line-height: 1.3">
-                Este resultado es generado mediante herramientas de IA y puede contener
-                imprecisiones; se recomienda su revisión y validación.
-              </p>
+            <div style="padding: 0 24px">
+              <h4 class="m-0">
+                {{ previewEspacializacionData?.report_name || 'Mapa espacializado' }}
+              </h4>
+
+              <div class="mensaje-ia" role="note">
+                <span class="pictograma-informacion" aria-hidden="true"></span>
+                <p>
+                  Este resultado es generado mediante herramientas de IA y puede contener
+                  imprecisiones; se recomienda su revisión y validación.
+                </p>
+              </div>
             </div>
           </template>
+
           <template #cuerpo>
             <div
               v-if="previewGeojsonUrl"
-              class="m-y-2 posicion-relativa"
+              class="posicion-relativa"
               style="
+                position: relative;
                 width: 100%;
                 height: 50vh;
                 min-height: 350px;
-                border: 1px solid var(--borde-neutro);
-                border-radius: 8px;
+                border-top: 1px solid #d7dce2;
+                border-bottom: 1px solid #d7dce2;
+                border-radius: 0;
                 overflow: hidden;
               "
             >
               <!-- Mapa -->
-              <SisdaiMapa class="gema" :vista="{ centro: [-102.5, 23.6], zoom: 4.5 }">
+              <SisdaiMapa
+                :key="mapInstanceKey"
+                class="gema"
+                :vista="{ centro: [-102.5, 23.6], zoom: 4.5 }"
+              >
                 <!-- Base grisácea clara -->
                 <SisdaiCapaXyz
                   id="capa-base"
                   url="https://{a-c}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
                 />
                 <!-- Vector sobrepuesto -->
-                <SisdaiCapaVectorial id="capa-preview-ia" :fuente="previewGeojsonUrl" />
+                <SisdaiCapaVectorial
+                  id="capa-preview-ia"
+                  :fuente="previewGeojsonUrl"
+                  :estilo="{
+                    contorno: 'white', //para poligonos
+                    relleno: '#a9435b',
+                    'circulo-radio': 4, //para puntos
+                    'circulo-relleno-color': '#a9435b',
+                    'circulo-contorno-color': 'white',
+                    'circulo-contorno-width': 1,
+                  }"
+                  :globo-informativo="
+                    (d) =>
+                      `<p><b>Información</b><br />
+                       <b>Nombre:</b> ${d['name'] || 'S/N'}<br />
+                       <b>Tipo:</b> ${d['type'] || 'S/T'}<br />
+                       <b>Contexto:</b> ${d['context'] || 'S/C'}</p>`
+                  "
+                />
+
+                <!-- Globo Informativo (Tooltips en Hover) -->
+                <GloboInformativo />
               </SisdaiMapa>
+
               <!-- Leyenda superpuesta -->
               <div
-                class="posicion-absoluta fondo-color-neutro p-3 borde-redondeado-8 sombra-1"
-                style="bottom: 16px; left: 16px; z-index: 10"
+                class="p-2 borde-redondeado-8 sombra-1"
+                style="
+                  position: absolute;
+                  bottom: 16px;
+                  left: 16px;
+                  z-index: 9999;
+                  background-color: #ffffff;
+                  pointer-events: none;
+                "
               >
                 <p class="m-0 m-b-2" style="font-weight: 600; font-size: 14px">Leyenda</p>
-                <div class="flex flex-vertical-centrado m-b-1">
+
+                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px">
                   <div
                     style="
                       width: 12px;
@@ -2177,12 +2198,13 @@ onMounted(() => {
                       border-radius: 50%;
                       background-color: #a9435b;
                       border: 1px solid white;
+                      flex-shrink: 0;
                     "
-                    class="m-r-1"
                   ></div>
-                  <span style="font-size: 12px">Ubicaciones detectadas</span>
+                  <span style="font-size: 12px; line-height: 1">Ubicaciones detectadas</span>
                 </div>
-                <div class="flex flex-vertical-centrado">
+
+                <div style="display: flex; align-items: center; gap: 6px">
                   <div
                     style="
                       width: 12px;
@@ -2190,13 +2212,14 @@ onMounted(() => {
                       border-radius: 50%;
                       background-color: #cccccc;
                       border: 1px solid white;
+                      flex-shrink: 0;
                     "
-                    class="m-r-1"
                   ></div>
-                  <span style="font-size: 12px">Baja confianza</span>
+                  <span style="font-size: 12px; line-height: 1">Baja confianza</span>
                 </div>
               </div>
             </div>
+
             <div
               v-if="!previewGeojsonUrl"
               class="flex flex-contenido-centrado flex-vertical-centrado fondo-color-neutro borde-redondeado-8 p-3 m-y-2"
@@ -2474,7 +2497,7 @@ onMounted(() => {
                 </p>
               </div>
 
-              <div>
+              <div class="flex" style="gap: 2px; flex-shrink: 0">
                 <a
                   :href="reporte.download_url"
                   target="_blank"
@@ -2483,6 +2506,14 @@ onMounted(() => {
                 >
                   <span class="pictograma-archivo-descargar" aria-hidden="true" />
                 </a>
+                <button
+                  class="boton-pictograma boton-sin-contenedor-secundario"
+                  :aria-label="`Eliminar ${reporte.type === 'espacializacion' ? 'espacialización' : 'reporte'}`"
+                  type="button"
+                  @click.stop="pedirConfirmacionEliminar(reporte)"
+                >
+                  <span class="pictograma-eliminar" aria-hidden="true" />
+                </button>
               </div>
             </div>
 
@@ -2493,6 +2524,34 @@ onMounted(() => {
             </div>
           </div>
         </div>
+        <!-- Modal confirmación de eliminación -->
+        <SisdaiModal ref="modalConfirmarEliminar">
+          <template #encabezado>
+            <h2 class="m-0">Eliminar elemento</h2>
+          </template>
+          <template #cuerpo>
+            <p>
+              ¿Deseas eliminar
+              <strong>{{ reporteParaEliminar?.report_name }}</strong
+              >? Esta acción no se puede deshacer.
+            </p>
+          </template>
+          <template #pie>
+            <button class="boton-primario boton-chico" type="button" @click="confirmarEliminar">
+              Eliminar
+            </button>
+            <button
+              class="boton-secundario boton-chico"
+              type="button"
+              @click="
+                modalConfirmarEliminar.cerrarModal();
+                reporteParaEliminar = null;
+              "
+            >
+              Cancelar
+            </button>
+          </template>
+        </SisdaiModal>
       </div>
     </template>
   </IaLayoutPaneles>
@@ -2806,5 +2865,67 @@ input[type='file'] {
   border: solid white;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
+}
+
+/* Fix CSS para el Globo Informativo de Sisdai (Aparecía invisible al estar en el slot) */
+:deep(.globo-informacion-capa) {
+  position: absolute;
+  z-index: 1000;
+  display: block;
+  visibility: visible;
+  pointer-events: none;
+}
+:deep(.globo-informacion-capa.oculto) {
+  visibility: hidden;
+}
+:deep(.globo-informacion-cuerpo) {
+  background: #333333;
+  border-radius: 8px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+  padding: 8px 12px;
+  color: white;
+  font-size: 12px;
+  max-width: 280px;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+/* Permitir que el mapa espacializado ocupe el 100% del ancho del modal sin márgenes */
+:deep(.modal-espacializacion .modal-contenedor) {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  padding-bottom: 0 !important;
+}
+:deep(.modal.modal-espacializacion .modal-cuerpo) {
+  padding: 0 !important;
+}
+:deep(.modal-espacializacion .modal-pie) {
+  padding: 0 24px 24px 24px !important;
+}
+
+.mensaje-ia {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 8px;
+
+  background-color: #e3ebfb;
+  border: 1px solid #1440cc;
+  color: #1440cc;
+  margin-top: 15px;
+
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.mensaje-ia p {
+  margin: 0;
+}
+
+.mensaje-ia .pictograma-informacion {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  line-height: 1.2;
 }
 </style>
