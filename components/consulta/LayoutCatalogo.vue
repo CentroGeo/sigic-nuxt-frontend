@@ -259,11 +259,6 @@ onMounted(async () => {
   if (resources.value.length !== 0) {
     updateResources(resources.value);
   }
-
-  console.log(`${config.public.geonodeApi}/resources/`);
-  //const dataB = await gnoxyFetch(`${config.public.geonodeApi}/resources/`);
-  //const resourcesB = await data.json();
-  //console.log(resourcesB);
 });
 </script>
 
