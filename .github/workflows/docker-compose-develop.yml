@@ -67,7 +67,7 @@ jobs:
             echo "NUXT_PUBLIC_BASE_URL=https://sigic.geoint.mx" >> "$GITHUB_OUTPUT"
           else            
             echo "NUXT_PUBLIC_BASE_URL=https://sigic.dev.geoint.mx" >> "$GITHUB_OUTPUT"
-          fi          
+          fi
 
       - name: Build & tag Docker image
         run: |
