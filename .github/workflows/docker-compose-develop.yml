@@ -62,13 +62,12 @@ jobs:
       - name: Set environment
         id: env
         run: |
+          echo "NODE_ENV=production" >> "$GITHUB_OUTPUT"
           if [ "${{ github.ref_name }}" = "main" ]; then
-            echo "NODE_ENV=production" >> "$GITHUB_OUTPUT"
             echo "NUXT_PUBLIC_BASE_URL=https://sigic.geoint.mx" >> "$GITHUB_OUTPUT"
-          else
-            echo "NODE_ENV=production" >> "$GITHUB_OUTPUT"
+          else            
             echo "NUXT_PUBLIC_BASE_URL=https://sigic.dev.geoint.mx" >> "$GITHUB_OUTPUT"
-          fi
+          fi          
 
       - name: Build & tag Docker image
         run: |
@@ -77,7 +76,7 @@ jobs:
             --build-arg NUXT_APP_BASE_URL=${{ steps.env.outputs.NUXT_APP_BASE_URL }} \
             --build-arg NUXT_PUBLIC_AUTH_BASE_URL=${{ steps.env.outputs.NUXT_PUBLIC_AUTH_BASE_URL }} \
             --build-arg NUXT_PUBLIC_BASE_URL=${{ steps.env.outputs.NUXT_PUBLIC_BASE_URL }} \
-            --build-arg NUXT_PUBLIC_LEVANTAMIENTO_URL=${{ steps.env.outputs.NUXT_PUBLIC_LEVANTAMIENTO_URL }} \
+            --build-arg NUXT_PUBLIC_LEVANTAMIENTO_URL=${{ vars.NUXT_PUBLIC_LEVANTAMIENTO_URL }} \
             -t ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.branch }} \
             -t ghcr.io/${{ steps.vars.outputs.owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.sha }} \
             -f Dockerfile .
