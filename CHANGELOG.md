@@ -7,6 +7,15 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.15.3] - 20-03-2026
+
+### Fixed (Arreglado)
+
+- Se hicieron ajustes en los tamaños del contenedor del mapa en el modal de previsualización para que el scroll vertical afecte únicamente al mapa.
+- Se habilitó el botón de descarga en el modal de previsualización de tablas en la revisión para publicación de capas geográficas.
+- Se corrigieron los filtros de la sección de Mis Revisiones para corregir un bug que hacía que no aparecieran los recursos debidos.
+- Se agregó lógica condicional en el modal de Agregar a mis solicitudes para mostrar una alerta en caso de que falle la petición.
+
 ## [0.15.2] - 10-03-2026
 
 ### Fixed (Arreglado)
@@ -328,6 +337,7 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.15.3]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.2...v0.15.3
 [0.15.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.1...v0.15.2
 [0.15.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.0...v0.15.1
 [0.15.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.14.2...v0.15.0
