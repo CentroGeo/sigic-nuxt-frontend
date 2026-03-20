@@ -292,6 +292,10 @@ onMounted(async () => {
               ref="tablaChild"
               :key="`tabla_${resourceElement.pk}_${'dataLayer'}`"
               :selected-element="resourceElement"
+              @notify-download="
+                tablaChild.cerrarModalTabla();
+                downloadOneChild.abrirModalDescarga();
+              "
             />
 
             <!-- Modal opacidad -->
