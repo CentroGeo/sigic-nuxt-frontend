@@ -195,8 +195,3 @@ onMounted(async () => {
     </template>
   </UiLayoutPaneles>
 </template>
-<style scoped>
-.h3 {
-  background-color: pink;
-}
-</style>

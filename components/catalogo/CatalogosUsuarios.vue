@@ -304,7 +304,12 @@ onMounted(async () => {
               </nuxt-link>
             </td>
             <td>
-              <a :href="harvester.remote_url" target="_blank" rel="noopener noreferrer">
+              <a
+                :href="harvester.remote_url"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="break-url"
+              >
                 {{ harvester.remote_url }}
               </a>
             </td>
@@ -336,5 +341,9 @@ onMounted(async () => {
   background-color: var(--fondo-acento);
   gap: 8px;
   padding: 16px;
+}
+.break-url {
+  word-break: break-all !important;
+  display: inline-block !important;
 }
 </style>
