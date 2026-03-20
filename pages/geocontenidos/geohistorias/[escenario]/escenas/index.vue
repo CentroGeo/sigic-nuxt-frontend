@@ -121,10 +121,13 @@ function Eliminar(id) {
             </div>
 
             <div class="tarjeta-pie flex">
-              <button class="boton boton-chico boton-secundario m-t-3">
+              <NuxtLink
+                class="boton boton-chico boton-secundario m-t-3"
+                :to="`/geocontenidos/geohistorias/${escenario}/escenas/${escena.id}/capas`"
+              >
                 <span class="pictograma-agregar m-r-1" />
                 Agregar capas
-              </button>
+              </NuxtLink>
 
               <button class="boton boton-chico boton-secundario">
                 <span class="pictograma-agregar m-r-1" />

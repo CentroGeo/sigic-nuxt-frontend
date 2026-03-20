@@ -18,10 +18,10 @@ defineEmits(['alClickTab']);
     }"
   >
     <button
-      v-for="(value, idx) in tabs"
-      :key="value.id"
+      v-for="({ id }, idx) in tabs"
+      :key="id"
       class="button-tab fondo-color-primario"
-      @click="() => $emit('alClickTab', value.id)"
+      @click="() => $emit('alClickTab', id)"
     >
       {{ idx + 1 }}
     </button>

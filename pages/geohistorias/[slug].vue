@@ -61,8 +61,8 @@ async function cargarEscena(escenaId) {
           class="borde-r borde-color-secundario"
           :style="`width: ${escenario?.scenes_layout_styles.text_panel}%;`"
         >
+          <h1>{{ escena.name }}</h1>
           <div v-html="escena.text_content" />
-
           <!-- <div>Paginador</div> -->
         </div>
 
@@ -85,8 +85,8 @@ async function cargarEscena(escenaId) {
           class="borde-l borde-color-secundario"
           :style="`width: ${escenario?.scenes_layout_styles.text_panel}%;`"
         >
+          <h1>{{ escena.name }}</h1>
           <div v-html="escena.text_content" />
-
           <!-- <div>Paginador</div> -->
         </div>
       </div>
