@@ -14,6 +14,7 @@ const selectedPkRequest = route.query.pk_request;
 const selectedResourceType = route.query.resource_type;
 const processingRequest = ref(false);
 const acceptingFailed = ref(false);
+const owningProcessFailed = ref(false);
 
 const previousPath = computed(() => storeCatalogo.previousPath || '');
 
@@ -104,6 +105,7 @@ async function noAceptarSolicitud() {
 }
 
 async function agregarAMisSolicitudes() {
+  owningProcessFailed.value = false;
   try {
     // petición para agregar la solicitud a Mis revisiones
     const response = await $fetch(`${configEnv.public.basePath}/api/solicitudes`, {
@@ -115,11 +117,11 @@ async function agregarAMisSolicitudes() {
         rejection_reason: 'En revisión.', // no se puede quedar vacío ''
       },
     });
-    console.warn(response);
-    if (response !== undefined) {
+    if (response !== undefined && response !== 'Error') {
       modalAgregar.value.cerrarModal();
-      // ir a Mis revisiones
       await navigateTo('/catalogo/revision-solicitudes/mis-revisiones');
+    } else {
+      owningProcessFailed.value = true;
     }
   } catch (error) {
     console.error(error);
@@ -215,10 +217,20 @@ onMounted(() => {
         <SisdaiModal ref="modalAgregar">
           <template #encabezado> <h2>Agregar a mi revisión</h2> </template>
           <template #cuerpo>
-            <p>
+            <p v-if="!owningProcessFailed">
               ¿Deseas añadir este documento a tu revisión? Al hacerlo, quedará reservado para ti y
               no podrá ser revisado por otras personas hasta que lo liberes o completes el proceso.
             </p>
+
+            <div
+              v-if="owningProcessFailed"
+              class="fondo-color-error flex flex-contenido-centrado ancho-lectura borde-redondeado-8 sin-seleccion"
+            >
+              <p class="texto-color-error m-2">
+                No pudimos completar la solicitud. Revisa tu conexión a internet e intentalo de
+                nuevo más tarde.
+              </p>
+            </div>
           </template>
           <template #pie>
             <button
@@ -229,6 +241,7 @@ onMounted(() => {
               Cancelar
             </button>
             <button
+              v-if="!owningProcessFailed"
               class="boton-primario boton-chico"
               type="button"
               @click="agregarAMisSolicitudes"

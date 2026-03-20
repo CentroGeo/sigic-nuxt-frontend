@@ -5,7 +5,6 @@ export default defineEventHandler(async (event) => {
   const pk = body.pk;
   const baseUrl = configEnv.public.geonodeUrl;
   const headers = { Authorization: `Bearer ${body.token}`, 'Content-Type': 'application/json' };
-
   try {
     const response = await fetch(`${baseUrl}/sigic/requests/${pk}`, {
       method: 'PATCH',
