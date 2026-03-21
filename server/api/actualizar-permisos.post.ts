@@ -5,7 +5,6 @@ export default defineEventHandler(async (event) => {
   const pk = data.pk;
   const token = getHeader(event, 'token');
   const url = `${config.public.geonodeApi}/resources/${pk}/permissions/`;
-  console.log(url);
   try {
     const updatePermissionReq = await fetch(url, {
       method: 'PATCH',

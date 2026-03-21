@@ -15,3 +15,11 @@ export function formatDate(date) {
   const formattedDate = formatter.value.format(date);
   return `${formattedDate} ${formattedTime}`;
 }
+
+export function tieneRolAdministrador(accessToken) {
+  const role = 'levantamiento-admin';
+  if (!accessToken) return false;
+
+  const decoded = JSON.parse(atob(accessToken.split('.')[1]));
+  return decoded?.realm_access?.roles?.includes(role);
+}

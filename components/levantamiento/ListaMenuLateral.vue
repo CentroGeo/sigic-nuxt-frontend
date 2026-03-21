@@ -1,7 +1,10 @@
 <script setup>
+import { tieneRolAdministrador } from '~/utils/levantamiento';
+
 const route = useRoute();
 const { data } = useAuth();
 const storeLevantamiento = useLevantamientoStore();
+const esAdministradorLevantamiento = computed(() => tieneRolAdministrador(data.value?.accessToken));
 
 onMounted(async () => {
   await storeLevantamiento.obtenerEsRevisor(data.value?.user.email);
@@ -46,18 +49,42 @@ onMounted(async () => {
         </li>
       </ul>
       <ul
-        v-if="storeLevantamiento.esRevisor"
+        v-if="storeLevantamiento.esRevisor || esAdministradorLevantamiento"
         class="lista-subpagina"
-        :class="{ revisor: storeLevantamiento.esRevisor }"
+        :class="{ revisor: storeLevantamiento.esRevisor || esAdministradorLevantamiento }"
       >
-        <li>
-          <nuxt-link to="/levantamiento/revision-proyectos">Revisión de proyectos</nuxt-link>
+        <li v-if="esAdministradorLevantamiento">
+          <nuxt-link
+            :class="{
+              ['router-link-active router-link-exact-active']: route.path.includes(
+                '/levantamiento/revision-proyectos'
+              ),
+            }"
+            to="/levantamiento/revision-proyectos"
+            >Revisión de proyectos</nuxt-link
+          >
         </li>
         <li>
-          <nuxt-link to="/levantamiento/revision-aportes">Revisión de aportes</nuxt-link>
+          <nuxt-link
+            :class="{
+              ['router-link-active router-link-exact-active']: route.path.includes(
+                '/levantamiento/revision-aportes'
+              ),
+            }"
+            to="/levantamiento/revision-aportes"
+            >Revisión de aportes</nuxt-link
+          >
         </li>
         <li>
-          <nuxt-link to="/levantamiento/revision-descargas">Revisión de descargar</nuxt-link>
+          <nuxt-link
+            :class="{
+              ['router-link-active router-link-exact-active']: route.path.includes(
+                '/levantamiento/revision-descargas'
+              ),
+            }"
+            to="/levantamiento/revision-descargas"
+            >Revisión de descargar</nuxt-link
+          >
         </li>
       </ul>
     </div>

@@ -7,6 +7,36 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.15.3] - 20-03-2026
+
+### Fixed (Arreglado)
+
+- Se hicieron ajustes en los tamaños del contenedor del mapa en el modal de previsualización para que el scroll vertical afecte únicamente al mapa.
+- Se habilitó el botón de descarga en el modal de previsualización de tablas en la revisión para publicación de capas geográficas.
+- Se corrigieron los filtros de la sección de Mis Revisiones para corregir un bug que hacía que no aparecieran los recursos debidos.
+- Se agregó lógica condicional en el modal de Agregar a mis solicitudes para mostrar una alerta en caso de que falle la petición.
+
+## [0.15.2] - 10-03-2026
+
+### Fixed (Arreglado)
+
+- Se invirtió el orden en el que se hacen las solicitudes de publicación de recursos y permisos. Ahora primero se publican y luego se actualizan los permisos.
+- Se resolvió un pequeño bug en la edición de metadatos que tenía que ver con la ocasional aparición de mayúsculas en el campo de date_type.
+- Se resolvió un bug en el modal de revisión de metadatos que tenía que ver con intentar obtener los atributos de un documento.
+
+## [0.15.1] - 05-03-2026
+
+### Fixed (Arreglado)
+
+- Se crearon dos propiedades computadas con lo que se modifica la forma de distinguir las capas arcgis de las capas ows en el visor de capas.
+- Se modificó la forma en la que se pasa el servidor de origen al componente SisdaiLeyendaWMS para eliminar un doble signo de interrogación que evitaba que se mostrara la leyenda.
+
+## [0.15.0] - 02-03-2026
+
+### Agregado (Added)
+
+- Se agregó la revisión de proyectos en la sección de levantamiento.
+
 ## [0.14.2] - 02-03-2026
 
 ### Fixed (Arreglado)
@@ -307,6 +337,11 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.15.3]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.2...v0.15.3
+[0.15.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.1...v0.15.2
+[0.15.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.0...v0.15.1
+[0.15.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.14.2...v0.15.0
+[0.14.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.14.1...v0.14.2
 [0.14.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.14.0...v0.14.1
 [0.14.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.4...v0.13.0

@@ -239,7 +239,7 @@ onMounted(async () => {
                     <SisdaiLeyendaWms
                       v-if="serverType === 'ogc'"
                       :consulta="gnoxyFetch"
-                      :fuente="findServer(resourceElement)"
+                      :fuente="findServer(resourceElement).replace('?', '')"
                       :nombre="resourceElement.alternate"
                       :titulo="resourceElement.title || 'cargando...'"
                       :estilo="selectedStyle"
@@ -292,6 +292,10 @@ onMounted(async () => {
               ref="tablaChild"
               :key="`tabla_${resourceElement.pk}_${'dataLayer'}`"
               :selected-element="resourceElement"
+              @notify-download="
+                tablaChild.cerrarModalTabla();
+                downloadOneChild.abrirModalDescarga();
+              "
             />
 
             <!-- Modal opacidad -->
