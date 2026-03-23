@@ -630,8 +630,15 @@ const reportesGenerados = ref([]); // Lista reactiva de reportes en sesión actu
 const isEspacializando = ref(false); // Estado de carga para el modal de espacializar
 
 const pollStatus = async (itemId, type = 'reporte') => {
-  const endpoint =
-    type === 'espacializacion' ? `/api/localidades/${itemId}/` : `/api/reports/${itemId}/`;
+  let endpoint = '';
+
+  if (type === 'espacializacion') {
+    endpoint = `/api/localidades/${itemId}/`;
+  } else if (type === 'geospatial') {
+    endpoint = `/api/geospatial/${itemId}`;
+  } else {
+    endpoint = `/api/reports/${itemId}/`;
+  }
   let failedAttempts = 0; // Circuito preventivo para loops infinitos
 
   const interval = setInterval(async () => {
@@ -728,6 +735,17 @@ const fetchInitialReports = async () => {
       }
     );
 
+    const resGeoSpatial = await fetch(
+      `${config.public.iaBackendUrl}/api/geospatial/?context_id=${contextID.value}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${data.value.accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
     let combined = [];
     if (resReports.ok) {
       const reports = await resReports.json();
@@ -746,6 +764,16 @@ const fetchInitialReports = async () => {
           file_format: s.export_format,
           type: 'espacializacion',
           progress: s.progress || 0,
+        }))
+      );
+    }
+
+    if (resGeoSpatial.ok) {
+      const spatial = await resGeoSpatial.json();
+      combined = combined.concat(
+        spatial.map((s) => ({
+          ...s,
+          type: 'geospatial',
         }))
       );
     }
@@ -797,6 +825,7 @@ async function generarReporte(modo) {
           status: data.status,
           report_name: payload.report_name,
           file_format: payload.file_format,
+          type: 'report',
         });
 
         // Start polling for this specific task
@@ -929,10 +958,11 @@ async function generarReporte(modo) {
           status: data.status,
           report_name: payload.report_name,
           file_format: payload.file_format,
+          type: 'geospatial',
         });
-        console.log('DATA!!!', data);
+
         // Start polling for this specific task
-        pollStatus(data.report_id);
+        pollStatus(data.report_id, 'geospatial');
       } else {
         const errorData = await res.json();
         console.error('Error en la operación geoespacial:', errorData);
@@ -2476,7 +2506,7 @@ onMounted(() => {
                 class="flex cursor-pointer hover-texto-acento"
                 style="cursor: pointer"
                 @click="
-                  reporte.type !== 'espacializacion'
+                  reporte.type === 'reporte'
                     ? abrirPreviewReporte(reporte)
                     : abrirPreviewEspacializacion(reporte)
                 "
