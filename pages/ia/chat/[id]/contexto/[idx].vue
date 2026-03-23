@@ -76,6 +76,58 @@ const chatId = computed(() => parseInt(route.params.id) || 0);
 const contextID = computed(() => parseInt(route.params.idx));
 const chatID = ref(0);
 
+const estiloCapaPreview = computed(() => {
+  const isDensidad = previewEspacializacionData.value?.report_type === 'densidad';
+
+  if (isDensidad) {
+    return {
+      contorno: 'gris',
+      categorias: {
+        atributo: 'density_quintile',
+        estilo: {
+          'Muy Alta': { relleno: 'rgb(198, 51, 42)' },
+          Alta: { relleno: 'rgb(241, 176, 110)' },
+          Media: { relleno: 'rgb(255, 240, 60)' },
+          Baja: { relleno: 'rgb(177, 215, 120)' },
+          'Muy Baja': { relleno: 'rgb(72, 146, 75)' },
+        },
+      },
+    };
+  }
+
+  return {
+    contorno: 'white',
+    relleno: '#a9435b',
+    'circulo-radio': 4,
+    'circulo-relleno-color': '#a9435b',
+    'circulo-contorno-color': 'white',
+    'circulo-contorno-width': 1,
+  };
+});
+
+const obtenerGloboInformativo = (d) => {
+  const isDensidad = previewEspacializacionData.value?.report_type === 'densidad';
+
+  if (isDensidad) {
+    return `<p><b>Información de Densidad</b><br />
+            <b>Nombre:</b> ${d['name'] || 'S/N'}<br />
+            <b>Densidad:</b> ${d['density_quintile'] || 'S/F'}</p>`;
+  }
+
+  return `<p><b>Información</b><br />
+          <b>Nombre:</b> ${d['name'] || 'S/N'}<br />
+          <b>Tipo:</b> ${d['type'] || 'S/T'}<br />
+          <b>Contexto:</b> ${d['context'] || 'S/C'}</p>`;
+};
+
+const categoriasLeyendaDensidad = [
+  { nombre: 'Muy Alta', color: 'rgb(198, 51, 42)' },
+  { nombre: 'Alta', color: 'rgb(241, 176, 110)' },
+  { nombre: 'Media', color: 'rgb(255, 240, 60)' },
+  { nombre: 'Baja', color: 'rgb(177, 215, 120)' },
+  { nombre: 'Muy Baja', color: 'rgb(72, 146, 75)' },
+];
+
 // datos para generar reportes
 const modalPreviewReporte = ref(null);
 const previewReporte = ref(null);
@@ -2185,21 +2237,8 @@ onMounted(() => {
                 <SisdaiCapaVectorial
                   id="capa-preview-ia"
                   :fuente="previewGeojsonUrl"
-                  :estilo="{
-                    contorno: 'white', //para poligonos
-                    relleno: '#a9435b',
-                    'circulo-radio': 4, //para puntos
-                    'circulo-relleno-color': '#a9435b',
-                    'circulo-contorno-color': 'white',
-                    'circulo-contorno-width': 1,
-                  }"
-                  :globo-informativo="
-                    (d) =>
-                      `<p><b>Información</b><br />
-                       <b>Nombre:</b> ${d['name'] || 'S/N'}<br />
-                       <b>Tipo:</b> ${d['type'] || 'S/T'}<br />
-                       <b>Contexto:</b> ${d['context'] || 'S/C'}</p>`
-                  "
+                  :estilo="estiloCapaPreview"
+                  :globo-informativo="obtenerGloboInformativo"
                 />
 
                 <!-- Globo Informativo (Tooltips en Hover) -->
@@ -2220,33 +2259,48 @@ onMounted(() => {
               >
                 <p class="m-0 m-b-2" style="font-weight: 600; font-size: 14px">Leyenda</p>
 
-                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px">
+                <template v-if="previewEspacializacionData?.report_type === 'densidad'">
                   <div
-                    style="
-                      width: 12px;
-                      height: 12px;
-                      border-radius: 50%;
-                      background-color: #a9435b;
-                      border: 1px solid white;
-                      flex-shrink: 0;
-                    "
-                  ></div>
-                  <span style="font-size: 12px; line-height: 1">Ubicaciones detectadas</span>
-                </div>
+                    v-for="cat in categoriasLeyendaDensidad"
+                    :key="cat.nombre"
+                    style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px"
+                  >
+                    <div
+                      :style="`width: 12px; height: 12px; border-radius: 50%; background-color: ${cat.color}; border: 1px solid white; flex-shrink: 0;`"
+                    ></div>
+                    <span style="font-size: 11px; line-height: 1">{{ cat.nombre }}</span>
+                  </div>
+                </template>
 
-                <div style="display: flex; align-items: center; gap: 6px">
-                  <div
-                    style="
-                      width: 12px;
-                      height: 12px;
-                      border-radius: 50%;
-                      background-color: #cccccc;
-                      border: 1px solid white;
-                      flex-shrink: 0;
-                    "
-                  ></div>
-                  <span style="font-size: 12px; line-height: 1">Baja confianza</span>
-                </div>
+                <template v-else>
+                  <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px">
+                    <div
+                      style="
+                        width: 12px;
+                        height: 12px;
+                        border-radius: 50%;
+                        background-color: #a9435b;
+                        border: 1px solid white;
+                        flex-shrink: 0;
+                      "
+                    ></div>
+                    <span style="font-size: 12px; line-height: 1">Ubicaciones detectadas</span>
+                  </div>
+
+                  <div style="display: flex; align-items: center; gap: 6px">
+                    <div
+                      style="
+                        width: 12px;
+                        height: 12px;
+                        border-radius: 50%;
+                        background-color: #cccccc;
+                        border: 1px solid white;
+                        flex-shrink: 0;
+                      "
+                    ></div>
+                    <span style="font-size: 12px; line-height: 1">Baja confianza</span>
+                  </div>
+                </template>
               </div>
             </div>
 
