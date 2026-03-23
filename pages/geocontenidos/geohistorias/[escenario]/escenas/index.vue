@@ -120,9 +120,17 @@ function Eliminar(id) {
               </button>
             </div>
 
-            <div class="tarjeta-pie flex">
+            <div class="tarjeta-pie flex m-t-3">
               <NuxtLink
-                class="boton boton-chico boton-secundario m-t-3"
+                class="boton boton-chico boton-secundario"
+                :to="`/geocontenidos/geohistorias/${escenario}/escenas/${escena.id}/editar`"
+              >
+                <span class="pictograma-editar m-r-1" />
+                Editar escena
+              </NuxtLink>
+
+              <NuxtLink
+                class="boton boton-chico boton-secundario"
                 :to="`/geocontenidos/geohistorias/${escenario}/escenas/${escena.id}/capas`"
               >
                 <span class="pictograma-agregar m-r-1" />
@@ -133,14 +141,6 @@ function Eliminar(id) {
                 <span class="pictograma-agregar m-r-1" />
                 Agregar marcadores
               </button>
-
-              <NuxtLink
-                class="boton boton-chico boton-secundario"
-                :to="`/geocontenidos/geohistorias/${escenario}/escenas/${escena.id}/editar`"
-              >
-                <span class="pictograma-editar m-r-1" />
-                Editar escena
-              </NuxtLink>
 
               <button class="boton boton-chico boton-primario" @click="Eliminar(escena.id)">
                 <span class="pictograma-eliminar m-r-1" />

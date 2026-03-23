@@ -19,7 +19,7 @@ defineEmits(['alClickTab']);
   >
     <button
       v-for="({ id }, idx) in tabs"
-      :key="id"
+      :key="`menu-tab-opcion-${id}`"
       class="button-tab fondo-color-primario"
       @click="() => $emit('alClickTab', id)"
     >

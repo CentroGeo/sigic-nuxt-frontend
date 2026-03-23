@@ -81,7 +81,7 @@ function formatearFecha(fecha) {
 
             <NuxtLink
               class="boton boton-chico boton-secundario"
-              :to="`/geohistorias/${escenario.id}`"
+              :to="`/geohistorias/${escenario.id}/`"
               target="_blank"
             >
               <span class="pictograma-ojo-ver m-r-1" />

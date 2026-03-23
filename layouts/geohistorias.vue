@@ -12,7 +12,7 @@ const accesibilidadStore = useAccesibilidadStore();
     <a href="#principal" class="ir-contenido-principal">Ir a contenido principal</a>
     <SisdaiNavegacionGobMx />
 
-    <div class="contenido">
+    <div class="contenido vista-geohistorias">
       <slot />
     </div>
 
@@ -22,3 +22,9 @@ const accesibilidadStore = useAccesibilidadStore();
     <SisdaiPiePaginaGobMx />
   </div>
 </template>
+
+<style lang="scss" scoped>
+.vista-geohistorias {
+  min-height: calc(100vh - 51px);
+}
+</style>
