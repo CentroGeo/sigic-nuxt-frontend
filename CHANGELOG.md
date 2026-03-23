@@ -7,6 +7,12 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.15.4] - 21-03-2026
+
+### Fixed (Arreglado)
+
+- La función cerrarSesion ahora construye el post_logout_redirect_uri utilizando baseURL y basePath desde config.public, asegurando que los usuarios sean redirigidos a la ubicación correcta después de cerrar sesión en Keycloak.
+
 ## [0.15.3] - 20-03-2026
 
 ### Fixed (Arreglado)
@@ -337,6 +343,7 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.15.4]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.3...v0.15.4
 [0.15.3]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.2...v0.15.3
 [0.15.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.1...v0.15.2
 [0.15.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.0...v0.15.1
