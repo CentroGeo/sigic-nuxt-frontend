@@ -8,10 +8,10 @@ const props = defineProps({
     type: String,
     default: '',
   },
-  // mensajeCarga: {
-  //   type: String,
-  //   default: 'Guardando...',
-  // },
+  permitirCerrar: {
+    type: Boolean,
+    default: true,
+  },
   pictograma: {
     type: String,
     default: 'aprobado',
@@ -49,7 +49,11 @@ watch(modal, iniciar);
 
 <template>
   <ClientOnly>
-    <GeocontenidosSisdaiModal ref="modal" class="geocontenidos-modal" :permitir-cerrar="false">
+    <GeocontenidosSisdaiModal
+      ref="modal"
+      class="geocontenidos-modal"
+      :permitir-cerrar="permitirCerrar"
+    >
       <template #encabezado>
         <h1 class="m-1">{{ titulo }}</h1>
       </template>
@@ -66,6 +70,17 @@ watch(modal, iniciar);
     </GeocontenidosSisdaiModal>
   </ClientOnly>
 </template>
+
+<script>
+export const valoresPorDefecto = {
+  cargando: false,
+  mensaje: '',
+  permitirCerrar: false,
+  pictograma: 'aprobado',
+  visible: false,
+  titulo: '',
+};
+</script>
 
 <style lang="scss">
 .geocontenidos-modal {
