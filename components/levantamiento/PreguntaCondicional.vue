@@ -75,6 +75,36 @@ function handleChangeRadio(e) {
   const optSelected = props.pregunta.opciones.find((opt) => opt.opcion === selected);
   opcionSeleccionada.value = optSelected;
 }
+
+function actualizarRespuesta(valor) {
+  emit('update:pregunta', { ...props.pregunta, respuesta: valor });
+}
+
+function actualizarSubRespuesta(valor) {
+  const indiceOpcion = props.pregunta.opciones.findIndex(
+    (opt) => opt.opcion === props.pregunta.respuesta
+  );
+
+  if (indiceOpcion === -1) return;
+
+  const nuevasOpciones = [...props.pregunta.opciones];
+  const opcionActual = nuevasOpciones[indiceOpcion];
+
+  nuevasOpciones[indiceOpcion] = {
+    ...opcionActual,
+    subpregunta: {
+      ...opcionActual.subpregunta,
+      respuesta: valor,
+    },
+  };
+
+  emit('update:pregunta', {
+    ...props.pregunta,
+    opciones: nuevasOpciones,
+  });
+
+  opcionSeleccionada.value = nuevasOpciones[indiceOpcion];
+}
 </script>
 
 <template>
@@ -228,7 +258,9 @@ function handleChangeRadio(e) {
             :value="opcion.opcion"
             :name="`opcion-preg-${indice}`"
             :autofocus="false"
+            :model-value="props.pregunta.respuesta"
             @change="handleChangeRadio"
+            @update:model-value="(valor) => actualizarRespuesta(valor)"
           />
         </SisdaiBotonesRadioGrupo>
         <p class="borde-b borde-color-secundario m-y-2" />
@@ -244,6 +276,8 @@ function handleChangeRadio(e) {
             ejemplo="Responde la pregunta"
             :es_etiqueta_visible="false"
             :autofocus="false"
+            :model-value="opcionSeleccionada.subpregunta.respuesta"
+            @update:model-value="(valor) => actualizarSubRespuesta(valor)"
           />
         </div>
         <div v-if="opcionSeleccionada.tipoCondicion === 'opcion'">

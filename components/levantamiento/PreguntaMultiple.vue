@@ -58,8 +58,6 @@ function actualizarRespuesta(valor, opcion) {
     respuestaActual = respuestaActual.filter((item) => item !== opcion);
   }
 
-  console.log(respuestaActual);
-
   emit('update:pregunta', {
     ...props.pregunta,
     respuesta: respuestaActual,

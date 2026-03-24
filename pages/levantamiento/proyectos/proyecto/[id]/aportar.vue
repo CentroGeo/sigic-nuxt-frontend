@@ -195,6 +195,7 @@ function guardarBorrador() {
                     :pregunta="pregunta"
                     :es-edicion="false"
                     :indice="index"
+                    @update:pregunta="preguntas[index] = $event"
                   />
                   <levantamiento-pregunta-multimedia
                     v-if="pregunta.tipo === 'multimedia'"
