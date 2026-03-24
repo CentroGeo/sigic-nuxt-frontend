@@ -28,7 +28,6 @@ async function fetchRemoteResources() {
     const serviceUrl = `${config.public.geonodeApi}/sigic-remote-datasets/?harvester_id=${selectedId}`;
     const datasetRequest = await gnoxyFetch(serviceUrl);
     if (!datasetRequest.ok) {
-      //const error = await requestRemotes.json();
       console.error('Falló petición de harvesters:');
       fetchStatus.value = 'failed';
     } else {

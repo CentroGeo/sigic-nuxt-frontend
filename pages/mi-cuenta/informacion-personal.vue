@@ -310,7 +310,7 @@ async function updateInfo() {
       body[key] = userInfo.value[key];
     }
   }
-  const response = await $fetch('/api/info-personal', {
+  const response = await $fetch(`${config.public.basePath}/api/info-personal`, {
     method: 'POST',
     headers: { token: token },
     body: body,
@@ -338,7 +338,7 @@ async function guardarImagen(files) {
     formData.append('token', data.value?.accessToken);
     formData.append('image', files[0]);
 
-    const response = await fetch('/api/update-avatar/', {
+    const response = await fetch(`${config.public.basePath}/api/update-avatar/`, {
       method: 'POST',
       body: formData,
     });

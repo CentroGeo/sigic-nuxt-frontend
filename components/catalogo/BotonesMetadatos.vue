@@ -22,6 +22,7 @@ const props = defineProps({
   },
 });
 const { data } = useAuth();
+const configEnv = useRuntimeConfig();
 const cargaExitosa = ref(false);
 const modalActualizar = ref(null);
 const rutas = ref({});
@@ -102,7 +103,8 @@ async function updateMetadata() {
     isMetaInvalid.value = false;
     modalActualizar.value?.abrirModal();
     const token = data.value?.accessToken;
-    const response = await $fetch('/api/metadatos', {
+    const endpoint = `${configEnv.public.basePath}/api/metadatos`;
+    const response = await $fetch(endpoint, {
       method: 'POST',
       headers: { token: token, resourceType: resourceTypeGeonode[props.tipo], pk: props.pk },
       body: requestBody,

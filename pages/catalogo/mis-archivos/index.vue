@@ -61,13 +61,15 @@ function setActions(recurso) {
   if (recurso.sourcetype === 'REMOTE' && recurso.is_published) {
     return 'Ver';
   } else if (recurso.sourcetype === 'REMOTE') {
-    return 'Editar, Ver, Publicar, Remover';
+    //return 'Editar, Ver, Publicar, Remover';
+    return 'Editar, Ver, Publicar';
   } else if (recurso.is_published === true) {
     return 'Ver, Descargar';
   } else {
     return 'Editar, Ver, Publicar, Descargar, Remover';
   }
 }
+
 function updateResources() {
   tableResources.value = resources.value.map((d) => ({
     pk: d.pk,

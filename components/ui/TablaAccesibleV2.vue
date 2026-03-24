@@ -1,7 +1,7 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
-import { categoriesInSpanish, resourceTypeDic, wait } from '~/utils/consulta';
+import { categoriesInSpanish, resourceTypeDic } from '~/utils/consulta';
 import SelectedLayer from '~/utils/consulta/SelectedLayer';
 import SelectedResource from '~/utils/consulta/SelectedResource';
 
@@ -25,7 +25,7 @@ const config = useRuntimeConfig();
 const route = useRoute();
 const router = useRouter();
 const { gnoxyFetch } = useGnoxyUrl();
-const { getSLDs } = useResourcesSupplements();
+const { getSLDs, getWMSserver } = useResourcesSupplements();
 
 const { data } = useAuth();
 const token = data.value?.accessToken;
@@ -340,8 +340,8 @@ async function borrarRemoto() {
   const remoteAlternate = resourceToDelete.value.alternate;
 
   // Obtenemos el identificador del harvester
-  const linkObject = resourceToDelete.value.links.find((link) => link.link_type === 'OGC:WMS');
-  const serviceLink = linkObject.url.replace('https://', '').replace('http://', '').split('/')[0];
+  const linkObject = getWMSserver(resourceToDelete.value);
+  const serviceLink = linkObject.replace('https://', '').replace('http://', '').split('/')[0];
   const harvesterIdentifier = await getHarvesterId(serviceLink);
 
   // Cambiamos el estatus del recurso a should_be_harvested false
@@ -353,19 +353,21 @@ async function borrarRemoto() {
   ];
 
   try {
-    const updateHarvestables = await $fetch('/api/importar-externo', {
+    const updateHarvestables = await $fetch(`${config.public.basePath}/api/importar-externo`, {
       method: 'POST',
       headers: { token: token },
       body: { harvesterID: harvesterIdentifier, resources: requestBody },
     });
-
     // Actualizamos los recursos cosechables
     if (updateHarvestables) {
-      const updateHarvesterStatus = await $fetch('/api/actualizar-externo', {
-        method: 'POST',
-        headers: { token: token },
-        body: { id: harvesterIdentifier, status: 'harvesting-resources' },
-      });
+      const updateHarvesterStatus = await $fetch(
+        `${config.public.basePath}/api/actualizar-externo`,
+        {
+          method: 'POST',
+          headers: { token: token },
+          body: { id: harvesterIdentifier, status: 'harvesting-resources' },
+        }
+      );
       if (updateHarvesterStatus) {
         return true;
       } else {
@@ -385,7 +387,7 @@ async function borrarRemoto() {
 async function borrarLocal() {
   const token = data.value?.accessToken;
   try {
-    const response = await $fetch('/api/delete-resource', {
+    const response = await $fetch(`${config.public.basePath}/api/delete-resource`, {
       method: 'DELETE',
       headers: { token: token, pk: resourceToDeletePk.value },
     });
@@ -415,7 +417,6 @@ async function confirmarEliminar() {
   } else {
     wasDeletionSuccesful.value = await borrarLocal();
   }
-  await wait(3000);
   isBeingDeleted.value = false;
   if (wasDeletionSuccesful.value) {
     modalEliminar.value?.cerrarModal();

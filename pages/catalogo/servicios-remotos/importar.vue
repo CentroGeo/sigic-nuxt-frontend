@@ -1,5 +1,5 @@
 <script setup>
-import { wait } from '@/utils/consulta';
+import { wait } from '~/utils/consulta';
 
 definePageMeta({
   middleware: 'sidebase-auth',
@@ -106,16 +106,15 @@ async function importarRecursos() {
     should_be_harvested: true,
   }));
   // Primero hacemos una petición para actualizar el estatus de cosecha de cada recurso
-  const updateHarvestables = await $fetch('/api/importar-externo', {
+  const updateHarvestables = await $fetch(`${config.public.basePath}/api/importar-externo`, {
     method: 'POST',
     headers: { token: token },
     body: { harvesterID: selectedId, resources: requestBody },
   });
-
   // Ahora actualizamos el estatus del harvester para activar la importación de los recursos
   let updateStatus;
   if (updateHarvestables) {
-    updateStatus = await $fetch('/api/actualizar-externo', {
+    updateStatus = await $fetch(`${config.public.basePath}/api/actualizar-externo`, {
       method: 'POST',
       headers: { token: token },
       body: { id: selectedId, status: 'harvesting-resources' },
@@ -299,7 +298,7 @@ onMounted(async () => {
                       :disabled="status !== 'authenticated'"
                       @change="toggleSelection(value)"
                     />
-                    <label :for="`checkbox-${value.unique_identifier}`">
+                    <label :for="`checkbox-${value.unique_identifier}`" class="break-url">
                       {{ value.unique_identifier }}
                     </label>
                   </td>
@@ -354,5 +353,9 @@ onMounted(async () => {
 .loader {
   max-height: 3em;
   object-fit: scale-down;
+}
+.break-url {
+  word-break: break-all !important;
+  display: inline-block !important;
 }
 </style>

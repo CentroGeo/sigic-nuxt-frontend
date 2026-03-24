@@ -4,6 +4,7 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event);
   const token = getHeader(event, 'token');
   const url = `${config.public.geonodeApi}/account/me/profile/`;
+  //console.warn(body)
 
   try {
     const updateRequest = await fetch(url, {

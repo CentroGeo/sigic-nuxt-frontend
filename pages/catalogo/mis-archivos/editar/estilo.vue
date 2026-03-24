@@ -10,6 +10,7 @@ definePageMeta({
 const storeCatalogo = useCatalogoStore();
 const storeResources = useResourcesCatalogoStore();
 const { getSLDs } = useResourcesSupplements();
+const config = useRuntimeConfig();
 
 const { data } = useAuth();
 const route = useRoute();
@@ -47,7 +48,7 @@ async function guardarArchivo(files) {
       formData.append('base_file', d);
       formData.append('token', data.value?.accessToken);
       formData.append('pk', selectedPk);
-      const fileUpdateStatus = await $fetch('/api/subirSLDMultiple', {
+      const fileUpdateStatus = await $fetch(`${config.public.basePath}/api/subirSLDMultiple`, {
         method: 'POST',
         body: formData,
       });

@@ -10,6 +10,7 @@ definePageMeta({
     class: '',
   },
 });
+const config = useRuntimeConfig();
 
 const campoTipo = ref('');
 const campoURL = ref('');
@@ -113,28 +114,24 @@ async function registrar() {
         const token = data.value?.accessToken;
 
         // Creamos la conexión
-        const { responseStatus, message } = await $fetch('/api/registrar-servicio', {
-          method: 'POST',
-          headers: { token: token },
-          body: {
-            url: campoURL.value,
-            type: campoTipo.value,
-            abstract: campoDescripcion.value,
-            title: campoNombre.value,
-          },
-        });
+        const { responseStatus, message } = await $fetch(
+          `${config.public.basePath}/api/registrar-servicio`,
+          {
+            method: 'POST',
+            headers: { token: token },
+            body: {
+              url: campoURL.value,
+              type: campoTipo.value,
+              abstract: campoDescripcion.value,
+              title: campoNombre.value,
+            },
+          }
+        );
         if (responseStatus === 'error') {
           error.value = message;
         } else {
           responseOk.value = true;
           console.warn('Se registró exitosamente');
-
-          /*  const updateStatus = await $fetch('/api/actualizar-externo', {
-            method: 'POST',
-            headers: { token: token },
-            body: { id: harvesterID, status: 'updating-harvestable-resources' },
-          });
-          console.warn('Update harvester status', updateStatus); */
         }
       } else {
         error.value = 'Revisa que la url apunte a un servicio válido';

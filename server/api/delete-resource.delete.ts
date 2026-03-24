@@ -5,6 +5,7 @@ export default defineEventHandler(async (event) => {
   const pk = getHeader(event, 'pk');
   const baseUrl = config.public.geonodeApi;
   const url = `${baseUrl}/resources/${pk}/`;
+  //console.log(url)
 
   try {
     const response = await fetch(url, {
@@ -13,7 +14,7 @@ export default defineEventHandler(async (event) => {
         Authorization: `Bearer ${token}`,
       },
     });
-
+    //console.warn(response)
     //console.log('La respuesta:', response);
     if (!response.ok) {
       throw new Error(`Falló el borrar un recurso: ${response.status}`);

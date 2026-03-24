@@ -6,7 +6,7 @@ definePageMeta({
   middleware: 'auth',
 });
 const storeCatalogo = useCatalogoStore();
-
+const config = useRuntimeConfig();
 // Recuperamos información a partir de la url
 const route = useRoute();
 const selectedPk = route.query.pk;
@@ -61,7 +61,7 @@ async function aceptarSolicitud() {
       return;
     } else {
       // Actualizamos permisos
-      const updatePermissions = await $fetch('/api/actualizar-permisos', {
+      const updatePermissions = await $fetch(`${config.public.basePath}/api/actualizar-permisos`, {
         method: 'POST',
         headers: { token: token },
         body: { pk: selectedPk },

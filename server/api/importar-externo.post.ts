@@ -6,6 +6,8 @@ export default defineEventHandler(async (event) => {
   const harvesterID = data.harvesterID;
   const resources = data.resources;
   const url = `${config.public.geonodeApi}/harvesters/${harvesterID}/harvestable-resources/`;
+  //console.log("url externo:", url)
+  //console.log("el cuerpo:", resources)
   let updateStatus = null;
 
   try {
@@ -17,6 +19,7 @@ export default defineEventHandler(async (event) => {
       },
       body: JSON.stringify(resources),
     });
+    console.warn('Importar:', response);
     updateStatus = response.ok;
   } catch (error) {
     console.error('Error al subir al GeoNode:', error);
