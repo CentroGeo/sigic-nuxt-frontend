@@ -7,6 +7,14 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.15.5] - 24-03-2026
+
+### Fixed (Arreglado)
+
+- Se implementó el uso de $fetch en la petición de cambio de avatar.
+- Se eliminó la opción de eliminar un servicio remoto no publicado, pues se identificó que el nombre alternativo con el que se guarda el recurso en geonode no siempre coincide con la información del endpoint de los recursos cosechables asociados a un servicio.
+- Se implementó un estilo para evitar que urls creen un scroll lateral en la sección de importar recursos de un servicio remoto.
+
 ## [0.15.4] - 21-03-2026
 
 ### Fixed (Arreglado)
@@ -343,6 +351,7 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.15.5]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.4...v0.15.5
 [0.15.4]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.3...v0.15.4
 [0.15.3]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.2...v0.15.3
 [0.15.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.1...v0.15.2

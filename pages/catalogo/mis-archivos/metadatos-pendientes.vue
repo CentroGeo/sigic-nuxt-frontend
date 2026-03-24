@@ -54,6 +54,14 @@ function tipoRecurso(recurso) {
   return tipo;
 }
 
+function setActions(recurso) {
+  if (recurso.sourcetype === 'REMOTE') {
+    return 'Editar';
+  } else {
+    return 'Editar, Remover';
+  }
+}
+
 /**Crea el objeto de información como se necesita para esta vista */
 function updateResources() {
   tableResources.value = resources.value.map((d) => ({
@@ -62,7 +70,7 @@ function updateResources() {
     tipo_recurso: tipoRecurso(d),
     categoria: d.category,
     actualizacion: d.last_updated,
-    acciones: 'Editar, Remover',
+    acciones: setActions(d),
     uuid: d.uuid,
     resource_type: d.resource_type,
     extent: d.extent,
