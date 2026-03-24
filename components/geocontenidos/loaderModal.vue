@@ -1,12 +1,20 @@
 <script setup>
-defineProps({
+const props = defineProps({
+  cargando: {
+    type: Boolean,
+    default: true,
+  },
   mensaje: {
     type: String,
     default: '',
   },
-  mensajeLoader: {
+  // mensajeCarga: {
+  //   type: String,
+  //   default: 'Guardando...',
+  // },
+  pictograma: {
     type: String,
-    default: '',
+    default: 'aprobado',
   },
   titulo: {
     type: String,
@@ -17,26 +25,53 @@ defineProps({
     default: false,
   },
 });
+const { visible } = toRefs(props);
+
+watch(visible, (nv) => {
+  if (modal.value === null) return;
+
+  if (nv) {
+    modal.value.abrir();
+  } else {
+    modal.value.cerrar();
+  }
+});
+
+function iniciar() {
+  if (visible.value) {
+    modal.value?.abrir();
+  }
+}
+
+const modal = ref(null);
+watch(modal, iniciar);
 </script>
 
 <template>
   <ClientOnly>
-    <SisdaiModal ref="modalStatus">
+    <GeocontenidosSisdaiModal ref="modal" class="geocontenidos-modal" :permitir-cerrar="false">
       <template #encabezado>
-        <span v-if="estatusAlGuardar.cargando" />
-        <h2 v-else>{{ estatusAlGuardar.estado ? 'Guardado con éxito' : 'Error' }}</h2>
+        <h1 class="m-1">{{ titulo }}</h1>
       </template>
 
-      <template #cuerpo>
-        <GeocontenidosLoader
-          v-if="estatusAlGuardar.cargando"
-          :mensaje="estatusAlGuardar.textoCargando"
-        />
+      <GeocontenidosLoader v-if="cargando" mensaje="Guardando..." />
 
-        <p v-else-if="estatusAlGuardar.estado === false" v-text="estatusAlGuardar.mensaje" />
+      <div v-else class="texto-centrado texto-tamanio-8">
+        <span :class="`pictograma-${pictograma}`" />
+      </div>
 
-        <p v-else><span class="pictograma-aprobado pictograma-grande" /></p>
+      <template #pie>
+        <p class="m-0">{{ mensaje }}</p>
       </template>
-    </SisdaiModal>
+    </GeocontenidosSisdaiModal>
   </ClientOnly>
 </template>
+
+<style lang="scss">
+.geocontenidos-modal {
+  .modal-pie {
+    margin: 0 !important;
+    justify-content: center;
+  }
+}
+</style>

@@ -1,32 +1,25 @@
 <script setup>
+// import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import { SisdaiLeyendaWms } from '@centrogeomx/sisdai-mapas';
-import { categoriesNamesInSpanish } from '~/utils/consulta';
+import { categoriesNamesInSpanish, wait } from '~/utils/consulta';
 
 const { gnoxyFetch } = useGnoxyUrl();
 const config = useRuntimeConfig();
+const { data: userData } = useAuth();
 const { escenario, escena } = useRoute().params;
 
 /**
- *
- */
-const categoriasOrdenadas = computed(() =>
-  Object.keys(categorias.categorias)
-    .map((identifier) => [identifier, categoriesNamesInSpanish[identifier]])
-    .sort((a, b) => a[1].localeCompare(b[1]))
-);
-
-/**
- *
+ * Guarda la información de las categorías y las capas del catalogo
  */
 const categorias = reactive({
-  cargando: false,
-  categorias: {},
-  cargandoCapas: true,
-  seleccion: undefined,
+  cargando: false, // Estado de carga de las categorías
+  datos: {}, // Datos del catálogo
+  cargandoCapas: true, // Estado de carga de las capas
+  seleccion: undefined, // Categoría seleccionada
 });
 
 /**
- *
+ * Realiza la consulta de las categorías del catalogo
  */
 async function consultarCategorias() {
   categorias.cargando = true;
@@ -36,8 +29,8 @@ async function consultarCategorias() {
     const respuesta = await gnoxyFetch(url);
     const data = await respuesta.json();
 
-    categorias.categorias = {
-      ...categorias.categorias,
+    categorias.datos = {
+      ...categorias.datos,
       ...Object.fromEntries(
         // data.categories.map(({ identifier, fa_class }) => [identifier, { fa_class }])
         data.categories.map(({ identifier }) => [identifier, undefined])
@@ -53,12 +46,20 @@ async function consultarCategorias() {
 consultarCategorias();
 
 /**
- *
- * @param identifier
+ * Devuelve el listado de las categorias ordenadas alfabeticamente en español
+ */
+const categoriasOrdenadas = computed(() =>
+  Object.keys(categorias.datos)
+    .map((identifier) => [identifier, categoriesNamesInSpanish[identifier]])
+    .sort((a, b) => a[1].localeCompare(b[1]))
+);
+
+/**
+ * Realiza la consulta de las capas de una categoría
+ * @param {string} identificador de la categoría
  */
 async function consultarCapasEnCategoria(identifier) {
-  // if (Object.prototype.hasOwnProperty.call(categorias.categorias[identifier], 'capas')) return;
-  if (categorias.categorias[identifier] !== undefined) return;
+  if (categorias.datos[identifier] !== undefined) return;
 
   categorias.cargandoCapas = true;
 
@@ -72,14 +73,13 @@ async function consultarCapasEnCategoria(identifier) {
   };
 
   let url = `${config.public.geonodeApi}/sigic-resources?${new URLSearchParams(params).toString()}`;
-  // categorias.categorias[identifier]['capas'] = [];
-  categorias.categorias[identifier] = {};
+  categorias.datos[identifier] = {};
   do {
     const respuesta = await gnoxyFetch(url);
     const data = await respuesta.json();
 
-    categorias.categorias[identifier] = {
-      ...categorias.categorias[identifier],
+    categorias.datos[identifier] = {
+      ...categorias.datos[identifier],
       ...Object.fromEntries(
         data.resources.map(({ pk, title, alternate, category }) => [
           pk,
@@ -87,17 +87,6 @@ async function consultarCapasEnCategoria(identifier) {
         ])
       ),
     };
-
-    // console.log(toRaw(categorias.categorias[identifier]));
-
-    // categorias.categorias[identifier]['capas'].push(
-    //   ...data.resources.map(({ pk, title, alternate, category }) => ({
-    //     pk,
-    //     title,
-    //     alternate,
-    //     category,
-    //   }))
-    // );
 
     url = data.links.next;
   } while (url !== null);
@@ -107,15 +96,15 @@ async function consultarCapasEnCategoria(identifier) {
 watch(() => categorias.seleccion, consultarCapasEnCategoria);
 
 /**
- *
+ * Guarda la información de las capas almacenadas en la escena
  */
 const capasEnEscena = reactive({
-  capas: [],
-  cargando: false,
+  capas: [], // Datos de la escena
+  cargando: false, // Estado de carga
 });
 
 /**
- *
+ * Realiza la consulta de las capas almacenadas en la escena
  */
 async function consultarCapasEnEscena() {
   capasEnEscena.cargando = true;
@@ -125,26 +114,24 @@ async function consultarCapasEnEscena() {
 
   const data = await respuesta.json();
   capasEnEscena.capas = data;
-  // console.log('consultarCapasEnEscena', toRaw(capasEnEscena.capas));
-
   capasEnEscena.cargando = false;
 }
 consultarCapasEnEscena();
 
 /**
- * Capas seleccionadas que no están guardadas en la escena
+ * Capas seleccionadas que aún no están almacenadas en la escena
  */
 const capasSeleccionadas = ref([]);
 
 /**
- *
+ * Capas almacenadas en la escena con formato de selección
  */
 const capasEnEscenaSeleccionadas = computed(() =>
   capasEnEscena.capas.map(({ geonode_id }) => `${categorias.seleccion}-${geonode_id}`)
 );
 
 /**
- * Capas seleccionadas junto con las guardadas en la escena para el catálogo
+ * Capas seleccionadas junto con las almacenadas en la escena para los checkboxs del catálogo
  */
 const capasSeleccionadasParaCatalogo = computed({
   get: () => [...capasSeleccionadas.value, ...capasEnEscenaSeleccionadas.value],
@@ -155,11 +142,16 @@ const capasSeleccionadasParaCatalogo = computed({
   },
 });
 
+/**
+ * Capas seleccionadas con formato para visualizar en capas almacenadas (pero que aún no ahn sido almacenadas)
+ */
 const capasSeleccionadasParaAgregar = computed(() =>
   capasSeleccionadas.value.map((categoriaCapa) => {
     const [identifier, pk] = categoriaCapa.split('-');
 
     return {
+      // scene: Number(escena),
+      // geonode_id: Number(pk),
       scene: escena,
       geonode_id: pk,
       visible: true,
@@ -168,8 +160,8 @@ const capasSeleccionadasParaAgregar = computed(() =>
       style_title: null, //
 
       id: -1, //
-      name: categorias.categorias[identifier][pk].alternate, //
-      dataset_title: categorias.categorias[identifier][pk].title, //
+      name: categorias.datos[identifier][pk].alternate, //
+      dataset_title: categorias.datos[identifier][pk].title, //
       stack_order: -1, //
     };
   })
@@ -185,11 +177,48 @@ const capasSeleccionadasParaAgregar = computed(() =>
 //   "style_title": "Estilo Rojo",
 // }
 
+const modal = reactive({
+  cargando: false,
+  mensaje: '',
+  pictograma: undefined,
+  visible: false,
+  titulo: '',
+});
+
 /**
  *
  */
-function guardarCambios() {
-  // console.log(params);
+async function guardarCambios() {
+  if (capasSeleccionadas.value.length === 0) return;
+
+  modal.visible = true;
+  modal.cargando = true;
+
+  const url = `${config.public.geonodeApi}/scene-layers/bulk-add/${escena}//`;
+  const respuesta = await gnoxyFetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${userData.value?.accessToken}`,
+    },
+    body: JSON.stringify(capasSeleccionadasParaAgregar.value),
+  });
+
+  const datos = await respuesta.json();
+
+  modal.cargando = false;
+
+  if (datos?.success === false) {
+    modal.titulo = 'Error';
+    modal.pictograma = 'cerrar';
+    modal.mensaje = datos.errors.join(` `);
+  } else {
+    modal.titulo = 'Guardado con éxito';
+  }
+
+  await wait(1500);
+  modal.visible = false;
+  modal.titulo = '';
 }
 </script>
 
@@ -199,6 +228,19 @@ function guardarCambios() {
       :volver="`/geohistorias/${escenario}/escenas`"
       titulo="Agregar capas"
     />
+
+    <!--  -->
+    <section class="flex flex-contenido-final">
+      <NuxtLink
+        :to="`/geocontenidos/geohistorias/${escenario}/escenas`"
+        class="boton boton-secundario"
+      >
+        Volver
+      </NuxtLink>
+
+      <input type="submit" class="boton-primario" value="Guardar" />
+    </section>
+    <!--  -->
 
     <p class="m-0">Selecciona las capas que deseas agregar a esta escena</p>
 
@@ -235,14 +277,14 @@ function guardarCambios() {
 
             <GeocontenidosLoader v-if="categorias.cargandoCapas" />
 
-            <!-- <p v-else-if="categorias.categorias[categorias.seleccion].capas.length === 0"> -->
-            <p v-else-if="Object.keys(categorias.categorias[categorias.seleccion]).length === 0">
+            <!-- <p v-else-if="categorias.datos[categorias.seleccion].capas.length === 0"> -->
+            <p v-else-if="Object.keys(categorias.datos[categorias.seleccion]).length === 0">
               No se encontraron resultados que coincidan con la búsqueda.
             </p>
 
-            <!-- v-for="capa in categorias.categorias[categorias.seleccion].capas" -->
+            <!-- v-for="capa in categorias.datos[categorias.seleccion].capas" -->
             <li
-              v-for="(capa, pk) in categorias.categorias[categorias.seleccion]"
+              v-for="(capa, pk) in categorias.datos[categorias.seleccion]"
               v-else
               :key="`checkbox-capa-catalogo-${pk}`"
               class="fondo-color-acento borde-redondeado-8"
@@ -319,18 +361,7 @@ function guardarCambios() {
       </div>
     </section>
 
-    <!--  -->
-    <section class="flex flex-contenido-final">
-      <NuxtLink
-        :to="`/geocontenidos/geohistorias/${escenario}/escenas`"
-        class="boton boton-secundario"
-      >
-        Volver
-      </NuxtLink>
-
-      <input type="submit" class="boton-primario" value="Guardar" />
-    </section>
-    <!--  -->
+    <GeocontenidosLoaderModal v-bind="modal" />
   </form>
 </template>
 

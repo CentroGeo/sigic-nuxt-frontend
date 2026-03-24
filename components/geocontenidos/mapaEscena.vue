@@ -23,9 +23,7 @@ defineProps({
         :posicion="capa.stack_order"
         :visible="capa.visible"
       />
-      <!-- 
-            :estilo="capa.estilo"
-           -->
+      <!-- :estilo="capa.estilo" -->
     </SisdaiMapa>
   </ClientOnly>
 </template>

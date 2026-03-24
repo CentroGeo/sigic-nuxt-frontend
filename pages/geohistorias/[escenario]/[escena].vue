@@ -3,11 +3,18 @@ const { gnoxyFetch } = useGnoxyUrl();
 const config = useRuntimeConfig();
 const { escenario, escena: escenaId } = useRoute().params;
 
+/**
+ *
+ */
 const escena = reactive({
   cargando: false,
   datos: {},
 });
-async function cargarEscena() {
+
+/**
+ * Realiza la consulta de la escena
+ */
+async function consultarEscena() {
   escena.cargando = true;
   const respuesta = await gnoxyFetch(`${config.public.geonodeApi}/scenes/${escenaId}`);
 
@@ -16,7 +23,7 @@ async function cargarEscena() {
 
   escena.cargando = false;
 }
-cargarEscena();
+consultarEscena();
 </script>
 
 <template>
