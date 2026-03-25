@@ -74,8 +74,30 @@ function continuarSinUbicacion() {
   paso.value = 2;
 }
 
-function guardarBorrador() {
-  console.log(preguntas.value);
+const modalBorrador = ref(null);
+
+async function guardarBorrador() {
+  const aporte = {
+    id_usuario: data.value?.user.email,
+    id_proyecto: route.params.id,
+    respuestas: preguntas.value,
+    latitud: punto.value.features[0].geometry.coordinates[1],
+    longitud: punto.value.features[0].geometry.coordinates[0],
+    status: 'POR ENVIAR',
+    titulo: proyecto.value.nombre,
+  };
+
+  await storeLevantamiento.guardarBorradorAporte(aporte);
+
+  modalBorrador.value.abrirModal();
+}
+
+function irAProyectos() {
+  router.push('/levantamiento/proyectos/');
+}
+
+function irAAportesPorEnviar() {
+  router.push('/aportes/por-enviar/');
 }
 </script>
 <template>
@@ -229,6 +251,24 @@ function guardarBorrador() {
             </button>
             <button type="button" class="boton-primario boton-chico" @click="continuarSinUbicacion">
               Continuar
+            </button>
+          </template>
+        </SisdaiModal>
+
+        <SisdaiModal ref="modalBorrador">
+          <template #encabezado><h3>Aporte guardado</h3></template>
+          <template #cuerpo>
+            <p class="m-t-0 m-b-3">
+              Tu aporte se ha guardado correctamente, puedes retormarlo desde la sección "Aportes
+              por enviar"
+            </p>
+          </template>
+          <template #pie>
+            <button type="button" class="boton-secundario boton-chico" @click="irAAportesPorEnviar">
+              Ir a aportes por enviar
+            </button>
+            <button type="button" class="boton-primario boton-chico" @click="irAProyectos">
+              Ir a proyectos
             </button>
           </template>
         </SisdaiModal>

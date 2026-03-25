@@ -444,5 +444,35 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
     obtenerTotalProyectosRechazados() {
       return this.proyectosRechazados.length;
     },
+    async guardarBorradorAporte(aporte) {
+      try {
+        const data = await $fetch(`${apiUrl}/raising/user/create`, {
+          method: 'POST',
+          body: aporte,
+        });
+
+        console.log(data);
+      } catch (err) {
+        console.error('Error guardando borrador:', err);
+      }
+    },
+    async obtenerAportesPorStatus(email, status) {
+      const body = {
+        email: email,
+        status: status,
+      };
+
+      try {
+        const data = await $fetch(`${apiUrl}/raising/user/list`, {
+          method: 'POST',
+          body: body,
+        });
+
+        console.log(data);
+        return data.levantamientos;
+      } catch (err) {
+        console.error('Error obteniendo aportes:', err);
+      }
+    },
   };
 });

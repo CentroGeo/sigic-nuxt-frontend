@@ -12,7 +12,7 @@ const router = useRouter();
 const route = useRoute();
 
 const porEnviar = ref([
-  {
+  /* {
     id: 0,
     thumbnail_img: 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/kale-1.jpg',
     title: 'Título del aporte',
@@ -25,7 +25,7 @@ const porEnviar = ref([
     title: 'Título del aporte',
     update_date: formatDate(new Date()),
     status: 'Por enviar',
-  },
+  }, */
 ]);
 
 const modalRemoverAporte = ref(null);
@@ -51,6 +51,20 @@ function irAEditarAporte() {
     },
   });
 }
+
+const { data } = useAuth();
+
+onMounted(async () => {
+  const aportes = await storeLevantamiento.obtenerAportesPorStatus(
+    data.value?.user.email,
+    'POR ENVIAR'
+  );
+
+  porEnviar.value = aportes.map((item) => ({
+    ...item,
+    fecha_formateada: formatDate(new Date(item.fecha_levantamiento)),
+  }));
+});
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeLevantamiento.catalogoColapsado">
@@ -90,7 +104,7 @@ function irAEditarAporte() {
           <div class="columna-16">
             <div class="flex">
               <h2>Aportes por enviar</h2>
-              <UiNumeroElementos :numero="0" />
+              <UiNumeroElementos :numero="porEnviar.length" />
             </div>
           </div>
           <div class="columna-8">
@@ -101,23 +115,24 @@ function irAEditarAporte() {
               <div class="grid">
                 <div v-for="value in porEnviar" :key="value.id" class="columna-5">
                   <div class="tarjeta">
-                    <img class="tarjeta-imagen" alt="" :srcset="value.thumbnail_img" />
+                    <img class="tarjeta-imagen" alt="" srcset="/img/aporte_imagen.png" />
 
                     <div class="tarjeta-cuerpo">
-                      <p class="tarjeta-etiqueta">Aporte creado en:</p>
+                      <p class="texto-tamanio-3 texto-color-secundario">Aporte creado en:</p>
                       <p class="tarjeta-titulo">{{ value.title }}</p>
-                      <p>{{ value.update_date }}</p>
+                      <p class="texto-tamanio-3 texto-color-secundario">
+                        {{ value.fecha_formateada }}
+                      </p>
                     </div>
 
                     <div class="tarjeta-pie">
                       <div class="flex" style="row-gap: 8px">
-                        <!-- <button
+                        <button
                           class="boton-primario boton-chico texto-centrado tarjeta-pie-boton"
                           type="button"
-                          @click="modalEnviarRevision.abrirModal()"
                         >
                           Enviar a revisión
-                        </button> -->
+                        </button>
                         <button
                           class="boton-secundario boton-chico texto-centrado tarjeta-pie-boton"
                           type="button"
@@ -156,6 +171,13 @@ function irAEditarAporte() {
             >
               Regresar
             </button>
+            <button
+              class="boton-primario boton-chico"
+              type="button"
+              @click="modalRemoverAporte.cerrarModal()"
+            >
+              Confirmar
+            </button>
           </template>
         </SisdaiModal>
       </ClientOnly>
@@ -166,5 +188,13 @@ function irAEditarAporte() {
 .tarjeta-pie-boton {
   width: 100%;
   display: inline-block;
+}
+
+.tarjeta-imagen {
+  height: 130px;
+}
+
+.tarjeta-cuerpo > * {
+  margin: 8px 0;
 }
 </style>
