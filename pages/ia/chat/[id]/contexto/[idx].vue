@@ -1112,9 +1112,9 @@ async function confirmarEliminar() {
   if (reporte.type === 'espacializacion') {
     endpoint = `${config.public.iaBackendUrl}/api/localidades/${reporte.id}/delete/`;
   } else if (reporte.type === 'geospatial') {
-    endpoint = `${config.public.iaBackendUrl}/api/reports/${reporte.id}/delete/`;
-  } else {
     endpoint = `${config.public.iaBackendUrl}/api/geospatial/${reporte.id}/delete/`;
+  } else {
+    endpoint = `${config.public.iaBackendUrl}/api/reports/${reporte.id}/delete/`;
   }
 
   try {
