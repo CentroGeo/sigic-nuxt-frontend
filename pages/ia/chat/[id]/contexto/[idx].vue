@@ -170,9 +170,7 @@ const mapInstanceKey = ref(0);
 const modalConfirmarEliminar = ref(null);
 const reporteParaEliminar = ref(null);
 
-const idAleatorio = () => {
-  return 'areatexto-' + Math.random().toString(36).substring(2);
-};
+const idAleatorio = 'areatexto-' + Math.random().toString(36).substring(2);
 
 // Función para cargar historico de chat
 async function loadExistentChat(idchat) {
@@ -1505,7 +1503,7 @@ onMounted(() => {
               v-if="botonRadioReporte === 'Dos' && arrayContextSources.length > 0"
               class="tabla-archivos m-y-3"
             >
-              <table class="tabla">
+              <table class="tabla" style="width: 100%">
                 <thead>
                   <tr>
                     <th class="checkbox-header p-x-3 p-y-2">Selección</th>
@@ -1927,25 +1925,31 @@ onMounted(() => {
 
             <!-- Sección 3 -->
             <div>
-              <p style="font-weight: 600; font-size: 16px; margin-bottom: 4px">
-                Añade instrucciones para el análisis
-              </p>
-              <p style="font-size: 14px; margin-bottom: 16px; color: #444">
-                Puedes especificar qué elementos o palabras buscar para orientar la espacialización.
-              </p>
+              <form class="formulario-area-texto">
+                <label :for="idAleatorio" style="font-weight: 600" class="texto-color-primario">
+                  Añade instrucciones para el análisis
+                </label>
+                <p class="texto-color-secundario texto-tamanio-2">
+                  Puedes especificar qué elementos o palabras buscar para orientar la
+                  espacialización.
+                </p>
 
-              <textarea
-                v-model.lazy="instruccionesAnalisis"
-                class="area-texto ancho-100 p-2 borde-redondeado-4"
-                rows="4"
-                placeholder="Ej. Identifica las menciones de hospitales o centros de salud en los documentos y genera puntos en el mapa para cada ubicación encontrada."
-                style="border: 1px solid #6f7271; font-family: inherit; resize: vertical"
-              ></textarea>
+                <textarea
+                  :id="idAleatorio"
+                  v-model.lazy="instruccionesAnalisis"
+                  class="area-texto ancho-100 p-2 borde-redondeado-4"
+                  rows="4"
+                  placeholder="Ej. Identifica las menciones de hospitales o centros de salud en los documentos y genera puntos en el mapa para cada ubicación encontrada."
+                  style="border: 1px solid #6f7271; font-family: inherit; resize: vertical"
+                />
+              </form>
 
-              <div class="mensaje-ia m-t-2" role="note">
-                <span class="pictograma-informacion" aria-hidden="true"></span>
-                <p>La IA aplicará esta instrucción sobre las fuentes seleccionadas.</p>
-              </div>
+              <p
+                class="fondo-color-informacion texto-color-informacion borde borde-color-informacion borde-redondeado-8 p-1"
+              >
+                <span class="pictograma-informacion" aria-hidden="true" /> La IA aplicará esta
+                instrucción sobre las fuentes seleccionadas.
+              </p>
             </div>
           </template>
 
@@ -2094,8 +2098,8 @@ onMounted(() => {
               v-else
               class="fondo-color-informacion texto-color-informacion borde borde-color-informacion borde-redondeado-8 p-1"
             >
-              <span class="pictograma-informacion" /> La IA aplicará esta instrucción sobre el
-              análisis seleccionado.
+              <span class="pictograma-informacion" aria-hidden="true" /> La IA aplicará esta
+              instrucción sobre el análisis seleccionado.
             </p>
           </template>
 
@@ -2209,13 +2213,13 @@ onMounted(() => {
                 {{ previewEspacializacionData?.report_name || 'Mapa espacializado' }}
               </h4>
 
-              <div class="mensaje-ia" role="note">
-                <span class="pictograma-informacion" aria-hidden="true"></span>
-                <p>
-                  Este resultado es generado mediante herramientas de IA y puede contener
-                  imprecisiones; se recomienda su revisión y validación.
-                </p>
-              </div>
+              <p
+                class="fondo-color-informacion texto-color-informacion borde borde-color-informacion borde-redondeado-8 p-1"
+              >
+                <span class="pictograma-informacion" aria-hidden="true" /> Este resultado es
+                generado mediante herramientas de IA y puede contener imprecisiones; se recomienda
+                su revisión y validación.
+              </p>
             </div>
           </template>
 
