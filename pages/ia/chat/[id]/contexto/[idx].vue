@@ -158,6 +158,14 @@ const dictTipoOperacionGeo = ref({
   densidad: 'Densidad',
   avanzado: 'Avanzado',
 });
+
+const dictTipoHelpOperacionGeo = ref({
+  buffer: 'Ej. genera una capa de buffer de 500 metros.',
+  interseccion: 'Ej. genera una capa de intersección.',
+  densidad: 'Ej. genera una capa densidad.',
+  avanzado:
+    'Ej. Operación: puntos, instrucciones adicionales: Paso 1: Haz una operación union entre mi primera y segunda capa de puntos. Paso 2: Haz un buffer de 1000 metros alrededor del resultado de los puntos unidos. Paso 3: Haz un spatial_join entre ese buffer y mi capa de polígonos).',
+});
 const mapInstanceKey = ref(0);
 const modalConfirmarEliminar = ref(null);
 const reporteParaEliminar = ref(null);
@@ -1102,10 +1110,14 @@ async function confirmarEliminar() {
   const token = data.value?.accessToken;
   if (!token) return;
 
-  const endpoint =
-    reporte.type === 'espacializacion'
-      ? `${config.public.iaBackendUrl}/api/localidades/${reporte.id}/delete/`
-      : `${config.public.iaBackendUrl}/api/reports/${reporte.id}/delete/`;
+  let endpoint = '';
+  if (reporte.type === 'espacializacion') {
+    endpoint = `${config.public.iaBackendUrl}/api/localidades/${reporte.id}/delete/`;
+  } else if (reporte.type === 'geospatial') {
+    endpoint = `${config.public.iaBackendUrl}/api/reports/${reporte.id}/delete/`;
+  } else {
+    endpoint = `${config.public.iaBackendUrl}/api/geospatial/${reporte.id}/delete/`;
+  }
 
   try {
     const res = await fetch(endpoint, {
@@ -2066,7 +2078,7 @@ onMounted(() => {
                 id="area-idcreadoautomaticamente"
                 v-model="areaOperacionGeoespacialInstrucciones"
                 etiqueta="Instrucciones para la operación"
-                ejemplo="Ej. Operación: puntos, instrucciones adicionales: Paso 1: Haz una operación union entre mi primera y segunda capa de puntos. Paso 2: Haz un buffer de 1000 metros alrededor del resultado de los puntos unidos. Paso 3: Haz un spatial_join entre ese buffer y mi capa de polígonos)."
+                :ejemplo="dictTipoHelpOperacionGeo[botonRadioTipoOperacionGeoespacial]"
                 :es_obligatorio="true"
                 :es_etiqueta_visible="false"
               />
@@ -2272,7 +2284,7 @@ onMounted(() => {
                   </div>
                 </template>
 
-                <template v-else>
+                <template v-else-if="previewEspacializacionData?.type === 'espacializacion'">
                   <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px">
                     <div
                       style="
@@ -2560,7 +2572,7 @@ onMounted(() => {
                 class="flex cursor-pointer hover-texto-acento"
                 style="cursor: pointer"
                 @click="
-                  reporte.type === 'reporte'
+                  reporte.type === 'reporte' || reporte.type === 'report'
                     ? abrirPreviewReporte(reporte)
                     : abrirPreviewEspacializacion(reporte)
                 "
@@ -2609,33 +2621,35 @@ onMounted(() => {
           </div>
         </div>
         <!-- Modal confirmación de eliminación -->
-        <SisdaiModal ref="modalConfirmarEliminar">
-          <template #encabezado>
-            <h2 class="m-0">Eliminar elemento</h2>
-          </template>
-          <template #cuerpo>
-            <p>
-              ¿Deseas eliminar
-              <strong>{{ reporteParaEliminar?.report_name }}</strong
-              >? Esta acción no se puede deshacer.
-            </p>
-          </template>
-          <template #pie>
-            <button class="boton-primario boton-chico" type="button" @click="confirmarEliminar">
-              Eliminar
-            </button>
-            <button
-              class="boton-secundario boton-chico"
-              type="button"
-              @click="
-                modalConfirmarEliminar.cerrarModal();
-                reporteParaEliminar = null;
-              "
-            >
-              Cancelar
-            </button>
-          </template>
-        </SisdaiModal>
+        <ClientOnly>
+          <SisdaiModal ref="modalConfirmarEliminar">
+            <template #encabezado>
+              <h2 class="m-0">Eliminar elemento</h2>
+            </template>
+            <template #cuerpo>
+              <p>
+                ¿Deseas eliminar
+                <strong>{{ reporteParaEliminar?.report_name }}</strong
+                >? Esta acción no se puede deshacer.
+              </p>
+            </template>
+            <template #pie>
+              <button class="boton-primario boton-chico" type="button" @click="confirmarEliminar">
+                Eliminar
+              </button>
+              <button
+                class="boton-secundario boton-chico"
+                type="button"
+                @click="
+                  modalConfirmarEliminar.cerrarModal();
+                  reporteParaEliminar = null;
+                "
+              >
+                Cancelar
+              </button>
+            </template>
+          </SisdaiModal>
+        </ClientOnly>
       </div>
     </template>
   </IaLayoutPaneles>
