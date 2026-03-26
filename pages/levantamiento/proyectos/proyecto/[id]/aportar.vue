@@ -97,7 +97,7 @@ function irAProyectos() {
 }
 
 function irAAportesPorEnviar() {
-  router.push('/aportes/por-enviar/');
+  router.push('/levantamiento/aportes/por-enviar/');
 }
 </script>
 <template>

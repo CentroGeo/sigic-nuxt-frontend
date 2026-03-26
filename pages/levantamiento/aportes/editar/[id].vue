@@ -1,12 +1,8 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 
-import SisdaiBotonesRadioGrupo from '@centrogeomx/sisdai-componentes/src/componentes/boton-radio-grupo/SisdaiBotonesRadioGrupo.vue';
-import SisdaiBotonRadio from '@centrogeomx/sisdai-componentes/src/componentes/boton-radio/SisdaiBotonRadio.vue';
-import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
-
 // import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
-import { SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
+import { SisdaiCapaVectorial, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
 
 definePageMeta({
   middleware: 'auth',
@@ -19,21 +15,6 @@ const route = useRoute();
 
 const title = computed(() => route.query.title);
 const previous_path = computed(() => route.query.previous_path);
-
-const tipoObraBotonRadio = ref('mural');
-const estadoConservacionBotonRadio = ref('bueno');
-const autorCampoBase = ref('');
-const observacionesCampoBase = ref('');
-const imagenAporte = ref(null);
-const imagenPreview = ref(null);
-
-/**
- * Guardar y asignar un archivo de imagen al aporte
- * @param archivo de imagen que se guarda
- */
-async function guardarArchivo(archivo) {
-  imagenAporte.value = archivo;
-}
 
 const editarUbicaAporte = ref(true);
 
@@ -57,6 +38,50 @@ function obtenerRutaAnterior() {
   }
 }
 const modalRegresar = ref(null);
+
+const aporte = ref({});
+
+const punto = ref({
+  type: 'FeatureCollection',
+  features: [],
+});
+
+function generaIdAleatorio() {
+  return 'point-id-' + Math.random().toString(36).substring(2);
+}
+
+function clickMarca({ coordenadas }) {
+  const idAleatorio = generaIdAleatorio();
+
+  punto.value.features = [
+    {
+      type: 'Feature',
+      properties: { id: idAleatorio, img: 'url' },
+      geometry: { type: 'Point', coordinates: coordenadas },
+    },
+  ];
+}
+
+const preguntas = computed(() => {
+  const ficha = aporte.value?.answers;
+
+  return Array.isArray(ficha) ? ficha : [];
+});
+
+onMounted(async () => {
+  aporte.value = await storeLevantamiento.obtenerAportePorId(route.params.id);
+  const coordenadas = [aporte.value.longitud, aporte.value.latitud];
+
+  const idAleatorio = generaIdAleatorio();
+
+  punto.value.features = [
+    {
+      type: 'Feature',
+      properties: { id: idAleatorio, img: 'url' },
+      geometry: { type: 'Point', coordinates: coordenadas },
+    },
+  ];
+});
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeLevantamiento.catalogoColapsado">
@@ -67,33 +92,39 @@ const modalRegresar = ref(null);
     <template #visualizador>
       <main id="principal" class="m-t-4">
         <div class="contenedor">
-          <div class="flex">
-            <nuxt-link aria-label="Regresar a aportes" @click="modalRegresar.abrirModal()">
-              <span
-                class="pictograma-flecha-izquierda pictograma-mediano texto-color-acento m-r-2"
-                aria-hidden="true"
-              />
-              <span class="h5 texto-color-primario">Aportes {{ obtenerRutaAnterior() }}</span>
-            </nuxt-link>
+          <div class="boton-regresar m-b-3">
+            <button
+              class="boton-pictograma boton-sin-contenedor-secundario m-r-2"
+              aria-label="Regresar a proyectos"
+              type="button"
+              @click="modalRegresar.abrirModal()"
+            >
+              <span class="pictograma-flecha-izquierda" aria-hidden="true" />
+            </button>
+            Aportes {{ obtenerRutaAnterior() }}
           </div>
-          <h2>Editando aporte en:</h2>
-          <h3>{{ title }}</h3>
+          <h3 class="m-t-0 m-b-1">Editando aporte en:</h3>
+          <h5 class="m-t-0 texto-color-secundario">{{ title }}</h5>
         </div>
-        <hr />
+        <div class="borde-b borde-color-secundario"></div>
 
         <div v-if="editarUbicaAporte" class="contenedor m-b-1">
           <div class="flex m-t-3">
-            <div class="columna-5">
-              <h4 class="m-t-0">1. Ubica tu aporte</h4>
-              <p>
+            <div class="columna-6">
+              <p class="m-t-0 m-b-1 texto-tamanio-5">1. Ubica tu aporte</p>
+              <p class="m-t-0 m-b-3">
                 Usa tu ubicación actual, escribe un lugar en el buscador o selecciona un punto en el
                 mapa.
               </p>
-              <button class="boton-primario" type="button" @click="editarUbicaAporte = false">
+              <button
+                class="boton-primario boton-chico"
+                type="button"
+                @click="editarUbicaAporte = false"
+              >
                 Siguiente
               </button>
             </div>
-            <div class="columna-11">
+            <div class="columna-10">
               <ClientOnly>
                 <SisdaiMapa
                   id="aportesmapa"
@@ -101,8 +132,20 @@ const modalRegresar = ref(null);
                   style="height: 60vh; width: 100%"
                   descripcion="Este mapa permite seleccionar una ubicación y buscar un lugar en el buscador"
                   :vista="{ extension: '-118.3651,14.5321,-86.7104,32.7187' }"
+                  @click-marca="clickMarca"
                 >
                   <SisdaiCapaXyz />
+                  <SisdaiCapaVectorial
+                    v-for="value in punto.features"
+                    :id="`puntoss_${value.properties.id}`"
+                    :key="value.properties.id"
+                    :fuente="punto"
+                    :estilo="{
+                      'icono-anchura': 32,
+                      'icono-altura': 32,
+                      'icono-fuente': '/img/icono_ubicacion.svg',
+                    }"
+                  />
                 </SisdaiMapa>
               </ClientOnly>
             </div>
@@ -111,122 +154,64 @@ const modalRegresar = ref(null);
 
         <div v-if="!editarUbicaAporte" class="contenedor m-b-3" style="overflow-y: hidden">
           <div class="flex m-t-3">
-            <div class="columna-5">
-              <h4 class="m-t-0">2. Completa el formulario</h4>
-              <p>Completa la información solicitada relacionada con tu aporte.</p>
-              <button class="boton-secundario" type="button" @click="editarUbicaAporte = true">
+            <div class="columna-6">
+              <p class="m-t-0 m-b-1 texto-tamanio-5">2. Completa el formulario</p>
+              <p class="m-t-0 m-b-3">
+                Completa la información solicitada relacionada con tu aporte.
+              </p>
+              <div class="m-b-2">
+                <button class="boton-primario boton-chico m-r-2">Enviar a aprobación</button>
+              </div>
+              <div class="m-b-2">
+                <button class="boton-secundario boton-chico">Guardar borrador</button>
+              </div>
+              <button
+                class="boton-secundario boton-chico m-r-2"
+                type="button"
+                @click="editarUbicaAporte = true"
+              >
                 Regresar
               </button>
             </div>
-            <div
-              class="columna-11 fondo-color-acento borde-redondeado-16"
-              style="height: 60vh; overflow-y: auto"
-            >
-              <ol class="lista-sin-estilo m-3">
-                <li class="fondo-color-primario borde-redondeado-16 p-3">
-                  <p>1. Tipo de obra artística</p>
-                  <label class="p-b-3">
-                    Selecciona la opción que mejor describa el tipo de obra artística
-                  </label>
-                  <hr class="m-b-3" />
-                  <ClientOnly>
-                    <SisdaiBotonesRadioGrupo leyenda="" :es_vertical="true" :es_obligatorio="true">
-                      <SisdaiBotonRadio
-                        v-model="tipoObraBotonRadio"
-                        etiqueta="Mural"
-                        value="mural"
-                        name="tipodeobraartistica"
-                        :es_obligatorio="true"
-                      />
-                      <SisdaiBotonRadio
-                        v-model="tipoObraBotonRadio"
-                        etiqueta="Escultura"
-                        value="escultura"
-                        name="tipodeobraartistica"
-                        :es_obligatorio="true"
-                      />
-                      <SisdaiBotonRadio
-                        v-model="tipoObraBotonRadio"
-                        etiqueta="Instalación temporal"
-                        value="instalacion"
-                        name="tipodeobraartistica"
-                        :es_obligatorio="true"
-                      />
-                    </SisdaiBotonesRadioGrupo>
-                  </ClientOnly>
-                </li>
-                <li class="fondo-color-primario borde-redondeado-16 p-3">
-                  <p>2. Estado de conservación</p>
-                  <label class="p-b-3">
-                    Especifica el estado de conservación de la obra artística
-                  </label>
-                  <hr class="m-b-3" />
-                  <ClientOnly>
-                    <SisdaiBotonesRadioGrupo leyenda="" :es_vertical="true" :es_obligatorio="true">
-                      <SisdaiBotonRadio
-                        v-model="estadoConservacionBotonRadio"
-                        etiqueta="Bueno (colores vivos, sin daños visibles)"
-                        value="bueno"
-                        name="estadodeconservacion"
-                        :es_obligatorio="true"
-                      />
-                      <SisdaiBotonRadio
-                        v-model="estadoConservacionBotonRadio"
-                        etiqueta="Regular (algunos daños, desgaste por clima)"
-                        value="regular"
-                        name="estadodeconservacion"
-                        :es_obligatorio="true"
-                      />
-                      <SisdaiBotonRadio
-                        v-model="estadoConservacionBotonRadio"
-                        etiqueta="Deteriorado (despintado, vandalizado, apenas visible)"
-                        value="deteriorado"
-                        name="estadodeconservacion"
-                        :es_obligatorio="true"
-                      />
-                    </SisdaiBotonesRadioGrupo>
-                  </ClientOnly>
-                </li>
-                <li class="fondo-color-primario borde-redondeado-16 p-3">
-                  <p>3. Autor o colectivo</p>
-                  <label class="p-b-1">
-                    Escribe el nombre del autor o colectivo de la obra artística
-                  </label>
-                  <ClientOnly>
-                    <SisdaiCampoBase
-                      v-model="autorCampoBase"
-                      etiqueta="Autor o colectivo"
-                      ejemplo="Colectivo Arte Urbano"
-                      :es_obligatorio="true"
-                      :es_etiqueta_visible="false"
-                    />
-                  </ClientOnly>
-                </li>
-                <li class="fondo-color-primario borde-redondeado-16 p-3">
-                  <p>4. Observaciones adicionales</p>
-                  <ClientOnly>
-                    <SisdaiCampoBase
-                      v-model="observacionesCampoBase"
-                      etiqueta="Observaciones adicionales"
-                      ejemplo="El mural representa la vida cotidiana del barrio, con escena de merca..."
-                      :es_obligatorio="true"
-                      :es_etiqueta_visible="false"
-                    />
-                  </ClientOnly>
-                </li>
-                <li class="fondo-color-primario borde-redondeado-16 p-3">
-                  5. Agrega fotografías
-                  <label class="p-y-2">
-                    Adjunta hasta cuatro fotos donde se aprecie claramente la obra artística
-                    (Formatos permitidos: JPG, PNG, máximo 5 MB)
-                  </label>
-                  <IaElementoDragNdDrop
-                    ref="dragNdDrop"
-                    :imagen-inicial="imagenPreview"
-                    @pasar-archivo="(i) => guardarArchivo(i)"
+            <div class="columna-10">
+              <div class="fondo-color-acento borde-redondeado-20 p-3">
+                <div v-for="(pregunta, index) in preguntas" :key="index">
+                  <levantamiento-pregunta-abierta
+                    v-if="pregunta.tipo === 'abierta'"
+                    :pregunta="pregunta"
+                    :es-edicion="false"
+                    :indice="index"
+                    @update:pregunta="preguntas[index] = $event"
                   />
-                </li>
-              </ol>
+                  <levantamiento-pregunta-unica
+                    v-if="pregunta.tipo === 'unica'"
+                    :pregunta="pregunta"
+                    :es-edicion="false"
+                    :indice="index"
+                    @update:pregunta="preguntas[index] = $event"
+                  />
+                  <levantamiento-pregunta-multiple
+                    v-if="pregunta.tipo === 'multiple'"
+                    :pregunta="pregunta"
+                    :es-edicion="false"
+                    :indice="index"
+                    @update:pregunta="preguntas[index] = $event"
+                  />
+                  <levantamiento-pregunta-condicional
+                    v-if="pregunta.tipo === 'condicional'"
+                    :pregunta="pregunta"
+                    :es-edicion="false"
+                    :indice="index"
+                    @update:pregunta="preguntas[index] = $event"
+                  />
+                  <levantamiento-pregunta-multimedia
+                    v-if="pregunta.tipo === 'multimedia'"
+                    :pregunta="pregunta"
+                    :es-edicion="false"
+                    :indice="index"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -252,4 +237,13 @@ const modalRegresar = ref(null);
     </template>
   </UiLayoutPaneles>
 </template>
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.boton-regresar {
+  display: flex;
+  align-items: center;
+  font-size: var(--Tipos-Tamao-Prrafos-Texto-alto, 20px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--Tipos-Interlineado-Prrafos-Texto-alto, 30px);
+}
+</style>
