@@ -13,6 +13,7 @@ const config = useRuntimeConfig();
 
 async function cerrarSesion() {
   const idToken = data.value?.idToken;
+  const { baseURL, basePath } = config.public;
 
   // 1) Cerrar sesión local sin redirección
   await signOut({ redirect: false });
@@ -20,7 +21,7 @@ async function cerrarSesion() {
   // 2) Redirigir al logout de Keycloak
   const logoutUrl =
     `${config.public.keycloakIssuer}/protocol/openid-connect/logout` +
-    `?post_logout_redirect_uri=${encodeURIComponent(window.location.origin)}` +
+    `?post_logout_redirect_uri=${baseURL}${basePath}` +
     `&id_token_hint=${idToken}` +
     `&client_id=${config.public.keycloakClientId}`;
 

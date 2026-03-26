@@ -63,18 +63,19 @@ defineExpose({
             {{ estilo }}
           </option>
         </SisdaiSelector>
+        <div class="contenedor-mapa">
+          <SisdaiMapa class="gema" :vista="{ extension: extentMap }">
+            <SisdaiCapaXyz />
 
-        <SisdaiMapa class="gema" :vista="{ extension: extentMap }">
-          <SisdaiCapaXyz />
-
-          <SisdaiCapaWms
-            :capa="selectedElement.alternate"
-            :estilo="estiloSeleccionado"
-            :consulta="gnoxyFetch"
-            :fuente="findServer(selectedElement)"
-            @al-finalizar-carga="extentMap = selectedElement.extent.coords"
-          />
-        </SisdaiMapa>
+            <SisdaiCapaWms
+              :capa="selectedElement.alternate"
+              :estilo="estiloSeleccionado"
+              :consulta="gnoxyFetch"
+              :fuente="findServer(selectedElement)"
+              @al-finalizar-carga="extentMap = selectedElement.extent.coords"
+            />
+          </SisdaiMapa>
+        </div>
       </template>
 
       <template #pie>
@@ -104,6 +105,12 @@ defineExpose({
 <style lang="scss" scoped>
 #modal-mapa {
   max-width: 40%;
+  //max-height: 95vh;
+}
+.contenedor-mapa {
+  max-height: 30vh;
+  overflow-y: auto;
+  margin: 0px;
 }
 
 .ancho {

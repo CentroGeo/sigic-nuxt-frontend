@@ -27,8 +27,13 @@ function abrirModalTabla() {
   modalTabla.value?.abrirModal();
 }
 
+function cerrarModalTabla() {
+  modalTabla.value?.cerrarModal();
+}
+
 defineExpose({
   abrirModalTabla,
+  cerrarModalTabla,
 });
 
 watch([paginaActual], () => {

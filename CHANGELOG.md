@@ -7,6 +7,37 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.15.5] - 24-03-2026
+
+### Fixed (Arreglado)
+
+- Se implementó el uso de $fetch en la petición de cambio de avatar.
+- Se eliminó la opción de eliminar un servicio remoto no publicado, pues se identificó que el nombre alternativo con el que se guarda el recurso en geonode no siempre coincide con la información del endpoint de los recursos cosechables asociados a un servicio.
+- Se implementó un estilo para evitar que urls creen un scroll lateral en la sección de importar recursos de un servicio remoto.
+
+## [0.15.4] - 21-03-2026
+
+### Fixed (Arreglado)
+
+- La función cerrarSesion ahora construye el post_logout_redirect_uri utilizando baseURL y basePath desde config.public, asegurando que los usuarios sean redirigidos a la ubicación correcta después de cerrar sesión en Keycloak.
+
+## [0.15.3] - 20-03-2026
+
+### Fixed (Arreglado)
+
+- Se hicieron ajustes en los tamaños del contenedor del mapa en el modal de previsualización para que el scroll vertical afecte únicamente al mapa.
+- Se habilitó el botón de descarga en el modal de previsualización de tablas en la revisión para publicación de capas geográficas.
+- Se corrigieron los filtros de la sección de Mis Revisiones para corregir un bug que hacía que no aparecieran los recursos debidos.
+- Se agregó lógica condicional en el modal de Agregar a mis solicitudes para mostrar una alerta en caso de que falle la petición.
+
+## [0.15.2] - 10-03-2026
+
+### Fixed (Arreglado)
+
+- Se invirtió el orden en el que se hacen las solicitudes de publicación de recursos y permisos. Ahora primero se publican y luego se actualizan los permisos.
+- Se resolvió un pequeño bug en la edición de metadatos que tenía que ver con la ocasional aparición de mayúsculas en el campo de date_type.
+- Se resolvió un bug en el modal de revisión de metadatos que tenía que ver con intentar obtener los atributos de un documento.
+
 ## [0.15.1] - 05-03-2026
 
 ### Fixed (Arreglado)
@@ -320,6 +351,10 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.15.5]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.4...v0.15.5
+[0.15.4]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.3...v0.15.4
+[0.15.3]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.2...v0.15.3
+[0.15.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.1...v0.15.2
 [0.15.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.0...v0.15.1
 [0.15.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.14.2...v0.15.0
 [0.14.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.14.1...v0.14.2

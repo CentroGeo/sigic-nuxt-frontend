@@ -86,9 +86,7 @@ updateValues();
   background-color: var(--fondo);
   z-index: 9;
 }
-.contenedor {
-  background-color: pink;
-}
+
 .borde-enlace-activo {
   border-bottom: 4px solid var(--boton-primario-borde);
   border-radius: 0px;

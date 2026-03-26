@@ -338,24 +338,17 @@ async function guardarImagen(files) {
     formData.append('token', data.value?.accessToken);
     formData.append('image', files[0]);
 
-    const response = await fetch('/api/update-avatar/', {
+    const response = await $fetch('/api/update-avatar/', {
       method: 'POST',
       body: formData,
     });
-
-    if (!response.ok) {
+    if (response === 'Error') {
       didAvatarUpdateFail.value = true;
       isAvatarUpdating.value = false;
     } else {
-      const status = await response.text();
-      if (status === 'Error') {
-        didAvatarUpdateFail.value = true;
-        isAvatarUpdating.value = false;
-      } else {
-        userInfo.value.avatar_url = status;
-        didAvatarUpdateFail.value = false;
-        isAvatarUpdating.value = false;
-      }
+      userInfo.value.avatar_url = response;
+      didAvatarUpdateFail.value = false;
+      isAvatarUpdating.value = false;
     }
   } else {
     dragNdropAvatar.value?.archivoNoValido();

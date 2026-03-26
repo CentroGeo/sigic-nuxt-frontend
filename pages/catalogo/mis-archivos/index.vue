@@ -61,7 +61,8 @@ function setActions(recurso) {
   if (recurso.sourcetype === 'REMOTE' && recurso.is_published) {
     return 'Ver';
   } else if (recurso.sourcetype === 'REMOTE') {
-    return 'Editar, Ver, Publicar, Remover';
+    //return 'Editar, Ver, Publicar, Remover';
+    return 'Editar, Ver, Publicar';
   } else if (recurso.is_published === true) {
     return 'Ver, Descargar';
   } else {

@@ -299,7 +299,7 @@ onMounted(async () => {
                       :disabled="status !== 'authenticated'"
                       @change="toggleSelection(value)"
                     />
-                    <label :for="`checkbox-${value.unique_identifier}`">
+                    <label :for="`checkbox-${value.unique_identifier}`" class="break-url">
                       {{ value.unique_identifier }}
                     </label>
                   </td>
@@ -354,5 +354,9 @@ onMounted(async () => {
 .loader {
   max-height: 3em;
   object-fit: scale-down;
+}
+.break-url {
+  word-break: break-all !important;
+  display: inline-block !important;
 }
 </style>
