@@ -7,6 +7,15 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.16.0] - 26-03-2026
+
+### Agregado (Added)
+
+- Se agregaron las mini apps para generar reportes, espacializar información y realizar análisis geoespacial.
+- Se instalaron librerías para visualizar documentos de office como pptx, word, excel, pdf.
+- Se subieron imágenes en jpg para representar los diferentes tipos de representación para el análisis geoespacial.
+- Se integró una api para el backend del módulo de ia para las mini apps.
+
 ## [0.15.5] - 24-03-2026
 
 ### Fixed (Arreglado)
@@ -351,6 +360,7 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.16.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.5...v0.16.0
 [0.15.5]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.4...v0.15.5
 [0.15.4]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.3...v0.15.4
 [0.15.3]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.2...v0.15.3
