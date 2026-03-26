@@ -1,7 +1,8 @@
 <script setup>
 import { SisdaiLeyendaWms } from '@centrogeomx/sisdai-mapas';
 import { valoresPorDefecto as valoresModal } from '~/components/geocontenidos/loaderModal.vue';
-import { categoriesNamesInSpanish, wait } from '~/utils/consulta';
+import { wait } from '~/utils/consulta';
+import { GestionCapas } from '~/utils/geocontenidos/GestionCapas';
 
 const { gnoxyFetch } = useGnoxyUrl();
 const config = useRuntimeConfig();
@@ -13,10 +14,10 @@ const { escenario, escena } = useRoute().params;
  */
 const categorias = reactive({
   cargando: false, // Estado de carga de las categorías
-  datos: {}, // Datos del catálogo
   cargandoCapas: true, // Estado de carga de las capas
-  seleccion: undefined, // Categoría seleccionada
 });
+
+const gCapas = reactive(new GestionCapas());
 
 /**
  * Realiza la consulta de las categorías del catalogo
@@ -29,34 +30,25 @@ async function consultarCategorias() {
     const respuesta = await gnoxyFetch(url);
     const datos = await respuesta.json();
 
-    categorias.datos = {
-      ...categorias.datos,
+    gCapas.categorias = {
+      ...gCapas.categorias,
       ...Object.fromEntries(datos.categories.map(({ identifier }) => [identifier, undefined])),
     };
 
     url = datos.links.next;
   } while (url !== null);
 
-  categorias.seleccion = categoriasOrdenadas.value[0][0];
+  gCapas.categoria = gCapas.categoriasOrdenadas[0][0];
   categorias.cargando = false;
 }
 consultarCategorias();
-
-/**
- * Devuelve el listado de las categorias ordenadas alfabeticamente en español
- */
-const categoriasOrdenadas = computed(() =>
-  Object.keys(categorias.datos)
-    .map((identifier) => [identifier, categoriesNamesInSpanish[identifier]])
-    .sort((a, b) => a[1].localeCompare(b[1]))
-);
 
 /**
  * Realiza la consulta de las capas de una categoría
  * @param {string} identificador de la categoría
  */
 async function consultarCapasEnCategoria(identifier) {
-  if (categorias.datos[identifier] !== undefined) return;
+  if (gCapas.categorias[identifier] !== undefined) return;
 
   categorias.cargandoCapas = true;
 
@@ -70,13 +62,13 @@ async function consultarCapasEnCategoria(identifier) {
   };
 
   let url = `${config.public.geonodeApi}/sigic-resources?${new URLSearchParams(params).toString()}`;
-  categorias.datos[identifier] = {};
+  gCapas.categorias[identifier] = {};
   do {
     const respuesta = await gnoxyFetch(url);
     const datos = await respuesta.json();
 
-    categorias.datos[identifier] = {
-      ...categorias.datos[identifier],
+    gCapas.categorias[identifier] = {
+      ...gCapas.categorias[identifier],
       ...Object.fromEntries(
         datos.resources.map(({ pk, title, alternate, category }) => [
           pk,
@@ -90,16 +82,14 @@ async function consultarCapasEnCategoria(identifier) {
 
   categorias.cargandoCapas = false;
 }
-watch(() => categorias.seleccion, consultarCapasEnCategoria);
+watch(() => gCapas.categoria, consultarCapasEnCategoria);
 
 /**
  * Guarda la información de las capas almacenadas en la escena
  */
 const capasAlmacenadas = reactive({
-  datos: [], // Datos de la escena
   cargando: false, // Estado de carga
 });
-let capasEstaticas;
 
 /**
  * Realiza la consulta de las capas almacenadas en la escena
@@ -111,70 +101,18 @@ async function consultarCapasAlmacenadas() {
   const respuesta = await gnoxyFetch(url);
 
   const datos = await respuesta.json();
-  capasAlmacenadas.datos = datos;
+  gCapas.almacenadas = datos;
   capasAlmacenadas.cargando = false;
-  capasEstaticas = Object.fromEntries(datos.map((capa) => [capa.id, { ...capa }]));
 }
 consultarCapasAlmacenadas();
 
-/**
- * Capas seleccionadas que aún no están almacenadas en la escena
- */
-const capasSeleccionNoAlmacenadas = ref([]);
-
-/**
- * Capas almacenadas en la escena con formato de selección
- */
-const capasSeleccionAlmacenadas = computed(() =>
-  capasAlmacenadas.datos.map(({ geonode_id }) => `${categorias.seleccion}-${geonode_id}`)
-);
-
-/**
- * Capas seleccionadas junto con las almacenadas en la escena para los checkboxs del catálogo
- */
-const capasSeleccion = computed({
-  get: () => [...capasSeleccionNoAlmacenadas.value, ...capasSeleccionAlmacenadas.value],
-  set(nv) {
-    capasSeleccionNoAlmacenadas.value = nv.filter(
-      (categoriaCapa) => !capasSeleccionAlmacenadas.value.includes(categoriaCapa)
-    );
-  },
-});
-
-const modal = reactive({
-  ...valoresModal,
-});
-
-/**
- * Capas seleccionadas con formato para visualizar en capas almacenadas (pero que aún no ahn sido almacenadas)
- */
-const capasAlmacenar = computed(() =>
-  capasSeleccionNoAlmacenadas.value.map((categoriaCapa) => {
-    const [identifier, pk] = categoriaCapa.split('-');
-
-    return {
-      scene: escena,
-      geonode_id: pk,
-      visible: true,
-      opacity: 1,
-      style: null, //
-      style_title: null, //
-
-      id: -1, //
-      name: categorias.datos[identifier][pk].alternate, //
-      dataset_title: categorias.datos[identifier][pk].title, //
-      stack_order: -1, //
-    };
-  })
-);
+const modal = reactive({ ...valoresModal });
 
 /**
  *
  */
 async function almacenarCapas() {
-  modal.visible = true;
-  modal.cargando = true;
-
+  modal.mensaje = 'Almacenando capas';
   const url = `${config.public.geonodeApi}/scene-layers/bulk-add/${escena}//`;
   const respuesta = await gnoxyFetch(url, {
     method: 'POST',
@@ -182,47 +120,15 @@ async function almacenarCapas() {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${userData.value?.accessToken}`,
     },
-    body: JSON.stringify(capasAlmacenar.value),
+    body: JSON.stringify(gCapas.almacenar),
   });
 
-  const datos = await respuesta.json();
-
-  modal.cargando = false;
-
-  if (datos?.success === false) {
-    modal.titulo = 'Error';
-    modal.pictograma = 'cerrar';
-    modal.mensaje = datos.errors.join(` `);
-  } else {
-    modal.titulo = 'Guardado con éxito';
-  }
-
-  await wait(1500);
-  // modal.visible = false;
-  // modal.titulo = '';
-  Object.assign(modal, valoresModal);
+  return await respuesta.json();
 }
 
-/**
- *
- */
-const capasComoAlmacenadas = computed(() => [...capasAlmacenadas.datos, ...capasAlmacenar.value]);
-
-// visible: true,
-// opacity: 1,
-// style: null, //
-// style_title: null, //
-const capasActualizar = computed(() =>
-  capasAlmacenadas.datos.filter(
-    (capa) => JSON.stringify(capasEstaticas[capa.id]) !== JSON.stringify(capa)
-  )
-);
 async function actualizarCapa(capa) {
-  modal.visible = true;
-  modal.cargando = true;
-
+  modal.mensaje = 'Actualizando capas';
   const url = `${config.public.geonodeApi}/scene-layers/${capa.id}//`;
-  // console.log(url);
   const respuesta = await gnoxyFetch(url, {
     method: 'PATCH',
     headers: {
@@ -232,26 +138,11 @@ async function actualizarCapa(capa) {
     body: JSON.stringify({ ...capa }),
   });
 
-  const datos = await respuesta.json();
-
-  modal.cargando = false;
-  if (datos?.success === false) {
-    modal.titulo = 'Error';
-    modal.pictograma = 'cerrar';
-    modal.mensaje = datos.errors.join(` `);
-  } else {
-    modal.titulo = 'Guardado con éxito';
-  }
-
-  await wait(1500);
-  Object.assign(modal, valoresModal);
+  return await respuesta.json();
 }
 
-const capasEliminar = ref([]);
 async function eliminarCapas() {
-  modal.visible = true;
-  modal.cargando = true;
-
+  modal.mensaje = 'Eliminando capas';
   const url = `${config.public.geonodeApi}/scene-layers/bulk-delete/${escena}//`;
   const respuesta = await gnoxyFetch(url, {
     method: 'POST',
@@ -259,38 +150,53 @@ async function eliminarCapas() {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${userData.value?.accessToken}`,
     },
-    body: JSON.stringify(capasEliminar.value),
+    body: JSON.stringify(gCapas.eliminar),
   });
 
-  const datos = await respuesta.json();
+  return await respuesta.json();
+}
 
+function mostrarError({ errors }) {
   modal.cargando = false;
-  if (datos?.success === false) {
-    modal.titulo = 'Error';
-    modal.pictograma = 'cerrar';
-    modal.mensaje = datos.errors.join(` `);
-    modal.permitirCerrar = true;
-    return;
-  } else {
-    modal.titulo = 'Guardado con éxito';
-  }
-
-  await wait(1500);
-  Object.assign(modal, valoresModal);
+  modal.titulo = 'Error';
+  modal.pictograma = 'cerrar';
+  modal.mensaje = errors.join(` `);
+  modal.permitirCerrar = true;
 }
 
 async function guardarCambios() {
-  for await (const capa of capasActualizar.value) {
-    await actualizarCapa(capa);
+  modal.visible = true;
+  modal.cargando = true;
+
+  if (gCapas.eliminar.length > 0) {
+    const datos = await eliminarCapas();
+    if (datos?.success === false) {
+      mostrarError(datos);
+      return;
+    }
   }
 
-  if (capasSeleccionNoAlmacenadas.value.length > 0) {
-    await almacenarCapas();
+  for await (const capa of gCapas.actualizar) {
+    const datos = await actualizarCapa(capa);
+    if (datos?.success === false) {
+      mostrarError(datos);
+      return;
+    }
   }
 
-  if (capasEliminar.value.length > 0) {
-    await eliminarCapas();
+  if (gCapas.seleccionNoAlmacenadas.length > 0) {
+    const datos = await almacenarCapas();
+    if (datos?.success === false) {
+      mostrarError(datos);
+      return;
+    }
   }
+
+  modal.titulo = 'Guardado con éxito';
+  modal.cargando = false;
+  modal.mensaje = '';
+  await wait(1500);
+  reloadNuxtApp();
 }
 </script>
 
@@ -310,17 +216,29 @@ async function guardarCambios() {
         Volver
       </NuxtLink>
 
-      <input type="submit" class="boton-primario" value="Guardar" />
+      <button class="boton-secundario" :disabled="!gCapas.hayCambios">Restablecer</button>
+
+      <input type="submit" class="boton-primario" value="Guardar" :disabled="!gCapas.hayCambios" />
     </section>
     <!--  -->
 
+    <!-- <hr />
+    almacenadas: {{ gCapas.almacenadas_ }}
     <hr />
-    capasActualizar: <code>{{ capasActualizar }}</code>
+    seleccionAlmacenadas: {{ gCapas.seleccionAlmacenadas }}
     <hr />
-    capasAlmacenar: <code>{{ capasAlmacenar }}</code>
+    seleccionNoAlmacenadas: {{ gCapas.seleccionNoAlmacenadas }}
     <hr />
-    capasEliminar: <code>{{ capasEliminar }}</code>
+    seleccion: {{ gCapas.seleccion }}
     <hr />
+    <b>almacenar:</b> {{ gCapas.almacenar }}
+    <hr />
+    <b>actualizar:</b> {{ gCapas.actualizar }}
+    <hr />
+    <b>eliminar:</b> {{ gCapas.eliminar }}
+    <hr />
+    eliminarSeleccion: {{ gCapas.eliminarSeleccion }}
+    <hr /> -->
 
     <p class="m-0">Selecciona las capas que deseas agregar a esta escena</p>
 
@@ -328,7 +246,7 @@ async function guardarCambios() {
       <div class="columna-10">
         <h3>Buscar y Agregar capas</h3>
 
-        <div style="background-color: antiquewhite">Buscador {{ categorias.seleccion }}</div>
+        <div style="background-color: antiquewhite">Buscador {{ gCapas.categoria }}</div>
 
         <div class="flex">
           <ul class="columna-6 lista-sin-estilo lista-categorias">
@@ -337,14 +255,14 @@ async function guardarCambios() {
             <GeocontenidosLoader v-if="categorias.cargando" />
 
             <li
-              v-for="[identifier, nombre] in categoriasOrdenadas"
+              v-for="[identifier, nombre] in gCapas.categoriasOrdenadas"
               v-else
               :key="`categoria-${identifier}`"
               class="fondo-color-acento borde-redondeado-8"
             >
               <input
                 :id="`radio-${identifier}`"
-                v-model="categorias.seleccion"
+                v-model="gCapas.categoria"
                 type="radio"
                 :value="identifier"
               />
@@ -357,25 +275,25 @@ async function guardarCambios() {
 
             <GeocontenidosLoader v-if="categorias.cargandoCapas" />
 
-            <p v-else-if="Object.keys(categorias.datos[categorias.seleccion]).length === 0">
+            <p v-else-if="Object.keys(gCapas.categorias[gCapas.categoria]).length === 0">
               No se encontraron resultados que coincidan con la búsqueda.
             </p>
 
             <li
-              v-for="(capa, pk) in categorias.datos[categorias.seleccion]"
+              v-for="(capa, pk) in gCapas.categorias[gCapas.categoria]"
               v-else
               :key="`checkbox-capa-catalogo-${pk}`"
               class="fondo-color-acento borde-redondeado-8"
             >
               <input
                 :id="`checkbox-capa-catalogo-${pk}`"
-                v-model="capasSeleccion"
+                v-model="gCapas.seleccion"
                 type="checkbox"
                 :value="`${capa.category}-${pk}`"
-                :disabled="capasSeleccionAlmacenadas.includes(`${capa.category}-${pk}`)"
+                :disabled="gCapas.seleccionAlmacenadas.includes(`${gCapas.categoria}-${pk}`)"
               />
               <label :for="`checkbox-capa-catalogo-${pk}`">
-                {{ capa.title }} ({{ `${capa.category}-${pk}` }})
+                {{ capa.title }}
               </label>
             </li>
           </ul>
@@ -388,12 +306,12 @@ async function guardarCambios() {
         <ul class="lista-sin-estilo lista-capas">
           <GeocontenidosLoader v-if="capasAlmacenadas.cargando" />
 
-          <p v-else-if="capasComoAlmacenadas.length === 0">
+          <p v-else-if="gCapas.comoAlmacenadas.length === 0">
             No se encontraron resultados que coincidan con la búsqueda.
           </p>
 
           <li
-            v-for="capa in capasComoAlmacenadas"
+            v-for="capa in gCapas.comoAlmacenadas"
             v-else
             :key="`capa-${capa.id}`"
             class="fondo-color-acento borde-redondeado-8 p-2"
@@ -424,7 +342,7 @@ async function guardarCambios() {
                 aria-label="Eliminar selección"
                 type="button"
                 class="boton-pictograma boton-sin-contenedor-secundario"
-                @click="capasEliminar.push(capa)"
+                @click="gCapas.asociaElimimar(capa)"
               >
                 <span class="pictograma-eliminar" aria-hidden="true" />
               </button>
@@ -435,7 +353,10 @@ async function guardarCambios() {
                 class="boton-pictograma boton-sin-contenedor-secundario"
                 @click="capa.visible = !capa.visible"
               >
-                <span :class="`pictograma-ojo-${capa.visible ? 'ver' : 'ocultar'}`" />
+                <span
+                  :class="`pictograma-ojo-${capa.visible ? 'ver' : 'ocultar'}`"
+                  aria-hidden="true"
+                />
               </button>
 
               <button
