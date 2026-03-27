@@ -321,7 +321,7 @@ onUnmounted(() => {
                   Sube una imagen en formato JPG o PNG (máx. 5MB).
                 </div>
                 <ClientOnly>
-                  <IaElementoDragNdDrop
+                  <agNdDrop
                     ref="dragNdDrop"
                     :imagen-inicial="imagenPreview"
                     @pasar-archivo="(i) => guardarArchivo(i)"

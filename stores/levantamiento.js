@@ -491,5 +491,17 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
         console.error('Error obteniendo aporte por id:', err);
       }
     },
+    async enviarAporte(formData) {
+      try {
+        const data = await $fetch(`${apiUrl}/raising/user/create`, {
+          method: 'POST',
+          body: formData,
+        });
+
+        console.log(data);
+      } catch (err) {
+        console.error('Error enviando aporte:', err);
+      }
+    },
   };
 });

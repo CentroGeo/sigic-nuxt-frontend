@@ -99,6 +99,50 @@ function irAProyectos() {
 function irAAportesPorEnviar() {
   router.push('/levantamiento/aportes/por-enviar/');
 }
+
+const imagenesPorPregunta = ref({});
+
+function recibirImagenes({ indice, archivos }) {
+  imagenesPorPregunta.value[indice] = archivos;
+}
+
+async function enviarAporte() {
+  try {
+    const formData = new FormData();
+
+    formData.append('id_usuario', data.value?.user.email);
+    formData.append('id_proyecto', route.params.id);
+    formData.append('latitud', punto.value.features[0].geometry.coordinates[1]);
+    formData.append('longitud', punto.value.features[0].geometry.coordinates[0]);
+    formData.append('status', 'EN REVISION');
+    formData.append('titulo', proyecto.value.nombre);
+
+    const preguntasConMedia = JSON.parse(JSON.stringify(toRaw(preguntas.value)));
+
+    Object.entries(imagenesPorPregunta.value).forEach(([indice, archivos]) => {
+      if (!preguntasConMedia[indice]) return;
+
+      preguntasConMedia[indice].media = [];
+
+      archivos.forEach((archivo, i) => {
+        const extension = archivo.name.split('.').pop()?.toLowerCase() || 'jpg';
+        const timestamp = Date.now();
+        const nombre = `${route.params.id}_${indice}_${timestamp}_${i}.${extension}`;
+
+        preguntasConMedia[indice].media.push(nombre);
+        formData.append('media', archivo, nombre);
+      });
+    });
+
+    formData.append('respuestas', JSON.stringify(preguntasConMedia));
+
+    await storeLevantamiento.enviarAporte(formData);
+
+    modalBorrador.value.abrirModal();
+  } catch (error) {
+    console.error('Error en enviarAporte:', error);
+  }
+}
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeLevantamiento.catalogoColapsado">
@@ -169,13 +213,13 @@ function irAAportesPorEnviar() {
                 Completa la información solicitada relacionada con tu aporte.
               </p>
               <div class="m-b-2">
-                <button class="boton-primario boton-chico m-r-2" disabled>
+                <button class="boton-primario boton-chico m-r-2" @click="enviarAporte">
                   Enviar a aprobación
                 </button>
               </div>
-              <p class="m-t-0 m-b-2 texto-tamanio-2 texto-color-error">
+              <!-- <p class="m-t-0 m-b-2 texto-tamanio-2 texto-color-error">
                 *Aun no se han completado todas las preguntas obligatorias
-              </p>
+              </p> -->
               <div class="m-b-2">
                 <button class="boton-secundario boton-chico" @click="guardarBorrador">
                   Guardar borrador
@@ -224,6 +268,7 @@ function irAAportesPorEnviar() {
                     :pregunta="pregunta"
                     :es-edicion="false"
                     :indice="index"
+                    @guardar-imagenes="recibirImagenes"
                   />
                 </div>
               </div>
