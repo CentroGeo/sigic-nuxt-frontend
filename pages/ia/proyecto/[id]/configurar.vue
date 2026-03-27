@@ -533,7 +533,7 @@ onBeforeUnmount(() => {
                   ref="fileInput"
                   type="file"
                   multiple
-                  accept=".shp,.geojson,.csv,.kml,.zip,.pdf,.doc,.docx,.xls,.xlsx"
+                  accept=".shp,.geojson,.csv,.kml,.zip,.pdf,.doc,.docx,.xls,.xlsx,.json"
                   style="display: none"
                   @change="manejarSeleccionArchivos"
                 />
