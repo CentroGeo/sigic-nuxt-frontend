@@ -88,8 +88,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     // Variables privadas (solo disponibles en el servidor)
     authSecret: process.env.NUXT_AUTH_SECRET,
-    keycloakClientId: process.env.KEYCLOAK_CLIENT_ID,
-    keycloakIssuer: process.env.KEYCLOAK_ISSUER,
+    keycloakClientId: process.env.NUXT_PUBLIC_KEYCLOAK_CLIENT_ID,
+    keycloakIssuer: process.env.NUXT_PUBLIC_KEYCLOAK_ISSUER,
     keycloakClientSecret: process.env.KEYCLOAK_CLIENT_SECRET,
 
     // Variables públicas (disponibles en el cliente)

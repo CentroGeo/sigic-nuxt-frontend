@@ -13,15 +13,23 @@ const config = useRuntimeConfig();
 
 async function cerrarSesion() {
   const idToken = data.value?.idToken;
-  const { baseURL, basePath } = config.public;
 
   // 1) Cerrar sesión local sin redirección
   await signOut({ redirect: false });
 
   // 2) Redirigir al logout de Keycloak
+  const origin = import.meta.client
+    ? window.location.origin
+    : (() => {
+        const event = useRequestEvent();
+        const host = event?.node.req.headers.host;
+        const proto = event?.node.req.headers['x-forwarded-proto'] || 'http';
+        return `${proto}://${host}`;
+      })();
+
   const logoutUrl =
     `${config.public.keycloakIssuer}/protocol/openid-connect/logout` +
-    `?post_logout_redirect_uri=${baseURL}${basePath}` +
+    `?post_logout_redirect_uri=${origin}${config.app.baseURL}` +
     `&id_token_hint=${idToken}` +
     `&client_id=${config.public.keycloakClientId}`;
 
@@ -108,27 +116,29 @@ if (route.path === '/mi-cuenta') {
   gap: 0;
   border-bottom: var(--boton-secundario-deshabilitado-borde) 1px solid;
 }
+
 a {
   box-shadow: inherit;
-  padding: inherit;
   padding: 16px 24px 16px 16px;
   position: relative;
   color: var(--texto-secundario);
   font-weight: 600;
   border-radius: 0;
+
   &::after {
     content: '';
     position: absolute;
     left: calc(50%);
     top: calc(100%);
-    width: 0px;
+    width: 0;
     height: 4px;
-    border-radius: 2px 2px 0px 0px;
+    border-radius: 2px 2px 0 0;
     background-color: var(--boton-primario-borde);
     text-align: center;
     margin: -4px auto 0;
     transition: all 0.2s;
   }
+
   &.router-link-active.router-link-exact-active {
     &::after {
       content: '';
@@ -139,6 +149,7 @@ a {
       height: 8px;
     }
   }
+
   &:hover,
   &:focus {
     background-color: var(--boton-secundario-cursor-fondo);
@@ -146,9 +157,11 @@ a {
     // background-color: transparent;
   }
 }
+
 .contenedor-botones {
   button {
     width: 100%;
+
     span {
       margin: auto;
     }
