@@ -783,7 +783,11 @@ async function removerRevision() {
             </div>
           </div>
           <!--Alerta de que fracasó la eliminación-->
-          <div v-if="wasDeletionSuccesful === false" class="flex" style="gap: 0px">
+          <div
+            v-if="wasDeletionSuccesful === false && !isBeingDeleted"
+            class="flex"
+            style="gap: 0px"
+          >
             <p
               class="columna-14 texto-color-error fondo-color-error borde borde-color-error p-2 borde-redondeado-8"
             >

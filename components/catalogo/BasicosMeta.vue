@@ -160,7 +160,7 @@ async function guardarImagen(files) {
             >
               <option value="creation">Creación</option>
               <option value="publication">Publicación</option>
-              <option value="revison">Revisón</option>
+              <option value="revision">Revisón</option>
             </SisdaiSelector>
           </ClientOnly>
         </div>

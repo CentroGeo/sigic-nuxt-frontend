@@ -27,10 +27,12 @@ const seleccionTipoArchivo = computed({
   get: () => storeFilters.filters.requests,
   set: (value) => storeFilters.updateFilter('requests', value),
 });
-const seleccionOrden = computed({
+
+// const seleccionOrden = ref('updated_at');
+/* const seleccionOrden = computed({
   get: () => storeFilters.filters.sort,
   set: (value) => storeFilters.updateFilter('sort', value),
-});
+}); */
 
 /* const inputSearch = computed({
   get: () => storeFilters.filters.inputSearch,
@@ -88,7 +90,8 @@ function updateResources() {
       categoria: d.resource.category,
       actualizacion: formatearFecha(d.updated_at),
       estatus: dictEstatus[d.status],
-      acciones: d.status === 'pending' ? 'Ver, Comentarios, Cancelar' : 'Ver, Comentarios',
+      //acciones: d.status === 'pending' ? 'Ver, Comentarios, Cancelar' : 'Ver, Comentarios',
+      acciones: 'Ver, Comentarios',
       comentarios: d.rejection_reason,
       revisor: d.reviewer?.username,
     };
@@ -132,14 +135,8 @@ onMounted(async () => {
   await storeCatalogo.getUserInfo();
   storeFilters.resetAll();
   storeFilters.buildQueryParams('all');
-  storeResources.getMyTotal('disponibles', {
-    ...params.value,
-    'filter{owner}': storeCatalogo.userInfo.pk,
-  });
-  storeResources.getMyTotal('pendientes', {
-    ...params.value,
-    'filter{owner}': storeCatalogo.userInfo.pk,
-  });
+  storeResources.getMyTotal('disponibles', params.value);
+  storeResources.getMyTotal('pendientes', params.value);
 });
 </script>
 
@@ -172,7 +169,7 @@ onMounted(async () => {
             </ClientOnly>
           </div>
           <!--class="columna-4"-->
-          <div class="columna-7">
+          <!-- <div class="columna-7">
             <ClientOnly>
               <label for="selector-orden-solicitudes">Ordenar por</label>
               <select
@@ -181,13 +178,13 @@ onMounted(async () => {
                 class="m-b-2"
                 :disabled="true"
               >
-                <option value="titulo">Título</option>
-                <option value="categoria">Categoría</option>
-                <option value="fecha_descendente">Más reciente</option>
-                <option value="fecha_ascendente">Más antiguo</option>
+                <option value="title">Título</option>
+                <option value="category">Categoría</option>
+                <option value="updated_at">Más reciente</option>
+                <option value="-updated_at">Más antiguo</option>
               </select>
             </ClientOnly>
-          </div>
+          </div> -->
           <div class="columna-8">
             <div class="flex flex-contenido-separado">
               <!--Campo de busqueda-->

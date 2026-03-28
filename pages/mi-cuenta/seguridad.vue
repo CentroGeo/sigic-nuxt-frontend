@@ -92,63 +92,12 @@ onMounted(() => {
     <div class="p-x-7 p-b-5">
       <h3>Cambiar contraseña</h3>
       <p class="m-0">
-        Elige una nueva contraseña para tu cuenta. Es posible que se cierre tu sesión en otros
-        dispositivos.
+        Elige una nueva contraseña para tu cuenta. Usa al menos 8 caracteres, incluyendo una letra
+        mayúscula, una letra minúscula, un número y un símbolo.
       </p>
-      <p class="m-0">
-        Usa al menos 8 caracteres, incluyendo una letra mayúscula, una letra minúscula, un número y
-        un símbolo.
-      </p>
+      <p>Es posible que se cierre tu sesión en otros dispositivos.</p>
 
-      <div class="m-y-2">
-        <label for="current-password">Contraseña actual</label>
-        <input
-          id="current-password"
-          type="password"
-          name="current-password"
-          minlength="8"
-          placeholder="Introduce la contaseña actual"
-          :disabled="true"
-        />
-      </div>
-
-      <div class="m-y-2">
-        <label for="new-password">Contraseña nueva</label>
-        <input
-          id="new-password"
-          type="password"
-          name="current-password"
-          minlength="8"
-          placeholder="Introduce la contaseña nueva"
-          :disabled="true"
-        />
-      </div>
-      <!--       <ClientOnly>
-        <SisdaiCampoBase
-          class="m-y-2"
-          etiqueta="Contraseña actual"
-          ejemplo="Introduce tu contraseña actual"
-          tipo="password"
-          :es_obligatorio="false"
-          :es_etiqueta_visible="true"
-        />
-      </ClientOnly>
-      <ClientOnly>
-        <SisdaiCampoBase
-          class="m-y-2"
-          etiqueta="Contraseña nueva"
-          ejemplo="Introduce la contraseña nueva"
-          tipo="password"
-          :es_obligatorio="false"
-          :es_etiqueta_visible="true"
-        />
-      </ClientOnly> -->
-
-      <!-- <button class="boton-primario boton-chico m-y-2" >
-        Guardar Contraseña <span class="pictograma-guardar"></span>
-      </button> -->
-
-      <button class="boton-primario boton-chico m-y-2" @click="updatePassword">
+      <button class="boton-primario boton-chico m-b-3" @click="updatePassword">
         Cambiar Contraseña
       </button>
 

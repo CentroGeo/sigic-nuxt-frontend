@@ -61,7 +61,8 @@ function setActions(recurso) {
   if (recurso.sourcetype === 'REMOTE' && recurso.is_published) {
     return 'Ver';
   } else if (recurso.sourcetype === 'REMOTE') {
-    return 'Editar, Ver, Publicar, Remover';
+    //return 'Editar, Ver, Publicar, Remover';
+    return 'Editar, Ver, Publicar';
   } else if (recurso.is_published === true) {
     return 'Ver, Descargar';
   } else {
@@ -187,7 +188,10 @@ onMounted(async () => {
   storeFilters.resetAll();
   storeFilters.buildQueryParams(seleccionTipoArchivo.value);
   storeResources.getMyTotal('pendientes', params.value);
-  storeResources.getMyTotal('publicacion', params.value);
+  storeResources.getMyTotal('publicacion', {
+    ...params.value,
+    'filter{owner}': storeCatalogo.userInfo.pk,
+  });
 });
 </script>
 

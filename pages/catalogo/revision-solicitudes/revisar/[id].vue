@@ -12,6 +12,9 @@ const route = useRoute();
 const selectedPk = route.query.pk;
 const selectedPkRequest = route.query.pk_request;
 const selectedResourceType = route.query.resource_type;
+const processingRequest = ref(false);
+const acceptingFailed = ref(false);
+const owningProcessFailed = ref(false);
 
 const previousPath = computed(() => storeCatalogo.previousPath || '');
 
@@ -27,7 +30,17 @@ const areaMensajeNoAceptar = ref('');
 const { data } = useAuth();
 const token = data.value?.accessToken;
 
+function abrirModalAceptar() {
+  acceptingFailed.value = false;
+  processingRequest.value = false;
+  modalAceptar.value.abrirModal();
+}
+
+/**
+ * Aprueba la solicitud y actualiza los permisos del recurso recién publicado
+ */
 async function aceptarSolicitud() {
+  processingRequest.value = true;
   try {
     // petición para aceptar y publicar la solicitud del recurso
     const response = await $fetch(`/api/solicitudes`, {
@@ -40,10 +53,32 @@ async function aceptarSolicitud() {
           areaMensajeAceptar.value === '' ? 'Sin comentarios' : areaMensajeAceptar.value,
       },
     });
-    console.warn(response);
-    modalAceptar.value.cerrarModal();
-    await navigateTo('/catalogo/revision-solicitudes/aceptadas');
+    if (publishRequest === 'Error') {
+      console.error('No se pudo aceptar la solicitud');
+      processingRequest.value = false;
+      acceptingFailed.value = true;
+      return;
+    } else {
+      // Actualizamos permisos
+      const updatePermissions = await $fetch('/api/actualizar-permisos', {
+        method: 'POST',
+        headers: { token: token },
+        body: { pk: selectedPk },
+      });
+      if (updatePermissions === 'Error') {
+        console.error('No se pudieron actualizar los permisos');
+        processingRequest.value = false;
+        acceptingFailed.value = true;
+        return;
+      } else {
+        processingRequest.value = false;
+        acceptingFailed.value = false;
+        modalAceptar.value.cerrarModal();
+        await navigateTo('/catalogo/revision-solicitudes/aceptadas');
+      }
+    }
   } catch (error) {
+    processingRequest.value = false;
     console.error(error);
   }
 }
@@ -69,6 +104,7 @@ async function noAceptarSolicitud() {
 }
 
 async function agregarAMisSolicitudes() {
+  owningProcessFailed.value = false;
   try {
     // petición para agregar la solicitud a Mis revisiones
     const response = await $fetch(`/api/solicitudes`, {
@@ -80,11 +116,11 @@ async function agregarAMisSolicitudes() {
         rejection_reason: 'En revisión.', // no se puede quedar vacío ''
       },
     });
-    console.warn(response);
-    if (response !== undefined) {
+    if (response !== undefined && response !== 'Error') {
       modalAgregar.value.cerrarModal();
-      // ir a Mis revisiones
       await navigateTo('/catalogo/revision-solicitudes/mis-revisiones');
+    } else {
+      owningProcessFailed.value = true;
     }
   } catch (error) {
     console.error(error);
@@ -136,11 +172,11 @@ onMounted(() => {
           </nuxt-link>
 
           <div v-if="previousPath === `${baseUrl}/mis-revisiones`" class="flex">
-            <button type="button" @click="modalAceptar.abrirModal()">
+            <button type="button" @click="abrirModalAceptar">
               Aceptar<span class="pictograma-aprobado" aria-hidden="true" />
             </button>
             <button type="button" @click="modalNoAceptar.abrirModal()">
-              Rechazar<span class="pictograma-cerrar" aria-hidden="true" />
+              No Aceptar<span class="pictograma-cerrar" aria-hidden="true" />
             </button>
           </div>
 
@@ -180,10 +216,20 @@ onMounted(() => {
         <SisdaiModal ref="modalAgregar">
           <template #encabezado> <h2>Agregar a mi revisión</h2> </template>
           <template #cuerpo>
-            <p>
+            <p v-if="!owningProcessFailed">
               ¿Deseas añadir este documento a tu revisión? Al hacerlo, quedará reservado para ti y
               no podrá ser revisado por otras personas hasta que lo liberes o completes el proceso.
             </p>
+
+            <div
+              v-if="owningProcessFailed"
+              class="fondo-color-error flex flex-contenido-centrado ancho-lectura borde-redondeado-8 sin-seleccion"
+            >
+              <p class="texto-color-error m-2">
+                No pudimos completar la solicitud. Revisa tu conexión a internet e intentalo de
+                nuevo más tarde.
+              </p>
+            </div>
           </template>
           <template #pie>
             <button
@@ -194,6 +240,7 @@ onMounted(() => {
               Cancelar
             </button>
             <button
+              v-if="!owningProcessFailed"
               class="boton-primario boton-chico"
               type="button"
               @click="agregarAMisSolicitudes"
@@ -207,23 +254,54 @@ onMounted(() => {
         <SisdaiModal ref="modalAceptar">
           <template #encabezado> <h2>Aceptar solicitud</h2> </template>
           <template #cuerpo>
-            <SisdaiAreaTexto
-              v-model="areaMensajeAceptar"
-              etiqueta="Mensaje (opcional)"
-              ejemplo="Escribe un mensaje"
-              :es_obligatorio="false"
-              :es_etiqueta_visible="true"
-            />
+            <!--Alerta de proceso activo-->
+            <div
+              v-if="processingRequest"
+              class="flex m-y-2 p-1 borde-redondeado-16 fondo-color-informacion texto-color-informacion borde borde-color-informacion"
+            >
+              <div class="columna-3 flex-vertical-centrado">
+                <img src="/img/loader.gif" alt="...Cargando" class="loader" />
+              </div>
+              <p class="columna-12">Procesando solicitud</p>
+            </div>
+            <!--Alerta de proceso fallido-->
+
+            <div
+              v-if="acceptingFailed"
+              class="flex m-y-2 p-1 borde-redondeado-16 fondo-color-error texto-color-error borde borde-color-error"
+            >
+              <p class="columna-12">
+                <span class="pictograma-alerta"></span> No se pudo completar el proceso
+              </p>
+            </div>
+
+            <!--Cuadro de texto y botones-->
+            <div>
+              <label for="textarea1">Escribe un mensaje</label>
+              <textarea
+                id="textarea1"
+                v-model="areaMensajeAceptar"
+                name="textarea1"
+                placeholder="Mensaje (opcional)"
+                :disabled="processingRequest || acceptingFailed"
+              ></textarea>
+            </div>
           </template>
           <template #pie>
             <button
               class="boton-secundario boton-chico"
               type="button"
+              :disabled="processingRequest || acceptingFailed"
               @click="modalAceptar.cerrarModal()"
             >
               Cerrar
             </button>
-            <button class="boton-primario boton-chico" type="button" @click="aceptarSolicitud">
+            <button
+              class="boton-primario boton-chico"
+              type="button"
+              :disabled="processingRequest || acceptingFailed"
+              @click="aceptarSolicitud"
+            >
               Enviar
             </button>
           </template>

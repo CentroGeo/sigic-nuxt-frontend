@@ -20,11 +20,12 @@ const dragNdDrop = ref(null);
 const style_files = ['.sld'];
 const isLoadingGlobal = ref(true);
 const isLoading = ref(false);
-const loadedStylesSatus = ref({});
+const loadedStylesStatus = ref({});
 const resourcestyles = ref([]);
 
 // Función que usa el nuevo endpoint
 async function guardarArchivo(files) {
+  loadedStylesStatus.value = {};
   subidaExitosa.value = undefined;
   isLoading.value = true;
 
@@ -38,7 +39,7 @@ async function guardarArchivo(files) {
   // Si los archivos son válidos, agregamos los sld
   if (!Object.values(validFileList).includes(false)) {
     for (const d of files) {
-      loadedStylesSatus.value[d.name] = 'loading';
+      loadedStylesStatus.value[d.name] = 'loading';
     }
     for (const d of files) {
       const fileName = d.name;
@@ -50,7 +51,7 @@ async function guardarArchivo(files) {
         method: 'POST',
         body: formData,
       });
-      loadedStylesSatus.value[fileName] = fileUpdateStatus;
+      loadedStylesStatus.value[fileName] = fileUpdateStatus;
       const styles = await getSLDs(resourceToEdit.value);
       resourcestyles.value = styles.styleList;
     }
@@ -147,12 +148,12 @@ onMounted(async () => {
             </div>
 
             <div class="columna-16">
-              <div v-if="Object.keys(loadedStylesSatus).length > 0">
+              <div v-if="Object.keys(loadedStylesStatus).length > 0">
                 <h2>Cargas recientes</h2>
-                <div v-for="file in Object.keys(loadedStylesSatus)" :key="file">
+                <div v-for="file in Object.keys(loadedStylesStatus)" :key="file">
                   <!--Cargando-->
                   <div
-                    v-if="loadedStylesSatus[file] === 'loading'"
+                    v-if="loadedStylesStatus[file] === 'loading'"
                     class="fondo-color-neutro p-3 borde-redondeado-16 m-y-2"
                   >
                     <img class="color-invertir" src="/img/loader.gif" height="30" />
@@ -161,7 +162,7 @@ onMounted(async () => {
 
                   <!--Subida exitosa-->
                   <div
-                    v-else-if="loadedStylesSatus[file] === 'finished'"
+                    v-else-if="loadedStylesStatus[file] === 'finished'"
                     class="fondo-color-confirmacion p-3 borde-redondeado-16 m-y-2"
                   >
                     <div class="flex texto-color-confirmacion">
@@ -194,8 +195,3 @@ onMounted(async () => {
     </template>
   </UiLayoutPaneles>
 </template>
-<style scoped>
-.h3 {
-  background-color: pink;
-}
-</style>

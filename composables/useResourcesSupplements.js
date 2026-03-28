@@ -324,7 +324,7 @@ export function useResourcesSupplements() {
         const stylesRes = await gnoxyFetch(stylesURL);
 
         if (!stylesRes.ok) {
-          console.error('Falló la petición de estilos de:', resource.title);
+          //console.error('Falló la petición de estilos de:', resource.title);
           return { defaultStyle, styleList };
         }
 
@@ -350,7 +350,7 @@ export function useResourcesSupplements() {
         return { defaultStyle, styleList };
       }
     } catch {
-      console.error('Falló la petición general de estilos de:', resource.title);
+      //console.error('Falló la petición general de estilos de:', resource.title);
       return { defaultStyle, styleList };
     }
   }
@@ -430,6 +430,27 @@ export function useResourcesSupplements() {
     }
     return { status, data };
   }
+
+  /**Esta función regresa una lista con las capas dependiendo de
+   * si vienen de un servidor tipo arcgis o ows
+   */
+  function filteredByServerType(resourcesList, serverType) {
+    const serverTypeCollection = [];
+    resourcesList.forEach((d) => {
+      const server = findServer(d);
+      if (serverType === 'arcgis') {
+        if (server.includes(serverType)) {
+          serverTypeCollection.push(d);
+        }
+      } else {
+        if (!server.toLowerCase().includes('arcgis')) {
+          serverTypeCollection.push(d);
+        }
+      }
+    });
+    return serverTypeCollection;
+  }
+
   return {
     getWMSserver,
     findServer,
@@ -443,5 +464,6 @@ export function useResourcesSupplements() {
     getSLDs,
     fetchByPk,
     fetchRemoteServices,
+    filteredByServerType,
   };
 }

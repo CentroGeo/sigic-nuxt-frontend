@@ -31,6 +31,7 @@ const selectedStyle = ref();
 const predeterminedStyle = ref();
 const allStyles = ref();
 const serverType = ref();
+const revisionMetadatos = ref(null);
 const modalOpacidad = ref(null);
 const controlOpacidad = ref();
 const layerOpacity = ref(100);
@@ -126,7 +127,13 @@ onMounted(async () => {
 
 <template>
   <div v-if="!isLoading">
-    <h2>{{ resourceElement.title }}</h2>
+    <div class="m-y-4 flex flex-contenido-separado">
+      <h2 class="m-0">{{ resourceElement.title }}</h2>
+      <button class="boton-secundario p-1" @click="revisionMetadatos?.abrirModalRevision">
+        Ver metadatos
+      </button>
+    </div>
+
     <ConsultaLayoutPaneles>
       <template #catalogo> </template>
 
@@ -232,7 +239,7 @@ onMounted(async () => {
                     <SisdaiLeyendaWms
                       v-if="serverType === 'ogc'"
                       :consulta="gnoxyFetch"
-                      :fuente="findServer(resourceElement)"
+                      :fuente="findServer(resourceElement).replace('?', '')"
                       :nombre="resourceElement.alternate"
                       :titulo="resourceElement.title || 'cargando...'"
                       :estilo="selectedStyle"
@@ -285,6 +292,10 @@ onMounted(async () => {
               ref="tablaChild"
               :key="`tabla_${resourceElement.pk}_${'dataLayer'}`"
               :selected-element="resourceElement"
+              @notify-download="
+                tablaChild.cerrarModalTabla();
+                downloadOneChild.abrirModalDescarga();
+              "
             />
 
             <!-- Modal opacidad -->
@@ -344,6 +355,12 @@ onMounted(async () => {
       <figcaption class="texto-centrado">Cargando Capa Geográfica</figcaption>
     </figure>
   </div>
+
+  <CatalogoModalRevisionMeta
+    ref="revisionMetadatos"
+    :review-pk="selectedPk"
+    :resource-type="'datasets'"
+  />
 </template>
 
 <style lang="scss" scoped>

@@ -30,26 +30,26 @@ const { contextId, chatId } = defineProps({
 });
 
 if (contextId) {
-  console.log('contextId:', contextId);
-  console.log('chatId:', chatId);
+  // console.log('contextId:', contextId);
+  // console.log('chatId:', chatId);
   contextID.value = parseInt(contextId); // Asegura que sea número si es necesario
   chatID.value = parseInt(chatId);
-  console.log(contextID.value);
-  console.log(chatID.value);
+  // console.log(contextID.value);
+  // console.log(chatID.value);
 
   if (chatID.value > 0) {
-    console.log('chat existente');
+    // console.log('chat existente');
     loadExistentChat(chatID.value);
   }
 } else {
-  console.log('Chat no válido');
+  // console.log('Chat no válido');
 }
 
 watch(
   () => chatId,
   (nuevoValor) => {
     chatID.value = Number(nuevoValor || 0);
-    console.log('chat existente');
+    // console.log('chat existente');
     if (nuevoValor > 0) {
       loadExistentChat(nuevoValor);
     }
@@ -74,7 +74,7 @@ watch(
 
 // Función para cargar historico de chat
 async function loadExistentChat(idchat) {
-  console.log('loadExistentChat');
+  // console.log('loadExistentChat');
   //arraySources = [];
   //Consulta fuentes
   const historyChat = await storeIA.getChat(idchat);
@@ -299,8 +299,8 @@ const submitMensaje = async () => {
             //const statusObj = JSON.parse(statusStr);
             //console.log(statusObj["status"])
           } catch (err) {
-            console.log('Error Leyendo status: ' + err);
-            console.log(resultElement);
+            console.error('Error Leyendo status: ' + err);
+            // console.log(resultElement);
           }
         }
         if (resultElement.includes('event: done')) {
@@ -327,8 +327,8 @@ const submitMensaje = async () => {
                 scrollToBottomIfNeeded();
               }
             } catch (err) {
-              console.log('Error Leyendo data: ' + err);
-              console.log(resultElement);
+              console.error('Error Leyendo data: ' + err);
+              // console.log(resultElement);
             }
           }
         }
@@ -337,8 +337,8 @@ const submitMensaje = async () => {
   } catch (err) {
     //resultado.value = 'Error en el streaming: ' + err
     //mensajes.value[aiMessageIndex].message = 'Error en el streaming: ' + err
-    console.log('Error en el streaming: ' + err);
-    console.log(mensajeRespuesta);
+    console.error('Error en el streaming: ' + err, mensajeRespuesta);
+    // console.log(mensajeRespuesta);
     //scrollToBottom();
     scrollToBottomIfNeeded();
   } finally {

@@ -7,6 +7,93 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.16.0] - 26-03-2026
+
+### Agregado (Added)
+
+- Se agregaron las mini apps para generar reportes, espacializar información y realizar análisis geoespacial.
+- Se instalaron librerías para visualizar documentos de office como pptx, word, excel, pdf.
+- Se subieron imágenes en jpg para representar los diferentes tipos de representación para el análisis geoespacial.
+- Se integró una api para el backend del módulo de ia para las mini apps.
+
+## [0.15.5] - 24-03-2026
+
+### Fixed (Arreglado)
+
+- Se implementó el uso de $fetch en la petición de cambio de avatar.
+- Se eliminó la opción de eliminar un servicio remoto no publicado, pues se identificó que el nombre alternativo con el que se guarda el recurso en geonode no siempre coincide con la información del endpoint de los recursos cosechables asociados a un servicio.
+- Se implementó un estilo para evitar que urls creen un scroll lateral en la sección de importar recursos de un servicio remoto.
+
+## [0.15.4] - 21-03-2026
+
+### Fixed (Arreglado)
+
+- La función cerrarSesion ahora construye el post_logout_redirect_uri utilizando baseURL y basePath desde config.public, asegurando que los usuarios sean redirigidos a la ubicación correcta después de cerrar sesión en Keycloak.
+
+## [0.15.3] - 20-03-2026
+
+### Fixed (Arreglado)
+
+- Se hicieron ajustes en los tamaños del contenedor del mapa en el modal de previsualización para que el scroll vertical afecte únicamente al mapa.
+- Se habilitó el botón de descarga en el modal de previsualización de tablas en la revisión para publicación de capas geográficas.
+- Se corrigieron los filtros de la sección de Mis Revisiones para corregir un bug que hacía que no aparecieran los recursos debidos.
+- Se agregó lógica condicional en el modal de Agregar a mis solicitudes para mostrar una alerta en caso de que falle la petición.
+
+## [0.15.2] - 10-03-2026
+
+### Fixed (Arreglado)
+
+- Se invirtió el orden en el que se hacen las solicitudes de publicación de recursos y permisos. Ahora primero se publican y luego se actualizan los permisos.
+- Se resolvió un pequeño bug en la edición de metadatos que tenía que ver con la ocasional aparición de mayúsculas en el campo de date_type.
+- Se resolvió un bug en el modal de revisión de metadatos que tenía que ver con intentar obtener los atributos de un documento.
+
+## [0.15.1] - 05-03-2026
+
+### Fixed (Arreglado)
+
+- Se crearon dos propiedades computadas con lo que se modifica la forma de distinguir las capas arcgis de las capas ows en el visor de capas.
+- Se modificó la forma en la que se pasa el servidor de origen al componente SisdaiLeyendaWMS para eliminar un doble signo de interrogación que evitaba que se mostrara la leyenda.
+
+## [0.15.0] - 02-03-2026
+
+### Agregado (Added)
+
+- Se agregó la revisión de proyectos en la sección de levantamiento.
+
+## [0.14.2] - 02-03-2026
+
+### Fixed (Arreglado)
+
+- Al eliminó el filtro de ordenamiento en la sección de mis-archivos/publicacion-solicitudes
+- Se eliminó el botón de eliminar solicitud en la sección de mis-archivos/publicacion-solicitudes
+
+## [0.14.1] - 02-03-2026
+
+### Fixed (Arreglado)
+
+- Al subir archivos sld, se agregó al nombre del archivo subido el pk de la capa asociada para evitar colisiones en geoserver.
+- Se editó el contenido del cuadro de información en la sección de carga de archivos para hacer algunas precisiones respecto al manejo de los csv.
+- Se modificó el estilo del botón de revisión de metadatos en la sección de revisión para publicación.
+
+## [0.14.0] - 27-02-2026
+
+### Agregado (Added)
+
+- Se agrega modal para espacializar y la funcionalidad para generar y consultar reportes en el módulo de IA.
+
+## [0.13.0] - 27-02-2026
+
+### Agregado (Added)
+
+- Se agregó un botón que abre un modal para revisar los metadatos en la sección de revisión de archivos para su publicación.
+- Se agregó una petición que actualiza los permisos y manejo de errores al aprobar una solicitud de publicacion.
+- Se ocultaron los botones de las secciones de Inteligencia Artificial y Levantamiento cuando no hay sesión activa.
+- Se hizo una corrección en el uso de filtros de mis-archivos/solicitudes-publicación para eliminar un conflicto en el uso de las mismas funciones en la sección de revisiones al cambiar de página.
+- Se arregló un bug en el redireccionamiento a edicion de metadatos al cargar un csv.
+- Se arregló un bug que mostraba alerta de fracaso antes de que desapareciera el spinner en el modal de eliminar un recurso.
+- Se arregló un bug que ocurría al navegar entre las secciones de revision de documentos antes de que terminara de solicitar los recursos y evitaba que se visualizara la tabla.
+- Se arregló un bug que hacia que a veces no se viera en el menu lateral la opcion de Revisar Servicios en las vistas de revision de servicios
+
 ## [0.12.4] - 26-02-2026
 
 ### Arreglado (Fix)
@@ -273,7 +360,18 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
-[0.12.3]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.3...v0.12.4
+[0.16.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.5...v0.16.0
+[0.15.5]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.4...v0.15.5
+[0.15.4]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.3...v0.15.4
+[0.15.3]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.2...v0.15.3
+[0.15.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.1...v0.15.2
+[0.15.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.0...v0.15.1
+[0.15.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.14.2...v0.15.0
+[0.14.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.14.1...v0.14.2
+[0.14.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.14.0...v0.14.1
+[0.14.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.13.0...v0.14.0
+[0.13.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.4...v0.13.0
+[0.12.4]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.3...v0.12.4
 [0.12.3]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.2...v0.12.3
 [0.12.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.1...v0.12.2
 [0.12.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.12.0...v0.12.1
