@@ -43,7 +43,7 @@ async function aceptarSolicitud() {
   processingRequest.value = true;
   try {
     // petición para aceptar y publicar la solicitud del recurso
-    const response = await $fetch(`/api/solicitudes`, {
+    const publishRequest = await $fetch(`/api/solicitudes`, {
       method: 'POST',
       body: {
         pk: selectedPkRequest,
@@ -57,7 +57,6 @@ async function aceptarSolicitud() {
       console.error('No se pudo aceptar la solicitud');
       processingRequest.value = false;
       acceptingFailed.value = true;
-      return;
     } else {
       // Actualizamos permisos
       const updatePermissions = await $fetch('/api/actualizar-permisos', {
@@ -69,7 +68,6 @@ async function aceptarSolicitud() {
         console.error('No se pudieron actualizar los permisos');
         processingRequest.value = false;
         acceptingFailed.value = true;
-        return;
       } else {
         processingRequest.value = false;
         acceptingFailed.value = false;
