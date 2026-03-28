@@ -7,6 +7,16 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.17.0] - 27-03-2026
+
+### Fixed (Arreglado)
+
+- Se refactorizó nuxt.config.ts para eliminar el uso de baseURL, basePath y variables de entorno relacionadas dinámicas, estableciendo todos los valores relevantes a '/' y eliminando entradas de configuración pública que ya no eran necesarias. Este cambio asegura consistencia en el enrutamiento y la resolución de assets entre distintos entornos.
+- Se actualizaron el Dockerfile y el workflow relacionado de GitHub Actions para eliminar argumentos de build asociados a variables de entorno
+- Se reemplazaron todos los usos de config.public.basePath, config.public.baseURL y variables similares en el código por rutas absolutas (por ejemplo, /api/..., /img/...) para endpoints de API y assets estáticos. Esto afecta múltiples componentes y páginas, incluyendo navegación, catálogo, modales y composables utilitarios.
+- Se agregó un nuevo workflow de GitHub Actions (.github/workflows/sigic-release.yml) para construir y publicar imágenes Docker en GHCR al hacer push de tags, soportando releases automatizados.
+- Se mejoró el composable useGnoxyUrl para resolver correctamente URLs tanto en renderizado del lado del servidor como del cliente, asegurando el manejo adecuado de host y protocolo durante SSR.
+
 ## [0.16.0] - 26-03-2026
 
 ### Agregado (Added)
@@ -360,6 +370,7 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.17.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.5...v0.16.0
 [0.15.5]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.4...v0.15.5
 [0.15.4]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.3...v0.15.4
