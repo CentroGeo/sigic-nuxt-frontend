@@ -10,6 +10,7 @@ export default defineEventHandler(async (event) => {
   const data = await new Promise<{
     // @ts-ignore
     fields: Fields;
+    // @ts-ignore
     files: Files;
   }>((resolve, reject) => {
     form.parse(event.node.req, (err, fields, files) => {
