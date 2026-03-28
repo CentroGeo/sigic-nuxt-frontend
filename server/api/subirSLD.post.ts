@@ -7,7 +7,11 @@ export default defineEventHandler(async (event) => {
   const url = `${baseUrl}/upload/uploads/upload`;
   const form = formidable({ multiples: false });
 
-  const data = await new Promise<{ fields: Fields; files: Files }>((resolve, reject) => {
+  const data = await new Promise<{
+    // @ts-ignore
+    fields: Fields;
+    files: Files;
+  }>((resolve, reject) => {
     form.parse(event.node.req, (err, fields, files) => {
       if (err) reject(err);
       else resolve({ fields, files });
@@ -48,7 +52,7 @@ export default defineEventHandler(async (event) => {
   //console.warn('formData', formData);
 
   try {
-    // Esta primera peticion sube el archivo pero solo regresa un execution ID
+    // Esta primera petición sube el archivo, pero solo regresa un execution ID
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -73,6 +77,7 @@ export default defineEventHandler(async (event) => {
         }
       );
       const { requests } = await resStatus.json();
+      // @ts-ignore
       const current = requests.find((d) => d.exec_id === executionID);
       status = current.status; //puede ser running, finished y failed
       console.warn(status);
