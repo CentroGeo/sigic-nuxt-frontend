@@ -160,7 +160,7 @@ function openAddRequestToMyReviewsModal(resource) {
 async function addRequestToMyReviews() {
   try {
     // petición para añadir la solicitud a mis revisiones
-    const response = await $fetch(`${config.public.basePath}/api/solicitudes`, {
+    const response = await $fetch(`/api/solicitudes`, {
       method: 'POST',
       body: JSON.stringify({
         pk: pkResource.value,
@@ -462,7 +462,7 @@ function abrirModalCancelarRevision(solicitud) {
 async function removerRevision() {
   try {
     // petición para aceptar y publicar la solicitud del recurso
-    const response = await $fetch(`${config.public.basePath}/api/solicitudes`, {
+    const response = await $fetch(`/api/solicitudes`, {
       method: 'POST',
       body: {
         pk: recursoSolicitud.value.pk_request,

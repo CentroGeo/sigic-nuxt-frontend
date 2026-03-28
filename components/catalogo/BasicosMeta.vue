@@ -31,7 +31,6 @@ const props = defineProps({
 const storeMetadatos = useEditedMetadataStore();
 storeMetadatos.checkFilling(props.resourcePk, props.resourceType);
 const { data } = useAuth();
-const configEnv = useRuntimeConfig();
 
 const campoTitulo = computed({
   get: () => storeMetadatos.metadata.title,
@@ -97,7 +96,7 @@ async function guardarImagen(files) {
     formData.append('token', token.value);
     formData.append('pk', props.resourcePk);
 
-    const endpoint = `${configEnv.public.basePath}/api/metadatos-thumbnail`;
+    const endpoint = `/api/metadatos-thumbnail`;
     // Mandamos el formdata a subirse por
     const response = await fetch(endpoint, {
       method: 'PUT',

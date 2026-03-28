@@ -26,12 +26,11 @@ const areaMensajeNoAceptar = ref('');
 
 const { data } = useAuth();
 const token = data.value?.accessToken;
-const configEnv = useRuntimeConfig();
 
 async function aceptarSolicitud() {
   try {
     // petición para aceptar y publicar la solicitud del recurso
-    const response = await $fetch(`${configEnv.public.basePath}/api/solicitudes`, {
+    const response = await $fetch(`/api/solicitudes`, {
       method: 'POST',
       body: {
         pk: selectedPkRequest,
@@ -52,7 +51,7 @@ async function aceptarSolicitud() {
 async function noAceptarSolicitud() {
   try {
     // petición para no aceptar y rechazar la solicitud del recurso
-    const response = await $fetch(`${configEnv.public.basePath}/api/solicitudes`, {
+    const response = await $fetch(`/api/solicitudes`, {
       method: 'POST',
       body: {
         pk: selectedPkRequest,
@@ -72,7 +71,7 @@ async function noAceptarSolicitud() {
 async function agregarAMisSolicitudes() {
   try {
     // petición para agregar la solicitud a Mis revisiones
-    const response = await $fetch(`${configEnv.public.basePath}/api/solicitudes`, {
+    const response = await $fetch(`/api/solicitudes`, {
       method: 'POST',
       body: {
         pk: selectedPkRequest,
