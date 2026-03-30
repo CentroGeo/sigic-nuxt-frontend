@@ -30,7 +30,6 @@ const IaPreviewFiles = defineAsyncComponent(
 
 const { data, refresh } = useAuth();
 const config = useRuntimeConfig();
-const basePath = config.public.basePath;
 
 const storeIA = useIAStore();
 const router = useRouter();
@@ -1612,7 +1611,7 @@ onMounted(() => {
                         <div class="tarjeta tarjeta-hipervinculo-interno" href="#">
                           <img
                             class="tarjeta-imagen"
-                            :src="`${basePath}/img/ia-buffer.jpg`"
+                            :src="`/img/ia-buffer.jpg`"
                             alt="Tipo de operación geoespacial Buffer"
                           />
                           <div class="tarjeta-cuerpo">
@@ -1636,7 +1635,7 @@ onMounted(() => {
                         <div class="tarjeta tarjeta-hipervinculo-interno" href="#">
                           <img
                             class="tarjeta-imagen"
-                            :src="`${basePath}/img/ia-interseccion.jpg`"
+                            :src="`/img/ia-interseccion.jpg`"
                             alt="Tipo de operación geoespacial Intersección"
                           />
                           <div class="tarjeta-cuerpo">
@@ -1660,7 +1659,7 @@ onMounted(() => {
                         <div class="tarjeta tarjeta-hipervinculo-interno" href="#">
                           <img
                             class="tarjeta-imagen"
-                            :src="`${basePath}/img/ia-densidad.jpg`"
+                            :src="`/img/ia-densidad.jpg`"
                             alt="Tipo de operación geoespacial Densidad"
                           />
                           <div class="tarjeta-cuerpo">
@@ -1684,7 +1683,7 @@ onMounted(() => {
                         <div class="tarjeta tarjeta-hipervinculo-interno" href="#">
                           <img
                             class="tarjeta-imagen"
-                            :src="`${basePath}/img/ia-puntos-calor.jpg`"
+                            :src="`/img/ia-puntos-calor.jpg`"
                             alt="Tipo de operación geoespacial Puntos de calor"
                           />
                           <div class="tarjeta-cuerpo">
