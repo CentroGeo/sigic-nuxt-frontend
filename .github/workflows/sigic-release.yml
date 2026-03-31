@@ -27,7 +27,7 @@ jobs:
           echo "IMAGE=$IMAGE" >> $GITHUB_OUTPUT
 
       - name: Login to GHCR
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+        run: echo "${{ secrets.GHCR_GEOINTSIGIC_PAT }}" | docker login ghcr.io -u geointsigic --password-stdin
 
       - name: Build image
         run: |

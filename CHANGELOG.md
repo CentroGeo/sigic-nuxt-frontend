@@ -7,6 +7,12 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.16.4] - 31-03-2026
+
+### Fixed (Arreglado)
+
+- corrección de login para ghcr
+
 ## [0.16.3] - 31-03-2026
 
 ### Fixed (Arreglado)
@@ -383,6 +389,7 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.16.3]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.16.3...v0.16.4
 [0.16.3]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.16.2...v0.16.3
 [0.16.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.16.1...v0.16.2
 [0.16.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.16.0...v0.16.1
