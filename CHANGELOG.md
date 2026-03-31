@@ -7,15 +7,14 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
-## [0.18.0] - 27-03-2026
+## [0.16.2] - 31-03-2026
 
 ### Fixed (Arreglado)
 
 - corrección de versión
 - corrección de permisos de actions
-- lo de 0.17.0 en realidad está en 0.16.1
 
-## [0.17.0] - 27-03-2026
+## [0.16.1] - 27-03-2026
 
 ### Fixed (Arreglado)
 
