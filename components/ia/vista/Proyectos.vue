@@ -366,7 +366,11 @@ const handleDelete = async () => {
         <template #cuerpo>
           <div v-if="!isDocumentoReading" class="flex flex-contenido-centrado">
             <figure>
-              <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
+              <img
+                class="color-invertir"
+                :src="`${config.app.baseURL}img/loader.gif`"
+                alt="Loader de SIGIC"
+              />
               <figcaption class="texto-centrado">Cargando documento</figcaption>
             </figure>
           </div>
@@ -384,7 +388,11 @@ const handleDelete = async () => {
         <template #cuerpo>
           <div v-if="!isDataTableReading" class="flex flex-contenido-centrado">
             <figure>
-              <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
+              <img
+                class="color-invertir"
+                :src="`${config.app.baseURL}img/loader.gif`"
+                alt="Loader de SIGIC"
+              />
               <figcaption class="texto-centrado">Cargando tabla</figcaption>
             </figure>
           </div>

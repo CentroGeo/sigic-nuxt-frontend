@@ -16,6 +16,7 @@ import { categoriesInSpanish, resourceTypeDic, tooltipContent } from '~/utils/co
 
 const storeConsulta = useConsultaStore();
 storeConsulta.resourceType = resourceTypeDic.dataLayer;
+const config = useRuntimeConfig();
 
 const storeCatalogo = useResourcesCatalogoStore();
 const { gnoxyFetch } = useGnoxyUrl();
@@ -351,7 +352,11 @@ onMounted(async () => {
   </div>
   <div v-else class="flex flex-contenido-centrado">
     <figure>
-      <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
+      <img
+        class="color-invertir"
+        :src="`${config.app.baseURL}img/loader.gif`"
+        alt="Loader de SIGIC"
+      />
       <figcaption class="texto-centrado">Cargando Capa Geográfica</figcaption>
     </figure>
   </div>

@@ -8,6 +8,7 @@ definePageMeta({
   },
 });
 
+const config = useRuntimeConfig();
 const storeCatalogo = useCatalogoStore();
 const storeMetadatos = useEditedMetadataStore();
 const { fetchByPk } = useResourcesSupplements();
@@ -52,7 +53,12 @@ onMounted(async () => {
       </main>
       <main v-else>
         <div class="flex flex-contenido-centrado m-t-3">
-          <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
+          <img
+            class="color-invertir"
+            :src="`${config.app.baseURL}img/loader.gif`"
+            alt="...Cargando"
+            height="120px"
+          />
         </div>
       </main>
     </template>

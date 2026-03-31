@@ -1,0 +1,41 @@
+name: Build & Push Docker Image (Release)
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Extract tag
+        id: tag
+        run: echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Set image name (lowercase)
+        id: image
+        run: |
+          echo "IMAGE=ghcr.io/centrogeo/sigic-nuxt-frontend" >> $GITHUB_OUTPUT
+
+      - name: Login to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Build image
+        run: |
+          docker build \
+            -t ${{ steps.image.outputs.IMAGE }}:${{ steps.tag.outputs.TAG }} \
+            -t ${{ steps.image.outputs.IMAGE }}:latest \
+            .
+
+      - name: Push image
+        run: |
+          docker push ${{ steps.image.outputs.IMAGE }}:${{ steps.tag.outputs.TAG }}
+          docker push ${{ steps.image.outputs.IMAGE }}:latest

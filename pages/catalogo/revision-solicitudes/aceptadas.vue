@@ -201,7 +201,12 @@ onMounted(async () => {
         <p>Solicitudes que haz aprobado y están actualmente en el catálogo público.</p>
 
         <div v-if="isLoading" class="flex flex-contenido-centrado m-t-3">
-          <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
+          <img
+            class="color-invertir"
+            :src="`${$config.app.baseURL}img/loader.gif`"
+            alt="...Cargando"
+            height="120px"
+          />
         </div>
 
         <div v-if="totalResources > 0 && !isLoading" class="flex">

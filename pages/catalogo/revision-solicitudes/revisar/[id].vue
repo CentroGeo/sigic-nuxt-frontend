@@ -29,7 +29,6 @@ const areaMensajeNoAceptar = ref('');
 
 const { data } = useAuth();
 const token = data.value?.accessToken;
-const configEnv = useRuntimeConfig();
 
 function abrirModalAceptar() {
   acceptingFailed.value = false;
@@ -43,8 +42,8 @@ function abrirModalAceptar() {
 async function aceptarSolicitud() {
   processingRequest.value = true;
   try {
-    // Petición para aceptar la solicitud de publicación del recurso
-    const publishRequest = await $fetch(`${configEnv.public.basePath}/api/solicitudes`, {
+    // petición para aceptar y publicar la solicitud del recurso
+    const publishRequest = await $fetch(`/api/solicitudes`, {
       method: 'POST',
       body: {
         pk: selectedPkRequest,
@@ -58,7 +57,6 @@ async function aceptarSolicitud() {
       console.error('No se pudo aceptar la solicitud');
       processingRequest.value = false;
       acceptingFailed.value = true;
-      return;
     } else {
       // Actualizamos permisos
       const updatePermissions = await $fetch('/api/actualizar-permisos', {
@@ -70,7 +68,6 @@ async function aceptarSolicitud() {
         console.error('No se pudieron actualizar los permisos');
         processingRequest.value = false;
         acceptingFailed.value = true;
-        return;
       } else {
         processingRequest.value = false;
         acceptingFailed.value = false;
@@ -87,7 +84,7 @@ async function aceptarSolicitud() {
 async function noAceptarSolicitud() {
   try {
     // petición para no aceptar y rechazar la solicitud del recurso
-    const response = await $fetch(`${configEnv.public.basePath}/api/solicitudes`, {
+    const response = await $fetch(`/api/solicitudes`, {
       method: 'POST',
       body: {
         pk: selectedPkRequest,
@@ -108,7 +105,7 @@ async function agregarAMisSolicitudes() {
   owningProcessFailed.value = false;
   try {
     // petición para agregar la solicitud a Mis revisiones
-    const response = await $fetch(`${configEnv.public.basePath}/api/solicitudes`, {
+    const response = await $fetch(`/api/solicitudes`, {
       method: 'POST',
       body: {
         pk: selectedPkRequest,
@@ -194,7 +191,11 @@ onMounted(() => {
         <div v-if="selectedResourceType === 'document'">
           <div v-if="!isDocumentoReading" class="flex flex-contenido-centrado">
             <figure>
-              <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
+              <img
+                class="color-invertir"
+                :src="`${$config.app.baseURL}img/loader.gif`"
+                alt="Loader de SIGIC"
+              />
               <figcaption class="texto-centrado">Cargando documento</figcaption>
             </figure>
           </div>
@@ -261,7 +262,11 @@ onMounted(() => {
               class="flex m-y-2 p-1 borde-redondeado-16 fondo-color-informacion texto-color-informacion borde borde-color-informacion"
             >
               <div class="columna-3 flex-vertical-centrado">
-                <img src="/img/loader.gif" alt="...Cargando" class="loader" />
+                <img
+                  :src="`${$config.app.baseURL}img/loader.gif`"
+                  alt="...Cargando"
+                  class="loader"
+                />
               </div>
               <p class="columna-12">Procesando solicitud</p>
             </div>

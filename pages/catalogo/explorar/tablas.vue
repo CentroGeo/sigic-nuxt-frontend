@@ -1,6 +1,7 @@
 <script setup>
 import { cleanInput, resourceTypeDic } from '~/utils/consulta';
 
+const config = useRuntimeConfig();
 const storeCatalogo = useCatalogoStore();
 const storeResources = useResourcesCatalogoStore();
 const storeFilters = useFilteredResources();
@@ -220,7 +221,12 @@ onMounted(async () => {
           <UiNumeroElementos :numero="totalResources" />
         </div>
         <div v-if="isLoading" class="flex flex-contenido-centrado m-t-3">
-          <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
+          <img
+            class="color-invertir"
+            :src="`${config.app.baseURL}img/loader.gif`"
+            alt="...Cargando"
+            height="120px"
+          />
         </div>
         <div v-if="totalResources === 0 && !isLoading" class="flex">
           <div

@@ -1,20 +1,6 @@
 # 🏗️ Build stage
 FROM node:22 AS builder
 
-# Build-time arguments (usados por Nuxt en build)
-ARG NUXT_APP_BASE_URL
-ARG NUXT_PUBLIC_AUTH_BASE_URL
-ARG NUXT_PUBLIC_BASE_URL
-ARG NUXT_PUBLIC_LEVANTAMIENTO_URL
-ARG NUXT_PUBLIC_KEYCLOAK_CLIENT_ID
-
-# Set environment for build & runtime
-ENV NUXT_APP_BASE_URL=${NUXT_APP_BASE_URL:-'/'}
-ENV NUXT_PUBLIC_AUTH_BASE_URL=${NUXT_PUBLIC_AUTH_BASE_URL:-http://localhost:3000/api/auth}
-ENV NUXT_PUBLIC_BASE_URL=${NUXT_PUBLIC_BASE_URL:-http://localhost:3000}
-ENV NUXT_PUBLIC_LEVANTAMIENTO_URL=${NUXT_PUBLIC_LEVANTAMIENTO_URL:-http://localhost:3003}
-ENV NUXT_PUBLIC_KEYCLOAK_CLIENT_ID=${NUXT_PUBLIC_KEYCLOAK_CLIENT_ID:-'sigic-frontend'}
-
 ENV NODE_ENV=production
 
 WORKDIR /app
@@ -31,7 +17,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY package*.json ./
 
 # instalar dependencias
-RUN npm install --include=dev --legacy-peer-deps
+RUN npm install --include=dev --legacy-peer-deps \
+    && npm cache clean --force
 
 # --- copiar el código ---
 COPY . .
@@ -45,16 +32,6 @@ RUN npm run build  \
 
 # 🚀 Final stage
 FROM node:22-slim
-
-# Build-time arguments (usados por Nuxt en build)
-ARG NUXT_APP_BASE_URL
-ARG NUXT_PUBLIC_AUTH_BASE_URL
-ARG NUXT_PUBLIC_BASE_URL
-
-# Set environment for build & runtime
-ENV NUXT_APP_BASE_URL=${NUXT_APP_BASE_URL:-'/'}
-ENV NUXT_PUBLIC_AUTH_BASE_URL=${NUXT_PUBLIC_AUTH_BASE_URL:-http://localhost:3000/api/auth}
-ENV NUXT_PUBLIC_BASE_URL=${NUXT_PUBLIC_BASE_URL:-http://localhost:3000}
 
 ENV NODE_ENV=production
 

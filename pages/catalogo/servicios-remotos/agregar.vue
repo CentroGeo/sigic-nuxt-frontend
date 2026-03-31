@@ -11,6 +11,7 @@ definePageMeta({
   },
 });
 
+const config = useRuntimeConfig();
 const campoTipo = ref('');
 const campoURL = ref('');
 const campoNombre = ref('');
@@ -217,7 +218,12 @@ onMounted(() => {
 
             <!--Validación-->
             <div v-if="isLoading" class="flex flex-contenido-centrado m-y-2">
-              <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="40px" />
+              <img
+                class="color-invertir"
+                :src="`${config.app.baseURL}img/loader.gif`"
+                alt="...Cargando"
+                height="40px"
+              />
             </div>
             <p
               v-if="error"
@@ -268,7 +274,11 @@ onMounted(() => {
             class="flex flex-contenido-inicio texto-color-informacion fondo-color-informacion p-1 borde borde-color-informacion borde-redondeado-8"
           >
             <div class="flex-vertical-centrado columna-2">
-              <img src="/img/loader.gif" alt="...Cargando" class="loader color-invertir" />
+              <img
+                :src="`${config.app.baseURL}img/loader.gif`"
+                alt="...Cargando"
+                class="loader color-invertir"
+              />
             </div>
             <p class="columna-14">
               Estamos obteniendo los recursos del catálogo registrado. Este proceso puede demorar

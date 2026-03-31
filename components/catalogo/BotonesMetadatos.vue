@@ -1,6 +1,7 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import { resourceTypeGeonode } from '~/utils/consulta';
+const config = useRuntimeConfig();
 
 const storeMetadatos = useEditedMetadataStore();
 const props = defineProps({
@@ -183,7 +184,7 @@ function irAmisArchivos() {
           <div v-if="isLoading" class="m-y-2">
             <div class="flex flex-contenido-centrado">
               <img
-                src="/img/loader.gif"
+                :src="`${config.app.baseURL}img/loader.gif`"
                 class="color-invertir"
                 alt="...Guardando"
                 heigh="160px"

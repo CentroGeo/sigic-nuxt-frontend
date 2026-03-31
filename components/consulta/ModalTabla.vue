@@ -11,6 +11,8 @@ const props = defineProps({
   },
 });
 
+const config = useRuntimeConfig();
+
 const modalTabla = ref(null);
 const isLoading = ref(true);
 const paginaActual = ref(0);
@@ -70,7 +72,7 @@ watch([paginaActual], async () => {
       <template v-if="isLoading" #cuerpo>
         <div class="flex flex-contenido-centrado">
           <img
-            src="/img/loader.gif"
+            :src="`${config.app.baseURL}img/loader.gif`"
             class="color-invertir"
             alt="...Cargando"
             heigh="120px"

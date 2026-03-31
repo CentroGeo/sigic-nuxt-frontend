@@ -24,6 +24,7 @@ const obtenerMasRecientes = (type) => {
   return computed(() => storeResources.resourcesByType(type) || [{}]);
 };
 
+const config = useRuntimeConfig();
 const isLoading = ref(true);
 const capasMasRecientes = obtenerMasRecientes('dataLayer');
 
@@ -298,7 +299,12 @@ watch(
         </div>
         <div class="contenedor ancho-fijo">
           <div v-if="isLoading" class="flex flex-contenido-centrado m-t-3">
-            <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
+            <img
+              class="color-invertir"
+              :src="`${config.app.baseURL}img/loader.gif`"
+              alt="...Cargando"
+              height="120px"
+            />
           </div>
           <div v-if="!isLoading" class="flex">
             <div v-for="(capa, i) in capasMasRecientes" :key="i" class="columna-4">

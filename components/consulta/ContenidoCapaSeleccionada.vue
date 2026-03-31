@@ -216,7 +216,12 @@ watch(selectedStyle, (nv) => {
     </div>
   </div>
   <div v-else class="flex flex-contenido-centrado">
-    <img src="/img/loader.gif" class="color-invertir" alt="...Cargando" height="50px" />
+    <img
+      :src="`${$config.app.baseURL}img/loader.gif`"
+      class="color-invertir"
+      alt="...Cargando"
+      height="50px"
+    />
   </div>
 </template>
 

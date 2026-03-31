@@ -126,7 +126,7 @@ onMounted(() => {
                   <img :src="avatar_url" alt="" />
                 </div>
                 <div v-else-if="avatar_url && avatar_url === 'cargando'" class="avatar-imagen">
-                  <img src="/img/loader.gif" alt="" />
+                  <img :src="`${$config.app.baseURL}img/loader.gif`" alt="" />
                 </div>
                 <div v-else>
                   <p class="pictograma-persona texto-color-acento"></p>

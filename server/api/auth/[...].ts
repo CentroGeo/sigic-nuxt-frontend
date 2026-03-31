@@ -57,7 +57,7 @@ export default NuxtAuthHandler({
           token.accessToken = refreshed.access_token;
           token.refreshToken = refreshed.refresh_token || token.refreshToken;
           token.expires_at = Date.now() + refreshed.expires_in * 1000;
-          // AQUI MANDAR UN HTTP POST A API DE IA AVISANDO QUE EL USUARIO ACTUALIZÓ SU TOKEN
+          // AQUÍ MANDAR UN HTTP POST A API DE IA AVISANDO QUE EL USUARIO ACTUALIZÓ SU TOKEN
           // Y MANDAR SOLO EL accessToken Y ALGO QUE IDENTIFIQUE AL USUARIO (POR EJEMPLO SUB O EMAIL)
           // PARA QUE LA API DE IA LO GUARDE EN MEMORIA O DONDE SEA Y LO USE PARA SUS PETICIONES
           // A GEONODE

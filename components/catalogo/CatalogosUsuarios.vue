@@ -34,7 +34,7 @@ const statusDict = {
 async function getUserInfo() {
   const { data } = useAuth();
   const email = data.value?.user.email;
-  const url = `https://geonode.dev.geoint.mx/api/v2/users/?filter{username}=${email}`;
+  const url = `${config.public.geonodeUrl}/api/v2/users/?filter{username}=${email}`;
   const request = await gnoxyFetch(url);
   if (!request.ok) {
     console.error('No se pudo recuperar la información de usuario');
@@ -49,11 +49,20 @@ async function getUserInfo() {
  */
 async function getTotal() {
   let url;
-  if (inputSearch.value) {
-    url = `${config.public.geonodeApi}/services/?title=${inputSearch.value.trim()}`;
+  if (queryParams.value['owner_id']) {
+    if (inputSearch.value) {
+      url = `${config.public.geonodeApi}/services/?title=${inputSearch.value.trim()}&owner_id=${queryParams.value['owner_id']}`;
+    } else {
+      url = `${config.public.geonodeApi}/services/?owner_id=${queryParams.value['owner_id']}`;
+    }
   } else {
-    url = `${config.public.geonodeApi}/services/`;
+    if (inputSearch.value) {
+      url = `${config.public.geonodeApi}/services/?title=${inputSearch.value.trim()}`;
+    } else {
+      url = `${config.public.geonodeApi}/services/`;
+    }
   }
+
   const requestServices = await gnoxyFetch(url);
   if (!requestServices.ok) {
     const error = await requestServices.json();
@@ -231,7 +240,12 @@ onMounted(async () => {
 
     <!--El spinner general-->
     <div v-if="isLoadingGeneral" class="flex flex-contenido-centrado m-y-5">
-      <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
+      <img
+        class="color-invertir"
+        :src="`${config.app.baseURL}img/loader.gif`"
+        alt="...Cargando"
+        height="120px"
+      />
     </div>
 
     <!--Si aun no hay servicios catgados por usuarios-->
@@ -256,7 +270,12 @@ onMounted(async () => {
       v-if="!isLoadingGeneral && isLoadingPage && harvesters.length === 0"
       class="flex flex-contenido-centrado m-y-5"
     >
-      <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
+      <img
+        class="color-invertir"
+        :src="`${config.app.baseURL}img/loader.gif`"
+        alt="...Cargando"
+        height="120px"
+      />
     </div>
     <!--La tabla de servicios remotos-->
     <div
@@ -317,7 +336,12 @@ onMounted(async () => {
         </tbody>
       </table>
       <div v-if="isLoadingPage" class="flex flex-contenido-centrado m-y-2">
-        <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="32px" />
+        <img
+          class="color-invertir"
+          :src="`${config.app.baseURL}img/loader.gif`"
+          alt="...Cargando"
+          height="32px"
+        />
       </div>
       <UiPaginador
         :pagina-parent="paginaActual"
