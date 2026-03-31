@@ -2,9 +2,10 @@
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import { wait } from '~/utils/consulta';
 
+const config = useRuntimeConfig();
 const modalCompartir = ref(null);
 const route = useRoute();
-const currentPath = computed(() => route.fullPath);
+const currentPath = computed(() => config.public.baseURL + route.fullPath);
 const linkStatus = ref(false);
 
 async function copyToClipboard() {

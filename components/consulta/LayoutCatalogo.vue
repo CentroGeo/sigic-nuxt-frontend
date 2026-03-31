@@ -40,7 +40,7 @@ const categorizedResources = ref({});
 const selectedCategories = ref([]);
 const modalFiltroAvanzado = ref(null);
 const modalOWSglobal = ref(null);
-const sigicOWS = `/catalogue/csw`;
+const sigicOWS = `${config.public.baseURL}/catalogue/csw`;
 const isFilterActive = ref(false);
 
 async function fetchTotalByCategory(category) {
