@@ -23,7 +23,7 @@ jobs:
       - name: Set image name (lowercase)
         id: image
         run: |
-          echo "IMAGE=ghcr.io/centrogeo/sigic-nuxt-frontend" >> $GITHUB_OUTPUT
+          echo "IMAGE=ghcr.io/${{ github.repository }}" >> $GITHUB_OUTPUT
 
       - name: Login to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
