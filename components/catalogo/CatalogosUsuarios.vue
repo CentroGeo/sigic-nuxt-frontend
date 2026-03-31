@@ -49,11 +49,20 @@ async function getUserInfo() {
  */
 async function getTotal() {
   let url;
-  if (inputSearch.value) {
-    url = `${config.public.geonodeApi}/services/?title=${inputSearch.value.trim()}`;
+  if (queryParams.value['owner_id']) {
+    if (inputSearch.value) {
+      url = `${config.public.geonodeApi}/services/?title=${inputSearch.value.trim()}&owner_id=${queryParams.value['owner_id']}`;
+    } else {
+      url = `${config.public.geonodeApi}/services/?owner_id=${queryParams.value['owner_id']}`;
+    }
   } else {
-    url = `${config.public.geonodeApi}/services/`;
+    if (inputSearch.value) {
+      url = `${config.public.geonodeApi}/services/?title=${inputSearch.value.trim()}`;
+    } else {
+      url = `${config.public.geonodeApi}/services/`;
+    }
   }
+
   const requestServices = await gnoxyFetch(url);
   if (!requestServices.ok) {
     const error = await requestServices.json();
