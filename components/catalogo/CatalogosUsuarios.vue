@@ -34,7 +34,7 @@ const statusDict = {
 async function getUserInfo() {
   const { data } = useAuth();
   const email = data.value?.user.email;
-  const url = `https://geonode.dev.geoint.mx/api/v2/users/?filter{username}=${email}`;
+  const url = `${config.public.geonodeUrl}/api/v2/users/?filter{username}=${email}`;
   const request = await gnoxyFetch(url);
   if (!request.ok) {
     console.error('No se pudo recuperar la información de usuario');
