@@ -16,6 +16,7 @@ const totalResources = computed(() => storeResources.myTotalBySection(section));
 const resources = computed(() => storeResources.mineBySection(section));
 const tableResources = ref([]);
 const variables = ['titulo', 'estatus', 'tipo_recurso', 'categoria', 'acciones'];
+const config = useRuntimeConfig();
 
 const paginaActual = ref(0);
 const tamanioPagina = 10;
@@ -272,7 +273,12 @@ onMounted(async () => {
         </p>
 
         <div v-if="isLoading" class="flex flex-contenido-centrado m-t-3">
-          <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
+          <img
+            class="color-invertir"
+            :src="`${config.app.baseURL}img/loader.gif`"
+            alt="...Cargando"
+            height="120px"
+          />
         </div>
 
         <div v-if="totalResources > 0 && !isLoading" class="flex">

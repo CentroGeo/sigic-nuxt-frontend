@@ -1611,7 +1611,7 @@ onMounted(() => {
                         <div class="tarjeta tarjeta-hipervinculo-interno" href="#">
                           <img
                             class="tarjeta-imagen"
-                            :src="`/img/ia-buffer.jpg`"
+                            :src="`${$config.app.baseURL}img/ia-buffer.jpg`"
                             alt="Tipo de operación geoespacial Buffer"
                           />
                           <div class="tarjeta-cuerpo">
@@ -1635,7 +1635,7 @@ onMounted(() => {
                         <div class="tarjeta tarjeta-hipervinculo-interno" href="#">
                           <img
                             class="tarjeta-imagen"
-                            :src="`/img/ia-interseccion.jpg`"
+                            :src="`${$config.app.baseURL}img/ia-interseccion.jpg`"
                             alt="Tipo de operación geoespacial Intersección"
                           />
                           <div class="tarjeta-cuerpo">
@@ -1659,7 +1659,7 @@ onMounted(() => {
                         <div class="tarjeta tarjeta-hipervinculo-interno" href="#">
                           <img
                             class="tarjeta-imagen"
-                            :src="`/img/ia-densidad.jpg`"
+                            :src="`${$config.app.baseURL}img/ia-densidad.jpg`"
                             alt="Tipo de operación geoespacial Densidad"
                           />
                           <div class="tarjeta-cuerpo">
@@ -1683,7 +1683,7 @@ onMounted(() => {
                         <div class="tarjeta tarjeta-hipervinculo-interno" href="#">
                           <img
                             class="tarjeta-imagen"
-                            :src="`/img/ia-puntos-calor.jpg`"
+                            :src="`${$config.app.baseURL}img/ia-puntos-calor.jpg`"
                             alt="Tipo de operación geoespacial Puntos de calor"
                           />
                           <div class="tarjeta-cuerpo">

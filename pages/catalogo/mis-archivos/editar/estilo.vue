@@ -10,6 +10,7 @@ definePageMeta({
 const storeCatalogo = useCatalogoStore();
 const storeResources = useResourcesCatalogoStore();
 const { getSLDs } = useResourcesSupplements();
+const config = useRuntimeConfig();
 
 const { data } = useAuth();
 const route = useRoute();
@@ -78,7 +79,12 @@ onMounted(async () => {
     <template #visualizador>
       <main v-if="isLoadingGlobal">
         <div class="flex flex-contenido-centrado m-t-3">
-          <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
+          <img
+            class="color-invertir"
+            :src="`${config.app.baseURL}img/loader.gif`"
+            alt="...Cargando"
+            height="120px"
+          />
         </div>
       </main>
       <main v-else id="principal" class="contenedor m-b-10 m-y-3">
@@ -156,7 +162,11 @@ onMounted(async () => {
                     v-if="loadedStylesStatus[file] === 'loading'"
                     class="fondo-color-neutro p-3 borde-redondeado-16 m-y-2"
                   >
-                    <img class="color-invertir" src="/img/loader.gif" height="30" />
+                    <img
+                      class="color-invertir"
+                      :src="`${config.app.baseURL}img/loader.gif`"
+                      height="30"
+                    />
                     <b> Subiendo {{ file }}... </b>
                   </div>
 

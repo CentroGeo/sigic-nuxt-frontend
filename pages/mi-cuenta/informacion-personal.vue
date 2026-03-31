@@ -363,7 +363,12 @@ onMounted(async () => {
   <div>
     <h2>Información personal</h2>
     <div v-if="isLoading" class="flex flex-contenido-centrado m-y-5">
-      <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
+      <img
+        class="color-invertir"
+        :src="`${config.app.baseURL}img/loader.gif`"
+        alt="...Cargando"
+        height="120px"
+      />
     </div>
     <div v-else-if="!isLoading && failedFetching" class="m-t-2 m-b-2">
       <div
@@ -464,7 +469,7 @@ onMounted(async () => {
           <div v-if="isUpdating" class="m-y-2">
             <div class="flex flex-contenido-centrado">
               <img
-                src="/img/loader.gif"
+                :src="`${config.app.baseURL}img/loader.gif`"
                 class="color-invertir"
                 alt="...Guardando"
                 heigh="160px"
@@ -509,7 +514,7 @@ onMounted(async () => {
           <div v-if="isAvatarUpdating" class="m-y-2">
             <div class="flex flex-contenido-centrado">
               <img
-                src="/img/loader.gif"
+                :src="`${config.app.baseURL}img/loader.gif`"
                 class="color-invertir"
                 alt="...Actualizando Avatar"
                 heigh="160px"

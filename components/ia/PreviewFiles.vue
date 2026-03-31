@@ -53,7 +53,11 @@ function errorHandler() {
   <client-only>
     <div v-if="loading" class="flex flex-contenido-centrado">
       <figure>
-        <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
+        <img
+          class="color-invertir"
+          :src="`${$config.app.baseURL}img/loader.gif`"
+          alt="Loader de SIGIC"
+        />
         <figcaption class="texto-centrado">Cargando previsualización</figcaption>
       </figure>
     </div>

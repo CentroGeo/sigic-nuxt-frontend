@@ -18,6 +18,7 @@ const hayMetaPendiente = computed(() =>
 const haySolicitudesDeAprobacion = computed(() =>
   storeResources.myTotalBySection('publicacion') > 0 ? true : false
 );
+const config = useRuntimeConfig();
 const isLoading = ref(true);
 const totalResources = computed(() => storeResources.myTotalBySection(section));
 const resources = computed(() => storeResources.mineBySection(section));
@@ -246,7 +247,12 @@ onMounted(async () => {
 
         <!--Si está cargando-->
         <div v-if="isLoading" class="flex flex-contenido-centrado m-t-3 columna-16">
-          <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
+          <img
+            class="color-invertir"
+            :src="`${config.app.baseURL}img/loader.gif`"
+            alt="...Cargando"
+            height="120px"
+          />
         </div>
 
         <!--Cuando no se encontraron resultados que coincidan con la búsqueda-->

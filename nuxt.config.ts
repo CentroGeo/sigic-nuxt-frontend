@@ -4,7 +4,7 @@ import { defineNuxtConfig } from 'nuxt/config';
 const isDev = process.env.NODE_ENV !== 'production';
 const originEnvKey = isDev ? undefined : 'NUXT_AUTH_ORIGIN';
 
-const metaImg = '/img/icono_sigic.png';
+const metaImg = process.env.NUXT_APP_BASE_URL + 'img/icono_sigic.png';
 const metaDescription =
   'Sistema Integral de Gestión de Información Científica. Integra, visualiza y aprovecha el conocimiento científico de México.';
 

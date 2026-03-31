@@ -191,7 +191,11 @@ onMounted(() => {
         <div v-if="selectedResourceType === 'document'">
           <div v-if="!isDocumentoReading" class="flex flex-contenido-centrado">
             <figure>
-              <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
+              <img
+                class="color-invertir"
+                :src="`${$config.app.baseURL}img/loader.gif`"
+                alt="Loader de SIGIC"
+              />
               <figcaption class="texto-centrado">Cargando documento</figcaption>
             </figure>
           </div>
@@ -258,7 +262,11 @@ onMounted(() => {
               class="flex m-y-2 p-1 borde-redondeado-16 fondo-color-informacion texto-color-informacion borde borde-color-informacion"
             >
               <div class="columna-3 flex-vertical-centrado">
-                <img src="/img/loader.gif" alt="...Cargando" class="loader" />
+                <img
+                  :src="`${$config.app.baseURL}img/loader.gif`"
+                  alt="...Cargando"
+                  class="loader"
+                />
               </div>
               <p class="columna-12">Procesando solicitud</p>
             </div>

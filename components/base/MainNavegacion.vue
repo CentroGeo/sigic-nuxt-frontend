@@ -31,7 +31,7 @@ const mostrarAuth = computed(() => config.public.enableAuth);
           class="nav-hiperviculo-logo"
         >
           <img
-            :src="`/img/logo_secihiti.svg`"
+            :src="`${config.app.baseURL}img/logo_secihiti.svg`"
             class="nav-logo color-invertir"
             alt="SECIHITI"
             height="36"
@@ -39,7 +39,7 @@ const mostrarAuth = computed(() => config.public.enableAuth);
         </a>
         <NuxtLink to="/" rel="noopener noreferrer" class="nav-hiperviculo-logo">
           <img
-            :src="`/img/logo_sigic.svg`"
+            :src="`${config.app.baseURL}img/logo_sigic.svg`"
             class="nav-logo color-invertir"
             alt="SIGIC"
             height="36"

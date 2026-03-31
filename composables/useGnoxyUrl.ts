@@ -12,7 +12,7 @@ export function useGnoxyUrl() {
     }
 
     // Caso 2: cualquier otra URL → usar gnoxy/proxy con encode
-    return `/api/gnoxy/proxy/?url=${encodeURIComponent(inputUrl)}`;
+    return `${config.app.baseURL}api/gnoxy/proxy/?url=${encodeURIComponent(inputUrl)}`;
   }
 
   return {

@@ -205,7 +205,11 @@ async function monitorLayerImport(executionId, archivo) {
                         v-if="['pendiente', 'procesando'].includes(archivo.estatus)"
                         class="pictograma-de-carga-sigic"
                       >
-                        <img src="/img/loader.gif" alt="cargando" class="color-invertir" />
+                        <img
+                          :src="`${configEnv.app.baseURL}img/loader.gif`"
+                          alt="cargando"
+                          class="color-invertir"
+                        />
                       </span>
                       {{ archivo.nombre }}
                     </p>

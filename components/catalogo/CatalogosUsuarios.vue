@@ -231,7 +231,12 @@ onMounted(async () => {
 
     <!--El spinner general-->
     <div v-if="isLoadingGeneral" class="flex flex-contenido-centrado m-y-5">
-      <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
+      <img
+        class="color-invertir"
+        :src="`${config.app.baseURL}img/loader.gif`"
+        alt="...Cargando"
+        height="120px"
+      />
     </div>
 
     <!--Si aun no hay servicios catgados por usuarios-->
@@ -256,7 +261,12 @@ onMounted(async () => {
       v-if="!isLoadingGeneral && isLoadingPage && harvesters.length === 0"
       class="flex flex-contenido-centrado m-y-5"
     >
-      <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
+      <img
+        class="color-invertir"
+        :src="`${config.app.baseURL}img/loader.gif`"
+        alt="...Cargando"
+        height="120px"
+      />
     </div>
     <!--La tabla de servicios remotos-->
     <div
@@ -317,7 +327,12 @@ onMounted(async () => {
         </tbody>
       </table>
       <div v-if="isLoadingPage" class="flex flex-contenido-centrado m-y-2">
-        <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="32px" />
+        <img
+          class="color-invertir"
+          :src="`${config.app.baseURL}img/loader.gif`"
+          alt="...Cargando"
+          height="32px"
+        />
       </div>
       <UiPaginador
         :pagina-parent="paginaActual"

@@ -154,7 +154,7 @@ defineExpose({
         <p class="h5 title">{{ selectedElement.title }}</p>
         <div v-if="isDownloadActive" class="flex m-y-2 borde-redondeado-16 contenedor-proceso">
           <div class="columna-4 flex-vertical-centrado">
-            <img src="/img/loader.gif" alt="...Cargando" class="loader" />
+            <img :src="`${$config.app.baseURL}img/loader.gif`" alt="...Cargando" class="loader" />
           </div>
           <p class="columna-12">
             Descarga en curso.

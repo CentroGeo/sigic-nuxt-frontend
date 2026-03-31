@@ -34,7 +34,7 @@ function irARutaQuery() {
       </div>
       <div class="tarjeta-titulo">
         <img
-          src="@/public/img/icono_sigic.png"
+          :src="`${$config.app.baseURL}img/icono_sigic.png`"
           height="40px"
           width="40px"
           class="m-0 color-invertir"

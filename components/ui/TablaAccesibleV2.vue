@@ -488,7 +488,11 @@ async function removerRevision() {
       <figure class="flex flex-contenido-centrado">
         <div class="flex-vertical-centrado" style="height: calc(100vh - 112px)">
           <figure>
-            <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
+            <img
+              class="color-invertir"
+              :src="`${config.app.baseURL}img/loader.gif`"
+              alt="Loader de SIGIC"
+            />
             <figcaption class="texto-centrado">Cargando documento</figcaption>
           </figure>
         </div>
@@ -779,7 +783,11 @@ async function removerRevision() {
               </button>
             </div>
             <div v-if="isBeingDeleted" class="columna-3 color-invertir">
-              <img src="/img/loader.gif" class="color-invertir" alt="...Procesando" />
+              <img
+                :src="`${config.app.baseURL}img/loader.gif`"
+                class="color-invertir"
+                alt="...Procesando"
+              />
             </div>
           </div>
           <!--Alerta de que fracasó la eliminación-->

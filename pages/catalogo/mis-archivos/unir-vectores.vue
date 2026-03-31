@@ -25,6 +25,8 @@ const titleEditedResource = ref('');
 const seleccionCampoCapa = ref('');
 const variables = ref([]);
 
+const config = useRuntimeConfig();
+
 storeCatalogoResources.getMyTotalResources('dataLayer');
 storeCatalogoResources.getMyResourcesByType('dataLayer');
 const layerTotals = computed(() => storeCatalogoResources.myTotalsByType['dataLayer']);
@@ -316,7 +318,7 @@ onMounted(async () => {
           <template #cuerpo>
             <div class="flex flex-contenido-centrado">
               <figure>
-                <img src="/img/loader.gif" alt="Loader de SIGIC" />
+                <img :src="`${config.app.baseURL}img/loader.gif`" alt="Loader de SIGIC" />
                 <figcaption class="texto-centrado">Uniendo capa</figcaption>
               </figure>
             </div>

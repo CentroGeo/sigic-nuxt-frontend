@@ -183,7 +183,11 @@ onMounted(async () => {
       <template v-if="isLoading" #cuerpo>
         <div class="flex flex-contenido-centrado">
           <figure>
-            <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
+            <img
+              class="color-invertir"
+              :src="`${config.app.baseURL}img/loader.gif`"
+              alt="Loader de SIGIC"
+            />
             <figcaption class="texto-centrado">Obteniendo Metadatos</figcaption>
           </figure>
         </div>
