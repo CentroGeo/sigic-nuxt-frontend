@@ -27,7 +27,7 @@ async function subirArchivo() {
     if (archivo.value) formData.append('base_file', archivo.value);
     formData.append('token', token);
 
-    await fetch(`${config.app.baseURL}/api/subir`, {
+    await fetch(`${config.app.baseURL}api/subir`, {
       method: 'POST',
       body: formData,
     });
