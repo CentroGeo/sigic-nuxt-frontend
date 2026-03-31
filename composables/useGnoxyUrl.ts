@@ -8,7 +8,7 @@ export function useGnoxyUrl() {
 
     // Caso 1: URL empieza con geonodeUrl → traducir a gnoxy normal
     if (inputUrl.startsWith(geonodeUrl)) {
-      return inputUrl.replace(geonodeUrl, `/api/gnoxy`);
+      return inputUrl.replace(geonodeUrl, `${config.app.baseURL}api/gnoxy`);
     }
 
     // Caso 2: cualquier otra URL → usar gnoxy/proxy con encode
