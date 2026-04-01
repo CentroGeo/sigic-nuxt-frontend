@@ -27,14 +27,11 @@ const props = defineProps({
     default: false,
   },
 });
-//const storeCatalogo = useCatalogoStore();
+
 const storeMetadatos = useEditedMetadataStore();
 storeMetadatos.checkFilling(props.resourcePk, props.resourceType);
 const { data } = useAuth();
-//const { gnoxyFetch } = useGnoxyUrl();
-//const config = useRuntimeConfig();
-
-const configEnv = useRuntimeConfig();
+const config = useRuntimeConfig();
 
 const campoTitulo = computed({
   get: () => storeMetadatos.metadata.title,
@@ -63,78 +60,29 @@ const campoPalabrasClave = computed({
   get: () => storeMetadatos.metadata.keywords,
   set: (value) => storeMetadatos.updateAttr('keywords', value),
 });
-/* const campoAutorMeta = computed({
-  get: () => storeMetadatos.metadata.metadata_author,
-  set: (value) => storeMetadatos.updateAttr('metadata_author', value),
-}); */
 
 const dictCategoria = [
-  { imageryBaseMapsEarthCover: 'Mapas Base y Cobertura Terrestre' },
-  { society: 'Sociedad' },
+  { farming: 'Agricultura' },
+  { inlandWaters: 'Aguas Continentales' },
+  { biota: 'Biota' },
+  { climatologyMeteorologyAtmosphere: 'Climatología, Meteorología y Atmósfera' },
   { economy: 'Economía' },
-  { utilitiesCommunication: 'Servicios Públicos y Comunicación' },
+  { elevation: 'Elevación' },
+  { structure: 'Estructura' },
+  { boundaries: 'Fronteras' },
+  { geoscientificInformation: 'Información Geocientífica' },
+  { intelligenceMilitary: 'Inteligencia Militar' },
+  { imageryBaseMapsEarthCover: 'Mapas Base y Cobertura Terrestre' },
   { environment: 'Medio Ambiente' },
   { oceans: 'Océanos' },
-  { biota: 'Biota' },
-  { health: 'Salud' },
-  { elevation: 'Elevación' },
-  { geoscientificInformation: 'Información Geocientífica' },
   { planningCadastre: 'Planeación Catastral' },
-  { inlandWaters: 'Aguas Continentales' },
-  { boundaries: 'Fronteras' },
-  { structure: 'Estructura' },
-  { transportation: 'Transporte' },
-  { intelligenceMilitary: 'Inteligencia Militar' },
-  { location: 'Ubicación' },
-  { climatologyMeteorologyAtmosphere: 'Climatología, Meteorología y Atmósfera' },
-  { farming: 'Agricultura' },
   { population: 'Población' },
+  { health: 'Salud' },
+  { utilitiesCommunication: 'Servicios Públicos y Comunicación' },
+  { society: 'Sociedad' },
+  { transportation: 'Transporte' },
+  { location: 'Ubicación' },
 ];
-
-/*const geonodeUsers = ref([]);
-
-
-async function getUsers() {
-  geonodeUsers.value.push({
-    pk: storeMetadatos.metadata.metadata_author_pk,
-    username: storeMetadatos.metadata.metadata_author,
-  });
-
-  let endpoint = `${config.public.geonodeApi}/users`;
-  do {
-    const requestUsers = await gnoxyFetch(endpoint);
-    if (!requestUsers.ok) {
-      const error = await requestUsers.json();
-      console.error('Falló petición de usuarios:', error);
-    }
-    const resUsers = await requestUsers.json();
-    const newUsers = resUsers.users
-      .map((d) => {
-        return { pk: d.pk, username: d.username };
-      })
-      .filter((d) => d.username !== storeMetadatos.metadata.metadata_author);
-    geonodeUsers.value = [...geonodeUsers.value, ...newUsers];
-
-    endpoint = resUsers.links.next;
-  } while (endpoint);
-
-  //const requestTotal = await gnoxyFetch(url);
-  //const resTotal = await requestTotal.json();
-  //const totalUsers = resTotal.total;
-  //const requestUsers = await gnoxyFetch(`${url}?page_size=${totalUsers}`);
-  //const resUsers = await requestUsers.json();
-  //const newUsers = resUsers.users.map((d) => {
-  //  return { pk: d.pk, username: d.username };
-  //});
-  //geonodeUsers.value = [...geonodeUsers.value, ...newUsers]; 
-} */
-
-//getUsers();
-
-/* watch(campoAutorMeta, () => {
-  const selectedAuthor = geonodeUsers.value.find((d) => d.username === campoAutorMeta.value);
-  storeMetadatos.updateAttr('metadata_author_pk', selectedAuthor.pk);
-}); */
 
 const dragNdDrop = ref(null);
 const img_files = ['.jpg', '.jpeg', '.png', '.webp'];
@@ -149,7 +97,7 @@ async function guardarImagen(files) {
     formData.append('token', token.value);
     formData.append('pk', props.resourcePk);
 
-    const endpoint = `${configEnv.public.basePath}/api/metadatos-thumbnail`;
+    const endpoint = `${config.app.baseURL}api/metadatos-thumbnail`;
     // Mandamos el formdata a subirse por
     const response = await fetch(endpoint, {
       method: 'PUT',
@@ -213,7 +161,7 @@ async function guardarImagen(files) {
             >
               <option value="creation">Creación</option>
               <option value="publication">Publicación</option>
-              <option value="revison">Revisón</option>
+              <option value="revision">Revisón</option>
             </SisdaiSelector>
           </ClientOnly>
         </div>
@@ -249,20 +197,6 @@ async function guardarImagen(files) {
             />
           </ClientOnly>
         </div>
-        <!-- <div class="columna-16">
-          <ClientOnly>
-            <SisdaiSelector
-              v-model="campoAutorMeta"
-              class="m-t-3"
-              etiqueta="Autor(a) de los metadatos"
-              ejemplo="Añade nombre de autor"
-            >
-              <option v-for="value in geonodeUsers" :key="value.pk" :value="value.username">
-                {{ value.username }}
-              </option>
-            </SisdaiSelector>
-          </ClientOnly>
-        </div> -->
       </div>
 
       <CatalogoBotonesMetadatos

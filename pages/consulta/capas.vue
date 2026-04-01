@@ -1,26 +1,40 @@
 <script setup>
-import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa, utiles } from '@centrogeomx/sisdai-mapas';
-import { arrayNewsOlds, findServer, resourceTypeDic } from '~/utils/consulta';
+import {
+  SisdaiCapaArcgis,
+  SisdaiCapaWms,
+  SisdaiCapaXyz,
+  SisdaiMapa,
+  utiles,
+} from '@centrogeomx/sisdai-mapas';
+import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
+import { arrayNewsOlds, resourceTypeDic } from '~/utils/consulta';
 
 const storeConsulta = useConsultaStore();
 const storeResources = useResourcesConsultaStore();
 const storeSelected = useSelectedResources2Store();
 const config = useRuntimeConfig();
 const { gnoxyFetch } = useGnoxyUrl();
+const { findServer, filteredByServerType } = useResourcesSupplements();
 const route = useRoute();
 const router = useRouter();
 storeConsulta.resourceType = resourceTypeDic.dataLayer;
 const isSwipeActive = computed(() => storeConsulta.divisionMapaActivado());
-
 const vistaDelMapa = ref({ extension: storeConsulta.mapExtent });
 const selectorDivisionAbierto = ref(undefined);
 const estaAbiertoSelectorDivisionMapa = (lado) => selectorDivisionAbierto.value === lado;
+const owsLayers = computed(() =>
+  filteredByServerType(storeResources.findResources(storeSelected.pks), 'ogc')
+);
+const arcgisLayers = computed(() =>
+  filteredByServerType(storeResources.findResources(storeSelected.pks), 'arcgis')
+);
+const linkExportaMapa = ref();
+const attributes = ref({});
+
 function alAbrirSelectorDivisionMapa(lado) {
   selectorDivisionAbierto.value = estaAbiertoSelectorDivisionMapa(lado) ? undefined : lado;
 }
 
-const attributes = ref({});
-const linkExportaMapa = ref();
 function exportarMapa() {
   utiles.exportarHTMLComoPNG(
     document.querySelectorAll('.mapa .ol-viewport').item(0),
@@ -88,12 +102,10 @@ async function addAttribute(pk) {
   const maxAttrs = 5;
   const resource = await gnoxyFetch(`${config.public.geonodeApi}/datasets/${pk}`);
   if (!resource.ok) {
-    //console.error('Error en la peticion de atributos');
     const alternateTitle = storeResources.findResource(pk, 'dataLayer')['alternate'];
     attributes.value[alternateTitle] = [];
   } else {
     const res = await resource.json();
-    //console.log(res);
     let visibleAttrs = res.dataset.attribute_set
       .filter((a) => a.visible)
       .sort((a, b) => a.display_order - b.display_order);
@@ -119,18 +131,18 @@ async function addAttribute(pk) {
  */
 async function buildLayerInfo(url, alternate, title, sourcetype) {
   if (sourcetype === 'REMOTE') {
-    //return `<p style="margin-bottom: 8px;">${title}</p> <p>No hay información disponible para esta capa.</p>`;
-    return undefined;
+    return `<p style="margin-bottom: 8px;">${title}</p> <p>No hay información disponible para esta capa.</p>`;
+    //return undefined;
   } else {
     const res = await gnoxyFetch(url);
     if (!res.ok) {
-      //return `<p style="margin-bottom: 8px;">${title}</p> <p>No hay información disponible para esta capa.</p>`;
-      return undefined;
+      return `<p style="margin-bottom: 8px;">${title}</p> <p>No hay información disponible para esta capa.</p>`;
+      //return undefined;
     }
     const data = await res.json();
     if (data.features.length === 0) {
-      //return `<p style="margin-bottom: 8px;">${title}</p> <p>No hay información disponible para este punto.</p>`;
-      return undefined;
+      return `<p style="margin-bottom: 8px;">${title}</p> <p>No hay información disponible para este punto.</p>`;
+      //return undefined;
     } else {
       const propiedades = data.features[0].properties;
       const match = attributes.value[alternate].map(({ attribute, attribute_label }) => {
@@ -152,7 +164,6 @@ watch(
   (nv_) => {
     const selectedPks = Object.keys(nv_);
     const attributesPks = Object.keys(attributes.value);
-    //console.log(selectedPks, attributesPks);
     const { news, olds } = arrayNewsOlds(attributesPks, selectedPks);
     news.forEach(async (r) => await addAttribute(r));
     olds.forEach((resource) => delete attributes.value[resource]);
@@ -161,6 +172,7 @@ watch(
 );
 
 watch(() => storeSelected.asQueryParam(), updateQueryParam, { deep: true });
+
 watch(isSwipeActive, async (nv) => {
   await actualizarSwipeEnHash();
   if (nv === false) {
@@ -168,6 +180,7 @@ watch(isSwipeActive, async (nv) => {
     storeSelected.pks.forEach((pk) => storeSelected.byPk(pk).resetLado());
   }
 });
+
 watch(
   () => storeConsulta.mapExtent,
   (extension) => {
@@ -177,20 +190,17 @@ watch(
 );
 
 onMounted(async () => {
-  //console.log('Extension:', vistaDelMapa.value);
+  storeConsulta.catalogoColapsado = false;
   updateMapFromHash(route.hash?.slice(1));
   storeResources.resetByType(storeConsulta.resourceType);
   storeSelected.addFromQueryParam(route.query.capas);
 
-  // Para cuando hace el cambio de página
+  // Cuando hace el cambio de página
   if (storeSelected.pks.length > 0) {
     storeResources.fetchResourcesByPk(storeConsulta.resourceType, storeSelected.pks);
     updateQueryParam(storeSelected.asQueryParam());
   }
 });
-
-// api/v2/datasets?page_size=1&filter{alternate.in}[]=alternate
-// const contenedorSelectoresDivisionColapsado = ref(true);
 </script>
 
 <template>
@@ -205,6 +215,7 @@ onMounted(async () => {
       </div>
       <ClientOnly v-else>
         <SisdaiMapa
+          :key="`mapa-`"
           class="gema"
           :vista="vistaDelMapa"
           :dividir="storeConsulta.divisionMapa"
@@ -235,7 +246,7 @@ onMounted(async () => {
           <SisdaiCapaXyz :posicion="0" />
           <!---->
           <SisdaiCapaWms
-            v-for="resource in storeResources.findResources(storeSelected.pks)"
+            v-for="resource in owsLayers"
             :key="`wms-${resource.pk}-${resource.position_}`"
             :capa="resource.alternate"
             :consulta="gnoxyFetch"
@@ -245,9 +256,21 @@ onMounted(async () => {
             :opacidad="storeSelected.byPk(resource.pk).opacidad"
             :posicion="storeSelected.byPk(resource.pk).posicion + 1"
             :visible="storeSelected.byPk(resource.pk).visible"
+            :estilo="storeSelected.byPk(resource.pk).estilo"
             :cuadro-informativo="
               (url) => buildLayerInfo(url, resource.alternate, resource.title, resource.sourcetype)
             "
+          />
+          <SisdaiCapaArcgis
+            v-for="resource in arcgisLayers"
+            :key="`arcgis-${resource.pk}-${resource.position_}`"
+            :fuente="findServer(resource).replace('?', '')"
+            :capa="resource.alternate.split(':')[1]"
+            :mosaicos="true"
+            :lado="storeSelected.byPk(resource.pk).lado"
+            :opacidad="storeSelected.byPk(resource.pk).opacidad"
+            :posicion="storeSelected.byPk(resource.pk).posicion + 1"
+            :visible="storeSelected.byPk(resource.pk).visible"
           />
         </SisdaiMapa>
       </ClientOnly>

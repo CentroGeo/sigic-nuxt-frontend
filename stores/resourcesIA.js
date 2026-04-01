@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
-import { buildUrl, defineGeomType, resourceTypeDic } from '~/utils/consulta';
+import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
+import { buildUrl, resourceTypeDic } from '~/utils/consulta';
 
 export const useResourcesIAStore = defineStore('resourcesIA', () => {
   const config = useRuntimeConfig();
@@ -75,12 +76,14 @@ export const useResourcesIAStore = defineStore('resourcesIA', () => {
      * @param {Array} params
      */
     async fetchByCategory(resourceType = storeConsulta.resourceType, pageNum, params) {
-      // console.log('params', params);
       const { gnoxyFetch } = useGnoxyUrl();
+      const { defineGeomType } = useResourcesSupplements();
       const queryParams = {
         page: pageNum,
         page_size: 2,
         ...params,
+        'filter{complete_metadata}': 'true',
+        'filter{is_published}': 'true',
       };
       const url = buildUrl(`${config.public.geonodeApi}/sigic-resources`, queryParams);
       const request = await gnoxyFetch(url);
@@ -97,14 +100,7 @@ export const useResourcesIAStore = defineStore('resourcesIA', () => {
 
       //En caso de que los recursos incluyan servicios remotos, revisamos su getCapabilities
       const datum = res.resources;
-
-      // TODO: Agregar en los query params el filtrado para indicar que recursos con metadatos
-      // completos. Borrar la siguiente linea y cambiar data por datum
-      const data = datum.filter((d) => d.category);
-      resources[resourceType] = [...resources[resourceType], ...data];
-
-      //const data = res.resources;
-      //resources[resourceType] = [...resources[resourceType], ...data];
+      resources[resourceType] = [...resources[resourceType], ...datum];
     },
     /**
      * Reescribe la lista de pks correspondientes a los enésimos elementos
@@ -191,10 +187,10 @@ export const useResourcesIAStore = defineStore('resourcesIA', () => {
     let remotes = datum.filter((resource) => resource.sourcetype === 'REMOTE');
     const filterRemotes = await Promise.all(
       remotes.map(async (resource) => {
-        return { resourceValue: resource, resourceHasWms: await hasWMS(resource, 'map', proxyURL) };
+        return { resourceValue: resource, resourcehasWFS: await hasWFS(resource, 'map', proxyURL) };
       })
     );
-    remotes = filterRemotes.filter((d) => d.resourceHasWms).map((d) => d.resourceValue);
+    remotes = filterRemotes.filter((d) => d.resourcehasWFS).map((d) => d.resourceValue);
     return locals.concat(remotes);
   }
   if (resourceType === resourceTypeDic.dataTable) {
@@ -205,11 +201,11 @@ export const useResourcesIAStore = defineStore('resourcesIA', () => {
       remotes.map(async (resource) => {
         return {
           resourceValue: resource,
-          resourceHasWms: await hasWMS(resource, 'table', proxyURL),
+          resourcehasWFS: await hasWFS(resource, 'table', proxyURL),
         };
       })
     );
-    remotes = filterRemotes.filter((d) => d.resourceHasWms).map((d) => d.resourceValue);
+    remotes = filterRemotes.filter((d) => d.resourcehasWFS).map((d) => d.resourceValue);
     return locals.concat(remotes);
   }
 } */

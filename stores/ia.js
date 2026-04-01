@@ -44,7 +44,7 @@ export const useIAStore = defineStore('ia', {
         //formData.append('visibility', visibilidadProyecto.value);
         formData.append('public', isPublic === 'publico' ? 'True' : 'False');
 
-        console.log(archivos);
+        console.log('archivos:', archivos);
 
         // Agregar archivos si existen
         archivos.forEach((archivo) => {
@@ -54,7 +54,7 @@ export const useIAStore = defineStore('ia', {
         archivosGeonode.forEach((archivo) => {
           formData.append(
             'archivos_geonode',
-            JSON.stringify({ id: archivo.pk, category: archivo.category })
+            JSON.stringify({ id: archivo.pk, category: archivo.category, nombre: archivo.nombre })
           );
         });
 
@@ -85,7 +85,7 @@ export const useIAStore = defineStore('ia', {
             this.isUploading = false;
             if (xhr.status >= 200 && xhr.status < 300) {
               const data = JSON.parse(xhr.responseText);
-              console.log('Proyecto guardado:', data);
+              console.log('Proyecto guardado correctamente:', data);
               this.existenProyectos = true;
               resolve(data);
             } else {
@@ -116,21 +116,18 @@ export const useIAStore = defineStore('ia', {
     },
 
     async crearContexto(formData) {
+      console.log('crear contexto');
+
       const token = this.authToken;
       const userEmail = this.userEmail;
-
       formData.append('user_id', userEmail);
-      //this.existeContexto = true;
 
-      console.log('crear crearContexto');
+      // Log para depuración
+      for (const pair of formData.entries()) {
+        console.log(`${pair[0]}: ${pair[1]}`);
+      }
+
       try {
-        /*         const formData = new FormData();
-        formData.append("title", title);
-        formData.append("description", description);
-        //formData.append('visibility', visibilidadProyecto.value);
-        formData.append("public", isPublic === "publico" ? "True" : "False");
- */
-
         const response = await fetch(
           this.backend + '/api/fileuploads/workspaces/admin/contexts/create',
           {
@@ -141,19 +138,14 @@ export const useIAStore = defineStore('ia', {
             body: formData,
           }
         );
-
-        console.log(response);
+        // console.log(response);
 
         if (!response.ok) {
           throw new Error('Error al guardar el contexto');
         }
 
         const data = await response.json();
-        console.log('Contexto guardado:', data);
-
-        // Redirigir después de guardar
-        //this.existenProyectos = true;
-        //navigateTo('/ia/proyectos');
+        console.log('Contexto guardado exitosamente:', data);
       } catch (error) {
         console.error('Error:', error);
         throw error;
@@ -161,10 +153,13 @@ export const useIAStore = defineStore('ia', {
       }
     },
 
+    /**
+     * Obtiene la lista de proyectos guardados por user_id
+     * y selecciona un proyecto si la lista no está vacía
+     * @returns {Array}
+     */
     async getProjectsList() {
-      //this.existeContexto = true;
       const token = this.authToken;
-
       const userEmail = this.userEmail;
 
       const formData = new FormData();
@@ -181,19 +176,30 @@ export const useIAStore = defineStore('ia', {
       if (!response.ok) {
         throw new Error('Error al consultar proyectos');
       }
-
       const data = await response.json();
+
+      // Para que el último sea siempre el primero
+      this.data = data.reverse();
+
+      // asigna data a proyectos
       this.proyectos = data;
 
+      // si data es mayor a cero selecciona el primer proyecto de la lista
       if (data.length > 0) {
-        this.proyectoSeleccionado = data[0];
+        // console.log('this.proyectoSeleccionado', this.proyectoSeleccionado);
+        if (this.proyectoSeleccionado !== null) {
+          // eslint-disable-next-line no-self-assign
+          this.proyectoSeleccionado = this.proyectoSeleccionado;
+        } else {
+          this.proyectoSeleccionado = data[0];
+        }
+
         this.existenProyectos = true;
       } else {
         this.proyectoSeleccionado = null;
         this.existenProyectos = false;
       }
 
-      //console.log('Proyectos:', data);
       return data;
     },
 
@@ -201,7 +207,7 @@ export const useIAStore = defineStore('ia', {
       const token = this.authToken;
 
       const response = await fetch(
-        this.backend + '/api/fileuploads/workspaces/admin/' + project_id + '/files',
+        this.backend + `/api/fileuploads/workspaces/admin/${project_id}/files`,
         {
           method: 'POST',
           headers: {
@@ -274,13 +280,9 @@ export const useIAStore = defineStore('ia', {
      * @param {Number} user_id
      * @returns {Array} data con los chats
      */
-    async getChatList(user_id) {
+    async getChatList() {
       const token = this.authToken;
-      //this.existeContexto = true;
-      console.log(user_id);
-
       const userEmail = this.userEmail;
-
       const formData = new FormData();
       formData.append('user_id', userEmail);
 
@@ -298,21 +300,14 @@ export const useIAStore = defineStore('ia', {
 
       const data = await response.json();
       this.chats = data;
-
-      /*       if (data.length > 0) {
-        this.proyectoSeleccionado = data[0];
-      } else {
-        this.proyectoSeleccionado = null;
-      } */
-      //this.existenProyectos = true;
-      //console.log('Proyectos:', data);
+      console.log('Chats:', this.chats);
       return data;
     },
 
     async getChat(chat_id) {
       const token = this.authToken;
       //this.existeContexto = true;
-      console.log(chat_id);
+      console.log('chat_id', chat_id);
 
       const response = await fetch(this.backend + '/api/chat/history/user', {
         method: 'POST',
@@ -328,7 +323,8 @@ export const useIAStore = defineStore('ia', {
       }
 
       const data = await response.json();
-      console.log(data);
+      // console.log(data);
+      console.log('openChat: ', data);
       //this.chats = data;
 
       /*       if (data.length > 0) {
@@ -351,6 +347,7 @@ export const useIAStore = defineStore('ia', {
     },
     async getProjectById(project_id) {
       const token = this.authToken;
+
       const response = await fetch(
         this.backend + `/api/fileuploads/workspaces/admin/register/${project_id}`,
         {
@@ -431,8 +428,8 @@ export const useIAStore = defineStore('ia', {
         //formData.append('visibility', visibilidadProyecto.value);
         formData.append('public', isPublic === 'publico' ? 'True' : 'False');
 
-        console.log(archivos);
-        console.log(archivosGeonode);
+        // console.log('archivos', archivos);
+        // console.log('archivosGeonode', archivosGeonode);
 
         // Agregar archivos si existen
         archivos.forEach((archivo) => {
@@ -442,12 +439,15 @@ export const useIAStore = defineStore('ia', {
         archivosGeonode.forEach((archivo) => {
           formData.append(
             'archivos_geonode',
-            JSON.stringify({ id: archivo.pk, category: archivo.category })
+            JSON.stringify({ id: archivo.pk, category: archivo.category, nombre: archivo.nombre })
           );
         });
+        // console.log('formData', formData);
 
         if (archivosEliminados.length > 0) {
-          formData.append('delete_files[]', archivosEliminados);
+          archivosEliminados.forEach((element) => {
+            formData.append('delete_files[]', element);
+          });
         }
 
         // Log para depuración
@@ -508,8 +508,12 @@ export const useIAStore = defineStore('ia', {
       try {
         const token = this.authToken;
         const userEmail = this.userEmail;
-
         formData.append('user_id', userEmail);
+
+        // imprime lo que va en el formData
+        for (const pair of formData.entries()) {
+          console.log(`${pair[0]}: ${pair[1]}`);
+        }
 
         const response = await fetch(
           this.backend + `/api/fileuploads/workspaces/admin/contexts/edit/${contexto_id}`,
@@ -521,15 +525,14 @@ export const useIAStore = defineStore('ia', {
             body: formData,
           }
         );
-
-        console.log(response);
+        // console.log(response);
 
         if (!response.ok) {
           throw new Error('Error al actualizar el contexto');
         }
 
         const data = await response.json();
-        console.log('Contexto actualizado:', data);
+        console.log('Contexto actualizado exitosamente:', data);
       } catch (error) {
         console.error('Error:', error);
         throw error;
@@ -548,8 +551,7 @@ export const useIAStore = defineStore('ia', {
             },
           }
         );
-
-        console.log(response);
+        // console.log(response);
 
         if (!response.ok) {
           throw new Error('Error al eliminar el proyecto');
@@ -575,8 +577,7 @@ export const useIAStore = defineStore('ia', {
             },
           }
         );
-
-        console.log(response);
+        // console.log(response);
 
         if (!response.ok) {
           throw new Error('Error al eliminar el contexto');
@@ -606,7 +607,7 @@ export const useIAStore = defineStore('ia', {
       }
 
       const data = await response.json();
-      console.log(data);
+      console.log('Chat actualizado:', data);
 
       return data;
     },

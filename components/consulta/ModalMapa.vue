@@ -1,7 +1,9 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { SisdaiCapaWms, SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
-import { findServer, resourceTypeDic } from '~/utils/consulta';
+import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
+import { resourceTypeDic } from '~/utils/consulta';
 import SelectedLayer from '~/utils/consulta/SelectedLayer';
 
 const props = defineProps({
@@ -11,18 +13,22 @@ const props = defineProps({
   },
 });
 const { gnoxyFetch } = useGnoxyUrl();
+const { findServer } = useResourcesSupplements();
+const storeSelected = useSelectedResources2Store();
 const extentMap = ref(undefined);
-//const estilosLista = ref(['Opcion 1', 'Opción 2', 'Opcion 3']);
-//const estiloSeleccionado = ref(estilosLista.value[0]);
 const modalMapa = ref(null);
+const estilosLista = ref(props.selectedElement.styles);
+const estiloSeleccionado = ref(props.selectedElement.default_style);
 const emit = defineEmits(['notifyDownload']);
 
 async function openLayerView() {
-  useSelectedResources2Store().add(
+  storeSelected.reset(resourceTypeDic.dataLayer);
+  storeSelected.add(
     new SelectedLayer({ pk: props.selectedElement.pk }),
+    estiloSeleccionado.value,
     resourceTypeDic.dataLayer
   );
-
+  modalMapa.value?.cerrarModal();
   await navigateTo('/consulta/capas');
 }
 
@@ -33,16 +39,6 @@ function downloadClicked() {
 function abrirModalMapa() {
   modalMapa.value?.abrirModal();
 }
-/* function findServer(resource) {
-  if (resource.sourcetype === 'REMOTE') {
-    const url = getWMSserver(resource);
-    return url;
-  } else {
-    const url = `${config.public.geonodeUrl}/gs/wms?`;
-    const urlCurada = gnoxyUrl(url);
-    return urlCurada;
-  }
-} */
 defineExpose({
   abrirModalMapa,
 });
@@ -56,27 +52,30 @@ defineExpose({
       </template>
 
       <template #cuerpo>
-        <!--  <SisdaiSelector
+        <SisdaiSelector
+          v-if="estilosLista.length > 1"
           v-model="estiloSeleccionado"
           etiqueta="Variables disponibles para visualizar"
           instruccional="Selecciona el estilo para visualizar"
-          class="m-y-2"
+          class="m-b-3"
         >
           <option v-for="(estilo, index) in estilosLista" :key="`estilo-${index}`" :value="estilo">
             {{ estilo }}
           </option>
-        </SisdaiSelector>-->
+        </SisdaiSelector>
+        <div class="contenedor-mapa">
+          <SisdaiMapa class="gema" :vista="{ extension: extentMap }">
+            <SisdaiCapaXyz />
 
-        <SisdaiMapa class="gema" :vista="{ extension: extentMap }">
-          <SisdaiCapaXyz />
-
-          <SisdaiCapaWms
-            :capa="selectedElement.alternate"
-            :consulta="gnoxyFetch"
-            :fuente="findServer(selectedElement)"
-            @al-finalizar-carga="extentMap = selectedElement.extent.coords"
-          />
-        </SisdaiMapa>
+            <SisdaiCapaWms
+              :capa="selectedElement.alternate"
+              :estilo="estiloSeleccionado"
+              :consulta="gnoxyFetch"
+              :fuente="findServer(selectedElement)"
+              @al-finalizar-carga="extentMap = selectedElement.extent.coords"
+            />
+          </SisdaiMapa>
+        </div>
       </template>
 
       <template #pie>
@@ -106,11 +105,17 @@ defineExpose({
 <style lang="scss" scoped>
 #modal-mapa {
   max-width: 40%;
+  //max-height: 95vh;
+}
+.contenedor-mapa {
+  max-height: 30vh;
+  overflow-y: auto;
+  margin: 0px;
 }
 
 .ancho {
   width: 50%;
   display: flex;
-  justify-content: center; /* horizontal center */
+  justify-content: center;
 }
 </style>

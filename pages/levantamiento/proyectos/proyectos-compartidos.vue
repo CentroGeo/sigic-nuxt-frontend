@@ -6,7 +6,7 @@ definePageMeta({
 });
 
 const notificaciones = [
-  {
+  /* {
     id: 1,
     email: 'persona_usuaria@email.com',
     proyecto: { nombre: 'Registro de arte urbano en la ciudad de Mérida' },
@@ -25,10 +25,18 @@ const notificaciones = [
     id: 4,
     email: 'persona_usuaria@email.com',
     proyecto: { nombre: 'Inventario de faroles en el barrio Flores del Amanecer' },
-  },
+  }, */
 ];
 
 const storeLevantamiento = useLevantamientoStore();
+const { data } = useAuth();
+
+const proyectosCompartidosFiltrado = ref([]);
+
+onMounted(async () => {
+  await storeLevantamiento.obtenerProyectosCompartidos(data.value?.user.email);
+  proyectosCompartidosFiltrado.value = storeLevantamiento.proyectosCompartidos;
+});
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeLevantamiento.catalogoColapsado">
@@ -55,9 +63,9 @@ const storeLevantamiento = useLevantamientoStore();
         />
 
         <div class="flex titulo-contenido-levantamiento">
-          <h2>Proyectos públicos</h2>
+          <h2>Proyectos compartidos</h2>
           <UiNumeroElementos
-            :numero="storeLevantamiento.obtenerTotalProyectosPublicos()"
+            :numero="storeLevantamiento.obtenerTotalProyectosCompartidos()"
             etiqueta="Proyectos"
           />
         </div>
@@ -65,11 +73,17 @@ const storeLevantamiento = useLevantamientoStore();
           <div class="columna-8">
             <ClientOnly>
               <label for="buscadoravanzado">Buscador</label>
-              <SisdaiCampoBusqueda etiqueta="" />
+              <SisdaiCampoBusqueda
+                etiqueta=""
+                :catalogo="storeLevantamiento.proyectosCompartidos"
+                propiedad-busqueda="nombre"
+                @al-filtrar="(r) => (proyectosCompartidosFiltrado = r)"
+              />
             </ClientOnly>
           </div>
         </div>
         <div
+          v-if="notificaciones.length > 0"
           class="texto-color-informacion fondo-color-informacion borde-redondeado-20 borde borde-color-informacion p-3 m-b-3"
         >
           <div class="m-b-1 flex flex-contenido-separado">
@@ -95,11 +109,14 @@ const storeLevantamiento = useLevantamientoStore();
         </div>
         <div class="grid">
           <div
-            v-for="proyecto in storeLevantamiento.proyectosPublicos"
+            v-for="proyecto in proyectosCompartidosFiltrado"
             :key="proyecto.id"
             class="columna-4 fondo-color-neutro p-3 borde-redondeado-20"
           >
-            <img class="icono-proyecto m-b-minimo color-invertir" src="/img/icono_sigic.png" />
+            <img
+              class="icono-proyecto m-b-minimo color-invertir"
+              :src="`${$config.app.baseURL}img/icono_sigic.png`"
+            />
             <div class="m-b-minimo texto-tamanio-4 nombre-proyecto">
               <b>{{ proyecto.nombre }}</b>
             </div>

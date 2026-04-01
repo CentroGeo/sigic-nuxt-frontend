@@ -15,7 +15,7 @@ const buttonTagDict = {
   dataTable: 'archivos',
   document: 'archivos',
 };
-// const route = useRoute();
+
 const shownModal = ref('ninguno');
 const modalResource = ref(null);
 const owsLink = ref(null);
@@ -84,7 +84,6 @@ function notifyShareChild() {
 
 function shareState() {
   shownModal.value = 'share';
-  //console.log('Se copia el url en el portapapeles: ', route.fullPath);
   nextTick(() => {
     notifyShareChild();
   });
@@ -96,7 +95,6 @@ function changeModal(to) {
   }
 }
 
-// const isOpen = ref(false);
 const storeConsulta = useConsultaStore();
 const dividirMapa = computed({
   get: () => storeConsulta.divisionMapaActivado(),
@@ -117,6 +115,7 @@ const dividirMapa = computed({
 
         <div class="flex m-y-3">
           <button
+            :disabled="storeSelected.list(resourceType).length === 0"
             type="button"
             class="boton-primario boton-chico"
             aria-label="Descargar mapa"
@@ -132,6 +131,7 @@ const dividirMapa = computed({
 
           <button
             v-globo-informacion:derecha="'Compartir'"
+            :disabled="storeSelected.list(resourceType).length === 0"
             type="button"
             class="boton-pictograma boton-con-contenedor-secundario"
             aria-label="Compartir"
@@ -142,6 +142,7 @@ const dividirMapa = computed({
 
           <button
             v-globo-informacion:derecha="'Eliminar selección'"
+            :disabled="storeSelected.list(resourceType).length === 0"
             type="button"
             class="boton-pictograma boton-con-contenedor-secundario"
             aria-label="Eliminar"
@@ -173,7 +174,12 @@ const dividirMapa = computed({
           </button>
 
           <div class="contendor-control-dividir">
-            <input id="control-dividir" v-model="dividirMapa" type="checkbox" />
+            <input
+              id="control-dividir"
+              v-model="dividirMapa"
+              :disabled="storeSelected.list(resourceType).length === 0"
+              type="checkbox"
+            />
             <label for="control-dividir"> Dividir pantalla </label>
           </div>
         </div>

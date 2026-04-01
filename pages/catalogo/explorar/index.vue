@@ -7,7 +7,7 @@ const storeResources = useResourcesCatalogoStore();
 const storeCatalogo = useCatalogoStore();
 const storeSelected = useSelectedResources2Store();
 const config = useRuntimeConfig();
-const basePath = config.public.basePath;
+
 function buildQueryParams(resourceType) {
   const queryParams = {};
   queryParams['filter{resource_type}'] = resourceTypeGeonode[resourceType];
@@ -33,7 +33,7 @@ const resourcesDict = computed(() => ({
     total: storeResources.totalByType('dataLayer'),
     latest: storeResources.latestByType('dataLayer'),
     to: '/catalogo/explorar/capas',
-    img: `${basePath}/img/thumbnail-capas.png`,
+    img: `${config.app.baseURL}img/thumbnail-capas.png`,
     keyword: 'capas',
     consultaTo: '/consulta/capas',
     consultaLabel: 'Ver Capa en el Visualizador',
@@ -43,7 +43,7 @@ const resourcesDict = computed(() => ({
     total: storeResources.totalByType('dataTable'),
     latest: storeResources.latestByType('dataTable'),
     to: '/catalogo/explorar/tablas',
-    img: `${basePath}/img/thumbnail-tablas.png`,
+    img: `${config.app.baseURL}img/thumbnail-tablas.png`,
     keyword: 'datos tabulados',
     consultaTo: '/consulta/tablas',
     consultaLabel: 'Ver Archivo en el Visualizador',
@@ -53,7 +53,7 @@ const resourcesDict = computed(() => ({
     total: storeResources.totalByType('document'),
     latest: storeResources.latestByType('document'),
     to: '/catalogo/explorar/documentos',
-    img: `${basePath}/img/thumbnail-docs.png`,
+    img: `${config.app.baseURL}img/thumbnail-docs.png`,
     keyword: 'documentos',
     consultaTo: '/consulta/documentos',
     consultaLabel: 'Ver Documento en el Visualizador',
@@ -63,9 +63,13 @@ const resourcesDict = computed(() => ({
 async function updateSelection(type) {
   const currentPk = resourcesDict.value[type].latest.pk;
   if (type === 'dataTable' || type === 'document') {
-    storeSelected.add(new SelectedResource({ pk: currentPk }), type);
+    storeSelected.add(new SelectedResource({ pk: currentPk }), null, type);
   } else {
-    storeSelected.add(new SelectedLayer({ pk: currentPk }), type);
+    storeSelected.add(
+      new SelectedLayer({ pk: currentPk }),
+      resourcesDict.value[type].default_style,
+      type
+    );
   }
   nextTick(async () => {
     await navigateTo(resourcesDict.value[type].consultaTo);
@@ -124,14 +128,13 @@ async function updateSelection(type) {
                   </span>
                 </div>
                 <div class="tarjeta-pie">
-                  <nuxt-link
+                  <button
                     class="boton boton-primario boton-chico"
                     aria-label="Ver capa en visualizador"
-                    :to="resourcesDict[type].consultaTo"
-                    @click.prevent="updateSelection(type)"
+                    @click="updateSelection(type)"
                   >
                     {{ resourcesDict[type].consultaLabel }}
-                  </nuxt-link>
+                  </button>
                 </div>
               </div>
             </div>

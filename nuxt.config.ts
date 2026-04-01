@@ -2,18 +2,17 @@
 import { defineNuxtConfig } from 'nuxt/config';
 
 const isDev = process.env.NODE_ENV !== 'production';
-const appBasePath = process.env.NUXT_PUBLIC_APP_BASE_PATH || '/';
-const basePath = appBasePath.replace(/\/+$/, '');
-const authBaseUrl = process.env.NUXT_PUBLIC_AUTH_BASE_URL;
 const originEnvKey = isDev ? undefined : 'NUXT_AUTH_ORIGIN';
 
-const metaImg = 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg';
+const metaImg = process.env.NUXT_APP_BASE_URL + 'img/icono_sigic.png';
 const metaDescription =
   'Sistema Integral de Gestión de Información Científica. Integra, visualiza y aprovecha el conocimiento científico de México.';
 
 export default defineNuxtConfig({
+  ssr: true,
+
   app: {
-    baseURL: appBasePath,
+    baseURL: '/',
     head: {
       link: [
         {
@@ -53,7 +52,9 @@ export default defineNuxtConfig({
   },
 
   nitro: {
-    baseURL: appBasePath,
+    baseURL: '/',
+    preset: 'node-server',
+    compressPublicAssets: false,
   },
 
   modules: [
@@ -70,9 +71,8 @@ export default defineNuxtConfig({
   auth: {
     debug: !isDev,
     isEnabled: true,
-    baseURL: authBaseUrl,
+    baseURL: '/',
     originEnvKey: originEnvKey,
-    basePath: appBasePath,
     globalAppMiddleware: false,
     provider: {
       type: 'authjs',
@@ -88,20 +88,22 @@ export default defineNuxtConfig({
   runtimeConfig: {
     // Variables privadas (solo disponibles en el servidor)
     authSecret: process.env.NUXT_AUTH_SECRET,
-    keycloakClientId: process.env.KEYCLOAK_CLIENT_ID,
-    keycloakIssuer: process.env.KEYCLOAK_ISSUER,
+    keycloakClientId: process.env.NUXT_PUBLIC_KEYCLOAK_CLIENT_ID,
+    keycloakIssuer: process.env.NUXT_PUBLIC_KEYCLOAK_ISSUER,
     keycloakClientSecret: process.env.KEYCLOAK_CLIENT_SECRET,
 
     // Variables públicas (disponibles en el cliente)
     public: {
-      baseURL: process.env.NUXT_PUBLIC_BASE_URL || 'http://localhost:3000',
-      basePath: basePath,
+      keycloakIssuer: process.env.NUXT_PUBLIC_KEYCLOAK_ISSUER,
+      keycloakClientId: process.env.NUXT_PUBLIC_KEYCLOAK_CLIENT_ID,
       ollamaModel: process.env.NUXT_PUBLIC_OLLAMA_MODEL || 'deepseek-r1',
       geonodeUrl: process.env.NUXT_PUBLIC_GEONODE_URL || 'https://geonode.dev.geoint.mx',
       geonodeApi: process.env.NUXT_PUBLIC_GEONODE_API || 'https://geonode.dev.geoint.mx/api/v2',
       geoserverUrl:
         process.env.NUXT_PUBLIC_GEOSERVER_URL || 'https://geonode.dev.geoint.mx/geoserver',
       iaBackendUrl: process.env.NUXT_PUBLIC_IA_BACKEND_URL || 'https://sigic.ia.dev.geoint.mx/llmb',
+      levantamientoBackendUrl: process.env.NUXT_PUBLIC_LEVANTAMIENTO_URL,
+      baseURL: process.env.NUXT_PUBLIC_BASE_URL,
       defaultPage: process.env.NUXT_PUBLIC_DEFAULT_PAGE || '/',
       geonodeApiDefaultFilter: process.env.NUXT_PUBLIC_GEONODE_API_DEFAULT_FILTER || '',
       enableAuth: process.env.NUXT_PUBLIC_ENABLE_AUTH === 'true',

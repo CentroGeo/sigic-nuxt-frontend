@@ -5,6 +5,13 @@ definePageMeta({
   middleware: 'auth',
 });
 const storeLevantamiento = useLevantamientoStore();
+
+const proyectosPublicosFiltrado = ref([]);
+
+onMounted(async () => {
+  await storeLevantamiento.obtenerProyectosPublicos();
+  proyectosPublicosFiltrado.value = storeLevantamiento.proyectosPublicos;
+});
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeLevantamiento.catalogoColapsado">
@@ -41,23 +48,35 @@ const storeLevantamiento = useLevantamientoStore();
           <div class="columna-8">
             <ClientOnly>
               <label for="buscadoravanzado">Buscador</label>
-              <SisdaiCampoBusqueda etiqueta="" />
+              <SisdaiCampoBusqueda
+                etiqueta=""
+                :catalogo="storeLevantamiento.proyectosPublicos"
+                propiedad-busqueda="nombre"
+                @al-filtrar="(r) => (proyectosPublicosFiltrado = r)"
+              />
             </ClientOnly>
           </div>
         </div>
         <div class="grid">
           <div
-            v-for="proyecto in storeLevantamiento.proyectosPublicos"
+            v-for="proyecto in proyectosPublicosFiltrado"
             :key="proyecto.id"
             class="columna-4 fondo-color-neutro p-3 borde-redondeado-20"
           >
-            <img class="icono-proyecto m-b-minimo color-invertir" src="/img/icono_sigic.png" />
+            <img
+              class="icono-proyecto m-b-minimo color-invertir"
+              :src="`${$config.app.baseURL}img/icono_sigic.png`"
+            />
             <div class="m-b-minimo texto-tamanio-4 nombre-proyecto">
               <b>{{ proyecto.nombre }}</b>
             </div>
             <div class="m-b-minimo texto-color-secundario">{{ proyecto.institucion }}</div>
-            <div class="m-b-minimo texto-color-secundario">{{ proyecto.autor }}</div>
-            <UiNumeroElementos :numero="proyecto.aportes" etiqueta="Aportes" class="m-b-3" />
+            <div class="m-b-minimo texto-color-secundario">{{ proyecto.lider }}</div>
+            <UiNumeroElementos
+              :numero="proyecto.num_aportaciones"
+              etiqueta="Aportes"
+              class="m-b-3"
+            />
             <NuxtLink
               class="boton boton-primario boton-chico boton-accion-proyecto m-b-1"
               aria-label="Ver proyecto"

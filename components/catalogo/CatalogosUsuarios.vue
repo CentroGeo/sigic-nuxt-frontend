@@ -1,23 +1,26 @@
 <script setup>
-import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { fetchHarvesters } from '~/utils/catalogo';
+import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
 const { gnoxyFetch } = useGnoxyUrl();
+const { fetchRemoteServices } = useResourcesSupplements();
+
 const config = useRuntimeConfig();
+const userID = ref(null);
 const harvesters = ref([]);
 const isLoadingGeneral = ref(true);
 const isLoadingPage = ref(true);
 const fetchStatus = ref(null);
 
-const seleccionOrden = ref('-id');
+const seleccionOrden = ref('-created');
 const inputSearch = ref(null);
 const paginaActual = ref(0);
-const tamanioPagina = 5;
+const tamanioPagina = 10;
 const totalHarvesters = ref();
 const totalPags = computed(() => Math.ceil(totalHarvesters.value / tamanioPagina));
 const queryParams = ref({
   page: paginaActual.value + 1,
   page_size: tamanioPagina,
-  'sort[]': seleccionOrden.value,
+  sort: seleccionOrden.value,
+  title: inputSearch.value,
 });
 
 const statusDict = {
@@ -26,17 +29,47 @@ const statusDict = {
   'harvesting-resources': 'Cosechando recursos',
 };
 /**
+ * Esta función obtiene el pk de la persona usuaria
+ */
+async function getUserInfo() {
+  const { data } = useAuth();
+  const email = data.value?.user.email;
+  const url = `${config.public.geonodeUrl}/api/v2/users/?filter{username}=${email}`;
+  const request = await gnoxyFetch(url);
+  if (!request.ok) {
+    console.error('No se pudo recuperar la información de usuario');
+  } else {
+    const res = await request.json();
+    userID.value = res.users[0]['pk'];
+    queryParams.value['owner_id'] = userID.value;
+  }
+}
+/**
  * Esta petición obtiene el total de servicios externos
  */
 async function getTotal() {
-  const url = `${config.public.geonodeApi}/harvesters/`;
-  const requestHarvesters = await gnoxyFetch(url);
-  if (!requestHarvesters.ok) {
-    const error = await requestHarvesters.json();
-    console.error('Falló petición de harvesters:', error);
+  let url;
+  if (queryParams.value['owner_id']) {
+    if (inputSearch.value) {
+      url = `${config.public.geonodeApi}/services/?title=${inputSearch.value.trim()}&owner_id=${queryParams.value['owner_id']}`;
+    } else {
+      url = `${config.public.geonodeApi}/services/?owner_id=${queryParams.value['owner_id']}`;
+    }
+  } else {
+    if (inputSearch.value) {
+      url = `${config.public.geonodeApi}/services/?title=${inputSearch.value.trim()}`;
+    } else {
+      url = `${config.public.geonodeApi}/services/`;
+    }
   }
-  const resHarvesters = await requestHarvesters.json();
-  return resHarvesters.total;
+
+  const requestServices = await gnoxyFetch(url);
+  if (!requestServices.ok) {
+    const error = await requestServices.json();
+    console.error('Falló petición de servicios:', error);
+  }
+  const resServices = await requestServices.json();
+  return resServices.count;
 }
 
 /**
@@ -45,7 +78,8 @@ async function getTotal() {
  */
 async function fetchResources() {
   isLoadingPage.value = true;
-  const { status, data } = await fetchHarvesters(true, queryParams.value);
+  totalHarvesters.value = await getTotal();
+  const { status, data } = await fetchRemoteServices(queryParams.value);
   harvesters.value = data;
   fetchStatus.value = status;
   isLoadingPage.value = false;
@@ -64,7 +98,28 @@ async function getResources() {
 }
 
 /**
- *
+ * Hace la petición de los servicios externos mandando
+ * el input de busqueda como query param
+ */
+async function searchByName() {
+  queryParams.value['title'] = inputSearch.value;
+  if (paginaActual.value === 0) {
+    fetchResources();
+  } else {
+    paginaActual.value = 0;
+  }
+}
+
+/**
+ * Limpia el input de busqueda y vuelve a pedir los servicios
+ */
+async function resetSearch() {
+  inputSearch.value = null;
+  searchByName();
+}
+
+/**
+ * Redirige
  * @param v
  * @param destino
  */
@@ -76,8 +131,6 @@ const irARutaQuery = (v, destino) => {
         id: v.id,
         title: v.title,
         total: v.imported_resources + v.to_attend_resources,
-        /*         unique_identifier: v.unique_identifier,
-        remote_resource_type: v.remote_resource_type, */
       },
     });
   } else {
@@ -86,8 +139,6 @@ const irARutaQuery = (v, destino) => {
       query: {
         id: v.id,
         title: v.title,
-        /*         unique_identifier: v.unique_identifier,
-        remote_resource_type: v.remote_resource_type, */
       },
     });
   }
@@ -99,7 +150,7 @@ watch(paginaActual, () => {
 });
 
 watch(seleccionOrden, () => {
-  queryParams.value['sort[]'] = seleccionOrden.value;
+  queryParams.value['sort'] = seleccionOrden.value;
   if (paginaActual.value === 0) {
     fetchResources();
   } else {
@@ -107,28 +158,33 @@ watch(seleccionOrden, () => {
   }
 });
 
-onMounted(() => {
-  getResources();
+onMounted(async () => {
+  isLoadingGeneral.value = true;
+  await getUserInfo();
+  await getResources();
 });
 </script>
 <template>
   <main>
     <div id="servicios-institucionales">
-      <h3>Explora catálogos externos preconectados</h3>
-      <div class="flex">
+      <div class="flex m-t-3 m-b-2">
         <!-- Selector Orden -->
         <div class="columna-8">
-          <ClientOnly>
-            <SisdaiSelector v-model="seleccionOrden" etiqueta="Ordenar por">
-              <option value="id">Más Antiguo</option>
-              <option value="-id">Más Reciente</option>
-              <option value="name">Nombre</option>
-              <option value="status">Status</option>
-            </SisdaiSelector>
-          </ClientOnly>
+          <label for="selector-orden-remotos">Ordenar por</label>
+          <select
+            v-model="seleccionOrden"
+            name="selector-orden-remotos"
+            class="m-b-2"
+            :disabled="isLoadingPage || isLoadingGeneral"
+          >
+            <option value="created">Más Antiguo</option>
+            <option value="-created">Más Reciente</option>
+            <option value="title">Nombre</option>
+          </select>
+          <ClientOnly> </ClientOnly>
         </div>
-        <!-- Campo de búsqueda avanzada -->
-        <div class="columna-8" style="opacity: 0.5">
+        <!-- Campo de búsqueda -->
+        <div class="columna-8">
           <div class="flex flex-contenido-separado">
             <div class="columna-14">
               <ClientOnly>
@@ -140,6 +196,8 @@ onMounted(() => {
                     type="search"
                     class="campo-busqueda-entrada"
                     placeholder="Campo de búsqueda"
+                    :disabled="isLoadingPage || isLoadingGeneral"
+                    @keyup.enter="searchByName"
                   />
 
                   <button
@@ -147,6 +205,8 @@ onMounted(() => {
                     class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
                     aria-label="Borrar"
                     type="button"
+                    :disabled="isLoadingPage || isLoadingGeneral"
+                    @click="resetSearch"
                   >
                     <span aria-hidden="true" class="pictograma-cerrar" />
                   </button>
@@ -155,6 +215,8 @@ onMounted(() => {
                     class="boton-primario boton-pictograma campo-busqueda-buscar"
                     aria-label="Buscar"
                     type="button"
+                    :disabled="isLoadingPage || isLoadingGeneral"
+                    @click="searchByName"
                   >
                     <span class="pictograma-buscar" aria-hidden="true" />
                   </button>
@@ -163,6 +225,11 @@ onMounted(() => {
             </div>
           </div>
         </div>
+      </div>
+      <div class="flex">
+        <!--         <h3>Explora catálogos externos preconectados</h3> -->
+        <h2>Servicios Remotos</h2>
+        <UiNumeroElementos :numero="totalHarvesters" />
       </div>
       <p>
         Explora los recursos de información de catálogos precargados, al importarlos podrás
@@ -173,12 +240,17 @@ onMounted(() => {
 
     <!--El spinner general-->
     <div v-if="isLoadingGeneral" class="flex flex-contenido-centrado m-y-5">
-      <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
+      <img
+        class="color-invertir"
+        :src="`${config.app.baseURL}img/loader.gif`"
+        alt="...Cargando"
+        height="120px"
+      />
     </div>
 
     <!--Si aun no hay servicios catgados por usuarios-->
     <div
-      v-if="!isLoadingGeneral && fetchStatus === 'ok' && harvesters.length === 0"
+      v-if="!isLoadingGeneral && !isLoadingPage && fetchStatus === 'ok' && harvesters.length === 0"
       class="flex flex-contenido-centrado"
     >
       <div class="texto-color-error borde-redondeado-8 sin-recursos" style="max-width: 50%">
@@ -194,6 +266,17 @@ onMounted(() => {
       </div>
     </div>
 
+    <div
+      v-if="!isLoadingGeneral && isLoadingPage && harvesters.length === 0"
+      class="flex flex-contenido-centrado m-y-5"
+    >
+      <img
+        class="color-invertir"
+        :src="`${config.app.baseURL}img/loader.gif`"
+        alt="...Cargando"
+        height="120px"
+      />
+    </div>
     <!--La tabla de servicios remotos-->
     <div
       v-if="!isLoadingGeneral && fetchStatus === 'ok' && harvesters.length > 0"
@@ -203,32 +286,16 @@ onMounted(() => {
         <thead>
           <tr>
             <th>Nombre de servicio externo</th>
+            <!--<th>Tipo</th>-->
+            <th>Status</th>
             <th>Recursos importados</th>
             <th>Recursos pendientes</th>
             <th>URL</th>
-            <!--<th>Tipo</th>-->
-            <th>Status</th>
           </tr>
         </thead>
         <tbody v-if="!isLoadingPage">
           <tr v-for="harvester in harvesters" :key="harvester.id">
             <td>{{ harvester.title }}</td>
-            <td>
-              <nuxt-link @click="irARutaQuery(harvester, '')">
-                {{ harvester.imported_resources }}
-              </nuxt-link>
-            </td>
-
-            <td>
-              <nuxt-link @click="irARutaQuery(harvester, 'pendientes')">
-                {{ harvester.to_attend_resources }}
-              </nuxt-link>
-            </td>
-            <td>
-              <a :href="harvester.remote_url" target="_blank" rel="noopener noreferrer">
-                {{ harvester.remote_url }}
-              </a>
-            </td>
             <!--<td>Servcio de Mapas</td>-->
             <td>
               <div
@@ -244,11 +311,37 @@ onMounted(() => {
                 {{ statusDict[harvester.status] }}
               </div>
             </td>
+            <td>
+              <nuxt-link @click="irARutaQuery(harvester, '')">
+                {{ harvester.imported_resources }}
+              </nuxt-link>
+            </td>
+
+            <td>
+              <nuxt-link @click="irARutaQuery(harvester, 'pendientes')">
+                {{ harvester.to_attend_resources }}
+              </nuxt-link>
+            </td>
+            <td>
+              <a
+                :href="harvester.remote_url"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="break-url"
+              >
+                {{ harvester.remote_url }}
+              </a>
+            </td>
           </tr>
         </tbody>
       </table>
       <div v-if="isLoadingPage" class="flex flex-contenido-centrado m-y-2">
-        <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="32px" />
+        <img
+          class="color-invertir"
+          :src="`${config.app.baseURL}img/loader.gif`"
+          alt="...Cargando"
+          height="32px"
+        />
       </div>
       <UiPaginador
         :pagina-parent="paginaActual"
@@ -272,5 +365,9 @@ onMounted(() => {
   background-color: var(--fondo-acento);
   gap: 8px;
   padding: 16px;
+}
+.break-url {
+  word-break: break-all !important;
+  display: inline-block !important;
 }
 </style>

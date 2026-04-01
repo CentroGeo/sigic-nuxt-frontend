@@ -1,21 +1,18 @@
 <script setup>
-// TODO: Reactivar filtrado
-import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import { cleanInput, resourceTypeDic } from '~/utils/consulta';
+const config = useRuntimeConfig();
 
 const storeResources = useResourcesCatalogoStore();
 const storeCatalogo = useCatalogoStore();
-const storeConsulta = useConsultaStore();
 const storeFilters = useFilteredResources();
-storeConsulta.resourceType = resourceTypeDic.document;
 const params = computed(() => storeFilters.filters.queryParams);
 const isLoading = computed(() => storeResources.isLoading);
-const totalResources = computed(() => storeResources.totalByType());
+const totalResources = computed(() => storeResources.totalByType(resourceTypeDic.document));
 const paginaActual = ref(0);
 const tamanioPagina = 10;
 const totalPags = computed(() => Math.ceil(totalResources.value / tamanioPagina));
 const variables = ['pk', 'titulo', 'tipo_recurso', 'categoria', 'actualizacion', 'acciones'];
-const resources = computed(() => storeResources.resourcesByType());
+const resources = computed(() => storeResources.resourcesByType(resourceTypeDic.document));
 const tableResources = ref([]);
 const modalFiltroAvanzado = ref(null);
 const isFilterActive = ref(false);
@@ -27,8 +24,8 @@ const inputSearch = computed({
   get: () => storeFilters.filters.inputSearch,
   set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
 });
+
 function updateResources() {
-  //filteredResources.value = nuevosRecursos;
   // obteniendo datos por las props de la tabla
   tableResources.value = resources.value.map((d) => ({
     pk: d.pk,
@@ -41,44 +38,82 @@ function updateResources() {
     recurso_completo: d,
   }));
 }
-function fetchNewData() {
-  storeResources.resetByType();
-  storeResources.getResourcesByPage(
-    storeConsulta.resourceType,
+
+async function fetchNewData() {
+  storeResources.resetByType(resourceTypeDic.document);
+  await storeResources.getResourcesByPage(
+    resourceTypeDic.document,
     paginaActual.value + 1,
     tamanioPagina,
     params.value
   );
 }
+
+function activateAdvancedFilter() {
+  let activeFilters = 0;
+  if (
+    Object.keys(params.value).includes('filter{category.identifier.in}') &&
+    params.value['filter{category.identifier.in}'].length > 0
+  ) {
+    activeFilters += 1;
+  }
+  if (
+    Object.keys(params.value).includes('filter{year}') &&
+    params.value['filter{year}'].length > 0
+  ) {
+    activeFilters += 1;
+  }
+  if (
+    Object.keys(params.value).includes('filter{institution}') &&
+    params.value['filter{institution}'].length > 0
+  ) {
+    activeFilters += 1;
+  }
+  if (
+    Object.keys(params.value).includes('filter{keywords.name.in}') &&
+    params.value['filter{keywords.name.in}'].length > 0
+  ) {
+    activeFilters += 1;
+  }
+  if (activeFilters > 0) {
+    isFilterActive.value = true;
+  } else {
+    isFilterActive.value = false;
+  }
+}
+
 function applyAdvancedFilter() {
-  isFilterActive.value = true;
   modalFiltroAvanzado.value.cerrarModalBusqueda();
-  storeFilters.buildQueryParams();
+  storeFilters.buildQueryParams(resourceTypeDic.document);
+  activateAdvancedFilter();
 }
 
 function resetSearch() {
   storeFilters.updateFilter('inputSearch', '');
-  storeFilters.buildQueryParams();
+  storeFilters.buildQueryParams(resourceTypeDic.document);
 }
 
 function resetAdvancedFilter() {
   isFilterActive.value = false;
   storeFilters.resetFilters();
   modalFiltroAvanzado.value.cerrarModalBusqueda();
-  storeFilters.buildQueryParams();
+  storeFilters.buildQueryParams(resourceTypeDic.document);
 }
 
 watch(paginaActual, () => {
   fetchNewData();
 });
+
 watch(seleccionOrden, () => {
-  storeFilters.buildQueryParams();
+  storeFilters.buildQueryParams(resourceTypeDic.document);
 });
+
 watch(params, () => {
   paginaActual.value = 0;
-  storeResources.getTotalResources(storeConsulta.resourceType, params.value);
+  storeResources.getTotalResources(resourceTypeDic.document, params.value);
   fetchNewData();
 });
+
 watch(
   resources,
   () => {
@@ -89,9 +124,7 @@ watch(
 
 onMounted(async () => {
   storeFilters.resetAll();
-  storeFilters.buildQueryParams();
-  storeResources.getTotalResources(storeConsulta.resourceType, params.value);
-  fetchNewData();
+  storeFilters.buildQueryParams(resourceTypeDic.document);
 });
 </script>
 
@@ -107,12 +140,18 @@ onMounted(async () => {
           <!-- Selector Orden -->
           <div class="columna-8">
             <ClientOnly>
-              <SisdaiSelector v-model="seleccionOrden" etiqueta="Ordenar por">
+              <label for="selector-orden-documentos">Ordenar por</label>
+              <select
+                v-model="seleccionOrden"
+                name="selector-orden-documentos"
+                class="m-b-2"
+                :disabled="isLoading"
+              >
                 <option value="titulo">Título</option>
                 <option value="categoria">Categoría</option>
                 <option value="fecha_descendente">Más Reciente</option>
                 <option value="fecha_ascendente">Más Antiguo</option>
-              </SisdaiSelector>
+              </select>
             </ClientOnly>
           </div>
 
@@ -129,6 +168,8 @@ onMounted(async () => {
                       type="search"
                       class="campo-busqueda-entrada"
                       placeholder="Campo de búsqueda"
+                      :disabled="isLoading"
+                      @keyup.enter="storeFilters.buildQueryParams(resourceTypeDic.document)"
                     />
 
                     <button
@@ -136,6 +177,7 @@ onMounted(async () => {
                       class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
                       aria-label="Borrar"
                       type="button"
+                      :disabled="isLoading"
                       @click="resetSearch"
                     >
                       <span aria-hidden="true" class="pictograma-cerrar" />
@@ -145,7 +187,8 @@ onMounted(async () => {
                       class="boton-primario boton-pictograma campo-busqueda-buscar"
                       aria-label="Buscar"
                       type="button"
-                      @click="storeFilters.buildQueryParams"
+                      :disabled="isLoading"
+                      @click="storeFilters.buildQueryParams(resourceTypeDic.document)"
                     >
                       <span class="pictograma-buscar" aria-hidden="true" />
                     </button>
@@ -162,6 +205,7 @@ onMounted(async () => {
                   aria-label="Filtro Avanzado"
                   type="button"
                   style="position: relative; align-self: center"
+                  :disabled="isLoading"
                   @click="modalFiltroAvanzado.abrirModalBusqueda"
                 >
                   <div v-if="isFilterActive" class="circulo"></div>
@@ -178,7 +222,12 @@ onMounted(async () => {
         </div>
 
         <div v-if="isLoading" class="flex flex-contenido-centrado m-t-3">
-          <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
+          <img
+            class="color-invertir"
+            :src="`${config.app.baseURL}img/loader.gif`"
+            alt="...Cargando"
+            height="120px"
+          />
         </div>
         <div v-if="totalResources === 0 && !isLoading" class="flex">
           <div

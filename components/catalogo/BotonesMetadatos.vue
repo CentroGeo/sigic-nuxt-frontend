@@ -1,6 +1,7 @@
 <script setup>
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import { resourceTypeGeonode } from '~/utils/consulta';
+const config = useRuntimeConfig();
 
 const storeMetadatos = useEditedMetadataStore();
 const props = defineProps({
@@ -21,7 +22,6 @@ const props = defineProps({
     default: () => ({}),
   },
 });
-//const storeCatalogo = useCatalogoStore();
 const { data } = useAuth();
 const cargaExitosa = ref(false);
 const modalActualizar = ref(null);
@@ -114,12 +114,11 @@ async function updateMetadata() {
     } else {
       didUpdateFail.value = true;
     }
-    //const router = useRouter();
-    //router.go(0);
+    isLoading.value = false;
+    isMetaInvalid.value = false;
   } else {
     isLoading.value = false;
     isMetaInvalid.value = true;
-    //alert('Revisa la validez de los datos introducidos.');
   }
 }
 
@@ -150,7 +149,6 @@ function irAmisArchivos() {
       >
         Regresar
       </button>
-      <!--<button class="boton-primario boton-chico" :disabled="false" @click="actualizaMetadatos()"> -->
       <button
         aria-label="Actualizar Metadatos"
         class="boton-primario boton-chico"
@@ -185,7 +183,13 @@ function irAmisArchivos() {
         <template #cuerpo>
           <div v-if="isLoading" class="m-y-2">
             <div class="flex flex-contenido-centrado">
-              <img src="/img/loader.gif" alt="...Guardando" heigh="160px" width="160px" />
+              <img
+                :src="`${config.app.baseURL}img/loader.gif`"
+                class="color-invertir"
+                alt="...Guardando"
+                heigh="160px"
+                width="160px"
+              />
             </div>
             <p style="text-align: center">Guardando</p>
           </div>

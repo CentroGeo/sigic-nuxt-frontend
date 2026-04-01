@@ -28,8 +28,6 @@ const props = defineProps({
   },
 });
 
-// const storeCatalogo = useCatalogoStore();
-// console.log('props.recurso', props.recurso);
 const storeMetadatos = useEditedMetadataStore();
 storeMetadatos.checkFilling(props.resourcePk, props.resourceType);
 const campoEdicion = computed({
@@ -48,62 +46,26 @@ const campoInformacionAdicional = computed({
   get: () => storeMetadatos.metadata.supplemental_information,
   set: (value) => storeMetadatos.updateAttr('supplemental_information', value),
 });
-//const seleccionInicioExtension = ref('');
-//const seleccionFinExtension = ref('');
+
 const seleccionFrecuenciaActual = computed({
   get: () => storeMetadatos.metadata.maintenance_frequency,
   set: (value) => storeMetadatos.updateAttr('maintenance_frequency', value),
 });
-//const campoExtrametadato = ref('');
-//const seleccionRecursosRelacionados = ref('');
-//const campoPuntoContacto = ref('');
-//const seleccionDuenio = ref('');
 
 const dictFrecuenciaActual = [
-  { unknown: 'se desconoce la frecuencia de actualización de los datos' },
-  { continual: 'los datos se actualizan repetida y frecuentemente' },
-  { notPlanned: 'no existen planes de actualizar los datos' },
-  { daily: 'los datos se actualizan a diario' },
-  { annually: 'los datos se actualizan cada año' },
-  { asNeeded: 'los datos se actualizan cuando se considera necesario' },
-  { monthly: 'los datos se actualizan todos los meses' },
-  { fortnightly: 'los datos se actualizan cada dos semanas' },
-  { irregular: 'los datos se actualizan a intervalos de duración irregular' },
-  { weekly: 'los datos se actualizan semanalmente' },
-  { biannually: 'los datos se actualizan dos veces al año' },
-  { quarterly: 'los datos se actualizan cada tres meses' },
+  { unknown: 'Se desconoce la frecuencia de actualización de los datos' },
+  { continual: 'Los datos se actualizan repetida y frecuentemente' },
+  { notPlanned: 'No existen planes de actualizar los datos' },
+  { daily: 'Los datos se actualizan a diario' },
+  { annually: 'Los datos se actualizan cada año' },
+  { asNeeded: 'Los datos se actualizan cuando se considera necesario' },
+  { monthly: 'Los datos se actualizan todos los meses' },
+  { fortnightly: 'Los datos se actualizan cada dos semanas' },
+  { irregular: 'Los datos se actualizan a intervalos de duración irregular' },
+  { weekly: 'Los datos se actualizan semanalmente' },
+  { biannually: 'Los datos se actualizan dos veces al año' },
+  { quarterly: 'Los datos se actualizan cada tres meses' },
 ];
-
-/* watch(
-  () => storeMetadatos.metadata,
-  (nv) => {
-    console.log('nv', nv);
-  },
-  { deep: true }
-); */
-// function editarMetadatos(dato, valor) {
-//   storeCatalogo.metadatos[dato] = valor;
-//   // console.log(storeCatalogo.metadatos[dato]);
-// }
-// watch(
-//   [
-//     campoEdicion,
-//     campoDOI,
-//     campoProposito,
-//     campoInformacionAdicional,
-//     seleccionInicioExtension,
-//     seleccionFinExtension,
-//     seleccionFrecuenciaActual,
-//     campoExtrametadato,
-//     seleccionRecursosRelacionados,
-//     campoPuntoContacto,
-//     seleccionDuenio,
-//   ],
-//   (nv) => {
-//     // console.log('nv', nv);
-//     // actualizar datos en el store
-//   }
-// );
 </script>
 <template>
   <div>
@@ -160,26 +122,7 @@ const dictFrecuenciaActual = [
             />
           </ClientOnly>
         </div>
-        <!--         <div class="columna-8">
-          <ClientOnly>
-            <SisdaiCampoBase
-              v-model="seleccionInicioExtension"
-              etiqueta="Inicio de extensión temporal (extend)"
-              ejemplo="tipo date"
-              tipo="date"
-            />
-          </ClientOnly>
-        </div>
-        <div class="columna-8">
-          <ClientOnly>
-            <SisdaiCampoBase
-              v-model="seleccionFinExtension"
-              etiqueta="Fin de extensión temporal (extend)"
-              ejemplo="tipo date"
-              tipo="date"
-            />
-          </ClientOnly>
-        </div> -->
+
         <div class="columna-16">
           <ClientOnly>
             <SisdaiSelector
@@ -197,58 +140,6 @@ const dictFrecuenciaActual = [
             </SisdaiSelector>
           </ClientOnly>
         </div>
-        <!--         <div class="columna-16">
-          <ClientOnly>
-            <SisdaiCampoBase
-              v-model="campoExtrametadato"
-              etiqueta="Extrametadato"
-              ejemplo=""
-              tipo="text"
-              :es_etiqueta_visible="true"
-            />
-          </ClientOnly>
-        </div> -->
-        <!--         <div class="columna-16">
-          <ClientOnly>
-            <SisdaiSelector
-              v-model="seleccionRecursosRelacionados"
-              etiqueta="Recursos relacionados"
-            >
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-            </SisdaiSelector>
-          </ClientOnly>
-        </div> -->
-        <!--         <div class="columna-16">
-          <div class="fondo-color-neutro borde-redondeado-16 p-2">
-            <p class="h3 m-t-0">Responsables</p>
-            <div class="flex">
-              <div class="columna-16">
-                <ClientOnly>
-                  <SisdaiCampoBase
-                    v-model="campoPuntoContacto"
-                    etiqueta="Punto de contacto"
-                    ejemplo=""
-                  />
-                </ClientOnly>
-              </div>
-              <div class="columna-16">
-                <ClientOnly>
-                  <SisdaiSelector
-                    v-model="seleccionDuenio"
-                    etiqueta="Dueño"
-                    texto_ayuda="Responsable y permisos"
-                  >
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                  </SisdaiSelector>
-                </ClientOnly>
-              </div>
-            </div>
-          </div>
-        </div> -->
       </div>
 
       <CatalogoBotonesMetadatos

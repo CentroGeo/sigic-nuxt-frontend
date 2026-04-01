@@ -24,15 +24,25 @@ const obtenerMasRecientes = (type) => {
   return computed(() => storeResources.resourcesByType(type) || [{}]);
 };
 
+const config = useRuntimeConfig();
+const isLoading = ref(true);
 const capasMasRecientes = obtenerMasRecientes('dataLayer');
 
-async function updateSelection(newPk) {
-  storeSelected.add(new SelectedLayer({ pk: newPk }), 'dataLayer');
+async function updateSelection(newPk, style) {
+  storeSelected.reset();
+  storeSelected.add(new SelectedLayer({ pk: newPk }), style, 'dataLayer');
 
   nextTick(async () => {
     await navigateTo('/consulta/capas');
   });
 }
+watch(
+  capasMasRecientes,
+  () => {
+    isLoading.value = false;
+  },
+  { deep: true }
+);
 </script>
 <template>
   <div>
@@ -288,7 +298,15 @@ async function updateSelection(newPk) {
           </p>
         </div>
         <div class="contenedor ancho-fijo">
-          <div class="flex">
+          <div v-if="isLoading" class="flex flex-contenido-centrado m-t-3">
+            <img
+              class="color-invertir"
+              :src="`${config.app.baseURL}img/loader.gif`"
+              alt="...Cargando"
+              height="120px"
+            />
+          </div>
+          <div v-if="!isLoading" class="flex">
             <div v-for="(capa, i) in capasMasRecientes" :key="i" class="columna-4">
               <div class="tarjeta">
                 <img class="tarjeta-imagen" :src="capa.thumbnail_url" alt="" />
@@ -303,7 +321,7 @@ async function updateSelection(newPk) {
                     class="boton boton-primario boton-chico"
                     aria-label="Ver capa en visualizador"
                     :to="`/consulta/capas?capas=${capa.pk}`"
-                    @click.prevent="updateSelection(capa.pk)"
+                    @click.prevent="updateSelection(capa.pk, capa.default_style)"
                   >
                     Ver Capa en visualizador
                   </nuxt-link>

@@ -10,20 +10,14 @@ const archivoValido = ref(false);
 const onDropZone = ref(null);
 const { files } = useDropZone(onDropZone, { onDrop });
 async function onDrop() {
-  // imprime el archivo que se suba mediante el drop
-  // console.log('files', files.value);
   archivos.value = files.value;
   archivosArriba.value = true;
-  // files.value = Array.from(files.value);
 }
 
 const { open, onChange } = useFileDialog();
 onChange(async (files) => {
-  // imprime el archivo que se suba mediante el diálogo
-  // console.log('files', files);
   archivos.value = files;
   archivosArriba.value = true;
-  // const files = Array.from(files);
 });
 
 const removerArchivos = () => {
@@ -35,6 +29,18 @@ const removerArchivos = () => {
 const archivoNoValido = () => {
   archivoValido.value = true;
 };
+
+function deleteFile(file) {
+  const newFiles = new DataTransfer();
+  const arrayFiles = Array.from(archivos.value);
+  const newArray = arrayFiles.filter((d) => d.name !== file.name);
+  newArray.forEach((d) => newFiles.items.add(d));
+  archivos.value = newFiles.files;
+  if (archivos.value.length === 0) {
+    archivosArriba.value = false;
+    archivoValido.value = false;
+  }
+}
 
 defineExpose({
   archivoValido,
@@ -56,12 +62,24 @@ defineExpose({
           style="max-height: 184px; overflow-y: scroll"
         >
           <div v-for="archivo in archivos" :key="archivo.name" class="flex flex-contenido-separado">
-            <p class="flex flex-vertical-centrado m-y-1">{{ archivo.name }}</p>
+            <p class="nombre-archivo flex flex-vertical-centrado m-y-1 columna-9">
+              {{ archivo.name }}
+            </p>
+
             <div class="flex">
-              <p class="fondo-color-neutro borde borde-redondeado-8 m-y-1" style="padding: 4px">
+              <p
+                class="flex flex-vertical-centrado fondo-color-neutro borde borde-redondeado-8 m-y-1"
+                style="padding: 4px"
+              >
                 .{{ archivo.name.split('.')[1] }}
               </p>
               <p class="flex flex-vertical-centrado m-y-1">{{ convertirBytes(archivo.size) }}</p>
+              <button
+                class="boton-pictograma boton-sin-contenedor-secundario boton-chico"
+                @click.stop="deleteFile(archivo)"
+              >
+                <span class="pictograma-cerrar"></span>
+              </button>
             </div>
           </div>
         </div>
@@ -75,22 +93,12 @@ defineExpose({
                 <div>
                   <span class="pictograma-archivo-subir pictograma-mediano" />
                 </div>
-                <p>Arratra o suelta tu archivo</p>
+                <p>Arrastra o suelta tu archivo</p>
               </div>
 
-              <label
-                class="boton boton-secundario boton-chico"
-                for="identificadorCAMPOFILE"
-                @click="open()"
-              >
+              <label class="boton boton-secundario boton-chico" @click.stop="open()">
                 Elige Archivo
               </label>
-              <input
-                id="identificadorCAMPOFILE"
-                name="identificadorCAMPOFILE"
-                type="file"
-                @click="open()"
-              />
             </div>
           </div>
         </div>
@@ -104,7 +112,7 @@ defineExpose({
             class="boton-primario boton-chico"
             aria-label="Guardar"
             type="button"
-            :disabled="false"
+            :disabled="!archivosArriba"
             @click="emit('pasarArchivo', archivos)"
           >
             Guardar
@@ -126,7 +134,6 @@ defineExpose({
 
 <style lang="scss">
 .contenedor-dragnddrop {
-  // min-height: 281px;
   height: 300px;
   border-style: dashed;
   cursor: pointer;
@@ -145,5 +152,10 @@ defineExpose({
 }
 #identificadorCAMPOFILE:focus + label,
 #identificadorCAMPOFILE + label:hover {
+}
+
+.nombre-archivo {
+  overflow-wrap: break-word;
+  white-space: normal;
 }
 </style>

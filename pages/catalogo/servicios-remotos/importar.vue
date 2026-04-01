@@ -201,28 +201,16 @@ onMounted(async () => {
 
         <!-- Cargando harvestable resources-->
         <div v-if="fetchingHarvestableResources" class="flex flex-contenido-centrado m-t-5">
-          <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
+          <img
+            class="color-invertir"
+            :src="`${config.app.baseURL}img/loader.gif`"
+            alt="...Cargando"
+            height="120px"
+          />
         </div>
 
         <!-- Recursos cosechables listos -->
         <div v-else>
-          <!--Cuadro de información de inicio de sesión-->
-          <div
-            v-if="status !== 'authenticated'"
-            class="fondo-color-informacion texto-color-informacion borde-redondeado-16 borde -color-informacion m-t-2"
-            style="padding: 21px"
-          >
-            <h6 class="m-y-2">¿Quieres visualizar capas de este catálogo?</h6>
-            <p class="m-y-1">
-              Puedes importar recursos de información para visualizarlos en la plataforma SIGIC,
-              para ello debes iniciar sesión con una cuenta existente o crear una y completar el
-              proceso de importación.
-            </p>
-            <a href="#" style="font-weight: bold" @click.prevent="iniciarSesion(event)"
-              >Iniciar sesión</a
-            >
-          </div>
-
           <!--Cuadro de información de que el servicio no está listo-->
           <div
             v-if="harvesterStatus !== 'ready' && !importingActive && status === 'authenticated'"
@@ -270,7 +258,11 @@ onMounted(async () => {
               class="m-y-2 flex flex-contenido-inicio texto-color-informacion fondo-color-informacion p-1 borde borde-color-informacion borde-redondeado-8"
             >
               <div class="flex-vertical-centrado columna-2">
-                <img src="/img/loader.gif" alt="...Cargando" class="loader color-invertir" />
+                <img
+                  :src="`${config.app.baseURL}img/loader.gif`"
+                  alt="...Cargando"
+                  class="loader color-invertir"
+                />
               </div>
               <p class="columna-14">
                 Estamos importando los recursos. Este proceso puede demorar unos minutos.
@@ -316,7 +308,7 @@ onMounted(async () => {
                       :disabled="status !== 'authenticated'"
                       @change="toggleSelection(value)"
                     />
-                    <label :for="`checkbox-${value.unique_identifier}`">
+                    <label :for="`checkbox-${value.unique_identifier}`" class="break-url">
                       {{ value.unique_identifier }}
                     </label>
                   </td>
@@ -327,7 +319,12 @@ onMounted(async () => {
               </tbody>
             </table>
             <div v-if="isLoadingPage" class="flex flex-contenido-centrado m-y-2">
-              <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="32px" />
+              <img
+                class="color-invertir"
+                :src="`${config.app.baseURL}img/loader.gif`"
+                alt="...Cargando"
+                height="32px"
+              />
             </div>
             <ClientOnly>
               <UiPaginador
@@ -371,5 +368,9 @@ onMounted(async () => {
 .loader {
   max-height: 3em;
   object-fit: scale-down;
+}
+.break-url {
+  word-break: break-all !important;
+  display: inline-block !important;
 }
 </style>

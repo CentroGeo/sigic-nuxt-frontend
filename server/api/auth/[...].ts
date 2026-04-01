@@ -57,7 +57,7 @@ export default NuxtAuthHandler({
           token.accessToken = refreshed.access_token;
           token.refreshToken = refreshed.refresh_token || token.refreshToken;
           token.expires_at = Date.now() + refreshed.expires_in * 1000;
-          // AQUI MANDAR UN HTTP POST A API DE IA AVISANDO QUE EL USUARIO ACTUALIZÓ SU TOKEN
+          // AQUÍ MANDAR UN HTTP POST A API DE IA AVISANDO QUE EL USUARIO ACTUALIZÓ SU TOKEN
           // Y MANDAR SOLO EL accessToken Y ALGO QUE IDENTIFIQUE AL USUARIO (POR EJEMPLO SUB O EMAIL)
           // PARA QUE LA API DE IA LO GUARDE EN MEMORIA O DONDE SEA Y LO USE PARA SUS PETICIONES
           // A GEONODE
@@ -71,7 +71,15 @@ export default NuxtAuthHandler({
           // });
         } catch (err) {
           console.error('Error refrescando token:', err);
-          token.error = 'RefreshAccessTokenError';
+
+          // Invalida completamente el token
+          return {
+            ...token,
+            accessToken: undefined,
+            refreshToken: undefined,
+            expires_at: 0,
+            error: 'RefreshAccessTokenError',
+          };
         }
       }
       return token;
@@ -80,6 +88,10 @@ export default NuxtAuthHandler({
     async session({ session, token }) {
       // @ts-expect-error extendiendo Session con campos propios
       session.accessToken = token.accessToken;
+      // @ts-expect-error extendiendo Session con campos propios
+      session.refreshToken = token.refreshToken;
+      // @ts-expect-error extendiendo Session con campos propios
+      session.idToken = token.idToken;
       // @ts-expect-error extendiendo Session con campos propios
       session.error = token.error;
       return session;

@@ -25,10 +25,8 @@ export default defineEventHandler(async (event) => {
       },
       body: JSON.stringify(actualBody),
     });
-    //console.log(response);
     responseStatus = response.ok;
     if (!response.ok) {
-      //throw new Error(`Error POST servicio externo (${body.type}): ${response.status}`);
       responseObject = {};
     } else {
       responseObject = await response.json();

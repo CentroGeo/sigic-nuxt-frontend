@@ -87,7 +87,7 @@ function cancelar() {
           />
         </ClientOnly>
         <div v-else class="columna-4 flex-vertical-centrado">
-          <img src="/img/loader.gif" alt="...Cargando" />
+          <img :src="`${$config.app.baseURL}img/loader.gif`" alt="...Cargando" />
         </div>
       </template>
       <template v-if="!guardando" #pie>

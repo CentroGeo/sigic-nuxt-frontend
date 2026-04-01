@@ -30,9 +30,31 @@ defineProps({
     default: 'id-colapsable',
   },
 });
-
 const { status } = useAuth();
+const { gnoxyFetch } = useGnoxyUrl();
 const estaLogueado = computed(() => status.value === 'authenticated');
+const avatar_url = ref('cargando');
+
+async function fetchAvatar() {
+  const config = useRuntimeConfig();
+  const url = `${config.public.geonodeApi}/account/me/profile/`;
+  try {
+    const infoRequest = await gnoxyFetch(url);
+    if (!infoRequest.ok) {
+      avatar_url.value = null;
+    } else {
+      const info = await infoRequest.json();
+      avatar_url.value = info.avatar_url;
+    }
+  } catch {
+    avatar_url.value = null;
+  }
+}
+onMounted(() => {
+  if (estaLogueado.value) {
+    fetchAvatar();
+  }
+});
 </script>
 
 <template>
@@ -96,15 +118,18 @@ const estaLogueado = computed(() => status.value === 'authenticated');
             </div>
           </div>
         </div>
-        <div class="columna-16 flex-vertical-final">
+        <div v-if="estaLogueado" class="columna-16 flex-vertical-final">
           <div class="flex flex-contenido-centrado">
             <ul class="lista-sin-estilo">
               <li>
-                <div class="avatar-imagen">
-                  <img
-                    src="https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/nilo.jpg"
-                    alt=""
-                  />
+                <div v-if="avatar_url && avatar_url != 'cargando'" class="avatar-imagen">
+                  <img :src="avatar_url" alt="" />
+                </div>
+                <div v-else-if="avatar_url && avatar_url === 'cargando'" class="avatar-imagen">
+                  <img :src="`${$config.app.baseURL}img/loader.gif`" alt="" />
+                </div>
+                <div v-else>
+                  <p class="pictograma-persona texto-color-acento"></p>
                 </div>
               </li>
             </ul>
@@ -141,6 +166,9 @@ const estaLogueado = computed(() => status.value === 'authenticated');
           img {
             object-fit: cover;
           }
+        }
+        p {
+          font-size: 32px;
         }
       }
     }

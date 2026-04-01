@@ -1,5 +1,5 @@
 <script setup>
-import { fetchByPk } from '~/utils/catalogo';
+import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
 
 definePageMeta({
   middleware: 'sidebase-auth',
@@ -10,8 +10,11 @@ definePageMeta({
 
 const storeCatalogo = useCatalogoStore();
 const storeMetadatos = useEditedMetadataStore();
+const { fetchByPk } = useResourcesSupplements();
+
 // Recuperamos información a partir de la url
 const route = useRoute();
+const config = useRuntimeConfig();
 const selectedPk = route.query.data;
 const type = route.query.type;
 const editedResource = ref(undefined);
@@ -51,7 +54,12 @@ onMounted(async () => {
 
       <main v-else>
         <div class="flex flex-contenido-centrado m-t-3">
-          <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
+          <img
+            class="color-invertir"
+            :src="`${config.app.baseURL}img/loader.gif`"
+            alt="...Cargando"
+            height="120px"
+          />
         </div>
       </main>
     </template>

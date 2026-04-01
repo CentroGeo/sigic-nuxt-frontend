@@ -1,6 +1,6 @@
 {
   "name": "sigic-nuxt-frontend",
-  "version": "0.0.1",
+  "version": "0.16.4",
   "private": true,
   "scripts": {
     "build": "nuxt build",
@@ -17,17 +17,25 @@
     "format-lint": "npm run format && npm run lint",
     "lint": "eslint . --fix",
     "lint:no-fix": "eslint . --ext .js,.ts,.vue",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:unit": "vitest --project unit",
+    "test:nuxt": "vitest --project nuxt"
   },
   "dependencies": {
     "@centrogeomx/sisdai-componentes": "^4.14.1",
     "@centrogeomx/sisdai-css": "^1.10.2",
-    "@centrogeomx/sisdai-mapas": "git+https://github.com/CentroGeo/sisdai-mapas.git#v2.3.1",
+    "@centrogeomx/sisdai-mapas": "git+https://github.com/CentroGeo/sisdai-mapas.git#feat/capa-arcgis",
     "@nuxt/image": "^1.10.0",
     "@nuxt/scripts": "^0.11.10",
     "@pinia/nuxt": "^0.11.1",
     "@sidebase/nuxt-auth": "1.1.1",
     "@unhead/vue": "^2.0.14",
+    "@vue-office/docx": "^1.6.3",
+    "@vue-office/excel": "^1.7.14",
+    "@vue-office/pdf": "^2.0.10",
+    "@vue-office/pptx": "^1.0.1",
     "@vueuse/nuxt": "^13.5.0",
     "dompurify": "^3.2.6",
     "formidable": "^3.5.4",
@@ -37,6 +45,8 @@
     "pinia": "^3.0.3",
     "undici": "^7.10.0",
     "vue": "latest",
+    "vue-demi": "^0.14.6",
+    "vue-files-preview": "^1.0.43",
     "vue-router": "latest"
   },
   "devDependencies": {
@@ -44,6 +54,7 @@
     "@nuxt/eslint": "^1.7.0",
     "@nuxt/test-utils": "^3.19.2",
     "@types/formidable": "^3.4.5",
+    "@vue/test-utils": "^2.4.6",
     "@vueuse/nuxt": "^13.5.0",
     "eslint": "^9.32.0",
     "eslint-config-google": "^0.14.0",
@@ -52,6 +63,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.1.5",
     "prettier": "^3.6.2",
+    "vitest": "^4.0.17",
     "yargs": "^18.0.0"
   },
   "lint-staged": {

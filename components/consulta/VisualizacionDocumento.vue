@@ -1,9 +1,11 @@
 <script setup>
 import { onBeforeUnmount, ref } from 'vue';
-import { fetchDoc, resourceTypeDic } from '~/utils/consulta';
+import { useDownloadResources } from '~/composables/useDownloadResources';
+import { resourceTypeDic } from '~/utils/consulta';
 
 const storeResources = useResourcesConsultaStore();
 const storeSelected = useSelectedResources2Store();
+const { fetchDoc } = useDownloadResources();
 const resourceType = resourceTypeDic.document;
 const embedRef = ref(null);
 const selectedPk = computed(() => storeSelected.lastVisible()?.pk ?? null);
@@ -12,18 +14,7 @@ const selectedElement = computed(() => {
   return storeResources.findResources([selectedPk.value], resourceType)[0] ?? null;
 });
 let resizeObserver;
-/* const extensionDocumento = computed(() => {
-  const linkCargado = selectedElement.value.links.find((link) => link.link_type === 'uploaded');
-  if (linkCargado.url) {
-    return linkCargado.extension;
-  } else return '';
-});
 
-const urlEmbebido = ref(
-  extensionDocumento.value === 'pdf'
-    ? selectedElement.value.embed_url
-    : selectedElement.value.embed_url.replace('/embed', '/link')
-); */
 const urlEmbebido = ref();
 const extensionDocumento = ref();
 const blobedUrl = ref();
@@ -38,18 +29,16 @@ if (selectedElement.value !== null) {
 }
 watch(selectedElement, (nv) => {
   (async () => {
-    // console.log('cambio el pk');
     if (nv) {
       // limpiar antes de volver a asignar
       urlEmbebido.value = null;
       blobedUrl.value = null;
       extensionDocumento.value = null;
+
       //esperar a que el DOM reaccione
       await nextTick();
-
-      /*       urlEmbebido.value =
-        extensionDocumento.value === 'pdf' ? nv.embed_url : nv.embed_url.replace('/embed', '/link');*/
       updateValues();
+
       // esperar a que el <embed> esté en DOM
       await nextTick();
 
@@ -77,7 +66,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="contenedor-embed fondo-color-neutro">
-    <iframe
+    <embed
       v-if="urlEmbebido"
       ref="embedRef"
       :src="blobedUrl"

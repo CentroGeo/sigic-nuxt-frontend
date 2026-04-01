@@ -4,11 +4,10 @@ import SisdaiNavegacionGobMx from '@centrogeomx/sisdai-componentes/src/component
 import SisdaiPiePaginaGobMx from '@centrogeomx/sisdai-componentes/src/componentes/pie-pagina-gob-mx/SisdaiPiePaginaGobMx.vue';
 import MainNavegacion from '~/components/base/MainNavegacion.vue';
 import { useAccesibilidadStore } from '~/stores/accesibilidad';
+
 const accesibilidadStore = useAccesibilidadStore();
-const config = useRuntimeConfig();
 const route = useRoute();
-const baseUrl = config.public.baseURL;
-const currentPath = computed(() => baseUrl + route.fullPath);
+const currentPath = computed(() => route.fullPath);
 
 useHead(() => ({
   meta: [
@@ -29,7 +28,7 @@ useHead(() => ({
       <slot />
     </div>
 
-    <!-- parece que boton flotante agrega un id al elemento html que no 
+    <!-- parece que botón flotante agrega un id al elemento html que no
     coincide al hacer server side rendering -->
     <client-only>
       <SisdaiMenuAccesibilidad :objeto-store="accesibilidadStore" perfil-color="sigic" />

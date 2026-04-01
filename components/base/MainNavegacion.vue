@@ -11,7 +11,6 @@ async function iniciarSesion() {
     callbackUrl: route.fullPath,
   });
 }
-const basePath = config.public.basePath || '';
 const mostrarInicio = computed(() => config.public.defaultPage);
 const mostrarCatalogo = computed(() => config.public.enableCatalogoVista);
 const mostrarConsulta = computed(() => config.public.enableConsulta);
@@ -32,7 +31,7 @@ const mostrarAuth = computed(() => config.public.enableAuth);
           class="nav-hiperviculo-logo"
         >
           <img
-            :src="`${basePath}/img/logo_secihiti.svg`"
+            :src="`${config.app.baseURL}img/logo_secihiti.svg`"
             class="nav-logo color-invertir"
             alt="SECIHITI"
             height="36"
@@ -40,7 +39,7 @@ const mostrarAuth = computed(() => config.public.enableAuth);
         </a>
         <NuxtLink to="/" rel="noopener noreferrer" class="nav-hiperviculo-logo">
           <img
-            :src="`${basePath}/img/logo_sigic.svg`"
+            :src="`${config.app.baseURL}img/logo_sigic.svg`"
             class="nav-logo color-invertir"
             alt="SIGIC"
             height="36"
@@ -60,10 +59,10 @@ const mostrarAuth = computed(() => config.public.enableAuth);
       <li v-if="mostrarConsulta">
         <NuxtLink class="nav-hipervinculo" to="/consulta">Consulta</NuxtLink>
       </li>
-      <li v-if="mostrarIaa">
+      <li v-if="mostrarIaa && status === 'authenticated'">
         <NuxtLink class="nav-hipervinculo" to="/ia">Análisis Inteligencia Artificial</NuxtLink>
       </li>
-      <li v-if="mostrarLevantamiento">
+      <li v-if="mostrarLevantamiento && status === 'authenticated'">
         <NuxtLink class="nav-hipervinculo" to="/levantamiento">Levantamiento</NuxtLink>
       </li>
       <li v-if="mostrarAuth">

@@ -11,7 +11,10 @@ const props = defineProps({
   },
 });
 
+const config = useRuntimeConfig();
+
 const modalTabla = ref(null);
+const isLoading = ref(true);
 const paginaActual = ref(0);
 const tamanioPagina = 6;
 const {
@@ -30,12 +33,13 @@ function abrirModalTabla() {
 }
 
 async function openTablas() {
-  // modalTabla.value?.cerrarModal();
+  useSelectedResources2Store().reset(resourceTypeDic.dataTable);
   useSelectedResources2Store().add(
     new SelectedResource({ pk: props.selectedElement.pk }),
+    null,
     resourceTypeDic.dataTable
   );
-
+  modalTabla.value?.cerrarModal();
   await navigateTo('/consulta/tablas');
 }
 
@@ -43,12 +47,18 @@ defineExpose({
   abrirModalTabla,
 });
 
-watch([paginaActual], () => {
-  fetchTable({
+watch(datos, () => {
+  isLoading.value = false;
+});
+
+watch([paginaActual], async () => {
+  isLoading.value = true;
+  await fetchTable({
     paginaActual: paginaActual.value,
     tamanioPagina: tamanioPagina,
     resource: props.selectedElement,
   });
+  isLoading.value = false;
 });
 </script>
 
@@ -56,10 +66,22 @@ watch([paginaActual], () => {
   <ClientOnly>
     <SisdaiModal id="modal-tabla" ref="modalTabla">
       <template #encabezado>
-        <h1>{{ props.selectedElement.title }}</h1>
+        <h1 class="title">{{ props.selectedElement.title }}</h1>
       </template>
 
-      <template #cuerpo>
+      <template v-if="isLoading" #cuerpo>
+        <div class="flex flex-contenido-centrado">
+          <img
+            :src="`${config.app.baseURL}img/loader.gif`"
+            class="color-invertir"
+            alt="...Cargando"
+            heigh="120px"
+            width="120px"
+          />
+        </div>
+      </template>
+
+      <template v-else #cuerpo>
         <div class="contenedor-tabla">
           <UiPaginador
             :pagina-parent="paginaActual"
@@ -70,7 +92,7 @@ watch([paginaActual], () => {
         </div>
       </template>
 
-      <template v-if="props.selectedElement.sourcetype !== 'REMOTE'" #pie>
+      <template v-if="props.selectedElement.sourcetype !== 'REMOTE' && !isLoading" #pie>
         <button
           type="button"
           aria-label="Ver Tabla en Visualizador"
@@ -105,6 +127,13 @@ watch([paginaActual], () => {
 .ancho {
   width: 50%;
   display: flex;
-  justify-content: center; /* horizontal center */
+  justify-content: center;
+}
+
+.title {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  height: 1.2em;
+  white-space: nowrap;
 }
 </style>

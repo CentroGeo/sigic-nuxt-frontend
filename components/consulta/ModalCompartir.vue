@@ -2,16 +2,15 @@
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import { wait } from '~/utils/consulta';
 
+const config = useRuntimeConfig();
 const modalCompartir = ref(null);
 const route = useRoute();
-const config = useRuntimeConfig();
-const baseUrl = config.public.baseURL;
-const currentPath = computed(() => baseUrl + route.fullPath);
+const currentPath = computed(() => config.public.baseURL + route.fullPath);
 const linkStatus = ref(false);
+
 async function copyToClipboard() {
   try {
     await navigator.clipboard.writeText(currentPath.value);
-    //alert('Enlace copiado al portapapeles: ' + currentPath.value);
     linkStatus.value = true;
     await wait(1000);
     linkStatus.value = false;
@@ -109,21 +108,24 @@ defineExpose({
 .contenedor-boton {
   flex-direction: column;
 }
+
 .tarjeta {
   width: 99%;
   background-color: var(--color-alerta-1);
   border: 1px solid var(--color-alerta-3);
+
   p {
     color: var(--color-alerta-3);
   }
 }
+
 .contenedor-alerta {
   position: absolute;
   top: -48px;
   left: 20%;
   background-color: var(--color-neutro-4);
   color: var(--color-neutro-1);
-  padding: 0px 8px;
+  padding: 0 8px;
   width: max-content;
 }
 </style>

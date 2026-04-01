@@ -1,6 +1,4 @@
 <script setup>
-// TODO: Quitar toda la logica para elementos sin categoria
-import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 import {
   buildUrl,
   categoriesInSpanish,
@@ -42,7 +40,6 @@ const categorizedResources = ref({});
 const selectedCategories = ref([]);
 const modalFiltroAvanzado = ref(null);
 const modalOWSglobal = ref(null);
-//https://geonode.dev.geoint.mx/gs/ows
 const sigicOWS = `${config.public.baseURL}/catalogue/csw`;
 const isFilterActive = ref(false);
 
@@ -59,7 +56,6 @@ async function fetchTotalByCategory(category) {
 async function buildCategoriesDict() {
   categoriesDict.value = {};
   orderedCategories.value = [];
-  // Esta parte es para obtener todas las categorias
   if (storeFilters.filters.categories.length === 0) {
     const request = await gnoxyFetch(apiCategorias);
     const geonodeCategories = await request.json();
@@ -74,6 +70,7 @@ async function buildCategoriesDict() {
             total: totalByCat,
             page: 1,
             isLoading: false,
+            wasFetchSuccesful: true,
           };
         }
         return totalByCat;
@@ -93,6 +90,7 @@ async function buildCategoriesDict() {
             total: totalByCat,
             page: 1,
             isLoading: false,
+            wasFetchSuccesful: true,
           };
         }
         return totalByCat;
@@ -118,12 +116,15 @@ async function callResources(categoria) {
     categoriesDict.value[categoria].isLoading = true;
     const preParams = params.value;
     preParams['filter{category.identifier.in}'] = categoriesValues[categoria];
-    await storeResources.fillByCategory(
+    const status = await storeResources.fillByCategory(
       storeConsulta.resourceType,
       categoriesDict.value[categoria].page,
       preParams
     );
-    categoriesDict.value[categoria].page += 1;
+    if (status === true) {
+      categoriesDict.value[categoria].page += 1;
+    }
+    categoriesDict.value[categoria]['wasFetchSuccesful'] = status;
     categoriesDict.value[categoria].isLoading = false;
   }
 }
@@ -172,6 +173,7 @@ async function setSelectedCategory(categoria) {
   } else {
     selectedCategories.value.push(categoria);
   }
+
   // Se agrega este if para que no se dispare la misma petición más de una vez
   if (!categoriesDict.value[categoria].isLoading) {
     await callResources(categoria);
@@ -186,10 +188,43 @@ async function fetchNewData(category) {
   }
 }
 
+function activateAdvancedFilter() {
+  let activeFilters = 0;
+  if (
+    Object.keys(params.value).includes('filter{category.identifier.in}') &&
+    params.value['filter{category.identifier.in}'].length > 0
+  ) {
+    activeFilters += 1;
+  }
+  if (
+    Object.keys(params.value).includes('filter{year}') &&
+    params.value['filter{year}'].length > 0
+  ) {
+    activeFilters += 1;
+  }
+  if (
+    Object.keys(params.value).includes('filter{institution}') &&
+    params.value['filter{institution}'].length > 0
+  ) {
+    activeFilters += 1;
+  }
+  if (
+    Object.keys(params.value).includes('filter{keywords.name.in}') &&
+    params.value['filter{keywords.name.in}'].length > 0
+  ) {
+    activeFilters += 1;
+  }
+  if (activeFilters > 0) {
+    isFilterActive.value = true;
+  } else {
+    isFilterActive.value = false;
+  }
+}
+
 async function applyAdvancedFilter() {
-  isFilterActive.value = true;
   modalFiltroAvanzado.value.cerrarModalBusqueda();
   storeFilters.buildQueryParams();
+  activateAdvancedFilter();
 }
 
 function resetSearch() {
@@ -235,13 +270,14 @@ onMounted(async () => {
       <div class="m-x-2 m-y-1">
         <p v-if="!isLoggedIn" class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
 
-        <ClientOnly>
-          <SisdaiSelector
-            v-if="isLoggedIn"
+        <!--Selector de propiedad-->
+        <div v-if="isLoggedIn">
+          <label for="selector-origen">Buscar en catálogo y tus archivos</label>
+          <select
             v-model="selectedOwner"
-            class="m-y-2"
-            etiqueta="Buscar en catálogo y tus archivos:"
-            instruccional="Selecciona los recursos por permisos"
+            name="selector-origen"
+            class="m-b-2"
+            :disabled="isLoading"
           >
             <option value="catalogo">Archivos del Catálogo</option>
             <option v-if="storeConsulta.resourceType === 'dataLayer'" value="remotos">
@@ -249,9 +285,10 @@ onMounted(async () => {
             </option>
             <option value="privados">Mis Archivos</option>
             <option value="todos">Todos los Conjuntos de Datos</option>
-          </SisdaiSelector>
-        </ClientOnly>
+          </select>
+        </div>
 
+        <!--Búsqueda-->
         <ClientOnly>
           <div class="flex flex-contenido-centrado m-y-3">
             <form class="campo-busqueda columna-12" @submit.prevent>
@@ -262,10 +299,13 @@ onMounted(async () => {
                 type="search"
                 class="campo-busqueda-entrada"
                 placeholder="Campo de búsqueda"
+                :disabled="isLoading"
+                @keyup.enter="storeFilters.buildQueryParams(storeConsulta.resourceType)"
               />
 
               <button
                 aria-label="Borrar"
+                :disabled="isLoading"
                 class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
                 type="button"
                 @click="resetSearch"
@@ -274,17 +314,21 @@ onMounted(async () => {
               </button>
 
               <button
+                v-globo-informacion:derecha="'Buscar'"
                 aria-label="Buscar"
+                :disabled="isLoading"
                 class="boton-primario boton-pictograma campo-busqueda-buscar"
                 type="button"
-                @click="storeFilters.buildQueryParams"
+                @click="storeFilters.buildQueryParams(storeConsulta.resourceType)"
               >
                 <span class="pictograma-buscar" aria-hidden="true" />
               </button>
             </form>
 
             <button
+              v-globo-informacion:derecha="'Búsqueda avanzada'"
               type="button"
+              :disabled="isLoading"
               :class="
                 isFilterActive
                   ? 'boton-primario boton-pictograma boton-grande'
@@ -299,12 +343,15 @@ onMounted(async () => {
             </button>
           </div>
         </ClientOnly>
+
+        <!--CSW y Catálogos externos-->
         <div
           v-if="storeConsulta.resourceType === 'dataLayer'"
           class="flex flex-contenido-centrado"
           style="gap: 0px"
         >
           <button
+            v-globo-informacion:derecha="'Enlace CSW'"
             type="button"
             class="boton-secundario columna-16 boton-chico flex flex-contenido-centrado"
             aria-label="Enlace Catalogue Service for the Web"
@@ -321,16 +368,27 @@ onMounted(async () => {
               style="align-self: center"
               to="/catalogo/servicios-remotos/agregar"
             >
-              <span aria-hidden="true" class="pictograma-colaborar" />
+              <span
+                v-globo-informacion:derecha="'Conectar Catálogo Externo'"
+                aria-hidden="true"
+                class="pictograma-colaborar"
+              />
             </nuxt-link>
           </div>
         </div>
         <UiNumeroElementos :numero="totalResources" :etiqueta="etiquetaElementos" />
       </div>
+      <!--Spinner general-->
       <div v-if="isLoading" class="flex flex-contenido-centrado m-t-3">
-        <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
+        <img
+          class="color-invertir"
+          :src="`${$config.app.baseURL}img/loader.gif`"
+          alt="...Cargando"
+          height="120px"
+        />
       </div>
 
+      <!--Si no hay resultados que coincidan con la busqueda-->
       <div v-if="orderedCategories.length === 0 && !isLoading">
         <div class="borde-redondeado-16 m-2 fondo-color-informacion texto-color-informacion p-2">
           <p class="nota texto-color-informacion m-2">
@@ -341,6 +399,7 @@ onMounted(async () => {
 
       <div v-if="orderedCategories.length > 0 && !isLoading">
         <div v-for="category in orderedCategories" :key="category" class="m-y-1">
+          <!--Tarjetas de categoría-->
           <ConsultaElementoCategoria
             :title="categoriesDict[category]?.inSpanish"
             :tag="etiquetaElementos"
@@ -348,6 +407,7 @@ onMounted(async () => {
             @click="setSelectedCategory(category)"
           />
 
+          <!--Tarjetas de recursos-->
           <div
             v-for="(resource, index) in categorizedResources[category]"
             :key="index"
@@ -362,13 +422,34 @@ onMounted(async () => {
               @trigger-fetch="fetchNewData"
             />
           </div>
+
+          <!--Boton de reintentar-->
+          <div
+            v-if="
+              !categoriesDict[category]?.isLoading &&
+              categoriesDict[category]?.wasFetchSuccesful === false
+            "
+            class="flex flex-contenido-centrado m-y-1"
+          >
+            <button
+              type="button"
+              class="boton-secundario boton-chico flex"
+              style="gap: 8px"
+              aria-label="Reintentar"
+              @click="fetchNewData(category)"
+            >
+              <span aria-hidden="true" class="pictograma-restablecer" /> Reintentar
+            </button>
+          </div>
+
+          <!--Spinner por categoría-->
           <div
             v-if="categoriesDict[category]?.isLoading && selectedCategories.includes(category)"
             class="flex flex-contenido-centrado"
           >
             <img
               class="color-invertir m-y-2"
-              src="/img/loader.gif"
+              :src="`${$config.app.baseURL}img/loader.gif`"
               alt="...Cargando"
               height="40px"
             />

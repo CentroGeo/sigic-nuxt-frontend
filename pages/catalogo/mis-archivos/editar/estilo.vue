@@ -1,4 +1,6 @@
 <script setup>
+import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
+
 definePageMeta({
   middleware: 'sidebase-auth',
   bodyAttrs: {
@@ -7,45 +9,65 @@ definePageMeta({
 });
 const storeCatalogo = useCatalogoStore();
 const storeResources = useResourcesCatalogoStore();
+const { getSLDs } = useResourcesSupplements();
+const config = useRuntimeConfig();
+
 const { data } = useAuth();
 const route = useRoute();
 const selectedPk = route.query.data;
-//const resourceType = route.query.type;
 const subidaExitosa = ref(undefined);
-const nombreSLD = ref('');
-const resourceToEdit = await storeResources.fetchResourceByPk(selectedPk);
-const user = data.value?.user.email || 'Sin sesion';
+const resourceToEdit = ref(null);
 const dragNdDrop = ref(null);
 const style_files = ['.sld'];
+const isLoadingGlobal = ref(true);
 const isLoading = ref(false);
+const loadedStylesStatus = ref({});
+const resourcestyles = ref([]);
 
+// Función que usa el nuevo endpoint
 async function guardarArchivo(files) {
-  // solo uno o el primer archivo
+  loadedStylesStatus.value = {};
   subidaExitosa.value = undefined;
   isLoading.value = true;
-  if (style_files.map((end) => files[0]?.name.endsWith(end)).includes(true)) {
-    const formData = new FormData();
-    // solo el primer elemento del arreglo
-    nombreSLD.value = files[0].name;
-    formData.append('base_file', files[0]);
-    formData.append('dataset_title', resourceToEdit.alternate);
-    formData.append('token', data.value?.accessToken);
 
-    const response = await $fetch('/api/subirSLD', {
-      method: 'POST',
-      body: formData,
-    });
-    //console.warn('response', response);
-    if (response === 'finished') {
-      subidaExitosa.value = true;
-    } else {
-      subidaExitosa.value = false;
+  const validFileList = {};
+  // Primero revisamos si los archivos son válidos
+  for (const file of files) {
+    const isValid = style_files.map((end) => file.name.endsWith(end)).includes(true);
+    validFileList[file.name] = isValid;
+  }
+
+  // Si los archivos son válidos, agregamos los sld
+  if (!Object.values(validFileList).includes(false)) {
+    for (const d of files) {
+      loadedStylesStatus.value[d.name] = 'loading';
+    }
+    for (const d of files) {
+      const fileName = d.name;
+      const formData = new FormData();
+      formData.append('base_file', d);
+      formData.append('token', data.value?.accessToken);
+      formData.append('pk', selectedPk);
+      const fileUpdateStatus = await $fetch('/api/subirSLDMultiple', {
+        method: 'POST',
+        body: formData,
+      });
+      loadedStylesStatus.value[fileName] = fileUpdateStatus;
+      const styles = await getSLDs(resourceToEdit.value);
+      resourcestyles.value = styles.styleList;
     }
   } else {
     dragNdDrop.value?.archivoNoValido();
   }
-  isLoading.value = true;
+  isLoading.value = false;
 }
+
+onMounted(async () => {
+  resourceToEdit.value = await storeResources.fetchResourceByPk(selectedPk);
+  const styles = await getSLDs(resourceToEdit.value);
+  resourcestyles.value = styles.styleList;
+  isLoadingGlobal.value = false;
+});
 </script>
 
 <template>
@@ -55,24 +77,26 @@ async function guardarArchivo(files) {
     </template>
 
     <template #visualizador>
-      <main v-if="!resourceToEdit || resourceToEdit === 'Error'">
-        <div
-          class="contenedor ancho-lectura borde-redondeado-16 texto-color-error fondo-color-error p-3 m-3 flex flex-contenido-centrado"
-        >
-          <span class="pictograma-alerta" />
-          <b> Hubo un error en el servidor o el archivo no existe</b>
-        </div>
-      </main>
-      <main v-else-if="!user || user !== resourceToEdit?.owner.username">
-        <div
-          class="contenedor ancho-lectura borde-redondeado-16 texto-color-error fondo-color-error p-3 m-3 flex flex-contenido-centrado"
-        >
-          <span class="pictograma-alerta" />
-          <b> No tienes permisos para ver esta página.</b>
+      <main v-if="isLoadingGlobal">
+        <div class="flex flex-contenido-centrado m-t-3">
+          <img
+            class="color-invertir"
+            :src="`${config.app.baseURL}img/loader.gif`"
+            alt="...Cargando"
+            height="120px"
+          />
         </div>
       </main>
       <main v-else id="principal" class="contenedor m-b-10 m-y-3">
-        <div class="alineacion-izquierda ancho-lectura">
+        <div v-if="resourceToEdit === 'Error'">
+          <div
+            class="contenedor ancho-lectura borde-redondeado-16 texto-color-error fondo-color-error p-3 m-3 flex flex-contenido-centrado"
+          >
+            <span class="pictograma-alerta" />
+            <b> Hubo un error en el servidor o el archivo no existe</b>
+          </div>
+        </div>
+        <div v-else class="alineacion-izquierda ancho-lectura">
           <div class="flex">
             <nuxt-link to="/catalogo/mis-archivos" aria-label="regresar a mis archivos">
               <span
@@ -103,7 +127,22 @@ async function guardarArchivo(files) {
               />
 
               <h2 class="m-t-0">Estilo</h2>
-              <p><b>Estilo, solo archivos .sld</b></p>
+              <div>
+                <table class="tabla-condensada">
+                  <thead>
+                    <tr>
+                      <th>Estilos de la capa</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="style in resourcestyles" :key="style">
+                      <td>{{ style }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <p><b style="font-weight: bold">Agregar estilos, solo archivos .sld</b></p>
 
               <!-- Drag & Drop -->
               <ClientOnly>
@@ -115,32 +154,48 @@ async function guardarArchivo(files) {
             </div>
 
             <div class="columna-16">
-              <div v-if="isLoading">
-                <div class="borde-redondeado-16 flex fondo-color-neutro p-3">
-                  <img src="/img/loader.gif" height="30" /> <b> Cargando Archivo </b>
-                </div>
-              </div>
-              <!--Subida exitosa-->
-              <div v-if="subidaExitosa">
+              <div v-if="Object.keys(loadedStylesStatus).length > 0">
                 <h2>Cargas recientes</h2>
-                <div class="fondo-color-confirmacion p-3 borde-redondeado-16">
-                  <div class="flex texto-color-confirmacion">
-                    <span class="pictograma-aprobado" />
-                    <b> Archivo cargado correctamente </b>
+                <div v-for="file in Object.keys(loadedStylesStatus)" :key="file">
+                  <!--Cargando-->
+                  <div
+                    v-if="loadedStylesStatus[file] === 'loading'"
+                    class="fondo-color-neutro p-3 borde-redondeado-16 m-y-2"
+                  >
+                    <img
+                      class="color-invertir"
+                      :src="`${config.app.baseURL}img/loader.gif`"
+                      height="30"
+                    />
+                    <b> Subiendo {{ file }}... </b>
                   </div>
 
-                  <p>{{ nombreSLD }}</p>
-
-                  <div>
-                    <nuxt-link to="/catalogo/mis-archivos">Ver en mis archivos</nuxt-link>
+                  <!--Subida exitosa-->
+                  <div
+                    v-else-if="loadedStylesStatus[file] === 'finished'"
+                    class="fondo-color-confirmacion p-3 borde-redondeado-16 m-y-2"
+                  >
+                    <div class="flex texto-color-confirmacion">
+                      <span class="pictograma-aprobado" />
+                      <b> Archivo cargado correctamente </b>
+                    </div>
+                    <p>{{ file }}</p>
+                    <div>
+                      <nuxt-link to="/catalogo/mis-archivos">Ver en mis archivos</nuxt-link>
+                    </div>
                   </div>
-                </div>
-              </div>
-              <!--Subida fracasó-->
-              <div v-if="subidaExitosa === false">
-                <div class="borde-redondeado-16 flex texto-color-error fondo-color-error p-3">
-                  <span class="pictograma-alerta" />
-                  <b> No se logró cargar el archivo adecuadamente. Inténtalo de nuevo </b>
+
+                  <!--Subida fracasó-->
+                  <div
+                    v-else
+                    class="fondo-color-error texto-color-error p-3 borde-redondeado-16 m-y-2"
+                  >
+                    <div class="flex texto-color-error">
+                      <span class="pictograma-alerta" />
+                      <b> No se logró cargar el archivo adecuadamente. Inténtalo de nuevo </b>
+                    </div>
+                    <p>{{ file }}</p>
+                  </div>
                 </div>
               </div>
             </div>

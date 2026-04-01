@@ -1,21 +1,30 @@
 <script setup>
-import { convertirBytes } from '~/utils/catalogo';
-
 import { useAuth, useRuntimeConfig } from '#imports';
 import { useCatalogoStore } from '@/stores/catalogo';
 import { reactive, ref } from 'vue';
+import { convertirBytes } from '~/utils/catalogo';
+
+definePageMeta({
+  middleware: 'sidebase-auth',
+  bodyAttrs: {
+    class: '',
+  },
+});
 
 const storeCatalogo = useCatalogoStore();
 const configEnv = useRuntimeConfig();
 const statusOk = ref(false);
 const archivosEnCarga = ref([]);
+const hayCargas = ref(false);
 const { data } = useAuth();
 const { gnoxyFetch } = useGnoxyUrl();
 
-const base_files = ['.geojson', '.gpkg', '.zip', '.csv'];
-const docs_files = ['.txt', '.pdf', '.xls', '.xlsx'];
+const base_files = ['.geojson', '.gpkg', '.csv'];
+const docs_files = ['.txt', '.pdf'];
 
 async function guardarArchivo(files) {
+  archivosEnCarga.value = [];
+  hayCargas.value = true;
   const token = ref(data.value?.accessToken);
 
   const nuevosArchivos = Array.from(files).map((file) =>
@@ -39,9 +48,9 @@ async function guardarArchivo(files) {
     let endpoint = null;
 
     if (base_files.some((end) => file.name.endsWith(end))) {
-      endpoint = `${configEnv.public.basePath}/api/cargar-base-file`;
+      endpoint = `${configEnv.app.baseURL}api/cargar-base-file`;
     } else if (docs_files.some((end) => file.name.endsWith(end))) {
-      endpoint = `${configEnv.public.basePath}/api/cargar-doc-file`;
+      endpoint = `${configEnv.app.baseURL}api/cargar-doc-file`;
     } else {
       archivo.estatus = 'error_carga';
       archivo.mensaje = 'Formato no soportado';
@@ -64,7 +73,7 @@ async function guardarArchivo(files) {
 
       const result = await response.json();
 
-      // 5️⃣ Evaluar respuesta
+      // Evaluar respuesta
       if (!result.success) {
         archivo.estatus = 'error_carga';
         archivo.mensaje = result.message || 'Error en procesamiento';
@@ -75,38 +84,36 @@ async function guardarArchivo(files) {
         monitorLayerImport(result.execution_id, archivo);
       } else if (result.url) {
         // Caso: documento cargado
-        archivo.estatus = 'carga_finalizada';
-        archivo.mensaje = 'Archivo cargado correctamente';
         archivo.IdRutaArchivo = result.url.split('/').slice(-1)[0];
-        statusOk.value = true;
-        // Me parece que todo esto tendría quye dispararse condicionalmente.
-        // Si el recurso no es un dataset, todo lo de abajo falla.
-        // Si es document solo habría que fijar el archivo.tipo_recurso = document
+        // Se recupera la información necesaria para cada tipo de archivo
         let tipo;
-
         if (base_files.includes('.' + file.name.split('.').slice(-1)[0])) {
           const request_geonode = await gnoxyFetch(
             `${configEnv.public.geonodeUrl}/api/v2/datasets/${archivo.IdRutaArchivo}`
           );
           const res_geonode = await request_geonode.json();
           tipo = isGeometricExtension(res_geonode.dataset.extent) ? 'dataLayer' : 'dataTable';
-
           if (tipo === 'dataLayer') {
             archivo.tipo_recurso = tipo;
-
             const request_geoserver = await gnoxyFetch(
-              `${configEnv.public.geoserverUrl}/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=${res_geonode.dataset.alternate}&resultType=hits`
+              `${configEnv.public.geonodeUrl}/gs/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=${res_geonode.dataset.alternate}&resultType=hits`
             );
             const proyeccion = res_geonode?.dataset?.srid;
             const res_geoserver = await request_geoserver.text();
             const match = res_geoserver.match(/numberOfFeatures="(\d+)"/);
             archivo.numero_geometrias = match ? parseInt(match[1], 10) : null;
             archivo.proyeccion = proyeccion;
+          } else if (tipo === 'dataTable') {
+            archivo.tipo_recurso = tipo;
           }
         } else {
           tipo = 'document';
           archivo.tipo_recurso = tipo;
         }
+        // Se actualizan las banderas de carga
+        archivo.estatus = 'carga_finalizada';
+        archivo.mensaje = 'Archivo cargado correctamente';
+        statusOk.value = true;
       } else {
         archivo.estatus = 'error_carga';
         archivo.mensaje = 'Respuesta inesperada del servidor';
@@ -119,19 +126,14 @@ async function guardarArchivo(files) {
   });
 }
 
-// 🕒 Polling para monitorear la importación de capas base
+// Polling para monitorear la importación de capas base
 async function monitorLayerImport(executionId, archivo) {
-  const token = ref(data.value?.accessToken);
+  //const token = ref(data.value?.accessToken);
   const startTime = Date.now();
   const interval = setInterval(async () => {
     try {
-      const res = await fetch(
-        `${configEnv.public.geonodeUrl}/api/v2/executionrequest/${executionId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token.value}`,
-          },
-        }
+      const res = await gnoxyFetch(
+        `${configEnv.public.geonodeUrl}/api/v2/executionrequest/${executionId}`
       );
       const data = await res.json();
 
@@ -165,13 +167,26 @@ async function monitorLayerImport(executionId, archivo) {
       <main id="principal" class="contenedor m-b-10">
         <div class="alineacion-izquierda ancho-lectura">
           <h2>Carga archivo</h2>
-          <p><b>Solo archivos GeoJSON, Geopaquetes, CSV, XML, PDF, JPG y PNG.</b></p>
-
+          <p class="m-y-1">
+            <b>Solo archivos GeoJSON, Geopaquetes, csv, pdf y txt.</b>
+          </p>
+          <p
+            class="texto-color-informacion fondo-color-informacion borde borde-color-informacion borde-redondeado-2 p-2 m-y-2"
+          >
+            Los archivos en formato CSV se almacenan como datos tabulares, a menos que contengan
+            coordenadas que representen una ubicación puntual. Para que el sistema reconozca dichas
+            coordenadas, estas deben expresarse como valores numéricos en columnas cuyos nombres
+            correspondan a alguno de los siguientes pares admitidos: x, y; long, lat; o longitude,
+            latitude.
+          </p>
+          <!-- Si el archivo contiene datos de coordenadas pero estos no siguen la
+            nomenclatura establecida, serán procesados como cualquier otro valor numérico sin
+            interpretación geoespacial.-->
           <ClientOnly>
             <CatalogoElementoDragNdDrop @pasar-archivo="(i) => guardarArchivo(i)" />
           </ClientOnly>
 
-          <h2>Cargas</h2>
+          <h2 v-if="hayCargas">Cargas</h2>
 
           <div v-for="(archivo, i) in archivosEnCarga" :key="i" class="tarjetitas-carga">
             <div
@@ -190,7 +205,11 @@ async function monitorLayerImport(executionId, archivo) {
                         v-if="['pendiente', 'procesando'].includes(archivo.estatus)"
                         class="pictograma-de-carga-sigic"
                       >
-                        <img src="/img/loader.gif" alt="cargando" class="color-invertir" />
+                        <img
+                          :src="`${configEnv.app.baseURL}img/loader.gif`"
+                          alt="cargando"
+                          class="color-invertir"
+                        />
                       </span>
                       {{ archivo.nombre }}
                     </p>
@@ -220,31 +239,37 @@ async function monitorLayerImport(executionId, archivo) {
                     <b>{{ archivo.mensaje }}</b>
                   </div>
 
-                  <div v-if="archivo.numero_geometrias" class="nota">
+                  <div
+                    v-if="archivo.numero_geometrias && archivo.estatus === 'carga_finalizada'"
+                    class="nota"
+                  >
                     Se detectaron {{ archivo.numero_geometrias }} geometrías <br />
                     Sistema de referencia {{ archivo.proyeccion }}
                   </div>
 
-                  <div v-if="archivo.IdRutaArchivo" class="flex flex-contenido-separado">
-                    <div>
+                  <div
+                    v-if="archivo.IdRutaArchivo && archivo.estatus === 'carga_finalizada'"
+                    class="flex flex-contenido-inicio"
+                  >
+                    <div class="m-x-2 m-y-1">
                       <NuxtLink
                         :to="`/catalogo/mis-archivos/editar/MetadatosBasicos?data=${archivo.IdRutaArchivo}&type=${archivo.tipo_recurso}`"
                         target="_blank"
                         >Editar metadatos</NuxtLink
                       >
                     </div>
-                    <div v-if="archivo.tipo_recurso === 'dataLayer'">
+                    <div v-if="archivo.tipo_recurso === 'dataLayer'" class="m-x-2 m-y-1">
                       <NuxtLink
                         :to="`/catalogo/mis-archivos/editar/estilo?data=${archivo.IdRutaArchivo}&type=dataLayer`"
                       >
                         Agregar un estilo (.sld)</NuxtLink
                       >
                     </div>
-                    <div>
+                    <!-- <div>
                       <NuxtLink to="/catalogo/mis-archivos/metadatos-pendientes">
                         Ver en Mis archivos</NuxtLink
                       >
-                    </div>
+                    </div> -->
                   </div>
                 </div>
               </div>

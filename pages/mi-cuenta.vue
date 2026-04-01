@@ -5,13 +5,35 @@ definePageMeta({
   middleware: 'auth',
 });
 
-const { status, signOut } = useAuth();
+const { status, signOut, data } = useAuth();
 const route = useRoute();
 const router = useRouter();
 const modalConfirmarCierre = ref();
+const config = useRuntimeConfig();
+
 async function cerrarSesion() {
-  // Cierra sesión y redirige al inicio
-  await signOut({ callbackUrl: '/' });
+  const idToken = data.value?.idToken;
+
+  // 1) Cerrar sesión local sin redirección
+  await signOut({ redirect: false });
+
+  // 2) Redirigir al logout de Keycloak
+  const origin = import.meta.client
+    ? window.location.origin
+    : (() => {
+        const event = useRequestEvent();
+        const host = event?.node.req.headers.host;
+        const proto = event?.node.req.headers['x-forwarded-proto'] || 'http';
+        return `${proto}://${host}`;
+      })();
+
+  const logoutUrl =
+    `${config.public.keycloakIssuer}/protocol/openid-connect/logout` +
+    `?post_logout_redirect_uri=${origin}${config.app.baseURL}` +
+    `&id_token_hint=${idToken}` +
+    `&client_id=${config.public.keycloakClientId}`;
+
+  window.location.href = logoutUrl;
 }
 
 if (route.path === '/mi-cuenta') {
@@ -21,43 +43,46 @@ if (route.path === '/mi-cuenta') {
 
 <template>
   <div class="contenedor ancho-lectura">
-    <SisdaiModal ref="modalConfirmarCierre">
-      <template #encabezado>
-        <p class="h4">¿Confirmas que deseas cerrar sesión?</p>
-        <p></p>
-      </template>
-      <template #cuerpo>
-        <p>
-          Si cierras sesión, tendrás que volver a ingresar tu correo y contraseña para acceder
-          nuevamente.
-        </p>
-      </template>
-      <template #pie>
-        <div class="flex flex-contenido-centrado contenedor contenedor-botones">
-          <div class="columna-8">
-            <button
-              aria-label="Cancelar"
-              type="button"
-              class="boton-secundario texto-centrado"
-              @click="modalConfirmarCierre.cerrarModal()"
-            >
-              <span class="flex">Cancelar</span>
-            </button>
+    <ClientOnly>
+      <SisdaiModal ref="modalConfirmarCierre">
+        <template #encabezado>
+          <p class="h4">¿Confirmas que deseas cerrar sesión?</p>
+          <p></p>
+        </template>
+        <template #cuerpo>
+          <p>
+            Si cierras sesión, tendrás que volver a ingresar tu correo y contraseña para acceder
+            nuevamente.
+          </p>
+        </template>
+        <template #pie>
+          <div class="flex flex-contenido-centrado contenedor contenedor-botones">
+            <div class="columna-8">
+              <button
+                aria-label="Cancelar"
+                type="button"
+                class="boton-secundario texto-centrado"
+                @click="modalConfirmarCierre.cerrarModal()"
+              >
+                <span class="flex">Cancelar</span>
+              </button>
+            </div>
+            <div class="columna-8">
+              <button
+                v-if="status === 'authenticated'"
+                aria-label="Cerrar sesión"
+                type="button"
+                class="boton-primario texto-centrado"
+                @click="cerrarSesion"
+              >
+                <span class="flex">Cerrar sesión</span>
+              </button>
+            </div>
           </div>
-          <div class="columna-8">
-            <button
-              v-if="status === 'authenticated'"
-              aria-label="Cerrar sesión"
-              type="button"
-              class="boton-primario texto-centrado"
-              @click="cerrarSesion"
-            >
-              <span class="flex">Cerrar sesión</span>
-            </button>
-          </div>
-        </div>
-      </template>
-    </SisdaiModal>
+        </template>
+      </SisdaiModal>
+    </ClientOnly>
+
     <div class="flex flex-contenido-separado">
       <div class="flex"><h1>Mi Cuenta</h1></div>
       <div class="flex-vertical-centrado">
@@ -75,8 +100,7 @@ if (route.path === '/mi-cuenta') {
       <div class="p-t-5 p-b-3">
         <div class="flex menu-mis-archivos">
           <NuxtLink to="/mi-cuenta/informacion-personal">Información personal</NuxtLink>
-          <NuxtLink to="/mi-cuenta/produccion-colaboraciones">Producción y colaboraciones</NuxtLink>
-
+          <!-- <NuxtLink to="/mi-cuenta/produccion-colaboraciones">Producción y colaboraciones</NuxtLink> -->
           <NuxtLink to="/mi-cuenta/seguridad">Seguridad</NuxtLink>
         </div>
       </div>
@@ -92,27 +116,29 @@ if (route.path === '/mi-cuenta') {
   gap: 0;
   border-bottom: var(--boton-secundario-deshabilitado-borde) 1px solid;
 }
+
 a {
   box-shadow: inherit;
-  padding: inherit;
   padding: 16px 24px 16px 16px;
   position: relative;
   color: var(--texto-secundario);
   font-weight: 600;
   border-radius: 0;
+
   &::after {
     content: '';
     position: absolute;
     left: calc(50%);
     top: calc(100%);
-    width: 0px;
+    width: 0;
     height: 4px;
-    border-radius: 2px 2px 0px 0px;
+    border-radius: 2px 2px 0 0;
     background-color: var(--boton-primario-borde);
     text-align: center;
     margin: -4px auto 0;
     transition: all 0.2s;
   }
+
   &.router-link-active.router-link-exact-active {
     &::after {
       content: '';
@@ -123,6 +149,7 @@ a {
       height: 8px;
     }
   }
+
   &:hover,
   &:focus {
     background-color: var(--boton-secundario-cursor-fondo);
@@ -130,9 +157,11 @@ a {
     // background-color: transparent;
   }
 }
+
 .contenedor-botones {
   button {
     width: 100%;
+
     span {
       margin: auto;
     }

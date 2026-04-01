@@ -1,0 +1,62 @@
+import formidable from 'formidable';
+import { promises as fsp } from 'fs';
+const config = useRuntimeConfig();
+
+export default defineEventHandler(async (event) => {
+  const form = formidable({ multiples: false });
+  const data = await new Promise<{
+    // @ts-ignore
+    fields: Fields;
+    // @ts-ignore
+    files: Files;
+  }>((resolve, reject) => {
+    form.parse(event.node.req, (err, fields, files) => {
+      if (err) reject(err);
+      else resolve({ fields, files });
+    });
+  });
+
+  const datasetPk = data.fields.pk[0];
+  const token = data.fields.token[0];
+  const { base_file } = data.files;
+  const url = `${config.public.geonodeApi}/datasets/${datasetPk}/sldstyles/`;
+
+  if (!base_file) {
+    return 'failed';
+  }
+
+  const formData = new FormData();
+  formData.append('name', `${datasetPk}_${base_file[0].originalFilename.replace('.sld', '')}`);
+  formData.append(
+    'sld_file',
+    base_file[0].filepath
+      ? new Blob([await fsp.readFile(base_file[0].filepath)], {
+          type: base_file[0].mimetype,
+        })
+      : base_file[0],
+    base_file[0].originalFilename.replace('.sld', '')
+  );
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    //console.warn(response);
+    if (!response.ok) {
+      //const res = await response.text()
+      //console.warn(res)
+      return 'failed';
+    } else {
+      //const res = await response.json()
+      //console.warn(res)
+      return 'finished';
+    }
+  } catch {
+    return 'failed';
+  }
+});
