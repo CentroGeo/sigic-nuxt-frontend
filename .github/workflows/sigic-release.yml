@@ -20,7 +20,13 @@ jobs:
 
       - name: Extract tag
         id: tag
-        run: echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            TAG="${GITHUB_REF#refs/tags/}"
+          else
+            TAG=$(git describe --tags --abbrev=0)
+          fi
+          echo "TAG=$TAG" >> $GITHUB_OUTPUT
 
       - name: Set image name (lowercase)
         id: image
