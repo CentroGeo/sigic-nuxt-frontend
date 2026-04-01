@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+
 
 jobs:
   build-and-push:
@@ -29,14 +31,24 @@ jobs:
       - name: Login to GHCR
         run: echo "${{ secrets.GHCR_GEOINTSIGIC_PAT }}" | docker login ghcr.io -u geointsigic --password-stdin
 
+      # ✅ BUILD (solo un tag)
       - name: Build image
         run: |
           docker build \
             -t ${{ steps.image.outputs.IMAGE }}:${{ steps.tag.outputs.TAG }} \
-            -t ${{ steps.image.outputs.IMAGE }}:latest \
             .
 
-      - name: Push image
+      # ✅ TAG + PUSH
+      - name: Tag & Push image
         run: |
-          docker push ${{ steps.image.outputs.IMAGE }}:${{ steps.tag.outputs.TAG }}
-          docker push ${{ steps.image.outputs.IMAGE }}:latest
+          IMAGE="${{ steps.image.outputs.IMAGE }}"
+          VERSION="${{ steps.tag.outputs.TAG }}"
+
+          # push versión
+          docker push "$IMAGE:$VERSION"
+
+          # retag a latest
+          docker tag "$IMAGE:$VERSION" "$IMAGE:latest"
+
+          # push latest
+          docker push "$IMAGE:latest"
