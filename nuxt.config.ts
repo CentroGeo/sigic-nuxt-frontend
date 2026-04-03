@@ -102,7 +102,7 @@ export default defineNuxtConfig({
       geoserverUrl:
         process.env.NUXT_PUBLIC_GEOSERVER_URL || 'https://geonode.dev.geoint.mx/geoserver',
       iaBackendUrl: process.env.NUXT_PUBLIC_IA_BACKEND_URL || 'https://sigic.ia.dev.geoint.mx/llmb',
-      levantamientoBackendUrl: process.env.NUXT_PUBLIC_LEVANTAMIENTO_URL,
+      levantamientoBackendUrl: process.env.NUXT_PUBLIC_LEVANTAMIENTO_BACKEND_URL,
       baseURL: process.env.NUXT_PUBLIC_BASE_URL,
       defaultPage: process.env.NUXT_PUBLIC_DEFAULT_PAGE || '/',
       geonodeApiDefaultFilter: process.env.NUXT_PUBLIC_GEONODE_API_DEFAULT_FILTER || '',
