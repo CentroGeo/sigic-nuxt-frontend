@@ -65,6 +65,32 @@ onMounted(async () => {
     fecha_formateada: formatDate(new Date(item.fecha_levantamiento)),
   }));
 });
+
+function seleccionarAporte(aporte) {
+  aporteSeleccionado.value = aporte;
+  modalRemoverAporte.value.abrirModal();
+}
+
+const modalAporteEliminado = ref(null);
+let timeoutModal = null;
+
+async function eliminarAporte() {
+  const id = aporteSeleccionado.value.id;
+
+  await storeLevantamiento.eliminarAporte(id);
+
+  modalRemoverAporte.value.cerrarModal();
+
+  modalAporteEliminado.value.abrirModal();
+
+  porEnviar.value = porEnviar.value.filter((item) => item.id !== id);
+
+  if (timeoutModal) clearTimeout(timeoutModal);
+  timeoutModal = setTimeout(() => {
+    modalAporteEliminado.value.cerrarModal();
+    timeoutModal = null;
+  }, 3000);
+}
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeLevantamiento.catalogoColapsado">
@@ -143,7 +169,7 @@ onMounted(async () => {
                         <button
                           class="boton-secundario boton-chico texto-centrado tarjeta-pie-boton"
                           type="button"
-                          @click="modalRemoverAporte.abrirModal()"
+                          @click="seleccionarAporte(value)"
                         >
                           Eliminar aporte
                         </button>
@@ -171,13 +197,23 @@ onMounted(async () => {
             >
               Regresar
             </button>
-            <button
-              class="boton-primario boton-chico"
-              type="button"
-              @click="modalRemoverAporte.cerrarModal()"
-            >
+            <button class="boton-primario boton-chico" type="button" @click="eliminarAporte">
               Confirmar
             </button>
+          </template>
+        </SisdaiModal>
+
+        <SisdaiModal id="aporteEliminadoModal" ref="modalAporteEliminado">
+          <template #encabezado><h3>Aporte eliminado</h3></template>
+          <template #cuerpo>
+            <div
+              class="fondo-color-confirmacion p-x-2 p-y-1 borde borde-color-confirmacion borde-redondeado-20"
+            >
+              <p class="texto-color-confirmacion">
+                <span class="pictograma-aprobado" />
+                El aporte y toda su información relacionada se ha eliminado con éxito.
+              </p>
+            </div>
           </template>
         </SisdaiModal>
       </ClientOnly>

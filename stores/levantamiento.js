@@ -444,7 +444,7 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
     obtenerTotalProyectosRechazados() {
       return this.proyectosRechazados.length;
     },
-    async guardarBorradorAporte(aporte) {
+    /* async guardarBorradorAporte(aporte) {
       try {
         const data = await $fetch(`${apiUrl}/raising/user/create`, {
           method: 'POST',
@@ -455,7 +455,7 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
       } catch (err) {
         console.error('Error guardando borrador:', err);
       }
-    },
+    }, */
     async obtenerAportesPorStatus(email, status) {
       const body = {
         email: email,
@@ -501,6 +501,17 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
         console.log(data);
       } catch (err) {
         console.error('Error enviando aporte:', err);
+      }
+    },
+    async eliminarAporte(id) {
+      try {
+        const data = await $fetch(`${apiUrl}/raising/user/register/${id}`, {
+          method: 'DELETE',
+        });
+
+        console.log(data);
+      } catch (err) {
+        console.error('Error eliminando aporte:', err);
       }
     },
   };

@@ -12,7 +12,7 @@ const router = useRouter();
 const route = useRoute();
 
 const enRevision = ref([
-  {
+  /* {
     id: 0,
     thumbnail_img: 'https://cdn.conahcyt.mx/sisdai/sisdai-css/documentacion/kale-1.jpg',
     title: 'Título del aporte',
@@ -25,7 +25,7 @@ const enRevision = ref([
     title: 'Título del aporte',
     update_date: formatDate(new Date()),
     status: 'Revisando',
-  },
+  }, */
 ]);
 
 const modalRemoverAporte = ref(null);
@@ -50,6 +50,45 @@ function irAEditarAporte() {
       previous_path: route.path,
     },
   });
+}
+
+const { data } = useAuth();
+
+onMounted(async () => {
+  const aportes = await storeLevantamiento.obtenerAportesPorStatus(
+    data.value?.user.email,
+    'EN REVISION'
+  );
+
+  enRevision.value = aportes.map((item) => ({
+    ...item,
+    fecha_formateada: formatDate(new Date(item.fecha_levantamiento)),
+  }));
+});
+
+function seleccionarAporte(aporte) {
+  aporteSeleccionado.value = aporte;
+  modalRemoverAporte.value.abrirModal();
+}
+
+const modalAporteEliminado = ref(null);
+let timeoutModal = null;
+
+async function eliminarAporte() {
+  const id = aporteSeleccionado.value.id;
+
+  await storeLevantamiento.eliminarAporte(id);
+  modalRemoverAporte.value.cerrarModal();
+
+  modalAporteEliminado.value.abrirModal();
+
+  enRevision.value = enRevision.value.filter((item) => item.id !== id);
+
+  if (timeoutModal) clearTimeout(timeoutModal);
+  timeoutModal = setTimeout(() => {
+    modalAporteEliminado.value.cerrarModal();
+    timeoutModal = null;
+  }, 3000);
 }
 </script>
 <template>
@@ -90,7 +129,7 @@ function irAEditarAporte() {
           <div class="columna-16">
             <div class="flex">
               <h2>Aportes en revisión</h2>
-              <UiNumeroElementos :numero="0" />
+              <UiNumeroElementos :numero="enRevision.length" />
             </div>
           </div>
 
@@ -102,12 +141,14 @@ function irAEditarAporte() {
               <div class="grid">
                 <div v-for="value in enRevision" :key="value.id" class="columna-5">
                   <div class="tarjeta" style="position: relative">
-                    <img class="tarjeta-imagen" alt="" :srcset="value.thumbnail_img" />
+                    <img class="tarjeta-imagen" alt="" srcset="/img/aporte_imagen.png" />
 
                     <div class="tarjeta-cuerpo">
-                      <p class="tarjeta-etiqueta">Aporte creado en:</p>
+                      <p class="texto-tamanio-3 texto-color-secundario">Aporte creado en:</p>
                       <p class="tarjeta-titulo">{{ value.title }}</p>
-                      <p>{{ value.update_date }}</p>
+                      <p class="texto-tamanio-3 texto-color-secundario">
+                        {{ value.fecha_formateada }}
+                      </p>
                     </div>
 
                     <div class="tarjeta-pie" style="display: block">
@@ -122,19 +163,14 @@ function irAEditarAporte() {
                         <button
                           class="boton-secundario boton-chico texto-centrado tarjeta-pie-boton"
                           type="button"
-                          @click="modalRemoverAporte.abrirModal()"
+                          @click="seleccionarAporte(value)"
                         >
                           Eliminar aporte
                         </button>
                       </div>
                     </div>
                     <p
-                      class="borde borde-redondeado-12 p-1"
-                      :class="
-                        value.status === 'Revisando'
-                          ? 'fondo-color-alerta texto-color-alerta borde-color-alerta'
-                          : 'fondo-color-acento texto-color-acento borde-color-acento'
-                      "
+                      class="borde borde-redondeado-12 p-1 fondo-color-alerta texto-color-alerta borde-color-alerta"
                       style="position: absolute; top: 0; right: 24px"
                     >
                       {{ value.status }}
@@ -161,6 +197,23 @@ function irAEditarAporte() {
             >
               Regresar
             </button>
+            <button class="boton-primario boton-chico" type="button" @click="eliminarAporte">
+              Confirmar
+            </button>
+          </template>
+        </SisdaiModal>
+
+        <SisdaiModal id="aporteEliminadoModal" ref="modalAporteEliminado">
+          <template #encabezado><h3>Aporte eliminado</h3></template>
+          <template #cuerpo>
+            <div
+              class="fondo-color-confirmacion p-x-2 p-y-1 borde borde-color-confirmacion borde-redondeado-20"
+            >
+              <p class="texto-color-confirmacion">
+                <span class="pictograma-aprobado" />
+                El aporte y toda su información relacionada se ha eliminado con éxito.
+              </p>
+            </div>
           </template>
         </SisdaiModal>
       </ClientOnly>
@@ -171,5 +224,13 @@ function irAEditarAporte() {
 .tarjeta-pie-boton {
   width: 100%;
   display: inline-block;
+}
+
+.tarjeta-imagen {
+  height: 130px;
+}
+
+.tarjeta-cuerpo > * {
+  margin: 8px 0;
 }
 </style>

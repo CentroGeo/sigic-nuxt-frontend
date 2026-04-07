@@ -77,19 +77,41 @@ function continuarSinUbicacion() {
 const modalBorrador = ref(null);
 
 async function guardarBorrador() {
-  const aporte = {
-    id_usuario: data.value?.user.email,
-    id_proyecto: route.params.id,
-    respuestas: preguntas.value,
-    latitud: punto.value.features[0].geometry.coordinates[1],
-    longitud: punto.value.features[0].geometry.coordinates[0],
-    status: 'POR ENVIAR',
-    titulo: proyecto.value.nombre,
-  };
+  try {
+    const formData = new FormData();
 
-  await storeLevantamiento.guardarBorradorAporte(aporte);
+    formData.append('id_usuario', data.value?.user.email);
+    formData.append('id_proyecto', route.params.id);
+    formData.append('latitud', punto.value.features[0].geometry.coordinates[1]);
+    formData.append('longitud', punto.value.features[0].geometry.coordinates[0]);
+    formData.append('status', 'POR ENVIAR');
+    formData.append('titulo', proyecto.value.nombre);
 
-  modalBorrador.value.abrirModal();
+    const preguntasConMedia = JSON.parse(JSON.stringify(toRaw(preguntas.value)));
+
+    Object.entries(imagenesPorPregunta.value).forEach(([indice, archivos]) => {
+      if (!preguntasConMedia[indice]) return;
+
+      preguntasConMedia[indice].media = [];
+
+      archivos.forEach((archivo, i) => {
+        const extension = archivo.name.split('.').pop()?.toLowerCase() || 'jpg';
+        const timestamp = Date.now();
+        const nombre = `${route.params.id}_${indice}_${timestamp}_${i}.${extension}`;
+
+        preguntasConMedia[indice].media.push(nombre);
+        formData.append('media', archivo, nombre);
+      });
+    });
+
+    formData.append('respuestas', JSON.stringify(preguntasConMedia));
+
+    await storeLevantamiento.enviarAporte(formData);
+
+    modalBorrador.value.abrirModal();
+  } catch (error) {
+    console.error('Error en enviarAporte:', error);
+  }
 }
 
 function irAProyectos() {
