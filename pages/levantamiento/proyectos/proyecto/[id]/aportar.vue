@@ -128,6 +128,8 @@ function recibirImagenes({ indice, archivos }) {
   imagenesPorPregunta.value[indice] = archivos;
 }
 
+const modalAporteCompletado = ref(null);
+
 async function enviarAporte() {
   try {
     const formData = new FormData();
@@ -160,10 +162,14 @@ async function enviarAporte() {
 
     await storeLevantamiento.enviarAporte(formData);
 
-    modalBorrador.value.abrirModal();
+    modalAporteCompletado.value.abrirModal();
   } catch (error) {
     console.error('Error en enviarAporte:', error);
   }
+}
+
+function irAAportes() {
+  router.push('/levantamiento/aportes/');
 }
 </script>
 <template>
@@ -333,6 +339,24 @@ async function enviarAporte() {
           <template #pie>
             <button type="button" class="boton-secundario boton-chico" @click="irAAportesPorEnviar">
               Ir a aportes por enviar
+            </button>
+            <button type="button" class="boton-primario boton-chico" @click="irAProyectos">
+              Ir a proyectos
+            </button>
+          </template>
+        </SisdaiModal>
+
+        <SisdaiModal ref="modalAporteCompletado">
+          <template #encabezado><h3>Aporte completado</h3></template>
+          <template #cuerpo>
+            <p class="m-t-0 m-b-3">
+              Tu aporte se ha enviado a revisión correctamente. Puedes revisar su estatus en la
+              sección de "Aportes".
+            </p>
+          </template>
+          <template #pie>
+            <button type="button" class="boton-secundario boton-chico" @click="irAAportes">
+              Ir a aportes
             </button>
             <button type="button" class="boton-primario boton-chico" @click="irAProyectos">
               Ir a proyectos

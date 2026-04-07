@@ -91,6 +91,30 @@ async function eliminarAporte() {
     timeoutModal = null;
   }, 3000);
 }
+
+const modalAporteCompletado = ref(null);
+
+function seleccionarAporteParaEnvio(aporte) {
+  aporteSeleccionado.value = aporte;
+  enviarARevision();
+}
+
+async function enviarARevision() {
+  const id = aporteSeleccionado.value.id;
+
+  await storeLevantamiento.actualizarEstadoAporte(id);
+
+  modalAporteCompletado.value.abrirModal();
+  porEnviar.value = porEnviar.value.filter((item) => item.id !== id);
+}
+
+function irAProyectos() {
+  router.push('/levantamiento/proyectos/');
+}
+
+function irAAportes() {
+  router.push('/levantamiento/aportes/');
+}
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeLevantamiento.catalogoColapsado">
@@ -156,6 +180,7 @@ async function eliminarAporte() {
                         <button
                           class="boton-primario boton-chico texto-centrado tarjeta-pie-boton"
                           type="button"
+                          @click="seleccionarAporteParaEnvio(value)"
                         >
                           Enviar a revisión
                         </button>
@@ -214,6 +239,24 @@ async function eliminarAporte() {
                 El aporte y toda su información relacionada se ha eliminado con éxito.
               </p>
             </div>
+          </template>
+        </SisdaiModal>
+
+        <SisdaiModal ref="modalAporteCompletado">
+          <template #encabezado><h3>Aporte completado</h3></template>
+          <template #cuerpo>
+            <p class="m-t-0 m-b-3">
+              Tu aporte se ha enviado a revisión correctamente. Puedes revisar su estatus en la
+              sección de "Aportes".
+            </p>
+          </template>
+          <template #pie>
+            <button type="button" class="boton-secundario boton-chico" @click="irAAportes">
+              Ir a aportes
+            </button>
+            <button type="button" class="boton-primario boton-chico" @click="irAProyectos">
+              Ir a proyectos
+            </button>
           </template>
         </SisdaiModal>
       </ClientOnly>

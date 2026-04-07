@@ -514,5 +514,22 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
         console.error('Error eliminando aporte:', err);
       }
     },
+    async actualizarEstadoAporte(id) {
+      const body = {
+        status: 'EN REVISION',
+      };
+
+      try {
+        const data = await $fetch(`${apiUrl}/raising/reviewer/status/${id}`, {
+          method: 'POST',
+          body: body,
+        });
+
+        console.log(data);
+        return data;
+      } catch (err) {
+        console.error('Error actualizando status aporte:', err);
+      }
+    },
   };
 });
