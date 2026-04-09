@@ -26,6 +26,12 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
     proyectosEnRevision: ref([]),
     existenProyectosRechazados: ref(false),
     proyectosRechazados: ref([]),
+    existenAportesAprobados: ref(false),
+    aportesAprobados: ref([]),
+    existenAportesEnRevision: ref(false),
+    aportesEnRevision: ref([]),
+    existenAportesRechazados: ref(false),
+    aportesRechazados: ref([]),
 
     async obtenerProyectosPublicos() {
       try {
@@ -529,6 +535,35 @@ export const useLevantamientoStore = defineStore('levantamiento', () => {
         return data;
       } catch (err) {
         console.error('Error actualizando status aporte:', err);
+      }
+    },
+    async obtenerAportesPorStatusRevisor(email, status) {
+      const body = {
+        email: email,
+        status: status,
+      };
+
+      try {
+        const data = await $fetch(`${apiUrl}/raising/reviewer/list/`, {
+          method: 'POST',
+          body: body,
+        });
+
+        console.log(data);
+        switch (status) {
+          case 'EN REVISION':
+            if (data.levantamientos.length > 0) {
+              this.existenAportesEnRevision = true;
+            }
+            this.aportesEnRevision = data.levantamientos;
+            break;
+
+          default:
+            break;
+        }
+        return data;
+      } catch (err) {
+        console.error('Error obteniendo aportes por status:', err);
       }
     },
   };
