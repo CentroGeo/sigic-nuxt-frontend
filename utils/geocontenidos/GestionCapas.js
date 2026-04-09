@@ -124,7 +124,7 @@ export class GestionCapas {
   }
 
   get hayCambios() {
-    return this.actualizar.length || this.actualizar.length || this.eliminar.length;
+    return this.actualizar.length || this.almacenar.length || this.eliminar.length;
   }
 }
 

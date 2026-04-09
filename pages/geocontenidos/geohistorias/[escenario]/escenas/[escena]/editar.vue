@@ -137,7 +137,7 @@ const vistaDelMapa = computed(() => {
       </div>
 
       <div class="m-b-4">
-        <label for="descripcion"> Contenido de la escena </label>
+        <label for="descripcion">Contenido de la escena</label>
         <textarea
           id="descripcion"
           v-model="formulario.text_content"

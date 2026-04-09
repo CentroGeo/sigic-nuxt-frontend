@@ -133,14 +133,17 @@ function Eliminar(id) {
                 class="boton boton-chico boton-secundario"
                 :to="`/geocontenidos/geohistorias/${escenario}/escenas/${escena.id}/capas`"
               >
-                <span class="pictograma-agregar m-r-1" />
-                Agregar capas
+                <span :class="`pictograma-${escena.layers.length ? 'editar' : 'agregar'} m-r-1`" />
+                {{ escena.layers.length ? 'Editar' : 'Agregar' }} capas
               </NuxtLink>
 
-              <button class="boton boton-chico boton-secundario">
-                <span class="pictograma-agregar m-r-1" />
-                Agregar marcadores
-              </button>
+              <NuxtLink
+                class="boton boton-chico boton-secundario"
+                :to="`/geocontenidos/geohistorias/${escenario}/escenas/${escena.id}/marcadores`"
+              >
+                <span :class="`pictograma-${escena.markers.length ? 'editar' : 'agregar'} m-r-1`" />
+                {{ escena.markers.length ? 'Editar' : 'Agregar' }} marcadores
+              </NuxtLink>
 
               <button class="boton boton-chico boton-primario" @click="Eliminar(escena.id)">
                 <span class="pictograma-eliminar m-r-1" />

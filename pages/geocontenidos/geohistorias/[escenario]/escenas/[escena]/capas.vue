@@ -204,7 +204,7 @@ async function guardarCambios() {
   <form @submit.prevent="guardarCambios">
     <GeocontenidosTituloVolver
       :volver="`/geohistorias/${escenario}/escenas`"
-      titulo="Agregar capas"
+      titulo="Agregar/Editar capas"
     />
 
     <!--  -->
