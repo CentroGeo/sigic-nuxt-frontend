@@ -1,4 +1,6 @@
 <script setup>
+import pictogramas from '~/utils/geocontenidos/pictogramas.json';
+
 const { escenario, escena: escenaId } = useRoute().params;
 const { gnoxyFetch } = useGnoxyUrl();
 const config = useRuntimeConfig();
@@ -31,12 +33,13 @@ const nuevaMarca = reactive({
   lng: undefined,
   title: '',
   content: '',
-  icon: 'fas fa-landmark',
+  icon: String.fromCharCode(parseInt(pictogramas['agregar'], 16)),
+  // icon: 'fas fa-landmark',
   // color: '#2563eb',
   color: 'pink',
 });
 
-const marcadores = [
+const marcadores = ref([
   // {
   //   id: 1,
   //   scene: 1,
@@ -51,7 +54,7 @@ const marcadores = [
   //   image_url: null,
   //   options: {},
   // },
-];
+]);
 
 function clickVista({ coordenadas }) {
   nuevaMarca.lat = coordenadas[1];
@@ -62,7 +65,8 @@ function clickVista({ coordenadas }) {
  * Función ejecutada al dar submit en el formulario de la vista
  */
 function guardarCambios() {
-  console.log(toRaw(nuevaMarca));
+  console.table(toRaw(nuevaMarca));
+  marcadores.value.push({ ...nuevaMarca, id: marcadores.value.length });
 }
 </script>
 
@@ -78,7 +82,8 @@ function guardarCambios() {
       <!-- {{ escena.datos.layers }} -->
       <!-- {{ escena.datos }} -->
 
-      <pre>{{ nuevaMarca }}</pre>
+      <pre>{{ marcadores }}</pre>
+      <!-- {{ pictogramas }} -->
     </section>
 
     <GeocontenidosLoader v-if="escena.cargando" />
@@ -104,7 +109,12 @@ function guardarCambios() {
       <div class="columna-8">
         <h3>Marcadores</h3>
 
-        <GeocontenidosPestanias :pestanias="[{ id: 'nuevo', titulo: '+ Nuevo' }]">
+        <GeocontenidosPestanias
+          :pestanias="[
+            { id: 'nuevo', titulo: `+ ${nuevaMarca.title}` },
+            ...marcadores.map((m) => ({ id: m.id, titulo: m.title })),
+          ]"
+        >
           <template #contenido-nuevo>
             <fieldset>
               <label for="titulo">Titulo</label>
@@ -117,14 +127,15 @@ function guardarCambios() {
             </fieldset>
 
             <fieldset>
-              <label for="titulo">Titulo</label>
-              <input id="titulo" v-model="nuevaMarca.title" type="text" required />
-            </fieldset>
-
-            <fieldset>
               <label for="icono">Icono</label>
-              <select id="icono">
-                <option value="left" selected>Casa</option>
+              <select id="icono" v-model="nuevaMarca.icon" required>
+                <option
+                  v-for="pictograma in Object.keys(pictogramas).sort()"
+                  :key="pictograma"
+                  :value="String.fromCharCode(parseInt(pictogramas[pictograma], 16))"
+                >
+                  {{ pictograma.split('-').join(' ') }}
+                </option>
               </select>
             </fieldset>
 

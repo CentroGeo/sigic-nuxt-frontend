@@ -16,6 +16,8 @@ defineProps({
 });
 
 defineEmits(['clickVista']);
+
+const icono = 16;
 </script>
 
 <template>
@@ -55,28 +57,33 @@ defineEmits(['clickVista']);
           })),
         }"
         :posicion="capas.length + 1"
-        :estilo="{
-          'icono-anchura': 32,
-          'icono-altura': 32,
-          'icono-fuente': `${config.public.baseURL}${config.public.basePath}/img/localizacion.svg`,
-        }"
+        :estilo="[
+          {
+            // triangulo
+            'forma-angulo': Math.PI / 1,
+            'forma-desplazamiento': [0, icono],
+            'forma-relleno-color': ['get', 'color'],
+            'forma-puntos': 3,
+            'forma-radio': icono,
+          },
+          {
+            // circulo
+            'circulo-desplazamiento': [0, icono * 2],
+            'circulo-relleno-color': ['get', 'color'],
+            'circulo-radio': icono,
+          },
+          {
+            // pictograma
+            'circulo-desplazamiento': [0, icono * 2],
+            'circulo-relleno-color': 'white',
+            'circulo-radio': icono - icono / 4,
+            'texto-relleno-color': ['get', 'color'],
+            'texto-tipografia': `${icono + icono / 4}px sisdai-pictogramas`,
+            'texto-desplazar_en-y': -(icono * 2) + 1,
+            'texto-valor': ['get', 'icon'],
+          },
+        ]"
       />
-      <!-- 
-        :fuente="{
-          type: 'FeatureCollection',
-          features: [
-            {
-              type: 'Feature',
-              properties: { id: 0, img: 'url' },
-              geometry: {
-                type: 'Point',
-                // coordinates: [-100.87976758760212, 20.754629042101435],
-                coordinates: [-101.25802689601808, 19.734229412412127],
-              },
-            },
-          ],
-        }"
-         -->
     </SisdaiMapa>
   </ClientOnly>
 </template>
