@@ -1,4 +1,7 @@
 <script setup>
+import { resourceTypeDic } from '~/utils/consulta';
+import SelectedLayer from '~/utils/consulta/SelectedLayer';
+
 definePageMeta({
   middleware: 'sidebase-auth',
   bodyAttrs: {
@@ -55,6 +58,20 @@ function tipoRecurso(recurso) {
     tipo = isGeometricExtension(recurso.extent) ? 'Capa Geográfica' : 'Datos Tabulados';
   }
   return tipo;
+}
+
+/**
+ * Navega al visualizador con el recurso remoto seleccionado
+ * @param recurso
+ */
+async function verRecurso(recurso) {
+  useSelectedResources2Store().reset();
+  useSelectedResources2Store().add(
+    new SelectedLayer({ pk: recurso.pk }),
+    recurso.default_style || null,
+    resourceTypeDic.dataLayer
+  );
+  await navigateTo('/consulta/capas');
 }
 
 /**Redirecciona */
@@ -167,8 +184,13 @@ onMounted(() => {
               <tbody>
                 <tr v-for="resource in importedResources" :key="resource.pk">
                   <td>
-                    <!--                  <nuxt-link @click="openResourceView(value)">{{ value.title }}</nuxt-link>-->
-                    {{ resource.title }}
+                    <button
+                      class="boton-sin-contenedor-secundario texto-color-acento"
+                      type="button"
+                      @click="verRecurso(resource)"
+                    >
+                      {{ resource.title }}
+                    </button>
                   </td>
                   <td>{{ resource.raw_abstract }}</td>
                   <td>{{ tipoRecurso(resource) }}</td>
