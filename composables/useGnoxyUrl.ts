@@ -17,7 +17,7 @@ export function useGnoxyUrl() {
 
   return {
     gnoxyUrl,
-    gnoxyFetch: (url: string) => {
+    gnoxyFetch: (url: string, params: object = {}) => {
       const event = useRequestEvent();
 
       const finalUrl = gnoxyUrl(url);
@@ -27,11 +27,11 @@ export function useGnoxyUrl() {
         const host = event.node.req.headers.host;
         const proto = event.node.req.headers['x-forwarded-proto'] || 'http';
 
-        return fetch(`${proto}://${host}${finalUrl}`);
+        return fetch(`${proto}://${host}${finalUrl}`, params);
       }
 
       // 🔵 CLIENTE
-      return fetch(finalUrl);
+      return fetch(finalUrl, params);
     },
   };
 }

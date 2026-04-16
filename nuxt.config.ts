@@ -66,7 +66,7 @@ export default defineNuxtConfig({
     '@vueuse/nuxt',
   ],
 
-  css: ['@centrogeomx/sisdai-css/dist/sisdai.min.css'],
+  css: ['@centrogeomx/sisdai-css/dist/sisdai.min.css', '@vueup/vue-quill/dist/vue-quill.snow.css'],
 
   auth: {
     debug: !isDev,
