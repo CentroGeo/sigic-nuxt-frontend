@@ -56,7 +56,7 @@ const ruta = '/geocontenidos';
                     },
                     {
                       nombre: 'Tableros de datos',
-                      // ruta: '/geocontenidos/tableros-datos',
+                      ruta: `${ruta}/tableros`,
                     },
                     {
                       nombre: 'Micrositios',
