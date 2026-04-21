@@ -17,3 +17,9 @@ const content = defineModel({
     />
   </ClientOnly>
 </template>
+
+<style lang="scss">
+.ql-container.ql-snow {
+  height: 148px;
+}
+</style>

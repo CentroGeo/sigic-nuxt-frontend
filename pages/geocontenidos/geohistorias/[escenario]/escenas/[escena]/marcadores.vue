@@ -1,4 +1,7 @@
 <script setup>
+import { valoresPorDefecto as valoresModal } from '~/components/geocontenidos/loaderModal.vue';
+import { wait } from '~/utils/consulta';
+import { GestionMarcadores } from '~/utils/geocontenidos/GestionMarcadores';
 import pictogramas from '~/utils/geocontenidos/pictogramas.json';
 
 const { escenario, escena: escenaId } = useRoute().params;
@@ -6,12 +9,14 @@ const { gnoxyFetch } = useGnoxyUrl();
 const config = useRuntimeConfig();
 
 /**
- *
+ * Guarda los datos de la escena y su estado de carga
  */
 const escena = reactive({
   cargando: false,
   datos: {},
+  idMarcadorActivo: null,
 });
+const gMarcadores = reactive(new GestionMarcadores());
 
 /**
  * Realiza la consulta de la escena
@@ -21,52 +26,85 @@ async function consultarEscena() {
   const respuesta = await gnoxyFetch(`${config.public.geonodeApi}/scenes/${escenaId}`);
 
   const datos = await respuesta.json();
-  Object.assign(escena.datos, datos);
+  escena.datos = datos;
+  escena.idMarcadorActivo = String(datos.markers?.[0]?.id);
+  gMarcadores.almacenados = datos.markers;
+  delete escena.datos.markers;
 
   escena.cargando = false;
 }
 consultarEscena();
 
-const nuevaMarca = reactive({
-  scene: escenaId,
-  lat: undefined,
-  lng: undefined,
-  title: '',
-  content: '',
-  icon: String.fromCharCode(parseInt(pictogramas['agregar'], 16)),
-  // icon: 'fas fa-landmark',
-  // color: '#2563eb',
-  color: 'pink',
-});
+function crearMarca() {
+  const nuevaMarca = {
+    id: `nuevo-${Date.now()}`,
+    scene: escenaId,
+    lat: undefined,
+    lng: undefined,
+    title: 'Nuevo marcador',
+    content: '',
+    icon: String.fromCharCode(parseInt(pictogramas['ayuda'], 16)),
+    color: 'pink',
+  };
+  gMarcadores.almacenar.push(nuevaMarca);
+  escena.idMarcadorActivo = nuevaMarca.id;
+}
 
-const marcadores = ref([
-  // {
-  //   id: 1,
-  //   scene: 1,
-  //   // lat: '19.4326000000',
-  //   // lng: '-99.1332000000',
-  //   lat: 19.734229412412127,
-  //   lng: -101.25802689601808,
-  //   title: 'Zócalo CDMX',
-  //   content: '<p>Centro histórico</p>',
-  //   icon: 'fas fa-landmark',
-  //   color: '#2563eb',
-  //   image_url: null,
-  //   options: {},
-  // },
-]);
+const modal = reactive({ ...valoresModal });
 
 function clickVista({ coordenadas }) {
-  nuevaMarca.lat = coordenadas[1];
-  nuevaMarca.lng = coordenadas[0];
+  gMarcadores.byId(escena.idMarcadorActivo).lat = coordenadas[1].toFixed(10);
+  gMarcadores.byId(escena.idMarcadorActivo).lng = coordenadas[0].toFixed(10);
+}
+
+async function API(url, method = 'POST', body = {}) {
+  const respuesta = await gnoxyFetch(`${config.public.geonodeApi}/scene-markers/${url}`, {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+  return await respuesta.json();
+}
+
+function mostrarError({ errors }) {
+  modal.cargando = false;
+  modal.titulo = 'Error';
+  modal.pictograma = 'cerrar';
+  modal.mensaje = errors.join(` `);
+  modal.permitirCerrar = true;
 }
 
 /**
  * Función ejecutada al dar submit en el formulario de la vista
  */
-function guardarCambios() {
-  console.table(toRaw(nuevaMarca));
-  marcadores.value.push({ ...nuevaMarca, id: marcadores.value.length });
+async function guardarCambios() {
+  // console.table(toRaw(nuevaMarca));
+  // marcadores.value.push({ ...nuevaMarca, id: marcadores.value.length });
+  modal.visible = true;
+  modal.cargando = true;
+
+  for await (const marcador of gMarcadores.actualizar) {
+    modal.mensaje = `Actualizando marcador ${marcador.title}`;
+    const datos = await API(`${marcador.id}//`, 'PUT', marcador);
+    if (datos?.success === false) {
+      return mostrarError(datos);
+    }
+  }
+
+  if (gMarcadores.almacenar.length) {
+    modal.mensaje = `Almacenando nuevos marcadores`;
+    const datos = await API(`bulk-add/${escenaId}//`, 'POST', gMarcadores.almacenar);
+    if (datos?.success === false) {
+      return mostrarError(datos);
+    }
+  }
+
+  modal.titulo = 'Guardado con éxito';
+  modal.cargando = false;
+  modal.mensaje = '';
+  await wait(1500);
+  reloadNuxtApp();
 }
 </script>
 
@@ -78,12 +116,13 @@ function guardarCambios() {
         titulo="Agregar/Editar marcadores"
       />
 
-      <p class="m-0">Agrega puntos de interés en el mapa de esta escena.</p>
-      <!-- {{ escena.datos.layers }} -->
-      <!-- {{ escena.datos }} -->
-
-      <pre>{{ marcadores }}</pre>
-      <!-- {{ pictogramas }} -->
+      <p class="m-0">
+        Agrega puntos de interés en el mapa de esta escena.
+        {{ gMarcadores.visualizar.length }} marcador{{
+          gMarcadores.visualizar.length !== 1 ? 'es' : ''
+        }}
+        en esta escena.
+      </p>
     </section>
 
     <GeocontenidosLoader v-if="escena.cargando" />
@@ -101,34 +140,79 @@ function guardarCambios() {
             centro: [escena.datos.map_center_long, escena.datos.map_center_lat],
           }"
           :capas="escena.datos.layers"
-          :marcadores="[...marcadores, nuevaMarca]"
+          :marcadores="gMarcadores.visualizar"
           @click-vista="clickVista"
         />
+        <!-- :marcadores="[...marcadores, nuevaMarca]" -->
+
+        <div class="flex flex-contenido-separado" style="gap: 0">
+          <fieldset class="columna-8">
+            <label for="lng">Longitud</label>
+            <input
+              id="lng"
+              v-model="gMarcadores.byId(escena.idMarcadorActivo).lng"
+              type="number"
+              step="any"
+              max="180"
+              min="-180"
+              required
+            />
+          </fieldset>
+
+          <fieldset class="columna-8">
+            <label for="lat">Latitud</label>
+            <input
+              id="lat"
+              v-model="gMarcadores.byId(escena.idMarcadorActivo).lat"
+              type="number"
+              step="any"
+              max="90"
+              min="-90"
+              required
+            />
+          </fieldset>
+        </div>
       </div>
 
       <div class="columna-8">
-        <h3>Marcadores</h3>
+        <div class="flex flex-contenido-separado" style="align-items: center">
+          <h3>Marcadores</h3>
+
+          <button
+            type="button"
+            class="boton-primario boton-chico"
+            style="height: fit-content"
+            @click="crearMarca"
+          >
+            Agregar
+            <span class="pictograma-agregar" aria-hidden="true" />
+          </button>
+        </div>
+        <!-- <h3>Marcadores</h3> -->
 
         <GeocontenidosPestanias
-          :pestanias="[
-            { id: 'nuevo', titulo: `+ ${nuevaMarca.title}` },
-            ...marcadores.map((m) => ({ id: m.id, titulo: m.title })),
-          ]"
+          :pestanias="gMarcadores.visualizar.map((m) => ({ id: String(m.id), titulo: m.title }))"
+          :id-seleccion="String(escena.idMarcadorActivo)"
+          @al-actualizar-seleccion="(id) => (escena.idMarcadorActivo = id)"
         >
-          <template #contenido-nuevo>
+          <template
+            v-for="marcador in gMarcadores.visualizar"
+            #[`contenido-${marcador.id}`]
+            :key="`pestania-contenido-${marcador.id}`"
+          >
             <fieldset>
               <label for="titulo">Titulo</label>
-              <input id="titulo" v-model="nuevaMarca.title" type="text" required />
+              <input id="titulo" v-model="marcador.title" type="text" required />
             </fieldset>
 
             <fieldset>
               <label>Descripción</label>
-              <GeocontenidosEditor v-model="nuevaMarca.content" />
+              <GeocontenidosEditor v-model="marcador.content" />
             </fieldset>
 
             <fieldset>
               <label for="icono">Icono</label>
-              <select id="icono" v-model="nuevaMarca.icon" required>
+              <select id="icono" v-model="marcador.icon" required>
                 <option
                   v-for="pictograma in Object.keys(pictogramas).sort()"
                   :key="pictograma"
@@ -141,7 +225,7 @@ function guardarCambios() {
 
             <fieldset>
               <label for="color">Color del marcador</label>
-              <input id="color" v-model="nuevaMarca.color" type="color" required />
+              <input id="color" v-model="marcador.color" type="color" required />
             </fieldset>
           </template>
         </GeocontenidosPestanias>
@@ -156,10 +240,34 @@ function guardarCambios() {
         Volver
       </NuxtLink>
 
-      <button class="boton-secundario" disabled>Restablecer</button>
+      <input
+        class="boton-secundario"
+        :disabled="!gMarcadores.hayCambios"
+        type="reset"
+        value="Restablecer"
+      />
 
-      <input type="submit" class="boton-primario" value="Guardar" />
+      <input
+        type="submit"
+        class="boton-primario"
+        value="Guardar"
+        :disabled="!gMarcadores.hayCambios"
+      />
     </section>
+
+    <GeocontenidosLoaderModal v-bind="modal" />
+    <!-- <hr />
+    id {{ escena.idMarcadorActivo }}: {{ gMarcadores.byId(escena.idMarcadorActivo) }}
+    <hr />
+    almacenadas: {{ gMarcadores.almacenados }}
+    <hr />
+    <b>actualizar:</b> {{ gMarcadores.actualizar }}
+    <hr />
+    <b>almacenar:</b> {{ gMarcadores.almacenar }} -->
+    <!-- 
+    <hr />
+    <b>eliminar:</b> {{ gMarcadores.eliminar }}
+      -->
   </form>
 </template>
 

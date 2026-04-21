@@ -20,7 +20,7 @@ const { baseURL, basePath } = config.public;
       :to="`${baseURL}${basePath}/geocontenidos${volver}`"
       class="boton boton-secundario boton-chico"
     >
-      <span class="pictograma-flecha-izquierda m-r-1" />
+      <span class="pictograma-flecha-izquierda m-r-1" aria-hidden="true" />
     </NuxtLink>
 
     <h2 class="m-0">{{ titulo }}</h2>
