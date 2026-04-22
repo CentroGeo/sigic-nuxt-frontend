@@ -23,7 +23,7 @@ const estatusAlGuardar = reactive({
 });
 const formulario = reactive({
   name: '',
-  text_content: '<h2>Título</h2><p>Contenido HTML...</p>',
+  text_content: '',
   scenario: escenario,
   text_position: '',
   map_center_lat: null,
@@ -137,13 +137,14 @@ const vistaDelMapa = computed(() => {
       </div>
 
       <div class="m-b-4">
-        <label for="descripcion">Contenido de la escena</label>
-        <textarea
+        <label>Contenido de la escena</label>
+        <GeocontenidosEditor v-model="formulario.text_content" />
+        <!-- <textarea
           id="descripcion"
           v-model="formulario.text_content"
           placeholder="Escribe el contenido narrativo de la escena"
           required
-        />
+        /> -->
       </div>
 
       <div class="m-b-4">
@@ -170,7 +171,10 @@ const vistaDelMapa = computed(() => {
             </ul>
           </template>
 
-          <SisdaiCapaXyz :posicion="0" />
+          <SisdaiCapaXyz
+            :posicion="0"
+            fuente="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+          />
         </SisdaiMapa>
       </ClientOnly>
     </section>

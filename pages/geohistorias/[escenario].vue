@@ -60,6 +60,7 @@ async function redirigir(escenaId) {
       />
 
       <NuxtPage
+        :titulo="escenario.datos.name"
         :style="`--ancho-panel-texto: ${escenario.datos.scenes_layout_styles.text_panel}%`"
       />
 

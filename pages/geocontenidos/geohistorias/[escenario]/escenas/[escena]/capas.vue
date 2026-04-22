@@ -220,7 +220,6 @@ async function guardarCambios() {
 
       <input type="submit" class="boton-primario" value="Guardar" :disabled="!gCapas.hayCambios" />
     </section>
-    <!--  -->
 
     <!-- <hr />
     almacenadas: {{ gCapas.almacenadas_ }}
@@ -246,7 +245,7 @@ async function guardarCambios() {
       <div class="columna-10">
         <h3>Buscar y Agregar capas</h3>
 
-        <div style="background-color: antiquewhite">Buscador {{ gCapas.categoria }}</div>
+        <!-- <div style="background-color: antiquewhite">Buscador {{ gCapas.categoria }}</div> -->
 
         <div class="flex">
           <ul class="columna-6 lista-sin-estilo lista-categorias">
@@ -359,13 +358,13 @@ async function guardarCambios() {
                 />
               </button>
 
-              <button
+              <!-- <button
                 aria-label=""
                 type="button"
                 class="boton-pictograma boton-sin-contenedor-secundario"
               >
                 <span class="pictograma-editar" aria-hidden="true" />
-              </button>
+              </button> -->
               <button
                 aria-label=""
                 type="button"
@@ -381,6 +380,18 @@ async function guardarCambios() {
                 <span class="pictograma-bajar-capa" aria-hidden="true" />
               </button>
             </div>
+
+            <fieldset class="m-b-0">
+              <label for="opacidad">Opacidad</label>
+              <input
+                id="opacidad"
+                v-model.number="capa.opacity"
+                type="range"
+                min="0"
+                max="1"
+                step="0.1"
+              />
+            </fieldset>
           </li>
         </ul>
       </div>

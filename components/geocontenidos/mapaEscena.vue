@@ -23,7 +23,10 @@ const icono = 16;
 <template>
   <ClientOnly>
     <SisdaiMapa class="gema" :vista="vista" @click-vista="(e) => $emit('clickVista', e)">
-      <SisdaiCapaXyz :posicion="0" />
+      <SisdaiCapaXyz
+        fuente="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+        :posicion="0"
+      />
 
       <SisdaiCapaWms
         v-for="capa in capas"

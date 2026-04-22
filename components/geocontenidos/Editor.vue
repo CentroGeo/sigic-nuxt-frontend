@@ -13,7 +13,7 @@ const content = defineModel({
       v-model:content="content"
       theme="snow"
       content-type="html"
-      placeholder="Escribe el contenido narrativo del marcador"
+      placeholder="Escribe el contenido narrativo"
     />
   </ClientOnly>
 </template>

@@ -1,7 +1,11 @@
 <script setup>
 const { gnoxyFetch } = useGnoxyUrl();
 const config = useRuntimeConfig();
-const { escenario, escena: escenaId } = useRoute().params;
+const { /* escenario, */ escena: escenaId } = useRoute().params;
+
+defineProps({
+  titulo: { type: String, default: () => '' },
+});
 
 /**
  *
@@ -44,14 +48,19 @@ consultarEscena();
         />
       </div>
 
-      <div class="panel-texto p-3">
-        <h1 class="m-t-2">{{ escena.datos.name }}</h1>
+      <div class="panel-texto p-4">
+        <h1 class="m-t-0 m-b-8">{{ titulo }}</h1>
 
-        <p>
-          {{ { escenario, escena } }}
-        </p>
+        <h2 class="m-t-2">{{ escena.datos.name }}</h2>
 
-        <div>Paginador</div>
+        <!-- eslint-disable vue/no-v-html -->
+        <p v-html="escena.datos.text_content" />
+
+        <!-- <p>
+          {{ escena.datos }}
+        </p> -->
+
+        <!-- <div>Paginador</div> -->
       </div>
 
       <div
@@ -77,7 +86,7 @@ consultarEscena();
   gap: 0;
 
   .panel-texto {
-    height: calc(100vh - 100px - 51px);
+    height: inherit;
     width: var(--ancho-panel-texto);
     overflow-y: auto;
   }
