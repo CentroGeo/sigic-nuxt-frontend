@@ -1,4 +1,7 @@
 <script setup>
+import { valoresPorDefecto as valoresModal } from '~/components/geocontenidos/loaderModal.vue';
+import { wait } from '~/utils/consulta';
+
 const { gnoxyFetch } = useGnoxyUrl();
 const config = useRuntimeConfig();
 const { data: userData } = useAuth();
@@ -57,8 +60,50 @@ async function guardarCambios() {
   console.log(data);
 }
 
-function Eliminar(id) {
-  console.log('Eliminar', id);
+const { geonodeApi } = config.public;
+async function API(endPoint, method = 'GET', body = {}) {
+  const parametros = {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+  };
+
+  if (method !== 'GET' && method !== 'DELETE') {
+    parametros.body = JSON.stringify(body);
+  }
+
+  const respuesta = await gnoxyFetch(`${geonodeApi}/${endPoint}`, parametros);
+
+  if (method === 'DELETE' && respuesta.ok) {
+    return { success: true };
+  }
+
+  return await respuesta.json();
+}
+
+const modal = reactive({ ...valoresModal });
+function mostrarError({ errors }) {
+  modal.cargando = false;
+  modal.titulo = 'Error';
+  modal.pictograma = 'cerrar';
+  modal.mensaje = errors.join(` `);
+  modal.permitirCerrar = true;
+}
+async function Eliminar(id) {
+  modal.visible = true;
+  modal.cargando = true;
+
+  modal.mensaje = `Eliminando escena...`;
+
+  const datos = await API(`scenes/${id}/`, 'DELETE');
+  if (datos?.success === false) {
+    return mostrarError(datos);
+  }
+
+  modal.titulo = 'Guardado con éxito';
+  modal.cargando = false;
+  modal.mensaje = '';
+  await wait(1500);
+  reloadNuxtApp();
 }
 </script>
 
@@ -158,6 +203,8 @@ function Eliminar(id) {
         <button class="boton-primario" @click="guardarCambios">Guardar orden</button>
       </section>
     </template>
+
+    <GeocontenidosLoaderModal v-bind="modal" />
   </div>
 </template>
 
