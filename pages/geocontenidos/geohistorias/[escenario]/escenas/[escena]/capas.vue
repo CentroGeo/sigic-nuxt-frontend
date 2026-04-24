@@ -201,28 +201,19 @@ async function guardarCambios() {
 </script>
 
 <template>
-  <form @submit.prevent="guardarCambios">
+  <form class="gestor-capas" @submit.prevent="guardarCambios">
     <GeocontenidosTituloVolver
       :volver="`/geohistorias/${escenario}/escenas`"
       titulo="Agregar/Editar capas"
     />
 
-    <!--  -->
-    <section class="flex flex-contenido-final">
-      <NuxtLink
-        :to="`/geocontenidos/geohistorias/${escenario}/escenas`"
-        class="boton boton-secundario"
-      >
-        Volver
-      </NuxtLink>
-
-      <button class="boton-secundario" :disabled="!gCapas.hayCambios">Restablecer</button>
-
-      <input type="submit" class="boton-primario" value="Guardar" :disabled="!gCapas.hayCambios" />
-    </section>
-
-    <!-- <hr />
+    <!--
+    <hr />
     almacenadas: {{ gCapas.almacenadas_ }}
+    <hr />
+    <b>actualizar:</b> {{ gCapas.actualizar }}
+    <hr />
+    <b>almacenar:</b> {{ gCapas.almacenar }}
     <hr />
     seleccionAlmacenadas: {{ gCapas.seleccionAlmacenadas }}
     <hr />
@@ -230,26 +221,25 @@ async function guardarCambios() {
     <hr />
     seleccion: {{ gCapas.seleccion }}
     <hr />
-    <b>almacenar:</b> {{ gCapas.almacenar }}
-    <hr />
-    <b>actualizar:</b> {{ gCapas.actualizar }}
-    <hr />
     <b>eliminar:</b> {{ gCapas.eliminar }}
     <hr />
     eliminarSeleccion: {{ gCapas.eliminarSeleccion }}
-    <hr /> -->
+    <hr />
+    -->
 
     <p class="m-0">Selecciona las capas que deseas agregar a esta escena</p>
 
-    <section class="flex administracion-capas">
-      <div class="columna-10">
-        <h3>Buscar y Agregar capas</h3>
+    <section class="administracion-capas">
+      <div class="a-a espacio-seleccionar">
+        <div class="contenedor-buscador">
+          <h3>Buscar y Agregar capas</h3>
 
-        <!-- <div style="background-color: antiquewhite">Buscador {{ gCapas.categoria }}</div> -->
+          <!-- <div style="background-color: antiquewhite">Buscador {{ gCapas.categoria }}</div> -->
+        </div>
 
-        <div class="flex">
-          <ul class="columna-6 lista-sin-estilo lista-categorias">
-            <h4>Categorías</h4>
+        <div class="contenedor-catalog">
+          <div class="lista-categorias lista-sin-estilo">
+            <h4 class="titulo-lista m-t-0">Categorías</h4>
 
             <GeocontenidosLoader v-if="categorias.cargando" />
 
@@ -257,7 +247,7 @@ async function guardarCambios() {
               v-for="[identifier, nombre] in gCapas.categoriasOrdenadas"
               v-else
               :key="`categoria-${identifier}`"
-              class="fondo-color-acento borde-redondeado-8"
+              class="fondo-color-acento borde-redondeado-8 m-y-1"
             >
               <input
                 :id="`radio-${identifier}`"
@@ -267,10 +257,10 @@ async function guardarCambios() {
               />
               <label :for="`radio-${identifier}`">{{ nombre }}</label>
             </li>
-          </ul>
+          </div>
 
-          <ul class="columna-10 lista-sin-estilo lista-capas">
-            <h4>Capas</h4>
+          <div class="lista-capas lista-sin-estilo">
+            <h4 class="titulo-lista m-t-0">Capas</h4>
 
             <GeocontenidosLoader v-if="categorias.cargandoCapas" />
 
@@ -282,7 +272,7 @@ async function guardarCambios() {
               v-for="(capa, pk) in gCapas.categorias[gCapas.categoria]"
               v-else
               :key="`checkbox-capa-catalogo-${pk}`"
-              class="fondo-color-acento borde-redondeado-8"
+              class="fondo-color-acento borde-redondeado-8 m-y-1"
             >
               <input
                 :id="`checkbox-capa-catalogo-${pk}`"
@@ -295,12 +285,12 @@ async function guardarCambios() {
                 {{ capa.title }}
               </label>
             </li>
-          </ul>
+          </div>
         </div>
       </div>
 
-      <div class="columna-6">
-        <h3>Capas en esta escena</h3>
+      <div class="espacio-seleccionado">
+        <h3 class="titulo-lista m-t-0">Capas en esta escena</h3>
 
         <ul class="lista-sin-estilo lista-capas">
           <GeocontenidosLoader v-if="capasAlmacenadas.cargando" />
@@ -336,7 +326,7 @@ async function guardarCambios() {
               </select>
             </fieldset> -->
 
-            <div class="flex flex-contenido-final">
+            <div class="flex flex-contenido-final m-t-2">
               <button
                 aria-label="Eliminar selección"
                 type="button"
@@ -365,7 +355,7 @@ async function guardarCambios() {
               >
                 <span class="pictograma-editar" aria-hidden="true" />
               </button> -->
-              <button
+              <!-- <button
                 aria-label=""
                 type="button"
                 class="boton-pictograma boton-sin-contenedor-secundario"
@@ -378,10 +368,10 @@ async function guardarCambios() {
                 class="boton-pictograma boton-sin-contenedor-secundario"
               >
                 <span class="pictograma-bajar-capa" aria-hidden="true" />
-              </button>
+              </button> -->
             </div>
 
-            <fieldset class="m-b-0">
+            <fieldset class="m-t-1 m-b-0">
               <label for="opacidad">Opacidad</label>
               <input
                 id="opacidad"
@@ -397,17 +387,75 @@ async function guardarCambios() {
       </div>
     </section>
 
+    <section class="flex flex-contenido-final m-y-3">
+      <NuxtLink
+        :to="`/geocontenidos/geohistorias/${escenario}/escenas`"
+        class="boton boton-secundario"
+      >
+        Volver
+      </NuxtLink>
+
+      <!-- <button class="boton-secundario" :disabled="!gCapas.hayCambios">Restablecer</button> -->
+
+      <input type="submit" class="boton-primario" value="Guardar" :disabled="!gCapas.hayCambios" />
+    </section>
+
     <GeocontenidosLoaderModal v-bind="modal" />
   </form>
 </template>
 
 <style lang="scss" scoped>
 .administracion-capas {
-  .lista-categorias,
-  .lista-capas {
-    label {
-      width: 100%;
+  max-height: 60vh;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+  gap: 1rem;
+
+  .espacio-seleccionar,
+  .espacio-seleccionado {
+    overflow: hidden;
+  }
+
+  /* 4. Div A.A (Izquierda dividida) */
+  .espacio-seleccionar {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+
+    .contenedor-buscador {
+      flex-shrink: 0; /* No se reduce, mantiene su altura */
     }
+
+    .contenedor-catalog {
+      flex-grow: 1; /* Ocupa el resto del alto de a-a */
+      display: flex;
+      flex-direction: row; /* Listas lado a lado */
+      overflow: hidden; /* Para que las listas no desborden */
+      gap: 1rem;
+
+      .lista-categorias,
+      .lista-capas {
+        flex: 1;
+        overflow-y: auto;
+
+        label {
+          width: 100%;
+        }
+      }
+    }
+  }
+
+  .espacio-seleccionado {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .titulo-lista {
+    position: sticky;
+    top: 0;
+    background: var(--fondo);
+    z-index: 9;
   }
 }
 </style>
