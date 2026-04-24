@@ -7,6 +7,7 @@ import pictogramas from '~/utils/geocontenidos/pictogramas.json';
 const { escenario, escena: escenaId } = useRoute().params;
 const { gnoxyFetch } = useGnoxyUrl();
 const config = useRuntimeConfig();
+const { geonodeApi } = config.public;
 
 /**
  * Guarda los datos de la escena y su estado de carga
@@ -18,16 +19,38 @@ const escena = reactive({
 });
 const gMarcadores = reactive(new GestionMarcadores());
 
+async function API(endPoint, method = 'GET', body = {}) {
+  // urlBase = `${geonodeApi}/scene-markers`
+  const parametros = {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+  };
+
+  if (method !== 'GET') {
+    parametros.body = JSON.stringify(body);
+  }
+
+  const respuesta = await gnoxyFetch(`${geonodeApi}/${endPoint}`, parametros);
+
+  return await respuesta.json();
+}
+
+function idMarcadorActivoValido(id) {
+  return id !== undefined && id !== null ? String(id) : undefined;
+}
+
 /**
  * Realiza la consulta de la escena
  */
 async function consultarEscena() {
   escena.cargando = true;
-  const respuesta = await gnoxyFetch(`${config.public.geonodeApi}/scenes/${escenaId}`);
+  // const respuesta = await gnoxyFetch(`${config.public.geonodeApi}/scenes/${escenaId}`);
 
-  const datos = await respuesta.json();
+  // const datos = await respuesta.json();
+  const datos = await API(`scenes/${escenaId}`);
+
   escena.datos = datos;
-  escena.idMarcadorActivo = String(datos.markers?.[0]?.id);
+  escena.idMarcadorActivo = idMarcadorActivoValido(datos.markers?.[0]?.id);
   gMarcadores.almacenados = datos.markers;
   delete escena.datos.markers;
 
@@ -47,24 +70,17 @@ function crearMarca() {
     color: 'pink',
   };
   gMarcadores.almacenar.push(nuevaMarca);
-  escena.idMarcadorActivo = nuevaMarca.id;
+  escena.idMarcadorActivo = idMarcadorActivoValido(nuevaMarca.id);
 }
 
 const modal = reactive({ ...valoresModal });
 
 function clickVista({ coordenadas }) {
+  if (!escena.idMarcadorActivo) {
+    crearMarca();
+  }
   gMarcadores.byId(escena.idMarcadorActivo).lat = coordenadas[1].toFixed(10);
   gMarcadores.byId(escena.idMarcadorActivo).lng = coordenadas[0].toFixed(10);
-}
-
-async function API(url, method = 'POST', body = {}) {
-  const respuesta = await gnoxyFetch(`${config.public.geonodeApi}/scene-markers/${url}`, {
-    method,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-
-  return await respuesta.json();
 }
 
 function mostrarError({ errors }) {
@@ -86,7 +102,7 @@ async function guardarCambios() {
 
   for await (const marcador of gMarcadores.actualizar) {
     modal.mensaje = `Actualizando marcador ${marcador.title}`;
-    const datos = await API(`${marcador.id}//`, 'PUT', marcador);
+    const datos = await API(`scene-markers/${marcador.id}//`, 'PUT', marcador);
     if (datos?.success === false) {
       return mostrarError(datos);
     }
@@ -94,7 +110,7 @@ async function guardarCambios() {
 
   if (gMarcadores.almacenar.length) {
     modal.mensaje = `Almacenando nuevos marcadores`;
-    const datos = await API(`bulk-add/${escenaId}//`, 'POST', gMarcadores.almacenar);
+    const datos = await API(`scene-markers/bulk-add/${escenaId}//`, 'POST', gMarcadores.almacenar);
     if (datos?.success === false) {
       return mostrarError(datos);
     }
@@ -127,7 +143,7 @@ async function guardarCambios() {
 
     <GeocontenidosLoader v-if="escena.cargando" />
 
-    <section v-else class="flex">
+    <section v-else class="flex m-b-3">
       <div class="columna-8">
         <h3>Mapa interactivo</h3>
 
@@ -143,9 +159,8 @@ async function guardarCambios() {
           :marcadores="gMarcadores.visualizar"
           @click-vista="clickVista"
         />
-        <!-- :marcadores="[...marcadores, nuevaMarca]" -->
 
-        <div class="flex flex-contenido-separado" style="gap: 0">
+        <div v-if="escena.idMarcadorActivo" class="flex flex-contenido-separado" style="gap: 0">
           <fieldset class="columna-8">
             <label for="lng">Longitud</label>
             <input
@@ -188,7 +203,6 @@ async function guardarCambios() {
             <span class="pictograma-agregar" aria-hidden="true" />
           </button>
         </div>
-        <!-- <h3>Marcadores</h3> -->
 
         <GeocontenidosPestanias
           :pestanias="gMarcadores.visualizar.map((m) => ({ id: String(m.id), titulo: m.title }))"
@@ -240,12 +254,12 @@ async function guardarCambios() {
         Volver
       </NuxtLink>
 
-      <input
+      <!-- <input
         class="boton-secundario"
         :disabled="!gMarcadores.hayCambios"
-        type="reset"
+        type="button"
         value="Restablecer"
-      />
+      /> -->
 
       <input
         type="submit"
@@ -256,18 +270,23 @@ async function guardarCambios() {
     </section>
 
     <GeocontenidosLoaderModal v-bind="modal" />
-    <!-- <hr />
+    <!--
+    <hr />
+    {{ toRaw(escena) }}
+    <hr />
+    {{ gMarcadores }}
+    <hr />
     id {{ escena.idMarcadorActivo }}: {{ gMarcadores.byId(escena.idMarcadorActivo) }}
     <hr />
     almacenadas: {{ gMarcadores.almacenados }}
     <hr />
     <b>actualizar:</b> {{ gMarcadores.actualizar }}
     <hr />
-    <b>almacenar:</b> {{ gMarcadores.almacenar }} -->
-    <!-- 
+    <b>almacenar:</b> {{ gMarcadores.almacenar }}
     <hr />
     <b>eliminar:</b> {{ gMarcadores.eliminar }}
-      -->
+    <hr />
+    -->
   </form>
 </template>
 

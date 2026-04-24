@@ -45,6 +45,7 @@ consultarEscena();
             centro: [escena.datos.map_center_long, escena.datos.map_center_lat],
           }"
           :capas="escena.datos.layers"
+          :marcadores="escena.datos.markers"
         />
       </div>
 
@@ -73,6 +74,7 @@ consultarEscena();
             centro: [escena.datos.map_center_long, escena.datos.map_center_lat],
           }"
           :capas="escena.datos.layers"
+          :marcadores="escena.datos.markers"
         />
       </div>
     </template>
