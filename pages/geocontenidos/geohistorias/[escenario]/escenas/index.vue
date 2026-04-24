@@ -99,7 +99,7 @@ async function Eliminar(id) {
     return mostrarError(datos);
   }
 
-  modal.titulo = 'Guardado con éxito';
+  modal.titulo = 'Eliminado con éxito';
   modal.cargando = false;
   modal.mensaje = '';
   await wait(1500);

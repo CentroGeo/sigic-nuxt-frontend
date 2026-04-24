@@ -1,4 +1,7 @@
 <script setup>
+import { valoresPorDefecto as valoresModal } from '~/components/geocontenidos/loaderModal.vue';
+import { wait } from '~/utils/consulta';
+
 const { gnoxyFetch } = useGnoxyUrl();
 const config = useRuntimeConfig();
 const { status } = useAuth();
@@ -23,6 +26,52 @@ function formatearFecha(fecha) {
     month: 'long',
     day: 'numeric',
   });
+}
+
+const { geonodeApi } = config.public;
+async function API(endPoint, method = 'GET', body = {}) {
+  const parametros = {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+  };
+
+  if (method !== 'GET' && method !== 'DELETE') {
+    parametros.body = JSON.stringify(body);
+  }
+
+  const respuesta = await gnoxyFetch(`${geonodeApi}/${endPoint}`, parametros);
+
+  if (method === 'DELETE' && respuesta.ok) {
+    return { success: true };
+  }
+
+  return await respuesta.json();
+}
+
+const modal = reactive({ ...valoresModal });
+function mostrarError({ errors }) {
+  modal.cargando = false;
+  modal.titulo = 'Error';
+  modal.pictograma = 'cerrar';
+  modal.mensaje = errors.join(` `);
+  modal.permitirCerrar = true;
+}
+async function Eliminar(id) {
+  modal.visible = true;
+  modal.cargando = true;
+
+  modal.mensaje = `Eliminando escenario...`;
+
+  const datos = await API(`scenarios/${id}/`, 'DELETE');
+  if (datos?.success === false) {
+    return mostrarError(datos);
+  }
+
+  modal.titulo = 'Eliminado con éxito';
+  modal.cargando = false;
+  modal.mensaje = '';
+  await wait(1500);
+  reloadNuxtApp();
 }
 </script>
 
@@ -104,11 +153,14 @@ function formatearFecha(fecha) {
                 <span class="pictograma-editar m-r-1" />
                 Editar escenas
               </NuxtLink>
-              <button class="boton boton-chico boton-secundario">
+              <NuxtLink
+                class="boton boton-chico boton-secundario"
+                :to="`/geocontenidos/geohistorias/${escenario.id}/escenas/nuevo/editar`"
+              >
                 <span class="pictograma-agregar m-r-1" />
                 Crear escena
-              </button>
-              <button class="boton boton-chico boton-primario">
+              </NuxtLink>
+              <button class="boton boton-chico boton-primario" @click="Eliminar(escenario.id)">
                 <span class="pictograma-eliminar m-r-1" />
                 Eliminar
               </button>
@@ -121,6 +173,8 @@ function formatearFecha(fecha) {
     <div v-else class="texto-centrado">
       <p class="h3">No hay escenarios disponibles.</p>
     </div>
+
+    <GeocontenidosLoaderModal v-bind="modal" />
   </div>
 </template>
 
