@@ -1,5 +1,5 @@
 <script setup>
-import SisdaiMenuAccesibilidad from '@centrogeomx/sisdai-componentes/src/componentes/menu-accesibilidad/SisdaiMenuAccesibilidad.vue';
+import SisdaiMenuAccesibilidad from '~/components/base/SisdaiMenuAccesibilidad.vue';
 import SisdaiNavegacionGobMx from '@centrogeomx/sisdai-componentes/src/componentes/navegacion-gob-mx/SisdaiNavegacionGobMx.vue';
 import SisdaiPiePaginaGobMx from '@centrogeomx/sisdai-componentes/src/componentes/pie-pagina-gob-mx/SisdaiPiePaginaGobMx.vue';
 import MainNavegacion from '~/components/base/MainNavegacion.vue';
