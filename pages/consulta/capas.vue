@@ -7,8 +7,7 @@ import {
   SisdaiMapa,
   utiles,
 } from '@centrogeomx/sisdai-mapas';
-// eslint-disable-next-line import/no-named-default
-import { default as html2canvas } from 'html2canvas';
+import html2canvas from 'html2canvas';
 import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
 import { arrayNewsOlds, resourceTypeDic } from '~/utils/consulta';
 
@@ -198,24 +197,25 @@ onMounted(async () => {
   }
 });
 
-const sisdaiModal = ref(null);
+const modalDescarga = ref(null);
+const mapaImagen = ref('');
+const tituloDescarga = ref('');
 function AbrirModalDescarga() {
-  // utiles.exportarHTMLComoPNG(
-  //   document.querySelectorAll('.mapa .ol-viewport').item(0),
-  //   linkExportaMapa.value
-  // );
-  sisdaiModal.value.abrirModal();
+  const elemento = document.querySelectorAll('.mapa .ol-viewport').item(0);
+  html2canvas(elemento, { useCORS: true }).then((canvas) => {
+    mapaImagen.value = canvas.toDataURL('image/png');
+    modalDescarga.value.abrirModal();
+  });
 }
 function DescargarMapa() {
-  console.log(html2canvas);
   const elemento = document.querySelectorAll('.mapa-descarga').item(0);
-  console.log(elemento);
   html2canvas(elemento, { useCORS: true }).then((canvas) => {
     const link = linkExportaMapa.value;
     link.href = canvas.toDataURL('image/png');
+    link.download = `${tituloDescarga.value || 'mapa'}.png`;
     link.click();
   });
-  // sisdaiModal?.cerrarModal()
+  modalDescarga.value?.cerrarModal();
 }
 </script>
 
@@ -290,21 +290,37 @@ function DescargarMapa() {
           />
         </SisdaiMapa>
 
-        <SisdaiModal ref="sisdaiModal" tamanio-modal="modal-grande">
+        <SisdaiModal ref="modalDescarga" tamanio-modal="modal-grande">
           <template #encabezado>
             <h1 class="m-t-0">Descargar mapa como imágen</h1>
           </template>
 
           <template #cuerpo>
+            <fieldset>
+              <label for="titulo-mapa-descarga">Titulo de la descarga</label>
+              <input
+                id="titulo-mapa-descarga"
+                v-model="tituloDescarga"
+                type="text"
+                placeholder="Ingrese el título para la descarga"
+              />
+            </fieldset>
+
             <ConsultaMapaDescarga
-              :vista-del-mapa="vistaDelMapa"
               :ows-layers="
                 owsLayers.map((resource) => ({
                   ...resource,
                   fuente: findServer(resource),
+                  lado: storeSelected.byPk(resource.pk).lado,
+                  opacidad: storeSelected.byPk(resource.pk).opacidad,
+                  posicion: storeSelected.byPk(resource.pk).posicion,
+                  visible: storeSelected.byPk(resource.pk).visible,
+                  estilo: storeSelected.byPk(resource.pk).estilo,
                 }))
               "
               :funcion-consulta="gnoxyFetch"
+              :mapa-imagen="mapaImagen"
+              :titulo-descarga="tituloDescarga"
             />
           </template>
 
