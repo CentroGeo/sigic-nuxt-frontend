@@ -5,7 +5,7 @@ import { buildUrl, resourceTypeDic, resourceTypeGeonode } from '~/utils/consulta
 export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => {
   const config = useRuntimeConfig();
   const storeConsulta = useConsultaStore();
-  const storeCatalogo = useCatalogoStore();
+  //const storeCatalogo = useCatalogoStore();
   const { data } = useAuth();
   const userEmail = data.value?.user.email;
 
@@ -182,10 +182,6 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       } else if (section === 'pendientes') {
         queryParams['filter{complete_metadata}'] = 'false';
         queryParams['filter{owner.username}'] = userEmail;
-      } else if (section === 'publicacion') {
-        if (storeCatalogo.userInfo.pk) {
-          queryParams['filter{owner}'] = storeCatalogo.userInfo.pk;
-        }
       }
 
       // Excluimos los servicios usando queryparams

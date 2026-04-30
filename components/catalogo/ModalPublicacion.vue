@@ -94,9 +94,8 @@ async function confirmarSolicitud(cerrarModal) {
   try {
     const { data } = useAuth();
     const token = data.value?.accessToken;
-    const config = useRuntimeConfig();
     // petición para enviar el recurso a la solicitud
-    const response = await $fetch(`${config.public.basePath}/api/requests`, {
+    const response = await $fetch(`/api/requests`, {
       method: 'POST',
       headers: { token: token },
       body: {

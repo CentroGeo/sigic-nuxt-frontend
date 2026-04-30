@@ -533,7 +533,7 @@ onBeforeUnmount(() => {
                   ref="fileInput"
                   type="file"
                   multiple
-                  accept=".shp,.geojson,.csv,.kml,.zip,.pdf,.doc,.docx,.xls,.xlsx"
+                  accept=".shp,.geojson,.csv,.kml,.zip,.pdf,.doc,.docx,.xls,.xlsx,.json"
                   style="display: none"
                   @change="manejarSeleccionArchivos"
                 />
@@ -722,7 +722,7 @@ onBeforeUnmount(() => {
                       <figure class="">
                         <img
                           class="color-invertir"
-                          src="/img/loader.gif"
+                          :src="`${$config.app.baseURL}img/loader.gif`"
                           alt="Loader de SIGIC"
                           height="128px"
                         />
@@ -748,7 +748,7 @@ onBeforeUnmount(() => {
                       <figure class="">
                         <img
                           class="color-invertir"
-                          src="/img/loader.gif"
+                          :src="`${$config.app.baseURL}img/loader.gif`"
                           alt="Loader de SIGIC"
                           height="128px"
                         />
@@ -772,7 +772,7 @@ onBeforeUnmount(() => {
                       >
                         <img
                           class="color-invertir"
-                          src="/img/loader.gif"
+                          :src="`${$config.app.baseURL}img/loader.gif`"
                           alt="Loader de SIGIC"
                           height="64px"
                         />
@@ -854,7 +854,11 @@ onBeforeUnmount(() => {
           <template #cuerpo>
             <div class="flex flex-contenido-centrado">
               <figure>
-                <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
+                <img
+                  class="color-invertir"
+                  :src="`${$config.app.baseURL}img/loader.gif`"
+                  alt="Loader de SIGIC"
+                />
                 <figcaption class="texto-centrado">{{ loaderMsg }}</figcaption>
               </figure>
             </div>

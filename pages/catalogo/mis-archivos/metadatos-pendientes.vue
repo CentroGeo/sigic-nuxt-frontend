@@ -18,6 +18,7 @@ const hayMetaPendiente = computed(() =>
 const haySolicitudesDeAprobacion = computed(() =>
   storeResources.myTotalBySection('publicacion') > 0 ? true : false
 );
+const config = useRuntimeConfig();
 const isLoading = ref(true);
 const totalResources = computed(() => storeResources.myTotalBySection(section));
 const resources = computed(() => storeResources.mineBySection(section));
@@ -54,6 +55,14 @@ function tipoRecurso(recurso) {
   return tipo;
 }
 
+function setActions(recurso) {
+  if (recurso.sourcetype === 'REMOTE') {
+    return 'Editar';
+  } else {
+    return 'Editar, Remover';
+  }
+}
+
 /**Crea el objeto de información como se necesita para esta vista */
 function updateResources() {
   tableResources.value = resources.value.map((d) => ({
@@ -62,7 +71,7 @@ function updateResources() {
     tipo_recurso: tipoRecurso(d),
     categoria: d.category,
     actualizacion: d.last_updated,
-    acciones: 'Editar, Remover',
+    acciones: setActions(d),
     uuid: d.uuid,
     resource_type: d.resource_type,
     extent: d.extent,
@@ -238,7 +247,12 @@ onMounted(async () => {
 
         <!--Si está cargando-->
         <div v-if="isLoading" class="flex flex-contenido-centrado m-t-3 columna-16">
-          <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
+          <img
+            class="color-invertir"
+            :src="`${config.app.baseURL}img/loader.gif`"
+            alt="...Cargando"
+            height="120px"
+          />
         </div>
 
         <!--Cuando no se encontraron resultados que coincidan con la búsqueda-->

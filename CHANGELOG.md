@@ -7,6 +7,81 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 \*Nota: Este Changelog se comenzó el 2025-12-29, cuando el sistema llevaba un avance considerable.
 
+## [0.16.5] - 02-04-2026
+
+### Fixed (Arreglado)
+
+- corrección menor de una variable de entorno
+
+## [0.16.4] - 31-03-2026
+
+### Fixed (Arreglado)
+
+- corrección de login para ghcr
+
+## [0.16.3] - 31-03-2026
+
+### Fixed (Arreglado)
+
+- corrección de repo remoto para tag build and push en el workflow de release
+
+## [0.16.2] - 31-03-2026
+
+### Fixed (Arreglado)
+
+- corrección de versión
+- corrección de permisos de actions
+
+## [0.16.1] - 27-03-2026
+
+### Fixed (Arreglado)
+
+- Se refactorizó nuxt.config.ts para eliminar el uso de baseURL, basePath y variables de entorno relacionadas dinámicas, estableciendo todos los valores relevantes a '/' y eliminando entradas de configuración pública que ya no eran necesarias. Este cambio asegura consistencia en el enrutamiento y la resolución de assets entre distintos entornos.
+- Se actualizaron el Dockerfile y el workflow relacionado de GitHub Actions para eliminar argumentos de build asociados a variables de entorno
+- Se reemplazaron todos los usos de config.public.basePath, config.public.baseURL y variables similares en el código por rutas absolutas (por ejemplo, /api/..., /img/...) para endpoints de API y assets estáticos. Esto afecta múltiples componentes y páginas, incluyendo navegación, catálogo, modales y composables utilitarios.
+- Se agregó un nuevo workflow de GitHub Actions (.github/workflows/sigic-release.yml) para construir y publicar imágenes Docker en GHCR al hacer push de tags, soportando releases automatizados.
+- Se mejoró el composable useGnoxyUrl para resolver correctamente URLs tanto en renderizado del lado del servidor como del cliente, asegurando el manejo adecuado de host y protocolo durante SSR.
+
+## [0.16.0] - 26-03-2026
+
+### Agregado (Added)
+
+- Se agregaron las mini apps para generar reportes, espacializar información y realizar análisis geoespacial.
+- Se instalaron librerías para visualizar documentos de office como pptx, word, excel, pdf.
+- Se subieron imágenes en jpg para representar los diferentes tipos de representación para el análisis geoespacial.
+- Se integró una api para el backend del módulo de ia para las mini apps.
+
+## [0.15.5] - 24-03-2026
+
+### Fixed (Arreglado)
+
+- Se implementó el uso de $fetch en la petición de cambio de avatar.
+- Se eliminó la opción de eliminar un servicio remoto no publicado, pues se identificó que el nombre alternativo con el que se guarda el recurso en geonode no siempre coincide con la información del endpoint de los recursos cosechables asociados a un servicio.
+- Se implementó un estilo para evitar que urls creen un scroll lateral en la sección de importar recursos de un servicio remoto.
+
+## [0.15.4] - 21-03-2026
+
+### Fixed (Arreglado)
+
+- La función cerrarSesion ahora construye el post_logout_redirect_uri utilizando baseURL y basePath desde config.public, asegurando que los usuarios sean redirigidos a la ubicación correcta después de cerrar sesión en Keycloak.
+
+## [0.15.3] - 20-03-2026
+
+### Fixed (Arreglado)
+
+- Se hicieron ajustes en los tamaños del contenedor del mapa en el modal de previsualización para que el scroll vertical afecte únicamente al mapa.
+- Se habilitó el botón de descarga en el modal de previsualización de tablas en la revisión para publicación de capas geográficas.
+- Se corrigieron los filtros de la sección de Mis Revisiones para corregir un bug que hacía que no aparecieran los recursos debidos.
+- Se agregó lógica condicional en el modal de Agregar a mis solicitudes para mostrar una alerta en caso de que falle la petición.
+
+## [0.15.2] - 10-03-2026
+
+### Fixed (Arreglado)
+
+- Se invirtió el orden en el que se hacen las solicitudes de publicación de recursos y permisos. Ahora primero se publican y luego se actualizan los permisos.
+- Se resolvió un pequeño bug en la edición de metadatos que tenía que ver con la ocasional aparición de mayúsculas en el campo de date_type.
+- Se resolvió un bug en el modal de revisión de metadatos que tenía que ver con intentar obtener los atributos de un documento.
+
 ## [0.15.1] - 05-03-2026
 
 ### Fixed (Arreglado)
@@ -320,6 +395,16 @@ y este proyecto se adhiere al [Versionamiento semántico](https://semver.org/spe
 
 ### Primer versionamiento del sistema
 
+[0.16.5]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.16.4...v0.16.5
+[0.16.4]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.16.3...v0.16.4
+[0.16.3]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.16.2...v0.16.3
+[0.16.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.16.1...v0.16.2
+[0.16.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.16.0...v0.16.1
+[0.16.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.5...v0.16.0
+[0.15.5]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.4...v0.15.5
+[0.15.4]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.3...v0.15.4
+[0.15.3]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.2...v0.15.3
+[0.15.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.1...v0.15.2
 [0.15.1]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.15.0...v0.15.1
 [0.15.0]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.14.2...v0.15.0
 [0.14.2]: https://github.com/CentroGeo/sigic-nuxt-frontend/compare/v0.14.1...v0.14.2

@@ -178,7 +178,7 @@ async function openResourceViewTable(resource) {
     resourceFilename.value = resource.filename;
     modalNoPublico.value?.abrirModal();
 
-    console.warn(`El recurso "${resource.filename}" no está público.`);
+    console.warn(`El recurso "${resource.filename}" no se puede previsualizar.`);
   }
 }
 
@@ -521,7 +521,11 @@ watch(
           <template #cuerpo>
             <div v-if="!isDocumentoReading" class="flex flex-contenido-centrado">
               <figure>
-                <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
+                <img
+                  class="color-invertir"
+                  :src="`${$config.app.baseURL}img/loader.gif`"
+                  alt="Loader de SIGIC"
+                />
                 <figcaption class="texto-centrado">Cargando documento</figcaption>
               </figure>
             </div>
@@ -543,7 +547,11 @@ watch(
           <template #cuerpo>
             <div v-if="!isDataTableReading" class="flex flex-contenido-centrado">
               <figure>
-                <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
+                <img
+                  class="color-invertir"
+                  :src="`${$config.app.baseURL}img/loader.gif`"
+                  alt="Loader de SIGIC"
+                />
                 <figcaption class="texto-centrado">Cargando tabla</figcaption>
               </figure>
             </div>
@@ -566,11 +574,8 @@ watch(
             <p
               class="fondo-color-alerta texto-color-alerta borde borde-color-alerta borde-redondeado-8 p-3"
             >
-              El recurso <b class="texto-peso-600">"{{ resourceFilename }}"</b> no está público en
-              geonode.
-              <nuxt-link to="/catalogo/mis-archivos/metadatos-pendientes"
-                >Ver en mis archivos</nuxt-link
-              >
+              El recurso <b class="texto-peso-600">"{{ resourceFilename }}"</b> no se puede
+              previsualizar. ><br />
             </p>
           </template>
 

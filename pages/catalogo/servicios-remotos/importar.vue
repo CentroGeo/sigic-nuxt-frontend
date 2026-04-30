@@ -201,7 +201,12 @@ onMounted(async () => {
 
         <!-- Cargando harvestable resources-->
         <div v-if="fetchingHarvestableResources" class="flex flex-contenido-centrado m-t-5">
-          <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
+          <img
+            class="color-invertir"
+            :src="`${config.app.baseURL}img/loader.gif`"
+            alt="...Cargando"
+            height="120px"
+          />
         </div>
 
         <!-- Recursos cosechables listos -->
@@ -253,7 +258,11 @@ onMounted(async () => {
               class="m-y-2 flex flex-contenido-inicio texto-color-informacion fondo-color-informacion p-1 borde borde-color-informacion borde-redondeado-8"
             >
               <div class="flex-vertical-centrado columna-2">
-                <img src="/img/loader.gif" alt="...Cargando" class="loader color-invertir" />
+                <img
+                  :src="`${config.app.baseURL}img/loader.gif`"
+                  alt="...Cargando"
+                  class="loader color-invertir"
+                />
               </div>
               <p class="columna-14">
                 Estamos importando los recursos. Este proceso puede demorar unos minutos.
@@ -299,7 +308,7 @@ onMounted(async () => {
                       :disabled="status !== 'authenticated'"
                       @change="toggleSelection(value)"
                     />
-                    <label :for="`checkbox-${value.unique_identifier}`">
+                    <label :for="`checkbox-${value.unique_identifier}`" class="break-url">
                       {{ value.unique_identifier }}
                     </label>
                   </td>
@@ -310,7 +319,12 @@ onMounted(async () => {
               </tbody>
             </table>
             <div v-if="isLoadingPage" class="flex flex-contenido-centrado m-y-2">
-              <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="32px" />
+              <img
+                class="color-invertir"
+                :src="`${config.app.baseURL}img/loader.gif`"
+                alt="...Cargando"
+                height="32px"
+              />
             </div>
             <ClientOnly>
               <UiPaginador
@@ -354,5 +368,9 @@ onMounted(async () => {
 .loader {
   max-height: 3em;
   object-fit: scale-down;
+}
+.break-url {
+  word-break: break-all !important;
+  display: inline-block !important;
 }
 </style>

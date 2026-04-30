@@ -48,9 +48,9 @@ async function guardarArchivo(files) {
     let endpoint = null;
 
     if (base_files.some((end) => file.name.endsWith(end))) {
-      endpoint = `${configEnv.public.basePath}/api/cargar-base-file`;
+      endpoint = `${configEnv.app.baseURL}api/cargar-base-file`;
     } else if (docs_files.some((end) => file.name.endsWith(end))) {
-      endpoint = `${configEnv.public.basePath}/api/cargar-doc-file`;
+      endpoint = `${configEnv.app.baseURL}api/cargar-doc-file`;
     } else {
       archivo.estatus = 'error_carga';
       archivo.mensaje = 'Formato no soportado';
@@ -205,7 +205,11 @@ async function monitorLayerImport(executionId, archivo) {
                         v-if="['pendiente', 'procesando'].includes(archivo.estatus)"
                         class="pictograma-de-carga-sigic"
                       >
-                        <img src="/img/loader.gif" alt="cargando" class="color-invertir" />
+                        <img
+                          :src="`${configEnv.app.baseURL}img/loader.gif`"
+                          alt="cargando"
+                          class="color-invertir"
+                        />
                       </span>
                       {{ archivo.nombre }}
                     </p>

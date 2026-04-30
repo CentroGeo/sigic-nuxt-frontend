@@ -71,7 +71,10 @@ onMounted(() => {
                   Aprobado
                 </p>
               </div>
-              <img class="icono-proyecto m-b-minimo color-invertir" src="/img/icono_sigic.png" />
+              <img
+                class="icono-proyecto m-b-minimo color-invertir"
+                :src="`${$config.app.baseURL}img/icono_sigic.png`"
+              />
               <div class="m-b-minimo texto-tamanio-4 nombre-proyecto">
                 <b>{{ proyecto.nombre }}</b>
               </div>

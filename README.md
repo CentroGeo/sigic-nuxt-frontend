@@ -108,7 +108,7 @@ NUXT_PUBLIC_GEOSERVER_URL = <geoserver url de desarrollo>
 # Url del backend de IA
 NUXT_PUBLIC_IA_BACKEND_URL = <Url del back de IA>
 # Url de backend de levantamiento
-NUXT_PUBLIC_LEVANTAMIENTO_URL = <Url del back de levantamiento>
+NUXT_PUBLIC_LEVANTAMIENTO_BACKEND_URL = <Url del back de levantamiento>
 
 NUXT_PUBLIC_BASE_URL = <url de desarrollo>
 NUXT_PUBLIC_AUTH_BASE_URL = http://localhost:3000/api/auth
@@ -155,7 +155,7 @@ NUXT_PUBLIC_GEOSERVER_URL = <geoserver url de producción>
 # Url del backend de IA
 NUXT_PUBLIC_IA_BACKEND_URL = <Url del back de IA>
 # Url de backend de levantamiento
-NUXT_PUBLIC_LEVANTAMIENTO_URL = <Url del back de levantamiento>
+NUXT_PUBLIC_LEVANTAMIENTO_BACKEND_URL = <Url del back de levantamiento>
 
 # Url del proyecto sigic
 NUXT_PUBLIC_BASE_URL = <sigic url de producción>

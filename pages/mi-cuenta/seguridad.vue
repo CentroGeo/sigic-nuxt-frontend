@@ -109,7 +109,12 @@ onMounted(() => {
 
       <!-- Spinner-->
       <div v-if="isLoading" class="flex flex-contenido-centrado m-y-5">
-        <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
+        <img
+          class="color-invertir"
+          :src="`${config.app.baseURL}img/loader.gif`"
+          alt="...Cargando"
+          height="120px"
+        />
       </div>
 
       <!-- Fracasaron las peticiones -->

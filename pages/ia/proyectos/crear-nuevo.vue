@@ -671,7 +671,7 @@ onMounted(() => {
                       <figure class="">
                         <img
                           class="color-invertir"
-                          src="/img/loader.gif"
+                          :src="`${$config.app.baseURL}img/loader.gif`"
                           alt="Loader de SIGIC"
                           height="128px"
                         />
@@ -697,7 +697,7 @@ onMounted(() => {
                       <figure class="">
                         <img
                           class="color-invertir"
-                          src="/img/loader.gif"
+                          :src="`${$config.app.baseURL}img/loader.gif`"
                           alt="Loader de SIGIC"
                           height="128px"
                         />
@@ -721,7 +721,7 @@ onMounted(() => {
                       >
                         <img
                           class="color-invertir"
-                          src="/img/loader.gif"
+                          :src="`${$config.app.baseURL}img/loader.gif`"
                           alt="Loader de SIGIC"
                           height="64px"
                         />
@@ -803,7 +803,11 @@ onMounted(() => {
           <template #cuerpo>
             <div class="flex flex-contenido-centrado">
               <figure>
-                <img class="color-invertir" src="/img/loader.gif" alt="Loader de SIGIC" />
+                <img
+                  class="color-invertir"
+                  :src="`${$config.app.baseURL}img/loader.gif`"
+                  alt="Loader de SIGIC"
+                />
                 <figcaption class="texto-centrado">{{ loaderMsg }}</figcaption>
               </figure>
             </div>

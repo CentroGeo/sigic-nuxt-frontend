@@ -26,7 +26,7 @@ export const catalogosSugeridos = [
     aliquam libero, eget tincidunt est purus sed orci. Donec facilisis, est posuere luctus malesuada, 
     lacus odio auctor purus, sed malesuada mi lacus sed nulla.`,
     etiquetas: 'Etiqueta',
-    tipo: 'OWS',
+    tipo: 'GN_WMS',
     origen: 'mide+',
     origen_url: 'https://mide.monterrey.gob.mx/',
     service_url: 'https://mide.monterrey.gob.mx/geoserver/ows',

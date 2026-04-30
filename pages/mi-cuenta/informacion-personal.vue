@@ -338,24 +338,17 @@ async function guardarImagen(files) {
     formData.append('token', data.value?.accessToken);
     formData.append('image', files[0]);
 
-    const response = await fetch('/api/update-avatar/', {
+    const response = await $fetch('/api/update-avatar/', {
       method: 'POST',
       body: formData,
     });
-
-    if (!response.ok) {
+    if (response === 'Error') {
       didAvatarUpdateFail.value = true;
       isAvatarUpdating.value = false;
     } else {
-      const status = await response.text();
-      if (status === 'Error') {
-        didAvatarUpdateFail.value = true;
-        isAvatarUpdating.value = false;
-      } else {
-        userInfo.value.avatar_url = status;
-        didAvatarUpdateFail.value = false;
-        isAvatarUpdating.value = false;
-      }
+      userInfo.value.avatar_url = response;
+      didAvatarUpdateFail.value = false;
+      isAvatarUpdating.value = false;
     }
   } else {
     dragNdropAvatar.value?.archivoNoValido();
@@ -370,7 +363,12 @@ onMounted(async () => {
   <div>
     <h2>Información personal</h2>
     <div v-if="isLoading" class="flex flex-contenido-centrado m-y-5">
-      <img class="color-invertir" src="/img/loader.gif" alt="...Cargando" height="120px" />
+      <img
+        class="color-invertir"
+        :src="`${config.app.baseURL}img/loader.gif`"
+        alt="...Cargando"
+        height="120px"
+      />
     </div>
     <div v-else-if="!isLoading && failedFetching" class="m-t-2 m-b-2">
       <div
@@ -471,7 +469,7 @@ onMounted(async () => {
           <div v-if="isUpdating" class="m-y-2">
             <div class="flex flex-contenido-centrado">
               <img
-                src="/img/loader.gif"
+                :src="`${config.app.baseURL}img/loader.gif`"
                 class="color-invertir"
                 alt="...Guardando"
                 heigh="160px"
@@ -516,7 +514,7 @@ onMounted(async () => {
           <div v-if="isAvatarUpdating" class="m-y-2">
             <div class="flex flex-contenido-centrado">
               <img
-                src="/img/loader.gif"
+                :src="`${config.app.baseURL}img/loader.gif`"
                 class="color-invertir"
                 alt="...Actualizando Avatar"
                 heigh="160px"

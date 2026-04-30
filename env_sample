@@ -9,7 +9,7 @@ NUXT_PUBLIC_GEONODE_API=https://geonode.dev.geoint.mx/api/v2
 NUXT_PUBLIC_GEONODE_URL=https://geonode.dev.geoint.mx
 NUXT_PUBLIC_GEOSERVER_URL=https://geonode.dev.geoint.mx/gs
 NUXT_PUBLIC_IA_BACKEND_URL=https://sigic.ia.dev.geoint.mx/llmb
-NUXT_PUBLIC_LEVANTAMIENTO_URL=http://localhost:4009
+NUXT_PUBLIC_LEVANTAMIENTO_BACKEND_URL=http://localhost:4009
 
 NUXT_PUBLIC_BASE_URL=http://localhost:3000
 NUXT_PUBLIC_AUTH_BASE_URL=http://localhost:3000/api/auth

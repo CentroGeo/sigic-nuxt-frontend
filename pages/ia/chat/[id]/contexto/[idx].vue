@@ -7,10 +7,28 @@ import SisdaiCampoBusqueda from '@centrogeomx/sisdai-componentes/src/componentes
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
 
+import { SisdaiCapaXyz, SisdaiMapa } from '@centrogeomx/sisdai-mapas';
+import SisdaiCapaVectorial from '@centrogeomx/sisdai-mapas/src/componentes/capa/vectorial/SisdaiCapaVectorial.vue';
+import GloboInformativo from '@centrogeomx/sisdai-mapas/src/componentes/mapa/elementos/info/GloboInformativo.vue';
+
 import DOMPurify from 'dompurify'; // Para seguridad XSS
 import { marked } from 'marked'; // Importar marked para mostrar formato markdown
+//
 
-const { data } = useAuth();
+// módulo para previsualizar
+const VueFilesPreview = defineAsyncComponent(() =>
+  import.meta.client
+    ? import('vue-files-preview').then((m) => {
+        console.log('VueFilesPreview cargado:', m.VueFilesPreview);
+        return m.VueFilesPreview;
+      })
+    : Promise.resolve({ render: () => null })
+);
+const IaPreviewFiles = defineAsyncComponent(
+  () => import('../../../../../components/ia/PreviewFiles.vue')
+);
+
+const { data, refresh } = useAuth();
 const config = useRuntimeConfig();
 
 const storeIA = useIAStore();
@@ -46,7 +64,10 @@ const mensaje = ref('');
 const mensajes = ref([]);
 
 const modalReporteInfo = ref(null);
+const modalTipoOperacionGeo = ref(null);
 const modalReporteInstrucciones = ref(null);
+const modalOperacionGeoespacialInstrucciones = ref(null);
+const modalConfirmaOperacionaGeoespacial = ref(null);
 const modalEspacializarInstrucciones = ref(null);
 const isSubmitting = ref(false);
 
@@ -54,12 +75,101 @@ const chatId = computed(() => parseInt(route.params.id) || 0);
 const contextID = computed(() => parseInt(route.params.idx));
 const chatID = ref(0);
 
+const estiloCapaPreview = computed(() => {
+  const isDensidad = previewEspacializacionData.value?.report_type === 'densidad';
+
+  if (isDensidad) {
+    return {
+      contorno: 'gris',
+      categorias: {
+        atributo: 'density_quintile',
+        estilo: {
+          'Muy Alta': { relleno: 'rgb(198, 51, 42)' },
+          Alta: { relleno: 'rgb(241, 176, 110)' },
+          Media: { relleno: 'rgb(255, 240, 60)' },
+          Baja: { relleno: 'rgb(177, 215, 120)' },
+          'Muy Baja': { relleno: 'rgb(72, 146, 75)' },
+        },
+      },
+    };
+  }
+
+  return {
+    contorno: 'white',
+    relleno: '#a9435b',
+    'circulo-radio': 4,
+    'circulo-relleno-color': '#a9435b',
+    'circulo-contorno-color': 'white',
+    'circulo-contorno-width': 1,
+  };
+});
+
+const obtenerGloboInformativo = (d) => {
+  const isDensidad = previewEspacializacionData.value?.report_type === 'densidad';
+
+  if (isDensidad) {
+    return `<p><b>Información de Densidad</b><br />
+            <b>Nombre:</b> ${d['name'] || 'S/N'}<br />
+            <b>Densidad:</b> ${d['density_quintile'] || 'S/F'}</p>`;
+  }
+
+  return `<p><b>Información</b><br />
+          <b>Nombre:</b> ${d['name'] || 'S/N'}<br />
+          <b>Tipo:</b> ${d['type'] || 'S/T'}<br />
+          <b>Contexto:</b> ${d['context'] || 'S/C'}</p>`;
+};
+
+const categoriasLeyendaDensidad = [
+  { nombre: 'Muy Alta', color: 'rgb(198, 51, 42)' },
+  { nombre: 'Alta', color: 'rgb(241, 176, 110)' },
+  { nombre: 'Media', color: 'rgb(255, 240, 60)' },
+  { nombre: 'Baja', color: 'rgb(177, 215, 120)' },
+  { nombre: 'Muy Baja', color: 'rgb(72, 146, 75)' },
+];
+
+// datos para generar reportes
 const modalPreviewReporte = ref(null);
 const previewReporte = ref(null);
 
-const idAleatorio = () => {
-  return 'areatexto-' + Math.random().toString(36).substring(2);
-};
+const modalPreviewEspacializacion = ref(null);
+const previewEspacializacionData = ref(null);
+const previewGeojsonUrl = ref(null);
+
+const archivosEliminados = ref([]);
+const fuentesSeleccionadas = ref([]);
+
+const arrayContextSources = ref([]);
+
+const tituloReporteModal = ref('');
+const campoNombreVisible = ref(false);
+const leyendaRadioGrupoReporteModal = ref('');
+
+const campoNombreReporte = ref();
+const botonRadioReporte = ref('Uno');
+
+const botonGenerarReporte = ref('');
+
+const opTipoArchivo = ref({ pdf: 'PDF', word: 'WORD', pptx: 'PPTX', csv: 'CSV' });
+
+const dictTipoOperacionGeo = ref({
+  buffer: 'Buffer',
+  interseccion: 'Intersección',
+  densidad: 'Densidad',
+  avanzado: 'Avanzado',
+});
+
+const dictTipoHelpOperacionGeo = ref({
+  buffer: 'Ej. genera una capa de buffer de 500 metros.',
+  interseccion: 'Ej. genera una capa de intersección.',
+  densidad: 'Ej. genera una capa densidad.',
+  avanzado:
+    'Ej. Operación: puntos, instrucciones adicionales: Paso 1: Haz una operación union entre mi primera y segunda capa de puntos. Paso 2: Haz un buffer de 1000 metros alrededor del resultado de los puntos unidos. Paso 3: Haz un spatial_join entre ese buffer y mi capa de polígonos).',
+});
+const mapInstanceKey = ref(0);
+const modalConfirmarEliminar = ref(null);
+const reporteParaEliminar = ref(null);
+
+const idAleatorio = 'areatexto-' + Math.random().toString(36).substring(2);
 
 // Función para cargar historico de chat
 async function loadExistentChat(idchat) {
@@ -82,7 +192,7 @@ if (contextID.value) {
   // volviendo reactivo el chat id del route params
   chatID.value = chatId.value;
   if (chatID.value > 0) {
-    console.log('chat existente');
+    // console.log('chat existente');
     loadExistentChat(chatID.value);
   }
 } else {
@@ -148,7 +258,6 @@ function transformarHistorial(historiales) {
   //return resultado;
 }
 
-// const arrayChats = ref([]);
 // Función para consultar lista de chats
 const loadChatsList = async () => {
   let arrayChats = [];
@@ -448,27 +557,6 @@ const submitMensaje = async () => {
   }
 };
 
-watch(seleccionProyecto, (nv) => {
-  loadContexts(nv);
-});
-
-watch(
-  () => storeIA.chatsVersion,
-  () => {
-    loadChatsList();
-  }
-);
-
-onMounted(() => {
-  // Recuperando la lista de chats
-  loadChatsList();
-
-  // Recuperando la lista de proyectos
-  loadProjectList();
-});
-//
-const archivosEliminados = ref([]);
-const fuentesSeleccionadas = ref([]);
 // Manejar selección/deselección de fuentes
 const toggleSeleccionFuente = (fuente) => {
   const index = fuentesSeleccionadas.value.findIndex((f) => f.id === fuente.id);
@@ -486,67 +574,84 @@ const toggleSeleccionFuente = (fuente) => {
   }
 };
 
-const arrayContextSources = ref([]);
-
 // Función para cargar las fuentes del contexto
 const loadSources = async () => {
-  // console.log('loadSources');
   let contextById = {};
   contextById = await storeIA.getContextById(contextID.value);
   arrayContextSources.value = contextById.files;
 };
 
-const tituloReporteModal = ref('');
-const campoNombreVisible = ref(false);
-const leyendaRadioGrupoReporteModal = ref('');
+// Abre modal de reporte con la info según el modo
 async function abrirModalReporteInfo(modo) {
-  // console.log('reporte modal info');
   if (modo === 'reporte') {
     tituloReporteModal.value = 'Generar reporte';
     campoNombreVisible.value = true;
     leyendaRadioGrupoReporteModal.value = 'Fuentes de información';
+    modalReporteInfo.value.abrirModal();
   } else {
     if (modo === 'espacializar') {
       tituloReporteModal.value = 'Espacializar información';
       campoNombreVisible.value = false;
       leyendaRadioGrupoReporteModal.value =
         'Selecciona los documentos o tabulados que quieras espacializar';
+      modalReporteInfo.value.abrirModal();
+    }
+
+    if (modo === 'operacion-geospacial') {
+      tituloReporteModal.value = 'Operación geoespacial';
+      campoNombreVisible.value = false;
+      leyendaRadioGrupoReporteModal.value =
+        'Selecciona los documentos o tabulados que quieras espacializar';
+      modalTipoOperacionGeo.value.abrirModal();
     }
   }
-  modalReporteInfo.value.abrirModal();
   // Recupera las fuentes del contexto
   await loadSources();
 }
 
-const campoNombreReporte = ref();
-const botonRadioReporte = ref('Uno');
-
+// Cierra y resetea los campos de información del modal de reporte
 function cancelarReporte() {
-  modalReporteInfo.value.cerrarModal();
-  campoNombreReporte.value = '';
-  botonRadioReporte.value = 'Uno';
-  fuentesSeleccionadas.value = [];
+  if (
+    tituloReporteModal.value === 'Generar reporte' ||
+    tituloReporteModal.value === 'Espacializar información'
+  ) {
+    modalReporteInfo.value.cerrarModal();
+    campoNombreReporte.value = '';
+    botonRadioReporte.value = 'Uno';
+    fuentesSeleccionadas.value = [];
+  } else {
+    modalTipoOperacionGeo.value.cerrarModal();
+  }
 }
 
-const botonGenerarReporte = ref('');
+// Abre modal de instrucciones con la info según el título del modal
 function abrirModalInstrucciones() {
-  modalReporteInfo.value.cerrarModal();
   if (tituloReporteModal.value === 'Generar reporte') {
+    modalReporteInfo.value.cerrarModal();
     botonGenerarReporte.value = 'Generar reporte';
     modalReporteInstrucciones.value.abrirModal();
   } else {
     if (tituloReporteModal.value === 'Espacializar información') {
+      modalReporteInfo.value.cerrarModal();
       botonGenerarReporte.value = 'Espacializar';
       modalEspacializarInstrucciones.value.abrirModal();
     }
+
+    if (tituloReporteModal.value === 'Operación geoespacial') {
+      modalTipoOperacionGeo.value.cerrarModal();
+      botonGenerarReporte.value = 'Espacializar';
+      modalOperacionGeoespacialInstrucciones.value.abrirModal();
+    }
   }
 
-  if (botonRadioReporte.value === 'Uno') {
+  if (
+    botonRadioReporte.value === 'Uno' &&
+    (tituloReporteModal.value === 'Generar reporte' ||
+      tituloReporteModal.value === 'Espacializar información')
+  ) {
     // seleccionando todas las fuentes del contexto
     arrayContextSources.value.forEach((d) => toggleSeleccionFuente(d));
   }
-  // console.log('campoNombreReporte.value', campoNombreReporte.value);
-  // console.log('fuentesSeleccionadas.value', fuentesSeleccionadas.value);
 }
 
 // Función para determinar el tipo de archivo
@@ -568,46 +673,94 @@ const obtenerTipoArchivo = (nombre) => {
 };
 
 const areaReporteInstrucciones = ref('');
+const botonRadioTipoOperacionGeoespacial = ref('buffer');
+const areaOperacionGeoespacialInstrucciones = ref('');
 const seleccionTipoReporte = ref('');
 const seleccionTipoArchivo = ref('');
 const botonRadioHojaMembretada = ref(false);
 const casillaArregloUbicaciones = ref([]);
 const botonRadioRepresentacion = ref('centroide');
-const botonRadioUbicacion = ref('resolver_auto');
-const botonRadioFormato = ref('capa_visualizador');
+const instruccionesAnalisis = ref('');
 
-// --- Nueva Lógica de Integración para Reportes ---
+// --- Nueva Lógica de Integración para Reportes y Espacialización ---
 const reportesGenerados = ref([]); // Lista reactiva de reportes en sesión actual
+const isEspacializando = ref(false); // Estado de carga para el modal de espacializar
 
-const pollStatus = async (reportId) => {
-  const token = data.value?.accessToken;
+const pollStatus = async (itemId, type = 'reporte') => {
+  let endpoint = '';
+
+  if (type === 'espacializacion') {
+    endpoint = `/api/localidades/${itemId}/`;
+  } else if (type === 'geospatial') {
+    endpoint = `/api/geospatial/${itemId}`;
+  } else {
+    endpoint = `/api/reports/${itemId}/`;
+  }
+  let failedAttempts = 0; // Circuito preventivo para loops infinitos
+
   const interval = setInterval(async () => {
+    const token = data.value?.accessToken;
+    if (!token) return;
+
     try {
-      const res = await fetch(`${config.public.iaBackendUrl}/api/reports/${reportId}/`, {
+      const res = await fetch(`${config.public.iaBackendUrl}${endpoint}`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
+
       if (res.ok) {
+        failedAttempts = 0; // Reiniciamos contador si responde bien
         const reportData = await res.json();
 
         // Find and update the local report tracking object
-        const idx = reportesGenerados.value.findIndex((r) => r.id === reportId);
+        const idx = reportesGenerados.value.findIndex((r) => r.id === itemId);
         if (idx !== -1) {
           reportesGenerados.value[idx] = { ...reportesGenerados.value[idx], ...reportData };
 
           if (reportData.status === 'done' || reportData.status === 'error') {
+            if (reportData.status === 'done' && type === 'espacializacion') {
+              reportesGenerados.value[idx].progress = 100;
+            }
             clearInterval(interval);
           }
         } else {
           // Not found in our current session array? stop polling
           clearInterval(interval);
         }
+      } else {
+        console.error(`pollStatus error - Status: ${res.status}`);
+        if (res.status === 401 || res.status === 403) {
+          failedAttempts++;
+          if (failedAttempts > 3) {
+            console.error(
+              `Demasiados fallos ${res.status} consecutivos, deteniendo polling para:`,
+              itemId
+            );
+            clearInterval(interval);
+            const idx = reportesGenerados.value.findIndex((r) => r.id === itemId);
+            if (idx !== -1) reportesGenerados.value[idx].status = 'error';
+            return;
+          }
+
+          // console.log('Intentando refrescar la sesión local de Nuxt Auth...');
+          try {
+            await refresh();
+            // Optional delay to let reactivity flush
+            await new Promise((r) => setTimeout(r, 500));
+            // console.log(
+            //   'Token local refrescado a:',
+            //   data.value?.accessToken?.substring(0, 15) + '...'
+            // );
+          } catch (refreshErr) {
+            console.error('Fallo al refrescar token local:', refreshErr);
+          }
+        }
       }
     } catch (err) {
-      console.error(`Error polling status for report ${reportId}:`, err);
+      console.error(`Error polling status for ${type} ${itemId}:`, err);
     }
   }, 10000); // Poll every 10 seconds
 };
@@ -617,7 +770,7 @@ const fetchInitialReports = async () => {
   if (!contextID.value || !data.value?.accessToken) return;
 
   try {
-    const res = await fetch(
+    const resReports = await fetch(
       `${config.public.iaBackendUrl}/api/reports/?context_id=${contextID.value}`,
       {
         method: 'GET',
@@ -628,33 +781,75 @@ const fetchInitialReports = async () => {
       }
     );
 
-    if (res.ok) {
-      const reports = await res.json();
-      // Map the returned data to our reactive format
-      reportesGenerados.value = reports.map((r) => ({
-        id: r.id,
-        status: r.status,
-        report_name: r.report_name,
-        download_url: r.download_url,
-        file_format: r.file_format,
-      }));
+    const resSpatial = await fetch(
+      `${config.public.iaBackendUrl}/api/localidades/?context_id=${contextID.value}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${data.value.accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
-      // Resume polling for any report that's still pending/processing
-      reportesGenerados.value.forEach((r) => {
-        if (r.status === 'pending' || r.status === 'processing') {
-          pollStatus(r.id);
-        }
-      });
+    const resGeoSpatial = await fetch(
+      `${config.public.iaBackendUrl}/api/geospatial/?context_id=${contextID.value}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${data.value.accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    let combined = [];
+    if (resReports.ok) {
+      const reports = await resReports.json();
+      combined = combined.concat(
+        reports.map((r) => ({
+          ...r,
+          type: 'reporte',
+        }))
+      );
     }
+    if (resSpatial.ok) {
+      const spatial = await resSpatial.json();
+      combined = combined.concat(
+        spatial.map((s) => ({
+          ...s,
+          file_format: s.export_format,
+          type: 'espacializacion',
+          progress: s.progress || 0,
+        }))
+      );
+    }
+
+    if (resGeoSpatial.ok) {
+      const spatial = await resGeoSpatial.json();
+      combined = combined.concat(
+        spatial.map((s) => ({
+          ...s,
+          type: 'geospatial',
+        }))
+      );
+    }
+
+    // Sort by created_date descending if needed
+    combined.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+    reportesGenerados.value = combined;
+    // Resume polling for any report/spatialization that's still pending/processing
+    reportesGenerados.value.forEach((item) => {
+      if (item.status === 'pending' || item.status === 'processing') {
+        pollStatus(item.id, item.type);
+      }
+    });
   } catch (err) {
     console.error('Error fetching initial reports:', err);
   }
 };
 
-onMounted(() => {
-  fetchInitialReports();
-});
-
+// Función para hacer la petición de generar reporte según el modo
 async function generarReporte(modo) {
   if (modo === 'reporte') {
     const token = data.value?.accessToken;
@@ -687,6 +882,7 @@ async function generarReporte(modo) {
           status: data.status,
           report_name: payload.report_name,
           file_format: payload.file_format,
+          type: 'report',
         });
 
         // Start polling for this specific task
@@ -699,28 +895,247 @@ async function generarReporte(modo) {
       console.error('Network error triggering report generation:', error);
     }
   } else if (modo === 'espacializar') {
-    console.log('file_ids', fuentesSeleccionadas.value);
-    console.log('casillaArregloUbicaciones.value', casillaArregloUbicaciones.value);
-    console.log('botonRadioRepresentacion.value', botonRadioRepresentacion.value);
-    console.log('botonRadioUbicacion.value', botonRadioUbicacion.value);
-    console.log('botonRadioFormato.value', botonRadioFormato.value);
+    isEspacializando.value = true;
+    const token = data.value?.accessToken;
+
+    // Traducir parámetros de la UI a los esperados por el Backend
+    // Representación: 'centroide' -> 'centroid', 'geometria' -> 'polygon', 'punto' -> 'point'
+    const geomMap = {
+      centroide: 'centroid',
+      geometria: 'polygon',
+      punto: 'point',
+    };
+    const geometryType = geomMap[botonRadioRepresentacion.value] || 'point';
+    const reportName =
+      fuentesSeleccionadas.value.length > 1
+        ? 'Mapa espacializado de varias fuentes'
+        : `Mapa espacializado: ${fuentesSeleccionadas.value[0]?.filename}`;
+    const selectedIds = fuentesSeleccionadas.value.map((d) => d.id);
+
+    // Crear un ID temporal para la tarjeta visual
+    const tempId = `esp-${Date.now()}`;
+
+    // Inyectar a la lista del sidebar
+    reportesGenerados.value.push({
+      id: tempId,
+      type: 'espacializacion',
+      status: 'processing',
+      report_name: reportName,
+      file_format: 'geojson',
+      progress: 0,
+    });
+
+    // Cerrar el modal inmediatamente para no bloquear la UI
+    modalEspacializarInstrucciones.value.cerrarModal();
+    fuentesSeleccionadas.value = [];
+
+    const payload = {
+      context_id: contextID.value,
+      file_ids: selectedIds,
+      report_name: reportName,
+      entity_types:
+        casillaArregloUbicaciones.value.length > 0 ? casillaArregloUbicaciones.value : undefined,
+      geometry_type: geometryType,
+      custom_instructions: instruccionesAnalisis.value,
+      refresh_token: data.value?.refreshToken,
+    };
+
+    try {
+      const res = await fetch(`${config.public.iaBackendUrl}/api/localidades/detect/`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        const responseData = await res.json();
+        const elementIndex = reportesGenerados.value.findIndex((r) => r.id === tempId);
+
+        if (elementIndex !== -1) {
+          // Reemplazamos tempId por el id real de base de datos e iniciamos polling
+          reportesGenerados.value[elementIndex].id = responseData.id;
+          reportesGenerados.value[elementIndex].status = responseData.status || 'processing';
+          pollStatus(responseData.id, 'espacializacion');
+        }
+      } else {
+        const errorData = await res.json();
+        console.error('Error enviando ubicaciones:', errorData);
+        const elementIndex = reportesGenerados.value.findIndex((r) => r.id === tempId);
+        if (elementIndex !== -1) reportesGenerados.value[elementIndex].status = 'error';
+      }
+    } catch (error) {
+      console.error('Error de red al intentar espacializar:', error);
+      const elementIndex = reportesGenerados.value.findIndex((r) => r.id === tempId);
+      if (elementIndex !== -1) reportesGenerados.value[elementIndex].status = 'error';
+    } finally {
+      isEspacializando.value = false;
+    }
+    return; // Early return para no ejecutar el cleanup normal de generacion de reportes asíncronos
+  } else if (modo === 'operacion_geoespacial') {
+    const token = data.value?.accessToken;
+    // Formato de exportación: 'descargar_geojson' -> 'geojson', 'descargar_shp' -> 'shp'
+    const exportFormat = 'geojson';
+    // if (botonRadioFormato.value === 'descargar_shp') exportFormat = 'shp';
+    // if (botonRadioFormato.value === 'descargar_gpkg') exportFormat = 'gpkg';
+    const reportName =
+      fuentesSeleccionadas.value.length > 1
+        ? 'Mapa espacializado de varias fuentes'
+        : `Mapa espacializado: ${fuentesSeleccionadas.value[0]?.filename}`;
+    const selectedIds = fuentesSeleccionadas.value.map((d) => d.id);
+    // Cerrar el modal inmediatamente para no bloquear la UI
+    modalConfirmaOperacionaGeoespacial.value.cerrarModal();
+    fuentesSeleccionadas.value = [];
+    const payload = {
+      context_id: contextID.value,
+      file_ids: selectedIds,
+      operation: botonRadioTipoOperacionGeoespacial.value,
+      report_name: reportName,
+      instructions: areaOperacionGeoespacialInstrucciones.value,
+      export_format: exportFormat,
+      refresh_token: data.value?.refreshToken,
+    };
+    try {
+      const res = await fetch(`${config.public.iaBackendUrl}/api/geospatial/execute_async`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        // Add to our reactive list of pending tasks
+        reportesGenerados.value.push({
+          id: data.report_id,
+          task_id: data.task_id,
+          status: data.status,
+          report_name: payload.report_name,
+          file_format: payload.file_format,
+          type: 'geospatial',
+        });
+
+        // Start polling for this specific task
+        pollStatus(data.report_id, 'geospatial');
+      } else {
+        const errorData = await res.json();
+        console.error('Error en la operación geoespacial:', errorData);
+      }
+    } catch (error) {
+      console.error('Error de red al intentar operacion geoespacial:', error);
+    }
+    return; // Early return para no ejecutar el cleanup normal de generacion de reportes asíncronos
   }
 
   fuentesSeleccionadas.value = [];
   modalReporteInstrucciones.value.cerrarModal();
 }
 
+// async function abrirPreviewEspacializacion(reporte) {
+//   previewEspacializacionData.value = reporte;
+//   previewGeojsonUrl.value = reporte.download_url;
+//   modalPreviewEspacializacion.value?.abrirModal();
+// }
+// function cerrarPreviewEspacializacion() {
+//   modalPreviewEspacializacion.value?.cerrarModal();
+//   previewEspacializacionData.value = null;
+//   previewGeojsonUrl.value = null;
+// }
+
+// Función para abrir el modal que visualiza el reporte según el formato
 function abrirPreviewReporte(reporte) {
   previewReporte.value = reporte;
+  // Añadir validación de url con google u microsoft
   modalPreviewReporte.value?.abrirModal();
+  // console.log('reporte', reporte);
 }
 
 function cerrarPreviewReporte() {
   modalPreviewReporte.value?.cerrarModal();
   previewReporte.value = null;
 }
+const confirmacionValida = ref(false);
+function confirmarOperacion() {
+  if (
+    !areaOperacionGeoespacialInstrucciones.value.trim() <= 0 &&
+    fuentesSeleccionadas.value.length
+  ) {
+    confirmacionValida.value = false;
+    modalOperacionGeoespacialInstrucciones.value.cerrarModal();
+    modalConfirmaOperacionaGeoespacial.value.abrirModal();
+  } else {
+    confirmacionValida.value = true;
+  }
+}
 
-const opTipoArchivo = ref({ pdf: 'PDF', word: 'WORD', pptx: 'PPTX', csv: 'CSV' });
+watch(seleccionProyecto, (nv) => {
+  loadContexts(nv);
+});
+
+watch(
+  () => storeIA.chatsVersion,
+  () => {
+    loadChatsList();
+  }
+);
+
+async function abrirPreviewEspacializacion(reporte) {
+  previewEspacializacionData.value = reporte;
+  previewGeojsonUrl.value = reporte.download_url;
+  mapInstanceKey.value += 1; // Fuerza desmontaje/remontaje de SisdaiMapa y sus capas
+  modalPreviewEspacializacion.value?.abrirModal();
+}
+
+function cerrarPreviewEspacializacion() {
+  modalPreviewEspacializacion.value?.cerrarModal();
+  previewEspacializacionData.value = null;
+  previewGeojsonUrl.value = null;
+}
+
+function pedirConfirmacionEliminar(reporte) {
+  reporteParaEliminar.value = reporte;
+  modalConfirmarEliminar.value?.abrirModal();
+}
+
+async function confirmarEliminar() {
+  const reporte = reporteParaEliminar.value;
+  if (!reporte) return;
+
+  const token = data.value?.accessToken;
+  if (!token) return;
+
+  let endpoint = '';
+  if (reporte.type === 'espacializacion') {
+    endpoint = `${config.public.iaBackendUrl}/api/localidades/${reporte.id}/delete/`;
+  } else if (reporte.type === 'geospatial') {
+    endpoint = `${config.public.iaBackendUrl}/api/geospatial/${reporte.id}/delete/`;
+  } else {
+    endpoint = `${config.public.iaBackendUrl}/api/reports/${reporte.id}/delete/`;
+  }
+
+  try {
+    const res = await fetch(endpoint, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (res.ok || res.status === 204) {
+      const idx = reportesGenerados.value.findIndex((r) => r.id === reporte.id);
+      if (idx !== -1) reportesGenerados.value.splice(idx, 1);
+    } else {
+      console.error('Error al eliminar:', res.status);
+    }
+  } catch (err) {
+    console.error('Error de red al eliminar:', err);
+  } finally {
+    modalConfirmarEliminar.value?.cerrarModal();
+    reporteParaEliminar.value = null;
+  }
+}
+
 watch(seleccionTipoReporte, (nv) => {
   if (nv === 'presentation') {
     seleccionTipoArchivo.value = 'pptx';
@@ -730,10 +1145,22 @@ watch(seleccionTipoReporte, (nv) => {
     opTipoArchivo.value = { pdf: 'PDF', word: 'WORD', pptx: 'PPTX', csv: 'CSV' };
   }
 });
+
 watch(seleccionTipoArchivo, (nv) => {
   if (!['pdf', 'word'].includes(nv)) {
     botonRadioHojaMembretada.value = false;
   }
+});
+
+onMounted(() => {
+  // Recuperando la lista de chats
+  loadChatsList();
+
+  // Recuperando la lista de proyectos
+  loadProjectList();
+
+  // Obteniendo los reportes
+  fetchInitialReports();
 });
 </script>
 
@@ -932,6 +1359,7 @@ watch(seleccionTipoArchivo, (nv) => {
           </div>
 
           <div class="columna-1" />
+          <div class="columna-16"></div>
         </div>
       </main>
 
@@ -1074,7 +1502,7 @@ watch(seleccionTipoArchivo, (nv) => {
               v-if="botonRadioReporte === 'Dos' && arrayContextSources.length > 0"
               class="tabla-archivos m-y-3"
             >
-              <table class="tabla">
+              <table class="tabla" style="width: 100%">
                 <thead>
                   <tr>
                     <th class="checkbox-header p-x-3 p-y-2">Selección</th>
@@ -1109,11 +1537,15 @@ watch(seleccionTipoArchivo, (nv) => {
                         class="texto-centrado fondo-color-acento p-1 m-0 texto-color-acento borde borde-redondeado-12"
                         style="width: max-content"
                       >
-                        <span v-if="fuente.document_type === 'application/pdf'">
+                        <span
+                          v-if="
+                            ['application/pdf', 'application/json'].includes(fuente.document_type)
+                          "
+                        >
                           <span class="pictograma-documento" />
                           Documentos
                         </span>
-                        <span v-if="fuente.document_type === 'text/csv'">
+                        <span v-if="['text/csv'].includes(fuente.document_type)">
                           <span class="pictograma-tabla" />
                           Datos tabulados
                         </span>
@@ -1140,6 +1572,142 @@ watch(seleccionTipoArchivo, (nv) => {
               @click="abrirModalInstrucciones"
             >
               Siguiente
+            </button>
+            <button
+              class="boton-secundario boton-chico"
+              aria-label="Cancelar generar reporte"
+              type="button"
+              @click="cancelarReporte"
+            >
+              Cancelar
+            </button>
+          </template>
+        </SisdaiModal>
+
+        <SisdaiModal ref="modalTipoOperacionGeo" class="modal-grande">
+          <template #encabezado>
+            <h2>Selecciona el tipo de análisis espacial</h2>
+            <p>Elige qué operación deseas realizar sobre tus capas geográficas.</p>
+          </template>
+
+          <template #cuerpo>
+            <ClientOnly>
+              <form @submit.prevent>
+                <fieldset
+                  class="grupo-formulario tarjetas-tipo-operacion-geo m-0"
+                  role="radiogroup"
+                >
+                  <legend></legend>
+                  <div class="flex flex-contenido-centrado p-x-1">
+                    <div class="columna-8">
+                      <input
+                        id="radio-tipooperaciongeoespacialuno"
+                        v-model="botonRadioTipoOperacionGeoespacial"
+                        type="radio"
+                        value="buffer"
+                        name="tipooperaciongeoespacial"
+                      />
+                      <label for="radio-tipooperaciongeoespacialuno">
+                        <div class="tarjeta tarjeta-hipervinculo-interno" href="#">
+                          <img
+                            class="tarjeta-imagen"
+                            :src="`${$config.app.baseURL}img/ia-buffer.jpg`"
+                            alt="Tipo de operación geoespacial Buffer"
+                          />
+                          <div class="tarjeta-cuerpo">
+                            <p class="tarjeta-titulo">Buffer</p>
+                            <p class="tarjeta-etiqueta">
+                              Crea un área alrededor de elementos a una distancia determinada.
+                            </p>
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                    <div class="columna-8">
+                      <input
+                        id="radio-tipooperaciongeoespacialdos"
+                        v-model="botonRadioTipoOperacionGeoespacial"
+                        type="radio"
+                        value="interseccion"
+                        name="tipooperaciongeoespacial"
+                      />
+                      <label for="radio-tipooperaciongeoespacialdos">
+                        <div class="tarjeta tarjeta-hipervinculo-interno" href="#">
+                          <img
+                            class="tarjeta-imagen"
+                            :src="`${$config.app.baseURL}img/ia-interseccion.jpg`"
+                            alt="Tipo de operación geoespacial Intersección"
+                          />
+                          <div class="tarjeta-cuerpo">
+                            <p class="tarjeta-titulo">Intersección</p>
+                            <p class="tarjeta-etiqueta">
+                              Genera una nueva capa con las áreas donde dos capas coinciden.
+                            </p>
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                    <div class="columna-8">
+                      <input
+                        id="radio-tipooperaciongeoespacialtres"
+                        v-model="botonRadioTipoOperacionGeoespacial"
+                        type="radio"
+                        value="densidad"
+                        name="tipooperaciongeoespacial"
+                      />
+                      <label for="radio-tipooperaciongeoespacialtres">
+                        <div class="tarjeta tarjeta-hipervinculo-interno" href="#">
+                          <img
+                            class="tarjeta-imagen"
+                            :src="`${$config.app.baseURL}img/ia-densidad.jpg`"
+                            alt="Tipo de operación geoespacial Densidad"
+                          />
+                          <div class="tarjeta-cuerpo">
+                            <p class="tarjeta-titulo">Densidad</p>
+                            <p class="tarjeta-etiqueta">
+                              Calcula la concentración de puntos en un área.
+                            </p>
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                    <div class="columna-8">
+                      <input
+                        id="radio-tipooperaciongeoespacialcuatro"
+                        v-model="botonRadioTipoOperacionGeoespacial"
+                        type="radio"
+                        value="avanzado"
+                        name="tipooperaciongeoespacial"
+                      />
+                      <label for="radio-tipooperaciongeoespacialcuatro">
+                        <div class="tarjeta tarjeta-hipervinculo-interno" href="#">
+                          <img
+                            class="tarjeta-imagen"
+                            :src="`${$config.app.baseURL}img/ia-puntos-calor.jpg`"
+                            alt="Tipo de operación geoespacial Puntos de calor"
+                          />
+                          <div class="tarjeta-cuerpo">
+                            <p class="tarjeta-titulo">Avanzado</p>
+                            <p class="tarjeta-etiqueta">Operaciones Libre</p>
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                </fieldset>
+              </form>
+            </ClientOnly>
+          </template>
+
+          <template #pie>
+            <button
+              class="boton-primario boton-chico"
+              aria-label="Ir a llenar instrucciones"
+              type="button"
+              :disabled="!botonRadioTipoOperacionGeoespacial"
+              @click="abrirModalInstrucciones"
+            >
+              Continuar
             </button>
             <button
               class="boton-secundario boton-chico"
@@ -1192,26 +1760,34 @@ watch(seleccionTipoArchivo, (nv) => {
                 </option>
               </SisdaiSelector>
 
-              <SisdaiBotonesRadioGrupo
-                v-show="['pdf', 'word'].includes(seleccionTipoArchivo)"
-                leyenda="Hoja membretada (Formato SECIHTI)"
-                :es_vertical="false"
-              >
-                <SisdaiBotonRadio
-                  v-model="botonRadioHojaMembretada"
-                  etiqueta="Sí"
-                  :value="true"
-                  name="hojamembretada"
-                  :es_obligatorio="true"
-                />
-                <SisdaiBotonRadio
-                  v-model="botonRadioHojaMembretada"
-                  etiqueta="No"
-                  :value="false"
-                  name="hojamembretada"
-                  :es_obligatorio="true"
-                />
-              </SisdaiBotonesRadioGrupo>
+              <form v-show="['pdf', 'word'].includes(seleccionTipoArchivo)" @submit.prevent>
+                <fieldset class="grupo-formulario" role="radiogroup">
+                  <legend>Hoja membretada (Formato SECIHTI)</legend>
+
+                  <span>
+                    <input
+                      id="radio-identificadorgrupaluno"
+                      v-model="botonRadioHojaMembretada"
+                      type="radio"
+                      :value="true"
+                      name="hojamembretada"
+                      required
+                    />
+                    <label for="radio-identificadorgrupaluno"> Sí </label>
+                  </span>
+                  <span>
+                    <input
+                      id="radio-identificadorgrupaldos"
+                      v-model="botonRadioHojaMembretada"
+                      type="radio"
+                      :value="false"
+                      name="hojamembretada"
+                      required
+                    />
+                    <label for="radio-identificadorgrupaldos"> No </label>
+                  </span>
+                </fieldset>
+              </form>
             </ClientOnly>
           </template>
 
@@ -1244,189 +1820,286 @@ watch(seleccionTipoArchivo, (nv) => {
 
         <SisdaiModal ref="modalEspacializarInstrucciones" class="modal-grande">
           <template #encabezado>
-            <h2>Espacializar información</h2>
+            <h2 class="m-0">Configura la espacialización</h2>
+            <p class="m-t-1 m-b-0" style="font-size: 16px">
+              Define cómo la IA debe identificar y representar las ubicaciones detectadas.
+            </p>
           </template>
 
           <template #cuerpo>
-            <p>
-              Ahora, define cómo la IA debe identificar y representar las ubicaciones detectadas.
-            </p>
-            <div class="flex">
-              <div class="columna-8">
-                <div class="fondo-color-neutro borde-redondeado-8 p-x-2 p-y-1">
-                  <div class="tarjeta-modal-espacializar">
-                    <ClientOnly>
-                      <form @submit.prevent>
-                        <fieldset class="grupo-formulario grupo-formulario-vertical">
-                          <legend>1. Selecciona los tipos de ubicaciones a identificar</legend>
-
-                          <div class="flex">
-                            <div class="columna-8">
-                              <div class="grupo-formulario grupo-formulario-vertical">
-                                <span>
-                                  <input
-                                    id="casilla-identificadorgrupaluno"
-                                    v-model="casillaArregloUbicaciones"
-                                    type="checkbox"
-                                    value="paises"
-                                    :required="!casillaArregloUbicaciones.length"
-                                  />
-                                  <label for="casilla-identificadorgrupaluno"> Países </label>
-                                </span>
-                                <span>
-                                  <input
-                                    id="casilla-identificadorgrupaldos"
-                                    v-model="casillaArregloUbicaciones"
-                                    type="checkbox"
-                                    value="estados"
-                                    :required="!casillaArregloUbicaciones.length"
-                                  />
-                                  <label for="casilla-identificadorgrupaldos"> Estados </label>
-                                </span>
-                                <span>
-                                  <input
-                                    id="casilla-identificadorgrupaltre"
-                                    v-model="casillaArregloUbicaciones"
-                                    type="checkbox"
-                                    value="municipios"
-                                    :required="!casillaArregloUbicaciones.length"
-                                  />
-                                  <label for="casilla-identificadorgrupaltre"> Municipios </label>
-                                </span>
-                              </div>
-                            </div>
-                            <div class="columna-8">
-                              <div class="grupo-formulario grupo-formulario-vertical">
-                                <span>
-                                  <input
-                                    id="casilla-identificadorgrupalcuatro"
-                                    v-model="casillaArregloUbicaciones"
-                                    type="checkbox"
-                                    value="localidades"
-                                    :required="!casillaArregloUbicaciones.length"
-                                  />
-                                  <label for="casilla-identificadorgrupalcuatro">
-                                    Localidades
-                                  </label>
-                                </span>
-                                <span>
-                                  <input
-                                    id="casilla-identificadorgrupalcinco"
-                                    v-model="casillaArregloUbicaciones"
-                                    type="checkbox"
-                                    value="infraestructura"
-                                    :required="!casillaArregloUbicaciones.length"
-                                  />
-                                  <label for="casilla-identificadorgrupalcinco">
-                                    Infraestructura
-                                  </label>
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        </fieldset>
-                        <p aria-live="polite" class="formulario-ayuda" role="status"></p>
-                      </form>
-                    </ClientOnly>
-                  </div>
-                </div>
-              </div>
-              <div class="columna-8">
-                <div class="fondo-color-neutro borde-redondeado-8 p-x-2 p-y-1">
-                  <div class="tarjeta-modal-espacializar">
-                    <ClientOnly>
-                      <SisdaiBotonesRadioGrupo
-                        leyenda="2. Define cómo se mostrarán las ubicaciones detectadas"
-                        es_vertical
-                      >
-                        <SisdaiBotonRadio
-                          v-model="botonRadioRepresentacion"
-                          etiqueta="Centroide"
-                          value="centroide"
-                          name="representacion"
-                          :es_obligatorio="true"
-                        />
-                        <SisdaiBotonRadio
-                          v-model="botonRadioRepresentacion"
-                          etiqueta="Geometría completa"
-                          value="geometria"
-                          name="representacion"
-                          :es_obligatorio="true"
-                        />
-                        <SisdaiBotonRadio
-                          v-model="botonRadioRepresentacion"
-                          etiqueta="Punto con nivel de confianza"
-                          value="punto"
-                          name="representacion"
-                          :es_obligatorio="true"
-                        />
-                      </SisdaiBotonesRadioGrupo>
-                    </ClientOnly>
-                  </div>
-                </div>
-              </div>
-              <div class="columna-8">
-                <div class="fondo-color-neutro borde-redondeado-8 p-x-2 p-y-1">
-                  <div class="tarjeta-modal-espacializar">
-                    <ClientOnly>
-                      <SisdaiBotonesRadioGrupo
-                        leyenda="3. Define qué debe hacer la IA cuando la ubicación no sea clara"
-                        es_vertical
-                      >
-                        <SisdaiBotonRadio
-                          v-model="botonRadioUbicacion"
-                          etiqueta="Resolver automáticamente"
-                          value="resolver_auto"
-                          name="ubicacion"
-                          :es_obligatorio="true"
-                        />
-                        <SisdaiBotonRadio
-                          v-model="botonRadioUbicacion"
-                          etiqueta="Marcar para revisión manual"
-                          value="marcar_manual"
-                          name="ubicacion"
-                          :es_obligatorio="true"
-                        />
-                      </SisdaiBotonesRadioGrupo>
-                    </ClientOnly>
-                  </div>
-                </div>
-              </div>
-              <div class="columna-8">
-                <div class="fondo-color-neutro borde-redondeado-8 p-x-2 p-y-1">
-                  <div class="tarjeta-modal-espacializar">
-                    <ClientOnly>
-                      <SisdaiBotonesRadioGrupo
-                        leyenda="4. Selecciona el formato de salida"
-                        es_vertical
-                      >
-                        <SisdaiBotonRadio
-                          v-model="botonRadioFormato"
-                          etiqueta="Mostrar como capa en el visualizador"
-                          value="capa_visualizador"
-                          name="formatosalida"
-                          :es_obligatorio="true"
-                        />
-                        <SisdaiBotonRadio
-                          v-model="botonRadioFormato"
-                          etiqueta="Guardar como capa en el catálogo"
-                          value="capa_catalogo"
-                          name="formatosalida"
-                          :es_obligatorio="true"
-                        />
-                        <SisdaiBotonRadio
-                          v-model="botonRadioFormato"
-                          etiqueta="Descargar como archivo GeoJSON"
-                          value="descargar_geojson"
-                          name="formatosalida"
-                          :es_obligatorio="true"
-                        />
-                      </SisdaiBotonesRadioGrupo>
-                    </ClientOnly>
-                  </div>
-                </div>
+            <!-- Sección 1 -->
+            <div class="m-b-3">
+              <p style="font-weight: 600; font-size: 16px; margin-bottom: 16px">
+                Selecciona los tipos de ubicaciones a identificar
+              </p>
+              <div class="grupo-formulario flex m-x-2" style="gap: 24px; flex-wrap: wrap">
+                <span>
+                  <input
+                    id="casilla-identificadorgrupaluno"
+                    v-model="casillaArregloUbicaciones"
+                    type="checkbox"
+                    value="paises"
+                    :required="!casillaArregloUbicaciones.length"
+                  />
+                  <label for="casilla-identificadorgrupaluno"> Países </label>
+                </span>
+                <span>
+                  <input
+                    id="casilla-identificadorgrupaldos"
+                    v-model="casillaArregloUbicaciones"
+                    type="checkbox"
+                    value="estados"
+                    :required="!casillaArregloUbicaciones.length"
+                  />
+                  <label for="casilla-identificadorgrupaldos"> Estados </label>
+                </span>
+                <span>
+                  <input
+                    id="casilla-identificadorgrupaltre"
+                    v-model="casillaArregloUbicaciones"
+                    type="checkbox"
+                    value="municipios"
+                    :required="!casillaArregloUbicaciones.length"
+                  />
+                  <label for="casilla-identificadorgrupaltre"> Municipios </label>
+                </span>
+                <span>
+                  <input
+                    id="casilla-identificadorgrupalcuatro"
+                    v-model="casillaArregloUbicaciones"
+                    type="checkbox"
+                    value="localidades"
+                    :required="!casillaArregloUbicaciones.length"
+                  />
+                  <label for="casilla-identificadorgrupalcuatro"> Localidades </label>
+                </span>
+                <span>
+                  <input
+                    id="casilla-identificadorgrupalcinco"
+                    v-model="casillaArregloUbicaciones"
+                    type="checkbox"
+                    value="infraestructura"
+                    :required="!casillaArregloUbicaciones.length"
+                  />
+                  <label for="casilla-identificadorgrupalcinco"> Infraestructura </label>
+                </span>
               </div>
             </div>
+
+            <hr style="border: none; border-top: 1px solid #d7dce2; margin-bottom: 24px" />
+
+            <!-- Sección 2 -->
+            <div class="m-b-3">
+              <ClientOnly>
+                <SisdaiBotonesRadioGrupo
+                  leyenda="Define cómo se mostrarán las ubicaciones detectadas"
+                  es_vertical
+                >
+                  <SisdaiBotonRadio
+                    v-model="botonRadioRepresentacion"
+                    etiqueta="Centroide"
+                    value="centroide"
+                    name="representacion"
+                    :es_obligatorio="true"
+                  />
+                  <SisdaiBotonRadio
+                    v-model="botonRadioRepresentacion"
+                    etiqueta="Geometría completa"
+                    value="geometria"
+                    name="representacion"
+                    :es_obligatorio="true"
+                  />
+                  <SisdaiBotonRadio
+                    v-model="botonRadioRepresentacion"
+                    etiqueta="Punto con nivel de confianza"
+                    value="punto"
+                    name="representacion"
+                    :es_obligatorio="true"
+                  />
+                </SisdaiBotonesRadioGrupo>
+              </ClientOnly>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid #d7dce2; margin-bottom: 24px" />
+
+            <!-- Sección 3 -->
+            <div>
+              <form class="formulario-area-texto">
+                <label :for="idAleatorio" style="font-weight: 600" class="texto-color-primario">
+                  Añade instrucciones para el análisis
+                </label>
+                <p class="texto-color-secundario texto-tamanio-2">
+                  Puedes especificar qué elementos o palabras buscar para orientar la
+                  espacialización.
+                </p>
+
+                <textarea
+                  :id="idAleatorio"
+                  v-model.lazy="instruccionesAnalisis"
+                  class="area-texto ancho-100 p-2 borde-redondeado-4"
+                  rows="4"
+                  placeholder="Ej. Identifica las menciones de hospitales o centros de salud en los documentos y genera puntos en el mapa para cada ubicación encontrada."
+                  style="border: 1px solid #6f7271; font-family: inherit; resize: vertical"
+                />
+              </form>
+
+              <p
+                class="fondo-color-informacion texto-color-informacion borde borde-color-informacion borde-redondeado-8 p-1"
+              >
+                <span class="pictograma-informacion" aria-hidden="true" /> La IA aplicará esta
+                instrucción sobre las fuentes seleccionadas.
+              </p>
+            </div>
+          </template>
+
+          <template #pie>
+            <div class="flex flex-contenido-final ancho-100">
+              <button
+                class="boton-secundario boton-chico m-r-2"
+                aria-label="Regresar a llenar información"
+                type="button"
+                :disabled="isEspacializando"
+                @click="
+                  modalEspacializarInstrucciones.cerrarModal();
+                  modalReporteInfo.abrirModal();
+                "
+              >
+                Regresar
+              </button>
+              <button
+                class="boton-primario boton-chico"
+                aria-label="Generar espacialización"
+                type="button"
+                :disabled="!casillaArregloUbicaciones.length"
+                @click="generarReporte('espacializar')"
+              >
+                Espacializar
+              </button>
+            </div>
+          </template>
+        </SisdaiModal>
+
+        <SisdaiModal ref="modalOperacionGeoespacialInstrucciones" class="modal-grande">
+          <template #encabezado>
+            <h2>Configura la operación</h2>
+            <p>Define las capas e instrucciones para la IA.</p>
+          </template>
+
+          <template #cuerpo>
+            <ul
+              class="fondo-color-acento texto-color-acento borde borde-color-acento borde-redondeado-8 p-x-4"
+              style="width: fit-content; font-weight: 800"
+            >
+              <li>{{ dictTipoOperacionGeo[botonRadioTipoOperacionGeoespacial] }}</li>
+            </ul>
+
+            <p class="titulo-tabla">Selecciona las capas necesarias</p>
+            <p class="texto-color-secundario">
+              Este análisis requiere {{ fuentesSeleccionadas.length }} capa{{
+                fuentesSeleccionadas.length > 1 || fuentesSeleccionadas.length === 0 ? 's' : ''
+              }}
+            </p>
+            <p class="texto-color-acento">
+              {{ fuentesSeleccionadas.length }}/{{ arrayContextSources.length }} selecionada{{
+                fuentesSeleccionadas.length > 1 || fuentesSeleccionadas.length === 0 ? 's' : ''
+              }}
+            </p>
+
+            <div
+              v-if="arrayContextSources.length > 0"
+              class="tabla-archivos m-y-3 borde"
+              style="width: 98%; height: 280px; overflow-y: auto"
+            >
+              <table class="tabla" style="width: 100%">
+                <!-- <caption>Selecciona las capas necesarias</caption> -->
+                <thead>
+                  <tr>
+                    <th class="checkbox-header p-x-3 p-y-2">Selección</th>
+                    <th class="p-x-3 p-y-2">Nombre</th>
+                    <th class="p-x-3 p-y-2">Tipo</th>
+                    <th class="p-x-3 p-y-2">Categoría</th>
+                    <th class="p-x-3 p-y-2">Origen</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr v-for="fuente in arrayContextSources" :key="`fila-fuentes-${fuente.id}`">
+                    <td class="checkbox-cell p-3">
+                      <label :for="`checkboxfuente${fuente.id}`" class="checkbox-wrapper">
+                        <input
+                          :id="`checkboxfuente${fuente.id}`"
+                          type="checkbox"
+                          :checked="fuentesSeleccionadas.some((f) => f.id === fuente.id)"
+                          @change="toggleSeleccionFuente(fuente)"
+                        />
+                        <span class="checkmark"></span>
+                      </label>
+                    </td>
+                    <td class="p-3">{{ fuente.filename }}</td>
+                    <td class="p-3 etiqueta-tabla">
+                      <span class="p-x-1 p-y-minimo">
+                        {{ obtenerTipoArchivo(fuente.filename) }}
+                      </span>
+                    </td>
+                    <td class="p-3 flex flex-contenido-centrado">
+                      <p
+                        class="texto-centrado fondo-color-acento p-1 m-0 texto-color-acento borde borde-redondeado-12"
+                        style="width: max-content"
+                      >
+                        <span
+                          v-if="
+                            ['application/pdf', 'application/json'].includes(fuente.document_type)
+                          "
+                        >
+                          <span class="pictograma-documento" />
+                          Documentos
+                        </span>
+                        <span v-if="['text/csv'].includes(fuente.document_type)">
+                          <span class="pictograma-tabla" />
+                          Datos tabulados
+                        </span>
+                      </p>
+                    </td>
+                    <td class="p-3 etiqueta-tabla">
+                      <span class="p-x-1 p-y-minimo"> Catálogo </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p class="borde-b m-t-5"></p>
+
+            <label class="h5" for="area-idcreadoautomaticamente">
+              Añade instrucciones para la operación
+            </label>
+            <p class="texto-color-secundario m-0">
+              Puedes especificar filtros o condiciones para personalizar el resultado.
+            </p>
+            <ClientOnly>
+              <SisdaiAreaTexto
+                id="area-idcreadoautomaticamente"
+                v-model="areaOperacionGeoespacialInstrucciones"
+                etiqueta="Instrucciones para la operación"
+                :ejemplo="dictTipoHelpOperacionGeo[botonRadioTipoOperacionGeoespacial]"
+                :es_obligatorio="true"
+                :es_etiqueta_visible="false"
+              />
+            </ClientOnly>
+            <p
+              v-if="confirmacionValida"
+              class="fondo-color-error texto-color-error borde borde-color-error borde-redondeado-8 p-1"
+            >
+              <span class="pictograma-alerta" /> Es necesario seleccionar fuentes y añadir una
+              instrucción para la operación.
+            </p>
+            <p
+              v-else
+              class="fondo-color-informacion texto-color-informacion borde borde-color-informacion borde-redondeado-8 p-1"
+            >
+              <span class="pictograma-informacion" aria-hidden="true" /> La IA aplicará esta
+              instrucción sobre el análisis seleccionado.
+            </p>
           </template>
 
           <template #pie>
@@ -1434,10 +2107,10 @@ watch(seleccionTipoArchivo, (nv) => {
               class="boton-primario boton-chico"
               aria-label="Generar reporte"
               type="button"
-              :disabled="!casillaArregloUbicaciones.length"
-              @click="generarReporte('espacializar')"
+              :disabled="false"
+              @click="confirmarOperacion"
             >
-              {{ botonGenerarReporte }}
+              Continuar
             </button>
             <button
               class="boton-secundario boton-chico"
@@ -1445,11 +2118,11 @@ watch(seleccionTipoArchivo, (nv) => {
               type="button"
               :disabled="false"
               @click="
-                modalEspacializarInstrucciones.cerrarModal();
-                modalReporteInfo.abrirModal();
+                modalOperacionGeoespacialInstrucciones.cerrarModal();
+                modalTipoOperacionGeo.abrirModal();
               "
             >
-              Regresar
+              Volver
             </button>
           </template>
         </SisdaiModal>
@@ -1460,30 +2133,54 @@ watch(seleccionTipoArchivo, (nv) => {
           </template>
 
           <template #cuerpo>
-            <div v-if="previewReporte" class="m-y-2" style="width: 100%; height: 60vh">
-              <!-- El iframe renderizará nativamente PDFs y TXT que el navegador soporte -->
-              <iframe
-                v-if="['pdf', 'txt'].includes(previewReporte.file_format)"
-                :src="previewReporte.download_url"
-                style="width: 100%; height: 100%; border: none; border-radius: 8px"
-                title="Previsualización del reporte"
-              >
-              </iframe>
-              <div
-                v-else
-                class="flex flex-contenido-centrado flex-vertical-centrado fondo-color-neutro borde-redondeado-8"
-                style="height: 100%; flex-direction: column"
-              >
-                <span
-                  class="pictograma-archivo-descargar texto-color-acento"
-                  style="font-size: 4rem"
-                ></span>
-                <p class="m-t-3 texto-centrado">
-                  <strong>Formato no compatible para previsualización.</strong><br />
-                  Los documentos en formato PowerPoint y Word no se pueden mostrar visualmente
-                  dentro del navegador.<br />
-                  Por favor, descárgalo para revisarlo en tu equipo.
-                </p>
+            <div>
+              <div v-if="previewReporte" class="m-y-2" style="width: 100%; height: 60vh">
+                <!-- El iframe renderizará nativamente PDFs y TXT que el navegador soporte -->
+                <div
+                  v-if="['word', 'pptx', 'csv', 'pdf', 'txt'].includes(previewReporte.file_format)"
+                >
+                  <div v-if="['word', 'pptx', 'csv'].includes(previewReporte.file_format)">
+                    <IaPreviewFiles
+                      :src="previewReporte.download_url"
+                      :file-format="previewReporte.file_format"
+                    />
+                  </div>
+                  <div
+                    v-if="['pdf', 'txt'].includes(previewReporte.file_format)"
+                    style="width: 100%; height: 60vh"
+                  >
+                    <iframe
+                      :src="previewReporte.download_url"
+                      style="width: 100%; height: 100%; border: none; border-radius: 8px"
+                      title="Previsualización del reporte"
+                    >
+                    </iframe>
+                  </div>
+                </div>
+                <div
+                  v-else-if="
+                    !['word', 'pptx', 'csv', 'pdf', 'txt'].includes(previewReporte.file_format)
+                  "
+                >
+                  <ClientOnly>
+                    <VueFilesPreview :url="previewReporte.download_url" />
+                  </ClientOnly>
+                </div>
+                <div
+                  v-else
+                  class="flex flex-contenido-centrado flex-vertical-centrado fondo-color-neutro borde-redondeado-8"
+                  style="height: 100%; flex-direction: column"
+                >
+                  <span
+                    class="pictograma-archivo-descargar texto-color-acento"
+                    style="font-size: 4rem"
+                  ></span>
+                  <p class="m-t-3 texto-centrado">
+                    <strong>Formato no compatible para previsualización.</strong><br />
+                    Por favor, descárgalo para revisarlo en tu equipo.
+                    {{ previewReporte.file_format }}
+                  </p>
+                </div>
               </div>
             </div>
           </template>
@@ -1505,6 +2202,204 @@ watch(seleccionTipoArchivo, (nv) => {
             >
               Descargar
             </a>
+          </template>
+        </SisdaiModal>
+
+        <SisdaiModal ref="modalPreviewEspacializacion" class="modal-grande modal-espacializacion">
+          <template #encabezado>
+            <div style="padding: 0 24px">
+              <h4 class="m-0">
+                {{ previewEspacializacionData?.report_name || 'Mapa espacializado' }}
+              </h4>
+
+              <p
+                class="fondo-color-informacion texto-color-informacion borde borde-color-informacion borde-redondeado-8 p-1"
+              >
+                <span class="pictograma-informacion" aria-hidden="true" /> Este resultado es
+                generado mediante herramientas de IA y puede contener imprecisiones; se recomienda
+                su revisión y validación.
+              </p>
+            </div>
+          </template>
+
+          <template #cuerpo>
+            <div
+              v-if="previewGeojsonUrl"
+              class="posicion-relativa"
+              style="
+                position: relative;
+                width: 100%;
+                height: 50vh;
+                min-height: 350px;
+                border-top: 1px solid #d7dce2;
+                border-bottom: 1px solid #d7dce2;
+                border-radius: 0;
+                overflow: hidden;
+              "
+            >
+              <!-- Mapa -->
+              <SisdaiMapa
+                :key="mapInstanceKey"
+                class="gema"
+                :vista="{ centro: [-102.5, 23.6], zoom: 4.5 }"
+              >
+                <!-- Base grisácea clara -->
+                <SisdaiCapaXyz
+                  id="capa-base"
+                  url="https://{a-c}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                />
+                <!-- Vector sobrepuesto -->
+                <SisdaiCapaVectorial
+                  id="capa-preview-ia"
+                  :fuente="previewGeojsonUrl"
+                  :estilo="estiloCapaPreview"
+                  :globo-informativo="obtenerGloboInformativo"
+                />
+
+                <!-- Globo Informativo (Tooltips en Hover) -->
+                <GloboInformativo />
+              </SisdaiMapa>
+
+              <!-- Leyenda superpuesta -->
+              <div
+                class="p-2 borde-redondeado-8 sombra-1"
+                style="
+                  position: absolute;
+                  bottom: 16px;
+                  left: 16px;
+                  z-index: 9999;
+                  background-color: #ffffff;
+                  pointer-events: none;
+                "
+              >
+                <p class="m-0 m-b-2" style="font-weight: 600; font-size: 14px">Leyenda</p>
+
+                <template v-if="previewEspacializacionData?.report_type === 'densidad'">
+                  <div
+                    v-for="cat in categoriasLeyendaDensidad"
+                    :key="cat.nombre"
+                    style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px"
+                  >
+                    <div
+                      :style="`width: 12px; height: 12px; border-radius: 50%; background-color: ${cat.color}; border: 1px solid white; flex-shrink: 0;`"
+                    ></div>
+                    <span style="font-size: 11px; line-height: 1">{{ cat.nombre }}</span>
+                  </div>
+                </template>
+
+                <template v-else-if="previewEspacializacionData?.type === 'espacializacion'">
+                  <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px">
+                    <div
+                      style="
+                        width: 12px;
+                        height: 12px;
+                        border-radius: 50%;
+                        background-color: #a9435b;
+                        border: 1px solid white;
+                        flex-shrink: 0;
+                      "
+                    ></div>
+                    <span style="font-size: 12px; line-height: 1">Ubicaciones detectadas</span>
+                  </div>
+
+                  <div style="display: flex; align-items: center; gap: 6px">
+                    <div
+                      style="
+                        width: 12px;
+                        height: 12px;
+                        border-radius: 50%;
+                        background-color: #cccccc;
+                        border: 1px solid white;
+                        flex-shrink: 0;
+                      "
+                    ></div>
+                    <span style="font-size: 12px; line-height: 1">Baja confianza</span>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <div
+              v-if="!previewGeojsonUrl"
+              class="flex flex-contenido-centrado flex-vertical-centrado fondo-color-neutro borde-redondeado-8 p-3 m-y-2"
+              style="height: 50vh; min-height: 350px"
+            >
+              <span class="pictograma-alerta texto-color-error" style="font-size: 4rem"></span>
+              <p class="m-t-3 texto-centrado">
+                Error al intentar cargar el archivo de espacialización geográfico o archivo
+                inexistente/inválido.
+              </p>
+            </div>
+          </template>
+          <template #pie>
+            <a
+              :href="previewEspacializacionData?.download_url"
+              target="_blank"
+              class="boton-primario boton-chico"
+              style="text-decoration: none"
+            >
+              <span class="pictograma-archivo-descargar m-r-1" aria-hidden="true" /> Descargar
+            </a>
+            <button
+              class="boton-secundario boton-chico m-l-2"
+              aria-label="Cerrar modal"
+              type="button"
+              @click="cerrarPreviewEspacializacion"
+            >
+              Cerrar
+            </button>
+          </template>
+        </SisdaiModal>
+
+        <SisdaiModal ref="modalConfirmaOperacionaGeoespacial" class="modal-grande">
+          <template #encabezado>
+            <h2>Confirma la operación</h2>
+            <p>Revisa la configuración antes de ejecutaren análisis.</p>
+          </template>
+
+          <template #cuerpo>
+            <ul
+              class="fondo-color-acento texto-color-acento borde borde-color-acento borde-redondeado-8 p-x-4"
+              style="width: fit-content; font-weight: 800"
+            >
+              <li>{{ dictTipoOperacionGeo[botonRadioTipoOperacionGeoespacial] }}</li>
+            </ul>
+
+            <dl>
+              <dt>Capa seleccionada:</dt>
+              <dd v-for="value in fuentesSeleccionadas" :key="value.id" class="p-l-2">
+                {{ value.filename }}
+              </dd>
+            </dl>
+
+            <dl>
+              <dt>Instrucciones para el análisis:</dt>
+              <dd class="p-l-2">{{ areaOperacionGeoespacialInstrucciones }}</dd>
+            </dl>
+          </template>
+
+          <template #pie>
+            <button
+              class="boton-primario"
+              aria-label="Generar reporte"
+              type="button"
+              :disabled="!areaOperacionGeoespacialInstrucciones"
+              @click="generarReporte('operacion_geoespacial')"
+            >
+              {{ botonGenerarReporte }}
+            </button>
+            <button
+              class="boton-secundario"
+              aria-label="Regresar a llenar información"
+              type="button"
+              :disabled="false"
+              @click="
+                modalConfirmaOperacionaGeoespacial.cerrarModal();
+                modalOperacionGeoespacialInstrucciones.abrirModal();
+              "
+            >
+              Editar
+            </button>
           </template>
         </SisdaiModal>
       </ClientOnly>
@@ -1575,18 +2470,19 @@ watch(seleccionTipoArchivo, (nv) => {
                 <div class="fondo-color-neutro borde-redondeado-8">
                   <div class="flex p-2" style="row-gap: 8px">
                     <div class="columna-16">
-                      <span class="pictograma-estrella texto-color-acento"></span>
+                      <span class="pictograma-visualizador texto-color-acento"></span>
                     </div>
                     <div class="columna-16">
                       <div class="flex flex-contenido-separado">
                         <div class="columna-8 flex-vertical-final">
-                          <p class="m-0">Herramienta</p>
+                          <p class="m-0">Análisis espacial</p>
                         </div>
                         <div class="flex-vertical-final">
                           <button
                             class="boton-pictograma boton-con-contenedor-secundario boton-grande"
-                            aria-label="Acción a realizar"
+                            aria-label="Operación geospacial"
                             type="button"
+                            @click="abrirModalReporteInfo('operacion-geospacial')"
                           >
                             <span class="pictograma-ia" aria-hidden="true" />
                           </button>
@@ -1632,16 +2528,45 @@ watch(seleccionTipoArchivo, (nv) => {
             class="fondo-color-acento borde-redondeado-8 m-b-2"
           >
             <!-- Estado: PROCESANDO o PENDIENTE -->
-            <div
-              v-if="reporte.status === 'processing' || reporte.status === 'pending'"
-              class="flex p-2"
-            >
-              <span
-                class="texto-color-acento flex-vertical-centrado pictograma-actualizar m-r-1 rotar"
-              />
-              <p class="flex-vertical-centrado m-0">
-                Generando reporte: {{ reporte.report_name }}...
-              </p>
+            <div v-if="reporte.status === 'processing' || reporte.status === 'pending'" class="p-2">
+              <div class="flex" :class="{ 'm-b-1': reporte.type === 'espacializacion' }">
+                <span
+                  class="texto-color-acento flex-vertical-centrado m-r-1"
+                  :class="
+                    reporte.type === 'espacializacion'
+                      ? 'pictograma-mapa-generador'
+                      : 'pictograma-actualizar rotar'
+                  "
+                />
+                <p class="flex-vertical-centrado m-0">
+                  <template v-if="reporte.type === 'espacializacion'">
+                    Espacializando información
+                  </template>
+                  <template v-else> Generando reporte: {{ reporte.report_name }} </template>
+                </p>
+              </div>
+              <!-- Barra de progreso para espacialización simulada -->
+              <div v-if="reporte.type === 'espacializacion'" class="m-t-2">
+                <div
+                  style="
+                    background: rgba(169, 67, 91, 0.2);
+                    height: 8px;
+                    border-radius: 4px;
+                    overflow: hidden;
+                    width: 100%;
+                  "
+                >
+                  <div
+                    :style="`width: ${Math.round(reporte.progress || 0)}%; background: #A9435B; height: 100%; transition: width 0.5s ease-in-out;`"
+                  ></div>
+                </div>
+                <p
+                  class="texto-derecha m-0 m-t-1 texto-color-acento"
+                  style="font-size: 11px; font-weight: 500"
+                >
+                  {{ Math.round(reporte.progress || 0) }}%
+                </p>
+              </div>
             </div>
 
             <!-- Estado: COMPLETADO -->
@@ -1649,33 +2574,85 @@ watch(seleccionTipoArchivo, (nv) => {
               <div
                 class="flex cursor-pointer hover-texto-acento"
                 style="cursor: pointer"
-                @click="abrirPreviewReporte(reporte)"
+                @click="
+                  reporte.type === 'reporte' || reporte.type === 'report'
+                    ? abrirPreviewReporte(reporte)
+                    : abrirPreviewEspacializacion(reporte)
+                "
               >
-                <span class="texto-color-acento flex-vertical-centrado pictograma-reporte" />
-                <p class="flex-vertical-centrado m-0" style="text-decoration: underline">
+                <span
+                  class="texto-color-acento flex-vertical-centrado m-r-1"
+                  :class="
+                    reporte.type === 'espacializacion'
+                      ? 'pictograma-mapa-generador'
+                      : 'pictograma-reporte'
+                  "
+                />
+                <p
+                  class="flex-vertical-centrado m-0"
+                  :style="reporte.type !== 'espacializacion' ? 'text-decoration: underline' : ''"
+                >
                   {{ reporte.report_name }}
                 </p>
               </div>
 
-              <div>
+              <div class="flex" style="gap: 2px; flex-shrink: 0">
                 <a
                   :href="reporte.download_url"
                   target="_blank"
                   class="boton-pictograma boton-sin-contenedor-secundario"
-                  aria-label="Descargar reporte"
+                  aria-label="Descargar archivo"
                 >
                   <span class="pictograma-archivo-descargar" aria-hidden="true" />
                 </a>
+                <button
+                  class="boton-pictograma boton-sin-contenedor-secundario"
+                  :aria-label="`Eliminar ${reporte.type === 'espacializacion' ? 'espacialización' : 'reporte'}`"
+                  type="button"
+                  @click.stop="pedirConfirmacionEliminar(reporte)"
+                >
+                  <span class="pictograma-eliminar" aria-hidden="true" />
+                </button>
               </div>
             </div>
 
             <!-- Estado: ERROR -->
             <div v-else-if="reporte.status === 'error'" class="flex p-2">
               <span class="texto-color-acento flex-vertical-centrado pictograma-cerrar m-r-1" />
-              <p class="flex-vertical-centrado m-0">Error generando: {{ reporte.report_name }}</p>
+              <p class="flex-vertical-centrado m-0">Error procesando: {{ reporte.report_name }}</p>
             </div>
           </div>
         </div>
+        <!-- Modal confirmación de eliminación -->
+        <ClientOnly>
+          <SisdaiModal ref="modalConfirmarEliminar">
+            <template #encabezado>
+              <h2 class="m-0">Eliminar elemento</h2>
+            </template>
+            <template #cuerpo>
+              <p>
+                ¿Deseas eliminar
+                <strong>{{ reporteParaEliminar?.report_name }}</strong
+                >? Esta acción no se puede deshacer.
+              </p>
+            </template>
+            <template #pie>
+              <button class="boton-primario boton-chico" type="button" @click="confirmarEliminar">
+                Eliminar
+              </button>
+              <button
+                class="boton-secundario boton-chico"
+                type="button"
+                @click="
+                  modalConfirmarEliminar.cerrarModal();
+                  reporteParaEliminar = null;
+                "
+              >
+                Cancelar
+              </button>
+            </template>
+          </SisdaiModal>
+        </ClientOnly>
       </div>
     </template>
   </IaLayoutPaneles>
@@ -1699,6 +2676,31 @@ watch(seleccionTipoArchivo, (nv) => {
 </style>
 
 <style lang="scss" scoped>
+.tarjetas-tipo-operacion-geo {
+  input[type='radio'] + label {
+    width: 100%;
+    padding: 0px;
+    border: none;
+    border-radius: 16px;
+    display: block;
+  }
+
+  input[type='radio']:checked + label {
+    box-shadow:
+      0 0 0 2px var(--tarjeta-enfoque-borde),
+      0 0 8px 1px var(--tarjeta-enfoque-sombra);
+  }
+
+  .tarjeta-hipervinculo-interno {
+    box-shadow: none;
+
+    &:hover,
+    &:focus,
+    &:focus-visible {
+      box-shadow: 0 0 8px var(--campo-enfoque-sombra);
+    }
+  }
+}
 fieldset:has([type='checkbox']:required):invalid + .formulario-ayuda::before {
   content: 'Una o más casillas necesitan estar verificadas. ';
 }
@@ -1964,5 +2966,67 @@ input[type='file'] {
   border: solid white;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
+}
+
+/* Fix CSS para el Globo Informativo de Sisdai (Aparecía invisible al estar en el slot) */
+:deep(.globo-informacion-capa) {
+  position: absolute;
+  z-index: 1000;
+  display: block;
+  visibility: visible;
+  pointer-events: none;
+}
+:deep(.globo-informacion-capa.oculto) {
+  visibility: hidden;
+}
+:deep(.globo-informacion-cuerpo) {
+  background: #333333;
+  border-radius: 8px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+  padding: 8px 12px;
+  color: white;
+  font-size: 12px;
+  max-width: 280px;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+/* Permitir que el mapa espacializado ocupe el 100% del ancho del modal sin márgenes */
+:deep(.modal-espacializacion .modal-contenedor) {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  padding-bottom: 0 !important;
+}
+:deep(.modal.modal-espacializacion .modal-cuerpo) {
+  padding: 0 !important;
+}
+:deep(.modal-espacializacion .modal-pie) {
+  padding: 0 24px 24px 24px !important;
+}
+
+.mensaje-ia {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 8px;
+
+  background-color: #e3ebfb;
+  border: 1px solid #1440cc;
+  color: #1440cc;
+  margin-top: 15px;
+
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.mensaje-ia p {
+  margin: 0;
+}
+
+.mensaje-ia .pictograma-informacion {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  line-height: 1.2;
 }
 </style>

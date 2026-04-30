@@ -4,7 +4,12 @@ const config = useRuntimeConfig();
 
 export default defineEventHandler(async (event) => {
   const form = formidable({ multiples: false });
-  const data = await new Promise<{ fields: Fields; files: Files }>((resolve, reject) => {
+  const data = await new Promise<{
+    // @ts-ignore
+    fields: Fields;
+    // @ts-ignore
+    files: Files;
+  }>((resolve, reject) => {
     form.parse(event.node.req, (err, fields, files) => {
       if (err) reject(err);
       else resolve({ fields, files });
