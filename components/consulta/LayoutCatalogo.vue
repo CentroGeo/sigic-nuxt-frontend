@@ -256,9 +256,14 @@ watch(params, async () => {
 onMounted(async () => {
   storeFilters.resetAll();
   storeFilters.buildQueryParams();
-  if (resources.value.length !== 0) {
-    updateResources(resources.value);
-  }
+  
+  // Limpia los recursos del store de Pinia para forzar una consulta limpia al backend.
+  // Esto evita mostrar capas que hayan sido borradas en el servidor mientras la pestaña estaba abierta.
+  storeResources.resetByType(storeConsulta.resourceType);
+  
+  isLoading.value = true;
+  await buildCategoriesDict();
+  isLoading.value = false;
 });
 </script>
 

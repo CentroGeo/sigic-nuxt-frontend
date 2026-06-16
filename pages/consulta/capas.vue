@@ -97,7 +97,9 @@ async function addAttribute(pk) {
   const maxAttrs = 5;
   const resource = await gnoxyFetch(`${config.public.geonodeApi}/datasets/${pk}`);
   if (!resource.ok) {
-    const alternateTitle = storeResources.findResource(pk, 'dataLayer')['alternate'];
+    // Evitamos que falle si el recurso es indefinido (ej. si fue borrado del servidor)
+    const resourceObj = storeResources.findResource(pk, 'dataLayer');
+    const alternateTitle = resourceObj ? resourceObj['alternate'] : pk;
     attributes.value[alternateTitle] = [];
   } else {
     const res = await resource.json();

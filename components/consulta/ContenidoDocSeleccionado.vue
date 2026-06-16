@@ -16,9 +16,12 @@ const selectedResource = computed({
   get: () => storeSelected.lastVisible().pk,
   set: (newSelectedPk) => storeSelected.setOnlyOneVisible(newSelectedPk),
 });
+// Evalúa si la tabla de datos posee geometría espacial válida protegiendo accesos nulos.
+// Se valida la existencia del recurso para evitar errores si fue borrado del backend.
 const hasGeometry = computed(() => {
   if (props.resourceType !== resourceTypeDic.dataTable) return false;
-  if (resourceElement.value['extent'] === undefined) return false;
+  // Comprobamos que el recurso esté definido antes de leer su propiedad 'extent'
+  if (!resourceElement.value || resourceElement.value['extent'] === undefined) return false;
   const a = resourceElement.value.extent.coords.join(',');
   const b = [-1, -1, 0, 0].join(',');
   if (a === b) return false;

@@ -134,15 +134,19 @@ async function updateFunctions() {
   actualButtons.value = buttons;
 }
 
+// Detecta cambios en la capa seleccionada y valida que esté definida antes de cargar sus funciones
 watch(resourceElement, async () => {
-  await updateFunctions();
-  isResourceReady.value = true;
-  selectedStyle.value = storeSelected.byPk(resourceElement.value.pk).estilo;
-  emit('resourceReady');
+  if (resourceElement.value && resourceElement.value.pk) {
+    await updateFunctions();
+    isResourceReady.value = true;
+    selectedStyle.value = storeSelected.byPk(resourceElement.value.pk)?.estilo;
+    emit('resourceReady');
+  }
 });
 
 onMounted(async () => {
-  if (resourceElement.value.title) {
+  // Inicializa las funciones de la capa si el recurso y su título están definidos
+  if (resourceElement.value && resourceElement.value.title) {
     await updateFunctions();
     isResourceReady.value = true;
 
@@ -150,8 +154,14 @@ onMounted(async () => {
   }
 });
 
+// Sincroniza los cambios del estilo seleccionado en el visor validando que la capa exista
 watch(selectedStyle, (nv) => {
-  storeSelected.byPk(resourceElement.value.pk).estilo = nv;
+  if (resourceElement.value && resourceElement.value.pk) {
+    const selected = storeSelected.byPk(resourceElement.value.pk);
+    if (selected) {
+      selected.estilo = nv;
+    }
+  }
 });
 </script>
 
