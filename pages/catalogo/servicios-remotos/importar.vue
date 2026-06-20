@@ -187,7 +187,7 @@ onMounted(async () => {
         <div class="flex alineacion-izquierda ancho-lectura">
           <nuxt-link
             to="/catalogo/explorar/catalogos-externos"
-            aria-label="regresar a mis archivos"
+            aria-label="regresar a mis recursos"
           >
             <span
               class="pictograma-flecha-izquierda pictograma-mediano texto-color-acento"
@@ -280,7 +280,7 @@ onMounted(async () => {
               class="flex flex-contenido-separado texto-color-confirmacion fondo-color-confirmacion borde borde-color-confirmacion p-2 borde-redondeado-8"
             >
               <span><span class="pictograma-aprobado" /> Recursos importados con éxito.</span>
-              <nuxt-link to="/catalogo/mis-archivos/metadatos-pendientes"
+              <nuxt-link to="/catalogo/mis-recursos/metadatos-pendientes"
                 >Ir a Editar Metadatos</nuxt-link
               >
             </p>

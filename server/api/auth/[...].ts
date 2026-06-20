@@ -16,6 +16,7 @@ export default NuxtAuthHandler({
       clientId: process.env.KEYCLOAK_CLIENT_ID,
       issuer: process.env.KEYCLOAK_ISSUER,
       clientSecret: process.env.KEYCLOAK_CLIENT_SECRET,
+      checks: ['none'],
     }),
   ],
 

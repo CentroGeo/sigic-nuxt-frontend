@@ -414,8 +414,8 @@ const handleDelete = async () => {
           >
             El recurso <b class="texto-peso-600">"{{ resourceFilename }}"</b> no está público en
             geonode.
-            <nuxt-link to="/catalogo/mis-archivos/metadatos-pendientes"
-              >Ver en mis archivos</nuxt-link
+            <nuxt-link to="/catalogo/mis-recursos/metadatos-pendientes"
+              >Ver en mis recursos</nuxt-link
             >
           </p>
         </template>

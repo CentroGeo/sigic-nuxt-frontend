@@ -28,6 +28,44 @@ const statusDict = {
   'updating-harvestable-resources': 'Listando recursos',
   'harvesting-resources': 'Cosechando recursos',
 };
+const retryingId = ref(null);
+const retryError = ref(null);
+
+async function retryHarvester(serviceId) {
+  retryingId.value = serviceId;
+  retryError.value = null;
+  try {
+    const result = await $fetch('/api/retry-harvesting', {
+      method: 'POST',
+      body: { serviceId },
+    });
+    if (!result.success) {
+      retryError.value = result.message;
+      retryingId.value = null;
+      return;
+    }
+    // Esperar a que el harvester termine (status === 'ready') antes de refrescar
+    const POLL_INTERVAL = 4000;
+    const MAX_WAIT = 120000;
+    const start = Date.now();
+    await new Promise((resolve) => {
+      const poll = async () => {
+        await fetchResources();
+        const harvester = harvesters.value.find((h) => h.service_id === serviceId);
+        if (!harvester || harvester.status === 'ready' || Date.now() - start > MAX_WAIT) {
+          resolve();
+        } else {
+          setTimeout(poll, POLL_INTERVAL);
+        }
+      };
+      setTimeout(poll, POLL_INTERVAL);
+    });
+  } catch {
+    retryError.value = 'No se pudo reintentar la cosecha';
+  } finally {
+    retryingId.value = null;
+  }
+}
 /**
  * Esta función obtiene el pk de la persona usuaria
  */
@@ -304,11 +342,21 @@ onMounted(async () => {
               >
                 {{ statusDict[harvester.status] }}
               </div>
-              <div
-                v-else
-                class="texto-color-alerta texto-centrado fondo-color-alerta borde borde-color-alerta borde-redondeado-8 p-1"
-              >
-                {{ statusDict[harvester.status] }}
+              <div v-else>
+                <div
+                  class="texto-color-alerta texto-centrado fondo-color-alerta borde borde-color-alerta borde-redondeado-8 p-1"
+                >
+                  {{ statusDict[harvester.status] || harvester.status }}
+                </div>
+                <button
+                  class="boton-secundario boton-chico m-t-1"
+                  style="width: 100%"
+                  :disabled="retryingId === harvester.service_id"
+                  @click="retryHarvester(harvester.service_id)"
+                >
+                  <span v-if="retryingId === harvester.service_id">Reintentando...</span>
+                  <span v-else>Reintentar cosecha</span>
+                </button>
               </div>
             </td>
             <td>
@@ -348,6 +396,17 @@ onMounted(async () => {
         :total-paginas="totalPags"
         @cambio="paginaActual = $event"
       />
+    </div>
+
+    <!--Mensaje de error al reintentar cosecha-->
+    <div
+      v-if="retryError"
+      class="contenedor ancho-lectura borde-redondeado-16 texto-color-error fondo-color-error p-2 m-2 flex flex-contenido-separado"
+    >
+      <span><span class="pictograma-alerta" /> {{ retryError }}</span>
+      <button class="boton-sin-contenedor-secundario" @click="retryError = null">
+        <span class="pictograma-cerrar" />
+      </button>
     </div>
 
     <!--Mensaje de error si falla la petición-->

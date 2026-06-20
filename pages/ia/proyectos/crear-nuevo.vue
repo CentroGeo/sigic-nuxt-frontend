@@ -29,6 +29,8 @@ const campoBusqueda = ref('');
 
 const agregaCatalogoModal = ref(null);
 const seleccionCatalogoModal = ref(null);
+
+/* eslint-disable no-unused-vars */
 const dictTipoRecurso = {
   dataLayer: 'capas',
   dataTable: 'tablas',
@@ -128,6 +130,7 @@ async function fetchNewData() {
 }
 
 // Selecciona la categoría en el modal de fuentes de catálogo
+
 async function seleccionarCategoria(categoria) {
   if (categoriaSeleccionada.value !== categoriesDict.value[categoria].label) {
     // reseteando recursos filtrados por categoría y valores
@@ -159,6 +162,7 @@ function removerBusquedaFiltro() {
 }
 
 // Método para buscar el recurso con filtro el modal de fuentes de catálogo
+
 async function buscarRecurso() {
   if (categoriaSeleccionada.value !== null) {
     // reseteando recursos filtrados por categoría y valores
@@ -184,6 +188,7 @@ async function buscarRecurso() {
 }
 
 // Remueve la búsqueda en el filtro del modal de fuentes de catálogo
+
 async function removerBusqueda() {
   storeFilters.updateFilter('inputSearch', '');
   if (categoriaSeleccionada.value !== null && inputSearch.value === '') {
@@ -204,6 +209,7 @@ async function removerBusqueda() {
 }
 
 // Abre el modal para elegir el tipo de fuente del catálogo
+
 function agregarFuentesCatalogo() {
   // limpiando recursos filtrados por categoría y seleccionados
   storeFilters.updateFilter('inputSearch', '');
@@ -215,6 +221,7 @@ function agregarFuentesCatalogo() {
 }
 
 // Abre el modal para agregar fuentes del catálogo
+
 async function siguenteAgregar() {
   agregaCatalogoModal.value.cerrarModal();
   seleccionCatalogoModal.value.abrirModal();
@@ -246,6 +253,7 @@ function seleccionarProyecto(proyecto) {
 }
 
 // Método para manejar los archivos seleccionados del catálogo de geonode
+
 function cargarArchivosGeonode() {
   seleccionCatalogoModal?.value.cerrarModal();
   // se obtiene primero del geonode
@@ -262,6 +270,7 @@ function cargarArchivosGeonode() {
   archivosGeonode.value = [...archivosGeonode.value, ...nuevosArchivos];
   archivosTabla.value = [...archivosSeleccionados.value, ...archivosGeonode.value];
 }
+/* eslint-enable no-unused-vars */
 
 // Método para manejar la selección de archivos
 const manejarSeleccionArchivos = (event) => {
@@ -436,7 +445,8 @@ onMounted(() => {
                   :es_obligatorio="false"
                   class="m-b-3"
                 />
-                <SisdaiGrupoBotonesRadio leyenda="Visibilidad">
+                <!-- OCULTO TEMPORALMENTE: Selección de visibilidad del proyecto -->
+                <!-- <SisdaiGrupoBotonesRadio leyenda="Visibilidad">
                   <SisdaiBotonRadio
                     v-model="visibilidadProyecto"
                     etiqueta="Público"
@@ -449,7 +459,7 @@ onMounted(() => {
                     value="privado"
                     name="visibilidad"
                   />
-                </SisdaiGrupoBotonesRadio>
+                </SisdaiGrupoBotonesRadio> -->
               </ClientOnly>
             </form>
           </div>
@@ -462,14 +472,14 @@ onMounted(() => {
               <h2>Agregar fuentes de información</h2>
 
               <div>
-                <button
+                <!-- <button
                   class="boton-pictograma boton-primario m-r-2"
                   aria-label="Agregar fuentes del catalogo"
                   @click="agregarFuentesCatalogo"
                 >
                   Agregar del catálogo
                   <span class="pictograma-agregar" aria-hidden="true" />
-                </button>
+                </button> -->
 
                 <button
                   class="boton-pictograma boton-primario"
@@ -479,6 +489,7 @@ onMounted(() => {
                   Subir archivos
                   <span class="pictograma-archivo-subir" aria-hidden="true" />
                 </button>
+
                 <input
                   ref="fileInput"
                   type="file"
@@ -487,6 +498,9 @@ onMounted(() => {
                   style="display: none"
                   @change="manejarSeleccionArchivos"
                 />
+                <p class="m-y-1 texto-derecha">
+                  <small><b>Solo archivos PDF, CSV y Word.</b></small>
+                </p>
               </div>
             </div>
 

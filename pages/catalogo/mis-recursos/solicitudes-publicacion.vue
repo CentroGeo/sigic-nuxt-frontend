@@ -1,0 +1,325 @@
+<script setup>
+definePageMeta({
+  middleware: 'sidebase-auth',
+  bodyAttrs: {
+    class: '',
+  },
+});
+
+const storeResources = useResourcesCatalogoStore();
+const storeFilters = useFilteredResources();
+const storeCatalogo = useCatalogoStore();
+const section = 'publicacion';
+const isLoading = computed(() => storeResources.isLoading);
+const params = computed(() => storeFilters.filters.queryParams);
+const totalResources = computed(() => storeResources.myTotalBySection(section));
+const resources = computed(() => storeResources.mineBySection(section));
+const tableResources = ref([]);
+const variables = ['titulo', 'estatus', 'tipo_recurso', 'categoria', 'acciones'];
+const config = useRuntimeConfig();
+
+const paginaActual = ref(0);
+const tamanioPagina = 10;
+const totalPags = computed(() => Math.ceil(totalResources.value / tamanioPagina));
+
+//const modalFiltroAvanzado = ref(null);
+//const isFilterActive = ref(false);
+const seleccionTipoArchivo = computed({
+  get: () => storeFilters.filters.requests,
+  set: (value) => storeFilters.updateFilter('requests', value),
+});
+
+// const seleccionOrden = ref('updated_at');
+/* const seleccionOrden = computed({
+  get: () => storeFilters.filters.sort,
+  set: (value) => storeFilters.updateFilter('sort', value),
+}); */
+
+/* const inputSearch = computed({
+  get: () => storeFilters.filters.inputSearch,
+  set: (value) => storeFilters.updateFilter('inputSearch', cleanInput(value)),
+}); */
+
+const hayMetaPendiente = computed(() =>
+  storeResources.myTotalBySection('pendientes') > 0 ? true : false
+);
+
+/**
+ * Valida si el tipo de recurso es documento o dataset con geometría o no
+ * @param recurso del catálogo
+ * @returns {String} ya sea Documentos, Capa geográfica o Datos tabulados
+ */
+function tipoRecurso(recurso) {
+  let tipo;
+  if (recurso.resource_type === 'document') {
+    tipo = 'Documentos';
+  } else if (recurso.sourcetype === 'REMOTE') {
+    tipo = 'Capa Geográfica, Catálogo Externo';
+  } else {
+    tipo = isGeometricExtension(recurso.extent) ? 'Capa Geográfica' : 'Datos Tabulados';
+  }
+  return tipo;
+}
+
+const dictEstatus = {
+  pending: 'Pendiente',
+  published: 'Publicado',
+  rejected: 'No aceptado',
+  on_review: 'En revisión',
+};
+
+/**
+ * Formatea la fecha del recurso a esta forma: dd/mm/aaaa
+ * @param fecha de actualización del recurso
+ * @returns {Date} objeto con la fecha
+ */
+function formatearFecha(fecha) {
+  return new Date(fecha).toLocaleDateString('es-ES', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+function updateResources() {
+  // obteniendo datos por las props de la tabla
+  tableResources.value = resources.value.map((d) => {
+    return {
+      titulo: d.resource.title,
+      pk: `${d.resource.pk}`,
+      tipo_recurso: tipoRecurso(d.resource),
+      categoria: d.resource.category,
+      actualizacion: formatearFecha(d.updated_at),
+      estatus: dictEstatus[d.status],
+      //acciones: d.status === 'pending' ? 'Ver, Comentarios, Cancelar' : 'Ver, Comentarios',
+      acciones: 'Ver, Comentarios',
+      comentarios: d.rejection_reason,
+      revisor: d.reviewer?.username,
+    };
+  });
+}
+
+function fetchNewData() {
+  storeResources.resetBySection(section);
+  storeResources.getMyResourcesByPage(section, paginaActual.value + 1, tamanioPagina, {
+    ...params.value,
+    'filter{owner}': storeCatalogo.userInfo.pk,
+  });
+}
+
+watch([seleccionTipoArchivo], () => {
+  storeFilters.buildQueryParams('all');
+});
+
+watch(paginaActual, () => {
+  fetchNewData();
+});
+
+watch(params, () => {
+  paginaActual.value = 0;
+  storeResources.getMyTotal('publicacion', {
+    ...params.value,
+    'filter{owner}': storeCatalogo.userInfo.pk,
+  });
+  fetchNewData();
+});
+
+watch(
+  resources,
+  () => {
+    updateResources();
+  },
+  { deep: true }
+);
+
+onMounted(async () => {
+  await storeCatalogo.getUserInfo();
+  storeFilters.resetAll();
+  storeFilters.buildQueryParams('all');
+  storeResources.getMyTotal('disponibles', params.value);
+  storeResources.getMyTotal('pendientes', params.value);
+});
+</script>
+
+<template>
+  <UiLayoutPaneles :estado-colapable="storeCatalogo.catalogoColapsado">
+    <template #catalogo>
+      <CatalogoListaMenuLateral />
+    </template>
+
+    <template #visualizador>
+      <main class="contenedor m-b-10 m-t-3">
+        <!--Controles de filtros-->
+        <div class="flex">
+          <!--class="columna-4"-->
+          <div class="columna-7">
+            <ClientOnly>
+              <label for="selector-tipo-solicitudes">Estatus</label>
+              <select
+                v-model="seleccionTipoArchivo"
+                name="selector-tipo-solicitudes"
+                class="m-b-2"
+                :disabled="isLoading"
+              >
+                <option value="all">Todos los estatus</option>
+                <option value="on_review">En revisión</option>
+                <option value="published">Publicados</option>
+                <option value="pending">Pendientes</option>
+                <option value="rejected">No aceptados</option>
+              </select>
+            </ClientOnly>
+          </div>
+          <!--class="columna-4"-->
+          <!-- <div class="columna-7">
+            <ClientOnly>
+              <label for="selector-orden-solicitudes">Ordenar por</label>
+              <select
+                v-model="seleccionOrden"
+                name="selector-tipo-solicitudes"
+                class="m-b-2"
+                :disabled="true"
+              >
+                <option value="title">Título</option>
+                <option value="category">Categoría</option>
+                <option value="updated_at">Más reciente</option>
+                <option value="-updated_at">Más antiguo</option>
+              </select>
+            </ClientOnly>
+          </div> -->
+          <div class="columna-8">
+            <div class="flex flex-contenido-separado">
+              <!--Campo de busqueda-->
+              <!-- <div class="columna-14">
+                <ClientOnly>
+                  <label for="idunicobusquedamisarchivos"> Campo de búsqueda </label>
+                  <form class="campo-busqueda" style="height: 40px" @submit.prevent>
+                    <input
+                      id="idunicobusquedamisarchivos"
+                      v-model="inputSearch"
+                      type="search"
+                      class="campo-busqueda-entrada"
+                      placeholder="Campo de búsqueda"
+                    />
+
+                    <button
+                      style="margin: 0; margin-right: 4px"
+                      class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
+                      aria-label="Borrar"
+                      type="button"
+                      @click="resetSearch"
+                    >
+                      <span aria-hidden="true" class="pictograma-cerrar" />
+                    </button>
+
+                    <button
+                      class="boton-primario boton-pictograma campo-busqueda-buscar"
+                      aria-label="Buscar"
+                      type="button"
+                    >
+                      <span class="pictograma-buscar" aria-hidden="true" />
+                    </button>
+                  </form>
+                </ClientOnly>
+              </div> -->
+              <!--Busqueda avanzada-->
+              <!-- <div class="columna-2 flex-vertical-final">
+                <button
+                  :class="
+                    isFilterActive
+                      ? 'boton-primario boton-pictograma boton-grande'
+                      : 'boton-secundario boton-pictograma boton-grande'
+                  "
+                  aria-label="Filtro Avanzado"
+                  type="button"
+                  @click="modalFiltroAvanzado.abrirModalBusqueda"
+                >
+                  <span class="pictograma-filtro" aria-hidden="true" />
+                </button>
+              </div> -->
+            </div>
+          </div>
+        </div>
+
+        <CatalogoMenuMisArchivos
+          :opciones="[
+            { texto: 'Disponibles', ruta: '/catalogo/mis-recursos' },
+            {
+              texto: 'Metadatos pendientes',
+              ruta: '/catalogo/mis-recursos/metadatos-pendientes',
+              notificacion: hayMetaPendiente,
+            },
+            {
+              texto: 'Solicitudes de publicación',
+              ruta: '/catalogo/mis-recursos/solicitudes-publicacion',
+              notificacion: totalResources > 0,
+            },
+          ]"
+        />
+
+        <div class="flex">
+          <!-- <p
+            class="texto-color-alerta fondo-color-alerta borde borde-color-alerta borde-redondeado-2 p-2 m-0"
+          >
+            Si el estatus de tu publicación aparece como <i>No aceptada</i>, revisa tu correo
+            electrónico donde encontrarás los motivos del rechazo y las indicaciones para realizar
+            las correciones necesarias.
+          </p> -->
+          <h2>Solicitudes de publicación</h2>
+          <UiNumeroElementos :numero="totalResources" />
+        </div>
+        <p>
+          En esta tabla se muestran los archivos enviados para revisión antes de publicarse en el
+          catálogo público de SIGIC. También puedes consultar el estatus de su aprobación.
+        </p>
+
+        <div v-if="isLoading" class="flex flex-contenido-centrado m-t-3">
+          <img
+            class="color-invertir"
+            :src="`${config.app.baseURL}img/loader.gif`"
+            alt="...Cargando"
+            height="120px"
+          />
+        </div>
+
+        <div v-if="totalResources > 0 && !isLoading" class="flex">
+          <div class="columna-16">
+            <ClientOnly>
+              <UiTablaAccesibleV2 :variables="variables" :datos="tableResources" />
+              <UiPaginador
+                :pagina-parent="paginaActual"
+                :total-paginas="totalPags"
+                @cambio="paginaActual = $event"
+              />
+            </ClientOnly>
+          </div>
+        </div>
+
+        <div v-if="totalResources === 0 && !isLoading">
+          <div class="flex flex-contenido-centrado">
+            <div class="columna-7">
+              <div class="fondo-color-acento borde-redondeado-8 p-x-3 p-y-1 m-b-3">
+                <p>Aún no hay archivos en esta sección.</p>
+                <p>
+                  No tienes solicitudes de publicación activas. Para iniciar, dirígete a Mis
+                  archivos > Disponibles y selecciona uno para enviar a publicación.
+                </p>
+              </div>
+              <div class="flex flex-contenido-centrado">
+                <NuxtLink class="boton boton-primario" to="/catalogo/mis-recursos"
+                  >Disponibles
+                </NuxtLink>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Modal Búsqueda avanzada -->
+      <!-- <ConsultaModalBusqueda
+        ref="modalFiltroAvanzado"
+        @apply-filter="console.log('applyAdvancedFilter')"
+        @reset-filter="console.log('resetAdvancedFilter')"
+      /> -->
+    </template>
+  </UiLayoutPaneles>
+</template>

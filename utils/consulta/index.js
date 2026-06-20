@@ -32,8 +32,32 @@ export const categoriesInSpanish = {
   Transportation: 'Transporte',
   'Utilities Communication': 'Servicios Públicos y Comunicación',
   'Sin Clasificar': 'Sin Clasificar',
+  'Catálogo externo': 'Catálogo externo',
+};
+export const categoriesNamesInSpanish = {
+  biota: 'Biota',
+  boundaries: 'Fronteras',
+  climatologyMeteorologyAtmosphere: 'Climatología, Meteorología y Atmósfera',
+  economy: 'Economía',
+  elevation: 'Elevación',
+  environment: 'Medio Ambiente',
+  farming: 'Agricultura',
+  geoscientificInformation: 'Información Geocientífica',
+  health: 'Salud',
+  imageryBaseMapsEarthCover: 'Mapas Base y Cobertura Terrestre',
+  inlandWaters: 'Aguas Continentales',
+  intelligenceMilitary: 'Inteligencia Militar',
+  location: 'Ubicación',
+  oceans: 'Océanos',
+  planningCadastre: 'Planeación Catastral',
+  population: 'Población',
+  society: 'Sociedad',
+  structure: 'Estructura',
+  transportation: 'Transporte',
+  utilitiesCommunication: 'Servicios Públicos y Comunicación',
 };
 export const categoriesNames = {
+  externalCatalog: 'Catálogo externo',
   biota: 'Biota',
   boundaries: 'Boundaries',
   climatologyMeteorologyAtmosphere: 'Climatology Meteorology Atmosphere',
@@ -56,6 +80,7 @@ export const categoriesNames = {
   utilitiesCommunication: 'Utilities Communication',
 };
 export const categoriesValues = {
+  'Catálogo externo': 'externalCatalog',
   Biota: 'biota',
   Boundaries: 'boundaries',
   'Climatology Meteorology Atmosphere': 'climatologyMeteorologyAtmosphere',

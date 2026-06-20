@@ -21,6 +21,7 @@ const props = defineProps({
   },
 });
 const storeCatalogo = useCatalogoStore();
+const mapasStore = useMapasStore();
 const config = useRuntimeConfig();
 const route = useRoute();
 const router = useRouter();
@@ -36,6 +37,7 @@ const downloadOneChild = ref(null);
 const releaseRequest = ref(null);
 const resourceType = ref('');
 const modalEliminar = ref(null);
+const isMapDelete = ref(false);
 const resourceToDeleteTitle = ref('');
 const resourceToDeletePk = ref(null);
 const resourceToDelete = ref(null);
@@ -52,7 +54,7 @@ const modalCancelarSolicitud = ref(null);
 const dictTable = ref({
   pk: 'pk',
   titulo: 'Título',
-  tipo_recurso: 'Tipo de archivo',
+  tipo_recurso: 'Tipo de recurso',
   categoria: 'Categoría',
   actualizacion: 'Actualización',
   acciones: 'Acciones',
@@ -75,14 +77,14 @@ function irARutaConQuery(recurso) {
         : 'dataTable';
 
   navigateTo({
-    path: '/catalogo/mis-archivos/editar/MetadatosBasicos',
+    path: '/catalogo/mis-recursos/editar/MetadatosBasicos',
     query: { data: recurso.pk, type: tipoRecurso },
   });
   // evitar problemas con espacios con JSON.stingify
   //const pk = encodeURIComponent(JSON.stringify({ pk: objeto.pk }));
   /*   if (objeto.tipo_recurso === 'Capa geográfica') {
     navigateTo({
-      path: '/catalogo/mis-archivos/editar-estilo',
+      path: '/catalogo/mis-recursos/editar-estilo',
       query: { data: pk },
     });*/
 }
@@ -298,6 +300,35 @@ function notifyDeleteResource(resource) {
   resourceToDeleteTitle.value = resource.titulo;
   resourceToDeletePk.value = resource.pk;
   resourceToDelete.value = resource.recurso_completo;
+  isMapDelete.value = false;
+  isBeingDeleted.value = false;
+  modalEliminar.value?.abrirModal();
+}
+
+/**
+ * Pre-visualizar un mapa: lleva a la sección de consulta de mapas.
+ */
+function previsualizarMapa() {
+  navigateTo('/consulta/mapas');
+}
+
+/**
+ * Editar la configuración de un mapa.
+ * @param mapa fila de la tabla (usa pk = id del mapa)
+ */
+function editarMapa(mapa) {
+  navigateTo(`/geocontenidos/mapas/${mapa.pk}/editar`);
+}
+
+/**
+ * Abre el modal de confirmación para eliminar un mapa.
+ * @param mapa fila de la tabla
+ */
+function notifyDeleteMapa(mapa) {
+  wasDeletionSuccesful.value = null;
+  resourceToDeleteTitle.value = mapa.titulo;
+  resourceToDeletePk.value = mapa.pk;
+  isMapDelete.value = true;
   isBeingDeleted.value = false;
   modalEliminar.value?.abrirModal();
 }
@@ -306,6 +337,7 @@ function notifyDeleteResource(resource) {
  * Cierra el modal de confirmación de eliminación de un recurso
  */
 function cancelarEliminar() {
+  isMapDelete.value = false;
   modalEliminar.value?.cerrarModal();
 }
 
@@ -404,6 +436,19 @@ async function borrarLocal() {
  */
 async function confirmarEliminar() {
   isBeingDeleted.value = true;
+
+  // Eliminación de mapa (API sigic-maps)
+  if (isMapDelete.value) {
+    wasDeletionSuccesful.value = await mapasStore.eliminarMapa(resourceToDeletePk.value);
+    await wait(1500);
+    isBeingDeleted.value = false;
+    if (wasDeletionSuccesful.value) {
+      modalEliminar.value?.cerrarModal();
+      useRouter().go(0);
+    }
+    return;
+  }
+
   let isRemoteDeleted;
   if (resourceToDelete.value.sourcetype === 'REMOTE') {
     isRemoteDeleted = await borrarRemoto();
@@ -537,6 +582,17 @@ async function removerRevision() {
             <!-- Tipo de recurso -->
             <div v-if="variable === 'tipo_recurso'" class="flex" style="gap: 8px">
               <div
+                v-if="datum[variable] === 'Mapa'"
+                class="texto-centrado fondo-color-acento p-1 texto-color-acento borde borde-redondeado-12"
+                style="width: max-content"
+              >
+                <span>
+                  <span class="pictograma-mapa-generador" />
+                  Mapa
+                </span>
+              </div>
+
+              <div
                 v-if="datum[variable] === 'Documentos'"
                 class="texto-centrado fondo-color-acento p-1 texto-color-acento borde borde-redondeado-12"
                 style="width: max-content"
@@ -591,111 +647,157 @@ async function removerRevision() {
             </div>
 
             <!-- Actualización -->
-            <div v-if="variable === 'actualizacion'">{{ formatearFecha(datum[variable]) }}</div>
+            <div v-if="variable === 'actualizacion'">
+              {{ datum[variable] ? formatearFecha(datum[variable]) : '' }}
+            </div>
 
             <!-- Acciones -->
             <div v-if="variable === 'acciones'">
               <div class="flex-width">
-                <button
-                  v-if="datum[variable].split(', ').includes('Editar')"
-                  v-globo-informacion:izquierda="'Editar'"
-                  class="boton-pictograma boton-secundario"
-                  aria-label="Editar metadatos"
-                  type="button"
-                  @click="irARutaConQuery(datum)"
-                >
-                  <span class="pictograma-editar"></span>
-                </button>
-                <button
-                  v-if="datum[variable].split(', ').includes('Ver')"
-                  v-globo-informacion:izquierda="'Ver en visualizador'"
-                  class="boton-pictograma boton-secundario"
-                  aria-label="Ver en visualizador"
-                  type="button"
-                  @click="openResourceView(datum)"
-                >
-                  <span class="pictograma-previsualizar"></span>
-                </button>
-                <button
-                  v-if="datum[variable].split(', ').includes('Visualizar')"
-                  v-globo-informacion:izquierda="'Visualizar'"
-                  class="boton-pictograma boton-secundario"
-                  aria-label="Visualizar archivo"
-                  type="button"
-                  @click="openResourceReview(datum)"
-                >
-                  <span class="pictograma-ayuda"></span>
-                </button>
-                <button
-                  v-if="datum[variable].split(', ').includes('Revisar')"
-                  v-globo-informacion:izquierda="'Revisar'"
-                  class="boton-pictograma boton-secundario"
-                  aria-label="Revisar archivo"
-                  type="button"
-                  @click="openResourceReview(datum)"
-                >
-                  <span class="pictograma-ayuda"></span>
-                </button>
-                <button
-                  v-if="datum[variable].split(', ').includes('Añadir')"
-                  v-globo-informacion:izquierda="'Agregar a mis revisiones'"
-                  class="boton-pictograma boton-secundario"
-                  aria-label="Agregar a mis revisiones"
-                  type="button"
-                  @click="openAddRequestToMyReviewsModal(datum)"
-                >
-                  <span class="pictograma-agregar"></span>
-                </button>
-                <button
-                  v-if="datum[variable].split(', ').includes('Publicar')"
-                  v-globo-informacion:izquierda="'Publicar en catálogo'"
-                  class="boton-pictograma boton-secundario"
-                  aria-label="Publicar en catálogo"
-                  type="button"
-                  @click="notifyReleaseRequest(datum)"
-                >
-                  <span class="pictograma-ayuda"></span>
-                </button>
-                <button
-                  v-if="datum[variable].split(', ').includes('Comentarios')"
-                  v-globo-informacion:izquierda="'Comentarios'"
-                  class="boton-pictograma boton-secundario"
-                  aria-label="Comentarios de la solicitud"
-                  type="button"
-                  @click="abrirModalComentarios(datum)"
-                >
-                  <span class="pictograma-ayuda"></span>
-                </button>
-                <button
-                  v-if="datum[variable].split(', ').includes('Descargar')"
-                  v-globo-informacion:izquierda="'Descargar'"
-                  class="boton-pictograma boton-secundario"
-                  aria-label="Descargar archivo"
-                  type="button"
-                  @click="notifyDownloadOneChild(datum)"
-                >
-                  <span class="pictograma-archivo-descargar"></span>
-                </button>
-                <button
-                  v-if="datum[variable].split(', ').includes('Cancelar')"
-                  v-globo-informacion:izquierda="'Cancelar'"
-                  class="boton-pictograma boton-secundario"
-                  aria-label="Cancelar solicitud"
-                  type="button"
-                  @click="abrirModalCancelarRevision(datum)"
-                >
-                  <span class="pictograma-cerrar"></span>
-                </button>
-                <button
-                  v-if="datum[variable].split(', ').includes('Remover')"
-                  v-globo-informacion:izquierda="'Remover'"
-                  class="boton-pictograma boton-secundario"
-                  aria-label="Remover archivo"
-                  type="button"
-                  @click="notifyDeleteResource(datum)"
-                >
-                  <span class="pictograma-eliminar"></span>
-                </button>
+                <template v-if="datum.is_map">
+                  <button
+                    v-if="datum[variable].split(', ').includes('Editar')"
+                    v-globo-informacion:izquierda="'Editar'"
+                    class="boton-pictograma boton-secundario"
+                    aria-label="Editar mapa"
+                    type="button"
+                    @click="editarMapa(datum)"
+                  >
+                    <span class="pictograma-editar"></span>
+                  </button>
+                  <button
+                    v-if="datum[variable].split(', ').includes('Pre-visualizar')"
+                    v-globo-informacion:izquierda="'Pre-visualizar'"
+                    class="boton-pictograma boton-secundario"
+                    aria-label="Pre-visualizar mapa"
+                    type="button"
+                    @click="previsualizarMapa()"
+                  >
+                    <span class="pictograma-previsualizar"></span>
+                  </button>
+                  <button
+                    v-if="datum[variable].split(', ').includes('Descargar')"
+                    v-globo-informacion:izquierda="'Descargar (próximamente)'"
+                    class="boton-pictograma boton-secundario"
+                    aria-label="Descargar mapa"
+                    type="button"
+                    disabled
+                  >
+                    <span class="pictograma-archivo-descargar"></span>
+                  </button>
+                  <button
+                    v-if="datum[variable].split(', ').includes('Eliminar')"
+                    v-globo-informacion:izquierda="'Eliminar'"
+                    class="boton-pictograma boton-secundario"
+                    aria-label="Eliminar mapa"
+                    type="button"
+                    @click="notifyDeleteMapa(datum)"
+                  >
+                    <span class="pictograma-eliminar"></span>
+                  </button>
+                </template>
+                <template v-else>
+                  <button
+                    v-if="datum[variable].split(', ').includes('Editar')"
+                    v-globo-informacion:izquierda="'Editar'"
+                    class="boton-pictograma boton-secundario"
+                    aria-label="Editar metadatos"
+                    type="button"
+                    @click="irARutaConQuery(datum)"
+                  >
+                    <span class="pictograma-editar"></span>
+                  </button>
+                  <button
+                    v-if="datum[variable].split(', ').includes('Ver')"
+                    v-globo-informacion:izquierda="'Ver en visualizador'"
+                    class="boton-pictograma boton-secundario"
+                    aria-label="Ver en visualizador"
+                    type="button"
+                    @click="openResourceView(datum)"
+                  >
+                    <span class="pictograma-previsualizar"></span>
+                  </button>
+                  <button
+                    v-if="datum[variable].split(', ').includes('Visualizar')"
+                    v-globo-informacion:izquierda="'Visualizar'"
+                    class="boton-pictograma boton-secundario"
+                    aria-label="Visualizar archivo"
+                    type="button"
+                    @click="openResourceReview(datum)"
+                  >
+                    <span class="pictograma-ayuda"></span>
+                  </button>
+                  <button
+                    v-if="datum[variable].split(', ').includes('Revisar')"
+                    v-globo-informacion:izquierda="'Revisar'"
+                    class="boton-pictograma boton-secundario"
+                    aria-label="Revisar archivo"
+                    type="button"
+                    @click="openResourceReview(datum)"
+                  >
+                    <span class="pictograma-ayuda"></span>
+                  </button>
+                  <button
+                    v-if="datum[variable].split(', ').includes('Añadir')"
+                    v-globo-informacion:izquierda="'Agregar a mis revisiones'"
+                    class="boton-pictograma boton-secundario"
+                    aria-label="Agregar a mis revisiones"
+                    type="button"
+                    @click="openAddRequestToMyReviewsModal(datum)"
+                  >
+                    <span class="pictograma-agregar"></span>
+                  </button>
+                  <button
+                    v-if="datum[variable].split(', ').includes('Publicar')"
+                    v-globo-informacion:izquierda="'Publicar en catálogo'"
+                    class="boton-pictograma boton-secundario"
+                    aria-label="Publicar en catálogo"
+                    type="button"
+                    @click="notifyReleaseRequest(datum)"
+                  >
+                    <span class="pictograma-ayuda"></span>
+                  </button>
+                  <button
+                    v-if="datum[variable].split(', ').includes('Comentarios')"
+                    v-globo-informacion:izquierda="'Comentarios'"
+                    class="boton-pictograma boton-secundario"
+                    aria-label="Comentarios de la solicitud"
+                    type="button"
+                    @click="abrirModalComentarios(datum)"
+                  >
+                    <span class="pictograma-ayuda"></span>
+                  </button>
+                  <button
+                    v-if="datum[variable].split(', ').includes('Descargar')"
+                    v-globo-informacion:izquierda="'Descargar'"
+                    class="boton-pictograma boton-secundario"
+                    aria-label="Descargar archivo"
+                    type="button"
+                    @click="notifyDownloadOneChild(datum)"
+                  >
+                    <span class="pictograma-archivo-descargar"></span>
+                  </button>
+                  <button
+                    v-if="datum[variable].split(', ').includes('Cancelar')"
+                    v-globo-informacion:izquierda="'Cancelar'"
+                    class="boton-pictograma boton-secundario"
+                    aria-label="Cancelar solicitud"
+                    type="button"
+                    @click="abrirModalCancelarRevision(datum)"
+                  >
+                    <span class="pictograma-cerrar"></span>
+                  </button>
+                  <button
+                    v-if="datum[variable].split(', ').includes('Remover')"
+                    v-globo-informacion:izquierda="'Remover'"
+                    class="boton-pictograma boton-secundario"
+                    aria-label="Remover archivo"
+                    type="button"
+                    @click="notifyDeleteResource(datum)"
+                  >
+                    <span class="pictograma-eliminar"></span>
+                  </button>
+                </template>
               </div>
             </div>
 

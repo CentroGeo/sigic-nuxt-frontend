@@ -1,4 +1,5 @@
 <script setup>
+import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import {
   SisdaiCapaArcgis,
   SisdaiCapaWms,
@@ -6,6 +7,7 @@ import {
   SisdaiMapa,
   utiles,
 } from '@centrogeomx/sisdai-mapas';
+import html2canvas from 'html2canvas';
 import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
 import { arrayNewsOlds, resourceTypeDic } from '~/utils/consulta';
 
@@ -14,7 +16,7 @@ const storeResources = useResourcesConsultaStore();
 const storeSelected = useSelectedResources2Store();
 const config = useRuntimeConfig();
 const { gnoxyFetch } = useGnoxyUrl();
-const { findServer, filteredByServerType } = useResourcesSupplements();
+const { getLayerName, findServer, filteredByServerType } = useResourcesSupplements();
 const route = useRoute();
 const router = useRouter();
 storeConsulta.resourceType = resourceTypeDic.dataLayer;
@@ -33,13 +35,6 @@ const attributes = ref({});
 
 function alAbrirSelectorDivisionMapa(lado) {
   selectorDivisionAbierto.value = estaAbiertoSelectorDivisionMapa(lado) ? undefined : lado;
-}
-
-function exportarMapa() {
-  utiles.exportarHTMLComoPNG(
-    document.querySelectorAll('.mapa .ol-viewport').item(0),
-    linkExportaMapa.value
-  );
 }
 
 /**
@@ -201,6 +196,40 @@ onMounted(async () => {
     updateQueryParam(storeSelected.asQueryParam());
   }
 });
+
+const modalDescarga = ref(null);
+const mapaImagen = ref('');
+const tituloDescarga = ref('');
+const leyendasDescarga = ref([]);
+function AbrirModalDescarga() {
+  leyendasDescarga.value = [];
+  html2canvas(document.querySelectorAll('.mapa .ol-viewport').item(0), { useCORS: true }).then(
+    (canvas) => {
+      mapaImagen.value = canvas.toDataURL('image/png');
+
+      leyendasDescarga.value = owsLayers.value.map((resource) => ({
+        ...resource,
+        fuente: findServer(resource).replace('?', ''),
+        lado: storeSelected.byPk(resource.pk).lado,
+        opacidad: storeSelected.byPk(resource.pk).opacidad,
+        posicion: storeSelected.byPk(resource.pk).posicion,
+        visible: storeSelected.byPk(resource.pk).visible,
+        estilo: storeSelected.byPk(resource.pk).estilo,
+      }));
+      modalDescarga.value.abrirModal();
+    }
+  );
+}
+function DescargarMapa() {
+  const elemento = document.querySelectorAll('.mapa-descarga').item(0);
+  html2canvas(elemento, { useCORS: true }).then((canvas) => {
+    const link = linkExportaMapa.value;
+    link.href = canvas.toDataURL('image/png');
+    link.download = `${tituloDescarga.value || 'mapa'}.png`;
+    link.click();
+  });
+  modalDescarga.value?.cerrarModal();
+}
 </script>
 
 <template>
@@ -248,7 +277,7 @@ onMounted(async () => {
           <SisdaiCapaWms
             v-for="resource in owsLayers"
             :key="`wms-${resource.pk}-${resource.position_}`"
-            :capa="resource.alternate"
+            :capa="getLayerName(resource)"
             :consulta="gnoxyFetch"
             :fuente="findServer(resource)"
             :lado="storeSelected.byPk(resource.pk).lado"
@@ -258,14 +287,15 @@ onMounted(async () => {
             :visible="storeSelected.byPk(resource.pk).visible"
             :estilo="storeSelected.byPk(resource.pk).estilo"
             :cuadro-informativo="
-              (url) => buildLayerInfo(url, resource.alternate, resource.title, resource.sourcetype)
+              (url) =>
+                buildLayerInfo(url, getLayerName(resource), resource.title, resource.sourcetype)
             "
           />
           <SisdaiCapaArcgis
             v-for="resource in arcgisLayers"
             :key="`arcgis-${resource.pk}-${resource.position_}`"
             :fuente="findServer(resource).replace('?', '')"
-            :capa="resource.alternate.split(':')[1]"
+            :capa="getLayerName(resource).split(':')[1]"
             :mosaicos="true"
             :lado="storeSelected.byPk(resource.pk).lado"
             :opacidad="storeSelected.byPk(resource.pk).opacidad"
@@ -273,6 +303,37 @@ onMounted(async () => {
             :visible="storeSelected.byPk(resource.pk).visible"
           />
         </SisdaiMapa>
+
+        <SisdaiModal ref="modalDescarga" tamanio-modal="modal-grande">
+          <template #encabezado>
+            <h1 class="m-t-0">Descargar mapa como imágen</h1>
+          </template>
+
+          <template #cuerpo>
+            <fieldset>
+              <label for="titulo-mapa-descarga">Titulo de la descarga</label>
+              <input
+                id="titulo-mapa-descarga"
+                v-model="tituloDescarga"
+                type="text"
+                placeholder="Ingrese el título para la descarga"
+              />
+            </fieldset>
+
+            <ConsultaMapaDescarga
+              :ows-layers="leyendasDescarga"
+              :funcion-consulta="gnoxyFetch"
+              :mapa-imagen="mapaImagen"
+              :titulo-descarga="tituloDescarga"
+            />
+          </template>
+
+          <template #pie>
+            <button type="button" class="boton-primario" value="acepta" @click="DescargarMapa">
+              Descargar
+            </button>
+          </template>
+        </SisdaiModal>
       </ClientOnly>
     </template>
 
@@ -281,7 +342,7 @@ onMounted(async () => {
         titulo="Capas seleccionadas"
         :resource-type="storeConsulta.resourceType"
         etiqueta-elementos="Capas"
-        :funcion-descarga="exportarMapa"
+        :funcion-descarga="AbrirModalDescarga"
       />
       <a ref="linkExportaMapa" class="oculto" download="sigic.png" />
     </template>

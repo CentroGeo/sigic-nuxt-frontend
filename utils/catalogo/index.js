@@ -52,18 +52,52 @@ export const catalogosSugeridos = [
     id: 4,
     total_resources: 5375,
     title: 'IDE SEDATU',
-    descripcion: 'Infraestructura de Datos Espaciales',
-    abstract: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi tempor vehicula blandit. 
-    Aliquam at ante urna. Vestibulum finibus magna nunc, nec consequat justo convallis a. Sed a lorem 
-    nec dui congue vulputate eu ac sem. Vivamus sed urna nisl. Curabitur et tortor nisl. Vestibulum 
-    ac pulvinar arcu, eu tempor erat. Phasellus maximus, neque nec ultricies suscipit, lectus arcu 
-    aliquam libero, eget tincidunt est purus sed orci. Donec facilisis, est posuere luctus malesuada, 
-    lacus odio auctor purus, sed malesuada mi lacus sed nulla.`,
+    descripcion:
+      'La IDE SEDATU funciona como un nodo de información geoespacial que facilita la visualización de capas cartográficas mediante visores web, así como el acceso a conjuntos de datos estructurados que apoyan la planeación territorial.',
+    abstract: `La Infraestructura de Datos Espaciales de la Secretaría de Desarrollo Agrario, Territorial y Urbano (IDE SEDATU) es una plataforma tecnológica diseñada para integrar, organizar y difundir información geográfica relacionada con el territorio, el desarrollo urbano y la vivienda en México. Su propósito principal es concentrar en un solo entorno digital los datos espaciales generados por la dependencia, permitiendo su consulta, análisis y aprovechamiento tanto por usuarios institucionales como por el público en general.`,
     tipo: 'GN_WMS',
     etiquetas: 'Etiqueta',
     origen: 'Secretaría de Desarrollo Agrario, Territorial y Urbano',
     origen_url: 'https://www.gob.mx/sedatu',
-    service_url: 'https://ide.sedatu.gob.mx/',
+    service_url: 'https://ide.sedatu.gob.mx/geoserver/geonode/wms',
+  },
+  {
+    id: 5,
+    total_resources: 0,
+    title: 'SITU SEDATU',
+    descripcion:
+      'El SITU permite acceder a más de dos mil capas de información pública para contribuir a la toma de decisiones e investigación sobre la política territorial.',
+    abstract: `El SITU (Sistema de Información Territorial y Urbano) es una herramienta valiosa para la toma de decisiones en materia de planeación territorial y desarrollo urbano, lo que permite diseñar e implementar políticas públicas más efectivas, ordenadas y sostenibles.`,
+    etiquetas: 'Etiqueta',
+    tipo: 'WMS',
+    origen: 'SEDATU',
+    origen_url: 'https://situ.sedatu.gob.mx/',
+    service_url: 'https://situ.sedatu.gob.mx/descargas/geoserver/wms',
+  },
+  {
+    id: 6,
+    total_resources: 0,
+    title: 'Geoportal GITS UNAM',
+    descripcion: 'Geoportal del Grupo de Interacción Territorial y Sistemas (GITS) UNAM',
+    abstract: `Servicio del Geoportal GITS UNAM.`,
+    etiquetas: 'Etiqueta',
+    tipo: 'WMS',
+    origen: 'UNAM',
+    origen_url: 'https://www.gits.igg.unam.mx/geoportal/home',
+    service_url: 'https://www.gits.igg.unam.mx/geoportal/home',
+  },
+  {
+    id: 7,
+    total_resources: 0,
+    title: 'CONAGUA SEMARNAT',
+    descripcion:
+      'El SINA es un sistema estadístico que presenta información con datos históricos actualizados.',
+    abstract: `El Sistema Nacional de Información del Agua (SINA) es un instrumento para la gestión de la información estratégica de los recursos hídricos en México. En el SINA se integra, analiza y brinda información estadística y geográfica del sector hídrico proveniente de diversas áreas de la CONAGUA y de otras instituciones para apoyar la toma de decisiones en el diseño, implementación y seguimiento de políticas públicas para lograr una buena administración de las aguas nacionales y la seguridad hídrica de la población.`,
+    etiquetas: 'Etiqueta',
+    tipo: 'WMS',
+    origen: 'CONAGUA',
+    origen_url: 'https://www.gob.mx/conagua',
+    service_url: 'https://geosinav30.conagua.gob.mx:8080/geoserver/wms',
   },
 ];
 

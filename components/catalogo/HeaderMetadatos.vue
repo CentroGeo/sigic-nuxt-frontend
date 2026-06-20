@@ -44,15 +44,15 @@ updateValues();
     :opciones="[
       {
         texto: 'Metadatos',
-        ruta: `/catalogo/mis-archivos/editar/${titleOptions[props.title]['nombre']}`,
+        ruta: `/catalogo/mis-recursos/editar/${titleOptions[props.title]['nombre']}`,
       },
       {
         texto: 'Estilo',
-        ruta: '/catalogo/mis-archivos/editar/estilo',
+        ruta: '/catalogo/mis-recursos/editar/estilo',
       },
       {
         texto: 'Clave Geoestadística',
-        ruta: '/catalogo/mis-archivos/unir-vectores',
+        ruta: '/catalogo/mis-recursos/unir-vectores',
       },
     ]"
   />

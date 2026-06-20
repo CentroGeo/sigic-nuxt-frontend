@@ -56,7 +56,7 @@ if (
 }
 function irARutaConQuery(direccion) {
   navigateTo({
-    path: `/catalogo/mis-archivos/editar/${rutas.value[props.title][direccion]}`,
+    path: `/catalogo/mis-recursos/editar/${rutas.value[props.title][direccion]}`,
     query: { data: props.pk, type: props.tipo },
   });
 }
@@ -125,7 +125,7 @@ async function updateMetadata() {
 function irAmisArchivos() {
   modalActualizar.value?.cerrarModal();
   navigateTo({
-    path: `/catalogo/mis-archivos`,
+    path: `/catalogo/mis-recursos`,
   });
 }
 </script>
@@ -138,12 +138,12 @@ function irAmisArchivos() {
     </div>
 
     <div class="flex p-t-3">
-      <nuxt-link class="boton-secundario boton-chico" type="button" to="/catalogo/mis-archivos"
-        >Ir a mis archivos</nuxt-link
+      <nuxt-link class="boton-secundario boton-chico" type="button" to="/catalogo/mis-recursos"
+        >Ir a mis recursos</nuxt-link
       >
       <button
         class="boton-secundario boton-chico"
-        aria-label="Ir a mis archivos"
+        aria-label="Ir a mis recursos"
         :disabled="props.title === firstButton ? true : false"
         @click="irARutaConQuery('anterior')"
       >
@@ -201,7 +201,7 @@ function irAmisArchivos() {
             </p>
             <div class="columna-14 flex flex-contenido-final">
               <button class="boton-primario boton-chico" @click="irAmisArchivos">
-                Ir a mis archivos
+                Ir a mis recursos
               </button>
             </div>
           </div>
@@ -215,7 +215,7 @@ function irAmisArchivos() {
             </p>
             <div class="columna-14 flex flex-contenido-final">
               <button class="boton-primario boton-chico" @click="irAmisArchivos">
-                Ir a mis archivos
+                Ir a mis recursos
               </button>
             </div>
           </div>

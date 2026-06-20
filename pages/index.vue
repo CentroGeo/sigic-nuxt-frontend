@@ -6,7 +6,7 @@ const { signIn } = useAuth();
 
 async function iniciarSesion() {
   await signIn('keycloak', {
-    callbackUrl: '/', // A dónde volver después del login
+    callbackUrl: '/',
   });
 }
 
@@ -16,7 +16,6 @@ const storeSelected = useSelectedResources2Store();
 const params = {
   'filter{resource_type}': 'dataset',
   'filter{has_geometry}': 'true',
-  //'sort[]': 'last_updated',
 };
 storeResources.getResourcesByPage('dataLayer', 1, 4, params);
 
@@ -43,255 +42,206 @@ watch(
   },
   { deep: true }
 );
+
+// Servicios IDEGeo
+const servicios = [
+  {
+    icono: '/inicio/idegeo/analitca01.png',
+    titulo: 'Geovisualización y analítica visual',
+    descripcion:
+      'Desarrollo de software de geovisualización y analítica visual para el análisis y la exploración de datos territoriales.',
+  },
+  {
+    icono: '/inicio/idegeo/ide02.png',
+    titulo: 'Infraestructuras de datos espaciales',
+    descripcion:
+      'Implementación de infraestructuras de datos espaciales para la gestión y distribución estandarizada de información geográfica.',
+  },
+  {
+    icono: '/inicio/idegeo/geoportal03.png',
+    titulo: 'Integración de geoportales',
+    descripcion:
+      'Integración de geoportales que centralicen y faciliten el acceso a información territorial de diversas fuentes.',
+  },
+  {
+    icono: '/inicio/idegeo/geoprocessing04.png',
+    titulo: 'Procesamiento geoespacial',
+    descripcion:
+      'Validación, estandarización y procesamiento de la información geoespacial para garantizar calidad y consistencia.',
+  },
+  {
+    icono: '/inicio/idegeo/analisis05.png',
+    titulo: 'Análisis espacial',
+    descripcion:
+      'Elaboración y representación de resultados de análisis espacial aplicados a problemáticas territoriales.',
+  },
+  {
+    icono: '/inicio/idegeo/diseno06.png',
+    titulo: 'Diseño cartográfico',
+    descripcion:
+      'Diseño cartográfico profesional para la comunicación clara y efectiva de información territorial.',
+  },
+  {
+    icono: '/inicio/idegeo/historias07.png',
+    titulo: 'Storytelling geoespacial',
+    descripcion:
+      'Construcción de narrativas interactivas basadas en datos geoespaciales para comunicar hallazgos de forma accesible.',
+  },
+  {
+    icono: '/inicio/idegeo/dashboard08.png',
+    titulo: 'Construcción de dashboards',
+    descripcion:
+      'Tableros de control interactivos para el monitoreo y seguimiento de indicadores territoriales.',
+  },
+];
+
+// Logos de usuarios/clientes
+const logosUsuarios = [
+  { src: '/inicio/idegeo/logo_cdm_rojo.png', alt: 'CDM', width: '200px' },
+  { src: '/inicio/idegeo/logo_ccmss.png', alt: 'CCMSS', width: '140px' },
+  { src: '/inicio/idegeo/comunicaciones.png', alt: 'Comunicaciones', width: '280px' },
+  { src: '/inicio/idegeo/logo-inei-peru.png', alt: 'INEI Perú', width: '120px' },
+  { src: '/inicio/idegeo/teeb_agrifood.png', alt: 'TEEB Agrifood', width: '140px' },
+  { src: '/inicio/idegeo/iica-logo.png', alt: 'IICA', width: '110px' },
+  { src: '/inicio/idegeo/onu_habitat.png', alt: 'ONU Habitat', width: '200px' },
+  { src: '/inicio/idegeo/inecc2.png', alt: 'INECC', width: '120px' },
+  { src: '/inicio/idegeo/conafor_horizontal.png', alt: 'CONAFOR', width: '180px' },
+  { src: '/inicio/idegeo/geoint2_geoint.png', alt: 'GeoINT', width: '50px' },
+];
 </script>
+
 <template>
   <div>
     <main id="principal">
-      <div class="portada portada-secundaria">
-        <video
-          aria-hidden="true"
-          role="presentation"
-          class="portada-imagen"
-          autoplay=""
-          loop=""
-          playsinline=""
-          muted=""
-        >
-          <source src="/inicio/Portada_SIGIC_1_1.mp4" type="video/mp4" />
-        </video>
-
-        <div class="portada-degradado">
-          <div class="portada-cuerpo">
-            <h1 class="portada-titulo">
-              Sistema Integral de Gestión de Información Científica (SIGIC)
-            </h1>
-            <strong class="portada-subtitulo">
-              Integra, visualiza y aprovecha el conocimiento científico de México
-            </strong>
+      <!-- ============================================ -->
+      <!-- PORTADA                                      -->
+      <!-- ============================================ -->
+      <div class="idegeo-portada">
+        <div class="idegeo-portada__bg">
+          <img
+            src="/inicio/idegeo/intro_background.svg"
+            alt=""
+            aria-hidden="true"
+            class="idegeo-portada__bg-img"
+          />
+        </div>
+        <div class="idegeo-portada__contenido">
+          <h1 class="idegeo-portada__titulo">Plataforma de Información Geoespacial</h1>
+          <p class="idegeo-portada__subtitulo">
+            IDEGeo tiene como misión diseñar y desarrollar geoportales que faciliten la comunicación
+            de información territorial de forma clara e intuitiva, promoviendo la toma de decisiones
+            informadas y el análisis de problemáticas desde una perspectiva espacial.
+          </p>
+          <div class="idegeo-portada__acciones">
+            <NuxtLink class="idegeo-btn idegeo-btn--primary" to="/catalogo">
+              Catálogo geoespacial
+            </NuxtLink>
+            <NuxtLink class="idegeo-btn idegeo-btn--outline" to="/consulta">
+              Ir al geovisor
+            </NuxtLink>
           </div>
         </div>
       </div>
 
-      <section id="que-es" class="m-y-10">
-        <div class="contenedor ancho-lectura texto-centrado m-b-10">
-          <h2>¿Qué es SIGIC?</h2>
-          <p>
-            SIGIC permite articular información estructurada de las ciencias, humanidades,
-            tecnologías e innovación en un ecosistema digital que impulsa la toma de decisiones, el
-            entendimiento territorial y la generación de nuevo conocimiento.
-          </p>
-          <p>
-            Con módulos para visualizar capas, generar mapas, cargar información propia y aprovechar
-            inteligencia artificial, SIGIC ofrece herramientas clave para investigar, planear y
-            actuar con base en datos.
-          </p>
+      <!-- ============================================ -->
+      <!-- SERVICIOS DE INFORMACIÓN GEOESPACIAL         -->
+      <!-- ============================================ -->
+      <section class="idegeo-seccion-banner">
+        <div class="idegeo-seccion-banner__inner">
+          <h2>Servicios de Información Geoespacial</h2>
         </div>
+      </section>
+
+      <section id="servicios" class="idegeo-servicios">
+        <div class="contenedor" style="width: 100%">
+          <div class="idegeo-servicios__grid">
+            <article v-for="(servicio, i) in servicios" :key="i" class="idegeo-servicio-card">
+              <div class="idegeo-servicio-card__icono">
+                <img :src="servicio.icono" :alt="servicio.titulo" />
+              </div>
+              <h3 class="idegeo-servicio-card__titulo">{{ servicio.titulo }}</h3>
+              <p class="idegeo-servicio-card__desc">{{ servicio.descripcion }}</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- ¿NECESITAS UN SERVICIO?                      -->
+      <!-- ============================================ -->
+      <section class="idegeo-seccion-banner">
+        <div class="idegeo-seccion-banner__inner">
+          <h2>¿Necesitas un servicio de información geoespacial?</h2>
+        </div>
+      </section>
+
+      <section id="contacto" class="idegeo-contacto" style="width: 100%">
         <div class="contenedor ancho-fijo">
-          <div class="flex">
-            <div class="columna-8">
-              <div class="tarjeta tarjeta-horizontal">
-                <img alt="" class="tarjeta-imagen" src="/inicio/tarjeta_visualiza.png" />
-                <div class="tarjeta-cuerpo">
-                  <p class="tarjeta-titulo">Visualiza información territorial</p>
-                  <p>
-                    Explora capas, datos y documentos desde una interfaz intuitiva. Filtra, consulta
-                    y combina fuentes para generar mapas listos para descargar.
-                  </p>
+          <div class="idegeo-contacto__grid">
+            <div class="idegeo-contacto__info">
+              <h2>Contáctanos</h2>
+              <div class="idegeo-contacto__tabla">
+                <div class="idegeo-contacto__fila">
+                  <span class="idegeo-contacto__nombre">Oscar Gerardo Sánchez Siordia</span>
+                  <a href="mailto:osanchez@centrogeo.edu.mx" class="idegeo-contacto__correo">
+                    osanchez@centrogeo.edu.mx
+                  </a>
                 </div>
-                <div class="tarjeta-pie">
-                  <NuxtLink class="boton-primario boton-chico" to="/consulta"
-                    >Ir al visualizador</NuxtLink
-                  >
+                <div class="idegeo-contacto__fila">
+                  <span class="idegeo-contacto__nombre">Jesus Trujillo Almeida</span>
+                  <a href="mailto:jtrujillo@centrogeo.edu.mx" class="idegeo-contacto__correo">
+                    jtrujillo@centrogeo.edu.mx
+                  </a>
                 </div>
+              </div>
+              <div class="idegeo-contacto__logos">
+                <img src="/inicio/idegeo/logo_centrogeo_wide-white.png" alt="CentroGeo" />
+                <img src="/inicio/idegeo/logo_idegeo_wide-white_72px.png" alt="IDEGeo" />
+                <img src="/inicio/idegeo/geoint2_geoint_blanco.png" alt="GeoINT" />
               </div>
             </div>
-            <div class="columna-8">
-              <div class="tarjeta tarjeta-horizontal">
-                <img alt="" class="tarjeta-imagen" src="/inicio/tarjeta_analiza.png" />
-                <div class="tarjeta-cuerpo">
-                  <p class="tarjeta-titulo">Analiza con Inteligencia Artificial</p>
-                  <p>
-                    Crea proyectos, define contextos y conversa con tus datos en lenguaje natural.
-                    La IA de SIGIC analiza, resume y entrega respuestas claras al instante.
-                  </p>
-                </div>
-                <div class="tarjeta-pie">
-                  <NuxtLink class="boton-primario boton-chico" to="/ia"
-                    >Iniciar análisis con IA</NuxtLink
-                  >
-                </div>
-              </div>
-            </div>
-            <div class="columna-8">
-              <div class="tarjeta tarjeta-horizontal">
-                <img alt="" class="tarjeta-imagen" src="/inicio/tarjeta_explora.png" />
-                <div class="tarjeta-cuerpo">
-                  <p class="tarjeta-titulo">Explora los recursos disponibles</p>
-                  <p>
-                    Explora capas, tablas y documentos en un solo lugar. Accede a tus archivos y a
-                    los públicos, ordénalos por tipo o fecha y encuentra rápidamente lo que buscas.
-                  </p>
-                </div>
-                <div class="tarjeta-pie">
-                  <NuxtLink class="boton-primario boton-chico" to="/catalogo"
-                    >Ir al catálogo de información</NuxtLink
-                  >
-                </div>
-              </div>
-            </div>
-            <div class="columna-8">
-              <div class="tarjeta tarjeta-horizontal">
-                <img class="tarjeta-imagen" alt="" src="/inicio/tarjeta_usa.png" />
-                <div class="tarjeta-cuerpo">
-                  <p class="tarjeta-titulo">Usa tu propia información</p>
-                  <p>
-                    Carga tus capas, tablas o documentos y publícalos en el catálogo. Georreferencia
-                    fácilmente y usa tus datos en mapas, proyectos o análisis dentro de SIGIC.
-                  </p>
-                </div>
-                <div class="tarjeta-pie">
-                  <NuxtLink class="boton-primario boton-chico" to="/catalogo/cargar-archivos"
-                    >Ir a subir archivo</NuxtLink
-                  >
-                </div>
-              </div>
+            <div class="idegeo-contacto__imagen">
+              <img
+                src="/inicio/idegeo/servicios_idegeo.jpg"
+                alt="Servicios IDEGeo"
+                loading="lazy"
+              />
             </div>
           </div>
         </div>
       </section>
-      <section id="que-hacer" class="m-y-10 fondo-color-acento p-y-5">
-        <div class="contenedor ancho-lectura texto-centrado">
-          <h2>¿Qué puedes hacer en SIGIC?</h2>
+
+      <!-- ============================================ -->
+      <!-- USUARIOS DE IDEGEO                           -->
+      <!-- ============================================ -->
+      <section class="idegeo-seccion-banner">
+        <div class="idegeo-seccion-banner__inner">
+          <h2>Usuarios de IDEGeo</h2>
         </div>
+      </section>
+
+      <section id="usuarios" class="idegeo-usuarios">
         <div class="contenedor ancho-fijo">
-          <div class="flex m-y-5-esc m-y-0-mov">
-            <div class="columna-8 flex-vertical-centrado">
-              <h3 class="texto-color-acento">Explorar información territorial diversa</h3>
-              <picture class="oculto-esc">
-                <img
-                  loading="lazy"
-                  class="borde-redondeado-20"
-                  src="/inicio/imagenexplorar.png"
-                  alt=""
-                />
-              </picture>
-              <p>
-                Consulta capas, tablas y documentos que puedes combinar fácilmente para entender
-                patrones espaciales, fenómenos sociales o contextos específicos con la información
-                científica del país.
-              </p>
-            </div>
-            <div class="columna-8">
-              <picture class="oculto-mov">
-                <img
-                  loading="lazy"
-                  class="borde-redondeado-20"
-                  src="/inicio/imagenexplorar.png"
-                  alt=""
-                />
-              </picture>
-            </div>
-          </div>
-          <div class="flex m-y-5-esc m-y-0-mov">
-            <div class="columna-8">
-              <picture>
-                <img loading="lazy" class="oculto-mov" src="/inicio/imagenprofundizar.png" alt="" />
-              </picture>
-            </div>
-            <div class="columna-8 flex-vertical-centrado">
-              <h3 class="texto-color-acento">Profundizar en temas con ayuda de la IA</h3>
-              <picture>
-                <img loading="lazy" class="oculto-esc" src="/inicio/imagenprofundizar.png" alt="" />
-              </picture>
-              <p>
-                Organiza la información en proyectos temáticos y analiza tus datos mediante
-                consultas en lenguaje natural. La IA del SIGIC te ayuda a interpretar contextos
-                complejos, generar síntesis, encontrar conexiones clave y preparar reportes
-                descargables en formato PDF.
-              </p>
-            </div>
-          </div>
-          <div class="flex m-y-5-esc m-y-0-mov">
-            <div class="columna-8 flex-vertical-centrado">
-              <h3 class="texto-color-acento">Aprovechar tus propios datos dentro del ecosistema</h3>
-              <picture class="oculto-esc">
-                <img
-                  loading="lazy"
-                  class="borde-redondeado-20"
-                  src="/inicio/imagenaprovechar.png"
-                  alt=""
-                />
-              </picture>
-              <p>
-                Sube información en distintos formatos, agrégale un componente geográfico y úsala
-                directamente en tus proyectos de IA, análisis o visualizaciones sin necesidad de
-                herramientas externas.
-              </p>
-            </div>
-            <div class="columna-8">
-              <picture class="oculto-mov">
-                <img
-                  loading="lazy"
-                  class="borde-redondeado-20"
-                  src="/inicio/imagenaprovechar.png"
-                  alt=""
-                />
-              </picture>
-            </div>
-          </div>
-          <div class="flex m-y-5-esc m-y-0-mov">
-            <div class="columna-8">
-              <picture>
-                <img loading="lazy" class="oculto-mov" src="/inicio/imagentener.png" alt="" />
-              </picture>
-            </div>
-            <div class="columna-8 flex-vertical-centrado">
-              <h3 class="texto-color-acento">Tener tu información ordenada y disponible</h3>
-              <picture>
-                <img loading="lazy" class="oculto-esc" src="/inicio/imagentener.png" alt="" />
-              </picture>
-              <p>
-                Accede fácilmente a todos tus archivos personales o a datos públicos desde un solo
-                catálogo. Filtra por tipo, tema o fecha, y encuentra lo que necesitas con el
-                buscador integrado.
-              </p>
-            </div>
-          </div>
-          <div class="flex m-y-5-esc m-y-0-mov">
-            <div class="columna-8 flex-vertical-centrado">
-              <h3 class="texto-color-acento">
-                Compartir tus visualizaciones mediante un enlace único
-              </h3>
-              <picture class="oculto-esc">
-                <img
-                  loading="lazy"
-                  class="borde-redondeado-20"
-                  src="/inicio/imagencompartir.png"
-                  alt=""
-                />
-              </picture>
-              <p>
-                ¿Quieres que tu equipo o colegas accedan exactamente a lo que estás viendo? Con un
-                enlace único, puedes compartir tus tablas, documentos o capas con todos los detalles
-                que hayas seleccionado.
-              </p>
-            </div>
-            <div class="columna-8">
-              <picture class="oculto-mov">
-                <img
-                  loading="lazy"
-                  class="borde-redondeado-20"
-                  src="/inicio/imagencompartir.png"
-                  alt=""
-                />
-              </picture>
-            </div>
+          <div class="idegeo-usuarios__logos">
+            <img
+              v-for="logo in logosUsuarios"
+              :key="logo.alt"
+              :src="logo.src"
+              :alt="logo.alt"
+              :style="{ maxWidth: logo.width }"
+              class="idegeo-usuarios__logo-img"
+              loading="lazy"
+            />
           </div>
         </div>
       </section>
-      <section id="explora" class="m-y-10">
+
+      <!-- ============================================ -->
+      <!-- CAPAS RECIENTES (CATÁLOGO)                   -->
+      <!-- ============================================ -->
+      <section id="explora" class="idegeo-explora">
         <div class="contenedor ancho-lectura texto-centrado">
-          <h2>Explora las últimas capas geográficas en SIGIC</h2>
+          <h2>Explora las últimas capas geográficas</h2>
           <p>
             Consulta lo más reciente del catálogo: datos geográficos listos para visualizar,
             compartir o descargar.
@@ -323,7 +273,7 @@ watch(
                     :to="`/consulta/capas?capas=${capa.pk}`"
                     @click.prevent="updateSelection(capa.pk, capa.default_style)"
                   >
-                    Ver Capa en visualizador
+                    Ver capa en visualizador
                   </nuxt-link>
                 </div>
               </div>
@@ -331,144 +281,446 @@ watch(
           </div>
         </div>
       </section>
-      <section id="empezar" class="m-t-10 fondo-color-acento p-y-10">
+      <!-- ============================================ -->
+      <!-- CTA: ¿CON QUÉ QUIERES EMPEZAR?              -->
+      <!-- ============================================ -->
+      <section id="empezar" class="idegeo-cta">
         <div class="contenedor ancho-lectura texto-centrado">
           <h2>¿Con qué quieres empezar?</h2>
           <div class="flex">
             <button
-              class="boton-primario boton-chico texto-centrado init-sesion columna-16"
+              class="idegeo-btn idegeo-btn--primary idegeo-btn--lg columna-16"
               @click="iniciarSesion"
             >
-              Crear una cuenta en SIGIC
+              Crear una cuenta
             </button>
           </div>
           <h3>o también puedes ir a:</h3>
         </div>
         <div class="contenedor ancho-lectura texto-centrado flex">
-          <nuxt-link
-            class="boton-secundario boton-chico texto-centrado init-sesion columna-8"
-            to="consulta/capas"
-          >
+          <nuxt-link class="idegeo-btn idegeo-btn--outline-dark columna-8" to="/consulta/capas">
             Visualizador de contenido
           </nuxt-link>
-          <nuxt-link
-            class="boton-secundario boton-chico texto-centrado init-sesion columna-8"
-            to="/ia/chats"
-          >
-            Análisis mediante IA
-          </nuxt-link>
-          <nuxt-link
-            class="boton-secundario boton-chico texto-centrado init-sesion columna-8"
-            to="/catalogo/explorar"
-          >
+          <nuxt-link class="idegeo-btn idegeo-btn--outline-dark columna-8" to="/catalogo/explorar">
             Catálogo de información
-          </nuxt-link>
-          <nuxt-link
-            class="boton-secundario boton-chico texto-centrado init-sesion columna-8"
-            to="/catalogo/cargar-archivos"
-          >
-            Subir mis propios archivos
           </nuxt-link>
         </div>
       </section>
     </main>
   </div>
 </template>
+
 <style lang="scss">
-.init-sesion {
-  display: inline;
-}
-/*
-.solo-en-index {
-  .contenido {
-    padding-top: 54px;
+/* ================================================================
+   IDEGeo Landing Page Styles
+   Paleta: rojo #db1631, dorado #ffd300/#f2d247,
+           fondo oscuro #111, textos #151414
+   ================================================================ */
+
+$color-theme: #db1631;
+$color-accent: #ffd300;
+$color-accent-light: #f2d247;
+$bg-dark: #111;
+$bg-section: #eef1f7;
+$text-dark: #151414;
+$text-white: #fff;
+
+/* ── Portada ── */
+.idegeo-portada {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: hidden;
+  background-color: $color-accent;
+
+  &__bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
   }
-  nav.navegacion.navegacion-pegada {
-    top: 54px;
+
+  &__bg-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: right center;
+  }
+
+  &__contenido {
+    position: relative;
+    z-index: 1;
+    max-width: 50%;
+    margin: 0 40px;
+    text-align: left;
+  }
+
+  &__titulo {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2rem;
+    font-weight: 600;
+    line-height: 1.3;
+    margin-bottom: 18px;
+    color: $text-dark;
+  }
+
+  &__subtitulo {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 400;
+    line-height: 1.4;
+    color: $text-dark;
+    margin-bottom: 1.5rem;
+  }
+
+  &__acciones {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
   }
 }
-*/
-:root {
-  --escala-rem-gob-sisdai: 0.65;
-}
-nav.navbar {
-  padding-top: calc(var(--escala-rem-gob-sisdai) * 0.5rem);
-  padding-bottom: calc(var(--escala-rem-gob-sisdai) * 0.5rem);
-}
-nav.navbar.navbar-fixed-top {
-  z-index: 9999;
-}
-a.navbar-brand {
-  margin-right: calc(var(--escala-rem-gob-sisdai) * 63rem);
-  margin-top: 0;
-  margin-bottom: 0;
-  padding: 0 0 calc(var(--escala-rem-gob-sisdai) * 0.3125rem) 0 !important;
-}
-.navbar-expand-md .navbar-nav .nav-link {
-  padding-right: calc(var(--escala-rem-gob-sisdai) * 0.5rem);
-  padding-left: calc(var(--escala-rem-gob-sisdai) * 1.5rem);
-  padding-top: calc(var(--escala-rem-gob-sisdai) * 1.8rem);
-}
-@media (min-width: 768px) and (max-width: 992px) {
-  a.navbar-brand {
-    margin-right: calc(var(--escala-rem-gob-sisdai) * 61rem);
-  }
-}
-@media (min-width: 576px) and (max-width: 768px) {
-  .navbar-dark .navbar-toggler {
-    margin-right: calc(var(--escala-rem-gob-sisdai) * 9rem);
-  }
-  a.navbar-brand {
-    margin-right: calc(var(--escala-rem-gob-sisdai) * 41rem);
-  }
-}
-@media (max-width: 576px) {
-  a.navbar-brand {
-    margin-right: calc(var(--escala-rem-gob-sisdai) * 41rem);
-  }
-}
-.navbar-toggler-icon {
+
+/* ── Botones IDEGeo ── */
+.idegeo-btn {
   display: inline-block;
-  width: calc(var(--escala-rem-gob-sisdai) * 1.5em);
-  height: calc(var(--escala-rem-gob-sisdai) * 1.5em);
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
+  font-size: 0.95rem;
+  padding: 0.65rem 1.5rem;
+  border-radius: 4px;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    border-color 0.2s;
+  border: 2px solid transparent;
+  text-align: center;
+
+  &--primary {
+    background: $color-theme;
+    color: $text-white;
+    border-color: $color-theme;
+
+    &:hover,
+    &:focus {
+      background: color-mix(in srgb, $color-theme, black 8%);
+      border-color: color-mix(in srgb, $color-theme, black 8%);
+    }
+  }
+
+  &--outline {
+    background: transparent;
+    color: $text-dark;
+    border-color: $text-dark;
+
+    &:hover,
+    &:focus {
+      background: $text-dark;
+      color: $text-white;
+    }
+  }
+
+  &--outline-dark {
+    background: transparent;
+    color: $color-theme;
+    border-color: $color-theme;
+
+    &:hover,
+    &:focus {
+      background: $color-theme;
+      color: $text-white;
+    }
+  }
+
+  &--lg {
+    font-size: 1.1rem;
+    padding: 0.8rem 2rem;
+  }
 }
-footer {
-  .accordion {
-    input {
-      display: none !important;
-      &:hover {
-        background: transparent;
-        label {
-          background: transparent;
-        }
+
+/* ── Banner separador (parallax-style) ── */
+.idegeo-seccion-banner {
+  background-image: url('/inicio/idegeo/curvas_naranjas.jpg');
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: repeat;
+  background-size: cover;
+
+  &__inner {
+    background-color: rgba(19, 19, 19, 0.6);
+    padding: 50px 15px;
+    border-top: 10px solid $color-accent;
+    border-bottom: 8px solid $color-accent-light;
+    text-align: center;
+  }
+
+  h2 {
+    color: $text-white;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 500;
+    margin: 0;
+    line-height: 1.3;
+  }
+}
+
+/* ── Servicios ── */
+.idegeo-servicios {
+  background: $bg-dark;
+  padding: 4rem 0;
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+  }
+}
+
+.idegeo-servicio-card {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  border-radius: 8px;
+  transition:
+    transform 0.2s,
+    background 0.2s;
+  cursor: default;
+
+  &:hover {
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  &__icono {
+    width: 74px;
+    height: 74px;
+    margin: 0 auto 1rem;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 50%;
+      border: 2px solid #ee7532;
+      padding: 4px;
+      transition: border-color 0.2s;
+    }
+  }
+
+  &:hover &__icono img {
+    border-color: $color-accent;
+  }
+
+  &__titulo {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: $text-white;
+    margin: 0 0 0.5rem;
+  }
+
+  &__desc {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.65);
+    line-height: 1.5;
+    margin: 0;
+  }
+}
+
+/* ── Contacto (split layout) ── */
+.idegeo-contacto {
+  background: #000;
+  padding: 0;
+
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 400px;
+  }
+
+  &__info {
+    padding: 3rem 2.5rem;
+    color: $text-white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin: 0 0 1.5rem;
+    }
+  }
+
+  &__tabla {
+    margin-bottom: 2rem;
+  }
+
+  &__fila {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  &__nombre {
+    font-size: 1rem;
+  }
+
+  &__correo {
+    color: $text-white;
+    text-decoration: none;
+    font-size: 1rem;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &__logos {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 1rem;
+
+    img {
+      height: auto;
+      max-height: 70px;
+      object-fit: contain;
+
+      &:first-child {
+        max-width: 200px;
+      }
+      &:nth-child(2) {
+        max-width: 130px;
+      }
+      &:last-child {
+        max-width: 60px;
       }
     }
-    [type='checkbox']:not(:disabled):hover + label,
-    [type='radio']:not(:disabled):hover + label {
-      background-color: transparent;
-      border-color: transparent;
+  }
+
+  &__imagen {
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
   }
-  [type='checkbox'] + label::before,
-  [type='radio'] + label::before {
-    display: none;
+}
+
+/* ── Usuarios / Logos ── */
+.idegeo-usuarios {
+  background: $text-white;
+  padding: 4rem 0;
+
+  &__logos {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
   }
-  [type='checkbox'] + label,
-  [type='radio'] + label {
-    line-height: 1.25em;
-    background-color: none;
-    border: none;
-    box-shadow: none;
-    border-radius: 8px;
-    cursor: pointer;
-    display: inline-flex;
-    position: relative;
-    margin: 0;
-    padding: 8px 8px 8px 0;
-    color: #fff;
+
+  &__logo-img {
+    height: auto;
+    max-height: 80px;
+    object-fit: contain;
+    filter: grayscale(0.2);
+    transition: filter 0.2s;
+
     &:hover {
-      background: transparent;
+      filter: grayscale(0);
     }
+  }
+}
+
+/* ── Explora (capas recientes) ── */
+.idegeo-explora {
+  background: $bg-section;
+  padding: 4rem 0;
+
+  h2 {
+    color: $text-dark;
+  }
+
+  p {
+    color: rgba(0, 0, 0, 0.7);
+  }
+}
+
+/* ── CTA final ── */
+.idegeo-cta {
+  background: $color-accent;
+  padding: 4rem 0;
+
+  h2 {
+    color: $text-dark;
+    font-family: 'Montserrat', sans-serif;
+    margin-bottom: 1.5rem;
+  }
+
+  h3 {
+    color: $text-dark;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 400;
+    margin: 1.5rem 0;
+  }
+}
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .idegeo-servicios__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .idegeo-portada {
+    height: auto;
+    min-height: 100vh;
+    padding: 6rem 0 3rem;
+
+    &__contenido {
+      max-width: 90%;
+      margin: 0 auto;
+    }
+
+    &__titulo {
+      font-size: 1.5rem;
+    }
+
+    &__subtitulo {
+      font-size: 1rem;
+    }
+  }
+
+  .idegeo-seccion-banner h2 {
+    font-size: 1.5rem;
+  }
+
+  .idegeo-contacto__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .idegeo-contacto__imagen {
+    max-height: 300px;
+  }
+
+  .idegeo-servicios__grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
 }
 </style>

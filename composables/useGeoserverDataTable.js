@@ -7,7 +7,7 @@ import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
 export function useGeoserverDataTable({ paginaActual, tamanioPagina, resource } = {}) {
   const config = useRuntimeConfig();
   const { gnoxyFetch } = useGnoxyUrl();
-  const { getWMSserver, buildArcgisLayerRequest } = useResourcesSupplements();
+  const { getLayerName, getWMSserver, buildArcgisLayerRequest } = useResourcesSupplements();
 
   const variables = ref([]);
   const datos = ref([]);
@@ -17,7 +17,7 @@ export function useGeoserverDataTable({ paginaActual, tamanioPagina, resource } 
   const fetchTable = async ({ paginaActual, tamanioPagina, resource }) => {
     let url = '';
     if (!resource || resource.sourcetype !== 'REMOTE') {
-      url = new URL(`${config.public.geonodeUrl}/gs/ows`);
+      url = new URL(`${config.public.geoserverUrl}/ows`);
       serverType = 'WMS';
     } else if (resource.sourcetype === 'REMOTE') {
       const link = getWMSserver(resource);
@@ -35,7 +35,7 @@ export function useGeoserverDataTable({ paginaActual, tamanioPagina, resource } 
         service: 'WFS',
         version: '1.0.0',
         request: 'GetFeature',
-        typeName: resource.alternate,
+        typeName: getLayerName(resource),
         outputFormat: 'application/json',
         maxFeatures: tamanioPagina,
         startIndex: paginaActual * tamanioPagina,

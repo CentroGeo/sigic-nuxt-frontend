@@ -113,7 +113,7 @@ async function confirmarSolicitud(cerrarModal) {
 /**Redirige a mis-archivos/solicitudes-publicacion */
 async function navigateToRequests() {
   modalPublicaConfirmar.value.cerrarModal();
-  await navigateTo('/catalogo/mis-archivos/solicitudes-publicacion');
+  await navigateTo('/catalogo/mis-recursos/solicitudes-publicacion');
 }
 
 function defineExtension() {
@@ -465,7 +465,7 @@ onMounted(() => {
           </div>
           <div class="columna-8">
             <button
-              aria-label="Ir a mis archivos"
+              aria-label="Ir a mis recursos"
               class="boton boton-primario texto-centrado"
               @click="navigateToRequests"
             >

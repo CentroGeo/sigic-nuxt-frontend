@@ -236,11 +236,11 @@ onMounted(async () => {
               <p class="h5 m-t-0">Aún no hay archivos en esta sección</p>
               <p class="m-b-0">
                 No tienes solicitudes pendientes de revisor. Estas se añadirán cuando se envíe
-                alguna solicitud de publicación desde mis archivos disponibles.
+                alguna solicitud de publicación desde mis recursos disponibles.
               </p>
             </div>
-            <nuxt-link class="boton boton-primario" to="/catalogo/mis-archivos"
-              >Ir a Mis archivos
+            <nuxt-link class="boton boton-primario" to="/catalogo/mis-recursos"
+              >Ir a Mis recursos
             </nuxt-link>
           </div>
         </div>

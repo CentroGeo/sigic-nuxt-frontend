@@ -90,7 +90,7 @@ onMounted(() => {
         <div class="flex">
           <nuxt-link
             to="/catalogo/explorar/catalogos-externos"
-            aria-label="regresar a mis archivos"
+            aria-label="regresar a mis recursos"
           >
             <span
               class="pictograma-flecha-izquierda pictograma-mediano texto-color-acento"
@@ -145,14 +145,15 @@ onMounted(() => {
         <!--Tabla de recursos-->
         <div v-if="!isLoading && importedResources.length > 0 && fetchStatus === 'ok'">
           <p
-            class="texto-color-alerta fondo-color-alerta borde borde-color-alerta p-2 borde-redondeado-8"
+            class="texto-color-informacion fondo-color-informacion borde borde-color-informacion p-2 borde-redondeado-8"
           >
-            Los catálogos externos tienen funciones limitadas. Algunas descargas o consultas pueden
-            no estar disponibles. <br />
-            <br />
-            Los recursos importados requieren que
-            <span style="font-weight: bold">completes sus metadatos</span> antes de poder
-            visualizarlos.
+            Los recursos importados ya pueden visualizarse en el mapa. Aparecen bajo la categoría
+            <span style="font-weight: bold">Catálogo externo</span> hasta que
+            <nuxt-link to="/catalogo/mis-recursos/metadatos-pendientes"
+              >completes sus metadatos</nuxt-link
+            >
+            y les asignes la categoría correcta. Los catálogos externos tienen funciones limitadas:
+            algunas descargas o consultas pueden no estar disponibles.
           </p>
 
           <form>
@@ -162,16 +163,22 @@ onMounted(() => {
                   <th>Título</th>
                   <th>Resumen</th>
                   <th>Tipo</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="resource in importedResources" :key="resource.pk">
-                  <td>
-                    <!--                  <nuxt-link @click="openResourceView(value)">{{ value.title }}</nuxt-link>-->
-                    {{ resource.title }}
-                  </td>
+                  <td>{{ resource.title }}</td>
                   <td>{{ resource.raw_abstract }}</td>
                   <td>{{ tipoRecurso(resource) }}</td>
+                  <td>
+                    <nuxt-link
+                      class="boton boton-secundario boton-chico"
+                      :to="`/consulta/capas?capas=${resource.pk},,,1,1`"
+                    >
+                      Visualizar
+                    </nuxt-link>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -181,7 +188,7 @@ onMounted(() => {
             <nuxt-link
               class="boton boton-primario boton-chico"
               aria-label="Ir a editar metadatos"
-              to="/catalogo/mis-archivos/metadatos-pendientes"
+              to="/catalogo/mis-recursos/metadatos-pendientes"
               >Editar metadatos
             </nuxt-link>
             <nuxt-link

@@ -97,9 +97,10 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
 
       // Agregamos los estilos
       if (res.resources[0]?.resource_type === 'dataset') {
-        const { defaultStyle, styleList } = await getSLDs(res.resources[0]);
+        const { defaultStyle, styleList, styleTitles } = await getSLDs(res.resources[0]);
         res.resources[0].default_style = defaultStyle;
         res.resources[0].styles = styleList;
+        res.resources[0].style_titles = styleTitles;
       }
       totals[resourceType] = res.total;
       latestResources[resourceType] = res.resources[0];
@@ -131,9 +132,10 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
       if (resourceType === 'dataLayer' || resourceType === 'dataTable') {
         await Promise.all(
           res.resources.map(async (d) => {
-            const { defaultStyle, styleList } = await getSLDs(d);
+            const { defaultStyle, styleList, styleTitles } = await getSLDs(d);
             d.default_style = defaultStyle;
             d.styles = styleList;
+            d.style_titles = styleTitles;
           })
         );
       }
@@ -250,9 +252,10 @@ export const useResourcesCatalogoStore = defineStore('resourcesCatalogo', () => 
         await Promise.all(
           res.resources.map(async (d) => {
             if (d.resource_type === 'dataset') {
-              const { defaultStyle, styleList } = await getSLDs(d);
+              const { defaultStyle, styleList, styleTitles } = await getSLDs(d);
               d.default_style = defaultStyle;
               d.styles = styleList;
+              d.style_titles = styleTitles;
             }
           })
         );

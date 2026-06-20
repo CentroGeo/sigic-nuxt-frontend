@@ -3,6 +3,18 @@ export function useResourcesSupplements() {
   const { gnoxyFetch } = useGnoxyUrl();
 
   /**
+   * Devuelve el typename correcto para peticiones WMS/WFS.
+   * Para recursos REMOTE usa remote_typename (sin sufijo _h{id}).
+   * Para recursos locales usa resource.alternate tal cual.
+   */
+  function getLayerName(resource) {
+    if (resource?.sourcetype === 'REMOTE' && resource?.remote_typename) {
+      return resource.remote_typename;
+    }
+    return resource?.alternate;
+  }
+
+  /**
    * Regresa el servidor en el que esta alojado un recurso
    * @param {Object} resource
    * @returns {String}
@@ -23,7 +35,7 @@ export function useResourcesSupplements() {
     if (resource.sourcetype === 'REMOTE') {
       return getWMSserver(resource);
     } else {
-      return `${config.public.geonodeUrl}/gs/ows`;
+      return `${config.public.geoserverUrl}/ows?`;
     }
   }
 
@@ -141,7 +153,7 @@ export function useResourcesSupplements() {
       service: 'WFS',
       version: '1.0.0',
       request: 'GetFeature',
-      typeName: resource.alternate,
+      typeName: getLayerName(resource),
       maxFeatures: 1,
       outputFormat: 'application/json',
     });
@@ -255,7 +267,7 @@ export function useResourcesSupplements() {
    * @returns {Promise<String, Array>}
    */
   async function fetchRemoteStyles(resource) {
-    const targetLayerName = resource.alternate;
+    const targetLayerName = getLayerName(resource);
     const targetLayerStyles = [];
     let targetLayerDefaultStyle = null;
     const server = getWMSserver(resource);
@@ -317,6 +329,7 @@ export function useResourcesSupplements() {
   async function getSLDs(resource) {
     let styleList = [];
     let defaultStyle = null;
+    let styleTitles = {};
 
     try {
       if (resource.sourcetype !== 'REMOTE') {
@@ -324,12 +337,13 @@ export function useResourcesSupplements() {
         const stylesRes = await gnoxyFetch(stylesURL);
 
         if (!stylesRes.ok) {
-          //console.error('Falló la petición de estilos de:', resource.title);
-          return { defaultStyle, styleList };
+          return { defaultStyle, styleList, styleTitles };
         }
 
         const stylesData = await stylesRes.json();
         defaultStyle = stylesData.default_style;
+        styleTitles = stylesData.style_titles || {};
+
         stylesData.styles.forEach((d) => {
           const optionList = d.split(':');
           if (optionList.length > 1 && !styleList.includes(optionList[1])) {
@@ -342,16 +356,15 @@ export function useResourcesSupplements() {
         if (!styleList.includes(defaultStyle)) {
           styleList.push(defaultStyle);
         }
-        return { defaultStyle, styleList };
+        return { defaultStyle, styleList, styleTitles };
       } else {
         const { targetLayerDefaultStyle, targetLayerStyles } = await fetchRemoteStyles(resource);
         defaultStyle = targetLayerDefaultStyle;
         styleList = targetLayerStyles;
-        return { defaultStyle, styleList };
+        return { defaultStyle, styleList, styleTitles };
       }
     } catch {
-      //console.error('Falló la petición general de estilos de:', resource.title);
-      return { defaultStyle, styleList };
+      return { defaultStyle, styleList, styleTitles };
     }
   }
 
@@ -414,6 +427,7 @@ export function useResourcesSupplements() {
 
           data[index] = {
             id: h.harvester_id,
+            service_id: h.id,
             title: h.title,
             status: harvesterStatus,
             total_resources: totalResources,
@@ -452,6 +466,7 @@ export function useResourcesSupplements() {
   }
 
   return {
+    getLayerName,
     getWMSserver,
     findServer,
     buildArcgisLayerRequest,

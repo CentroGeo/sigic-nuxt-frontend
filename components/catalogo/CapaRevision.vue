@@ -20,7 +20,7 @@ const config = useRuntimeConfig();
 
 const storeCatalogo = useResourcesCatalogoStore();
 const { gnoxyFetch } = useGnoxyUrl();
-const { findServer, hasWFS, getSLDs } = useResourcesSupplements();
+const { getLayerName, findServer, hasWFS, getSLDs } = useResourcesSupplements();
 const route = useRoute();
 const selectedPk = route.query.pk;
 const isLoading = ref(true);
@@ -151,7 +151,7 @@ onMounted(async () => {
             <SisdaiCapaWms
               v-if="serverType === 'ogc'"
               :key="`wms-${resourceElement.pk}`"
-              :capa="resourceElement.alternate"
+              :capa="getLayerName(resourceElement)"
               :consulta="gnoxyFetch"
               :fuente="findServer(resourceElement)"
               :mosaicos="true"
@@ -163,7 +163,7 @@ onMounted(async () => {
               v-if="serverType === 'arcgis'"
               :key="`arcgis-${resourceElement.pk}`"
               :fuente="findServer(resourceElement).replace('?', '')"
-              :capa="resourceElement.alternate.split(':')[1]"
+              :capa="getLayerName(resourceElement).split(':')[1]"
               :mosaicos="true"
               :opacidad="layerOpacity / 100"
             />
@@ -208,7 +208,7 @@ onMounted(async () => {
                     class="id-tag flex m-b-1 m-t-0"
                   >
                     <span class="pictograma-persona"></span>
-                    Mis archivos
+                    Mis recursos
                   </div>
                   <div
                     v-if="resourceElement.sourcetype === 'REMOTE'"
@@ -241,7 +241,7 @@ onMounted(async () => {
                       v-if="serverType === 'ogc'"
                       :consulta="gnoxyFetch"
                       :fuente="findServer(resourceElement).replace('?', '')"
-                      :nombre="resourceElement.alternate"
+                      :nombre="getLayerName(resourceElement)"
                       :titulo="resourceElement.title || 'cargando...'"
                       :estilo="selectedStyle"
                       :sin-control="true"
@@ -253,7 +253,7 @@ onMounted(async () => {
                       :sin-control="true"
                       :sin-control-clases="true"
                       :titulo="resourceElement.title || 'cargando...'"
-                      :capa="resourceElement.alternate.split(':')[1]"
+                      :capa="getLayerName(resourceElement).split(':')[1]"
                       :fuente="findServer(resourceElement).replace('?', '')"
                     />
                   </div>

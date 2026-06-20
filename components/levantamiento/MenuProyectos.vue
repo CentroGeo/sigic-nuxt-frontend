@@ -6,7 +6,7 @@
  */
 const props = defineProps({
   opciones: { type: Array, default: () => [] },
-  subruta: String,
+  subruta: String(''),
 });
 
 const emit = defineEmits(['update:subruta']);

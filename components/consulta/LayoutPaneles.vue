@@ -1,5 +1,17 @@
 <script setup>
 const storeConsulta = useConsultaStore();
+
+const props = defineProps({
+  // Cuando es false se omite el panel de selección y el visualizador absorbe su espacio.
+  mostrarSeleccion: { type: Boolean, default: true },
+});
+
+const columnasVisualizador = computed(() => {
+  let cols = 16;
+  if (!storeConsulta.catalogoColapsado) cols -= 4; // panel catálogo visible
+  if (props.mostrarSeleccion) cols -= 4; // panel selección visible
+  return cols;
+});
 </script>
 
 <!-- TODO: revisar si les laten cómo quedo el de ui/ -->
@@ -16,13 +28,13 @@ const storeConsulta = useConsultaStore();
     </div>
     <!--      class="fondo-color-neutro"
 -->
-    <div :class="`columna-${storeConsulta.catalogoColapsado ? '12' : '8'}`">
+    <div :class="`columna-${columnasVisualizador}`">
       <slot name="visualizador">
         <p>Panel visualización</p>
       </slot>
     </div>
 
-    <div class="columna-4">
+    <div v-if="mostrarSeleccion" class="columna-4">
       <slot name="seleccion">
         <p>Panel selección</p>
       </slot>

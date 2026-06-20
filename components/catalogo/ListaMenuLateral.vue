@@ -33,6 +33,9 @@ onMounted(async () => {
               <nuxt-link to="/catalogo/explorar/documentos">Documentos</nuxt-link>
             </li>
             <li>
+              <nuxt-link to="/catalogo/explorar/mapas">Mapas</nuxt-link>
+            </li>
+            <li>
               <nuxt-link to="/catalogo/explorar/catalogos-externos">Servicios remotos</nuxt-link>
             </li>
           </ul>
@@ -43,10 +46,10 @@ onMounted(async () => {
           <nuxt-link
             :class="{
               ['router-link-active router-link-exact-active']:
-                route.path.includes('/catalogo/mis-archivos/'),
+                route.path.includes('/catalogo/mis-recursos/'),
             }"
-            to="/catalogo/mis-archivos"
-            >Mis archivos</nuxt-link
+            to="/catalogo/mis-recursos"
+            >Mis recursos</nuxt-link
           >
         </li>
         <li>

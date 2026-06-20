@@ -3,7 +3,11 @@ import { getServerSession } from '#auth';
 
 export default defineEventHandler(async (event) => {
   const rawPath = event.context.params?.path;
-  const path = Array.isArray(rawPath) ? rawPath.join('/') : rawPath || '';
+  const pathWithoutSlash = Array.isArray(rawPath) ? rawPath.join('/') : rawPath || '';
+  // h3 strips the trailing slash from catch-all params; restore it from the original URL
+  const originalUrl = event.node.req.url || '';
+  const trailingSlash = originalUrl.endsWith('/') || originalUrl.includes('/?') ? '/' : '';
+  const path = pathWithoutSlash.endsWith('/') ? pathWithoutSlash : pathWithoutSlash + trailingSlash;
   const query = getQuery(event);
 
   const session = await getServerSession(event);
@@ -42,6 +46,18 @@ export default defineEventHandler(async (event) => {
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
+
+  // Evitar que el browser muestre el diálogo de autenticación básica
+  // cuando el backend responde 401 con WWW-Authenticate: Basic.
+  // proxyRequest llama a res.setHeader internamente, así que lo interceptamos
+  // antes de que escriba los headers.
+  const res = event.node.res;
+  const origSetHeader = res.setHeader.bind(res);
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  (res as any).setHeader = (name: string, value: unknown) => {
+    if (String(name).toLowerCase() === 'www-authenticate') return res;
+    return origSetHeader(name, value as any);
+  };
 
   return proxyRequest(event, url, { headers });
 });

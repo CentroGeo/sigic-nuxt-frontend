@@ -14,6 +14,52 @@ const storeFilters = useFilteredResources();
 const { gnoxyFetch } = useGnoxyUrl();
 const { data } = useAuth();
 
+// ── Modo mapas ────────────────────────────────────────────────────────────
+// En /consulta/mapas este catálogo muestra la lista de mapas (sigic-maps) en
+// lugar del catálogo de recursos GeoNode. La selección se comparte via store.
+const route = useRoute();
+const mapasStore = useMapasStore();
+const esRutaMapas = computed(() => route.path.startsWith('/consulta/mapas'));
+const cargandoMapas = ref(false);
+const busquedaMapas = ref('');
+const filtroMapas = ref('todos'); // todos | publicos | propios
+const modalCompartir = ref(null);
+
+function esMapaPropio(m) {
+  const ownerUsername = m.owner?.username;
+  if (!ownerUsername || !data.value) return false;
+  return ownerUsername === data.value.user?.email || ownerUsername === data.value.user?.name;
+}
+
+function abrirCompartir() {
+  modalCompartir.value?.abrir();
+}
+
+const mapasFiltrados = computed(() => {
+  const termino = busquedaMapas.value.trim().toLowerCase();
+  return mapasStore.maps.filter((m) => {
+    if (filtroMapas.value === 'publicos' && m.is_public === false) return false;
+    if (filtroMapas.value === 'propios' && !esMapaPropio(m)) return false;
+    if (termino && !(m.name || '').toLowerCase().includes(termino)) return false;
+    return true;
+  });
+});
+
+async function cargarListaMapas() {
+  cargandoMapas.value = true;
+  await mapasStore.cargarMapas({ page: 1, page_size: 50 });
+  cargandoMapas.value = false;
+}
+
+async function seleccionarMapa(id) {
+  if (mapasStore.activeMap?.id === id) return;
+  await mapasStore.cargarMapa(id);
+}
+
+function limpiarBusquedaMapas() {
+  busquedaMapas.value = '';
+}
+
 defineProps({
   titulo: { type: String, default: 'Título' },
   etiquetaElementos: { type: String, default: undefined },
@@ -100,7 +146,7 @@ async function buildCategoriesDict() {
   }
   if (Object.keys(categoriesDict.value).length > 0) {
     orderedCategories.value = Object.keys(categoriesDict.value).sort((a, b) =>
-      categoriesInSpanish[a].localeCompare(categoriesInSpanish[b])
+      (categoriesInSpanish[a] ?? a).localeCompare(categoriesInSpanish[b] ?? b)
     );
   } else {
     orderedCategories.value = [];
@@ -240,10 +286,12 @@ function resetAdvancedFilter() {
 }
 
 watch(selectedOwner, () => {
+  if (esRutaMapas.value) return;
   storeFilters.buildQueryParams();
 });
 
 watch(params, async () => {
+  if (esRutaMapas.value) return;
   isLoading.value = true;
   storeResources.resetByType();
   totalResources.value = 0;
@@ -254,6 +302,10 @@ watch(params, async () => {
 });
 
 onMounted(async () => {
+  if (esRutaMapas.value) {
+    await cargarListaMapas();
+    return;
+  }
   storeFilters.resetAll();
   storeFilters.buildQueryParams();
   if (resources.value.length !== 0) {
@@ -264,7 +316,83 @@ onMounted(async () => {
 
 <template>
   <div class="catalogo-layout">
-    <div class="encabezado-catalogo">
+    <!-- Modo mapas: lista de mapas (sigic-maps) -->
+    <div v-if="esRutaMapas" class="explorador-mapas">
+      <p class="h4 fondo-color-acento p-3 m-0">{{ titulo }}</p>
+
+      <div class="m-x-2 m-y-1">
+        <!-- Selector de búsqueda -->
+        <label for="selector-mapas">Filtrar mapas</label>
+        <select id="selector-mapas" v-model="filtroMapas" name="selector-mapas" class="m-b-2">
+          <option value="todos">Todos los mapas</option>
+          <option value="publicos">Mapas públicos</option>
+          <option v-if="isLoggedIn" value="propios">Mis mapas</option>
+        </select>
+
+        <!-- Campo de búsqueda -->
+        <ClientOnly>
+          <form class="campo-busqueda" @submit.prevent>
+            <label for="input-busqueda-mapas" class="a11y-solo-lectura">Campo de búsqueda</label>
+            <input
+              id="input-busqueda-mapas"
+              v-model="busquedaMapas"
+              type="search"
+              class="campo-busqueda-entrada"
+              placeholder="Buscar mapas"
+            />
+            <button
+              aria-label="Borrar"
+              class="boton-pictograma boton-sin-contenedor-secundario campo-busqueda-borrar"
+              type="button"
+              @click="limpiarBusquedaMapas"
+            >
+              <span aria-hidden="true" class="pictograma-cerrar" />
+            </button>
+            <button
+              v-globo-informacion:derecha="'Buscar'"
+              aria-label="Buscar"
+              class="boton-primario boton-pictograma campo-busqueda-buscar"
+              type="button"
+            >
+              <span class="pictograma-buscar" aria-hidden="true" />
+            </button>
+          </form>
+        </ClientOnly>
+
+        <UiNumeroElementos
+          :numero="mapasFiltrados.length"
+          :etiqueta="etiquetaElementos || 'Mapas'"
+        />
+      </div>
+
+      <p v-if="cargandoMapas" class="texto-secundario p-3 m-0">Cargando…</p>
+
+      <ul v-else-if="mapasFiltrados.length" class="lista">
+        <li
+          v-for="m in mapasFiltrados"
+          :key="m.id"
+          class="item p-2"
+          :class="{ activo: mapasStore.activeMap?.id === m.id }"
+          @click="seleccionarMapa(m.id)"
+        >
+          <div class="item-titulo">{{ m.name }}</div>
+          <div class="item-meta texto-secundario">
+            <span>{{ m.owner?.username || 'Anónimo' }}</span>
+            <span v-if="m.is_public === false" class="chip-privado">
+              <i class="fa-solid fa-lock" aria-hidden="true"></i> Privado
+            </span>
+            <button class="boton-secundario boton-chico" type="button" @click="abrirCompartir">
+              <i class="fa-solid fa-share-nodes" aria-hidden="true"></i> Compartir
+            </button>
+          </div>
+        </li>
+      </ul>
+
+      <p v-else class="texto-secundario p-3 m-0">No se encontraron mapas.</p>
+    </div>
+
+    <!-- Modo catálogo de recursos GeoNode -->
+    <div v-else class="encabezado-catalogo">
       <p class="h4 fondo-color-acento p-3 m-0">{{ titulo }}</p>
 
       <div class="m-x-2 m-y-1">
@@ -471,6 +599,7 @@ onMounted(async () => {
     :ows-link="sigicOWS"
     :service="'CSW'"
   />
+  <MapasModalCompartir ref="modalCompartir" :mapa="mapasStore.activeMap" />
 </template>
 
 <style lang="scss" scoped>
@@ -506,5 +635,65 @@ onMounted(async () => {
   right: -4px;
   top: -4px;
   z-index: 1;
+}
+
+// ── Modo mapas ──────────────────────────────────────────────────────────────
+.explorador-mapas {
+  .encabezado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--color-neutro-1);
+  }
+
+  .lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .item {
+    cursor: pointer;
+    border-bottom: 1px solid var(--color-neutro-1);
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background-color: var(--fondo-acento);
+    }
+
+    &.activo {
+      background-color: var(--color-secundario-2);
+      color: #000;
+
+      .item-titulo,
+      .item-meta,
+      .texto-secundario {
+        color: #000;
+      }
+    }
+  }
+
+  .item-titulo {
+    font-weight: 600;
+  }
+
+  .item-meta {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-size: 0.85rem;
+    margin-top: 2px;
+  }
+
+  .chip-privado {
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    padding: 0 6px;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
 }
 </style>

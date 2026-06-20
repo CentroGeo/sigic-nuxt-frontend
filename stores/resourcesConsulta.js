@@ -82,9 +82,10 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
         if (resourceType === 'dataLayer' || resourceType === 'dataTable') {
           await Promise.all(
             resourcesRes.resources.map(async (d) => {
-              const { defaultStyle, styleList } = await getSLDs(d);
+              const { defaultStyle, styleList, styleTitles } = await getSLDs(d);
               d.default_style = defaultStyle;
               d.styles = styleList;
+              d.style_titles = styleTitles;
 
               if (resourceType === 'dataLayer') {
                 d.geomType = await defineGeomType(d);
@@ -136,9 +137,10 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
 
           // Agregamos los estilos
           if (resourceData.resource_type === 'dataset') {
-            const { defaultStyle, styleList } = await getSLDs(resourceData);
+            const { defaultStyle, styleList, styleTitles } = await getSLDs(resourceData);
             resourceData.default_style = defaultStyle;
             resourceData.styles = styleList;
+            resourceData.style_titles = styleTitles;
           }
 
           return resourceData;

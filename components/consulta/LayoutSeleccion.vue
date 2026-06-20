@@ -111,7 +111,7 @@ const dividirMapa = computed({
       <p class="h4 fondo-color-acento p-3 m-0">{{ titulo }}</p>
 
       <div class="m-x-2 m-y-1">
-        <p class="m-0">Explora conjuntos de datos abiertos nacionales.</p>
+        <!-- <p class="m-0">Explora conjuntos de datos abiertos nacionales.</p> -->
 
         <div class="flex m-y-3">
           <button

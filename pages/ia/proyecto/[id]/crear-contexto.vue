@@ -398,7 +398,7 @@ onUnmounted(() => {
                     </td>
                     <td class="p-3 etiqueta-tabla">
                       <span class="p-x-1 p-y-minimo">
-                        {{ fuente.geonode_type === 'Catalogo' ? 'Catálogo' : fuente.geonode_type }}
+                        {{ fuente.geonode_type === 'Catalogo' ? 'Propio' : fuente.geonode_type }}
                       </span>
                     </td>
                   </tr>

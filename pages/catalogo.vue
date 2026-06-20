@@ -43,6 +43,11 @@ onUnmounted(() => (document.querySelector('body').className = ''));
           globo: 'Documentos',
         },
         {
+          pictograma: 'pictograma-explorar',
+          ruta: `${ruta}/explorar/mapas`,
+          globo: 'Mapas',
+        },
+        {
           pictograma: 'pictograma-flkt',
           ruta: `${ruta}/explorar/catalogos-externos`,
           globo: 'Servicios Remotos',
@@ -52,7 +57,7 @@ onUnmounted(() => (document.querySelector('body').className = ''));
         {
           pictograma: 'pictograma-proyectos',
           ruta: `${ruta}/mis-archivos`,
-          globo: 'Mis archivos',
+          globo: 'Mis recursos',
         },
         {
           pictograma: 'pictograma-archivo-subir',

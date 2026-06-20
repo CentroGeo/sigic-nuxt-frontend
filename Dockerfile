@@ -16,6 +16,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # --- copiar solo package.json primero ---
 COPY package*.json ./
 
+# scripts necesarios para postinstall
+COPY scripts/ ./scripts/
+
 # instalar dependencias
 RUN npm install --include=dev --legacy-peer-deps \
     && npm cache clean --force
@@ -24,10 +27,10 @@ RUN npm install --include=dev --legacy-peer-deps \
 COPY . .
 
 # compilar la aplicación
-RUN npm run build  \
-    && mv .output/ build_output \
-    && npm run clean \
-    && mv build_output/ .output/
+RUN npm run build  
+#    && mv .output/ build_output \
+#    && npm run clean \
+#    && mv build_output/ .output/
 
 
 # 🚀 Final stage

@@ -18,9 +18,11 @@ const archivosEnCarga = ref([]);
 const hayCargas = ref(false);
 const { data } = useAuth();
 const { gnoxyFetch } = useGnoxyUrl();
+const { uploadFile, pollJob, importToGeonode } = useDataImporter();
 
-const base_files = ['.geojson', '.gpkg', '.csv'];
+const base_files = ['.geojson', '.gpkg'];
 const docs_files = ['.txt', '.pdf'];
+const FORMATOS_TABULARES = ['csv', 'xlsx', 'xls', 'json'];
 
 async function guardarArchivo(files) {
   archivosEnCarga.value = [];
@@ -38,6 +40,9 @@ async function guardarArchivo(files) {
       numero_geometrias: null,
       proyeccion: null,
       tipo_recurso: null,
+      jobId: null,
+      jobSchema: null,
+      geoCapabilidad: null,
     })
   );
 
@@ -45,6 +50,26 @@ async function guardarArchivo(files) {
 
   nuevosArchivos.forEach(async (archivo, idx) => {
     const file = files[idx];
+    const ext = file.name.split('.').pop()?.toLowerCase() || '';
+
+    // Flujo SIGIC para tabulares
+    if (FORMATOS_TABULARES.includes(ext)) {
+      archivo.estatus = 'analizando_tabular';
+      archivo.mensaje = 'Analizando columnas del archivo…';
+      try {
+        const importJob = await uploadFile(file, data.value?.accessToken);
+        archivo.jobId = importJob.id;
+        await esperarAnalisis(archivo);
+        archivo.geoCapabilidad = calcularGeoCapabilidad(archivo.jobSchema);
+        archivo.estatus = 'decision_tabular';
+        archivo.mensaje = '';
+      } catch {
+        archivo.estatus = 'error_carga';
+        archivo.mensaje = 'Error al analizar el archivo.';
+      }
+      return;
+    }
+
     let endpoint = null;
 
     if (base_files.some((end) => file.name.endsWith(end))) {
@@ -126,6 +151,57 @@ async function guardarArchivo(files) {
   });
 }
 
+// Polling para análisis SIGIC de tabulares
+async function esperarAnalisis(archivo) {
+  for (let i = 0; i < 48; i++) {
+    await new Promise((r) => setTimeout(r, 2500));
+    const jobData = await pollJob(archivo.jobId, data.value?.accessToken);
+    if (jobData.status === 'ready') {
+      archivo.jobSchema = jobData.column_schema;
+      return;
+    }
+    if (jobData.status === 'error') throw new Error(jobData.error_message || 'Error analizando');
+  }
+  throw new Error('Tiempo de análisis agotado');
+}
+
+function calcularGeoCapabilidad(schema) {
+  if (!schema) return null;
+  const roles = schema.map((c) => c.geo_role).filter(Boolean);
+  if (roles.includes('lat') && roles.includes('lon')) return 'Columnas de coordenadas detectadas';
+  if (roles.some((r) => ['mun_key', 'state_key'].includes(r))) return 'Claves INEGI detectadas';
+  if (roles.some((r) => ['mun_name', 'state_name'].includes(r)))
+    return 'Nombres geográficos detectados';
+  return null;
+}
+
+function irAImportador(archivo) {
+  navigateTo(`/geocontenidos/importar-datos?job=${archivo.jobId}`);
+}
+
+async function subirComoTabular(archivo) {
+  archivo.estatus = 'procesando';
+  archivo.mensaje = 'Importando datos a GeoNode…';
+  try {
+    await importToGeonode(archivo.jobId, data.value?.accessToken);
+    for (let i = 0; i < 60; i++) {
+      await new Promise((r) => setTimeout(r, 5000));
+      const jobData = await pollJob(archivo.jobId, data.value?.accessToken);
+      if (jobData.status === 'done') {
+        archivo.estatus = 'carga_finalizada';
+        archivo.mensaje = 'Archivo cargado correctamente como tabla.';
+        statusOk.value = true;
+        return;
+      }
+      if (jobData.status === 'error') throw new Error(jobData.error_message || 'Error importando');
+    }
+    throw new Error('El procesamiento está tardando más de lo esperado.');
+  } catch (e) {
+    archivo.estatus = 'error_carga';
+    archivo.mensaje = e.message || 'Error al importar.';
+  }
+}
+
 // Polling para monitorear la importación de capas base
 async function monitorLayerImport(executionId, archivo) {
   //const token = ref(data.value?.accessToken);
@@ -168,16 +244,14 @@ async function monitorLayerImport(executionId, archivo) {
         <div class="alineacion-izquierda ancho-lectura">
           <h2>Carga archivo</h2>
           <p class="m-y-1">
-            <b>Solo archivos GeoJSON, Geopaquetes, csv, pdf y txt.</b>
+            <b>Formatos admitidos: GeoJSON, GeoPackage, CSV, XLSX, XLS, JSON, PDF y TXT.</b>
           </p>
           <p
             class="texto-color-informacion fondo-color-informacion borde borde-color-informacion borde-redondeado-2 p-2 m-y-2"
           >
-            Los archivos en formato CSV se almacenan como datos tabulares, a menos que contengan
-            coordenadas que representen una ubicación puntual. Para que el sistema reconozca dichas
-            coordenadas, estas deben expresarse como valores numéricos en columnas cuyos nombres
-            correspondan a alguno de los siguientes pares admitidos: x, y; long, lat; o longitude,
-            latitude.
+            Los archivos tabulares (CSV, Excel, JSON) se analizan automáticamente para detectar
+            columnas geográficas, lo que permite la espacialización de datos tabulares mediante la
+            construcción de geometrías de puntos.
           </p>
           <!-- Si el archivo contiene datos de coordenadas pero estos no siguen la
             nomenclatura establecida, serán procesados como cualquier otro valor numérico sin
@@ -194,7 +268,12 @@ async function monitorLayerImport(executionId, archivo) {
               :class="{
                 'fondo-color-confirmacion': archivo.estatus == 'carga_finalizada',
                 'fondo-color-error': archivo.estatus == 'error_carga',
-                'fondo-color-neutro': ['pendiente', 'procesando'].includes(archivo.estatus),
+                'fondo-color-neutro': [
+                  'pendiente',
+                  'procesando',
+                  'analizando_tabular',
+                  'decision_tabular',
+                ].includes(archivo.estatus),
               }"
             >
               <div>
@@ -202,7 +281,11 @@ async function monitorLayerImport(executionId, archivo) {
                   <div class="flex-vertical-centrado">
                     <p>
                       <span
-                        v-if="['pendiente', 'procesando'].includes(archivo.estatus)"
+                        v-if="
+                          ['pendiente', 'procesando', 'analizando_tabular'].includes(
+                            archivo.estatus
+                          )
+                        "
                         class="pictograma-de-carga-sigic"
                       >
                         <img
@@ -239,6 +322,30 @@ async function monitorLayerImport(executionId, archivo) {
                     <b>{{ archivo.mensaje }}</b>
                   </div>
 
+                  <!-- Decisión para archivos tabulares -->
+                  <div v-if="archivo.estatus === 'decision_tabular'" class="decision-tabular m-t-2">
+                    <p class="m-b-1">
+                      <strong>Archivo tabular detectado.</strong> ¿Cómo deseas subirlo?
+                    </p>
+                    <p
+                      v-if="archivo.geoCapabilidad"
+                      class="texto-chico texto-color-confirmacion m-b-2"
+                    >
+                      ✓ {{ archivo.geoCapabilidad }}
+                    </p>
+                    <div class="decision-botones">
+                      <button class="boton-primario boton-chico" @click="irAImportador(archivo)">
+                        Georreferenciar y crear geocontenido →
+                      </button>
+                      <button
+                        class="boton-secundario boton-chico"
+                        @click="subirComoTabular(archivo)"
+                      >
+                        Subir como datos tabulares
+                      </button>
+                    </div>
+                  </div>
+
                   <div
                     v-if="archivo.numero_geometrias && archivo.estatus === 'carga_finalizada'"
                     class="nota"
@@ -253,21 +360,21 @@ async function monitorLayerImport(executionId, archivo) {
                   >
                     <div class="m-x-2 m-y-1">
                       <NuxtLink
-                        :to="`/catalogo/mis-archivos/editar/MetadatosBasicos?data=${archivo.IdRutaArchivo}&type=${archivo.tipo_recurso}`"
+                        :to="`/catalogo/mis-recursos/editar/MetadatosBasicos?data=${archivo.IdRutaArchivo}&type=${archivo.tipo_recurso}`"
                         target="_blank"
                         >Editar metadatos</NuxtLink
                       >
                     </div>
                     <div v-if="archivo.tipo_recurso === 'dataLayer'" class="m-x-2 m-y-1">
                       <NuxtLink
-                        :to="`/catalogo/mis-archivos/editar/estilo?data=${archivo.IdRutaArchivo}&type=dataLayer`"
+                        :to="`/catalogo/mis-recursos/editar/estilo?data=${archivo.IdRutaArchivo}&type=dataLayer`"
                       >
                         Agregar un estilo (.sld)</NuxtLink
                       >
                     </div>
                     <!-- <div>
-                      <NuxtLink to="/catalogo/mis-archivos/metadatos-pendientes">
-                        Ver en Mis archivos</NuxtLink
+                      <NuxtLink to="/catalogo/mis-recursos/metadatos-pendientes">
+                        Ver en Mis recursos</NuxtLink
                       >
                     </div> -->
                   </div>
@@ -282,6 +389,17 @@ async function monitorLayerImport(executionId, archivo) {
   </UiLayoutPaneles>
 </template>
 <style lang="scss">
+.decision-tabular {
+  padding: 12px 0 4px;
+
+  .decision-botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+}
+
 span.pictograma-de-carga-sigic {
   display: inline-flex;
   vertical-align: middle;

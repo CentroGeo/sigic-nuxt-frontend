@@ -6,7 +6,6 @@ on:
       - 'v*'
   workflow_dispatch:
 
-
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -60,3 +59,13 @@ jobs:
 
           # push latest
           docker push "$IMAGE:latest"
+
+  deploy:
+    needs: build-and-push
+    runs-on: [self-hosted, deploy-release]
+    steps:
+      - name: Pull and restart frontend
+        run: |
+          cd ~/opt/sigic-bundle
+          docker compose pull frontend-admin frontend-pub
+          docker compose up -d frontend-admin frontend-pub

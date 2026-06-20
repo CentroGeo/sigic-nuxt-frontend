@@ -317,13 +317,13 @@ watch(
                 <div class="flex proyecto-encabezado">
                   <h2>{{ proyecto.title }}</h2>
 
-                  <p
+                  <!-- OCULTO TEMPORALMENTE: Etiqueta de visibilidad del proyecto (Público/Privado) -->
+                  <!-- <p
                     class="p-x-1 p-y-minimo fondo-color-acento texto-color-secundario borde borde-color-acento borde-redondeado-8"
                   >
                     <span>{{ proyecto.public ? 'Público' : 'Privado' }}</span>
-                    <!-- TODO: agregar icono de para privado/publico -->
                     <span class="pictograma-privado" aria-hidden="true" />
-                  </p>
+                  </p> -->
                 </div>
 
                 <div class="flex">
@@ -500,7 +500,7 @@ watch(
                       <td class="p-3 etiqueta-tabla">
                         <span class="p-x-1 p-y-minimo">
                           {{
-                            archivo.geonode_type === 'Catalogo' ? 'Catálogo' : archivo.geonode_type
+                            archivo.geonode_type === 'Catalogo' ? 'Propio' : archivo.geonode_type
                           }}
                         </span>
                       </td>

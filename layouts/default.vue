@@ -1,8 +1,19 @@
 <script setup>
+/**
+ * Layout principal con identidad IDEGeo.
+ *
+ * Reemplaza:
+ * - SisdaiNavegacionGobMx → IdegeoBarraSuperior
+ * - SisdaiNavegacionPrincipal + MainNavegacion → IdegeoNavegacionPrincipal
+ * - SisdaiPiePaginaGobMx → IdegeoPiePagina
+ *
+ * Mantiene:
+ * - SisdaiMenuAccesibilidad (funcionalidad de accesibilidad intacta)
+ */
 import SisdaiMenuAccesibilidad from '@centrogeomx/sisdai-componentes/src/componentes/menu-accesibilidad/SisdaiMenuAccesibilidad.vue';
-import SisdaiNavegacionGobMx from '@centrogeomx/sisdai-componentes/src/componentes/navegacion-gob-mx/SisdaiNavegacionGobMx.vue';
-import SisdaiPiePaginaGobMx from '@centrogeomx/sisdai-componentes/src/componentes/pie-pagina-gob-mx/SisdaiPiePaginaGobMx.vue';
-import MainNavegacion from '~/components/base/MainNavegacion.vue';
+import IdegeoBarraSuperior from '~/components/base/IdegeoBarraSuperior.vue';
+import IdegeoNavegacionPrincipal from '~/components/base/IdegeoNavegacionPrincipal.vue';
+import IdegeoPiePagina from '~/components/base/IdegeoPiePagina.vue';
 import { useAccesibilidadStore } from '~/stores/accesibilidad';
 
 const accesibilidadStore = useAccesibilidadStore();
@@ -14,25 +25,43 @@ useHead(() => ({
     { property: 'og:url', content: currentPath.value, key: 'og-url' },
     { name: 'twitter:url', content: currentPath.value, key: 'twitter-url' },
   ],
+  link: [
+    {
+      rel: 'preconnect',
+      href: 'https://fonts.googleapis.com',
+    },
+    {
+      rel: 'preconnect',
+      href: 'https://fonts.gstatic.com',
+      crossorigin: '',
+    },
+    {
+      rel: 'stylesheet',
+      href: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap',
+    },
+    {
+      rel: 'stylesheet',
+      href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css',
+    },
+  ],
 }));
 </script>
 
 <template>
   <div>
     <a href="#principal" class="ir-contenido-principal"> Ir a contenido principal </a>
-    <SisdaiNavegacionGobMx />
 
-    <MainNavegacion />
+    <IdegeoBarraSuperior />
+    <IdegeoNavegacionPrincipal />
 
-    <div class="contenido">
+    <div id="principal" class="contenido">
       <slot />
     </div>
 
-    <!-- parece que botón flotante agrega un id al elemento html que no
-    coincide al hacer server side rendering -->
     <client-only>
       <SisdaiMenuAccesibilidad :objeto-store="accesibilidadStore" perfil-color="sigic" />
     </client-only>
-    <SisdaiPiePaginaGobMx />
+
+    <IdegeoPiePagina />
   </div>
 </template>

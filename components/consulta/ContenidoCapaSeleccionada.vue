@@ -165,7 +165,7 @@ watch(selectedStyle, (nv) => {
           texto_ayuda="Texto de ayuda."
         >
           <option v-for="estilo in resourceElement.styles" :key="estilo" :value="estilo">
-            {{ estilo }}
+            {{ resourceElement.style_titles?.[estilo] || estilo }}
           </option>
         </SisdaiSelector>
       </ClientOnly>

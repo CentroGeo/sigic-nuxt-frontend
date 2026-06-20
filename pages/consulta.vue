@@ -7,13 +7,18 @@ definePageMeta({
 });
 
 const ruta = '/consulta';
+const route = useRoute();
 
 const storeConsulta = useConsultaStore();
+
+const enVisualizarMapa = computed(() => /\/mapas\/[^/]+\/(visualizar|embed)$/.test(route.path));
+
 onUnmounted(() => (document.querySelector('body').className = ''));
 </script>
 
 <template>
-  <div class="modulo-consultas flex">
+  <NuxtPage v-if="enVisualizarMapa" />
+  <div v-else class="modulo-consultas flex">
     <UiNavegacionLateral
       :sub-paginas="[
         {
@@ -30,6 +35,11 @@ onUnmounted(() => (document.querySelector('body').className = ''));
           pictograma: 'pictograma-documento',
           ruta: `${ruta}/documentos`,
           globo: 'Documentos',
+        },
+        {
+          pictograma: 'pictograma-explorar',
+          ruta: `${ruta}/mapas`,
+          globo: 'Mapas',
         },
       ]"
       :funcion-colapsar="storeConsulta.alternarCatalogoColapsable"

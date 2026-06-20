@@ -2,7 +2,7 @@
   <div class="flex flex-contenido-centrado ancho-lectura borde-redondeado-16 sin-seleccion">
     <span class="pictograma-flkt pictograma-grande texto-color-error m-1"></span>
     <h3 class="texto-color-error m-1">
-      Aún no se han seleccionado capas, tabulados o documentos para mostrar
+      Aún no se han seleccionado capas, tabulados, documentos o mapas para mostrar
     </h3>
     <p class="m-1">
       Cuando selecciones un conjunto de datos del catálogo, podrás explorarlo en esta sección
