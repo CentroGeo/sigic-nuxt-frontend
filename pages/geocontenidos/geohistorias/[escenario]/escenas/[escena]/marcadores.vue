@@ -1,7 +1,7 @@
 <script setup>
-definePageMeta({ middleware: 'auth' });
-
 import pictogramas from '~/utils/geocontenidos/pictogramas.json';
+
+definePageMeta({ middleware: 'auth' });
 
 const { escenario, escena: escenaId } = useRoute().params;
 const { gnoxyFetch } = useGnoxyUrl();

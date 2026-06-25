@@ -1,6 +1,4 @@
 <script setup>
-definePageMeta({ middleware: 'auth' });
-
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
 import {
   // SisdaiCapaArcgis,
@@ -10,6 +8,8 @@ import {
   // SisdaiLeyendaWms,
   SisdaiMapa,
 } from '@centrogeomx/sisdai-mapas';
+
+definePageMeta({ middleware: 'auth' });
 
 const config = useRuntimeConfig();
 const { data: userData } = useAuth();

@@ -42,7 +42,7 @@ function onEditarClick() {
   if (resourceElement.value.is_published === true) {
     modalVolverEditar.value.abrirModal();
   } else {
-  // De lo contrario a edición directo
+    // De lo contrario a edición directo
     navigateTo({
       path: '/catalogo/mis-archivos/editar/MetadatosBasicos',
       query: { data: resourceElement.value.pk, type: storeConsulta.resourceType },
@@ -288,9 +288,9 @@ watch(selectedStyle, (nv) => {
         <template #encabezado><h2>Volver a editar</h2></template>
         <template #cuerpo>
           <p>
-            Al volver a editar <b>{{ resourceElement.title }}</b>, la capa saldrá del catálogo
-            público y deberá pasar de nuevo por el proceso de revisión desde cero. ¿Deseas
-            continuar?
+            Al volver a editar <b>{{ resourceElement.title }}</b
+            >, la capa saldrá del catálogo público y deberá pasar de nuevo por el proceso de
+            revisión desde cero. ¿Deseas continuar?
           </p>
         </template>
         <template #pie>
@@ -301,11 +301,7 @@ watch(selectedStyle, (nv) => {
           >
             Cancelar
           </button>
-          <button
-            class="boton-primario boton-chico"
-            type="button"
-            @click="confirmarVolverAEditar"
-          >
+          <button class="boton-primario boton-chico" type="button" @click="confirmarVolverAEditar">
             Volver a editar
           </button>
         </template>

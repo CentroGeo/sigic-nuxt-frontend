@@ -47,7 +47,7 @@ export default defineEventHandler(async (event) => {
   // delete headers.host;
 
   const headers: Record<string, string> = { cookie: '' };
-  
+
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }

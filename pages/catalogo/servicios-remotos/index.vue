@@ -7,7 +7,6 @@ definePageMeta({
 });
 
 const storeCatalogo = useCatalogoStore();
-
 </script>
 <template>
   <UiLayoutPaneles :estado-colapable="storeCatalogo.catalogoColapsado">
