@@ -141,6 +141,19 @@ export const useEditedMetadataStore = defineStore('editedMetadata', () => {
      * si el metadato está vacío
      * @returns Objeto de metadatos
      */
+    /**
+     * Pre-llena los campos del formulario con los valores importados desde un XML.
+     * Solo sobrescribe los campos que tienen valor en el import; los demás se conservan.
+     * @param {Object} fields Campos parseados por el backend
+     */
+    fillFromImport(fields) {
+      Object.entries(fields).forEach(([key, value]) => {
+        if (key in metadata && value !== null && value !== undefined && value !== '') {
+          metadata[key] = value;
+        }
+      });
+    },
+
     buildRequestBody() {
       const metaDict = {};
       if (metadata.title && metadata.title.length > 0) {

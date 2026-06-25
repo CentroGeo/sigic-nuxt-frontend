@@ -634,6 +634,21 @@ async function volverAEditar() {
             <div v-if="variable === 'acciones'">
               <div class="flex-width">
                 <button
+                  v-if="datum[variable].split(', ').includes('Estilo')"
+                  v-globo-informacion:izquierda="'Administrar estilos'"
+                  class="boton-pictograma boton-secundario"
+                  aria-label="Administrar estilos de la capa"
+                  type="button"
+                  @click="
+                    navigateTo({
+                      path: '/catalogo/mis-archivos/editar/estilo',
+                      query: { data: datum.pk },
+                    })
+                  "
+                >
+                  <span class="pictograma-contraste"></span>
+                </button>
+                <button
                   v-if="datum[variable].split(', ').includes('Editar')"
                   v-globo-informacion:izquierda="'Editar'"
                   class="boton-pictograma boton-secundario"

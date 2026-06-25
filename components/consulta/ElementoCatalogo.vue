@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onUnmounted, ref, toRefs } from 'vue';
+import { computed, onMounted, onUnmounted, ref, toRefs } from 'vue';
 import { tooltipContent } from '~/utils/consulta';
 
 const { data } = useAuth();
@@ -24,7 +24,7 @@ const isLoggedIn = ref(data.value ? true : false);
 const username = ref(data.value ? data.value.user.email : undefined);
 
 const nthElementsPks = computed(() => storeResources.nthElementsByType());
-const geomType = ref(catalogueElement.value.geomType ? catalogueElement.value.geomType : 'Otro');
+const geomType = computed(() => catalogueElement.value.geomType ?? 'Otro');
 const geomDict = {
   Point: { tooltipText: 'Capa de puntos', class: 'pictograma-capa-puntos' },
   MultiPoint: {
@@ -98,15 +98,15 @@ const emit = defineEmits(['triggerFetch', 'delete']);
 let observer;
 const rootEl = ref();
 
-const iconOptions = {
+const iconOptions = computed(() => ({
   dataLayer: [
     {
-      tooltipText: geomDict[geomType.value].tooltipText,
-      class: geomDict[geomType.value].class,
+      tooltipText: geomDict[geomType.value]?.tooltipText ?? geomDict['Otro'].tooltipText,
+      class: geomDict[geomType.value]?.class ?? geomDict['Otro'].class,
       position: 'arriba',
     },
     {
-      tooltipText: `Visualizaciones disponibles`,
+      tooltipText: 'Visualizaciones disponibles',
       class: 'pictograma-visualizador',
       position: 'arriba',
     },
@@ -130,7 +130,7 @@ const iconOptions = {
       position: 'derecha',
     },
   ],
-};
+}));
 
 watch(capasSeleccionadas, () => {
   storeResources.fetchResourcesByPk(storeConsulta.resourceType, storeSelected.pks);
@@ -217,17 +217,18 @@ onUnmounted(() => {
           style="font-size: 12px; margin-left: 4px; text-align: center"
         >
           {{ catalogueElement.styles?.length === 0 ? 1 : catalogueElement.styles?.length }}
-        </span></span>
+        </span></span
+      >
 
-      <span                                                                                                                                                                       
-            v-if="isLoggedIn && esSuperusuaria"                                                                                                                                       
-            v-globo-informacion:arriba="'Eliminar'"                                                                                                                              
-            class="pictograma-eliminar pictograma-mediano picto"                                                                                                                      
-            style="cursor: pointer;"                                                                                                                                                  
-            role="button"                                                                                                                                                             
-            aria-label="Eliminar capa"                                                                                                                                                
-            @click.stop="emit('delete', catalogueElement)"                                                                                                                            
-          />  
+      <span
+        v-if="isLoggedIn && esSuperusuaria"
+        v-globo-informacion:arriba="'Eliminar'"
+        class="pictograma-eliminar pictograma-mediano picto"
+        style="cursor: pointer"
+        role="button"
+        aria-label="Eliminar capa"
+        @click.stop="emit('delete', catalogueElement)"
+      />
     </div>
   </div>
 </template>
