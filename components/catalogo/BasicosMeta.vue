@@ -1,7 +1,6 @@
 <script setup>
 import SisdaiCampoBase from '@centrogeomx/sisdai-componentes/src/componentes/campo-base/SisdaiCampoBase.vue';
 import SisdaiSelector from '@centrogeomx/sisdai-componentes/src/componentes/selector/SisdaiSelector.vue';
-import { OGC_CATEGORY_IDENTIFIERS, SIGIC_CATEGORY_IDENTIFIERS } from '~/utils/consulta';
 import { useResourcesSupplements } from '~/composables/useResourcesSupplements';
 const props = defineProps({
   recurso: {
@@ -162,35 +161,19 @@ const categoriaOGC = computed({
   get: () => storeMetadatos.metadata.categoriaOGC || '',
   set: (val) => {
     storeMetadatos.updateAttr('categoriaOGC', val);
-    if (val && tipoCategoria.value === 'ogc') storeMetadatos.updateAttr('category', val);
   },
 });
 
+// Categoría SIGIC se guarda en el store y SIEMPRE sobreescribe la categoría del previo selector
 const categoriaSIGIC = computed({
   get: () => storeMetadatos.metadata.categoriaSIGIC || '',
   set: (val) => {
     storeMetadatos.updateAttr('categoriaSIGIC', val);
-    if (val && tipoCategoria.value === 'sigic') storeMetadatos.updateAttr('category', val);
-  },
-});
-
-const tipoCategoria = computed({
-  get: () => {
-    if (storeMetadatos.metadata.category) {
-      if (OGC_CATEGORY_IDENTIFIERS.has(storeMetadatos.metadata.category)) return 'ogc';
-      if (SIGIC_CATEGORY_IDENTIFIERS.has(storeMetadatos.metadata.category)) return 'sigic';
+    if (val) {
+      storeMetadatos.updateAttr('category', val); 
     }
-    return '';
-  },
-  set: (val) => {
-    if (val === 'ogc' && categoriaOGC.value)
-      storeMetadatos.updateAttr('category', categoriaOGC.value);
-    else if (val === 'sigic' && categoriaSIGIC.value)
-      storeMetadatos.updateAttr('category', categoriaSIGIC.value);
-    else storeMetadatos.updateAttr('category', '');
   },
 });
-
 // ── Imagen ───────────────────────────────────────────────────────────────────
 
 const dragNdDrop = ref(null);
@@ -378,17 +361,7 @@ async function guardarImagen(files) {
               </option>
             </SisdaiSelector>
 
-            <!-- Selector 3: tipo de visualización -->
-            <SisdaiSelector
-              v-model="tipoCategoria"
-              class="m-t-3"
-              etiqueta="¿Qué categoría deseas que se visualice?*"
-            >
-              <option value="">Selecciona una opción</option>
-              <option value="ogc" :disabled="!categoriaOGC">Categoría OGC</option>
-              <option value="sigic" :disabled="!categoriaSIGIC">Categoría SIGIC</option>
-            </SisdaiSelector>
-
+            <!-- Selector 3: tipo de visualización ha sido eliminado-->
             <SisdaiCampoBase
               v-model="campoPalabrasClave"
               class="m-t-3"
