@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
     restriction_code_type: null,
     constraints_other: 'Ninguna',
     edition: '1.0',
-    doi: '-',
+    doi: 'Información no proporcionada',
     purpose: 'Propósito original no documentado',
     supplemental_information: 'Información no proporcionada',
     maintenance_frequency: 'unknown',
