@@ -73,7 +73,6 @@ async function guardarArchivo(files) {
   }
 
   if (!cuota.value.can_upload) {
-    mensajeCuota.value = 'Alcanzaste el límite de archivos y capas pendientes de aprobación.';
     return;
   }
 
