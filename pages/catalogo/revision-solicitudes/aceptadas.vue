@@ -201,7 +201,7 @@ onMounted(async () => {
           <h2>Aceptadas</h2>
           <UiNumeroElementos :numero="totalResources" />
         </div>
-        <p>Solicitudes que haz aprobado y están actualmente en el catálogo público.</p>
+        <p>Solicitudes que has aprobado y están actualmente en el catálogo público.</p>
 
         <div v-if="isLoading" class="flex flex-contenido-centrado m-t-3">
           <img
