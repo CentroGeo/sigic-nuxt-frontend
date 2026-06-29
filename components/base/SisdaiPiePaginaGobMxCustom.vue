@@ -1,10 +1,7 @@
 <!--This file is a customized version of SisdaiPiePaginaGobMx from @centrogeomx/sisdai-componentes.-->
 
 <template>
-  <div
-    class="contenedor piepagina-gobmx"
-    aria-label="Gobierno de México"
-  >
+  <div class="contenedor piepagina-gobmx" aria-label="Gobierno de México">
     <div class="flex flex-wrap">
       <div class="columna-8 columna-4-esc">
         <img
@@ -143,10 +140,7 @@
               target="_blank"
               rel="noopener noreferrer"
             >
-              <span
-                class="pictograma-social-facebook"
-                aria-hidden="true"
-              ></span>
+              <span class="pictograma-social-facebook" aria-hidden="true"></span>
               <span class="a11y-solo-lectura">feisbuk</span>
             </a>
           </li>
@@ -159,10 +153,7 @@
               target="_blank"
               rel="noopener noreferrer"
             >
-              <span
-                class="pictograma-social-x"
-                aria-hidden="true"
-              ></span>
+              <span class="pictograma-social-x" aria-hidden="true"></span>
               <span class="a11y-solo-lectura">x.</span>
             </a>
           </li>
@@ -174,10 +165,7 @@
               aria-label="instagram"
               class="hipervinculo-gobmx"
             >
-              <span
-                aria-hidden="true"
-                class="pictograma-social-instagram"
-              />
+              <span aria-hidden="true" class="pictograma-social-instagram" />
             </a>
           </li>
           <li>
@@ -188,10 +176,7 @@
               aria-label="youtube"
               class="hipervinculo-gobmx"
             >
-              <span
-                aria-hidden="true"
-                class="pictograma-social-youtube"
-              />
+              <span aria-hidden="true" class="pictograma-social-youtube" />
             </a>
           </li>
         </ul>

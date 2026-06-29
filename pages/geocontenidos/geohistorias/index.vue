@@ -152,7 +152,10 @@ function formatearFecha(fecha) {
                 <span class="pictograma-agregar m-r-1" />
                 Crear escena
               </NuxtLink>
-              <button class="boton boton-chico boton-primario" @click="abrirModalEliminar(escenario)">
+              <button
+                class="boton boton-chico boton-primario"
+                @click="abrirModalEliminar(escenario)"
+              >
                 <span class="pictograma-eliminar m-r-1" />
                 Eliminar
               </button>
@@ -174,12 +177,12 @@ function formatearFecha(fecha) {
 
         <p v-if="wasDeletionSuccesful === null || isBeingDeleted" class="alerta-advertencia-modal">
           <span v-if="resourceToDelete?.is_published">
-            El recurso <strong style="font-weight: bold;">{{ resourceToDeleteTitle }}</strong> está
+            El recurso <strong style="font-weight: bold">{{ resourceToDeleteTitle }}</strong> está
             publicado en el catálogo. Al eliminarlo, se borrará permanentemente del servidor y no
             será posible recuperarlo.
           </span>
           <span v-else>
-            El recurso <strong style="font-weight: bold;">{{ resourceToDeleteTitle }}</strong> será
+            El recurso <strong style="font-weight: bold">{{ resourceToDeleteTitle }}</strong> será
             eliminado permanentemente del servidor y no será posible recuperarlo.
           </span>
         </p>
@@ -189,9 +192,7 @@ function formatearFecha(fecha) {
           El escenario fue eliminado correctamente.
         </p>
 
-        <p v-else class="texto-color-error">
-          No se pudo eliminar el escenario. Intenta de nuevo.
-        </p>
+        <p v-else class="texto-color-error">No se pudo eliminar el escenario. Intenta de nuevo.</p>
 
         <template #pie>
           <div class="flex brecha-2 flex-contenido-final">

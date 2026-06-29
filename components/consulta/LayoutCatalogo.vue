@@ -8,7 +8,6 @@ import {
   cleanInput,
 } from '~/utils/consulta';
 
-
 const config = useRuntimeConfig();
 const storeResources = useResourcesConsultaStore();
 const storeConsulta = useConsultaStore();
@@ -32,6 +31,15 @@ const totalResources = ref(0);
 const isLoading = ref(true);
 const resources = computed(() => storeResources.resourcesByType());
 const params = computed(() => storeFilters.filters.queryParams);
+const categorizedResources = computed(() => {
+  const result = {};
+  resources.value.forEach((r) => {
+    const title = r.category?.gn_description ?? 'Sin Clasificar';
+    if (!result[title]) result[title] = [];
+    result[title].push(r);
+  });
+  return result;
+});
 const selectedOwner = computed({
   get: () => storeFilters.filters.owner,
   set: (value) => storeFilters.updateFilter('owner', value),
@@ -43,10 +51,8 @@ const inputSearch = computed({
 const nthElement = 1;
 const isLoggedIn = ref(data.value ? true : false);
 const apiCategorias = `${config.public.geonodeApi}/facets/category?page_size=30`;
-const filteredResources = ref([]);
 const categoriesDict = ref({});
 const orderedCategories = ref([]);
-const categorizedResources = ref({});
 const selectedCategories = ref([]);
 const modalFiltroAvanzado = ref(null);
 const modalOWSglobal = ref(null);
@@ -149,34 +155,6 @@ function getNthElements() {
   return nthElementsPks;
 }
 
-function groupResults() {
-  categorizedResources.value = {};
-  filteredResources.value.map((r) => {
-    if (r.category) {
-      const title = r.category.gn_description;
-      if (Object.keys(categorizedResources.value).includes(title)) {
-        categorizedResources.value[title].push(r);
-      } else {
-        categorizedResources.value[title] = [];
-        categorizedResources.value[title].push(r);
-      }
-    } else {
-      if (Object.keys(categorizedResources.value).includes('Sin Clasificar')) {
-        categorizedResources.value['Sin Clasificar'].push(r);
-      } else {
-        categorizedResources.value['Sin Clasificar'] = [];
-        categorizedResources.value['Sin Clasificar'].push(r);
-      }
-    }
-  });
-  storeResources.setNthElements(storeConsulta.resourceType, getNthElements());
-}
-
-function updateResources(nuevosRecursos) {
-  filteredResources.value = nuevosRecursos;
-  groupResults();
-}
-
 async function setSelectedCategory(categoria) {
   if (selectedCategories.value.includes(categoria)) {
     selectedCategories.value = selectedCategories.value.filter((c) => c !== categoria);
@@ -184,17 +162,14 @@ async function setSelectedCategory(categoria) {
     selectedCategories.value.push(categoria);
   }
 
-  // Se agrega este if para que no se dispare la misma petición más de una vez
   if (!categoriesDict.value[categoria].isLoading) {
     await callResources(categoria);
-    updateResources(resources.value);
   }
 }
 
 async function fetchNewData(category) {
   if (categoriesDict.value[category].isLoading === false) {
     await callResources(category);
-    updateResources(resources.value);
   }
 }
 
@@ -291,7 +266,7 @@ async function borrarRemoto(resource) {
   const remoteAlternate = resource.alternate;
   const linkObject = resource.links?.find((link) => link.link_type === 'OGC:WMS');
   if (!linkObject) return true;
-  
+
   const serviceLink = linkObject.url.replace('https://', '').replace('http://', '').split('/')[0];
   const harvesterIdentifier = await getHarvesterId(serviceLink);
   if (!harvesterIdentifier) return true;
@@ -323,7 +298,7 @@ async function borrarRemoto(resource) {
 async function ejecutarEliminar() {
   if (!resourceToDelete.value) return;
   isBeingDeleted.value = true;
-  
+
   let success = false;
   if (resourceToDelete.value.sourcetype === 'REMOTE') {
     const isRemoteDeleted = await borrarRemoto(resourceToDelete.value);
@@ -339,13 +314,9 @@ async function ejecutarEliminar() {
 
   if (success) {
     const type = storeConsulta.resourceType;
-    
+
     // Remueve el recurso de los stores y listas de visualización locales
     storeResources.resources[type] = storeResources.resources[type].filter(
-      (r) => r.pk !== resourceToDelete.value.pk
-    );
-
-    filteredResources.value = filteredResources.value.filter(
       (r) => r.pk !== resourceToDelete.value.pk
     );
 
@@ -354,8 +325,11 @@ async function ejecutarEliminar() {
     // Actualiza el conteo de la categoría y la excluye si ya no contiene elementos
     const categoryName = resourceToDelete.value.category?.gn_description || 'Sin Clasificar';
     if (categoriesDict.value[categoryName]) {
-      categoriesDict.value[categoryName].total = Math.max(0, categoriesDict.value[categoryName].total - 1);
-      
+      categoriesDict.value[categoryName].total = Math.max(
+        0,
+        categoriesDict.value[categoryName].total - 1
+      );
+
       if (categoriesDict.value[categoryName].total === 0) {
         orderedCategories.value = orderedCategories.value.filter((c) => c !== categoryName);
       }
@@ -364,8 +338,6 @@ async function ejecutarEliminar() {
     if (storeSelected.pks.includes(String(resourceToDelete.value.pk))) {
       storeSelected.removeByPk(String(resourceToDelete.value.pk));
     }
-
-    groupResults();
 
     setTimeout(() => {
       modalEliminar.value?.cerrarModal();
@@ -377,12 +349,15 @@ watch(selectedOwner, () => {
   storeFilters.buildQueryParams();
 });
 
+watch(categorizedResources, () => {
+  storeResources.setNthElements(storeConsulta.resourceType, getNthElements());
+});
+
 watch(params, async () => {
   isLoading.value = true;
   storeResources.resetByType();
   totalResources.value = 0;
   selectedCategories.value = [];
-  categorizedResources.value = {};
   await buildCategoriesDict();
   isLoading.value = false;
 });
@@ -390,9 +365,6 @@ watch(params, async () => {
 onMounted(async () => {
   storeFilters.resetAll();
   storeFilters.buildQueryParams();
-  if (resources.value.length !== 0) {
-    updateResources(resources.value);
-  }
 });
 </script>
 
@@ -618,15 +590,21 @@ onMounted(async () => {
       <template #cuerpo>
         <p v-if="wasDeletionSuccesful === null || isBeingDeleted" class="m-b-2">
           <span v-if="resourceToDelete?.is_published">
-            El recurso <strong style="font-weight: bold;">{{ resourceToDelete?.title }}</strong> está publicado en el catálogo. Al eliminarlo, se borrará permanentemente del servidor y no será posible recuperarlo.
+            El recurso <strong style="font-weight: bold">{{ resourceToDelete?.title }}</strong> está
+            publicado en el catálogo. Al eliminarlo, se borrará permanentemente del servidor y no
+            será posible recuperarlo.
           </span>
           <span v-else>
-            El recurso <strong style="font-weight: bold;">{{ resourceToDelete?.title }}</strong> será eliminado permanentemente del servidor y no será posible recuperarlo.
+            El recurso <strong style="font-weight: bold">{{ resourceToDelete?.title }}</strong> será
+            eliminado permanentemente del servidor y no será posible recuperarlo.
           </span>
         </p>
 
         <!-- Botones de Confirmar/Cancelar -->
-        <div v-if="wasDeletionSuccesful === null || isBeingDeleted" class="flex m-y-2 flex-contenido-centrado">
+        <div
+          v-if="wasDeletionSuccesful === null || isBeingDeleted"
+          class="flex m-y-2 flex-contenido-centrado"
+        >
           <div class="contenedor flex flex-contenido-centrado">
             <button
               type="button"
@@ -646,37 +624,38 @@ onMounted(async () => {
             </button>
           </div>
           <div v-if="isBeingDeleted" class="columna-3 color-invertir">
-            <img :src="`${config.app.baseURL}img/loader.gif`" class="color-invertir" alt="...Procesando" />
+            <img
+              :src="`${config.app.baseURL}img/loader.gif`"
+              class="color-invertir"
+              alt="...Procesando"
+            />
           </div>
         </div>
 
-        <!-- Alerta de éxito -->                                                                                                                                                  
-            <div v-if="wasDeletionSuccesful === true && !isBeingDeleted" class="flex" style="gap: 0px">                                                                               
-              <p class="columna-14 texto-color-confirmacion fondo-color-confirmacion borde borde-color-confirmacion p-2 borde-redondeado-8">                                          
-                <span class="pictograma-aprobado" /> El recurso fue eliminado con éxito del servidor.                                                                                 
-              </p>                                                                                                                                                                    
-            </div> 
+        <!-- Alerta de éxito -->
+        <div v-if="wasDeletionSuccesful === true && !isBeingDeleted" class="flex" style="gap: 0px">
+          <p
+            class="columna-14 texto-color-confirmacion fondo-color-confirmacion borde borde-color-confirmacion p-2 borde-redondeado-8"
+          >
+            <span class="pictograma-aprobado" /> El recurso fue eliminado con éxito del servidor.
+          </p>
+        </div>
 
         <!-- Alerta de error -->
-         <div                                                                                                                                                                      
-              v-if="wasDeletionSuccesful === false && !isBeingDeleted"                                                                                                                
-              class="flex"                                                                                                                                                            
-              style="gap: 0px"                                                                                                                                                        
-            >                                                                                                                                                                         
-              <p                                                                                                                                                                      
-                class="columna-14 texto-color-error fondo-color-error borde borde-color-error p-2 borde-redondeado-8"                                                                 
-              >                                                                                                                                                                       
-                <span class="pictograma-alerta" /> No pudimos eliminar {{ resourceToDelete?.title }}.
-                Revisa tu conexión e intentalo de nuevo más tarde.
-              </p>
-              <div class="columna-14 flex flex-contenido-final">
-                <button class="boton-primario boton-chico" @click="cancelarEliminar">Regresar</button>
-              </div>
-            </div>
+        <div v-if="wasDeletionSuccesful === false && !isBeingDeleted" class="flex" style="gap: 0px">
+          <p
+            class="columna-14 texto-color-error fondo-color-error borde borde-color-error p-2 borde-redondeado-8"
+          >
+            <span class="pictograma-alerta" /> No pudimos eliminar {{ resourceToDelete?.title }}.
+            Revisa tu conexión e intentalo de nuevo más tarde.
+          </p>
+          <div class="columna-14 flex flex-contenido-final">
+            <button class="boton-primario boton-chico" @click="cancelarEliminar">Regresar</button>
+          </div>
+        </div>
       </template>
     </SisdaiModal>
   </ClientOnly>
-
 </template>
 
 <style lang="scss" scoped>

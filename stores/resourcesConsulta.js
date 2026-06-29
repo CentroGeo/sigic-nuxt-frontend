@@ -6,6 +6,29 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
   const config = useRuntimeConfig();
   const storeConsulta = useConsultaStore();
   const storeSelected = useSelectedResources2Store();
+
+  async function loadMetadataProgressively(resourceType, newResources, getSLDs, defineGeomType) {
+    const concurrency = 3;
+    for (let i = 0; i < newResources.length; i += concurrency) {
+      const batch = newResources.slice(i, i + concurrency);
+      await Promise.all(
+        batch.map(async (resource) => {
+          try {
+            const { defaultStyle, styleList, styleTitles } = await getSLDs(resource);
+            resource.default_style = defaultStyle;
+            resource.styles = styleList;
+            resource.style_titles = styleTitles;
+
+            if (resourceType === 'dataLayer') {
+              resource.geomType = await defineGeomType(resource);
+            }
+          } catch {
+            console.warn(`No se pudieron cargar metadatos del recurso ${resource.pk}`);
+          }
+        })
+      );
+    }
+  }
   /**
    * Almacenamiento reactivo de los recursos seleccionados.
    */
@@ -78,23 +101,13 @@ export const useResourcesConsultaStore = defineStore('resourcesConsulta', () => 
         }
 
         const resourcesRes = await resourcesRequest.json();
-        // Agregamos el tipo de geometría y los estilos disponibles
-        if (resourceType === 'dataLayer' || resourceType === 'dataTable') {
-          await Promise.all(
-            resourcesRes.resources.map(async (d) => {
-              const { defaultStyle, styleList, styleTitles } = await getSLDs(d);
-              d.default_style = defaultStyle;
-              d.styles = styleList;
-              d.style_titles = styleTitles;
+        const newResources = resourcesRes.resources;
+        resources[resourceType] = [...resources[resourceType], ...newResources];
 
-              if (resourceType === 'dataLayer') {
-                d.geomType = await defineGeomType(d);
-              }
-            })
-          );
+        if (resourceType === 'dataLayer' || resourceType === 'dataTable') {
+          loadMetadataProgressively(resourceType, newResources, getSLDs, defineGeomType);
         }
-        const data = resourcesRes.resources;
-        resources[resourceType] = [...resources[resourceType], ...data];
+
         return true;
       } catch {
         console.error('Fracasó la petición de recursos por categoría');

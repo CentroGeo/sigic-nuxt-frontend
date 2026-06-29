@@ -633,6 +633,7 @@ async function volverAEditar() {
             <!-- Acciones -->
             <div v-if="variable === 'acciones'">
               <div class="flex-width">
+                <!-- Eliminamos el botón de contraste que te llevaba al mismo sitio que el botón editar -->
                 <button
                   v-if="datum[variable].split(', ').includes('Editar')"
                   v-globo-informacion:izquierda="'Editar'"

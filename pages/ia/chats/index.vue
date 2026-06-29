@@ -336,8 +336,8 @@ onMounted(() => {
                 <p class="m-b-0">
                   Esta herramienta está diseñada para ayudarte a analizar información científica y
                   territorial mediante chats con inteligencia artificial. Para iniciar, crea
-                  proyectos temáticos<!--, agregar información del catálogo--> o subir tus propios
-                  archivos.
+                  proyectos temáticos<!--, agregar información del catálogo-->
+                  o subir tus propios archivos.
                 </p>
               </div>
 
