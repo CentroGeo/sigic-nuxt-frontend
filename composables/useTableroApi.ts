@@ -67,7 +67,11 @@ export function useTableroApi() {
 
     fetchSitioPorUrl: async (urlSlug: string) => {
       const datos = await fetchJson(`${baseUrl}/sites/?url=${encodeURIComponent(urlSlug)}`);
-      return datos.results?.[0] ?? null;
+      const partial = datos.results?.[0] ?? null;
+      if (!partial?.id) return null;
+      // El endpoint de lista devuelve SiteListSerializer (sin logos/configuration/top_bar).
+      // Se necesita el retrieve para obtener los datos completos del tablero.
+      return fetchJson(`${baseUrl}/sites/${partial.id}/`);
     },
 
     crearSitio: (datos: unknown, token?: string | null) =>
@@ -142,6 +146,26 @@ export function useTableroApi() {
 
     reordenarLogos: (items: Array<{ id: number; stack_order: number }>, token?: string | null) =>
       jsonRequest(`${baseUrl}/site-logos/bulk-reorder/`, 'POST', items, token),
+
+    // ---------- Top bar institucional ----------
+    fetchTopBar: (siteId: number) => fetchJson(`${baseUrl}/top-bars/${siteId}/`),
+
+    actualizarTopBar: (siteId: number, datos: unknown, token?: string | null) =>
+      jsonRequest(`${baseUrl}/top-bars/${siteId}/`, 'PATCH', datos, token),
+
+    crearLogoTopBar: (form: FormData, token?: string | null) =>
+      formRequest(`${baseUrl}/top-bar-logos/`, 'POST', form, token),
+
+    actualizarLogoTopBar: (id: number, form: FormData, token?: string | null) =>
+      formRequest(`${baseUrl}/top-bar-logos/${id}/`, 'PATCH', form, token),
+
+    eliminarLogoTopBar: (id: number, token?: string | null) =>
+      deleteRequest(`${baseUrl}/top-bar-logos/${id}/`, token),
+
+    reordenarLogosTopBar: (
+      items: Array<{ id: number; stack_order: number }>,
+      token?: string | null
+    ) => jsonRequest(`${baseUrl}/top-bar-logos/bulk-reorder/`, 'POST', items, token),
 
     // ---------- Groups ----------
     fetchGrupos: (siteId: number) => fetchJson(`${baseUrl}/groups/?site=${siteId}`),
