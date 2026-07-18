@@ -16,15 +16,74 @@ const guardando = ref(false);
 const error = ref('');
 
 const PALETAS = [
-  { value: 'azules_3', label: 'Azules' },
-  { value: 'cafes', label: 'Cafés' },
-  { value: 'morados', label: 'Morados' },
-  { value: 'verdes_2', label: 'Verdes' },
-  { value: 'naranjas', label: 'Naranjas' },
-  { value: 'rosas', label: 'Rosas' },
-  { value: 'varios', label: 'Multicolor' },
-  { value: 'semaforo', label: 'Semáforo' },
-  { value: 'semaforo_3', label: 'Semáforo 3 tonos' },
+  {
+    group: 'Azules',
+    options: [
+      { value: 'azules', label: 'Azules' },
+      { value: 'azules_2', label: 'Azules 2' },
+      { value: 'azules_3', label: 'Azules 3' },
+      { value: 'azules_4', label: 'Azules 4' },
+      { value: 'azules_5', label: 'Azules 5' },
+    ],
+  },
+  {
+    group: 'Verdes',
+    options: [
+      { value: 'verdes', label: 'Verdes' },
+      { value: 'verdes_2', label: 'Verdes 2' },
+      { value: 'verdes_3', label: 'Verdes 3' },
+      { value: 'verdes_4', label: 'Verdes 4' },
+      { value: 'verdes_5', label: 'Verdes 5' },
+      { value: 'verdes_6', label: 'Verdes 6' },
+    ],
+  },
+  {
+    group: 'Cafés / naranjas',
+    options: [
+      { value: 'cafes', label: 'Cafés' },
+      { value: 'cafes_2', label: 'Cafés 2' },
+      { value: 'cafes_3', label: 'Cafés 3' },
+      { value: 'naranjas', label: 'Naranjas' },
+    ],
+  },
+  {
+    group: 'Morados / rosas',
+    options: [
+      { value: 'morados', label: 'Morados' },
+      { value: 'morados_2', label: 'Morados 2' },
+      { value: 'rosas', label: 'Rosas' },
+    ],
+  },
+  {
+    group: 'Divergentes',
+    options: [
+      { value: 'cafes_verdes', label: 'Café ↔ Verde' },
+      { value: 'naranja_azul', label: 'Naranja ↔ Azul' },
+      { value: 'rosa_verde', label: 'Rosa ↔ Verde' },
+    ],
+  },
+  {
+    group: 'Semáforo',
+    options: [
+      { value: 'semaforo', label: 'Semáforo' },
+      { value: 'semaforo_2', label: 'Semáforo 2' },
+      { value: 'semaforo_3', label: 'Semáforo 3 tonos' },
+      { value: 'semaforo_4', label: 'Semáforo 4 (invertido)' },
+      { value: 'semaforo_5', label: 'Semáforo 5 (intenso, invertido)' },
+      { value: 'semaforo_6', label: 'Semáforo 6 (3 colores)' },
+      { value: 'semaforo_7', label: 'Semáforo 7 (5 pasos)' },
+      { value: 'semaforo_8', label: 'Semáforo 8 (5 pasos)' },
+    ],
+  },
+  {
+    group: 'Otras',
+    options: [
+      { value: 'grises', label: 'Grises' },
+      { value: 'varios', label: 'Multicolor' },
+      { value: 'varios_2', label: 'Multicolor 2' },
+      { value: 'varios_3', label: 'Multicolor 3' },
+    ],
+  },
 ];
 
 const TIPOS_GRAFICA = [
@@ -62,11 +121,15 @@ const TIPOS_GRAFICA = [
 ];
 
 const METODOS = [
-  { value: 'quantile', label: 'Cuantiles' },
-  { value: 'jenks', label: 'Jenks (natural breaks)' },
-  { value: 'equal', label: 'Intervalos iguales' },
+  { value: 'quantil', label: 'Cuantiles' },
+  { value: 'naturalb', label: 'Jenks (natural breaks)' },
+  { value: 'sameintervals', label: 'Intervalos iguales' },
   { value: 'manual', label: 'Manual' },
 ];
+
+// Indicadores creados antes de este fix pueden tener guardados los valores en inglés
+// (quantile/jenks/equal) que el backend no reconoce; se normalizan al cargar.
+const METODOS_LEGADO = { quantile: 'quantil', jenks: 'naturalb', equal: 'sameintervals' };
 
 const formulario = reactive({
   name: '',
@@ -74,7 +137,7 @@ const formulario = reactive({
   plot_type: 'bar',
   colors: 'azules_3',
   reverse_colors: false,
-  category_method: 'quantile',
+  category_method: 'quantil',
   field_category: 5,
   use_single_field: true,
   show_general_values: false,
@@ -88,7 +151,8 @@ function cargarDesdeIndicador() {
   const rawColors = props.indicador.colors || 'azules_3';
   formulario.reverse_colors = rawColors.endsWith('_r');
   formulario.colors = formulario.reverse_colors ? rawColors.slice(0, -2) : rawColors;
-  formulario.category_method = props.indicador.category_method || 'quantile';
+  const rawMethod = props.indicador.category_method || 'quantil';
+  formulario.category_method = METODOS_LEGADO[rawMethod] || rawMethod;
   formulario.field_category = props.indicador.field_category ?? 5;
   formulario.use_single_field = props.indicador.use_single_field ?? true;
   formulario.show_general_values = props.indicador.show_general_values ?? false;
@@ -181,9 +245,11 @@ async function guardar() {
             <div class="campo">
               <label for="ind-paleta">Paleta de colores</label>
               <select id="ind-paleta" v-model="formulario.colors">
-                <option v-for="p in PALETAS" :key="p.value" :value="p.value">
-                  {{ p.label }}
-                </option>
+                <optgroup v-for="g in PALETAS" :key="g.group" :label="g.group">
+                  <option v-for="p in g.options" :key="p.value" :value="p.value">
+                    {{ p.label }}
+                  </option>
+                </optgroup>
               </select>
               <label class="check-inline m-t-1">
                 <input v-model="formulario.reverse_colors" type="checkbox" />

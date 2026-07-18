@@ -24,6 +24,8 @@ const GRUPOS = {
     'fas fa-poll-h',
     'fas fa-signal',
     'fas fa-percentage',
+    'fas fa-arrow-up',
+    'fas fa-arrow-down',
   ],
   Datos: [
     'fas fa-database',
@@ -54,6 +56,8 @@ const GRUPOS = {
     'fas fa-cloud',
     'fas fa-wind',
     'fas fa-fire',
+    'fas fa-fire-alt',
+    'fas fa-tint',
   ],
   Infraestructura: [
     'fas fa-road',
@@ -64,6 +68,9 @@ const GRUPOS = {
     'fas fa-truck',
     'fas fa-plug',
     'fas fa-wifi',
+    'fas fa-bolt',
+    'fas fa-oil-can',
+    'fas fa-solar-panel',
   ],
   Economía: [
     'fas fa-dollar-sign',

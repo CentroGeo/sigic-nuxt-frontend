@@ -13,7 +13,8 @@ const props = defineProps({
 const emit = defineEmits(['guardado', 'cerrar']);
 
 const { data: userData } = useAuth();
-const { crearCuadroDatos, actualizarCuadroDatos } = useTableroApi();
+const { crearCuadroDatos, actualizarCuadroDatos, fetchIndicador, fetchDatasetAttributes } =
+  useTableroApi();
 
 const modal = ref(null);
 const guardando = ref(false);
@@ -21,6 +22,28 @@ const error = ref('');
 const previewIcono = ref(null);
 
 const esEdicion = computed(() => !!props.cuadro);
+
+// Atributos reales del dataset del indicador, sólo como sugerencia (datalist): el
+// campo sigue siendo texto libre porque también se usan campos "virtuales" que sólo
+// existen en general_values y no son una columna real del dataset.
+const GEO_ATTRS = new Set(['the_geom', 'geometry', 'geom', 'wkb_geometry', 'shape']);
+const atributosDataset = ref([]);
+
+async function cargarAtributosDataset() {
+  atributosDataset.value = [];
+  try {
+    const indicador = await fetchIndicador(props.indicadorId);
+    const layerId = indicador?.layer;
+    if (!layerId) return;
+    const data = await fetchDatasetAttributes(layerId);
+    const attrs = data?.dataset?.attribute_set ?? data?.attribute_set ?? [];
+    atributosDataset.value = attrs
+      .map((a) => a.attribute)
+      .filter((name) => name && !GEO_ATTRS.has(name));
+  } catch {
+    atributosDataset.value = [];
+  }
+}
 
 const formulario = reactive({
   field: '',
@@ -120,6 +143,7 @@ watch(
   (m) => {
     if (m) {
       cargarDesdeCuadro();
+      cargarAtributosDataset();
       m.abrir();
     }
   },
@@ -145,9 +169,17 @@ watch(
                 id="cd-field"
                 v-model="formulario.field"
                 type="text"
+                list="cd-field-sugerencias"
                 placeholder="Ej: poblacion_total"
                 required
               />
+              <datalist id="cd-field-sugerencias">
+                <option v-for="attr in atributosDataset" :key="attr" :value="attr" />
+              </datalist>
+              <p v-if="atributosDataset.length" class="formulario-ayuda">
+                Sugerencias tomadas de las columnas reales del dataset del indicador. También puedes
+                escribir un campo que sólo exista en los valores generales del indicador.
+              </p>
             </div>
             <div class="campo">
               <label for="cd-name">Nombre personalizado <span class="requerido">*</span></label>
