@@ -24,12 +24,13 @@ const formulario = reactive({
   field_one: '',
   field_two: '',
   plot_type: 'bar',
-  category_method: 'quantile',
+  category_method: 'quantil',
   field_category: 5,
   colors: 'azules_3',
   reverse_colors: false,
   use_single_field: true,
   is_histogram: false,
+  show_general_values: true,
 });
 
 const CATEGORIAS_CAPAS = Object.entries(categoriesNamesInSpanish).map(([id, label]) => ({
@@ -208,6 +209,7 @@ async function guardar() {
       colors: colorsValue,
       use_single_field: formulario.use_single_field,
       is_histogram: formulario.is_histogram,
+      show_general_values: formulario.show_general_values,
       stack_order: 1,
     };
     const data = await crearIndicador(payload, userData.value?.accessToken);
@@ -447,9 +449,9 @@ onMounted(async () => {
               <div class="campo">
                 <label for="ind-method">Método</label>
                 <select id="ind-method" v-model="formulario.category_method">
-                  <option value="quantile">Cuantiles</option>
-                  <option value="jenks">Jenks (natural breaks)</option>
-                  <option value="equal">Intervalos iguales</option>
+                  <option value="quantil">Cuantiles</option>
+                  <option value="naturalb">Jenks (natural breaks)</option>
+                  <option value="sameintervals">Intervalos iguales</option>
                   <option value="manual">Manual</option>
                 </select>
               </div>
@@ -470,15 +472,53 @@ onMounted(async () => {
               <div class="campo">
                 <label for="ind-colors">Rampa de color</label>
                 <select id="ind-colors" v-model="formulario.colors">
-                  <option value="azules_3">Azules</option>
-                  <option value="cafes">Cafés</option>
-                  <option value="morados">Morados</option>
-                  <option value="verdes_2">Verdes</option>
-                  <option value="naranjas">Naranjas</option>
-                  <option value="rosas">Rosas</option>
-                  <option value="varios">Multicolor</option>
-                  <option value="semaforo">Semáforo</option>
-                  <option value="semaforo_3">Semáforo 3 tonos</option>
+                  <optgroup label="Azules">
+                    <option value="azules">Azules</option>
+                    <option value="azules_2">Azules 2</option>
+                    <option value="azules_3">Azules 3</option>
+                    <option value="azules_4">Azules 4</option>
+                    <option value="azules_5">Azules 5</option>
+                  </optgroup>
+                  <optgroup label="Verdes">
+                    <option value="verdes">Verdes</option>
+                    <option value="verdes_2">Verdes 2</option>
+                    <option value="verdes_3">Verdes 3</option>
+                    <option value="verdes_4">Verdes 4</option>
+                    <option value="verdes_5">Verdes 5</option>
+                    <option value="verdes_6">Verdes 6</option>
+                  </optgroup>
+                  <optgroup label="Cafés / naranjas">
+                    <option value="cafes">Cafés</option>
+                    <option value="cafes_2">Cafés 2</option>
+                    <option value="cafes_3">Cafés 3</option>
+                    <option value="naranjas">Naranjas</option>
+                  </optgroup>
+                  <optgroup label="Morados / rosas">
+                    <option value="morados">Morados</option>
+                    <option value="morados_2">Morados 2</option>
+                    <option value="rosas">Rosas</option>
+                  </optgroup>
+                  <optgroup label="Divergentes">
+                    <option value="cafes_verdes">Café ↔ Verde</option>
+                    <option value="naranja_azul">Naranja ↔ Azul</option>
+                    <option value="rosa_verde">Rosa ↔ Verde</option>
+                  </optgroup>
+                  <optgroup label="Semáforo">
+                    <option value="semaforo">Semáforo</option>
+                    <option value="semaforo_2">Semáforo 2</option>
+                    <option value="semaforo_3">Semáforo 3 tonos</option>
+                    <option value="semaforo_4">Semáforo 4 (invertido)</option>
+                    <option value="semaforo_5">Semáforo 5 (intenso, invertido)</option>
+                    <option value="semaforo_6">Semáforo 6 (3 colores)</option>
+                    <option value="semaforo_7">Semáforo 7 (5 pasos)</option>
+                    <option value="semaforo_8">Semáforo 8 (5 pasos)</option>
+                  </optgroup>
+                  <optgroup label="Otras">
+                    <option value="grises">Grises</option>
+                    <option value="varios">Multicolor</option>
+                    <option value="varios_2">Multicolor 2</option>
+                    <option value="varios_3">Multicolor 3</option>
+                  </optgroup>
                 </select>
                 <label class="check-inline m-t-1">
                   <input v-model="formulario.reverse_colors" type="checkbox" />
@@ -510,6 +550,12 @@ onMounted(async () => {
                 </select>
               </div>
             </div>
+
+            <label class="check-inline m-t-2">
+              <input v-model="formulario.show_general_values" type="checkbox" />
+              Mostrar valores generales (necesario para que los cuadros de datos del indicador
+              muestren un valor calculado)
+            </label>
           </div>
 
           <!-- ── Paso 3: Confirmar ── -->
@@ -553,6 +599,10 @@ onMounted(async () => {
               <div class="resumen-dl__fila">
                 <dt>Gráfica</dt>
                 <dd>{{ formulario.plot_type }}</dd>
+              </div>
+              <div class="resumen-dl__fila">
+                <dt>Valores generales</dt>
+                <dd>{{ formulario.show_general_values ? 'Sí' : 'No' }}</dd>
               </div>
             </dl>
             <p class="formulario-ayuda m-t-2">

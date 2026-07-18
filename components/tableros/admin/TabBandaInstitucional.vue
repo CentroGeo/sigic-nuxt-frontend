@@ -177,7 +177,7 @@ watch(() => props.siteId, cargar, { immediate: true });
 
       <!-- Gestión de logos -->
       <div class="tab-banda__seccion">
-        <TablerosAdminSubidorLogosTopBar :top-bar-id="topBar.id" />
+        <TablerosAdminSubidorLogosTopBar :top-bar-id="props.siteId" />
       </div>
     </template>
   </div>
