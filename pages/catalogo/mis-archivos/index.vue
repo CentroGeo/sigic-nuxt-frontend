@@ -59,15 +59,19 @@ function tipoRecurso(recurso) {
 }
 
 function setActions(recurso) {
+  const isGeoLayer = recurso.resource_type === 'dataset' && isGeometricExtension(recurso.extent);
   if (recurso.sourcetype === 'REMOTE' && recurso.is_published) {
     return 'Ver';
   } else if (recurso.sourcetype === 'REMOTE') {
-    //return 'Editar, Ver, Publicar, Remover';
     return 'Editar, Ver, Publicar';
   } else if (recurso.is_published === true) {
-    return 'Ver, Descargar, Volver a editar';
+    return isGeoLayer
+      ? 'Estilo, Ver, Descargar, Volver a editar'
+      : 'Ver, Descargar, Volver a editar';
   } else {
-    return 'Editar, Ver, Publicar, Descargar, Remover';
+    return isGeoLayer
+      ? 'Estilo, Editar, Ver, Publicar, Descargar, Remover'
+      : 'Editar, Ver, Publicar, Descargar, Remover';
   }
 }
 function updateResources() {

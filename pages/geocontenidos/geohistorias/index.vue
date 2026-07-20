@@ -6,7 +6,7 @@ import { wait } from '~/utils/consulta';
 
 const { gnoxyFetch } = useGnoxyUrl();
 const config = useRuntimeConfig();
-const { status } = useAuth();
+const { status, data: userData } = useAuth();
 const estaLogueado = computed(() => status.value === 'authenticated');
 
 const escenarios = ref([]);
@@ -21,6 +21,45 @@ async function cargarEscenarios() {
   estaCargando.value = false;
 }
 cargarEscenarios();
+
+// --- Modal de confirmación de eliminación ---
+const modalEliminar = ref(null);
+const resourceToDelete = ref(null);
+const resourceToDeleteTitle = computed(() => resourceToDelete.value?.name ?? '');
+const isBeingDeleted = ref(false);
+const wasDeletionSuccesful = ref(null);
+
+function abrirModalEliminar(escenario) {
+  resourceToDelete.value = escenario;
+  wasDeletionSuccesful.value = null;
+  modalEliminar.value?.abrir();
+}
+
+function cancelarEliminar() {
+  resourceToDelete.value = null;
+  modalEliminar.value?.cerrar();
+}
+
+async function confirmarEliminar() {
+  if (!resourceToDelete.value) return;
+  isBeingDeleted.value = true;
+  const token = userData.value?.accessToken;
+  const respuesta = await gnoxyFetch(
+    `${config.public.geonodeApi}/scenarios/${resourceToDelete.value.id}/`,
+    {
+      method: 'DELETE',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    }
+  );
+  isBeingDeleted.value = false;
+  if (respuesta.ok) {
+    wasDeletionSuccesful.value = true;
+    escenarios.value = escenarios.value.filter((e) => e.id !== resourceToDelete.value.id);
+    setTimeout(() => modalEliminar.value?.cerrar(), 1200);
+  } else {
+    wasDeletionSuccesful.value = false;
+  }
+}
 
 function formatearFecha(fecha) {
   return new Date(fecha).toLocaleDateString('es-MX', {
@@ -181,6 +220,13 @@ async function Eliminar(id) {
 </template>
 
 <style lang="scss" scoped>
+.alerta-advertencia-modal {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--color-neutro-5);
+  margin-bottom: 24px;
+}
+
 .modulo-geocontenidos .contenedor {
   .grid.reticula-12 {
     grid-template-columns: repeat(12, 1fr);

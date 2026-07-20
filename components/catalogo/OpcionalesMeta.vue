@@ -26,6 +26,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  isPreview: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const storeMetadatos = useEditedMetadataStore();
@@ -73,6 +77,8 @@ const dictFrecuenciaActual = [
       :resource="props.recurso"
       :title="'Metadatos Opcionales'"
       :exclude-links="props.isModal"
+      :is-preview="isPreview"
+      ,
     />
 
     <!-- Formulario -->

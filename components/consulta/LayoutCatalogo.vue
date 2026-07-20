@@ -31,6 +31,15 @@ const totalResources = ref(0);
 const isLoading = ref(true);
 const resources = computed(() => storeResources.resourcesByType());
 const params = computed(() => storeFilters.filters.queryParams);
+const categorizedResources = computed(() => {
+  const result = {};
+  resources.value.forEach((r) => {
+    const title = r.category?.gn_description ?? 'Sin Clasificar';
+    if (!result[title]) result[title] = [];
+    result[title].push(r);
+  });
+  return result;
+});
 const selectedOwner = computed({
   get: () => storeFilters.filters.owner,
   set: (value) => storeFilters.updateFilter('owner', value),
@@ -42,10 +51,8 @@ const inputSearch = computed({
 const nthElement = 1;
 const isLoggedIn = ref(data.value ? true : false);
 const apiCategorias = `${config.public.geonodeApi}/facets/category?page_size=30`;
-const filteredResources = ref([]);
 const categoriesDict = ref({});
 const orderedCategories = ref([]);
-const categorizedResources = ref({});
 const selectedCategories = ref([]);
 const modalFiltroAvanzado = ref(null);
 const modalOWSglobal = ref(null);
@@ -148,34 +155,6 @@ function getNthElements() {
   return nthElementsPks;
 }
 
-function groupResults() {
-  categorizedResources.value = {};
-  filteredResources.value.map((r) => {
-    if (r.category) {
-      const title = r.category.gn_description;
-      if (Object.keys(categorizedResources.value).includes(title)) {
-        categorizedResources.value[title].push(r);
-      } else {
-        categorizedResources.value[title] = [];
-        categorizedResources.value[title].push(r);
-      }
-    } else {
-      if (Object.keys(categorizedResources.value).includes('Sin Clasificar')) {
-        categorizedResources.value['Sin Clasificar'].push(r);
-      } else {
-        categorizedResources.value['Sin Clasificar'] = [];
-        categorizedResources.value['Sin Clasificar'].push(r);
-      }
-    }
-  });
-  storeResources.setNthElements(storeConsulta.resourceType, getNthElements());
-}
-
-function updateResources(nuevosRecursos) {
-  filteredResources.value = nuevosRecursos;
-  groupResults();
-}
-
 async function setSelectedCategory(categoria) {
   if (selectedCategories.value.includes(categoria)) {
     selectedCategories.value = selectedCategories.value.filter((c) => c !== categoria);
@@ -183,17 +162,14 @@ async function setSelectedCategory(categoria) {
     selectedCategories.value.push(categoria);
   }
 
-  // Se agrega este if para que no se dispare la misma petición más de una vez
   if (!categoriesDict.value[categoria].isLoading) {
     await callResources(categoria);
-    updateResources(resources.value);
   }
 }
 
 async function fetchNewData(category) {
   if (categoriesDict.value[category].isLoading === false) {
     await callResources(category);
-    updateResources(resources.value);
   }
 }
 
@@ -344,10 +320,6 @@ async function ejecutarEliminar() {
       (r) => r.pk !== resourceToDelete.value.pk
     );
 
-    filteredResources.value = filteredResources.value.filter(
-      (r) => r.pk !== resourceToDelete.value.pk
-    );
-
     totalResources.value = Math.max(0, totalResources.value - 1);
 
     // Actualiza el conteo de la categoría y la excluye si ya no contiene elementos
@@ -367,8 +339,6 @@ async function ejecutarEliminar() {
       storeSelected.removeByPk(String(resourceToDelete.value.pk));
     }
 
-    groupResults();
-
     setTimeout(() => {
       modalEliminar.value?.cerrarModal();
       resourceToDelete.value = null;
@@ -379,12 +349,15 @@ watch(selectedOwner, () => {
   storeFilters.buildQueryParams();
 });
 
+watch(categorizedResources, () => {
+  storeResources.setNthElements(storeConsulta.resourceType, getNthElements());
+});
+
 watch(params, async () => {
   isLoading.value = true;
   storeResources.resetByType();
   totalResources.value = 0;
   selectedCategories.value = [];
-  categorizedResources.value = {};
   await buildCategoriesDict();
   isLoading.value = false;
 });
@@ -392,9 +365,6 @@ watch(params, async () => {
 onMounted(async () => {
   storeFilters.resetAll();
   storeFilters.buildQueryParams();
-  if (resources.value.length !== 0) {
-    updateResources(resources.value);
-  }
 });
 </script>
 

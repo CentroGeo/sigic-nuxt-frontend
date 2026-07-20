@@ -400,6 +400,112 @@ export function useResourcesSupplements() {
   }
 
   /**
+   * Establece un estilo como predeterminado de un recurso local.
+   * @param {Object} params
+   * @param {string|number} params.pk Identificador del recurso
+   * @param {string} params.stylename Nombre técnico del estilo
+   * @param {string} params.token Token de autenticación
+   * @returns {Promise<boolean>} True si se actualizó con éxito
+   */
+  async function setDefaultSLD({ pk, stylename, token }) {
+    try {
+      const url = `${config.public.geonodeApi}/datasets/${pk}/sldstyles/set-default/`;
+      const res = await gnoxyFetch(url, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ style: stylename }),
+      });
+      return res.ok;
+    } catch (error) {
+      console.error('Error al establecer estilo predeterminado:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Actualiza el nombre visible (sld_title) de un estilo en GeoNode.
+   * @param {Object} params
+   * @param {string|number} params.pk Identificador del recurso
+   * @param {string} params.stylename Nombre técnico del estilo
+   * @param {string} params.newTitle Nuevo nombre visible
+   * @param {string} params.token Token de autenticación
+   * @returns {Promise<boolean>} True si se actualizó con éxito
+   */
+  async function renameSLD({ pk, stylename, newTitle, token }) {
+    try {
+      const url = `${config.public.geonodeApi}/datasets/${pk}/sldstyles/${stylename}/`;
+      const res = await gnoxyFetch(url, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sld_title: newTitle }),
+      });
+      return res.ok;
+    } catch (error) {
+      console.error('Error al renombrar estilo:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Importa metadatos desde un archivo XML estándar (ISO 19139 o Dublin Core).
+   * El backend parsea el archivo y retorna los campos para pre-llenar el formulario.
+   * @param {Object} params
+   * @param {string|number} params.pk Identificador del recurso
+   * @param {File} params.file Archivo XML a procesar
+   * @param {string} params.token Token de autenticación
+   * @returns {Promise<{format: string, fields: Object}|null>}
+   */
+  async function importMetadataFromXML({ pk, file, token }) {
+    try {
+      const formData = new FormData();
+      formData.append('xml_file', file);
+      formData.append('pk', String(pk));
+      formData.append('token', token ?? '');
+      const result = await $fetch('/api/importar-metadatos', {
+        method: 'POST',
+        body: formData,
+      });
+      return result;
+    } catch (error) {
+      console.error('Error al importar metadatos desde XML:', error);
+      const status = error?.status ?? error?.statusCode;
+      const msg = error?.data?.message ?? error?.statusMessage ?? error?.message ?? '';
+      return { _error: true, status, message: msg };
+    }
+  }
+
+  /**
+   * Sincroniza estilos de GeoServer que no tienen registro en GeoNode.
+   * @param {Object} params
+   * @param {string|number} params.pk Identificador del recurso
+   * @param {string} params.token Token de autenticación
+   * @returns {Promise<{synced: number, already_registered: number, errors?: string[]}|null>}
+   */
+  async function syncStylesFromGeoserver({ pk, token }) {
+    try {
+      const url = `${config.public.geonodeApi}/datasets/${pk}/sldstyles/sync-from-geoserver/`;
+      const res = await gnoxyFetch(url, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (error) {
+      console.error('Error al sincronizar estilos desde GeoServer:', error);
+      return null;
+    }
+  }
+
+  /**
    * Obtiene un recurso usando su pk
    * @param {*} pk
    * @returns
@@ -509,6 +615,10 @@ export function useResourcesSupplements() {
     fetchRemoteStyles,
     getSLDs,
     destroySLDs,
+    setDefaultSLD,
+    renameSLD,
+    syncStylesFromGeoserver,
+    importMetadataFromXML,
     fetchByPk,
     fetchRemoteServices,
     filteredByServerType,

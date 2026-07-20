@@ -12,6 +12,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  isPreview: {
+    type: Boolean,
+    default: false,
+  },
 });
 const titleOptions = ref({
   'Metadatos básicos': { nombre: 'MetadatosBasicos', valor: 1 },
@@ -58,8 +62,8 @@ updateValues();
   />
 
   <div class="positionSticky">
-    <h2>Metadatos</h2>
-    <div style="display: flex; gap: 4px">
+    <h2 v-if="!isPreview">Metadatos</h2>
+    <div v-if="!isPreview" style="display: flex; gap: 4px">
       <div
         v-for="option in Object.keys(titleOptions)"
         :key="`boton-${option}-${titleOptions[option]}`"

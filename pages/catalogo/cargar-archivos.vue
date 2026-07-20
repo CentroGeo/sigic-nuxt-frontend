@@ -20,9 +20,12 @@ const { data } = useAuth();
 const { gnoxyFetch } = useGnoxyUrl();
 const { uploadFile, getQuota, pollJob, importToGeonode } = useDataImporter();
 
-const base_files = ['.geojson', '.gpkg'];
+const base_files = ['.geojson', '.gpkg', '.zip'];
 const docs_files = ['.txt', '.pdf'];
+const sld_files = ['.sld'];
+const xml_files = ['.xml'];
 const FORMATOS_TABULARES = ['csv', 'xlsx', 'xls', 'json'];
+const SHAPEFILE_PARTS = new Set(['shp', 'dbf', 'shx', 'prj', 'cpg', 'sbn', 'sbx']);
 
 const cuota = ref(null);
 const cuotaCargando = ref(true);
@@ -60,10 +63,85 @@ watch(
   { immediate: true }
 );
 
+async function limpiarZipShapefile(file) {
+  if (!file.name.toLowerCase().endsWith('.zip')) return file;
+
+  const { default: JSZip } = await import('jszip');
+  let zip;
+  try {
+    zip = await JSZip.loadAsync(await file.arrayBuffer());
+  } catch {
+    return file;
+  }
+
+  const nombres = Object.keys(zip.files).filter((n) => !zip.files[n].dir);
+  const tieneShp = nombres.some((n) => n.split('/').pop()?.toLowerCase().endsWith('.shp'));
+  if (!tieneShp) return file;
+
+  const nuevoZip = new JSZip();
+  for (const nombre of nombres) {
+    const ext = nombre.split('.').pop()?.toLowerCase() || '';
+    if (SHAPEFILE_PARTS.has(ext)) {
+      nuevoZip.file(nombre.split('/').pop(), await zip.files[nombre].async('arraybuffer'));
+    }
+  }
+
+  const blob = await nuevoZip.generateAsync({ type: 'blob' });
+  return new File([blob], file.name, { type: 'application/zip' });
+}
+
+async function agruparShapefilesSueltos(archivos) {
+  const { default: JSZip } = await import('jszip');
+  const grupos = new Map();
+
+  for (const file of archivos) {
+    const ext = file.name.split('.').pop()?.toLowerCase() || '';
+    if (!SHAPEFILE_PARTS.has(ext)) continue;
+    const base = file.name.slice(0, file.name.lastIndexOf('.'));
+    if (!grupos.has(base)) grupos.set(base, []);
+    grupos.get(base).push(file);
+  }
+
+  const noShapefile = archivos.filter((f) => {
+    const ext = f.name.split('.').pop()?.toLowerCase() || '';
+    return !SHAPEFILE_PARTS.has(ext);
+  });
+
+  const resultados = [...noShapefile];
+  const errores = [];
+
+  for (const [base, partes] of grupos.entries()) {
+    const tieneShp = partes.some((f) => f.name.toLowerCase().endsWith('.shp'));
+    if (!tieneShp) {
+      errores.push({
+        nombre: partes.map((f) => f.name).join(', '),
+        motivo: 'Falta el archivo .shp principal',
+      });
+      continue;
+    }
+    const zip = new JSZip();
+    for (const f of partes) {
+      zip.file(f.name, await f.arrayBuffer());
+    }
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const zipFile = new File([blob], `${base}.zip`, { type: 'application/zip' });
+    resultados.push(zipFile);
+  }
+
+  return { archivos: resultados, errores };
+}
+
 async function guardarArchivo(files) {
   mensajeCuota.value = '';
 
-  const listaArchivos = Array.from(files || []);
+  const archivosRaw = Array.from(files || []);
+
+  // Limpiar ZIPs de INEGI (y similares) que traen archivos extra no reconocidos por GeoNode
+  const archivosLimpios = await Promise.all(archivosRaw.map((f) => limpiarZipShapefile(f)));
+
+  // Agrupar shapefiles sueltos en ZIPs antes de validar cuota
+  const { archivos: listaArchivos, errores: erroresShapefile } =
+    await agruparShapefilesSueltos(archivosLimpios);
 
   await actualizarCuota();
 
@@ -73,7 +151,6 @@ async function guardarArchivo(files) {
   }
 
   if (!cuota.value.can_upload) {
-    mensajeCuota.value = 'Alcanzaste el límite de archivos y capas pendientes de aprobación.';
     return;
   }
 
@@ -85,6 +162,30 @@ async function guardarArchivo(files) {
   archivosEnCarga.value = [];
   hayCargas.value = true;
   const token = ref(data.value?.accessToken);
+
+  // Mostrar errores de componentes shapefile sin .shp principal
+  for (const err of erroresShapefile) {
+    archivosEnCarga.value.push(
+      reactive({
+        nombre: err.nombre,
+        extension: '',
+        tamanio: '',
+        estatus: 'error_carga',
+        mensaje: err.motivo,
+        IdRutaArchivo: null,
+        numero_geometrias: null,
+        proyeccion: null,
+        tipo_recurso: null,
+        jobId: null,
+        jobSchema: null,
+        geoCapabilidad: null,
+        nombreEstilo: '',
+        datasetPkSeleccionado: null,
+        datasetsBuscados: [],
+        busquedaDataset: '',
+      })
+    );
+  }
 
   const nuevosArchivos = listaArchivos.map((file) =>
     reactive({
@@ -100,6 +201,14 @@ async function guardarArchivo(files) {
       jobId: null,
       jobSchema: null,
       geoCapabilidad: null,
+      // SLD
+      nombreEstilo: file.name.replace(/\.sld$/i, ''),
+      // XML metadata
+      datasetPkSeleccionado: null,
+      datasetsBuscados: [],
+      busquedaDataset: '',
+      // Referencia al File original (no reactivo)
+      _file: file,
     })
   );
 
@@ -129,11 +238,25 @@ async function guardarArchivo(files) {
       return;
     }
 
+    // SLD: marcar como esperando nombre antes de procesar
+    if (sld_files.some((end) => file.name.toLowerCase().endsWith(end))) {
+      archivo.estatus = 'esperando_nombre_estilo';
+      archivo.mensaje = '';
+      return;
+    }
+
+    // XML: marcar como esperando selección de dataset
+    if (xml_files.some((end) => file.name.toLowerCase().endsWith(end))) {
+      archivo.estatus = 'esperando_dataset_xml';
+      archivo.mensaje = '';
+      return;
+    }
+
     let endpoint = null;
 
-    if (base_files.some((end) => file.name.endsWith(end))) {
+    if (base_files.some((end) => file.name.toLowerCase().endsWith(end))) {
       endpoint = `${configEnv.app.baseURL}api/cargar-base-file`;
-    } else if (docs_files.some((end) => file.name.endsWith(end))) {
+    } else if (docs_files.some((end) => file.name.toLowerCase().endsWith(end))) {
       endpoint = `${configEnv.app.baseURL}api/cargar-doc-file`;
     } else {
       archivo.estatus = 'error_carga';
@@ -143,7 +266,7 @@ async function guardarArchivo(files) {
 
     try {
       const formData = new FormData();
-      if (base_files.some((end) => file.name.endsWith(end))) {
+      if (base_files.some((end) => file.name.toLowerCase().endsWith(end))) {
         formData.append('base_file', file);
       } else {
         formData.append('doc_file', file);
@@ -271,6 +394,82 @@ async function subirComoTabular(archivo) {
   }
 }
 
+async function subirSLD(archivo, file) {
+  archivo.estatus = 'procesando';
+  archivo.mensaje = 'Subiendo estilo SLD…';
+  try {
+    const formData = new FormData();
+    formData.append('sld_file', file);
+    formData.append('style_name', archivo.nombreEstilo || file.name.replace(/\.sld$/i, ''));
+    formData.append('token', data.value?.accessToken);
+
+    const response = await fetch(`${configEnv.app.baseURL}api/cargar-sld-file`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || result.statusMessage || `Error ${response.status}`);
+    }
+
+    archivo.estatus = 'sld_cargado';
+    archivo.mensaje = `Estilo "${result.style_name}" creado en GeoServer`;
+  } catch (e) {
+    archivo.estatus = 'error_carga';
+    archivo.mensaje = e.message || 'Error al subir el estilo SLD';
+  }
+}
+
+async function buscarDatasets(archivo, query) {
+  if (!query || query.length < 2) {
+    archivo.datasetsBuscados = [];
+    return;
+  }
+  try {
+    const res = await gnoxyFetch(
+      `${configEnv.public.geonodeUrl}/api/v2/datasets/?search=${encodeURIComponent(query)}&page_size=10`
+    );
+    const json = await res.json();
+    archivo.datasetsBuscados = json.datasets || [];
+  } catch {
+    archivo.datasetsBuscados = [];
+  }
+}
+
+async function importarMetadatosXML(archivo, file) {
+  if (!archivo.datasetPkSeleccionado) {
+    archivo.mensaje = 'Selecciona una capa de destino primero';
+    return;
+  }
+  archivo.estatus = 'procesando';
+  archivo.mensaje = 'Importando metadatos XML…';
+  try {
+    const formData = new FormData();
+    formData.append('xml_file', file);
+    formData.append('dataset_pk', String(archivo.datasetPkSeleccionado));
+    formData.append('token', data.value?.accessToken);
+
+    const response = await fetch(`${configEnv.app.baseURL}api/importar-xml-metadatos`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || result.statusMessage || `Error ${response.status}`);
+    }
+
+    archivo.estatus = 'xml_importado';
+    archivo.mensaje = result.message || 'Metadatos importados correctamente';
+  } catch (e) {
+    archivo.estatus = 'error_carga';
+    archivo.mensaje = e.message || 'Error al importar metadatos XML';
+  }
+}
+
 // Polling para monitorear la importación de capas base
 async function monitorLayerImport(executionId, archivo) {
   //const token = ref(data.value?.accessToken);
@@ -316,7 +515,10 @@ async function monitorLayerImport(executionId, archivo) {
         <div class="alineacion-izquierda ancho-lectura">
           <h2>Carga archivo</h2>
           <p class="m-y-1">
-            <b>Formatos admitidos: GeoJSON, GeoPackage, CSV, XLSX, XLS, JSON, PDF y TXT.</b>
+            <b
+              >Formatos admitidos: GeoJSON, GeoPackage, Shapefile (ZIP o archivos sueltos), CSV,
+              XLSX, XLS, JSON, PDF, TXT, SLD y XML (ISO 19115).</b
+            >
           </p>
           <p
             class="texto-color-informacion fondo-color-informacion borde borde-color-informacion borde-redondeado-2 p-2 m-y-2"
@@ -366,13 +568,19 @@ async function monitorLayerImport(executionId, archivo) {
             <div
               class="p-b-3 p-x-3 borde-redondeado-16 m-y-3"
               :class="{
-                'fondo-color-confirmacion': archivo.estatus == 'carga_finalizada',
+                'fondo-color-confirmacion': [
+                  'carga_finalizada',
+                  'sld_cargado',
+                  'xml_importado',
+                ].includes(archivo.estatus),
                 'fondo-color-error': archivo.estatus == 'error_carga',
                 'fondo-color-neutro': [
                   'pendiente',
                   'procesando',
                   'analizando_tabular',
                   'decision_tabular',
+                  'esperando_nombre_estilo',
+                  'esperando_dataset_xml',
                 ].includes(archivo.estatus),
               }"
             >
@@ -408,18 +616,100 @@ async function monitorLayerImport(executionId, archivo) {
                 </div>
                 <div
                   :class="{
-                    'texto-color-confirmacion': archivo.estatus == 'carga_finalizada',
+                    'texto-color-confirmacion': [
+                      'carga_finalizada',
+                      'sld_cargado',
+                      'xml_importado',
+                    ].includes(archivo.estatus),
                     'texto-color-error': archivo.estatus == 'error_carga',
                   }"
                 >
                   <div class="flex">
                     <span
                       :class="{
-                        'pictograma-aprobado': archivo.estatus == 'carga_finalizada',
+                        'pictograma-aprobado': [
+                          'carga_finalizada',
+                          'sld_cargado',
+                          'xml_importado',
+                        ].includes(archivo.estatus),
                         'pictograma-alerta': archivo.estatus == 'error_carga',
                       }"
                     />
                     <b>{{ archivo.mensaje }}</b>
+                  </div>
+
+                  <!-- Estilos SLD: campo de nombre + botón de carga -->
+                  <div
+                    v-if="archivo.estatus === 'esperando_nombre_estilo'"
+                    class="decision-tabular m-t-2"
+                  >
+                    <p class="m-b-1">
+                      <strong>Estilo SLD.</strong> Confirma o edita el nombre del estilo:
+                    </p>
+                    <div class="flex" style="gap: 8px; align-items: center; flex-wrap: wrap">
+                      <input
+                        v-model="archivo.nombreEstilo"
+                        type="text"
+                        class="campo-texto"
+                        placeholder="nombre_del_estilo"
+                        style="flex: 1; min-width: 160px"
+                      />
+                      <button
+                        class="boton-primario boton-chico"
+                        :disabled="!archivo.nombreEstilo"
+                        @click="subirSLD(archivo, archivo._file)"
+                      >
+                        Subir estilo
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Metadatos XML: buscador de dataset + botón de importación -->
+                  <div
+                    v-if="archivo.estatus === 'esperando_dataset_xml'"
+                    class="decision-tabular m-t-2"
+                  >
+                    <p class="m-b-1">
+                      <strong>Metadatos XML (ISO 19115).</strong> Selecciona la capa a la que se
+                      importarán:
+                    </p>
+                    <input
+                      v-model="archivo.busquedaDataset"
+                      type="text"
+                      class="campo-texto"
+                      placeholder="Buscar capa por nombre…"
+                      style="width: 100%; margin-bottom: 6px"
+                      @input="buscarDatasets(archivo, archivo.busquedaDataset)"
+                    />
+                    <ul v-if="archivo.datasetsBuscados.length" class="lista-datasets-xml">
+                      <li
+                        v-for="ds in archivo.datasetsBuscados"
+                        :key="ds.pk"
+                        :class="{ seleccionado: archivo.datasetPkSeleccionado === ds.pk }"
+                        @click="
+                          archivo.datasetPkSeleccionado = ds.pk;
+                          archivo.busquedaDataset = ds.title;
+                        "
+                      >
+                        {{ ds.title }}
+                      </li>
+                    </ul>
+                    <button
+                      class="boton-primario boton-chico m-t-1"
+                      :disabled="!archivo.datasetPkSeleccionado"
+                      @click="importarMetadatosXML(archivo, archivo._file)"
+                    >
+                      Importar metadatos
+                    </button>
+                  </div>
+
+                  <!-- Estilo SLD cargado correctamente -->
+                  <div v-if="archivo.estatus === 'sld_cargado'" class="m-t-1">
+                    <p class="texto-chico">
+                      Estilo disponible en GeoServer como
+                      <strong>{{ archivo.nombreEstilo }}</strong
+                      >. Puedes aplicarlo desde la edición de cualquier capa.
+                    </p>
                   </div>
 
                   <!-- Decisión para archivos tabulares -->
@@ -514,6 +804,27 @@ async function monitorLayerImport(executionId, archivo) {
     flex-wrap: wrap;
     gap: 8px;
     margin-top: 8px;
+  }
+}
+
+.lista-datasets-xml {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  max-height: 160px;
+  overflow-y: auto;
+
+  li {
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 0.9em;
+
+    &:hover,
+    &.seleccionado {
+      background: var(--color-informacion, #e8f4fd);
+    }
   }
 }
 

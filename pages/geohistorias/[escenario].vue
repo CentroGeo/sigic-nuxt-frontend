@@ -11,6 +11,7 @@ const { escenario: idEscenario, escena } = useRoute().params;
 const escenario = reactive({
   cargando: false,
   datos: {},
+  sinEscenas: false,
 });
 
 /**
@@ -33,6 +34,10 @@ consutarEscenario();
  * @param {Array<scenes>} Escenas del escenario
  */
 async function validarEscena(scenes) {
+  if (!scenes?.length) {
+    escenario.sinEscenas = true;
+    return;
+  }
   if (escena === undefined || !scenes.map(({ id }) => String(id)).includes(escena)) {
     await redirigir(scenes[0].id);
   }
@@ -51,6 +56,10 @@ async function redirigir(escenaId) {
   <main class="escenario">
     <!-- {{ escenario.datos.scenes }} -->
     <GeocontenidosLoader v-if="escenario.cargando" />
+
+    <p v-else-if="escenario.sinEscenas" class="escenario__sin-escenas">
+      Este escenario no tiene escenas configuradas.
+    </p>
 
     <template v-else>
       <GeocontenidosTab

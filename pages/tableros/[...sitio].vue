@@ -183,6 +183,7 @@ cargarSitio();
         Editar tablero
       </NuxtLink>
 
+      <TablerosBandaInstitucional :sitio="sitio.datos" />
       <TablerosEncabezado :sitio="sitio.datos" />
 
       <TablerosNavGrupos :grupos="grupos" :activo="grupoActivo" @seleccionar="cambiarGrupo" />

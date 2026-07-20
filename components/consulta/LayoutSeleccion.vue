@@ -27,6 +27,7 @@ const shareChild = ref(null);
 const mapChild = ref(null);
 const borrarChild = ref(null);
 const owsChild = ref(null);
+const metadatosChild = ref(null);
 
 function notifyDownloadAllChild() {
   shownModal.value = 'downloadAll';
@@ -47,6 +48,13 @@ function notifyTablaChild(resource) {
   modalResource.value = resource;
   nextTick(() => {
     tablaChild.value?.abrirModalTabla();
+  });
+}
+function notifyMetadatosChild(resource) {
+  shownModal.value = 'metadatosModal';
+  modalResource.value = resource;
+  nextTick(() => {
+    metadatosChild.value?.abrirModalRevision();
   });
 }
 function notifyOpacityChild(resource) {
@@ -197,6 +205,7 @@ const dividirMapa = computed({
         @open-opacity="(resource) => notifyOpacityChild(resource)"
         @open-download="(resource) => notifyDownloadOneChild(resource)"
         @open-tabla="(resource) => notifyTablaChild(resource)"
+        @open-metadata="(resource) => notifyMetadatosChild(resource)"
         @open-mapa="(resource) => notifyMapaChild(resource)"
         @open-o-w-s="notifyOWSChild"
       />
@@ -234,6 +243,14 @@ const dividirMapa = computed({
         :key="`tabla_${modalResource.pk}_${resourceType}`"
         :selected-element="modalResource"
         @notify-download="changeModal('downloadOne')"
+      />
+
+      <CatalogoModalRevisionMeta
+        v-if="shownModal === 'metadatosModal'"
+        ref="metadatosChild"
+        :key="`tabla_${modalResource.pk}_${resourceType}`"
+        :review-pk="modalResource.pk"
+        :resource-type="resourceType === 'dataLayer' ? 'datasets' : 'documents'"
       />
 
       <ConsultaModalMapa

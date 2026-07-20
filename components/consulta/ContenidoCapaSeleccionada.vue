@@ -14,6 +14,7 @@ const emit = defineEmits([
   'opacidadClicked',
   'descargaClicked',
   'tablaClicked',
+  'metadataClicked',
   'owsClicked',
   'resourceReady',
 ]);
@@ -113,6 +114,15 @@ const optionsButtons = ref([
     globo: 'Opacidad',
     action: () => {
       emit('opacidadClicked');
+    },
+  },
+  {
+    excludeFor: 'none',
+    label: 'Ver metadatos',
+    pictogram: 'pictograma-metadatos',
+    globo: 'Ver metadatos',
+    action: () => {
+      emit('metadataClicked');
     },
   },
   {

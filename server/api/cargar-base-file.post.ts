@@ -53,11 +53,14 @@ export default defineEventHandler(async (event) => {
   // Crear FormData para enviar a GeoNode
   const formData = new FormData();
   const buffer = await fsp.readFile(base_file[0].filepath);
-  formData.append(
-    'base_file',
-    new Blob([buffer], { type: base_file[0].mimetype }),
-    base_file[0].originalFilename
-  );
+  const filename = base_file[0].originalFilename ?? 'archivo';
+  const blob = new Blob([buffer], { type: base_file[0].mimetype });
+  formData.append('base_file', blob, filename);
+
+  // GeoNode requiere zip_file además de base_file para activar la extracción del ZIP
+  if (filename.toLowerCase().endsWith('.zip')) {
+    formData.append('zip_file', blob, filename);
+  }
 
   try {
     // 1️⃣ Subir archivo al GeoNode
@@ -114,7 +117,7 @@ export default defineEventHandler(async (event) => {
         success: true,
         message: 'Procesamiento completado',
         id: resource.id,
-        url: `${configEnv.public.geonodeHost}${resource.detail_url}`,
+        url: `${configEnv.public.geonodeUrl}${resource.detail_url}`,
         time: statusJson.finished,
       };
     } else {

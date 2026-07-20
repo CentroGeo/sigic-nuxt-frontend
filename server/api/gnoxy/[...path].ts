@@ -1,4 +1,4 @@
-import { defineEventHandler, proxyRequest, getQuery } from 'h3';
+import { defineEventHandler, proxyRequest, getQuery, createError } from 'h3';
 import { getServerSession } from '#auth';
 
 export default defineEventHandler(async (event) => {
@@ -14,10 +14,15 @@ export default defineEventHandler(async (event) => {
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const token = (session as any)?.accessToken;
 
+  delete event.node.req.headers.cookie;
+  delete event.node.req.headers.authorization;
   // Caso especial: /api/gnoxy/proxy/?url=...
   if (path === 'proxy' && query.url) {
     const targetUrl = String(query.url);
     const headers = Object.fromEntries(event.headers) as Record<string, string>;
+    delete headers.cookie;
+    delete headers.authorization;
+    delete headers.host;
 
     return proxyRequest(event, targetUrl, { headers });
   }
@@ -41,7 +46,7 @@ export default defineEventHandler(async (event) => {
   // delete headers.cookie;
   // delete headers.host;
 
-  const headers: Record<string, string> = {};
+  const headers: Record<string, string> = { cookie: '' };
 
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;

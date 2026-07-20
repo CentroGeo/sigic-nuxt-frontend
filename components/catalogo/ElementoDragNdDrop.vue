@@ -23,7 +23,7 @@ async function onDrop() {
   archivosArriba.value = true;
 }
 
-const { open, onChange } = useFileDialog();
+const { open, onChange } = useFileDialog({ multiple: true });
 onChange(async (files) => {
   if (props.disabled) return;
 

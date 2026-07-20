@@ -1,7 +1,7 @@
 <script setup>
-definePageMeta({ middleware: 'auth' });
-
 import SisdaiModal from '@centrogeomx/sisdai-componentes/src/componentes/modal/SisdaiModal.vue';
+
+definePageMeta({ middleware: 'auth' });
 
 const { data: userData, status, signIn } = useAuth();
 const route = useRoute();
@@ -123,6 +123,7 @@ async function guardar() {
 
 const pestanias = computed(() => [
   { id: 'identidad', titulo: 'Identidad del sitio' },
+  { id: 'banda', titulo: 'Banda institucional', deshabilitada: esNuevo.value },
   { id: 'estructura', titulo: 'Estructura', deshabilitada: esNuevo.value },
   { id: 'datos', titulo: 'Datos estáticos', deshabilitada: esNuevo.value },
 ]);
@@ -190,6 +191,10 @@ cargarSitio();
             @actualizar="aplicarCambios"
             @guardar="guardar"
           />
+        </template>
+
+        <template #contenido-banda>
+          <TablerosAdminTabBandaInstitucional v-if="sitio.id" :site-id="sitio.id" />
         </template>
 
         <template #contenido-estructura>

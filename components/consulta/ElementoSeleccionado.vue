@@ -18,7 +18,14 @@ const username = ref(data.value ? data.value.user.email : undefined);
 const goDown = () => storeSelected.changePosition(props.selectedElement.pk, -1);
 const goUp = () => storeSelected.changePosition(props.selectedElement.pk, +1);
 const isElementReady = ref(false);
-const emit = defineEmits(['openOpacity', 'openDownload', 'openTabla', 'openMapa', 'openOWS']);
+const emit = defineEmits([
+  'openOpacity',
+  'openDownload',
+  'openTabla',
+  'openMetadata',
+  'openMapa',
+  'openOWS',
+]);
 </script>
 
 <template>
@@ -92,6 +99,7 @@ const emit = defineEmits(['openOpacity', 'openDownload', 'openTabla', 'openMapa'
         @opacidad-clicked="emit('openOpacity', resourceElement)"
         @descarga-clicked="emit('openDownload', resourceElement)"
         @tabla-clicked="emit('openTabla', resourceElement)"
+        @metadata-clicked="emit('openMetadata', resourceElement)"
         @ows-clicked="(link) => emit('openOWS', link)"
         @resource-ready="isElementReady = true"
       />
