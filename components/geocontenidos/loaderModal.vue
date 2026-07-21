@@ -1,30 +1,6 @@
 <script setup>
-const props = defineProps({
-  cargando: {
-    type: Boolean,
-    default: true,
-  },
-  mensaje: {
-    type: String,
-    default: '',
-  },
-  permitirCerrar: {
-    type: Boolean,
-    default: true,
-  },
-  pictograma: {
-    type: String,
-    default: 'aprobado',
-  },
-  titulo: {
-    type: String,
-    default: '',
-  },
-  visible: {
-    type: Boolean,
-    default: false,
-  },
-});
+// defineEmits(['alAbrir', 'alCerrar']);
+const props = defineProps(_props);
 const { visible } = toRefs(props);
 
 watch(visible, (nv) => {
@@ -58,7 +34,7 @@ watch(modal, iniciar);
         <h1 class="m-1">{{ titulo }}</h1>
       </template>
 
-      <GeocontenidosLoader v-if="cargando" mensaje="Guardando..." />
+      <GeocontenidosLoader v-if="cargando" :mensaje="mensajeCargando" />
 
       <div v-else class="texto-centrado texto-tamanio-8">
         <span :class="`pictograma-${pictograma}`" />
@@ -72,14 +48,40 @@ watch(modal, iniciar);
 </template>
 
 <script>
-export const valoresPorDefecto = {
-  cargando: false,
-  mensaje: '',
-  permitirCerrar: false,
-  pictograma: 'aprobado',
-  visible: false,
-  titulo: '',
+const _props = {
+  cargando: {
+    type: Boolean,
+    default: true,
+  },
+  mensaje: {
+    type: String,
+    default: '',
+  },
+  mensajeCargando: {
+    type: String,
+    default: 'Guardando...',
+  },
+  permitirCerrar: {
+    type: Boolean,
+    default: true,
+  },
+  pictograma: {
+    type: String,
+    default: 'aprobado',
+  },
+  titulo: {
+    type: String,
+    default: '',
+  },
+  visible: {
+    type: Boolean,
+    default: false,
+  },
 };
+
+export const valoresPorDefecto = Object.fromEntries(
+  Object.keys(_props).map((prop) => [prop, _props[prop].default])
+);
 </script>
 
 <style lang="scss">

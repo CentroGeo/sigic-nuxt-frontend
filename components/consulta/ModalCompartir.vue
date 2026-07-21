@@ -7,10 +7,12 @@ const modalCompartir = ref(null);
 const route = useRoute();
 const currentPath = computed(() => config.public.baseURL + route.fullPath);
 const linkStatus = ref(false);
+const mensaje_copiar = ref('');
 
-async function copyToClipboard() {
+async function copyToClipboard(valor = currentPath.value, mensaje = 'Enlace copiado con éxito') {
   try {
-    await navigator.clipboard.writeText(currentPath.value);
+    await navigator.clipboard.writeText(valor);
+    mensaje_copiar.value = mensaje;
     linkStatus.value = true;
     await wait(1000);
     linkStatus.value = false;
@@ -44,6 +46,8 @@ const botonesEnlaces = computed(() => [
 defineExpose({
   abrirModalCompartir,
 });
+
+const codigo_iframe = `<iframe width="560" height="315" src="${currentPath.value.replace(route.path, '/iframe-mapa')}" frameborder="0"></iframe>`;
 </script>
 <template>
   <ClientOnly>
@@ -87,7 +91,7 @@ defineExpose({
                 type="button"
                 class="boton-primario boton-pictograma boton-grande twitter-share-button"
                 aria-label="Copiar vínculo al portapapeles"
-                @click="copyToClipboard"
+                @click="() => copyToClipboard()"
               >
                 <span class="pictograma-enlace-subrayado" aria-hidden="true" />
               </button>
@@ -97,8 +101,24 @@ defineExpose({
             </div>
           </div>
         </div>
+
+        <div class="codigo-embebido-contenedor">
+          <p class="m-t-0">Insertar este mapa</p>
+
+          <div class="codigo-embebido">
+            <button
+              class="boton-primario boton-pictograma boton-grande"
+              aria-label="Copiar código al portapapeles"
+              @click="() => copyToClipboard(codigo_iframe, 'Código copiado con éxito')"
+            >
+              <span class="pictograma-copiar" aria-hidden="true" />
+            </button>
+            <code>{{ codigo_iframe }}</code>
+          </div>
+        </div>
+
         <div v-if="linkStatus" class="m-y-1 borde-redondeado-8 contenedor-alerta">
-          <span class="pictograma-aprobado"></span> Enlace copiado con éxito
+          <span class="pictograma-aprobado" /> {{ mensaje_copiar }}
         </div>
       </template>
     </SisdaiModal>
@@ -116,6 +136,22 @@ defineExpose({
 
   p {
     color: var(--color-alerta-3);
+  }
+}
+
+.codigo-embebido-contenedor {
+  .codigo-embebido {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    flex-direction: row-reverse;
+    gap: 16px;
+
+    code {
+      white-space: nowrap;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
   }
 }
 

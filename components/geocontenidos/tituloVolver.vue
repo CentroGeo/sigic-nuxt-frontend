@@ -13,7 +13,7 @@ defineProps({
 
 <template>
   <section class="flex p-y-3">
-    <NuxtLink :to="`/geocontenidos${volver}`" class="boton boton-secundario boton-chico">
+    <NuxtLink :to="`/geocontenidos/${volver}`" class="boton boton-secundario boton-chico">
       <span class="pictograma-flecha-izquierda m-r-1" />
     </NuxtLink>
 

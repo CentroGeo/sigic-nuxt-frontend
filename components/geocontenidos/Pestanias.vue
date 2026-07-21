@@ -1,4 +1,5 @@
 <script setup>
+const emits = defineEmits(['alActualizarSeleccion']);
 const props = defineProps({
   pestanias: {
     type: Array,
@@ -27,6 +28,7 @@ const { pestanias, idSeleccion } = toRefs(props);
 
 const seleccion = ref(idSeleccion.value || pestanias.value[0].id);
 watch(idSeleccion, (nv) => (seleccion.value = nv));
+watch(seleccion, (nv) => emits('alActualizarSeleccion', nv));
 
 function calcularNuevoIndex(movimiento) {
   const idx_actual = pestanias.value.findIndex((p) => p.id === seleccion.value);

@@ -54,6 +54,7 @@ async function redirigir(escenaId) {
 
 <template>
   <main class="escenario">
+    <!-- {{ escenario.datos.scenes }} -->
     <GeocontenidosLoader v-if="escenario.cargando" />
 
     <p v-else-if="escenario.sinEscenas" class="escenario__sin-escenas">
@@ -69,6 +70,7 @@ async function redirigir(escenaId) {
       />
 
       <NuxtPage
+        :titulo="escenario.datos.name"
         :style="`--ancho-panel-texto: ${escenario.datos.scenes_layout_styles.text_panel}%`"
       />
 

@@ -161,20 +161,21 @@ const categoriaOGC = computed({
   get: () => {
     //Si el usuario ya interactuó, respetamos ese valor
     if (storeMetadatos.metadata.categoriaOGC) return storeMetadatos.metadata.categoriaOGC;
-    
+
     //Si no, tomamos la categoría original guardada en BD
-    const savedCategory = storeMetadatos.metadata.category?.identifier || storeMetadatos.metadata.category;
-    
+    const savedCategory =
+      storeMetadatos.metadata.category?.identifier || storeMetadatos.metadata.category;
+
     //Verificamos si esa categoría pertenece a la lista OGC
     const existsInOGC = dictCategoriaOGC.some((item) => Object.keys(item)[0] === savedCategory);
-    
+
     return existsInOGC ? savedCategory : '';
   },
   set: (val) => {
     storeMetadatos.updateAttr('categoriaOGC', val);
     if (val) {
       // Nos aseguramos de que actualice el campo maestro
-      storeMetadatos.updateAttr('category', val); 
+      storeMetadatos.updateAttr('category', val);
     }
   },
 });
@@ -183,16 +184,17 @@ const categoriaOGC = computed({
 const categoriaSIGIC = computed({
   get: () => {
     if (storeMetadatos.metadata.categoriaSIGIC) return storeMetadatos.metadata.categoriaSIGIC;
-    
-    const savedCategory = storeMetadatos.metadata.category?.identifier || storeMetadatos.metadata.category;
+
+    const savedCategory =
+      storeMetadatos.metadata.category?.identifier || storeMetadatos.metadata.category;
     const existsInSIGIC = dictCategoriaSIGIC.some((item) => Object.keys(item)[0] === savedCategory);
-    
+
     return existsInSIGIC ? savedCategory : '';
   },
   set: (val) => {
     storeMetadatos.updateAttr('categoriaSIGIC', val);
     if (val) {
-      storeMetadatos.updateAttr('category', val); 
+      storeMetadatos.updateAttr('category', val);
     }
   },
 });

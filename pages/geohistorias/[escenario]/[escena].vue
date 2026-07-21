@@ -1,7 +1,11 @@
 <script setup>
 const { gnoxyFetch } = useGnoxyUrl();
 const config = useRuntimeConfig();
-const { escenario, escena: escenaId } = useRoute().params;
+const { /* escenario, */ escena: escenaId } = useRoute().params;
+
+defineProps({
+  titulo: { type: String, default: '' },
+});
 
 /**
  *
@@ -24,6 +28,8 @@ async function consultarEscena() {
   escena.cargando = false;
 }
 consultarEscena();
+
+const marcador_visible = ref(null);
 </script>
 
 <template>
@@ -31,41 +37,33 @@ consultarEscena();
     <GeocontenidosLoader v-if="escena.cargando" />
 
     <template v-else>
-      <div
-        v-if="escena.datos.text_position === 'right'"
-        class="panel-mapa borde-r borde-color-secundario"
-      >
-        <GeocontenidosMapaEscena
-          :vista="{
-            acercamiento: escena.datos.zoom,
-            centro: [escena.datos.map_center_long, escena.datos.map_center_lat],
-          }"
-          :capas="escena.datos.layers"
-        />
-      </div>
-
-      <div class="panel-texto p-3">
-        <h1 class="m-t-2">{{ escena.datos.name }}</h1>
-
-        <p>
-          {{ { escenario, escena } }}
-        </p>
-
-        <div>Paginador</div>
-      </div>
-
-      <div
+      <GeocontenidosEscenaTexto
         v-if="escena.datos.text_position === 'left'"
-        class="panel-mapa borde-l borde-color-secundario"
-      >
-        <GeocontenidosMapaEscena
+        class="panel-texto p-3 borde-r borde-color-secundario"
+        :contenido="escena.datos.text_content"
+        :marcador="marcador_visible"
+        @al-cerrar="marcador_visible = null"
+      />
+
+      <div class="panel-mapa">
+        <GeocontenidosEscenaMapa
           :vista="{
             acercamiento: escena.datos.zoom,
             centro: [escena.datos.map_center_long, escena.datos.map_center_lat],
           }"
           :capas="escena.datos.layers"
+          :marcadores="escena.datos.markers"
+          @clickMarcador="(marcador) => (marcador_visible = marcador)"
         />
       </div>
+
+      <GeocontenidosEscenaTexto
+        v-if="escena.datos.text_position === 'right'"
+        class="panel-texto p-3 borde-l borde-color-secundario"
+        :contenido="escena.datos.text_content"
+        :marcador="marcador_visible"
+        @al-cerrar="marcador_visible = null"
+      />
     </template>
   </div>
 </template>
@@ -73,11 +71,11 @@ consultarEscena();
 <style lang="scss" scoped>
 .escena {
   width: 100%;
-  height: calc(100vh - 100px - 51px);
+  height: calc(100vh - 80px - 51px);
   gap: 0;
 
   .panel-texto {
-    height: calc(100vh - 100px - 51px);
+    height: inherit;
     width: var(--ancho-panel-texto);
     overflow-y: auto;
   }
